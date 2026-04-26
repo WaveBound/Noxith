@@ -12,12 +12,12 @@ if sys.stdout.encoding.lower() != 'utf-8':
         sys.stdout.reconfigure(encoding='utf-8')
 
 REQUIRED_FILES = [
-    "modules/state.js",
-    "data.js",
-    "modules/constants.js",
-    "modules/utils.js",
-    "math.js",
-    "modules/calculations.js"
+    "utdx/modules/state.js",
+    "utdx/data.js",
+    "utdx/modules/constants.js",
+    "utdx/modules/utils.js",
+    "utdx/math.js",
+    "utdx/modules/calculations.js"
 ]
 
 GENERATOR_SCRIPT = """
