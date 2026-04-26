@@ -1051,7 +1051,7 @@ const unitDatabase = [
             note: "Predatory Gluttony: Gain +30% True Damage and +30% (+50% at E6) Damage via kill-stacking. Reset after 10s without kill."
         },
         stats: {
-            dmg: 4300, spa: 8, range: 40, spaCap: 2,
+            dmg: 4300, spa: 8, range: 40, spaCap: 5.5,
             crit: 0, cdmg: 150,
             dot: 80, dotDuration: 6, dotStacks: 1,
             element: "Dark",
