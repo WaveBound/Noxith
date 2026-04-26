@@ -1,4 +1,4 @@
-/* ── Remote Connect Modal ── */
+/* ── Remote Connect Modal (Landing Page) ── */
 .rc-overlay {
     position: fixed;
     inset: 0;
@@ -9,13 +9,18 @@
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+
+    /* Ensure completely hidden default state */
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.35s var(--ease);
+
+    transition: opacity 0.35s var(--ease), visibility 0.35s;
 }
 
 .rc-overlay.active {
     opacity: 1;
+    visibility: visible;
     pointer-events: all;
 }
 
@@ -80,9 +85,9 @@
     border-color: var(--accent);
 }
 
-.rc-input::placeholder {
-    color: #3f3f46;
-    letter-spacing: 2px;
+/* Override letter spacing for password field */
+.rc-input[type="password"] {
+    letter-spacing: normal;
 }
 
 .rc-btn {
@@ -138,7 +143,7 @@
     color: var(--white);
 }
 
-/* ── Command Center View (Dashboard) ── */
+/* ── Remote View (Dashboard) ── */
 .dashboard-view {
     display: none;
     position: fixed;
@@ -149,8 +154,7 @@
 }
 
 .dashboard-view.active {
-    display: flex;
-    flex-direction: column;
+    display: block;
 }
 
 .landing-view.hidden {
@@ -165,93 +169,10 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-/* Sidebar Header */
-.cmd-sidebar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 18px;
-    border-bottom: 1px solid #1a1a1a;
-    background: #000;
-}
-
-.cmd-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: -0.5px;
-}
-
-.cmd-brand img {
-    height: 24px;
-}
-
-.cmd-status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.8rem;
-    font-family: 'JetBrains Mono', monospace;
-    color: #8b949e;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.cmd-ping-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #51cf66;
-    box-shadow: 0 0 10px rgba(81, 207, 102, 0.5);
-    animation: blink 2.4s ease-in-out infinite;
-}
-
-.cmd-btn-danger {
-    background: rgba(255, 107, 107, 0.1);
-    border: 1px solid rgba(255, 107, 107, 0.3);
-    color: #ff6b6b;
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.cmd-btn-danger:hover {
-    background: rgba(255, 107, 107, 0.2);
-    transform: translateY(-1px);
-}
-
-/* Main Workspace Desktop Layout */
-.cmd-workspace {
-    display: flex;
-    flex: 1;
-    height: 100vh;
-    width: 100vw;
-    position: relative;
-    overflow: hidden;
-}
-
-/* Video Stage (The Anchor) */
-.cmd-stage {
-    flex: 1;
-    background: #000;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid #1a1a1a;
-    z-index: 10;
-}
-
+/* ── Fullscreen Video Feed ── */
 .cmd-video-container {
-    flex: 1;
-    position: relative;
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     background: #000;
@@ -259,6 +180,7 @@
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    z-index: 10;
 }
 
 .cmd-video-container video {
@@ -291,419 +213,329 @@
     display: none;
 }
 
-.dash-fullscreen-btn {
+/* ── Floating Top Header ── */
+.remote-header {
     position: absolute;
-    bottom: 20px;
-    right: 20px;
-    width: 44px;
-    height: 44px;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 50;
+    pointer-events: none;
+}
+
+.remote-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(10, 10, 10, 0.7);
+    backdrop-filter: blur(8px);
+    padding: 8px 16px;
+    border-radius: 12px;
+    border: 1px solid #1a1a1a;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #fff;
+    pointer-events: auto;
+}
+
+.remote-brand img {
+    height: 18px;
+}
+
+.cmd-ping-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #51cf66;
+    box-shadow: 0 0 10px rgba(81, 207, 102, 0.5);
+    animation: blink 2.4s ease-in-out infinite;
+}
+
+.remote-actions {
+    display: flex;
+    gap: 8px;
+    pointer-events: auto;
+}
+
+/* Monitor Select */
+.dash-select {
+    /* Use background-color instead of background so we don't overwrite the image */
+    background-color: rgba(10, 10, 10, 0.7);
+
+    /* Custom SVG Arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23c9d1d9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 14px;
+
+    /* Hide default browser arrow */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    backdrop-filter: blur(8px);
+    border: 1px solid #1a1a1a;
+    border-radius: 12px;
+    color: #c9d1d9;
+    padding: 8px 32px 8px 12px;
+    /* Added extra right padding so text doesn't overlap arrow */
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    outline: none;
+    max-width: 150px;
+    text-overflow: ellipsis;
+}
+
+.dash-select:hover,
+.dash-select:focus {
+    background-color: #111111;
+    /* Update SVG arrow to white to match the text on hover */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    color: #fff;
+    border-color: var(--accent);
+}
+
+/* Style the dropdown options so they match the dark theme */
+.dash-select option {
+    background-color: #111111;
+    color: #c9d1d9;
+}
+
+.cmd-btn-danger {
+    background: rgba(255, 107, 107, 0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    color: #ff6b6b;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cmd-btn-danger:hover {
+    background: rgba(255, 107, 107, 0.25);
+    transform: translateY(-1px);
+}
+
+.dash-fullscreen-btn {
     background: rgba(10, 10, 10, 0.7);
     backdrop-filter: blur(8px);
     border: 1px solid #1a1a1a;
-    border-radius: 8px;
+    border-radius: 12px;
     color: #c9d1d9;
+    padding: 8px 12px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
-    z-index: 50;
-    /* Ensure it stays above the video feed */
 }
 
 .dash-fullscreen-btn:hover {
     background: #111111;
     color: #fff;
-    transform: scale(1.05);
 }
 
-/* Left/Right Control Sidebar */
-.cmd-sidebar {
-    width: 320px;
-    background: #0a0a0a;
-    flex-shrink: 0;
+/* ── Mobile Controls (Toolbar & Keyboard) ── */
+.mobile-controls-bar {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
-    flex-direction: column;
-    z-index: 20;
-    border-left: 1px solid #1a1a1a;
-}
-
-.cmd-panel {
-    padding: 14px 18px;
-    border-bottom: 1px solid #1a1a1a;
-}
-
-.cmd-panel-head {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    color: #8b949e;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
     gap: 8px;
-}
-
-/* Engine Status Panel */
-.cmd-engine-status {
-    background: #000;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(12px);
+    padding: 8px 12px;
+    border-radius: 12px;
     border: 1px solid #1a1a1a;
+    z-index: 50;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+}
+
+.mc-btn {
+    width: 42px;
+    height: 42px;
     border-radius: 8px;
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.engine-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #ff6b6b;
-    box-shadow: 0 0 10px rgba(255, 107, 107, 0.4);
-    transition: all 0.3s;
-}
-
-.engine-dot.running {
-    background: #51cf66;
-    box-shadow: 0 0 10px rgba(81, 207, 102, 0.4);
-}
-
-.cmd-engine-status strong {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 700;
-    color: #fff;
-    font-size: 0.95rem;
-}
-
-.cmd-ignition {
-    display: flex;
-    gap: 8px;
-}
-
-.cmd-btn-start,
-.cmd-btn-stop {
-    flex: 1;
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 800;
-    font-size: 0.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #c9d1d9;
+    font-size: 1.1rem;
     cursor: pointer;
-    transition: all 0.2s;
-    text-transform: uppercase;
-    letter-spacing: 1px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-}
-
-.cmd-btn-start {
-    background: rgba(81, 207, 102, 0.1);
-    border: 1px solid rgba(81, 207, 102, 0.3);
-    color: #51cf66;
-}
-
-.cmd-btn-start:hover {
-    background: rgba(81, 207, 102, 0.2);
-    box-shadow: 0 4px 16px rgba(81, 207, 102, 0.15);
-}
-
-.cmd-btn-stop {
-    background: rgba(255, 107, 107, 0.1);
-    border: 1px solid rgba(255, 107, 107, 0.3);
-    color: #ff6b6b;
-}
-
-.cmd-btn-stop:hover {
-    background: rgba(255, 107, 107, 0.2);
-    box-shadow: 0 4px 16px rgba(255, 107, 107, 0.15);
-}
-
-/* Config Panel */
-.cmd-config-box {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.cmd-select {
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid #1a1a1a;
-    background: #000;
-    color: #c9d1d9;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-    outline: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%238b949e'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    cursor: pointer;
-    transition: border 0.2s;
-}
-
-.cmd-select:focus {
-    border-color: #58a6ff;
-}
-
-.cmd-btn-primary {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid rgba(88, 166, 255, 0.3);
-    background: rgba(88, 166, 255, 0.1);
-    color: #58a6ff;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 700;
-    font-size: 0.8rem;
-    cursor: pointer;
     transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.cmd-btn-primary:hover:not(:disabled) {
+.mc-btn.active {
     background: rgba(88, 166, 255, 0.2);
-}
-
-.cmd-btn-primary:disabled {
-    opacity: 0.4;
-    background: #111111;
-    color: #555555;
-    border-color: #1a1a1a;
-    cursor: not-allowed;
-}
-
-.cmd-config-text {
-    margin-top: 10px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    background: rgba(88, 166, 255, 0.05);
-    color: #8b949e;
-    border: 1px solid rgba(88, 166, 255, 0.1);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-}
-
-.cmd-config-text strong {
     color: #58a6ff;
-    font-weight: bold;
+    border-color: #58a6ff;
+    box-shadow: inset 0 0 10px rgba(88, 166, 255, 0.2);
 }
 
-/* Terminal Flex */
-.cmd-terminal {
-    background: #000;
-    overflow-y: auto;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    color: #c9d1d9;
+.mc-btn:active {
+    transform: scale(0.95);
 }
 
-.cmd-stage:fullscreen {
-    border: none;
+/* Full Virtual Keyboard */
+.mobile-keyboard {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 98%;
+    max-width: 800px;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(12px);
+    padding: 8px;
+    border-radius: 12px;
+    border: 1px solid #1a1a1a;
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: auto;
 }
 
-.cmd-stage:-webkit-full-screen {
-    border: none;
-}
-
-/* Logs */
-.dash-log-entry {
+.mobile-keyboard.active {
     display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 4px 0;
-    border-bottom: 1px solid rgba(88, 166, 255, 0.08);
 }
 
-.dash-log-entry:last-child {
-    border-bottom: none;
+.mk-row {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    width: 100%;
 }
 
-.dash-log-ts {
-    color: #8b949e;
-    flex-shrink: 0;
-    margin-top: 2px;
+.mk-key {
+    flex: 1;
+    height: 40px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e1e1e1;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 2px;
+    box-sizing: border-box;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.dash-log-type {
-    display: inline-block;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.7em;
-    font-weight: bold;
-    text-transform: uppercase;
-    min-width: 50px;
-    text-align: center;
-    flex-shrink: 0;
-    margin-top: 1px;
+.mk-key.active,
+.mk-key:active {
+    background: rgba(88, 166, 255, 0.4);
+    color: #fff;
+    border-color: #58a6ff;
+    transform: scale(0.95);
 }
 
-.dash-log-type.info {
-    background-color: rgba(88, 166, 255, 0.2);
+/* Toggle state for Shift and Caps Lock */
+.mk-key.toggled {
+    background: rgba(88, 166, 255, 0.4);
+    color: #fff;
+    border-color: #58a6ff;
+    box-shadow: inset 0 0 8px rgba(88, 166, 255, 0.3);
+}
+
+/* F-key mode: number keys showing F1-F12 */
+.mk-key.fkey-mode {
+    background: rgba(88, 166, 255, 0.12);
     color: #58a6ff;
-    border: 1px solid rgba(88, 166, 255, 0.3);
+    border-color: rgba(88, 166, 255, 0.4);
+    font-size: 0.65rem;
 }
 
-.dash-log-type.macro {
-    background-color: rgba(81, 207, 102, 0.2);
-    color: #51cf66;
-    border: 1px solid rgba(81, 207, 102, 0.3);
+.mk-w15 {
+    flex: 1.5;
+    font-size: 0.65rem;
 }
 
-.dash-log-type.error {
-    background-color: rgba(255, 107, 107, 0.2);
-    color: #ff6b6b;
-    border: 1px solid rgba(255, 107, 107, 0.3);
+.mk-w20 {
+    flex: 2.0;
+    font-size: 0.65rem;
 }
 
-.dash-log-msg {
-    color: #c9d1d9;
-    word-break: break-word;
+.mk-w25 {
+    flex: 2.5;
+    font-size: 0.65rem;
 }
 
-/* Command Center Mobile Resizing */
-@media (max-width: 900px) {
-    .cmd-workspace {
-        flex-direction: column;
+.mk-space {
+    flex: 6.0;
+}
+
+/* Mobile Small Screen / Space Savers */
+@media (max-width: 650px) {
+    .hide-mobile {
+        display: none !important;
     }
 
-    .cmd-stage {
-        order: -1;
-        flex: none;
-        height: 35vh;
-        border-right: none;
-        border-bottom: 1px solid #1a1a1a;
-        min-height: 250px;
-    }
-
-    .cmd-sidebar {
-        width: 100%;
-        flex: 1;
-        overflow-y: auto;
-        background: #0a0a0a;
-        border-left: none;
-    }
-
-    .cmd-ignition {
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    /* Mobile Upscaling for Touch Targets */
-    .cmd-panel {
-        padding: 20px 24px;
-        border-bottom: 1px solid #111;
-    }
-
-    .cmd-panel-head {
-        font-size: 0.8rem;
-        margin-bottom: 16px;
-    }
-
-    .cmd-btn-start,
-    .cmd-btn-stop {
-        padding: 18px;
-        font-size: 1.05rem;
-    }
-
-    .cmd-select {
-        padding: 16px;
-        font-size: 1rem;
-    }
-
-    .cmd-btn-primary {
-        padding: 16px;
-        font-size: 1.05rem;
-    }
-
-    .cmd-config-text {
-        font-size: 0.85rem;
-        padding: 12px 16px;
-    }
-
-    .cmd-engine-status {
-        padding: 16px;
-    }
-
-    #dash-disconnect-panel {
-        margin-top: auto;
-        padding: 16px !important;
-        border-top: 1px solid #1a1a1a;
-    }
-
-    #dash-disconnect {
-        padding: 16px !important;
-        font-size: 1.05rem;
+    .dash-select {
+        max-width: 110px;
     }
 }
 
-@media (max-width: 768px) {
-    .dash-fullscreen-btn {
-        /* Slightly shrink the button and tuck it tighter into the corner on smaller screens */
-        bottom: 12px;
-        right: 12px;
-        width: 38px;
-        height: 38px;
+/* Landscape Tweaks */
+@media (orientation: landscape) and (max-height: 600px) {
+    .mobile-keyboard {
+        bottom: 10px;
+        padding: 4px;
+        gap: 2px;
     }
 
-    .dash-config-select {
-        width: 100%;
-        padding: 14px 16px;
-        font-size: 1rem;
+    .mk-row {
+        gap: 2px;
     }
 
-    .dash-config-load {
-        width: 100%;
-        padding: 14px;
-        font-size: 0.92rem;
-        text-align: center;
+    .mk-key {
+        height: 32px;
+        font-size: 0.7rem;
     }
 
-    .dash-video-wrap {
-        border-radius: 10px;
+    .remote-header {
+        top: 8px;
+        left: 8px;
+        right: 8px;
     }
 
-    .dash-logs {
-        max-height: 180px;
-        font-size: 0.62rem;
+    /* Keep the controls centered directly under the header to avoid overlap */
+    .mobile-controls-bar {
+        top: 54px;
+        transform: translateX(-50%);
+        left: 50%;
+        right: auto;
+        padding: 4px 8px;
     }
 
-    .rc-modal {
-        padding: 32px 24px 28px;
-        border-radius: 16px;
-    }
-
-    .rc-input {
-        font-size: 1.1rem;
-        padding: 14px 16px;
-    }
-
-    .rc-btn {
-        padding: 15px;
-        font-size: 1rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .dash-container {
-        padding: 72px 12px 24px;
-    }
-
-    .dash-title {
-        font-size: 1.05rem;
-    }
-
-    .dash-card {
-        padding: 14px;
-    }
-
-    .dash-card-header h3 {
-        font-size: 0.65rem;
+    .mc-btn {
+        width: 34px;
+        height: 34px;
     }
 }
