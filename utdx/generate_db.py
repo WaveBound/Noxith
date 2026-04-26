@@ -482,7 +482,7 @@ def run_combo(args):
         'mage': combo[5]
     }
     out_name = get_db_name(combo)
-    out_path = os.path.join("databases", out_name)
+    out_path = os.path.join("utdx", "databases", out_name)
     start_t = time.time()
 
     process = subprocess.run(
@@ -542,7 +542,7 @@ def main():
     MAX_PARALLEL = 4
 
     print(f"\n🚀 Initiating build for {total_runs} combinations ({MAX_PARALLEL} parallel)...")
-    os.makedirs("databases", exist_ok=True)
+    os.makedirs(os.path.join("utdx", "databases"), exist_ok=True)
 
     overall_start = time.time()
     args_list = [(i, combo, total_runs, temp_runner) for i, combo in enumerate(combinations)]
