@@ -11,13 +11,13 @@ const resetAndRender = () => {
     renderDatabase();
 };
 
-window.selectELevel = function(unitId, level) {
+window.selectELevel = function (unitId, level) {
     // If clicking the active level, toggle off to 0
     const current = window.unitELevels[unitId] || 0;
     const next = (current === level) ? 0 : level;
-    
+
     window.unitELevels[unitId] = next;
-    
+
     const card = document.getElementById('card-' + unitId);
     if (!card) return;
 
@@ -747,7 +747,7 @@ window.toggleFilterTab = (btn) => {
     const container = btn.closest('.search-container');
     const content = container.querySelector('.filter-tab-content');
     const isHidden = content.classList.contains('hidden');
-    
+
     if (isHidden) {
         content.classList.remove('hidden');
         btn.innerHTML = 'Filters ▲';

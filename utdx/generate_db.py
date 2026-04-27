@@ -503,7 +503,7 @@ def main():
         print("❌ Error: Node.js is required to run this script. Please install Node.js (https://nodejs.org/).")
         sys.exit(1)
 
-    combined_js = ""
+    combined_js = "// NODE.JS POLYFILLS\nif (typeof window === 'undefined') { global.window = global; }\n\n"
     print("📥 Reading JavaScript dependencies...")
     for filename in REQUIRED_FILES:
         file_path = filename

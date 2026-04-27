@@ -272,7 +272,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             };
         }
 
-        // ALWAYS re-calculate to ensure stats reflect the current upgrade level (window.unitELevels)
+        // ALWAYS re-calculate to ensure stats reflect the current unified math
         if (typeof reconstructMathData === 'function') {
             try {
                 const fullMath = reconstructMathData(res);
@@ -287,56 +287,13 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     res.subStats.finalCf = fullMath.critData ? fullMath.critData.rate : 0;
                     res.subStats.finalCm = fullMath.critData ? fullMath.critData.cdmg : 0;
                 }
-
-                // STABILITY FIX: Calculate MAX potential DPS for sorting purposes
-                // This ensures the list doesn't re-shuffle when clicking lower upgrades
-                const savedLevel = (window.unitELevels && window.unitELevels[unitId]) || 0;
-                const maxLevel = (unitObj && unitObj.upgrades) ? unitObj.upgrades.length - 1 : 0;
-
-                if (savedLevel !== maxLevel) {
-                    window.unitELevels[unitId] = maxLevel;
-                    const maxMath = reconstructMathData(res);
-                    res.sortDps = maxMath ? (maxMath.total || maxMath.dps || 0) : res.dps;
-                    window.unitELevels[unitId] = savedLevel; // Restore
-                } else {
-                    res.sortDps = res.dps;
-                }
-
+                // Math is always maxed now, so sortDps is just dps
+                res.sortDps = res.dps;
+                res.baseStats = null; // No next upgrade comparison needed
             } catch (e) {
                 console.warn("Hydration Math Error for", res.id, e);
             }
-
-            // Also update Next Level comparison stats
-            const savedLevel = (window.unitELevels && window.unitELevels[unitId]) || 0;
-            const maxLevel = (unitObj && unitObj.upgrades) ? unitObj.upgrades.length - 1 : 6;
-            if (savedLevel < maxLevel) {
-                try {
-                    // Temporarily set E-level to next to get stats
-                    window.unitELevels = window.unitELevels || {};
-                    window.unitELevels[unitId] = savedLevel + 1;
-                    const nextMath = reconstructMathData(res);
-                    if (nextMath) {
-                        res.baseStats = {
-                            dmgVal: nextMath.dmgVal,
-                            spa: nextMath.spa,
-                            range: nextMath.range,
-                            cf: (nextMath.critData ? nextMath.critData.rate : 0),
-                            cm: (nextMath.critData ? nextMath.critData.cdmg : 0),
-                            dot: nextMath.dot || 0
-                        };
-                    }
-                } catch (e) {
-                    console.warn("Base stats hydration error", e);
-                } finally {
-                    // Restore original level
-                    window.unitELevels[unitId] = savedLevel;
-                }
-            } else {
-                // If maxed, clear baseStats or keep it empty
-                res.baseStats = null;
-            }
         }
-
         return res;
     };
 
@@ -428,7 +385,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     }
 }
 
-function processUnitCache(unit, specificCfg = null, specificType = null, isMaxPotential = false) {
+function processUnitCache(unit, specificCfg = null, specificType = null) {
     if (!window.unitBuildsCache[unit.id]) {
         window.unitBuildsCache[unit.id] = {
             base: { fixed: [null] },
@@ -470,7 +427,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null, isMaxPo
 
             const traitsForCalc = (calculatedResults.length > 0 && !unit.id.includes('sasuke')) ? [...(typeof customTraits !== 'undefined' ? customTraits : []), ...(unitSpecificTraits[unit.id] || [])] : null;
             if (traitsForCalc === null || traitsForCalc.length > 0 || useInventory) {
-                const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode, isMaxPotential);
+                const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
                 calculatedResults = [...calculatedResults, ...dynamicResults];
             }
             targetCache[i] = calculatedResults;
@@ -839,7 +796,7 @@ function updateGuideBuilds(unitId) {
     const activeCfg = 0; // Forced to Max Potential
     const filterTraitId = document.getElementById('guideTraitSelect').value;
 
-    if (!unitBuildsCache[unitId]) processUnitCache(unit, null, null, true);
+    if (!unitBuildsCache[unitId]) processUnitCache(unit, null, null);
     const builds = processGuideTop3(getGuideBuildsFromCache(unit, activeMode, activeCfg), unit, filterTraitId);
 
     const mpLabel = document.getElementById(`guide-mp-${unitId}`);
