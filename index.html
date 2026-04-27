@@ -773,7 +773,7 @@
             <img src="${c.pfp}" class="badge-pfp" alt="${c.name}">
             <span class="badge-name">${c.name}</span>
             ${discordLogo}
-            <a href="https://discord.com/users/${c.userId}" target="_blank" class="discord-link-btn" onclick="event.stopPropagation()" title="Open Discord Profile">${linkIcon}</a>
+            <a href="https://discord.com/users/${c.userId}" target="_blank" class="discord-link-btn" onclick="handleDiscordLink('${c.userId}', event)" title="Open Discord Profile">${linkIcon}</a>
           </div>
         </div>
       `).join('');
@@ -783,6 +783,15 @@
       navigator.clipboard.writeText(id).then(() => {
         showToast(`Copied "${id}" to clipboard!`);
       });
+    }
+
+    function handleDiscordLink(userId, event) {
+      event.stopPropagation();
+      // On desktop, try to open the Discord App directly
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (!isMobile) {
+        window.location.href = `discord://-/users/${userId}`;
+      }
     }
 
     function showToast(message) {
