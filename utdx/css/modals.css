@@ -140,13 +140,13 @@
     align-items: center;
 }
 
-/* --- FIXED SNAPSHOT OVERVIEW LAYOUT --- */
+/* --- FIXED SNAPSHOT --- INDIVIDUAL ROWS --- */
 .math-row {
     display: flex;
     justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     align-items: center;
-    padding: 6px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 .math-row:last-child {
     border-bottom: none;
@@ -180,12 +180,12 @@
 .mq-box { 
     display: grid; 
     grid-template-columns: 1fr 1fr; 
-    gap: 12px; 
+    gap: 6px; 
 }
 
 .mq-box > div {
     background: #0a0a0c;
-    padding: 12px 8px;
+    padding: 8px 6px;
     border-radius: 6px;
     border: 1px solid #222;
     display: flex;
@@ -193,7 +193,7 @@
     align-items: center;
     text-align: center;
     justify-content: center;
-    min-height: 80px;
+    min-height: 60px;
 }
 
 .mq-label { 
@@ -202,7 +202,7 @@
     color: #666; 
     font-weight: 800; 
     text-transform: uppercase; 
-    margin-bottom: 6px; 
+    margin-bottom: 4px; 
     letter-spacing: 0.5px;
 }
 
@@ -217,7 +217,7 @@
 .mq-sub { 
     font-size: 0.65rem; 
     color: #444; 
-    margin-top: 6px; 
+    margin-top: 4px; 
     font-family: 'Consolas', monospace;
 }
 

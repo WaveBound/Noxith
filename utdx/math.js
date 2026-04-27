@@ -353,10 +353,6 @@ function calculateDPS(uStats, relicStats, context) {
     if (rRange !== 0) lvStats.range *= (1 + rRange/100);
 
     let passivePcent = (uStats.passiveDmg || 0) + (uStats.buffDmg || 0), passiveSpaPcent = uStats.passiveSpa || 0;
-    
-    if (uStats.id === 'water_god') {
-        passivePcent += (75 * placement);
-    }
 
     const totalBossDmg = (uStats.bossDmg || 0) + (traitObj.bossDmg || 0);
     let traitDmgPct = traitObj.dmg + (totalBossDmg && isBoss ? totalBossDmg : 0), traitSpaPct = traitObj.spa; 
@@ -535,7 +531,7 @@ function calculateDPS(uStats, relicStats, context) {
             extra: uStats.followUp / 100,
             attacksNeeded: 1,
             mult: attackMultiplier,
-            label: "Follow-up Attack"
+            label: "Chain Lightning"
         };
     } else if (uStats.reqCrits && uStats.hitCount) {
         const critsPerAttack = uStats.hitCount * (finalCritRate / 100);

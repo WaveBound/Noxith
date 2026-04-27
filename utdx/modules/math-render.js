@@ -70,7 +70,7 @@ function renderSourceTotalsSection(data) {
         <div class="math-section" style="border-color: rgba(255, 255, 255, 0.15); background: #000; flex: 1; margin-bottom: 0; padding: 14px; border-radius: 8px; box-shadow: inset 0 0 20px rgba(255,255,255,0.02);">
             <div class="math-header" style="color: #fff; font-size: 0.85rem; margin-bottom: 15px; letter-spacing: 1.5px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">SOURCE TOTALS</div>
             
-            <div style="margin-bottom: 16px; border-left: 3px solid #f472b6; padding-left: 10px;">
+            <div style="margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #f472b6; padding-left: 10px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <span style="font-size: 0.75rem; font-weight: 800; color: #f472b6; letter-spacing: 0.5px;">RELICS & TAGS</span>
                     <b style="color: #f472b6; font-size: 0.9rem;">${fmt.pct(gearTotalDmg)}</b>
@@ -87,9 +87,8 @@ function renderSourceTotalsSection(data) {
                 </div>
             </div>
 
-            <div style="margin-bottom: 16px; border-left: 3px solid #4ade80; padding-left: 10px; background: rgba(74, 222, 128, 0.03); padding-top: 6px; padding-bottom: 6px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <span style="font-size: 0.75rem; font-weight: 800; color: #4ade80; letter-spacing: 0.5px;">TRAIT: ${data.traitObj.name.toUpperCase()}</span>
+            <div style="margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #4ade80; padding-left: 10px; background: rgba(74, 222, 128, 0.02); padding-top: 4px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">                    <span style="font-size: 0.75rem; font-weight: 800; color: #4ade80; letter-spacing: 0.5px;">TRAIT: ${data.traitObj.name.toUpperCase()}</span>
                     <b style="color: #4ade80; font-size: 0.85rem;">${fmt.pct(traitDmg)}</b>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 0.7rem; color: #999;">
@@ -176,8 +175,8 @@ function renderActiveBuffsSection(data) {
     `).join('');
 
     return `
-        <div class="math-section" style="margin-bottom: 15px; border-color: rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); padding: 10px; border-radius: 8px;">
-            <div class="math-header" style="font-size: 0.7rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+        <div class="math-section" style="margin-bottom: 6px; border-color: rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); padding: 8px 10px; border-radius: 8px;">
+            <div class="math-header" style="font-size: 0.65rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
                 <span>Applied Passives & Global Buffs</span>
                 ${unit ? `<button class="calc-info-btn" onclick="openUnitInfo('${unit.id}')" title="View Full Unit Passives">?</button>` : ''}
             </div>
@@ -191,7 +190,7 @@ function renderQuickBreakdownSection(data, avgHitPerUnit, dotColorClass) {
     const dotLabelClass = data.dot > 0 ? 'text-accent-end' : '';
     const isNutaru = data.baseStats.id === 'nutaru_beast';
     return `
-        <div class="math-section no-border-bottom mb-3">
+        <div class="math-section no-border-bottom" style="margin-bottom: 4px;">
             <div class="math-header opacity-70">Quick Breakdown</div>
             <div class="mq-box">
                 <div style="border-color: rgba(251, 191, 36, 0.3);"><div class="mq-label mt-text-gold">Hit DPS</div><div class="mq-val mt-text-gold">${fmt.num(data.hit)}</div><div class="mq-sub">(${fmt.num(avgHitPerUnit)} avg ÷ ${fmt.fix(data.spa,2)}s) × ${data.placement}</div></div>
@@ -383,7 +382,7 @@ function renderDotSection(data, headDotRow) {
     <div class="dd-section">
         <div class="dd-title text-accent-end"><span>6. Status Effect (DoT) Breakdown</span> <button class="calc-info-btn" onclick="openInfoPopup('dot_logic')">?</button></div>
         <table class="calc-table">
-            <tr><td class="mt-cell-label">Hit Ref (Crit Avg)</td><td class="mt-cell-val" colspan="2">${fmt.num(data.dmgVal * db.critMult)}</td></tr>
+            <tr><td class="mt-cell-label">Hit Ref ${db.critMult > 1 ? '(Crit Avg)' : '(Non-Crit)'}</td><td class="mt-cell-val" colspan="2">${fmt.num(data.dmgVal * db.critMult)}</td></tr>
             
             ${headDotRow}
 
@@ -403,7 +402,12 @@ function renderDotSection(data, headDotRow) {
             ${setDot > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">• Set Bonus</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-dim">${fmt.pct(setDot)}</td></tr>` : ''}
             ${headDot > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">• Head Passive</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-dim">${fmt.pct(headDot)}</td></tr>` : ''}
             
-            <tr><td class="mt-cell-label mt-pt-md">Final Native Tick</td><td class="mt-cell-formula">=</td><td class="mt-cell-val calc-highlight">${fmt.fix(finalTickPct, 2)}%</td></tr>
+            <tr><td class="mt-cell-label mt-pt-md">Final Native Tick %</td><td class="mt-cell-formula">=</td><td class="mt-cell-val calc-highlight">${fmt.fix(finalTickPct, 2)}%</td></tr>
+            <tr><td class="mt-cell-label mt-pl-sm text-accent-end mt-pt-sm">↳ Total Damage</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-end mt-pt-sm">${fmt.num(db.nativeTotalDmg)}</td></tr>
+            ${data.baseStats.dotDuration ? `
+            <tr><td class="mt-cell-label mt-pl-md text-dim text-xs opacity-70">• Ticks Over Time</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">${data.baseStats.dotDuration} Ticks</td></tr>
+            <tr><td class="mt-cell-label mt-pl-md text-dim text-xs opacity-70">• Damage Per Tick</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">${fmt.num(db.nativeTotalDmg / data.baseStats.dotDuration)}</td></tr>
+            ` : ''}
           ${db.isMultiHit ? `<tr><td class="mt-cell-label mt-pl-md text-custom">↳ Multi-Hit Proc (Astral)</td><td class="mt-cell-formula">x${data.baseStats.hitCount}</td><td class="mt-cell-val text-custom">Active</td></tr>` : ''}
             <tr>
                 <td class="mt-cell-label mt-pt-sm">Native DoT DPS</td>
@@ -437,6 +441,15 @@ function renderDotSection(data, headDotRow) {
 
 function renderMathContent(data) {
     if (!data || !data.lvStats || !data.critData) return '<div class="msg-empty">Data incomplete.</div>';
+    
+    // BUILD IDENTITY SECTION
+    const identityHtml = `
+        <div class="build-identity-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 6px 15px; margin-bottom: 6px; border-left: 4px solid #60a5fa;">
+            <div style="font-size: 0.55rem; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; margin-bottom: 2px;">Relic Set & Trait</div>
+            <div style="font-size: 0.95rem; font-weight: 900; color: #fff; line-height: 1.1;">${data.setName || 'Standard Build'}</div>
+            <div style="font-size: 0.8rem; color: #60a5fa; font-weight: 800; margin-top: 1px;">${data.traitObj ? data.traitObj.name : 'Unknown Trait'}</div>
+        </div>
+    `;
     
     const levelMult = data.lvStats.dmgMult; 
     const avgHitPerUnit = data.dmgVal * data.critData.avgMult;
@@ -525,11 +538,11 @@ function renderMathContent(data) {
 
     const dotColorClass = data.dot > 0 ? 'text-accent-end' : 'text-dark-dim';
 
-    return `
-        <div class="breakdown-top-wrapper" style="position:relative; margin-bottom: 12px;">
+    return identityHtml + `
+        <div class="breakdown-top-wrapper" style="position:relative; margin-bottom: 4px;">
             <div class="breakdown-top-panels" style="display: flex; gap: 12px; align-items: stretch;">
                 <div class="breakdown-panel breakdown-panel--left" style="flex:1; min-width:0;">${renderSourceTotalsSection(data)}</div>
-                <div class="breakdown-panel breakdown-panel--right" style="display: flex; flex-direction: column; gap: 12px; flex: 1.1; min-width:0;">
+                <div class="breakdown-panel breakdown-panel--right" style="display: flex; flex-direction: column; gap: 4px; flex: 1.1; min-width:0;">
                     ${renderOverviewSection(data)}
                     ${renderBuffSummarySection(data)}
                 </div>

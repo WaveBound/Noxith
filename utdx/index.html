@@ -3,11 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Universal TD Optimizer</title>
-
-    <meta name="description"
-        content="The Universal TD Optimizer. Calculate and optimize the best DPS, Range, and SPA builds for your units. Discover meta traits, relic combinations, and tier lists.">
 
     <!-- CSS IMPORTS -->
     <link rel="stylesheet" href="css/variables.css">
@@ -26,12 +23,6 @@
 
     <!-- SIDEBAR NAVIGATION -->
     <aside class="dashboard-sidebar">
-        <!-- Back Button -->
-        <a href="/" class="back-to-hub">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            <span>Back to Hub</span>
-        </a>
-
         <div id="headerTitleSection" class="header-wrapper">
             <div class="header-inner">
                 <header id="mainHeader">
@@ -83,12 +74,15 @@
             <button class="nav-btn sidebar-footer-btn"
                 onclick="openFeedbackModal(); window.toggleMobileMenu && window.toggleMobileMenu(false)">Report /
                 Suggest</button>
-            <button class="nav-btn sidebar-footer-btn" style="color: var(--accent-light, #fff); font-weight: 700;"
-                onclick="NoxithDonations.open(); window.toggleMobileMenu && window.toggleMobileMenu(false)">Donate</button>
+            
+            <div class="sidebar-divider">Settings</div>
+            <div class="nav-toggle-label sidebar-toggle" title="Change scroll speed of the build list">
+                <span>Scroll Speed</span>
+                <input type="range" id="scrollSensitivity" min="1" max="5" step="0.5" value="1" oninput="updateScrollSensitivity(this.value)">
+                <span id="scrollSenseVal" style="font-size: 0.7rem; color: var(--accent-start); font-weight: 900; margin-left: 5px;">1x</span>
+            </div>
         </div>
     </aside>
-
-    <script src="../donations/donations.js"></script>
 
     <!-- MAIN CONTENT AREA -->
     <main class="dashboard-main">

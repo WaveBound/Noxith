@@ -214,14 +214,18 @@ function openUnitInfo(unitId) {
     if (!unit) return;
 
     let passivesHtml = '';
+    const s = unit.stats;
+    let innateStatsHtml = '';
+    if (s.passiveDmg) innateStatsHtml += `<li><span>Passive Damage:</span> <span class="text-white">+${s.passiveDmg}%</span></li>`;
+    if (s.passiveSpa) innateStatsHtml += `<li><span>Passive SPA:</span> <span class="text-white">-${s.passiveSpa}%</span></li>`;
+    if (s.passiveRange) innateStatsHtml += `<li><span>Passive Range:</span> <span class="text-white">+${s.passiveRange}%</span></li>`;
+    if (s.hyper) innateStatsHtml += `<li><span>Hyper Dmg:</span> <span class="text-white">+${s.hyper}%</span></li>`;
+
     if (unit.passives && Array.isArray(unit.passives)) {
         passivesHtml = unit.passives.map(p => `<li class="info-passive-item"><strong class="text-white">${p.name}:</strong> <span class="info-passive-desc">${p.desc}</span></li>`).join('');
+        if (innateStatsHtml) passivesHtml = innateStatsHtml + passivesHtml;
     } else {
-        const s = unit.stats;
-        if (s.passiveDmg) passivesHtml += `<li><span>Damage:</span> <span>+${s.passiveDmg}%</span></li>`;
-        if (s.passiveSpa) passivesHtml += `<li><span>SPA:</span> <span>-${s.passiveSpa}%</span></li>`;
-        if (s.passiveRange) passivesHtml += `<li><span>Range:</span> <span>+${s.passiveRange}%</span></li>`;
-        if (s.hyper) passivesHtml += `<li><span>Hyper Dmg:</span> <span>+${s.hyper}%</span></li>`;
+        passivesHtml = innateStatsHtml;
     }
 
     if (!passivesHtml) passivesHtml = '<li>None</li>';
@@ -275,9 +279,9 @@ function openUnitInfo(unitId) {
             <div class="info-section section-stats">
                 <div class="info-sec-title">Base Statistics (Lv 1)</div>
                 <ul class="info-list">
-                    <li><span>Damage:</span> <span class="text-white">${unit.stats.dmg.toLocaleString()}</span></li>
-                    <li><span>SPA:</span> <span class="text-white">${unit.stats.spa}s</span></li>
-                    <li><span>Range:</span> <span class="text-white">${unit.stats.range}</span></li>
+                    <li><span>Damage:</span> <span class="text-white">${(unit.stats.dmg || (unit.upgrades && unit.upgrades[0] ? unit.upgrades[0].dmg : 0)).toLocaleString()}</span></li>
+                    <li><span>SPA:</span> <span class="text-white">${unit.stats.spa || (unit.upgrades && unit.upgrades[0] ? unit.upgrades[0].spa : 0)}s</span></li>
+                    <li><span>Range:</span> <span class="text-white">${unit.stats.range || (unit.upgrades && unit.upgrades[0] ? unit.upgrades[0].range : 0)}</span></li>
                     <li><span>SPA Cap:</span> <span class="text-white">${unit.stats.spaCap}s</span></li>
                 </ul>
             </div>

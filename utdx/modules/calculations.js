@@ -40,9 +40,52 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     effectiveStats.id = unit.id;
     effectiveStats.placementType = unit.placementType;
     if (unit.tags) effectiveStats.tags = unit.tags;
+    
+    // --- APPLY UPGRADE STATS (Dmg/Spa/Range) ---
+    const upgradeLevel = window.unitELevels ? (window.unitELevels[unit.id] || 0) : 0;
+
+    if (unit.upgrades && unit.upgrades[upgradeLevel]) {
+        const upStats = unit.upgrades[upgradeLevel];
+        if (upStats.dmg) effectiveStats.dmg = upStats.dmg;
+        if (upStats.spa) effectiveStats.spa = upStats.spa;
+        if (upStats.range) effectiveStats.range = upStats.range;
+        if (upStats.passiveDmg !== undefined) effectiveStats.passiveDmg = upStats.passiveDmg;
+        if (upStats.passiveSpa !== undefined) effectiveStats.passiveSpa = upStats.passiveSpa;
+        if (upStats.passiveRange !== undefined) effectiveStats.passiveRange = upStats.passiveRange;
+    }
+    const eLevel = window.unitELevels ? (window.unitELevels[unit.id] || 0) : 0;
+    let maxPts = (unit.id === 'king_sailor') ? 129 : 99;
+
+    if (eLevel > 0 && unit.etherealization) {
+        for (let i = 0; i < eLevel; i++) {
+            const upgrade = unit.etherealization[i];
+            if (!upgrade) continue;
+            const lowU = upgrade.toLowerCase();
+
+            // Stat Point logic removed as per user request (Only King Sailor goes over 99)
+            
+            if (unit.id === 'water_god') {
+                // Apply all core passives at E1 to ensure consistency across all upgrades
+                if (i === 0) {
+                    effectiveStats.followUp = true;
+                    effectiveStats.passiveDotBuff = (effectiveStats.passiveDotBuff || 0) + 10;
+                }
+                continue; // Skip standard checks to avoid double-counting
+            }
+
+            // Apply special bonuses for other units
+            if (lowU.includes('+75% damage per placement')) {
+                effectiveStats.passiveDmg = (effectiveStats.passiveDmg || 0) + (75 * (unit.placement || 1));
+            }
+        }
+    }
+    // Update context with potentially increased maxPts
+    options.dmgPoints = Math.min(options.dmgPoints || 0, maxPts);
+    options.spaPoints = Math.min(options.spaPoints || 0, maxPts);
+    options.rangePoints = Math.min(options.rangePoints || 0, maxPts);
+
     if (isAbility && unit.ability) Object.assign(effectiveStats, unit.ability);
     
-
     const isKiritoVR = (unit.id === 'kirito' && kiritoState.realm);
     if (unit.id === 'kirito' && isKiritoVR && kiritoState.card) { effectiveStats.dot = 200; effectiveStats.dotDuration = 4; effectiveStats.dotStacks = 1; }
     if (unit.id === 'bambietta' && typeof BAMBIETTA_MODES !== 'undefined') {
@@ -64,17 +107,46 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     if (unit.id === 'kirito') { if (kiritoState.realm) suffix += '-VR'; if (kiritoState.card) suffix += '-CARD'; }
     const modeTag = (mode === 'bugged') ? '-b-' : '-f-';
 
-    const context = { dmgPoints, spaPoints, rangePoints, wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: isKiritoVR, headPiece, starMult, rankData, isAbility };
+    const context = { dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: isKiritoVR, headPiece, starMult, rankData, isAbility, maxPts };
     return { effectiveStats, traitObj, context, isKiritoVR, suffix, modeTag };
 }
 
-function createResultEntry({ id, buildName, traitName, res, prio, mainStats, subStats, headUsed, isCustom, relicIds = null }) {
-    const entry = { id: id, setName: buildName.split('(')[0].trim(), traitName: traitName, dps: res.total, dmgVal: res.dmgVal, spa: res.spa, range: res.range, prio: prio, mainStats: mainStats, subStats: subStats, headUsed: headUsed, isCustom: isCustom };
+function createResultEntry({ id, buildName, traitName, res, prio, mainStats, subStats, headUsed, isCustom, relicIds = null, baseRes = null }) {
+    const entry = { 
+        id: id, 
+        setName: buildName.split('(')[0].trim(), 
+        traitName: traitName, 
+        dps: res.total, 
+        dmgVal: res.dmgVal, 
+        spa: res.spa, 
+        range: res.range, 
+        dot: res.dot || 0,
+        dotTotal: res.dotData ? (res.dotData.nativeTotalDmg + (res.dotData.radTotalDmg || 0)) : 0,
+        prio: prio, 
+        mainStats: mainStats, 
+        subStats: { 
+            ...subStats, 
+            finalCf: (res.critData ? res.critData.rate : 0), 
+            finalCm: (res.critData ? res.critData.cdmg : 0) 
+        }, 
+        headUsed: headUsed, 
+        isCustom: isCustom 
+    };
+    if (baseRes) {
+        entry.baseStats = {
+            dmgVal: baseRes.dmgVal,
+            spa: baseRes.spa,
+            range: baseRes.range,
+            cf: (baseRes.critData ? baseRes.critData.rate : 0),
+            cm: (baseRes.critData ? baseRes.critData.cdmg : 0),
+            dot: baseRes.dot || 0
+        };
+    }
     if (relicIds) entry.relicIds = relicIds;
     return entry;
 }
 
-function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsToProcess, includeSubs, specificTraitsOnly = null, isAbilityContext = false, mode = 'fixed') {
+function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsToProcess, includeSubs, specificTraitsOnly = null, isAbilityContext = false, mode = 'fixed', isMaxPotential = false) {
     if (inventoryMode && relicInventory && relicInventory.length > 0) return calculateInventoryBuilds(unit, null, specificTraitsOnly, isAbilityContext, mode, headsToProcess, includeSubs);
     window.cachedResults = window.cachedResults || {};
     let activeTraits = [];
@@ -82,7 +154,7 @@ function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsT
     else { const specificTraits = unitSpecificTraits[unit.id] || []; activeTraits = [...traitsList, ...customTraits, ...specificTraits]; }
 
     let unitResults = [];
-    const { effectiveStats: baseEffective, isKiritoVR: baseVR } = buildCalculationContext(unit, 'ruler', { isAbility: isAbilityContext });
+    const { effectiveStats: baseEffective, isKiritoVR: baseVR } = buildCalculationContext(unit, 'ruler', { isAbility: isAbilityContext, isMaxPotential });
     const hasNativeDoT = (baseEffective.dot > 0) || (baseEffective.burnMultiplier > 0) || baseVR;
     let unitSubCandidates = [...subCandidates];
     if (!hasNativeDoT) unitSubCandidates = unitSubCandidates.filter(c => c !== 'dot');
@@ -90,7 +162,7 @@ function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsT
 
     activeTraits.forEach(trait => {
         if (trait.id === 'none') return; 
-        const { effectiveStats, context, isKiritoVR, suffix, modeTag } = buildCalculationContext(unit, trait, { isAbility: isAbilityContext, mode: mode });
+        const { effectiveStats, context, isKiritoVR, suffix, modeTag } = buildCalculationContext(unit, trait, { isAbility: isAbilityContext, mode: mode, isMaxPotential });
         const traitAddsDot = trait.dotBuff > 0 || trait.hasRadiation || trait.allowDotStack;
         const isDotPossible = hasNativeDoT || traitAddsDot;
         const currentCandidates = (traitAddsDot) ? subCandidates : unitSubCandidates;
@@ -107,18 +179,46 @@ function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsT
                     return getBestSubConfig(build, effectiveStats, includeSubs, headMode, currentCandidates, optType);
                 };
 
-                const maxPts = (unit.id === 'king_sailor') ? 129 : 99;
+                const maxPts = context.maxPts || 99;
                 const cfgDmg = runOpt(maxPts, 0, 0, 'dps');
                 const cfgSpa = runOpt(0, maxPts, 0, 'dps');
                 const cfgRaw = runOpt(maxPts, 0, 0, 'raw_dmg');
                 const cfgRange = runOpt(0, 0, 99, 'range');
 
+                const eLevel = window.unitELevels[unit.id] || 0;
+                let baseContext = null;
+                const upgradeMax = (unit.upgrades) ? unit.upgrades.length - 1 : 0;
+                if (eLevel < upgradeMax) {
+                    // Pre-calculate Next Level context for comparison
+                    const savedLevel = window.unitELevels[unit.id] || 0;
+                    window.unitELevels[unit.id] = savedLevel + 1;
+                    const bCtx = buildCalculationContext(unit, trait, { isAbility: isAbilityContext, mode: mode, isMaxPotential });
+                    window.unitELevels[unit.id] = savedLevel;
+                    baseContext = bCtx;
+                }
+
                 const baseId = `${unit.id}${suffix}-${trait.id}-${build.name.replace(/[^a-zA-Z0-9]/g, '')}`;
                 const processResult = (config, prioStr) => {
                     const res = config.res;
                     if (isNaN(res.total)) return;
+                    
+                    let bRes = null;
+                    if (baseContext) {
+                        const bEff = baseContext.effectiveStats;
+                        const bCtx = baseContext.context;
+                        // For base comparison, use same assignments but base stats
+                        const bOut = calculateDPS(bEff, trait, config.assignments, bCtx);
+                        bRes = bOut;
+                    }
+
                     const fullId = `${baseId}-${prioStr}${subsSuffix}-${headMode}${modeTag}`;
-                    const entry = createResultEntry({ id: fullId, buildName: build.name, traitName: trait.name, res: res, prio: prioStr, mainStats: { body: build.bodyType, legs: build.legType }, subStats: config.assignments, headUsed: config.assignments.selectedHead, isCustom: trait.isCustom });
+                    const entry = createResultEntry({ 
+                        id: fullId, buildName: build.name, traitName: trait.name, 
+                        res: res, baseRes: bRes, prio: prioStr, 
+                        mainStats: { body: build.bodyType, legs: build.legType }, 
+                        subStats: config.assignments, headUsed: config.assignments.selectedHead, 
+                        isCustom: trait.isCustom 
+                    });
                     window.cachedResults[fullId] = entry;
                     unitResults.push(entry);
                     return entry;
@@ -216,7 +316,7 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
                     }
 
                     // C. Run Calculation Loops (DMG, SPA, RANGE)
-                    const maxPts = (unit.id === 'king_sailor') ? 129 : 99;
+                    const maxPts = context.maxPts || 99;
                     const calcVariations = [
                         { id: 'dmg',   dmgPts: maxPts, spaPts: 0,  rangePts: 0 },
                         { id: 'spa',   dmgPts: 0,  spaPts: maxPts, rangePts: 0 },
@@ -297,10 +397,11 @@ function reconstructMathData(liteData) {
 
     const isSpaPrio = liteData.prio === 'spa';
     const isRangePrio = liteData.prio === 'range';
-    const maxPts = (unit.id === 'king_sailor') ? 129 : 99;
-    let dmgPts = maxPts, spaPts = 0, rangePts = 0;
-    if (isSpaPrio) { dmgPts = 0; spaPts = maxPts; }
-    else if (isRangePrio) { dmgPts = 0; spaPts = 0; rangePts = 99; }
+    
+    // Use a large value to allow buildCalculationContext to cap at the correct maxPts for the E-level
+    let dmgPts = isSpaPrio || isRangePrio ? 0 : 999;
+    let spaPts = isSpaPrio ? 999 : 0;
+    let rangePts = isRangePrio ? 999 : 0;
 
     // Use Unified Context Builder
     // NOTE: passing traitName here, helper will resolve it
@@ -374,6 +475,10 @@ function reconstructMathData(liteData) {
     // Run Calc
     effectiveStats.context = context;
     const result = calculateDPS(effectiveStats, totalStats, context);
+
+    // Re-attach identity info for the UI
+    result.setName = liteData.setName;
+    result.traitName = liteData.traitName;
 
     // Restore Config
     statConfig.applyRelicDot = previousDotState;

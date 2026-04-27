@@ -1,39 +1,5 @@
 body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-primary); margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column; }
 
-/* Back Button Style */
-.back-to-hub {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 20px 24px;
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    border-bottom: 1px solid var(--card-border);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    background: rgba(255, 255, 255, 0.01);
-}
-
-.back-to-hub:hover {
-    background: linear-gradient(to right, rgba(59, 130, 246, 0.05), transparent);
-    color: #fff;
-    padding-left: 28px;
-}
-
-.back-to-hub svg {
-    opacity: 0.4;
-    transition: all 0.25s ease;
-}
-
-.back-to-hub:hover svg {
-    opacity: 1;
-    color: var(--accent-start);
-    transform: translateX(-4px);
-}
-
 /* Custom Scrollbar Styles */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }

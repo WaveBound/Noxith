@@ -85,6 +85,12 @@ function getHeadBadgeHtml(headUsed) {
 function generateBuildRowHTML(r, i, unitConfig = {}) {
     const { totalCost = 50000, placement = 1, sortMode = 'dps', unitId = '', benchmarkDps = 0 } = unitConfig;
 
+    const currentLevel = (window.unitELevels && window.unitELevels[unitId]) || 0;
+    const nextLevel = currentLevel + 1;
+    const unitObj = unitDatabase ? unitDatabase.find(u => u.id === unitId) : null;
+    const maxLevel = (unitObj && unitObj.upgrades) ? unitObj.upgrades.length - 1 : 0;
+    const nextStats = r.baseStats || { dmgVal: 0, spa: 0, range: 0 };
+
     let rankClass = (i < 3 ? `rank-${i + 1}` : 'rank-other') + (r.isCustom ? ' is-custom' : '');
     const effScore = calculateBuildEfficiency(r, totalCost, placement, unitId).toFixed(3);
 
@@ -120,13 +126,13 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     const mainLegsBadge = getBadgeHtml(r.mainStats.legs, MAIN_STAT_VALS.legs[r.mainStats.legs]);
     const headHtml = getHeadBadgeHtml(r.headUsed);
     const s = r.subStats || {};
-    const headRow = (r.headUsed && r.headUsed !== 'none') ? `<div class="stat-line">${getRichBadgeHtml(s.head || [])}</div>` : '';
-    const bodyRow = `<div class="stat-line">${getRichBadgeHtml(s.body || [])}</div>`;
-    const legsRow = `<div class="stat-line">${getRichBadgeHtml(s.legs || [])}</div>`;
+    const headRow = (r.headUsed && r.headUsed !== 'none') ? `<div class="stat-line"><span class="sl-label">HEAD</span>${getRichBadgeHtml(s.head || [])}</div>` : '';
+    const bodyRow = `<div class="stat-line"><span class="sl-label">BODY</span>${getRichBadgeHtml(s.body || [])}</div>`;
+    const legsRow = `<div class="stat-line"><span class="sl-label">LEGS</span>${getRichBadgeHtml(s.legs || [])}</div>`;
 
     const mobileToggle = `<button class="mobile-stat-toggle" onclick="toggleRelicStatDisplay(this)"><span class="m-toggle-txt">Main</span><span class="m-toggle-txt">Sub</span></button>`;
 
-    let displayVal = format(r.dps), displayLabel = "DPS";
+    let displayVal = format(r.dps || 0), displayLabel = "DPS";
     if (sortMode === 'range') { displayVal = (r.range || 0).toFixed(1); displayLabel = "RNG"; }
 
     return `
@@ -142,9 +148,52 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
                     ${headRow}${bodyRow}${legsRow}
                 </div>
                 <div class="br-res-col">
-                    <button class="info-btn" onclick="showMath('${r.id}')">?</button>
                     <div class="eff-score-line" onclick="event.stopPropagation(); openInfoPopup('efficiency')">${effScore} <span class="eff-label">Eff</span></div>
-                    <div class="dps-container"><span class="build-dps">${displayVal}</span><span class="dps-label">${displayLabel}</span></div>
+                    <div class="dps-container">
+                        <span class="build-dps">${displayVal}</span>
+                        <div style="display:flex; align-items:center; gap:4px; justify-content: flex-end; margin-top: 2px;">
+                            <span class="dps-label" style="margin:0;">${displayLabel}</span>
+                            <button class="info-btn" onclick="showMath('${r.id}')">?</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="br-full-stats">
+                <div class="fs-comparison-grid">
+                    <div class="fs-col-header">CURRENT</div>
+                    <div class="fs-col-header">${nextLevel > maxLevel ? 'STATUS' : 'NEXT UPGRADE'}</div>
+
+                    <div class="fs-item-lg dmg-row">
+                        <span class="fs-icon-box dmg-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.37 13.1c-.24-.24-.55-.37-.87-.37h-.5l-4.5 4.5v.5c0 .32.13.63.37.87l4.5 4.5c.48.48 1.26.48 1.74 0 .48-.48.48-1.26 0-1.74l-3.38-3.38 3.38-3.38c.48-.48.48-1.26 0-1.74l-.74-.75zM15 11l2 2-7.5 7.5-2-2L15 11zm-1.12-1.12l-1.38-1.38c-.39-.39-.39-1.02 0-1.41l2.12-2.12c.39-.39 1.02-.39 1.41 0l1.38 1.38c.39.39.39 1.02 0 1.41l-2.12 2.12c-.39.39-1.02.39-1.41 0z"/></svg></span>
+                        <span class="fs-val val-dmg">${format(r.dmgVal || 0)}</span>
+                    </div>
+                    <div class="fs-item-lg dmg-row">
+                        <span class="fs-icon-box dmg-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.37 13.1c-.24-.24-.55-.37-.87-.37h-.5l-4.5 4.5v.5c0 .32.13.63.37.87l4.5 4.5c.48.48 1.26.48 1.74 0 .48-.48.48-1.26 0-1.74l-3.38-3.38 3.38-3.38c.48-.48.48-1.26 0-1.74l-.74-.75zM15 11l2 2-7.5 7.5-2-2L15 11zm-1.12-1.12l-1.38-1.38c-.39-.39-.39-1.02 0-1.41l2.12-2.12c.39-.39 1.02-.39 1.41 0l1.38 1.38c.39.39.39 1.02 0 1.41l-2.12 2.12c-.39.39-1.02.39-1.41 0z"/></svg></span>
+                        <span class="fs-val val-dmg">${nextLevel > maxLevel ? '<span style="color:#4ade80; font-weight: bold;">Maxed</span>' : format(nextStats.dmgVal)}</span>
+                    </div>
+
+                    <div class="fs-item-lg spa-row">
+                        <span class="fs-icon-box spa-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2v6h.01L6 8.01 10 12l-4 4 .01.01H6V22h12v-5.99h-.01L18 16l-4-4 4-3.99-.01-.01H18V2H6zm10 14.5V20H8v-3.5l4-4 4 4zM12 11.5l-4-4V4h8v3.5l-4 4z"/></svg></span>
+                        <span class="fs-val val-spa">${(r.spa || 0).toFixed(2)}s</span>
+                    </div>
+                    <div class="fs-item-lg spa-row">
+                        <span class="fs-icon-box spa-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2v6h.01L6 8.01 10 12l-4 4 .01.01H6V22h12v-5.99h-.01L18 16l-4-4 4-3.99-.01-.01H18V2H6zm10 14.5V20H8v-3.5l4-4 4 4zM12 11.5l-4-4V4h8v3.5l-4 4z"/></svg></span>
+                        <span class="fs-val val-spa">${nextLevel > maxLevel ? '<span style="color:#4ade80; font-weight: bold;">Maxed</span>' : nextStats.spa.toFixed(2) + 's'}</span>
+                    </div>
+
+                    <div class="fs-item-lg range-row">
+                        <span class="fs-icon-box range-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 2C5.36 2 2 5.36 2 9.5c0 3.1 1.9 5.77 4.59 6.9l-.69 3.1c-.08.35.14.7.5.78.35.08.7-.14.78-.5l.69-3.1h3.25l.69 3.1c.08.35.43.58.78.5.35-.08.58-.43.5-.78l-.69-3.1c2.69-1.13 4.59-3.8 4.59-6.9C17 5.36 13.64 2 9.5 2zm0 13c-3.03 0-5.5-2.47-5.5-5.5S6.47 4 9.5 4 15 6.47 15 9.5 12.53 15 9.5 15z"/></svg></span>
+                        <span class="fs-val val-range">${(r.range || 0).toFixed(1)}</span>
+                    </div>
+                    <div class="fs-item-lg range-row">
+                        <span class="fs-icon-box range-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 2C5.36 2 2 5.36 2 9.5c0 3.1 1.9 5.77 4.59 6.9l-.69 3.1c-.08.35.14.7.5.78.35.08.7-.14.78-.5l.69-3.1h3.25l.69 3.1c.08.35.43.58.78.5.35-.08.58-.43.5-.78l-.69-3.1c2.69-1.13 4.59-3.8 4.59-6.9C17 5.36 13.64 2 9.5 2zm0 13c-3.03 0-5.5-2.47-5.5-5.5S6.47 4 9.5 4 15 6.47 15 9.5 12.53 15 9.5 15z"/></svg></span>
+                        <span class="fs-val val-range">${nextLevel > maxLevel ? '<span style="color:#4ade80; font-weight: bold;">Maxed</span>' : nextStats.range.toFixed(1)}</span>
+                    </div>
+                </div>
+                <div class="fs-sub-row">
+                    <div class="fs-item-sm"><span class="fs-label">Crit %</span><span class="fs-val val-crit">${(s.finalCf || 0).toFixed(1)}%</span></div>
+                    <div class="fs-item-sm"><span class="fs-label">CDmg</span><span class="fs-val val-cdmg">${(s.finalCm || 0).toFixed(0)}%</span></div>
+                    <div class="fs-item-sm"><span class="fs-label">DoT Dmg</span><span class="fs-val val-dot">${format(r.dotTotal || 0)}</span></div>
                 </div>
             </div>
         </div>`;
@@ -154,7 +203,26 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const card = document.getElementById('card-' + unitId);
     if (!card) return;
     const unitObj = unitDatabase.find(u => u.id === unitId);
-    const unitCost = unitObj ? (unitObj.totalCost || 50000) : 50000;
+    const currentUpgrade = (window.unitELevels && window.unitELevels[unitId]) || 0;
+    
+    let unitCost = unitObj ? (unitObj.totalCost || 50000) : 50000;
+    
+    // If upgrades have individual costs, accurately calculate cumulative cost
+    if (unitObj && unitObj.upgrades && unitObj.upgrades.length > 0) {
+        let placementCost = unitObj.upgrades[0].cost || 0;
+        
+        if (currentUpgrade > 0) {
+            let cumulative = placementCost;
+            for (let i = 1; i <= currentUpgrade; i++) {
+                if (unitObj.upgrades[i] && unitObj.upgrades[i].cost) {
+                    cumulative += unitObj.upgrades[i].cost;
+                }
+            }
+            unitCost = cumulative;
+        } else {
+            unitCost = placementCost;
+        }
+    }
     const unitPlace = unitObj ? (unitObj.placement || 1) : 1;
 
     const activeMode = 'fixed';
@@ -181,25 +249,94 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     const hydrateBuildEntry = (r) => {
         if (!r) return null;
-        if (r.id && r.mainStats && r.setName) return r;
+        let res;
+        if (r.id && r.mainStats && r.setName) {
+            res = r;
+        } else {
+            res = {
+                id: r.id || `${unitId}-static-${Math.random().toString(36).substr(2, 9)}`,
+                traitName: (typeof r.t === 'number' ? (traitsList[r.t]?.name) : (r.traitName || r.t)) || 'Unknown Trait',
+                setName: (typeof r.s === 'number' ? (SETS[r.s]?.name) : (r.setName || r.s)) || 'Unknown Set',
+                dps: r.d || r.dps || 0,
+                dmgVal: r.dv || r.dmgVal || 0,
+                spa: r.sp || r.spa || 0,
+                range: r.ra || r.range || 0,
+                prio: r.p || r.prio || 'dmg',
+                headUsed: (typeof r.h === 'number' ? (['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head'][r.h]) : (r.headUsed || r.h)) || 'none',
+                isCustom: !!(r.c || r.isCustom),
+                subStats: r.ss || r.subStats || {},
+                mainStats: r.ms || r.mainStats || {
+                    body: (typeof r.b === 'string' ? r.b : (r.b === 1 ? 'dot' : (r.b === 2 ? 'cm' : 'dmg'))),
+                    legs: (typeof r.l === 'string' ? r.l : (r.l === 1 ? 'spa' : (r.l === 2 ? 'cf' : (r.l === 3 ? 'range' : 'dmg'))))
+                }
+            };
+        }
 
-        const res = {
-            id: r.id || `db-${unitId}-${Math.random().toString(36).substr(2, 9)}`,
-            traitName: (typeof r.t === 'number' ? (traitsList[r.t]?.name) : (r.traitName || r.t)) || 'Unknown Trait',
-            setName: (typeof r.s === 'number' ? (SETS[r.s]?.name) : (r.setName || r.s)) || 'Unknown Set',
-            dps: r.d || r.dps || 0,
-            dmgVal: r.dv || r.dmgVal || 0,
-            spa: r.sp || r.spa || 0,
-            range: r.ra || r.range || 0,
-            prio: r.p || r.prio || 'dmg',
-            headUsed: (typeof r.h === 'number' ? (['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head'][r.h]) : (r.headUsed || r.h)) || 'none',
-            isCustom: !!(r.c || r.isCustom),
-            subStats: r.ss || r.subStats || {},
-            mainStats: r.ms || r.mainStats || {
-                body: (typeof r.b === 'string' ? r.b : (r.b === 1 ? 'dot' : (r.b === 2 ? 'cm' : 'dmg'))),
-                legs: (typeof r.l === 'string' ? r.l : (r.l === 1 ? 'spa' : (r.l === 2 ? 'cf' : (r.l === 3 ? 'range' : 'dmg'))))
+        // ALWAYS re-calculate to ensure stats reflect the current upgrade level (window.unitELevels)
+        if (typeof reconstructMathData === 'function') {
+            try {
+                const fullMath = reconstructMathData(res);
+                if (fullMath) {
+                    res.dps = fullMath.total || fullMath.dps || 0;
+                    res.dmgVal = fullMath.dmgVal;
+                    res.spa = fullMath.spa;
+                    res.range = fullMath.range;
+                    res.dot = fullMath.dot || 0;
+                    res.dotTotal = fullMath.dotData ? (fullMath.dotData.nativeTotalDmg + (fullMath.dotData.radTotalDmg || 0)) : 0;
+                    if (!res.subStats) res.subStats = {};
+                    res.subStats.finalCf = fullMath.critData ? fullMath.critData.rate : 0;
+                    res.subStats.finalCm = fullMath.critData ? fullMath.critData.cdmg : 0;
+                }
+
+                // STABILITY FIX: Calculate MAX potential DPS for sorting purposes
+                // This ensures the list doesn't re-shuffle when clicking lower upgrades
+                const savedLevel = (window.unitELevels && window.unitELevels[unitId]) || 0;
+                const maxLevel = (unitObj && unitObj.upgrades) ? unitObj.upgrades.length - 1 : 0;
+                
+                if (savedLevel !== maxLevel) {
+                    window.unitELevels[unitId] = maxLevel;
+                    const maxMath = reconstructMathData(res);
+                    res.sortDps = maxMath ? (maxMath.total || maxMath.dps || 0) : res.dps;
+                    window.unitELevels[unitId] = savedLevel; // Restore
+                } else {
+                    res.sortDps = res.dps;
+                }
+
+            } catch (e) {
+                console.warn("Hydration Math Error for", res.id, e);
             }
-        };
+
+            // Also update Next Level comparison stats
+            const savedLevel = (window.unitELevels && window.unitELevels[unitId]) || 0;
+            const maxLevel = (unitObj && unitObj.upgrades) ? unitObj.upgrades.length - 1 : 6;
+            if (savedLevel < maxLevel) {
+                try {
+                    // Temporarily set E-level to next to get stats
+                    window.unitELevels = window.unitELevels || {};
+                    window.unitELevels[unitId] = savedLevel + 1; 
+                    const nextMath = reconstructMathData(res);
+                    if (nextMath) {
+                        res.baseStats = {
+                            dmgVal: nextMath.dmgVal,
+                            spa: nextMath.spa,
+                            range: nextMath.range,
+                            cf: (nextMath.critData ? nextMath.critData.rate : 0),
+                            cm: (nextMath.critData ? nextMath.critData.cdmg : 0),
+                            dot: nextMath.dot || 0
+                        };
+                    }
+                } catch (e) {
+                    console.warn("Base stats hydration error", e);
+                } finally {
+                    // Restore original level
+                    window.unitELevels[unitId] = savedLevel;
+                }
+            } else {
+                // If maxed, clear baseStats or keep it empty
+                res.baseStats = null;
+            }
+        }
+
         return res;
     };
 
@@ -239,7 +376,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     const currentWeight = getW(currentBest);
                     if (sortSelect === 'damage') isBetter = (r.dmgVal * weight > currentBest.dmgVal * currentWeight);
                     else if (sortSelect === 'range') isBetter = (r.range > currentBest.range);
-                    else isBetter = (r.dps * weight > currentBest.dps * currentWeight);
+                    else isBetter = (r.sortDps * weight > currentBest.sortDps * currentWeight);
                 }
                 if (isBetter) uniqueMap.set(key, r);
             });
@@ -258,7 +395,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             };
             if (sortSelect === 'range') return (b.range || 0) - (a.range || 0);
             if (sortSelect === 'damage') return (b.dmgVal * getWeight(b)) - (a.dmgVal * getWeight(a));
-            return (b.dps * getWeight(b)) - (a.dps * getWeight(a));
+            return (b.sortDps * getWeight(b)) - (a.sortDps * getWeight(a));
         });
 
         const slice = filtered.slice(0, limit);
@@ -275,7 +412,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         const isBambiAlt = (unitId === 'bambietta' && bambiettaState.element !== 'Dark');
         const isRobotAlt = (unitId === 'robot1718' && robot1718State.mode !== 'Robot 17');
         if (!isBambiAlt && !isRobotAlt) {
-            processUnitCache(unitObj, 0, activeType);
+            processUnitCache(unitObj, 0, activeType, false);
             buildData = window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0];
         }
     }
@@ -291,7 +428,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     }
 }
 
-function processUnitCache(unit, specificCfg = null, specificType = null) {
+function processUnitCache(unit, specificCfg = null, specificType = null, isMaxPotential = false) {
     if (!window.unitBuildsCache[unit.id]) {
         window.unitBuildsCache[unit.id] = {
             base: { fixed: [null] },
@@ -333,7 +470,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
 
             const traitsForCalc = (calculatedResults.length > 0 && !unit.id.includes('sasuke')) ? [...(typeof customTraits !== 'undefined' ? customTraits : []), ...(unitSpecificTraits[unit.id] || [])] : null;
             if (traitsForCalc === null || traitsForCalc.length > 0 || useInventory) {
-                const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
+                const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode, isMaxPotential);
                 calculatedResults = [...calculatedResults, ...dynamicResults];
             }
             targetCache[i] = calculatedResults;
@@ -361,8 +498,18 @@ window.getQuickScore = (unit) => {
             return unit.id === 'law' ? (list[0].range || 0) : list[0].dps;
         }
     }
-    if (unit.id === 'law') return unit.stats.range || 0;
-    return (unit.stats.dmg / unit.stats.spa) * 35;
+    if (unit.id === 'law') {
+        if (unit.stats.range) return unit.stats.range;
+        if (unit.upgrades && unit.upgrades.length > 0) return unit.upgrades[unit.upgrades.length - 1].range || 0;
+        return 0;
+    }
+    let d = unit.stats.dmg, s = unit.stats.spa;
+    if ((!d || !s) && unit.upgrades && unit.upgrades.length > 0) {
+        const last = unit.upgrades[unit.upgrades.length - 1];
+        d = d || last.dmg;
+        s = s || last.spa;
+    }
+    return ((d || 0) / (s || 1)) * 35;
 };
 
 function renderDatabase() {
@@ -387,6 +534,11 @@ function renderDatabase() {
         while (renderQueueIndex < sortedUnits.length) {
             const unit = sortedUnits[renderQueueIndex].unit;
 
+            // Initialize default upgrade level to MAX if not already set
+            if (window.unitELevels[unit.id] === undefined && unit.upgrades && unit.upgrades.length > 0) {
+                window.unitELevels[unit.id] = unit.upgrades.length - 1;
+            }
+
             renderQueueIndex++;
 
             let abilityLabel = (unit.ability && unit.ability.abilityName) ? unit.ability.abilityName : 'Ability';
@@ -409,7 +561,22 @@ function renderDatabase() {
                 toggleScript = `; this.parentElement.previousElementSibling.innerText = this.checked ? 'Perfect Form' : 'True Form'; this.closest('.unit-toolbar').firstElementChild.style.gap = '2px';`;
             }
 
-            const abilityToggleHtml = (unit.ability && !unit.ability.noToggle) ? `<div class="toggle-wrapper"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${activeAbilityIds.has(unit.id) ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>` : '<div></div>';
+            const currentLevel = (window.unitELevels && window.unitELevels[unit.id]) || 0;
+            let abilityUnlocked = true;
+            if (unit.upgrades && unit.upgrades.length > 0) {
+                const hasUnlockCondition = unit.upgrades.some(u => u.unlocksAbility);
+                if (hasUnlockCondition) {
+                    abilityUnlocked = false;
+                    for (let i = 0; i <= currentLevel; i++) {
+                        if (unit.upgrades[i] && unit.upgrades[i].unlocksAbility) {
+                            abilityUnlocked = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            const abilityToggleHtml = (unit.ability && !unit.ability.noToggle) ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${activeAbilityIds.has(unit.id) ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>` : '<div></div>';
             const topControls = `<div class="unit-toolbar"><div class="ut-actions"><button class="calc-btn ut-btn-compact" onclick="openCalc('${unit.id}')">🖩 Custom</button><button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">📊 Traits</button><button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">ⓘ Info</button></div>${abilityToggleHtml}</div>`;
 
             let defaultSort = 'dps';
@@ -460,7 +627,22 @@ function renderDatabase() {
                             </select>
                         </div>
                     </div>
-                </div>`;
+                </div>
+                ${(unit.upgrades && unit.upgrades.length > 0) ? `
+                <div class="upgrade-toolbar">
+                    ${unit.upgrades.map((u, idx) => {
+                        const level = idx;
+                        const isActive = (window.unitELevels[unit.id] || 0) === level;
+                        const isUnlocked = (window.unitELevels[unit.id] || 0) >= level;
+                        
+                        const isSpecial = (idx === unit.upgrades.length - 1);
+
+                        return `<div class="e-pill ${isActive ? 'active' : ''} ${isUnlocked && (window.unitELevels[unit.id] || 0) > 0 ? 'e-unlocked' : ''} ${isSpecial ? 'is-special' : 'is-stat'}" 
+                                     onclick="selectELevel('${unit.id}', ${level})" 
+                                     data-level="${level}" 
+                                     title="Upgrade ${level}">${level}</div>`;
+                    }).join('')}
+                </div>` : ''}`;
 
             let mainContent = '';
             // Generate only cfg-0 divs
@@ -493,7 +675,7 @@ function renderDatabase() {
                             window.visibleUnitIds.add(unitId);
                             const unit = unitDatabase.find(u => u.id === unitId);
                             if (unit) {
-                                updateBuildListDisplay(unitId, false, 50);
+                                updateBuildListDisplay(unitId, false, 100);
                             }
                             entry.target.classList.remove('lazy-build-load');
                         } else {
@@ -657,7 +839,7 @@ function updateGuideBuilds(unitId) {
     const activeCfg = 0; // Forced to Max Potential
     const filterTraitId = document.getElementById('guideTraitSelect').value;
 
-    if (!unitBuildsCache[unitId]) processUnitCache(unit);
+    if (!unitBuildsCache[unitId]) processUnitCache(unit, null, null, true);
     const builds = processGuideTop3(getGuideBuildsFromCache(unit, activeMode, activeCfg), unit, filterTraitId);
 
     const mpLabel = document.getElementById(`guide-mp-${unitId}`);
@@ -674,7 +856,7 @@ function updateGuideBuilds(unitId) {
     if (mpLabel) {
         mpLabel.className = `mp-container ${isRange ? 'is-range' : 'is-dps'}`;
         mpLabel.querySelector('.mp-label').innerText = isRange ? 'Max Range' : 'Max Potential';
-        mpLabel.querySelector('.mp-val').innerText = isRange ? (best.range || 0).toFixed(1) : format(best.dps);
+        mpLabel.querySelector('.mp-val').innerText = isRange ? (best.range || 0).toFixed(1) : format(best.dps || 0);
     }
     if (traitLabel) traitLabel.innerText = `Best: ${best.traitName}`;
     if (listContainer) {
@@ -833,7 +1015,7 @@ function openTraitBestList(unitId) {
 
     sortedTraits.forEach((b, idx) => {
         const isRange = (unitId === 'law');
-        const val = isRange ? (b.range || 0).toFixed(1) : format(b.dps);
+        const val = isRange ? (b.range || 0).toFixed(1) : format(b.dps || 0);
         const label = isRange ? 'RNG' : 'DPS';
         const labelClass = isRange ? 'comp-val-rng' : 'comp-val-dps';
 

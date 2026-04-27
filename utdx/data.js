@@ -352,136 +352,478 @@ const elementIcons = {
 
 const unitDatabase = [
     {
-        id: "Maid", name: "Scarlet Maid", role: "Damage / Support",
+        id: "Maid", name: "Scarlet Maid (World)", role: "Damage / Support",
         img: "images/units/Maid.png",
-        totalCost: 76000,
+        totalCost: 80700,
         placement: 1, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { dmg: 2950, spa: 5, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 3.5, passiveDmg: 0, element: "Light", dotDuration: 0, range: 28 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 3.5, 
+            passiveDmg: 0, 
+            element: "Light", 
+            dotDuration: 0 
+        },
+        upgrades: [
+            { dmg: 156, spa: 4, range: 16, cost: 1400 },    // Up 0 (Base)
+            { dmg: 286, spa: 4, range: 17, cost: 2600 },    // Up 1
+            { dmg: 429, spa: 4, range: 18, cost: 4200 },    // Up 2
+            { dmg: 715, spa: 5, range: 20, cost: 6000 },    // Up 3
+            { dmg: 910, spa: 5, range: 20, cost: 6500 },    // Up 4
+            { dmg: 1170, spa: 5, range: 22, cost: 7500 },   // Up 5
+            { dmg: 1430, spa: 5, range: 24, cost: 8500 },   // Up 6
+            { dmg: 1690, spa: 5, range: 24, cost: 10000 },  // Up 7
+            { dmg: 2015, spa: 5, range: 26, cost: 12000 },  // Up 8
+            { dmg: 2730, spa: 5, range: 28, cost: 22000 }   // Up 9
+        ]
     },
     {
         id: "sjw", name: "Jinoo (Monarch)", role: "Damage",
         img: "images/units/Sjw.png",
-        totalCost: 93000,
-        placement: 1, tags: [], placementType: "Ground",
+        totalCost: 93300,
+        placement: 1, tags: [], placementType: "Hybrid",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { dmg: 3350, spa: 5, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 5, passiveDmg: 25, element: "Dark", range: 35 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 5, 
+            passiveDmg: 25, 
+            element: "Dark" 
+        },
+        upgrades: [
+            { dmg: 184, spa: 4, range: 27, cost: 800 },    // Up 0 (Base)
+            { dmg: 322, spa: 4, range: 27, cost: 1700 },   // Up 1
+            { dmg: 506, spa: 4, range: 27, cost: 2800 },   // Up 2
+            { dmg: 920, spa: 6, range: 29, cost: 3600 },   // Up 3 (Line + Hybrid)
+            { dmg: 1092, spa: 6, range: 29, cost: 4400 },  // Up 4
+            { dmg: 1256, spa: 6, range: 29, cost: 6000 },  // Up 5
+            { dmg: 1437, spa: 6, range: 32, cost: 12000 }, // Up 6 (AoE → Circle)
+            { dmg: 1725, spa: 6, range: 32, cost: 18000 }, // Up 7
+            { dmg: 2185, spa: 6, range: 35, cost: 19000 }, // Up 8
+            { dmg: 2875, spa: 5, range: 35, cost: 25000 }  // Up 9
+        ]
     },
     {
         id: "ragna", name: "Dragon Guy", role: "Burst / Hybrid",
         img: "images/units/Ragna.png",
-        totalCost: 72000,
+        totalCost: 75700,
         placement: 1, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { dmg: 1800, spa: 9, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 3, passiveDmg: 12, element: "Ice", range: 35 },
-        ability: { dmg: 3600, spa: 15, passiveDmg: 72, }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 3, 
+            passiveDmg: 12, 
+            element: "Ice" 
+        },
+        ability: { dmg: 3600, spa: 15, passiveDmg: 72, },
+        upgrades: [
+            { dmg: 260, spa: 8, range: 23, cost: 2200 },   // Up 0 (Base)
+            { dmg: 320, spa: 8, range: 24, cost: 2800 },   // Up 1
+            { dmg: 440, spa: 8, range: 24, cost: 3800 },   // Up 2
+            { dmg: 480, spa: 7.5, range: 27, cost: 5200 },  // Up 3
+            { dmg: 580, spa: 7.5, range: 27, cost: 6700 },  // Up 4
+            { dmg: 700, spa: 7.5, range: 28, cost: 8500 },  // Up 5
+            { dmg: 750, spa: 7, range: 29, cost: 9500 },   // Up 6 (Line AoE)
+            { dmg: 900, spa: 7, range: 29, cost: 11000 },  // Up 7
+            { dmg: 1200, spa: 9, range: 30, cost: 12000 }, // Up 8 (Circle AoE)
+            { dmg: 1500, spa: 7, range: 35, cost: 14000, unlocksAbility: true } // Up 9
+        ]
     },
     {
         id: "kirito", name: "Kriatu", role: "Burst / Crit",
         img: "images/units/Kirito.png",
-        totalCost: 31000,
+        totalCost: 30400,
         placement: 3, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Eternal", virtual: "Astral", note: "Eternal provides highest DPS Potential, Ruler provides good dps to cost." },
-        stats: { dmg: 1200, spa: 7, crit: 50, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 4, hitCount: 14, reqCrits: 50, extraAttacks: 0, element: "Ice", range: 30 }
+        stats: { 
+            crit: 50, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 4, 
+            hitCount: 14, 
+            reqCrits: 50, 
+            extraAttacks: 0, 
+            element: "Ice" 
+        },
+        upgrades: [
+            { dmg: 80, spa: 7, range: 18, cost: 1200 },    // Up 0 (Base)
+            { dmg: 150, spa: 7, range: 20, cost: 1000 },   // Up 1
+            { dmg: 184, spa: 7, range: 30, cost: 1300 },   // Up 2
+            { dmg: 237, spa: 6, range: 32, cost: 1800 },   // Up 3 (Circle AoE)
+            { dmg: 294, spa: 6, range: 33, cost: 2200 },   // Up 4
+            { dmg: 357, spa: 6, range: 33, cost: 2750 },   // Up 5
+            { dmg: 453, spa: 6, range: 36, cost: 3050 },   // Up 6 (Circle AoE)
+            { dmg: 567, spa: 6, range: 36, cost: 3600 },   // Up 7
+            { dmg: 750, spa: 8, range: 30, cost: 6000 },   // Up 8 (Full AoE)
+            { dmg: 1000, spa: 7, range: 30, cost: 7500 }   // Up 9 (Enhance Armament)
+        ]
     },
     {
         id: "genos", name: "Cyborg", role: "DoT / Damage",
         img: "images/units/Genos.png",
-        totalCost: 31760,
+        totalCost: 26900,
         placement: 3, tags: [], placementType: "Hill",
         meta: { short: "Ruler", long: "Eternal/Sacred", note: "Standard DPS Selection." },
-        stats: { dmg: 1440, spa: 5.5, crit: 0, cdmg: 150, dot: 14, dotStacks: 1, spaCap: 4, passiveDmg: 0, element: "Fire", range: 32, burnMultiplier: 45 },
-        ability: { passiveDmg: 75 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 14, 
+            dotStacks: 1, 
+            spaCap: 4, 
+            passiveDmg: 0, 
+            element: "Fire", 
+            burnMultiplier: 45 
+        },
+        ability: { abilityName: "Nuke Blast", passiveDmg: 75 },
+        upgrades: [
+            { dmg: 50, spa: 4, range: 25, cost: 700 },     // Up 0 (Base)
+            { dmg: 115, spa: 4, range: 25, cost: 800 },    // Up 1
+            { dmg: 200, spa: 4, range: 25, cost: 1400 },   // Up 2
+            { dmg: 350, spa: 4, range: 25, cost: 2000 },   // Up 3
+            { dmg: 500, spa: 4, range: 25, cost: 2500 },   // Up 4
+            { dmg: 600, spa: 4, range: 28, cost: 2750 },   // Up 5
+            { dmg: 720, spa: 4, range: 28, cost: 3000 },   // Up 6
+            { dmg: 800, spa: 4, range: 30, cost: 3500 },   // Up 7
+            { dmg: 950, spa: 4, range: 32, cost: 5000, unlocksAbility: true }, // Up 8 (Gains Nuke Blast Ability)
+            { dmg: 1200, spa: 4, range: 32, cost: 5250 }   // Up 9
+        ]
     },
     {
         id: "kenpachi", name: "Berserker", role: "Damage / Slow",
         img: "images/units/Kenpachi.png",
-        totalCost: 31760,
-        placement: 3, tags: ["Peroxide", "Reaper", "Rage"], placementType: "Ground",
+        totalCost: 61700,
+        placement: 3, tags: ["Peroxide", "Reaper", "Rage"], placementType: "Hybrid",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { dmg: 2875, spa: 10, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 2.0, element: "Light", range: 27 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 2.0, 
+            element: "Light" 
+        },
+        upgrades: [
+            { dmg: 150, spa: 5, range: 20, cost: 800 },    // Up 0 (Base)
+            { dmg: 225, spa: 5, range: 20, cost: 1200 },   // Up 1
+            { dmg: 335, spa: 5, range: 20, cost: 1800 },   // Up 2
+            { dmg: 540, spa: 6, range: 22, cost: 2400 },   // Up 3 (AoE → Cone)
+            { dmg: 700, spa: 6, range: 22, cost: 3800 },   // Up 4
+            { dmg: 1000, spa: 6, range: 22, cost: 5400 },  // Up 5
+            { dmg: 1600, spa: 8, range: 24, cost: 8000 },  // Up 6 (AoE → Line)
+            { dmg: 1750, spa: 7, range: 24, cost: 9800 },  // Up 7
+            { dmg: 1900, spa: 10, range: 27, cost: 12500 }, // Up 8 (AoE → Full AoE, Gains Hybrid)
+            { dmg: 2400, spa: 10, range: 27, cost: 16000 }  // Up 9
+        ]
     },
     {
         id: "sasuke", name: "Sasuke (Chakra)", role: "Damage",
         img: "images/units/Sasuke.png",
-        totalCost: 40000,
+        totalCost: 42400,
         placement: 2, tags: ["Team 7", "Ninjaverse", "Hero", "Bloodline"], placementType: "Ground",
         meta: { short: "Ruler", long: "Eternal/Sacred", note: "Ruler for DPS, Eternal/Sacred for support." },
-        stats: { dmg: 2450, spa: 6.75, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 4, passiveDmg: 25, element: "Dark", range: 28 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 4, 
+            passiveDmg: 25, 
+            element: "Dark" 
+        },
+        upgrades: [
+            { dmg: 125, spa: 7, range: 15, cost: 1400 },   // Up 0 (Base)
+            { dmg: 250, spa: 7, range: 17, cost: 2000 },   // Up 1
+            { dmg: 400, spa: 7, range: 17, cost: 2700 },   // Up 2
+            { dmg: 425, spa: 9, range: 19, cost: 3100 },   // Up 3
+            { dmg: 475, spa: 9, range: 19, cost: 3900 },   // Up 4
+            { dmg: 560, spa: 6, range: 21, cost: 4500 },   // Up 5
+            { dmg: 650, spa: 6, range: 21, cost: 4800 },   // Up 6
+            { dmg: 800, spa: 6, range: 21, cost: 5800 },   // Up 7
+            { dmg: 1800, spa: 7.5, range: 28, cost: 6700 }, // Up 8
+            { dmg: 2175, spa: 7.5, range: 30, cost: 7500 }  // Up 9
+        ]
     },
     {
         id: "mob", name: "Psycho (100%)", role: "Damage",
         img: "images/units/Mob.png",
-        totalCost: 31000,
-        placement: 3, tags: [], placementType: "Ground",
+        totalCost: 56900,
+        placement: 3, tags: [], placementType: "Hybrid",
         meta: { short: "Ruler", long: "Ruler", note: "Standard DPS selection." },
-        stats: { dmg: 2600, spa: 6.5, crit: 0, cdmg: 150, dot: 20, dotStacks: 1, spaCap: 5.5, passiveDmg: 0, element: "Rose", dotDuration: 4, range: 35 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 20, 
+            dotStacks: 1, 
+            spaCap: 5.5, 
+            passiveDmg: 0, 
+            element: "Rose", 
+            dotDuration: 4 
+        },
+        upgrades: [
+            { dmg: 120, spa: 5, range: 15, cost: 1000 },   // Up 0 (Base)
+            { dmg: 247, spa: 5, range: 18, cost: 1500 },   // Up 1
+            { dmg: 500, spa: 5, range: 20, cost: 2500 },   // Up 2
+            { dmg: 670, spa: 5, range: 22, cost: 3700 },   // Up 3
+            { dmg: 750, spa: 5, range: 25, cost: 4500 },   // Up 4
+            { dmg: 850, spa: 8, range: 20, cost: 6500 },   // Up 5 (Full AoE)
+            { dmg: 980, spa: 8, range: 20, cost: 7200 },   // Up 6
+            { dmg: 1100, spa: 8, range: 20, cost: 8000 },  // Up 7
+            { dmg: 1450, spa: 7, range: 30, cost: 10000 }, // Up 8 (Circle + Hybrid)
+            { dmg: 1800, spa: 6.5, range: 30, cost: 12000 } // Up 9
+        ]
     },
     {
         id: "shanks", name: "Shunks", role: "Damage",
         img: "images/units/Shanks.png",
-        totalCost: 40000,
-        placement: 3, tags: [], placementType: "Ground",
+        totalCost: 66800,
+        placement: 3, tags: [], placementType: "Hybrid",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { dmg: 2750, spa: 12, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 2.5, passiveDmg: 0, element: "Rose", dotDuration: 0, range: 30 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 2.5, 
+            passiveDmg: 0, 
+            element: "Rose", 
+            dotDuration: 0 
+        },
+        upgrades: [
+            { dmg: 100, spa: 8, range: 15, cost: 800 },    // Up 0 (Base)
+            { dmg: 145, spa: 8, range: 15, cost: 1200 },   // Up 1
+            { dmg: 217, spa: 8, range: 15, cost: 1800 },   // Up 2
+            { dmg: 290, spa: 8, range: 18, cost: 2400 },   // Up 3 (Line AoE)
+            { dmg: 360, spa: 8, range: 18, cost: 3000 },   // Up 4
+            { dmg: 435, spa: 8, range: 18, cost: 3600 },   // Up 5
+            { dmg: 520, spa: 8, range: 21, cost: 4200 },   // Up 6
+            { dmg: 600, spa: 8, range: 21, cost: 4800 },   // Up 7
+            { dmg: 2000, spa: 12, range: 30, cost: 20000 }, // Up 8 (AoE + Hybrid)
+            { dmg: 2200, spa: 12, range: 30, cost: 25000 }  // Up 9
+        ]
     },
     {
-        id: "law", name: "Rule (Room)", role: "Support",
+        id: "law", name: "Rule (ROOM)", role: "Support",
         img: "images/units/Law.png",
-        totalCost: 33725,
+        totalCost: 85000,
         placement: 3, tags: [], placementType: "Ground",
         meta: { short: "Ruler/Sacred", long: "Ruler/Sacred", note: "Ruler/Sacred offer the most Spa%- / Rng%+" },
-        stats: { dmg: 1300, spa: 5, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 2, passiveDmg: 20, passiveSpa: 10, element: "Water", dotDuration: 0, range: 31.5 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 2, 
+            passiveDmg: 20, 
+            passiveSpa: 10, 
+            element: "Water", 
+            dotDuration: 0 
+        },
+        upgrades: [
+            { dmg: 160, spa: 6, range: 29, cost: 1200 },    // Up 0 (Base)
+            { dmg: 160, spa: 5.5, range: 30, cost: 2000 },  // Up 1
+            { dmg: 400, spa: 5.5, range: 30, cost: 3400 },  // Up 2
+            { dmg: 450, spa: 8, range: 25, cost: 5600 },    // Up 3
+            { dmg: 550, spa: 8, range: 25, cost: 6500 },    // Up 4
+            { dmg: 600, spa: 8, range: 26, cost: 8000 },    // Up 5
+            { dmg: 700, spa: 5, range: 32, cost: 8500 },    // Up 6
+            { dmg: 850, spa: 5, range: 35, cost: 9000 },    // Up 7
+            { dmg: 1050, spa: 5, range: 38, cost: 9800 },   // Up 8
+            { dmg: 1250, spa: 5, range: 40, cost: 11000 },  // Up 9
+            { dmg: 1300, spa: 5, range: 42, cost: 20000 }   // Up 10
+        ]
     },
     {
         id: "akainu", name: "Akainu", role: "Support / Damage",
         img: "images/units/Akainu.png",
-        totalCost: 31760,
-        placement: 3, tags: [], placementType: "Ground",
+        totalCost: 27150,
+        placement: 3, tags: [], placementType: "Hybrid",
         meta: { short: "Eternal/Sacred", long: "Eternal/Sacred", note: "Eternal/Sacred offer the the best dps + support performance." },
-        stats: { dmg: 1100, spa: 5, crit: 0, cdmg: 150, dot: 60, dotStacks: 1, spaCap: 2, passiveDmg: 0, passiveSpa: 0, element: "Fire", dotDuration: 7, range: 37 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 60, 
+            dotStacks: 1, 
+            spaCap: 2, 
+            passiveDmg: 0, 
+            passiveSpa: 0, 
+            element: "Fire", 
+            dotDuration: 7 
+        },
+        upgrades: [
+            { dmg: 150, spa: 7, range: 20, cost: 1000 },   // Up 0 (Base)
+            { dmg: 300, spa: 7, range: 22, cost: 1600 },   // Up 1
+            { dmg: 400, spa: 6, range: 24, cost: 2000 },   // Up 2
+            { dmg: 500, spa: 8, range: 23, cost: 2500 },   // Up 3 (Circle AoE)
+            { dmg: 640, spa: 8, range: 24, cost: 3000 },   // Up 4
+            { dmg: 700, spa: 7, range: 27, cost: 3400 },   // Up 5
+            { dmg: 830, spa: 7, range: 30, cost: 3900 },   // Up 6
+            { dmg: 950, spa: 8, range: 33, cost: 4500 },   // Up 7 (Line AoE + Hybrid)
+            { dmg: 1100, spa: 7, range: 37, cost: 5250 }   // Up 8
+        ]
     },
     {
         id: "ichigo", name: "Ichiko (Rage)", role: "Damage",
         img: "images/units/Ichigo.png",
-        totalCost: 108000,
+        totalCost: 111880,
         placement: 1, tags: ["Peroxide", "Reaper", "Rage", "Hollow"], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { dmg: 3000, spa: 8, crit: 15, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 7, passiveDmg: 50, passiveSpa: 0, element: "Dark", dotDuration: 0, range: 38 }
+        stats: { 
+            crit: 15, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 7, 
+            passiveDmg: 50, 
+            passiveSpa: 0, 
+            element: "Dark", 
+            dotDuration: 0 
+        },
+        upgrades: [
+            { dmg: 180, spa: 5.5, range: 25, cost: 1750 },   // Up 0 (Base)
+            { dmg: 255, spa: 5.5, range: 25, cost: 2250 },   // Up 1
+            { dmg: 365, spa: 5.0, range: 25, cost: 3000 },   // Up 2
+            { dmg: 570, spa: 7.0, range: 20, cost: 5800 },   // Up 3 (AoE → Line)
+            { dmg: 730, spa: 7.0, range: 20, cost: 8205 },   // Up 4
+            { dmg: 1300, spa: 6.5, range: 22, cost: 10750 }, // Up 5
+            { dmg: 1900, spa: 6.5, range: 22, cost: 12150 }, // Up 6 (AoE → Line continues)
+            { dmg: 2150, spa: 7.5, range: 28, cost: 14400 }, // Up 7
+            { dmg: 2400, spa: 7.5, range: 28, cost: 16000 }, // Up 8
+            { dmg: 2850, spa: 8.0, range: 35, cost: 18250 }, // Up 9
+            { dmg: 3000, spa: 8.0, range: 38, cost: 19325 }  // Up 10
+        ]
     },
     {
-        id: "grimjaw", name: "Grommjaw", role: "Damage",
+        id: "grimjaw", name: "Grommjaw (Panther)", role: "Damage",
         img: "images/units/Grimjaw.png",
-        totalCost: 31760,
+        totalCost: 41175,
         placement: 3, tags: ["Peroxide", "Hollow"], placementType: "Ground",
         meta: { short: "Ruler", long: "Eternal", note: "Standard DPS selection." },
-        stats: { dmg: 1590, spa: 9, crit: 0, cdmg: 150, dot: 50, dotStacks: 1, spaCap: 3, passiveDmg: 6.67, passiveSpa: 4.17, element: "Water", dotDuration: 10, range: 35 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 50, 
+            dotStacks: 1, 
+            spaCap: 3, 
+            passiveDmg: 6.67, 
+            passiveSpa: 4.17, 
+            element: "Water", 
+            dotDuration: 10 
+        },
+        upgrades: [
+            { dmg: 85, spa: 7, range: 20, cost: 1300 },    // Up 0 (Base)
+            { dmg: 140, spa: 7, range: 20, cost: 1850 },   // Up 1
+            { dmg: 245, spa: 6.5, range: 22, cost: 2290 }, // Up 2
+            { dmg: 320, spa: 6.5, range: 22, cost: 2900 }, // Up 3
+            { dmg: 485, spa: 6.5, range: 22, cost: 3575 }, // Up 4
+            { dmg: 545, spa: 8, range: 25, cost: 3775 },   // Up 5
+            { dmg: 670, spa: 7.5, range: 25, cost: 3900 }, // Up 6
+            { dmg: 870, spa: 7.5, range: 25, cost: 4450 }, // Up 7
+            { dmg: 955, spa: 7.5, range: 28, cost: 5010 }, // Up 8
+            { dmg: 1135, spa: 7, range: 28, cost: 5675 },  // Up 9
+            { dmg: 1590, spa: 9, range: 35, cost: 6450 }   // Up 10
+        ]
     },
     {
         id: "stark", name: "Koyote", role: "Damage",
         img: "images/units/Stark.png",
-        totalCost: 42000,
-        placement: 3, tags: ["Peroxide", "Hollow"], placementType: "Ground",
+        totalCost: 34855,
+        placement: 3, tags: ["Peroxide", "Hollow"], placementType: "Hybrid",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { dmg: 2800, spa: 6, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 6, passiveDmg: 0, passiveSpa: 0, element: "Ice", dotDuration: 0, range: 42 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 6, 
+            passiveDmg: 0, 
+            passiveSpa: 0, 
+            element: "Ice", 
+            dotDuration: 0 
+        },
+        upgrades: [
+            { dmg: 90, spa: 7, range: 20, cost: 1200 },    // Up 0 (Base)
+            { dmg: 145, spa: 7, range: 20, cost: 1750 },   // Up 1
+            { dmg: 250, spa: 7, range: 20, cost: 2190 },   // Up 2
+            { dmg: 330, spa: 7, range: 25, cost: 2800 },   // Up 3 (Circle + Hybrid)
+            { dmg: 490, spa: 7, range: 25, cost: 3475 },   // Up 4
+            { dmg: 540, spa: 7, range: 28, cost: 3675 },   // Up 5
+            { dmg: 675, spa: 6.5, range: 30, cost: 3800 }, // Up 6
+            { dmg: 775, spa: 6.5, range: 30, cost: 4350 }, // Up 7
+            { dmg: 830, spa: 6.5, range: 33, cost: 4990 }, // Up 8
+            { dmg: 905, spa: 6.5, range: 33, cost: 5575 }, // Up 9
+            { dmg: 1050, spa: 6, range: 35, cost: 1050 }   // Up 10
+        ]
     },
     {
         id: "ulquiorra", name: "Ultiorra", role: "Damage",
         img: "images/units/Ulqiorra.png",
-        totalCost: 40000,
+        totalCost: 31760,
         placement: 3, tags: ["Peroxide", "Hollow"], placementType: "Hill",
         meta: { short: "Ruler", long: "Eternal", note: "Standard DPS selection." },
-        stats: { dmg: 1275, spa: 5, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 2, passiveDmg: 0, passiveSpa: 5, element: "Dark", dotDuration: 0, range: 37 },
-        ability: { buffDmg: 65, passiveSpa: 2.5, crit: 10 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 2, 
+            passiveDmg: 0, 
+            passiveSpa: 5, 
+            element: "Dark", 
+            dotDuration: 0 
+        },
+        ability: { buffDmg: 65, passiveSpa: 2.5, crit: 10 },
+        upgrades: [
+            { dmg: 80, spa: 7, range: 15, cost: 1000 },    // Up 0 (Base)
+            { dmg: 200, spa: 7, range: 15, cost: 1550 },   // Up 1
+            { dmg: 315, spa: 6.5, range: 18, cost: 1980 },  // Up 2
+            { dmg: 490, spa: 8, range: 25, cost: 2600 },   // Up 3 (Line AoE)
+            { dmg: 675, spa: 8, range: 25, cost: 3250 },   // Up 4
+            { dmg: 875, spa: 7.5, range: 28, cost: 3475 },  // Up 5
+            { dmg: 940, spa: 7, range: 35, cost: 3600 },   // Up 6 (Circle AoE)
+            { dmg: 1025, spa: 7, range: 35, cost: 4150 },  // Up 7
+            { dmg: 1190, spa: 5.5, range: 30, cost: 4880 }, // Up 8 (Line AoE)
+            { dmg: 1275, spa: 5, range: 33, cost: 5275, unlocksAbility: true } // Up 9
+        ]
     },
     {
         id: "harribel", name: "Tierabel", role: "Damage",
         img: "images/units/Harribel.png",
-        totalCost: 31760,
+        totalCost: 30990,
         placement: 3, tags: ["Peroxide", "Hollow"], placementType: "Hill",
         meta: { short: "Ruler", long: "Eternal", note: "Standard DPS selection." },
-        stats: { dmg: 1490, spa: 8.5, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 2, passiveDmg: 0, passiveSpa: 0, element: "Water", dotDuration: 0, range: 30 },
-        ability: { buffDmg: 35, buffDuration: 80, spaCap: 4, hasToggle: true }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 2, 
+            passiveDmg: 0, 
+            passiveSpa: 0, 
+            element: "Water", 
+            dotDuration: 0 
+        },
+        ability: { buffDmg: 35, buffDuration: 80, spaCap: 4, hasToggle: true },
+        upgrades: [
+            { dmg: 100, spa: 6, range: 20, cost: 700 },     // Up 0 (Base)
+            { dmg: 310, spa: 6, range: 20, cost: 1150 },    // Up 1
+            { dmg: 480, spa: 6, range: 25, cost: 1775 },    // Up 2
+            { dmg: 620, spa: 6, range: 25, cost: 2250 },    // Up 3
+            { dmg: 760, spa: 7, range: 28, cost: 2925 },    // Up 4 (Line AoE)
+            { dmg: 885, spa: 7, range: 28, cost: 3475 },    // Up 5
+            { dmg: 990, spa: 6.5, range: 28, cost: 3800 },  // Up 6
+            { dmg: 1115, spa: 6.5, range: 28, cost: 4350 }, // Up 7
+            { dmg: 1490, spa: 8.5, range: 30, cost: 4990 }, // Up 8 (Circle AoE)
+            { dmg: 1560, spa: 8.5, range: 30, cost: 5575 }  // Up 9
+        ]
     },
     {
         id: "ace", name: "Spade", role: "Damage / Burn(DoT)",
@@ -489,7 +831,28 @@ const unitDatabase = [
         totalCost: 39000,
         placement: 3, tags: [], placementType: "Hill",
         meta: { short: "Ruler", long: "Ruler/Astral", note: "Ruler provides good dps to cost." },
-        stats: { dmg: 1500, spa: 9, crit: 0, cdmg: 150, dot: 100, dotStacks: 1, spaCap: 6, passiveDmg: 60, element: "Fire", dotDuration: 4, range: 30 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 100, 
+            dotStacks: 1, 
+            spaCap: 6, 
+            passiveDmg: 60, 
+            element: "Fire", 
+            dotDuration: 4 
+        },
+        upgrades: [
+            { dmg: 100, spa: 5, range: 22, cost: 1000 },   // Up 0 (Base)
+            { dmg: 250, spa: 4.8, range: 24, cost: 1300 }, // Up 1
+            { dmg: 360, spa: 4.5, range: 26, cost: 1750 }, // Up 2
+            { dmg: 575, spa: 6, range: 28, cost: 2350 },   // Up 3
+            { dmg: 750, spa: 5.8, range: 28, cost: 2900 }, // Up 4
+            { dmg: 850, spa: 5.6, range: 30, cost: 3500 }, // Up 5
+            { dmg: 975, spa: 5.4, range: 30, cost: 4700 }, // Up 6
+            { dmg: 1000, spa: 8, range: 27, cost: 6000 },  // Up 7 (Full AoE)
+            { dmg: 1100, spa: 8, range: 27, cost: 7000 },  // Up 8
+            { dmg: 1250, spa: 8, range: 30, cost: 8500 }   // Up 9
+        ]
     },
     {
         id: "Jingliu", name: "Jangluu", role: "Damage",
@@ -497,7 +860,29 @@ const unitDatabase = [
         totalCost: 33725,
         placement: 3, tags: [], placementType: "Hill",
         meta: { short: "Ruler", long: "Eternal/Sacred", note: "Eternal provides highest DPS Potential, Ruler provides good dps to cost." },
-        stats: { dmg: 1700, spa: 6, crit: 50, cdmg: 200, dot: 0, dotStacks: 1, spaCap: 3, passiveDmg: 35, element: "Ice", dotDuration: 0, range: 40 }
+        stats: { 
+            crit: 50, 
+            cdmg: 200, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 3, 
+            passiveDmg: 35, 
+            element: "Ice", 
+            dotDuration: 0 
+        },
+        upgrades: [
+            { dmg: 80, spa: 4.5, range: 20, cost: 1200 },   // Up 0 (Base)
+            { dmg: 185, spa: 4.5, range: 20, cost: 1750 },  // Up 1
+            { dmg: 310, spa: 4, range: 23, cost: 2190 },    // Up 2
+            { dmg: 495, spa: 4, range: 23, cost: 2800 },    // Up 3
+            { dmg: 685, spa: 5.5, range: 25, cost: 3475 },  // Up 4
+            { dmg: 880, spa: 5.5, range: 25, cost: 3675 },  // Up 5
+            { dmg: 1035, spa: 5.5, range: 28, cost: 3800 }, // Up 6
+            { dmg: 1290, spa: 5.5, range: 28, cost: 4350 }, // Up 7
+            { dmg: 1550, spa: 6.5, range: 35, cost: 4910 }, // Up 8
+            { dmg: 1700, spa: 6, range: 40, cost: 5575 }    // Up 9
+        ]
+
     },
     {
         id: "megumin", name: "Migumen", role: "Damage / Burn(Dot)",
@@ -505,8 +890,25 @@ const unitDatabase = [
         totalCost: 136000,
         placement: 1, tags: [], placementType: "Hybrid",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { dmg: 8750, spa: 14, crit: 0, cdmg: 150, dot: 50, dotStacks: 1, spaCap: 4, passiveDmg: 0, element: "Fire", dotDuration: 10, range: 50 },
-        ability: { passiveDmg: 50, passiveSpa: -50 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 50, 
+            dotStacks: 1, 
+            spaCap: 4, 
+            passiveDmg: 0, 
+            element: "Fire", 
+            dotDuration: 10 
+        },
+        ability: { passiveDmg: 50, passiveSpa: -50 },
+        upgrades: [
+            { dmg: 1000, spa: 11.5, range: 30, cost: 3000 },  // Up 0 (Base)
+            { dmg: 2175, spa: 11.5, range: 35, cost: 11865 }, // Up 1
+            { dmg: 3980, spa: 13, range: 38, cost: 21250 },   // Up 2
+            { dmg: 5050, spa: 13.5, range: 40, cost: 28600 }, // Up 3
+            { dmg: 5000, spa: 11.5, range: 45, cost: 32580 }, // Up 4
+            { dmg: 7230, spa: 14, range: 50, cost: 40000 }    // Up 5
+        ]
     },
     {
         id: "bambietta", name: "Bambee", role: "Damage / (Support/Dot)",
@@ -514,23 +916,75 @@ const unitDatabase = [
         totalCost: 40000,
         placement: 3, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Eternal", note: "Eternal provides highest DPS Potential, Ruler provides good dps to cost." },
-        stats: { dmg: 1250, spa: 6.5, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 2, passiveDmg: 0, element: "Dark", dotDuration: 0, range: 38, hasElementSelect: true }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 2, 
+            passiveDmg: 0, 
+            element: "Dark", 
+            dotDuration: 0, 
+            hasElementSelect: true 
+        },
+        upgrades: [
+            { dmg: 60, spa: 5, range: 25, cost: 900 },     // Up 0 (Base)
+            { dmg: 195, spa: 5, range: 28, cost: 1750 },   // Up 1
+            { dmg: 305, spa: 4.5, range: 28, cost: 2180 }, // Up 2
+            { dmg: 425, spa: 4.5, range: 30, cost: 2800 }, // Up 3
+            { dmg: 580, spa: 5.5, range: 30, cost: 3950 }, // Up 4
+            { dmg: 675, spa: 5.5, range: 33, cost: 5175 }, // Up 5
+            { dmg: 790, spa: 5.5, range: 35, cost: 7600 }, // Up 6
+            { dmg: 1050, spa: 7, range: 35, cost: 8150 },  // Up 7
+            { dmg: 1230, spa: 6.5, range: 38, cost: 9980 } // Up 8
+        ]
     },
     {
         id: "esdeath", name: "Ice Empress", role: "Damage / Support",
         img: "images/units/Esdeath.png",
-        totalCost: 92000,
+        totalCost: 92890,
         placement: 1, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Passive avg 37.5% Dmg (Cycles 0-75%). Ruler is strictly best due to 1 placement count." },
-        stats: { dmg: 1975, spa: 7.5, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 3, passiveDmg: 37.5, element: "Ice", dotDuration: 0, range: 50 }
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 3, 
+            passiveDmg: 37.5, 
+            element: "Ice", 
+            dotDuration: 0 
+        },
+        upgrades: [
+            { dmg: 120, spa: 6, range: 25, cost: 1500 },     // Up 0 (Base)
+            { dmg: 265, spa: 6, range: 28, cost: 2150 },     // Up 1
+            { dmg: 470, spa: 5.5, range: 30, cost: 3000 },   // Up 2
+            { dmg: 695, spa: 7, range: 35, cost: 6600 },     // Up 3
+            { dmg: 870, spa: 7, range: 35, cost: 7290 },     // Up 4
+            { dmg: 1050, spa: 7, range: 38, cost: 8750 },    // Up 5
+            { dmg: 1190, spa: 6.5, range: 40, cost: 9870 },  // Up 6
+            { dmg: 1265, spa: 6.5, range: 40, cost: 11100 }, // Up 7
+            { dmg: 1400, spa: 6.5, range: 45, cost: 12900 }, // Up 8
+            { dmg: 1765, spa: 8, range: 45, cost: 13730 },   // Up 9
+            { dmg: 1975, spa: 8.5, range: 50, cost: 16000 }  // Up 10
+        ]
     },
     {
         id: "phantom_captain", name: "Phantom Captain", role: "Summon / Dmg",
         img: "images/units/Phantom.png",
-        totalCost: 68000,
+        totalCost: 69000,
         placement: 1, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Needs low SPA (High Speed) to maintain max 9 planes." },
-        stats: { dmg: 3600, spa: 10, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 3, passiveDmg: 0, element: "Light", dotDuration: 0, range: 55 },
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 3, 
+            passiveDmg: 0, 
+            element: "Light", 
+            dotDuration: 0 
+        },
         ability: {
             summonStats: {
                 maxCount: 9,
@@ -544,17 +998,29 @@ const unitDatabase = [
                 buffCrit: 30, // 30% CR
                 buffCdmg: 200 // 200% CDmg
             }
-        }
+        },
+        upgrades: [
+            { dmg: 500, spa: 15, range: 20, cost: 2500 },   // Up 0 (Base)
+            { dmg: 1250, spa: 15, range: 25, cost: 7500 },  // Up 1
+            { dmg: 2375, spa: 15, range: 30, cost: 13000 }, // Up 2
+            { dmg: 2980, spa: 15, range: 35, cost: 19000 }, // Up 3
+            { dmg: 3600, spa: 10, range: 55, cost: 27000 }  // Up 4
+        ]
     },
     {
         id: "sharpshooter", name: "Sharpshooter", role: "Damage / Support",
         img: "images/units/Sharpshooter.png",
-        totalCost: 68000,
+        totalCost: 57560,
         placement: 2, tags: [], placementType: "Hill",
         meta: { short: "Ruler", long: "Ruler", note: "Toggle Ability for Sniper Mode (Global Range)." },
         stats: {
-            dmg: 1450, spa: 6, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 3.5,
-            element: "Fire", dotDuration: 0, range: 50,
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 3.5,
+            element: "Fire", 
+            dotDuration: 0,
             passiveDmg: 125, // Normal Mode: 2.25x Dmg
             passiveSpa: 0
         },
@@ -562,64 +1028,180 @@ const unitDatabase = [
             passiveDmg: 10,  // Sniper Mode: 1.1x Dmg
             passiveSpa: 10,  // Sniper Mode: 0.9x SPA (10% reduction)
             range: 120  // Sniper Mode: 200 Range
-        }
+        },
+        upgrades: [
+            { dmg: 130, spa: 5, range: 25, cost: 1750 },   // Up 0 (Base)
+            { dmg: 205, spa: 5, range: 28, cost: 2300 },   // Up 1
+            { dmg: 355, spa: 6.5, range: 30, cost: 3900 },  // Up 2
+            { dmg: 470, spa: 6, range: 35, cost: 4950 },   // Up 3
+            { dmg: 685, spa: 7.5, range: 38, cost: 6010 },  // Up 4
+            { dmg: 815, spa: 7.5, range: 38, cost: 7250 },  // Up 5
+            { dmg: 970, spa: 6.5, range: 40, cost: 8980 },  // Up 6
+            { dmg: 1065, spa: 6.5, range: 43, cost: 10355 }, // Up 7
+            { dmg: 1145, spa: 6, range: 45, cost: 12065 }   // Up 8
+        ]
     },
     {
         id: "rohan", name: "Rohan & Robot 16", role: "Damage",
         img: "images/units/Rohan.png",
-        totalCost: 54000,
+        totalCost: 70185,
         placement: 1, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Ability activates Unleashed mode." },
-        stats: { dmg: 1820, spa: 7.5, crit: 15, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 3, passiveDmg: 30, passiveSpa: 5, element: "Light", dotDuration: 0, range: 55 },
-        ability: { dmg: 2445, spa: 8.5, range: 58, spaCap: 2 }
+        stats: { 
+            crit: 15, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 3, 
+            passiveDmg: 30, 
+            passiveSpa: 5, 
+            element: "Light", 
+            dotDuration: 0 
+        },
+        ability: { dmg: 2445, spa: 8.5, range: 58, spaCap: 2 },
+        upgrades: [
+            { dmg: 145, spa: 6, range: 28, cost: 1750 },   // Up 0 (Base)
+            { dmg: 250, spa: 6, range: 30, cost: 2890 },   // Up 1
+            { dmg: 340, spa: 6, range: 33, cost: 3200 },   // Up 2
+            { dmg: 495, spa: 5.5, range: 35, cost: 3975 },  // Up 3
+            { dmg: 565, spa: 5, range: 40, cost: 4650 },   // Up 4 (Splash)
+            { dmg: 690, spa: 5, range: 45, cost: 5450 },   // Up 5
+            { dmg: 750, spa: 5, range: 48, cost: 6900 },   // Up 6
+            { dmg: 800, spa: 4.5, range: 50, cost: 7575 },  // Up 7
+            { dmg: 1650, spa: 8, range: 53, cost: 8800 },   // Up 8 (Cone)
+            { dmg: 1820, spa: 7.5, range: 55, cost: 10995 }, // Up 9
+            { dmg: 2445, spa: 8.5, range: 58, cost: 14000 }  // Up 10 (Line AoE)
+        ]
     },
     {
         id: "cell", name: "Bio-Android (Imperfect)", role: "Damage / Summon",
         img: "images/units/Cell.png",
-        totalCost: 56000,
-        placement: 1, tags: ["Bio-Android"], placementType: "Ground",
-        meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count. Base form is True Form. Toggle for Perfect Form (Summon)." },
+        totalCost: 59110,
+        placement: 1, tags: ["Bio-Android"], placementType: "Hybrid",
+        meta: { short: "Ruler", long: "Ruler", note: "Imperfect Form base. Toggle for True Form available at Max Upgrade." },
         stats: {
-            baseName: "True Form",
-            dmg: 3250, spa: 10, crit: 0, cdmg: 150, dot: 0, spaCap: 4.1,
-            passiveDmg: 70, element: "Wind", range: 43
+            baseName: "Imperfect Form",
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            spaCap: 4.1,
+            passiveDmg: 70, 
+            element: "Wind"
         },
         ability: {
-            abilityName: "Perfect Form",
-            dmg: 3025, spa: 9.5, spaCap: 2.5, range: 43,
+            abilityName: "True Form",
+            dmg: 3225, spa: 10, spaCap: 2.5, range: 43,
             passiveDmg: 50,
             summonStats: {
                 attacksToSpawn: 3, maxCount: 3, dmgPct: 50, buffWindow: 0,
                 planeA: { spa: 7.5, duration: 30 },
                 planeB: { spa: 7.5, duration: 30 }
             }
-        }
+        },
+        upgrades: [
+            { dmg: 115, spa: 7.5, range: 25, cost: 1000 },  // Up 0 (Base)
+            { dmg: 280, spa: 7.0, range: 25, cost: 1800 },  // Up 1
+            { dmg: 475, spa: 7.0, range: 25, cost: 2700 },  // Up 2
+            { dmg: 625, spa: 6.5, range: 25, cost: 3680 },  // Up 3
+            { dmg: 795, spa: 6.5, range: 30, cost: 4150 },  // Up 4
+            { dmg: 980, spa: 6.5, range: 30, cost: 5700 },  // Up 5
+            { dmg: 1085, spa: 6.0, range: 35, cost: 6150 }, // Up 6
+            { dmg: 1790, spa: 8.5, range: 38, cost: 6980 }, // Up 7 (Becomes Hybrid)
+            { dmg: 1860, spa: 8.0, range: 40, cost: 8350 }, // Up 8
+            { dmg: 2695, spa: 10.0, range: 45, cost: 8850 }, // Up 9
+            { dmg: 3000, spa: 9.5, range: 48, cost: 9750, unlocksAbility: true }   // Up 10
+        ]
     },
     {
         id: "vegeta", name: "Fallen Prince", role: "Damage",
         img: "images/units/Vegeta.png",
-        totalCost: 35112,
+        totalCost: 35115,
         placement: 3, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Eternal", note: "Toggle Boss Stacks for max damage." },
-        stats: { dmg: 2275, spa: 8, crit: 45, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 3, passiveDmg: 0, passiveSpa: 15, passiveRange: 15, element: "Dark", dotDuration: 0, range: 44 },
-        ability: { passiveDmg: 150 }
+        stats: { 
+            crit: 45, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 3, 
+            passiveDmg: 0, 
+            element: "Dark", 
+            dotDuration: 0, 
+            passiveSpa: 15, 
+            passiveRange: 15 
+        },
+        ability: { passiveDmg: 150 },
+        upgrades: [
+            { dmg: 130, spa: 9.5, range: 22, cost: 1000 },  // Up 0 (Base)
+            { dmg: 355, spa: 9.5, range: 22, cost: 1550 },  // Up 1
+            { dmg: 515, spa: 9.5, range: 25, cost: 2600 },  // Up 2
+            { dmg: 810, spa: 9, range: 30, cost: 3250 },    // Up 3
+            { dmg: 1080, spa: 9, range: 30, cost: 3875 },   // Up 4
+            { dmg: 1250, spa: 8.5, range: 35, cost: 4150 }, // Up 5
+            { dmg: 1699, spa: 8.5, range: 38, cost: 5200 }, // Up 6
+            { dmg: 1945, spa: 8, range: 40, cost: 6490 },   // Up 7 (AoE → Line)
+            { dmg: 2250, spa: 8, range: 45, cost: 7000 }    // Up 8
+        ]
     },
     {
         id: "super_roku", name: "Super Roku", role: "Damage",
         img: "images/units/SuperRoku.png",
-        totalCost: 48000,
+        totalCost: 50250,
         placement: 2, tags: ["Saiyan"], placementType: "Hill",
         meta: { short: "Ruler", long: "Ruler", note: "Toggle Same Enemy for boss DPS calculation." },
-        stats: { dmg: 1950, spa: 6.5, crit: 10, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 4, passiveDmg: 25, element: "Light", dotDuration: 0, range: 41 },
-        ability: {}
+        stats: { 
+            crit: 10, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 4, 
+            passiveDmg: 25, 
+            element: "Light", 
+            dotDuration: 0 
+        },
+        ability: {},
+        upgrades: [
+            { dmg: 64, spa: 4.5, range: 20, cost: 1250 },   // Up 0 (Base)
+            { dmg: 205, spa: 4.5, range: 22, cost: 1850 },  // Up 1
+            { dmg: 242, spa: 4, range: 22, cost: 2925 },    // Up 2
+            { dmg: 505, spa: 6, range: 25, cost: 4240 },    // Up 3
+            { dmg: 735, spa: 6, range: 25, cost: 5200 },    // Up 4
+            { dmg: 822, spa: 5.5, range: 25, cost: 5725 },  // Up 5
+            { dmg: 1195, spa: 7.5, range: 30, cost: 6055 }, // Up 6
+            { dmg: 1425, spa: 7.5, range: 33, cost: 6275 }, // Up 7
+            { dmg: 1630, spa: 6.5, range: 35, cost: 7730 }, // Up 8
+            { dmg: 1950, spa: 6.5, range: 41, cost: 9000 }  // Up 9
+        ]
     },
     {
         id: "trunks", name: "The Drink", role: "Damage / DoT",
         img: "images/units/Trunks.png",
-        totalCost: 40000,
+        totalCost: 41865,
         placement: 4, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Passive averages to +25% Damage." },
-        stats: { dmg: 1810, spa: 8.5, crit: 0, cdmg: 150, dot: 25, dotStacks: 1, spaCap: 2, passiveDmg: 45, element: "Water", dotDuration: 5, range: 45 },
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 25, 
+            dotStacks: 1, 
+            spaCap: 2, 
+            passiveDmg: 45, 
+            element: "Water", 
+            dotDuration: 5 
+        },
+        upgrades: [
+            { dmg: 85, spa: 7.5, range: 20, cost: 950 },    // Up 0 (Base)
+            { dmg: 170, spa: 7.6, range: 20, cost: 1350 },  // Up 1
+            { dmg: 245, spa: 7.0, range: 20, cost: 2225 },  // Up 2
+            { dmg: 375, spa: 8.5, range: 25, cost: 2650 },  // Up 3
+            { dmg: 500, spa: 8.5, range: 25, cost: 3050 },  // Up 4
+            { dmg: 635, spa: 8.5, range: 28, cost: 3385 },  // Up 5
+            { dmg: 680, spa: 6.5, range: 30, cost: 4235 },  // Up 6 (AoE → Full)
+            { dmg: 740, spa: 6.0, range: 30, cost: 4235 },  // Up 7
+            { dmg: 865, spa: 6.0, range: 33, cost: 4750 },  // Up 8
+            { dmg: 1615, spa: 9.0, range: 40, cost: 6800 }, // Up 9 (AoE → Cone)
+            { dmg: 1810, spa: 8.5, range: 45, cost: 8235 }  // Up 10
+        ]
     },
     {
         id: "water_god", name: "Enlightened God", role: "Utility Ground",
@@ -631,19 +1213,40 @@ const unitDatabase = [
             long: "Sacred/Fission",
             note: "God Of The Seas: +20% DoT/Affliction. Crit increases 5% per attack (Cap 30/50%). Double attack at cap."
         },
-        stats: { dmg: 2500, spa: 9, crit: 50, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 3.5, passiveDmg: 0, element: "Water", dotDuration: 0, range: 30, followUp: true },
+        stats: { 
+            crit: 50, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 3.5, 
+            passiveDmg: 225, 
+            element: "Water", 
+            dotDuration: 0 
+        },
         ability: { buffDmg: 50, abilityName: "Primordial Wave", noToggle: true, cooldown: 60, desc: "Water God summons a Primordial Wave down The Path that deals 200% Damage to all Enemies on That Path." },
         passives: [
             { name: "God Of The Seas", desc: "Applies +20% DoT and Affliction Time (+30% at E4). Increases Crit Rate by 5% per attack up to 30% (50% at E2). Performs FuA at cap." },
             { name: "Primordial Power", desc: "Inflicts 'Time Snail' (3s): +20% DoT Duration, 30% Slow, and buffs Water God Damage by 5% per enemy effected (max +50%)." }
         ],
+        upgrades: [
+            { dmg: 200, spa: 7, range: 22, cost: 1500 },  // Up 0 (Base)
+            { dmg: 600, spa: 7, range: 24, cost: 3000 },  // Up 1
+            { dmg: 1000, spa: 6.5, range: 25, cost: 5000 },  // Up 2
+            { dmg: 1500, spa: 3, range: 28, cost: 7600 },  // Up 3
+            { dmg: 1950, spa: 8, range: 28, cost: 10000 }, // Up 4
+            { dmg: 2050, spa: 9, range: 25, cost: 13500 }, // Up 5
+            { dmg: 2300, spa: 9, range: 26, cost: 15000 }, // Up 6
+            { dmg: 2500, spa: 9, range: 30, cost: 17000 }  // Up 7
+        ],
         etherealization: [
-            "+10 Stat Points",
-            "Crit rate cap increased to 50%<br>(God Of The Seas)",
-            "+10 Stat Points",
-            "DoT and Affliction Time increased by 10%<br>(God Of The Seas)",
-            "+10 Stat Points",
-            "+75% Damage per placement"
+            "+10 Stat Points (E1)",
+            "Crit rate cap increased to 50%\n(God Of The Seas) (E2)",
+            "+10 Stat Points (E3)",
+            "DoT and Affliction Time increased by 10%\n(God Of The Seas) (E4)",
+            "+10 Stat Points (E5)",
+            "+75% Damage per placement (E6)",
+            "+10 Stat Points (E7)",
+            "Final Evolution: God of the Seas (E8)"
         ]
     },
     {
@@ -652,7 +1255,16 @@ const unitDatabase = [
         totalCost: 89500,
         placement: 1, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", noz: "Attack Form: Demon art : Axe. Ruler is strictly best due to 1 placement count." },
-        stats: { dmg: 3200, spa: 7, crit: 0, cdmg: 150, dot: 120, dotStacks: 1, spaCap: 3, passiveDmg: 0, element: "Rose", dotDuration: 10, range: 32 },
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 120, 
+            dotStacks: 1, 
+            spaCap: 3, 
+            passiveDmg: 0, 
+            element: "Rose", 
+            dotDuration: 10 
+        },
         passives: [
             { name: "Guidance of the Original Monarch", desc: "Everytime First Emperor switches Demonic Arts, all Units in First Emperor's Range will perform an Attack. [On E6] Units Performing an Attack will gain 15% of First Emperor's Damage for 10 seconds." },
             { name: "Flow Disruptor", desc: "When First Emperor Attacks a Sprinter Enemy, The Enemy gets slowed by 30% for 3 seconds." },
@@ -664,11 +1276,23 @@ const unitDatabase = [
             noToggle: true,
             desc: "When First Emperor Reaches his Final Upgrade, he unlocks the Ability to Change his Demonic Art. Starts with <b class='mt-text-gold'>Blade</b>.<br><br>" +
                 "<span style='display: block; margin-top: 10px;'><b class='mt-text-gold'>Blade:</b> +60% Damage (+80% on E2) for 25s on switch.</span>" +
-                "<span style='display: block; margin-top: 6px;'><b class='mt-text-orange'>Axe:</b> Attacks Slow Enemies by 40% for 5s. Confusion for 3s on first hit.</span>" +
+                "<span style='display: block; margin-top: 6px;'><b class='mt-text-gold'>Axe:</b> Attacks Slow Enemies by 40% for 5s. Confusion for 3s on first hit.</span>" +
                 "<span style='display: block; margin-top: 6px;'><b class='text-accent-start'>Crossbow:</b> +1000% Range, Sets Priority to Strongest. Attacks apply Stun for 2s, but -20% Attack Speed. <span class='text-dim'>[On E6: +30% Damage]</span></span>" +
                 "<span style='display: block; margin-top: 6px;'><b class='mt-text-green'>Spear:</b> Attacks get rid of old Bleed and apply new Bleed (100% Damage, 120% on E2) over 10 ticks.</span>" +
                 "<span style='display: block; margin-top: 6px;'><b class='text-accent-end'>Armor:</b> Sets Priority to Last and moves to Closest Path point. Confusion for 1.5s (2.5s on E4) to Non-Boss enemies walking into him. <span class='text-dim'>[On E4: deals 50% Damage to confused enemies]</span></span>"
         },
+        upgrades: [
+            { dmg: 440, spa: 7, range: 25, cost: 3000 },   // Up 0 (Base)
+            { dmg: 560, spa: 7, range: 26, cost: 2500 },   // Up 1
+            { dmg: 720, spa: 7, range: 26, cost: 3000 },   // Up 2
+            { dmg: 905, spa: 7, range: 27, cost: 5000 },   // Up 3
+            { dmg: 1155, spa: 7, range: 27, cost: 7500 },  // Up 4
+            { dmg: 1690, spa: 7, range: 27, cost: 9500 },  // Up 5
+            { dmg: 1600, spa: 7, range: 29, cost: 11000 }, // Up 6
+            { dmg: 2000, spa: 7, range: 29, cost: 13000 }, // Up 7
+            { dmg: 2600, spa: 7, range: 30, cost: 15000 }, // Up 8
+            { dmg: 3200, spa: 7, range: 32, cost: 20000 }  // Up 9 (Unlocks Demon’s Arts)
+        ],
         etherealization: [
             "+10 Stat Points",
             "\"Demon Art: Blade\" Damage Buff Increased to +80%",
@@ -687,7 +1311,16 @@ const unitDatabase = [
         placement: 2,
         tags: ["Divinity"], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Divine Blood converts debuffs to buffs. Eldest Brother provides up to +90% Damage via Divinity tags." },
-        stats: { dmg: 7500, spa: 10, crit: 0, cdmg: 150, dot: 0, dotStacks: 1, spaCap: 4, passiveDmg: 90, passiveSpa: 15, element: "Wind", range: 40 },
+        stats: { 
+            crit: 0, 
+            cdmg: 150, 
+            dot: 0, 
+            dotStacks: 1, 
+            spaCap: 4, 
+            passiveDmg: 90, 
+            passiveSpa: 15, 
+            element: "Wind" 
+        },
         passives: [
             { name: "Divine Blood", desc: "Whenever Underworld God receives a negative buff, he converts it into a positive buff. [On E4]: These buffs last indefinitely." },
             { name: "As The Eldest Brother", desc: "Each unit with the 'Divinity' tag in range buffs this unit by +15% Damage, up to 60% (90% on E2)." },
@@ -701,6 +1334,17 @@ const unitDatabase = [
             "Divine Blood: Converted positive buffs now last indefinitely",
             "+10 Stat Points",
             "Sibling Combined Might: Hyper Armor Damage increased to 60%"
+        ],
+        upgrades: [
+            { dmg: 175, spa: 6, range: 22, cost: 1400 },   // Up 0 (Base)
+            { dmg: 500, spa: 6, range: 24, cost: 3000 },   // Up 1
+            { dmg: 850, spa: 5.5, range: 25, cost: 5000 },  // Up 2
+            { dmg: 1100, spa: 7, range: 27, cost: 8000 },   // Up 3
+            { dmg: 1350, spa: 6, range: 32, cost: 12000 },  // Up 4
+            { dmg: 1450, spa: 9, range: 38, cost: 18000 },  // Up 5
+            { dmg: 1850, spa: 9, range: 40, cost: 20000 },  // Up 6
+            { dmg: 2200, spa: 9, range: 45, cost: 22000 },  // Up 7
+            { dmg: 7500, spa: 10, range: 40, cost: 0, note: "SYNCRO DRIVE (Hybrid)" } // Up 8
         ]
     },
     {
@@ -744,6 +1388,15 @@ const unitDatabase = [
             "\"The Wisest\" Passive Buff increased to +5%.",
             "+10 Stat Points",
             "\"Reanimation\" Damage increased to +200%."
+        ],
+        upgrades: [
+            { dmg: 310, spa: 8, range: 26, cost: 2750 },   // Up 0
+            { dmg: 820, spa: 7.5, range: 31, cost: 5300 }, // Up 1
+            { dmg: 1230, spa: 7.5, range: 35, cost: 7700 }, // Up 2
+            { dmg: 2945, spa: 10, range: 40, cost: 15000 }, // Up 3
+            { dmg: 5875, spa: 15, range: 44, cost: 18900 }, // Up 4
+            { dmg: 6200, spa: 14.5, range: 48, cost: 23400 }, // Up 5
+            { dmg: 11750, spa: 25, range: 45, cost: 23400, unlocksAbility: true } // Up 6
         ]
     },
     {
@@ -818,6 +1471,14 @@ const unitDatabase = [
             element: "Dark",
             passiveDmg: 50 // Avg: Clanhood (20%) + Spirited Cage (15%) + Hatred (15%)
         },
+        upgrades: [
+            { dmg: 220, spa: 8, range: 23, cost: 2000 },   // Up 0 (Base)
+            { dmg: 580, spa: 8, range: 26, cost: 3000 },   // Up 1
+            { dmg: 950, spa: 8, range: 29, cost: 9500 },   // Up 2
+            { dmg: 1680, spa: 9, range: 32, cost: 12500 }, // Up 3
+            { dmg: 2450, spa: 9, range: 35, cost: 18500 }, // Up 4
+            { dmg: 3000, spa: 9, range: 40, cost: 23500 }  // Up 5
+        ],
         passives: [
             { name: "Spirited Cage", desc: "Stunning enemies builds charges. At full charge: +50% True Damage and Stun Immunity for 10s." },
             { name: "Clanhood", desc: "Gain +10% Damage for every 'Bloodline' tag unit in range." },
@@ -842,7 +1503,7 @@ const unitDatabase = [
         totalCost: 91800,
         placement: 2,
         tags: ["Magi", "King", "Hero", "Uncontrollable Power"], placementType: "Ground",
-        meta: { short: "Ruler", long: "Ruler", note: "Manipulator of Fate: +50% Dmg / -25% SPA. Baal's Lightning provides +20% Follow-up damage." },
+        meta: { short: "Ruler", long: "Ruler", note: "Manipulator of Fate: +50% Dmg / -25% SPA. Baal's Lightning provides +20% Chain Lightning damage." },
         stats: {
             dmg: 6325, spa: 15, range: 45, spaCap: 4,
             crit: 20, cdmg: 175, followUp: 20,
@@ -860,7 +1521,17 @@ const unitDatabase = [
             "+10 Stat Points",
             "\"Baal's Lightning\" Damage increased to 20%",
             "+10 Stat Points",
-            "\"Rukh's Judgement\" Buffs increased by 15% each."
+            "\"Rukh's Judgement\" Buffs increased by 15% each.",
+            "+10 Stat Points"
+        ],
+        upgrades: [
+            { dmg: 280, spa: 10, range: 25, cost: 2800 }, // Up 0
+            { dmg: 650, spa: 10, range: 27, cost: 6000 }, // Up 1
+            { dmg: 1050, spa: 10, range: 30, cost: 9500 }, // Up 2
+            { dmg: 1500, spa: 10, range: 33, cost: 13500 }, // Up 3
+            { dmg: 2120, spa: 10, range: 36, cost: 18000 }, // Up 4
+            { dmg: 2575, spa: 10, range: 40, cost: 20000 }, // Up 5
+            { dmg: 6325, spa: 15, range: 45, cost: 22000 } // Up 6
         ]
     },
     {
@@ -907,6 +1578,15 @@ const unitDatabase = [
             "Clones gain +25% Damage while Beast Mode is active.",
             "+10 Stat Points",
             "Beast Mode Crit Rate increased to 35%. Summons gain +60% Damage."
+        ],
+        upgrades: [
+            { dmg: 205, spa: 7, range: 25, cost: 2000 },    // Up 0 (Base)
+            { dmg: 570, spa: 6.5, range: 28, cost: 4450 },  // Up 1
+            { dmg: 800, spa: 6.5, range: 30, cost: 6750 },  // Up 2
+            { dmg: 1325, spa: 9, range: 34, cost: 9560 },   // Up 3
+            { dmg: 1900, spa: 8.5, range: 37, cost: 12650 },// Up 4
+            { dmg: 2500, spa: 8.5, range: 42, cost: 16000 },// Up 5
+            { dmg: 3300, spa: 8, range: 45, cost: 20500 }   // Up 6
         ]
     },
     {
@@ -927,6 +1607,14 @@ const unitDatabase = [
             crit: 0, cdmg: 150, dot: 60, dotDuration: 10, dotStacks: 1,
             element: "Fire"
         },
+        upgrades: [
+            { dmg: 150, spa: 6, range: 29, cost: 2750 },   // Up 0 (Base)
+            { dmg: 400, spa: 6, range: 33, cost: 2700 },   // Up 1
+            { dmg: 835, spa: 6, range: 35, cost: 7500 },   // Up 2
+            { dmg: 1165, spa: 8, range: 40, cost: 14500 }, // Up 3
+            { dmg: 2530, spa: 8, range: 43, cost: 18500 }, // Up 4
+            { dmg: 3050, spa: 8, range: 46, cost: 22500 }, // Up 5
+        ],
         passives: [
             { name: "Elusive Crow Distraction", desc: "Every 5 attacks (4 at E2) confuses enemies for 2 seconds (3s at E2)." },
             { name: "Flame Sealing Technique", desc: "On Kill (Enemy with Black Burn): 30% chance to stun nearby enemies for 4s." },
@@ -970,6 +1658,14 @@ const unitDatabase = [
             dotBuff: 40,     // Specialist focus (+40% DoT)
             hyper: 50        // Specialist focus (+50% True Dmg)
         },
+        upgrades: [
+            { dmg: 280, spa: 8, range: 25, cost: 2300 },   // Up 0 (Base)
+            { dmg: 700, spa: 8, range: 28, cost: 5800 },   // Up 1
+            { dmg: 1160, spa: 8, range: 32, cost: 9600 },  // Up 2
+            { dmg: 1950, spa: 8, range: 34, cost: 11500 }, // Up 3
+            { dmg: 3600, spa: 8, range: 40, cost: 15000 }, // Up 4
+            { dmg: 5500, spa: 8, range: 45, cost: 22500 }  // Up 5
+        ],
         modes: {
             "DPS": { desc: "Combat focus: +20% Dmg, -40% Atk Speed, +50% Boss Dmg. Applies Wind Shear (60% DoT over 10s)." },
             "Specialist": { desc: "Magic focus: +40% DoT, +50% True Damage. Swaps Wind Shear for Burn (60% DoT over 10s)." },
@@ -1019,6 +1715,15 @@ const unitDatabase = [
             element: "Rose",
             passiveDmg: 0
         },
+        upgrades: [
+            { dmg: 175, spa: 6, range: 26, cost: 1200 },   // Up 0 (Base)
+            { dmg: 400, spa: 6, range: 28, cost: 2000 },   // Up 1
+            { dmg: 800, spa: 6, range: 30, cost: 3000 },   // Up 2
+            { dmg: 1250, spa: 6, range: 38, cost: 5000 },  // Up 3
+            { dmg: 1600, spa: 6, range: 40, cost: 8000 },  // Up 4
+            { dmg: 1925, spa: 6, range: 41, cost: 12000 }, // Up 5
+            { dmg: 2450, spa: 6, range: 44, cost: 15000 }  // Up 6
+        ],
         passives: [
             { name: "Battle Dominant", desc: "Every attack: apply slow (30% Speed for 5s). [E4]: Attacking slowed units applies Stun for 2.5s." },
             { name: "Travel Buddies", desc: "If Ancient Mage is in Range: -20% Attack Speed.<br>If Dragon Slayer is in range: +25% Range.<br>[E2]: Buffs increased by 5%." }
@@ -1077,11 +1782,19 @@ const unitDatabase = [
             "\"Monarch's Devotion\" gives all units in range +10% Damage.",
             "+10 Stat Points",
             "\"Predatory Gluttony\" Damage Cap increased to +50%."
+        ],
+        upgrades: [
+            { dmg: 250, spa: 8, range: 30, cost: 2000 }, // Up 0
+            { dmg: 600, spa: 8, range: 31, cost: 5000 }, // Up 1
+            { dmg: 1150, spa: 8, range: 33, cost: 7500 }, // Up 2
+            { dmg: 2000, spa: 8, range: 34, cost: 9500 }, // Up 3
+            { dmg: 3800, spa: 8, range: 37, cost: 14000 }, // Up 4
+            { dmg: 4300, spa: 8, range: 40, cost: 25000 } // Up 5
         ]
     }
 ];
 
 const creditsData = [
-    { role: "Owner", name: "xKing.", id: "xking.", userId: "347578773857632258", pfp: "../pfp/xking.png", type: "owner" },
-    { role: "Helper", name: "xAuroraFlare", id: "xauroraflare", userId: "216293393888837632", pfp: "../pfp/xauroraflare.gif", type: "helper" }
+    { role: "Owner", name: "xKing.", id: "xking.", userId: "347578773857632258", pfp: "images/pfp/xking.png", type: "owner" },
+    { role: "Helper", name: "xAuroraFlare", id: "xauroraflare", userId: "216293393888837632", pfp: "images/pfp/xauroraflare.gif", type: "helper" }
 ];

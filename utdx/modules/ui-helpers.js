@@ -3,9 +3,65 @@
 // ============================================================================
 
 // Reset and trigger database re-render
+// State for unit-specific etherealization levels (E0-E6)
+window.unitELevels = {};
+
 const resetAndRender = () => {
     renderQueueIndex = 0;
     renderDatabase();
+};
+
+window.selectELevel = function(unitId, level) {
+    // If clicking the active level, toggle off to 0
+    const current = window.unitELevels[unitId] || 0;
+    const next = (current === level) ? 0 : level;
+    
+    window.unitELevels[unitId] = next;
+    
+    const card = document.getElementById('card-' + unitId);
+    if (!card) return;
+
+    // Update UI pills instantly
+    const container = card.querySelector('.upgrade-toolbar');
+    if (container) {
+        container.querySelectorAll('.e-pill').forEach(p => {
+            const l = parseInt(p.dataset.level);
+            p.classList.toggle('active', l === next);
+            p.classList.toggle('e-unlocked', l <= next && next > 0);
+        });
+    }
+
+    // Update Ability Toggle Visibility
+    const unit = unitDatabase.find(u => u.id === unitId);
+    if (unit && unit.upgrades) {
+        const hasUnlockCondition = unit.upgrades.some(u => u.unlocksAbility);
+        if (hasUnlockCondition) {
+            let unlocked = false;
+            for (let i = 0; i <= next; i++) {
+                if (unit.upgrades[i] && unit.upgrades[i].unlocksAbility) {
+                    unlocked = true;
+                    break;
+                }
+            }
+            const toggleWrapper = card.querySelector('.toggle-wrapper');
+            if (toggleWrapper) {
+                toggleWrapper.style.display = unlocked ? 'flex' : 'none';
+                // If it's being hidden, we should also uncheck the ability and update lists
+                if (!unlocked && activeAbilityIds.has(unitId)) {
+                    const checkbox = toggleWrapper.querySelector('input');
+                    if (checkbox) {
+                        checkbox.checked = false;
+                        toggleAbility(unitId, checkbox);
+                    }
+                }
+            }
+        }
+    }
+
+    // Trigger re-calculation for this unit
+    if (typeof updateBuildListDisplay === 'function') {
+        updateBuildListDisplay(unitId);
+    }
 };
 
 function filterList(element) {
