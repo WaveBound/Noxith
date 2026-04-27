@@ -110,6 +110,12 @@ h4 {
     gap: 32px;
 }
 
+.nav-group-left, .nav-group-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
 .nav-logo {
     display: flex;
     align-items: center;
