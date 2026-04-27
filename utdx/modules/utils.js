@@ -5,8 +5,12 @@
 const format = (n) => 
     n >= 1e9 ? (n/1e9).toFixed(2) + 'B' : 
     n >= 1e6 ? (n/1e6).toFixed(2) + 'M' : 
-    n >= 1e3 ? (n/1e3).toFixed(1) + 'k' : 
+    n >= 1e3 ? (n/1e3).toFixed(1).replace(/\.0$/, '') + 'k' : 
     n.toLocaleString(undefined, {maximumFractionDigits:0});
+
+const fix1 = (n) => parseFloat((n || 0).toFixed(1));
+const fix2 = (n) => parseFloat((n || 0).toFixed(2));
+
 
 // Resolve stat type from key/name (Normalization for UI/CSS)
 function getStatType(key) {
@@ -55,8 +59,7 @@ function getBadgeHtml(statKeyOrName, value = null) {
 
     let valueHtml = '';
     if (value !== null && !isNaN(value)) {
-        const fmtVal = Number.isInteger(value) ? value : value.toFixed(1);
-        valueHtml = `<span class="badge-val val-main">${fmtVal}%</span>`;
+        valueHtml = `<span class="badge-val val-main">${fix1(value)}%</span>`;
     }
 
     return `<div class="badge-base ${borderClass}" onclick="event.stopPropagation(); openInfoPopup('stat_${type}')">${labelHtml}${valueHtml}</div>`;
@@ -79,7 +82,7 @@ function getRichBadgeHtml(statsArray) {
 
     const parts = statsArray.map(stat => {
         const type = getStatType(stat.type);
-        const valStr = stat.val.toFixed(1) + '%';
+        const valStr = fix1(stat.val) + '%';
         const label = STAT_LABELS[type] || type;
         const textClass = `text-${type}`; 
         const gradClass = `grad-${type}`; 

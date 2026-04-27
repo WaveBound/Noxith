@@ -1,8 +1,8 @@
 //Helpers for formatting
 const fmt = {
-    pct: (n) => `${(n||0) >= 0 ? '+' : ''}${(n||0).toFixed(1)}%`,
+    pct: (n) => `${(n||0) >= 0 ? '+' : ''}${parseFloat((n||0).toFixed(1))}%`,
     num: (n) => (n||0).toLocaleString(undefined, {maximumFractionDigits: 1}),
-    fix: (n, d=2) => (n !== undefined && n !== null) ? n.toFixed(d) : (0).toFixed(d)
+    fix: (n, d=2) => (n !== undefined && n !== null) ? parseFloat(n.toFixed(d)) : 0
 };
 
 function renderOverviewSection(data) {

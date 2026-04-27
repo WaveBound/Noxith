@@ -34,6 +34,41 @@ body.dashboard-layout { flex-direction: row; height: 100vh; overflow: hidden; al
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ===== BACK TO HUB BUTTON ===== */
+.back-to-hub {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid var(--card-border);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.back-to-hub:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    padding-left: 24px;
+}
+
+.back-to-hub svg {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--accent-start);
+    filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.2));
+}
+
+.back-to-hub:hover svg {
+    transform: translateX(-4px);
+    color: #fff;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
+}
+
 .dashboard-main {
     flex: 1;
     height: 100vh;

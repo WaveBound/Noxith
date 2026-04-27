@@ -21,7 +21,7 @@ function getSlotOptions(slot, starMult = 1) {
     // Helper to format option
     const makeOpt = (key, baseVal) => ({
         value: key,
-        text: `${STAT_LABELS[getStatType(key)] || key.toUpperCase()} (${(baseVal * starMult).toFixed(1)}%)`
+        text: `${STAT_LABELS[getStatType(key)] || key.toUpperCase()} (${fix1(baseVal * starMult)}%)`
     });
 
     if (slot === 'Head') {
@@ -542,7 +542,7 @@ window.runOptimalityCalc = function (relicId) {
     // 4. Update UI Display
     const pct = (currentRes.total / maxScore) * 100;
     document.getElementById('optResultArea').classList.remove('hidden');
-    document.getElementById('optPercent').innerText = pct.toFixed(1) + '%';
+    document.getElementById('optPercent').innerText = fix1(pct) + '%';
     document.getElementById('optCurrent').innerText = format(currentRes.total);
     document.getElementById('optMax').innerText = format(maxScore);
 

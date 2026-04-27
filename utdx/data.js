@@ -357,15 +357,15 @@ const unitDatabase = [
         totalCost: 80700,
         placement: 1, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 3.5, 
-            passiveDmg: 0, 
-            element: "Light", 
-            dotDuration: 0 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 3.5,
+            passiveDmg: 0,
+            element: "Light",
+            dotDuration: 0
         },
         upgrades: [
             { dmg: 156, spa: 4, range: 16, cost: 1400 },    // Up 0 (Base)
@@ -386,14 +386,14 @@ const unitDatabase = [
         totalCost: 93300,
         placement: 1, tags: [], placementType: "Hybrid",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 5, 
-            passiveDmg: 25, 
-            element: "Dark" 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 5,
+            passiveDmg: 25,
+            element: "Dark"
         },
         upgrades: [
             { dmg: 184, spa: 4, range: 27, cost: 800 },    // Up 0 (Base)
@@ -414,14 +414,14 @@ const unitDatabase = [
         totalCost: 75700,
         placement: 1, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 3, 
-            passiveDmg: 12, 
-            element: "Ice" 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 3,
+            passiveDmg: 12,
+            element: "Ice"
         },
         ability: { dmg: 3600, spa: 15, passiveDmg: 72, },
         upgrades: [
@@ -443,16 +443,16 @@ const unitDatabase = [
         totalCost: 30400,
         placement: 3, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Eternal", virtual: "Astral", note: "Eternal provides highest DPS Potential, Ruler provides good dps to cost." },
-        stats: { 
-            crit: 50, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 4, 
-            hitCount: 14, 
-            reqCrits: 50, 
-            extraAttacks: 0, 
-            element: "Ice" 
+        stats: {
+            crit: 50,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 4,
+            hitCount: 14,
+            reqCrits: 50,
+            extraAttacks: 0,
+            element: "Ice"
         },
         upgrades: [
             { dmg: 80, spa: 7, range: 18, cost: 1200 },    // Up 0 (Base)
@@ -473,15 +473,15 @@ const unitDatabase = [
         totalCost: 26900,
         placement: 3, tags: [], placementType: "Hill",
         meta: { short: "Ruler", long: "Eternal/Sacred", note: "Standard DPS Selection." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 14, 
-            dotStacks: 1, 
-            spaCap: 4, 
-            passiveDmg: 0, 
-            element: "Fire", 
-            burnMultiplier: 45 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 14,
+            dotStacks: 1,
+            spaCap: 4,
+            passiveDmg: 0,
+            element: "Fire",
+            burnMultiplier: 45
         },
         ability: { abilityName: "Nuke Blast", passiveDmg: 75 },
         upgrades: [
@@ -503,13 +503,13 @@ const unitDatabase = [
         totalCost: 61700,
         placement: 3, tags: ["Peroxide", "Reaper", "Rage"], placementType: "Hybrid",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 2.0, 
-            element: "Light" 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 2.0,
+            element: "Light"
         },
         upgrades: [
             { dmg: 150, spa: 5, range: 20, cost: 800 },    // Up 0 (Base)
@@ -530,14 +530,14 @@ const unitDatabase = [
         totalCost: 42400,
         placement: 2, tags: ["Team 7", "Ninjaverse", "Hero", "Bloodline"], placementType: "Ground",
         meta: { short: "Ruler", long: "Eternal/Sacred", note: "Ruler for DPS, Eternal/Sacred for support." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 4, 
-            passiveDmg: 25, 
-            element: "Dark" 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 4,
+            passiveDmg: 25,
+            element: "Dark"
         },
         upgrades: [
             { dmg: 125, spa: 7, range: 15, cost: 1400 },   // Up 0 (Base)
@@ -558,15 +558,15 @@ const unitDatabase = [
         totalCost: 56900,
         placement: 3, tags: [], placementType: "Hybrid",
         meta: { short: "Ruler", long: "Ruler", note: "Standard DPS selection." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 20, 
-            dotStacks: 1, 
-            spaCap: 5.5, 
-            passiveDmg: 0, 
-            element: "Rose", 
-            dotDuration: 4 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 20,
+            dotStacks: 1,
+            spaCap: 5.5,
+            passiveDmg: 0,
+            element: "Rose",
+            dotDuration: 4
         },
         upgrades: [
             { dmg: 120, spa: 5, range: 15, cost: 1000 },   // Up 0 (Base)
@@ -587,15 +587,15 @@ const unitDatabase = [
         totalCost: 66800,
         placement: 3, tags: [], placementType: "Hybrid",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 2.5, 
-            passiveDmg: 0, 
-            element: "Rose", 
-            dotDuration: 0 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 2.5,
+            passiveDmg: 0,
+            element: "Rose",
+            dotDuration: 0
         },
         upgrades: [
             { dmg: 100, spa: 8, range: 15, cost: 800 },    // Up 0 (Base)
@@ -616,16 +616,16 @@ const unitDatabase = [
         totalCost: 85000,
         placement: 3, tags: [], placementType: "Ground",
         meta: { short: "Ruler/Sacred", long: "Ruler/Sacred", note: "Ruler/Sacred offer the most Spa%- / Rng%+" },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 2, 
-            passiveDmg: 20, 
-            passiveSpa: 10, 
-            element: "Water", 
-            dotDuration: 0 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 2,
+            passiveDmg: 20,
+            passiveSpa: 10,
+            element: "Water",
+            dotDuration: 0
         },
         upgrades: [
             { dmg: 160, spa: 6, range: 29, cost: 1200 },    // Up 0 (Base)
@@ -647,16 +647,16 @@ const unitDatabase = [
         totalCost: 27150,
         placement: 3, tags: [], placementType: "Hybrid",
         meta: { short: "Eternal/Sacred", long: "Eternal/Sacred", note: "Eternal/Sacred offer the the best dps + support performance." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 60, 
-            dotStacks: 1, 
-            spaCap: 2, 
-            passiveDmg: 0, 
-            passiveSpa: 0, 
-            element: "Fire", 
-            dotDuration: 7 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 60,
+            dotStacks: 1,
+            spaCap: 2,
+            passiveDmg: 0,
+            passiveSpa: 0,
+            element: "Fire",
+            dotDuration: 7
         },
         upgrades: [
             { dmg: 150, spa: 7, range: 20, cost: 1000 },   // Up 0 (Base)
@@ -676,16 +676,16 @@ const unitDatabase = [
         totalCost: 111880,
         placement: 1, tags: ["Peroxide", "Reaper", "Rage", "Hollow"], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { 
-            crit: 15, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 7, 
-            passiveDmg: 50, 
-            passiveSpa: 0, 
-            element: "Dark", 
-            dotDuration: 0 
+        stats: {
+            crit: 15,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 7,
+            passiveDmg: 50,
+            passiveSpa: 0,
+            element: "Dark",
+            dotDuration: 0
         },
         upgrades: [
             { dmg: 180, spa: 5.5, range: 25, cost: 1750 },   // Up 0 (Base)
@@ -707,16 +707,16 @@ const unitDatabase = [
         totalCost: 41175,
         placement: 3, tags: ["Peroxide", "Hollow"], placementType: "Ground",
         meta: { short: "Ruler", long: "Eternal", note: "Standard DPS selection." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 50, 
-            dotStacks: 1, 
-            spaCap: 3, 
-            passiveDmg: 6.67, 
-            passiveSpa: 4.17, 
-            element: "Water", 
-            dotDuration: 10 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 50,
+            dotStacks: 1,
+            spaCap: 3,
+            passiveDmg: 6.67,
+            passiveSpa: 4.17,
+            element: "Water",
+            dotDuration: 10
         },
         upgrades: [
             { dmg: 85, spa: 7, range: 20, cost: 1300 },    // Up 0 (Base)
@@ -738,16 +738,16 @@ const unitDatabase = [
         totalCost: 34855,
         placement: 3, tags: ["Peroxide", "Hollow"], placementType: "Hybrid",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 6, 
-            passiveDmg: 0, 
-            passiveSpa: 0, 
-            element: "Ice", 
-            dotDuration: 0 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 6,
+            passiveDmg: 0,
+            passiveSpa: 0,
+            element: "Ice",
+            dotDuration: 0
         },
         upgrades: [
             { dmg: 90, spa: 7, range: 20, cost: 1200 },    // Up 0 (Base)
@@ -769,16 +769,16 @@ const unitDatabase = [
         totalCost: 31760,
         placement: 3, tags: ["Peroxide", "Hollow"], placementType: "Hill",
         meta: { short: "Ruler", long: "Eternal", note: "Standard DPS selection." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 2, 
-            passiveDmg: 0, 
-            passiveSpa: 5, 
-            element: "Dark", 
-            dotDuration: 0 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 2,
+            passiveDmg: 0,
+            passiveSpa: 5,
+            element: "Dark",
+            dotDuration: 0
         },
         ability: { buffDmg: 65, passiveSpa: 2.5, crit: 10 },
         upgrades: [
@@ -800,16 +800,16 @@ const unitDatabase = [
         totalCost: 30990,
         placement: 3, tags: ["Peroxide", "Hollow"], placementType: "Hill",
         meta: { short: "Ruler", long: "Eternal", note: "Standard DPS selection." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 2, 
-            passiveDmg: 0, 
-            passiveSpa: 0, 
-            element: "Water", 
-            dotDuration: 0 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 2,
+            passiveDmg: 0,
+            passiveSpa: 0,
+            element: "Water",
+            dotDuration: 0
         },
         ability: { buffDmg: 35, buffDuration: 80, spaCap: 4, hasToggle: true },
         upgrades: [
@@ -831,15 +831,15 @@ const unitDatabase = [
         totalCost: 39000,
         placement: 3, tags: [], placementType: "Hill",
         meta: { short: "Ruler", long: "Ruler/Astral", note: "Ruler provides good dps to cost." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 100, 
-            dotStacks: 1, 
-            spaCap: 6, 
-            passiveDmg: 60, 
-            element: "Fire", 
-            dotDuration: 4 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 100,
+            dotStacks: 1,
+            spaCap: 6,
+            passiveDmg: 60,
+            element: "Fire",
+            dotDuration: 4
         },
         upgrades: [
             { dmg: 100, spa: 5, range: 22, cost: 1000 },   // Up 0 (Base)
@@ -860,15 +860,15 @@ const unitDatabase = [
         totalCost: 33725,
         placement: 3, tags: [], placementType: "Hill",
         meta: { short: "Ruler", long: "Eternal/Sacred", note: "Eternal provides highest DPS Potential, Ruler provides good dps to cost." },
-        stats: { 
-            crit: 50, 
-            cdmg: 200, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 3, 
-            passiveDmg: 35, 
-            element: "Ice", 
-            dotDuration: 0 
+        stats: {
+            crit: 50,
+            cdmg: 200,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 3,
+            passiveDmg: 35,
+            element: "Ice",
+            dotDuration: 0
         },
         upgrades: [
             { dmg: 80, spa: 4.5, range: 20, cost: 1200 },   // Up 0 (Base)
@@ -890,15 +890,15 @@ const unitDatabase = [
         totalCost: 136000,
         placement: 1, tags: [], placementType: "Hybrid",
         meta: { short: "Ruler", long: "Ruler", note: "Ruler is strictly best due to 1 placement count." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 50, 
-            dotStacks: 1, 
-            spaCap: 4, 
-            passiveDmg: 0, 
-            element: "Fire", 
-            dotDuration: 10 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 50,
+            dotStacks: 1,
+            spaCap: 4,
+            passiveDmg: 0,
+            element: "Fire",
+            dotDuration: 10
         },
         ability: { passiveDmg: 50, passiveSpa: -50 },
         upgrades: [
@@ -916,16 +916,16 @@ const unitDatabase = [
         totalCost: 40000,
         placement: 3, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Eternal", note: "Eternal provides highest DPS Potential, Ruler provides good dps to cost." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 2, 
-            passiveDmg: 0, 
-            element: "Dark", 
-            dotDuration: 0, 
-            hasElementSelect: true 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 2,
+            passiveDmg: 0,
+            element: "Dark",
+            dotDuration: 0,
+            hasElementSelect: true
         },
         upgrades: [
             { dmg: 60, spa: 5, range: 25, cost: 900 },     // Up 0 (Base)
@@ -945,15 +945,15 @@ const unitDatabase = [
         totalCost: 92890,
         placement: 1, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Passive avg 37.5% Dmg (Cycles 0-75%). Ruler is strictly best due to 1 placement count." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 3, 
-            passiveDmg: 37.5, 
-            element: "Ice", 
-            dotDuration: 0 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 3,
+            passiveDmg: 37.5,
+            element: "Ice",
+            dotDuration: 0
         },
         upgrades: [
             { dmg: 120, spa: 6, range: 25, cost: 1500 },     // Up 0 (Base)
@@ -975,15 +975,15 @@ const unitDatabase = [
         totalCost: 69000,
         placement: 1, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Needs low SPA (High Speed) to maintain max 9 planes." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 3, 
-            passiveDmg: 0, 
-            element: "Light", 
-            dotDuration: 0 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 3,
+            passiveDmg: 0,
+            element: "Light",
+            dotDuration: 0
         },
         ability: {
             summonStats: {
@@ -1014,12 +1014,12 @@ const unitDatabase = [
         placement: 2, tags: [], placementType: "Hill",
         meta: { short: "Ruler", long: "Ruler", note: "Toggle Ability for Sniper Mode (Global Range)." },
         stats: {
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
             spaCap: 3.5,
-            element: "Fire", 
+            element: "Fire",
             dotDuration: 0,
             passiveDmg: 125, // Normal Mode: 2.25x Dmg
             passiveSpa: 0
@@ -1047,16 +1047,16 @@ const unitDatabase = [
         totalCost: 70185,
         placement: 1, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Ability activates Unleashed mode." },
-        stats: { 
-            crit: 15, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 3, 
-            passiveDmg: 30, 
-            passiveSpa: 5, 
-            element: "Light", 
-            dotDuration: 0 
+        stats: {
+            crit: 15,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 3,
+            passiveDmg: 30,
+            passiveSpa: 5,
+            element: "Light",
+            dotDuration: 0
         },
         ability: { dmg: 2445, spa: 8.5, range: 58, spaCap: 2 },
         upgrades: [
@@ -1081,11 +1081,11 @@ const unitDatabase = [
         meta: { short: "Ruler", long: "Ruler", note: "Imperfect Form base. Toggle for True Form available at Max Upgrade." },
         stats: {
             baseName: "Imperfect Form",
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
             spaCap: 4.1,
-            passiveDmg: 70, 
+            passiveDmg: 70,
             element: "Wind"
         },
         ability: {
@@ -1118,17 +1118,17 @@ const unitDatabase = [
         totalCost: 35115,
         placement: 3, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Eternal", note: "Toggle Boss Stacks for max damage." },
-        stats: { 
-            crit: 45, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 3, 
-            passiveDmg: 0, 
-            element: "Dark", 
-            dotDuration: 0, 
-            passiveSpa: 15, 
-            passiveRange: 15 
+        stats: {
+            crit: 45,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 3,
+            passiveDmg: 0,
+            element: "Dark",
+            dotDuration: 0,
+            passiveSpa: 15,
+            passiveRange: 15
         },
         ability: { passiveDmg: 150 },
         upgrades: [
@@ -1149,15 +1149,15 @@ const unitDatabase = [
         totalCost: 50250,
         placement: 2, tags: ["Saiyan"], placementType: "Hill",
         meta: { short: "Ruler", long: "Ruler", note: "Toggle Same Enemy for boss DPS calculation." },
-        stats: { 
-            crit: 10, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 4, 
-            passiveDmg: 25, 
-            element: "Light", 
-            dotDuration: 0 
+        stats: {
+            crit: 10,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 4,
+            passiveDmg: 25,
+            element: "Light",
+            dotDuration: 0
         },
         ability: {},
         upgrades: [
@@ -1179,15 +1179,15 @@ const unitDatabase = [
         totalCost: 41865,
         placement: 4, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Passive averages to +25% Damage." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 25, 
-            dotStacks: 1, 
-            spaCap: 2, 
-            passiveDmg: 45, 
-            element: "Water", 
-            dotDuration: 5 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 25,
+            dotStacks: 1,
+            spaCap: 2,
+            passiveDmg: 45,
+            element: "Water",
+            dotDuration: 5
         },
         upgrades: [
             { dmg: 85, spa: 7.5, range: 20, cost: 950 },    // Up 0 (Base)
@@ -1213,15 +1213,15 @@ const unitDatabase = [
             long: "Sacred/Fission",
             note: "God Of The Seas: +20% DoT/Affliction. Crit increases 5% per attack (Cap 30/50%). Double attack at cap."
         },
-        stats: { 
-            crit: 50, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 3.5, 
-            passiveDmg: 225, 
-            element: "Water", 
-            dotDuration: 0 
+        stats: {
+            crit: 50,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 3.5,
+            passiveDmg: 0,
+            element: "Water",
+            dotDuration: 0
         },
         ability: { buffDmg: 50, abilityName: "Primordial Wave", noToggle: true, cooldown: 60, desc: "Water God summons a Primordial Wave down The Path that deals 200% Damage to all Enemies on That Path." },
         passives: [
@@ -1245,8 +1245,6 @@ const unitDatabase = [
             "DoT and Affliction Time increased by 10%\n(God Of The Seas) (E4)",
             "+10 Stat Points (E5)",
             "+75% Damage per placement (E6)",
-            "+10 Stat Points (E7)",
-            "Final Evolution: God of the Seas (E8)"
         ]
     },
     {
@@ -1255,15 +1253,15 @@ const unitDatabase = [
         totalCost: 89500,
         placement: 1, tags: [], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", noz: "Attack Form: Demon art : Axe. Ruler is strictly best due to 1 placement count." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 120, 
-            dotStacks: 1, 
-            spaCap: 3, 
-            passiveDmg: 0, 
-            element: "Rose", 
-            dotDuration: 10 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 120,
+            dotStacks: 1,
+            spaCap: 3,
+            passiveDmg: 0,
+            element: "Rose",
+            dotDuration: 10
         },
         passives: [
             { name: "Guidance of the Original Monarch", desc: "Everytime First Emperor switches Demonic Arts, all Units in First Emperor's Range will perform an Attack. [On E6] Units Performing an Attack will gain 15% of First Emperor's Damage for 10 seconds." },
@@ -1311,15 +1309,15 @@ const unitDatabase = [
         placement: 2,
         tags: ["Divinity"], placementType: "Ground",
         meta: { short: "Ruler", long: "Ruler", note: "Divine Blood converts debuffs to buffs. Eldest Brother provides up to +90% Damage via Divinity tags." },
-        stats: { 
-            crit: 0, 
-            cdmg: 150, 
-            dot: 0, 
-            dotStacks: 1, 
-            spaCap: 4, 
-            passiveDmg: 90, 
-            passiveSpa: 15, 
-            element: "Wind" 
+        stats: {
+            crit: 0,
+            cdmg: 150,
+            dot: 0,
+            dotStacks: 1,
+            spaCap: 4,
+            passiveDmg: 90,
+            passiveSpa: 15,
+            element: "Wind"
         },
         passives: [
             { name: "Divine Blood", desc: "Whenever Underworld God receives a negative buff, he converts it into a positive buff. [On E4]: These buffs last indefinitely." },
@@ -1522,7 +1520,6 @@ const unitDatabase = [
             "\"Baal's Lightning\" Damage increased to 20%",
             "+10 Stat Points",
             "\"Rukh's Judgement\" Buffs increased by 15% each.",
-            "+10 Stat Points"
         ],
         upgrades: [
             { dmg: 280, spa: 10, range: 25, cost: 2800 }, // Up 0

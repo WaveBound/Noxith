@@ -115,7 +115,7 @@
 /* Unit Upgrades Toolbar */
 .upgrade-toolbar {
     padding: 8px 15px;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0, 0, 0, 0.4);
     border-bottom: 1px solid var(--card-border);
     display: flex;
     flex-wrap: wrap;
@@ -132,9 +132,9 @@
     line-height: 16px;
     font-weight: 900;
     cursor: pointer;
-    border: 1px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.03);
-    color: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.2);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: center;
     display: flex;
@@ -143,7 +143,7 @@
 }
 
 .e-pill:hover {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     color: #fff;
 }
 
@@ -160,10 +160,10 @@
     background: #10b981;
     border-color: #10b981;
     color: #000;
-    box-shadow: 
+    box-shadow:
         0 0 10px rgba(16, 185, 129, 0.4),
         0 0 20px rgba(16, 185, 129, 0.2),
-        inset 0 0 4px rgba(255,255,255,0.3);
+        inset 0 0 4px rgba(255, 255, 255, 0.3);
     transform: translateY(-1px) scale(1.02);
 }
 
@@ -178,10 +178,10 @@
     background: #eab308;
     border-color: #eab308;
     color: #000;
-    box-shadow: 
+    box-shadow:
         0 0 10px rgba(234, 179, 8, 0.5),
         0 0 20px rgba(234, 179, 8, 0.2),
-        inset 0 0 4px rgba(255,255,255,0.3);
+        inset 0 0 4px rgba(255, 255, 255, 0.3);
     transform: translateY(-1px) scale(1.02);
 }
 
@@ -300,8 +300,15 @@
 }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .search-select {
@@ -530,7 +537,8 @@
         max-width: 60%;
     }
 
-    .br-set, .br-trait {
+    .br-set,
+    .br-trait {
         font-size: 0.7rem !important;
         white-space: nowrap !important;
     }
@@ -571,10 +579,26 @@
     margin: 0 1px;
 }
 
+
+/* =========================================================
+   GRID LAYOUT FOR BUILD ROWS
+   Easily adjust the column widths using these 3 variables 
+   ========================================================= */
 .br-grid {
+    /* 1. Increase --col-main to push the sub-stats column further to the right */
+    --col-main: 1.4fr;
+
+    /* 2. Controls the width of the Sub-stats column */
+    --col-sub: 1.4fr;
+
+    /* 3. Controls the width of the DPS/Results column at the end */
+    --col-res: 0.6fr;
+
     display: grid;
-    grid-template-columns: 1fr 1.4fr 0.6fr;
-    gap: 8px;
+    grid-template-columns: var(--col-main) var(--col-sub) var(--col-res);
+
+    /* REMOVED GAP: this is what was causing the text to cut off early on the right */
+    gap: 0;
     padding: 4px 15px;
     position: relative;
     z-index: 1;
@@ -587,14 +611,17 @@
     min-width: 0;
 }
 
+/* Added right padding so the main stats don't hit the divider */
 .br-col.main {
-    flex: 1.15;
+    padding-right: 6px;
 }
 
 .br-col.sub {
-    flex: 1.25;
     border-left: 1px solid rgba(255, 255, 255, 0.05);
-    padding-left: 4px;
+    /* Reduced left padding from 8px down to 3px to move it closer to the left line */
+    padding-left: 3px;
+    /* Allows the text to get right up to the right line before clipping */
+    padding-right: 2px;
     position: relative;
 }
 
@@ -614,7 +641,8 @@
 .sub-list-btn {
     position: absolute;
     top: -3px;
-    right: 10px;
+    right: 5px;
+    /* Moved slightly to match the new padding */
 }
 
 .br-col-title {
@@ -632,7 +660,8 @@
     justify-content: center;
     align-items: flex-end;
     gap: 0;
-    padding: 2px 2px 4px 5px;
+    padding: 2px 2px 4px 6px;
+    /* 6px padding on the left to push text off the divider */
     border-left: 1px solid rgba(255, 255, 255, 0.05);
     min-width: auto;
     text-align: right;
@@ -995,8 +1024,8 @@
 
 .fs-item-lg {
     flex: 1;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 8px;
     padding: 2px 8px;
     display: flex;
@@ -1020,9 +1049,20 @@
     height: 14px;
 }
 
-.dmg-bg { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-.spa-bg { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-.range-bg { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+.dmg-bg {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+}
+
+.spa-bg {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
+
+.range-bg {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}
 
 .fs-val-group {
     display: flex;
@@ -1035,13 +1075,13 @@
 }
 
 .fs-val-prev {
-    color: rgba(255,255,255,0.25);
+    color: rgba(255, 255, 255, 0.25);
     font-weight: 500;
     font-size: 0.7rem;
 }
 
 .fs-arrow {
-    color: rgba(255,255,255,0.15);
+    color: rgba(255, 255, 255, 0.15);
     font-size: 0.6rem;
 }
 
@@ -1084,9 +1124,20 @@
     font-family: 'Consolas', monospace;
 }
 
-.val-crit { color: #fbbf24; text-shadow: 0 0 8px rgba(251, 191, 36, 0.2); }
-.val-cdmg { color: #c084fc; text-shadow: 0 0 8px rgba(192, 132, 252, 0.2); }
-.val-dot { color: #fb7185; text-shadow: 0 0 8px rgba(251, 113, 133, 0.2); }
+.val-crit {
+    color: #fbbf24;
+    text-shadow: 0 0 8px rgba(251, 191, 36, 0.2);
+}
+
+.val-cdmg {
+    color: #c084fc;
+    text-shadow: 0 0 8px rgba(192, 132, 252, 0.2);
+}
+
+.val-dot {
+    color: #fb7185;
+    text-shadow: 0 0 8px rgba(251, 113, 133, 0.2);
+}
 
 .unit-toolbar .bambi-label {
     border: 1px solid;
@@ -1404,21 +1455,11 @@
     color: #333;
 }
 
-/* --- ADDED: EXTENDED STATS & GRID FIXES --- */
-.br-grid {
-    display: grid;
-    grid-template-columns: 1fr 1.4fr 0.6fr;
-    gap: 8px;
-    padding: 4px 15px;
-    position: relative;
-    z-index: 1;
-}
-
 /* Stats Footer Overhaul */
 .br-full-stats {
     padding: 4px 15px 6px;
-    background: rgba(0,0,0,0.2);
-    border-top: 1px solid rgba(255,255,255,0.05);
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
     gap: 0;
@@ -1480,6 +1521,17 @@
     height: 12px;
 }
 
-.dmg-bg { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-.spa-bg { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-.range-bg { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+.dmg-bg {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+}
+
+.spa-bg {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
+
+.range-bg {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}

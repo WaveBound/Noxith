@@ -102,7 +102,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
         else if (optPct >= 80) { color = '#ffcc00'; glow = 'rgba(255, 204, 0, 0.15)'; }
         else { color = '#ff4d4d'; glow = 'rgba(255, 77, 77, 0.15)'; }
 
-        optimalityHtml = `<div class="optimality-badge" style="color: ${color}; border-color: ${color}66; --glow-color: ${glow};"><span class="opt-label" style="color: ${color}">OPTIMALITY</span><span class="opt-pct">${optPct.toFixed(1)}%</span></div>`;
+        optimalityHtml = `<div class="optimality-badge" style="color: ${color}; border-color: ${color}66; --glow-color: ${glow};"><span class="opt-label" style="color: ${color}">OPTIMALITY</span><span class="opt-pct">${fix1(optPct)}%</span></div>`;
     }
 
     const prioConfig = { 'spa': { label: 'SPA STAT', cls: 'prio-spa' }, 'range': { label: 'RANGE STAT', cls: 'prio-range' }, 'default': { label: 'DMG STAT', cls: 'prio-dmg' } };
@@ -133,7 +133,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     const mobileToggle = `<button class="mobile-stat-toggle" onclick="toggleRelicStatDisplay(this)"><span class="m-toggle-txt">Main</span><span class="m-toggle-txt">Sub</span></button>`;
 
     let displayVal = format(r.dps || 0), displayLabel = "DPS";
-    if (sortMode === 'range') { displayVal = (r.range || 0).toFixed(1); displayLabel = "RNG"; }
+    if (sortMode === 'range') { displayVal = fix1(r.range || 0); displayLabel = "RNG"; }
 
     return `
         <div class="build-row ${rankClass} ${sortMode === 'efficiency' ? 'is-efficiency-sort' : ''}">
@@ -163,35 +163,35 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
                     <div class="fs-col-header">CURRENT</div>
                     <div class="fs-col-header">${nextLevel > maxLevel ? 'STATUS' : 'NEXT UPGRADE'}</div>
 
-                    <div class="fs-item-lg dmg-row">
-                        <span class="fs-icon-box dmg-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.37 13.1c-.24-.24-.55-.37-.87-.37h-.5l-4.5 4.5v.5c0 .32.13.63.37.87l4.5 4.5c.48.48 1.26.48 1.74 0 .48-.48.48-1.26 0-1.74l-3.38-3.38 3.38-3.38c.48-.48.48-1.26 0-1.74l-.74-.75zM15 11l2 2-7.5 7.5-2-2L15 11zm-1.12-1.12l-1.38-1.38c-.39-.39-.39-1.02 0-1.41l2.12-2.12c.39-.39 1.02-.39 1.41 0l1.38 1.38c.39.39.39 1.02 0 1.41l-2.12 2.12c-.39.39-1.02.39-1.41 0z"/></svg></span>
+<div class="fs-item-lg dmg-row">
+                        <span class="fs-icon-box dmg-bg"><svg viewBox="0 0 290.226 290.226" fill="currentColor"><path d="M63.951,243.575c-1.945-3.578-4.401-6.907-7.363-9.869c-3.106-3.102-6.626-5.633-10.4-7.63 c-4.51-2.387-0.945-7.5-0.945-7.5c4.616-7.023,8.825-14.079,12.305-20.226l-23.363-23.344H11.504c-4.362,0-7.898-3.539-7.898-7.902 c0-4.361,3.536-7.9,7.898-7.9h25.947c2.1,0,4.107,0.832,5.588,2.312l85.379,85.291c1.483,1.483,2.315,3.495,2.315,5.589v26.073 c0,4.365-3.537,7.897-7.9,7.897c-4.367,0-7.904-3.531-7.904-7.897v-22.798l-23.27-23.24c-6.281,3.707-13.582,8.252-20.816,13.25 C70.842,245.679,66.698,248.629,63.951,243.575z"/><path d="M26.61,237.102c-7.106,0-13.784,2.764-18.812,7.784c-5.019,5.015-7.782,11.686-7.782,18.778 c0,7.097,2.764,13.762,7.782,18.776c5.027,5.016,11.706,7.783,18.812,7.785c7.102,0,13.781-2.77,18.804-7.785 c5.023-5.015,7.79-11.682,7.79-18.776c0-7.093-2.768-13.764-7.79-18.778C40.392,239.866,33.712,237.102,26.61,237.102z"/><path d="M100.985,182.318c-3.502,3.499-9.232,3.499-12.734,0.001l-8.81-8.801c-3.502-3.498-3.502-9.223,0-12.721L229.832,10.564 c3.502-3.498,10.401-6.727,15.33-7.175l36.862-3.352c4.93-0.448,8.596,3.218,8.148,8.148l-3.346,36.791 c-0.448,4.93-3.68,11.825-7.182,15.324l-150.4,150.251c-3.502,3.498-9.232,3.498-12.734,0l-8.822-8.813 c-3.502-3.498-3.502-9.223,0-12.722L233.608,63.213c1.854-1.848,1.856-4.852,0.003-6.702c-1.848-1.853-4.853-1.853-6.709-0.002 L100.985,182.318z"/></svg></span>
                         <span class="fs-val val-dmg">${format(r.dmgVal || 0)}</span>
                     </div>
                     <div class="fs-item-lg dmg-row">
-                        <span class="fs-icon-box dmg-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.37 13.1c-.24-.24-.55-.37-.87-.37h-.5l-4.5 4.5v.5c0 .32.13.63.37.87l4.5 4.5c.48.48 1.26.48 1.74 0 .48-.48.48-1.26 0-1.74l-3.38-3.38 3.38-3.38c.48-.48.48-1.26 0-1.74l-.74-.75zM15 11l2 2-7.5 7.5-2-2L15 11zm-1.12-1.12l-1.38-1.38c-.39-.39-.39-1.02 0-1.41l2.12-2.12c.39-.39 1.02-.39 1.41 0l1.38 1.38c.39.39.39 1.02 0 1.41l-2.12 2.12c-.39.39-1.02.39-1.41 0z"/></svg></span>
+                        <span class="fs-icon-box dmg-bg"><svg viewBox="0 0 290.226 290.226" fill="currentColor"><path d="M63.951,243.575c-1.945-3.578-4.401-6.907-7.363-9.869c-3.106-3.102-6.626-5.633-10.4-7.63 c-4.51-2.387-0.945-7.5-0.945-7.5c4.616-7.023,8.825-14.079,12.305-20.226l-23.363-23.344H11.504c-4.362,0-7.898-3.539-7.898-7.902 c0-4.361,3.536-7.9,7.898-7.9h25.947c2.1,0,4.107,0.832,5.588,2.312l85.379,85.291c1.483,1.483,2.315,3.495,2.315,5.589v26.073 c0,4.365-3.537,7.897-7.9,7.897c-4.367,0-7.904-3.531-7.904-7.897v-22.798l-23.27-23.24c-6.281,3.707-13.582,8.252-20.816,13.25 C70.842,245.679,66.698,248.629,63.951,243.575z"/><path d="M26.61,237.102c-7.106,0-13.784,2.764-18.812,7.784c-5.019,5.015-7.782,11.686-7.782,18.778 c0,7.097,2.764,13.762,7.782,18.776c5.027,5.016,11.706,7.783,18.812,7.785c7.102,0,13.781-2.77,18.804-7.785 c5.023-5.015,7.79-11.682,7.79-18.776c0-7.093-2.768-13.764-7.79-18.778C40.392,239.866,33.712,237.102,26.61,237.102z"/><path d="M100.985,182.318c-3.502,3.499-9.232,3.499-12.734,0.001l-8.81-8.801c-3.502-3.498-3.502-9.223,0-12.721L229.832,10.564 c3.502-3.498,10.401-6.727,15.33-7.175l36.862-3.352c4.93-0.448,8.596,3.218,8.148,8.148l-3.346,36.791 c-0.448,4.93-3.68,11.825-7.182,15.324l-150.4,150.251c-3.502,3.498-9.232,3.498-12.734,0l-8.822-8.813 c-3.502-3.498-3.502-9.223,0-12.722L233.608,63.213c1.854-1.848,1.856-4.852,0.003-6.702c-1.848-1.853-4.853-1.853-6.709-0.002 L100.985,182.318z"/></svg></span>
                         <span class="fs-val val-dmg">${nextLevel > maxLevel ? '<span style="color:#4ade80; font-weight: bold;">Maxed</span>' : format(nextStats.dmgVal)}</span>
                     </div>
 
                     <div class="fs-item-lg spa-row">
                         <span class="fs-icon-box spa-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2v6h.01L6 8.01 10 12l-4 4 .01.01H6V22h12v-5.99h-.01L18 16l-4-4 4-3.99-.01-.01H18V2H6zm10 14.5V20H8v-3.5l4-4 4 4zM12 11.5l-4-4V4h8v3.5l-4 4z"/></svg></span>
-                        <span class="fs-val val-spa">${(r.spa || 0).toFixed(2)}s</span>
+                        <span class="fs-val val-spa">${fix2(r.spa || 0)}s</span>
                     </div>
                     <div class="fs-item-lg spa-row">
                         <span class="fs-icon-box spa-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2v6h.01L6 8.01 10 12l-4 4 .01.01H6V22h12v-5.99h-.01L18 16l-4-4 4-3.99-.01-.01H18V2H6zm10 14.5V20H8v-3.5l4-4 4 4zM12 11.5l-4-4V4h8v3.5l-4 4z"/></svg></span>
-                        <span class="fs-val val-spa">${nextLevel > maxLevel ? '<span style="color:#4ade80; font-weight: bold;">Maxed</span>' : nextStats.spa.toFixed(2) + 's'}</span>
+                        <span class="fs-val val-spa">${nextLevel > maxLevel ? '<span style="color:#4ade80; font-weight: bold;">Maxed</span>' : fix2(nextStats.spa) + 's'}</span>
                     </div>
 
                     <div class="fs-item-lg range-row">
-                        <span class="fs-icon-box range-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 2C5.36 2 2 5.36 2 9.5c0 3.1 1.9 5.77 4.59 6.9l-.69 3.1c-.08.35.14.7.5.78.35.08.7-.14.78-.5l.69-3.1h3.25l.69 3.1c.08.35.43.58.78.5.35-.08.58-.43.5-.78l-.69-3.1c2.69-1.13 4.59-3.8 4.59-6.9C17 5.36 13.64 2 9.5 2zm0 13c-3.03 0-5.5-2.47-5.5-5.5S6.47 4 9.5 4 15 6.47 15 9.5 12.53 15 9.5 15z"/></svg></span>
-                        <span class="fs-val val-range">${(r.range || 0).toFixed(1)}</span>
+                        <span class="fs-icon-box range-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg></span>
+                        <span class="fs-val val-range">${fix1(r.range || 0)}</span>
                     </div>
                     <div class="fs-item-lg range-row">
-                        <span class="fs-icon-box range-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 2C5.36 2 2 5.36 2 9.5c0 3.1 1.9 5.77 4.59 6.9l-.69 3.1c-.08.35.14.7.5.78.35.08.7-.14.78-.5l.69-3.1h3.25l.69 3.1c.08.35.43.58.78.5.35-.08.58-.43.5-.78l-.69-3.1c2.69-1.13 4.59-3.8 4.59-6.9C17 5.36 13.64 2 9.5 2zm0 13c-3.03 0-5.5-2.47-5.5-5.5S6.47 4 9.5 4 15 6.47 15 9.5 12.53 15 9.5 15z"/></svg></span>
-                        <span class="fs-val val-range">${nextLevel > maxLevel ? '<span style="color:#4ade80; font-weight: bold;">Maxed</span>' : nextStats.range.toFixed(1)}</span>
+                        <span class="fs-icon-box range-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg></span>
+                        <span class="fs-val val-range">${nextLevel > maxLevel ? '<span style="color:#4ade80; font-weight: bold;">Maxed</span>' : fix1(nextStats.range)}</span>
                     </div>
                 </div>
                 <div class="fs-sub-row">
-                    <div class="fs-item-sm"><span class="fs-label">Crit %</span><span class="fs-val val-crit">${(s.finalCf || 0).toFixed(1)}%</span></div>
+                    <div class="fs-item-sm"><span class="fs-label">Crit %</span><span class="fs-val val-crit">${fix1(s.finalCf || 0)}%</span></div>
                     <div class="fs-item-sm"><span class="fs-label">CDmg</span><span class="fs-val val-cdmg">${(s.finalCm || 0).toFixed(0)}%</span></div>
                     <div class="fs-item-sm"><span class="fs-label">DoT Dmg</span><span class="fs-val val-dot">${format(r.dotTotal || 0)}</span></div>
                 </div>
@@ -204,13 +204,13 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     if (!card) return;
     const unitObj = unitDatabase.find(u => u.id === unitId);
     const currentUpgrade = (window.unitELevels && window.unitELevels[unitId]) || 0;
-    
+
     let unitCost = unitObj ? (unitObj.totalCost || 50000) : 50000;
-    
+
     // If upgrades have individual costs, accurately calculate cumulative cost
     if (unitObj && unitObj.upgrades && unitObj.upgrades.length > 0) {
         let placementCost = unitObj.upgrades[0].cost || 0;
-        
+
         if (currentUpgrade > 0) {
             let cumulative = placementCost;
             for (let i = 1; i <= currentUpgrade; i++) {
@@ -292,7 +292,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 // This ensures the list doesn't re-shuffle when clicking lower upgrades
                 const savedLevel = (window.unitELevels && window.unitELevels[unitId]) || 0;
                 const maxLevel = (unitObj && unitObj.upgrades) ? unitObj.upgrades.length - 1 : 0;
-                
+
                 if (savedLevel !== maxLevel) {
                     window.unitELevels[unitId] = maxLevel;
                     const maxMath = reconstructMathData(res);
@@ -313,7 +313,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 try {
                     // Temporarily set E-level to next to get stats
                     window.unitELevels = window.unitELevels || {};
-                    window.unitELevels[unitId] = savedLevel + 1; 
+                    window.unitELevels[unitId] = savedLevel + 1;
                     const nextMath = reconstructMathData(res);
                     if (nextMath) {
                         res.baseStats = {
@@ -631,17 +631,17 @@ function renderDatabase() {
                 ${(unit.upgrades && unit.upgrades.length > 0) ? `
                 <div class="upgrade-toolbar">
                     ${unit.upgrades.map((u, idx) => {
-                        const level = idx;
-                        const isActive = (window.unitELevels[unit.id] || 0) === level;
-                        const isUnlocked = (window.unitELevels[unit.id] || 0) >= level;
-                        
-                        const isSpecial = (idx === unit.upgrades.length - 1);
+                const level = idx;
+                const isActive = (window.unitELevels[unit.id] || 0) === level;
+                const isUnlocked = (window.unitELevels[unit.id] || 0) >= level;
 
-                        return `<div class="e-pill ${isActive ? 'active' : ''} ${isUnlocked && (window.unitELevels[unit.id] || 0) > 0 ? 'e-unlocked' : ''} ${isSpecial ? 'is-special' : 'is-stat'}" 
+                const isSpecial = (idx === unit.upgrades.length - 1);
+
+                return `<div class="e-pill ${isActive ? 'active' : ''} ${isUnlocked && (window.unitELevels[unit.id] || 0) > 0 ? 'e-unlocked' : ''} ${isSpecial ? 'is-special' : 'is-stat'}" 
                                      onclick="selectELevel('${unit.id}', ${level})" 
                                      data-level="${level}" 
                                      title="Upgrade ${level}">${level}</div>`;
-                    }).join('')}
+            }).join('')}
                 </div>` : ''}`;
 
             let mainContent = '';
