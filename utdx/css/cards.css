@@ -598,6 +598,12 @@
     position: relative;
 }
 
+@media (min-width: 769px) {
+    .br-col.sub .sl-label {
+        display: none;
+    }
+}
+
 .br-col-header {
     display: flex;
     justify-content: space-between;
