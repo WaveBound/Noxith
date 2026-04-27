@@ -1082,6 +1082,6 @@ const unitDatabase = [
 ];
 
 const creditsData = [
-    { role: "Owner", name: "xKing.", id: "xking.", userId: "347578773857632258", pfp: "images/pfp/xking.png", type: "owner" },
-    { role: "Helper", name: "xAuroraFlare", id: "xauroraflare", userId: "216293393888837632", pfp: "images/pfp/xauroraflare.gif", type: "helper" }
+    { role: "Owner", name: "xKing.", id: "xking.", userId: "347578773857632258", pfp: "../pfp/xking.png", type: "owner" },
+    { role: "Helper", name: "xAuroraFlare", id: "xauroraflare", userId: "216293393888837632", pfp: "../pfp/xauroraflare.gif", type: "helper" }
 ];
