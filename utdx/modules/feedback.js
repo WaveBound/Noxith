@@ -2,7 +2,7 @@
 // FEEDBACK.JS - Handling Suggestions & Bug Reports
 // ============================================================================
 
-const WORKER_URL = "https://suggestion-bugreport.wavebound.workers.dev"; // User to replace this
+const WORKER_URL = "https://webhook.wavebound.workers.dev/"; // User to replace this
 
 const openFeedbackModal = () => {
     toggleModal('feedbackModal', true);
