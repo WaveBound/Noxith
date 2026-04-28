@@ -91,7 +91,7 @@ const updateBodyClass = (className, isChecked) => {
 window.getActiveDbFilename = () => {
     const parts = [];
     if (window.mikuBuffActive) parts.push('miku');
-    if (window.enlightenedGodBuffActive) parts.push('enlightened');
+    if (window.waterGodBuffActive) parts.push('watergod');
     if (window.bijuuLinkActive) parts.push('bijuu');
     if (window.ancientMageSupportActive) parts.push('amage');
     if (window.kingSailorBuffActive || window.kingSailorMarkActive) parts.push('ksailor');
@@ -338,15 +338,15 @@ window.toggleAncientMageSupport = (checkbox) => {
     window.triggerGlobalBuffUpdate();
 };
 
-// Add a global state for Enlightened God buff
-window.enlightenedGodBuffActive = false;
+// Add a global state for Water God buff
+window.waterGodBuffActive = false;
 
-// Toggle Enlightened God Buff
-window.toggleEnlightenedGodBuff = (checkbox) => {
+// Toggle Water God Buff
+window.toggleWaterGodBuff = (checkbox) => {
     const isChecked = checkbox.checked;
-    if (window.enlightenedGodBuffActive === isChecked) return;
+    if (window.waterGodBuffActive === isChecked) return;
 
-    window.enlightenedGodBuffActive = isChecked;
+    window.waterGodBuffActive = isChecked;
 
     const updateVisuals = (lbl, checked) => {
         if (!lbl) return;
@@ -362,7 +362,7 @@ window.toggleEnlightenedGodBuff = (checkbox) => {
     const label = checkbox.closest('.nav-toggle-label');
     updateVisuals(label, isChecked);
 
-    const otherId = checkbox.id === 'globalEnlightenedBuff' ? 'guideEnlightenedBuff' : 'globalEnlightenedBuff';
+    const otherId = checkbox.id === 'globalWaterGodBuff' ? 'guideWaterGodBuff' : 'globalWaterGodBuff';
     const otherCheckbox = document.getElementById(otherId);
     if (otherCheckbox) {
         otherCheckbox.checked = isChecked;

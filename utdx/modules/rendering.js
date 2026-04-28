@@ -934,8 +934,8 @@ function openTraitBestList(unitId) {
     if (window.mikuBuffActive) {
         tagsHtml += `<span style="background: rgba(74, 222, 128, 0.2); color: #4ade80; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(74, 222, 128, 0.3);">Miku Buff ON</span>`;
     }
-    if (window.enlightenedGodBuffActive) {
-        tagsHtml += `<span style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(251, 191, 36, 0.3);">Enlightened God ON</span>`;
+    if (window.waterGodBuffActive) {
+        tagsHtml += `<span style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(251, 191, 36, 0.3);">Water God ON</span>`;
     }
     if (window.mageHillBuffActive) {
         tagsHtml += `<span style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(251, 146, 60, 0.3);">Fern (Hill) ON</span>`;

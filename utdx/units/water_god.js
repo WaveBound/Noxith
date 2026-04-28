@@ -1,6 +1,6 @@
 unitDatabase.push({
     id: "water_god",
-    name: "Enlightened God",
+    name: "Water God",
     img: "images/units/WaterGod.png",
     placement: 3,
     placementType: "Ground",
