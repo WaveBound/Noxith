@@ -80,8 +80,8 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
 
     // --- APPLY UPGRADE STATS (Dmg/Spa/Range) ---
     // Use the forced level if provided, otherwise the selected level from window.unitELevels, else default to MAX
-    const upgradeLevel = (forcedLevel !== undefined) ? forcedLevel : ((window.unitELevels && window.unitELevels[unit.id] !== undefined) 
-        ? window.unitELevels[unit.id] 
+    const upgradeLevel = (forcedLevel !== undefined) ? forcedLevel : ((window.unitELevels && window.unitELevels[unit.id] !== undefined)
+        ? window.unitELevels[unit.id]
         : ((unit.upgrades && unit.upgrades.length > 0) ? unit.upgrades.length - 1 : 0));
 
     if (unit.upgrades && unit.upgrades[upgradeLevel]) {
