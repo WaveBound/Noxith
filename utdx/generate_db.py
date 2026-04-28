@@ -312,7 +312,8 @@ if (isMainThread) {
 
     // THE HIGH-SPEED RUNNER: Maps templates through calculateDPS instantly
     function fastCalculateUnitBuilds(unit, cfg, traitsForCalc, isAbility) {
-        const { effectiveStats, isKiritoVR, suffix } = buildCalculationContext(unit, 'ruler', { isAbility });
+        const upgradeLevel = (unit.upgrades && unit.upgrades.length > 0) ? unit.upgrades.length - 1 : 0;
+        const { effectiveStats, isKiritoVR, suffix } = buildCalculationContext(unit, 'ruler', { isAbility, upgradeLevel });
         const hasNativeDoT = (effectiveStats.dot > 0) || (effectiveStats.burnMultiplier > 0) || isKiritoVR;
 
         const allowedHeads = cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head'] : ['none'];
@@ -483,6 +484,9 @@ def run_combo(args):
     }
     out_name = get_db_name(combo)
     out_path = os.path.join("utdx", "databases", out_name)
+    # If utdx/databases doesn't exist relative to CWD but databases/ does (we are likely inside utdx), adjust
+    if not os.path.exists(os.path.dirname(out_path)) and os.path.exists("databases"):
+        out_path = os.path.join("databases", out_name)
     start_t = time.time()
 
     process = subprocess.run(
@@ -508,12 +512,34 @@ def main():
     for filename in REQUIRED_FILES:
         file_path = filename
         if not os.path.exists(file_path):
-            file_path = os.path.basename(filename)
-            if not os.path.exists(file_path):
-                print(f"❌ Error: Cannot find required file '{filename}' or '{file_path}'.")
+            # Try stripping 'utdx/' if we are already inside the utdx directory
+            if filename.startswith("utdx/"):
+                alt_path = filename[5:]
+                if os.path.exists(alt_path):
+                    file_path = alt_path
+                else:
+                    print(f"❌ Error: Cannot find required file '{filename}' or '{alt_path}'.")
+                    sys.exit(1)
+            else:
+                print(f"❌ Error: Cannot find required file '{filename}'.")
                 sys.exit(1)
+        
         with open(file_path, "r", encoding="utf-8") as f:
             combined_js += f.read() + "\n"
+            
+    # Dynamically load all unit files from the units/ directory
+    units_dir = 'units'
+    if not os.path.exists(units_dir):
+        units_dir = os.path.join('utdx', 'units')
+        
+    if os.path.exists(units_dir):
+        print(f"📥 Loading unit files from {units_dir}...")
+        for u_file in sorted(os.listdir(units_dir)):
+            if u_file.endswith('.js'):
+                with open(os.path.join(units_dir, u_file), "r", encoding="utf-8") as f:
+                    combined_js += f.read() + "\n"
+    else:
+        print("⚠️ Warning: 'units' directory not found. No units loaded.")
 
     combined_js += GENERATOR_SCRIPT
     temp_runner = "db_runner.js"
@@ -542,7 +568,11 @@ def main():
     MAX_PARALLEL = 4
 
     print(f"\n🚀 Initiating build for {total_runs} combinations ({MAX_PARALLEL} parallel)...")
-    os.makedirs(os.path.join("utdx", "databases"), exist_ok=True)
+    # Ensure output directory exists
+    db_dir = os.path.join("utdx", "databases")
+    if not os.path.exists("utdx") and os.path.exists("modules"): # We are likely inside utdx
+        db_dir = "databases"
+    os.makedirs(db_dir, exist_ok=True)
 
     overall_start = time.time()
     args_list = [(i, combo, total_runs, temp_runner) for i, combo in enumerate(combinations)]

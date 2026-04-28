@@ -89,7 +89,17 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     const nextLevel = currentLevel + 1;
     const unitObj = unitDatabase ? unitDatabase.find(u => u.id === unitId) : null;
     const maxLevel = (unitObj && unitObj.upgrades) ? unitObj.upgrades.length - 1 : 0;
-    const nextStats = r.baseStats || { dmgVal: 0, spa: 0, range: 0 };
+    let nextStats = { dmgVal: 0, spa: 0, range: 0 };
+    if (nextLevel <= maxLevel) {
+        try {
+            const nextMath = reconstructMathData(r, nextLevel);
+            if (nextMath) {
+                nextStats.dmgVal = nextMath.dmgVal;
+                nextStats.spa = nextMath.spa;
+                nextStats.range = nextMath.range;
+            }
+        } catch (e) { console.warn("Next Stats Error", e); }
+    }
 
     let rankClass = (i < 3 ? `rank-${i + 1}` : 'rank-other') + (r.isCustom ? ' is-custom' : '');
     const effScore = calculateBuildEfficiency(r, totalCost, placement, unitId).toFixed(3);

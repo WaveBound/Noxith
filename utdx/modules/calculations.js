@@ -62,7 +62,7 @@ const getSetFast = (name) => {
  * @param {Object} options - Config options { isAbility, mode, points... }
  */
 function buildCalculationContext(unit, traitIdent, options = {}) {
-    const { isAbility = false, mode = 'fixed', dmgPoints = 99, spaPoints = 0, rangePoints = 0, wave = 25, isBoss = false, headPiece = 'none', starMult = 1, rankData = null } = options;
+    const { isAbility = false, mode = 'fixed', dmgPoints = 99, spaPoints = 0, rangePoints = 0, wave = 25, isBoss = false, headPiece = 'none', starMult = 1, rankData = null, upgradeLevel: forcedLevel } = options;
     let traitObj = null;
 
     if (typeof traitIdent === 'object') traitObj = traitIdent;
@@ -79,8 +79,10 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     if (isAbility && unit.ability && unit.ability.limitPlace) actualPlacement = Math.min(actualPlacement, unit.ability.limitPlace);
 
     // --- APPLY UPGRADE STATS (Dmg/Spa/Range) ---
-    // Math always uses max stats; e-levels are purely visual
-    const upgradeLevel = (unit.upgrades && unit.upgrades.length > 0) ? unit.upgrades.length - 1 : 0;
+    // Use the forced level if provided, otherwise the selected level from window.unitELevels, else default to MAX
+    const upgradeLevel = (forcedLevel !== undefined) ? forcedLevel : ((window.unitELevels && window.unitELevels[unit.id] !== undefined) 
+        ? window.unitELevels[unit.id] 
+        : ((unit.upgrades && unit.upgrades.length > 0) ? unit.upgrades.length - 1 : 0));
 
     if (unit.upgrades && unit.upgrades[upgradeLevel]) {
         const upStats = unit.upgrades[upgradeLevel];
@@ -381,7 +383,7 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
     return unitResults;
 }
 
-function reconstructMathData(liteData) {
+function reconstructMathData(liteData, forcedUpgradeLevel = undefined) {
     if (!liteData || !liteData.id) throw new Error("Invalid data for reconstruction");
 
     const unitId = liteData.id.split('-')[0];
@@ -416,7 +418,8 @@ function reconstructMathData(liteData) {
         dmgPoints: dmgPts,
         spaPoints: spaPts,
         rangePoints: rangePts,
-        headPiece: liteData.headUsed || (liteData.subStats && liteData.subStats.selectedHead) || 'none'
+        headPiece: liteData.headUsed || (liteData.subStats && liteData.subStats.selectedHead) || 'none',
+        upgradeLevel: forcedUpgradeLevel
     });
 
     // Set Entry
