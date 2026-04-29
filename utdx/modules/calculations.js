@@ -136,7 +136,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     if (unit.id === 'kirito') { if (kiritoState.realm) suffix += '-VR'; if (kiritoState.card) suffix += '-CARD'; }
     const modeTag = (mode === 'bugged') ? '-b-' : '-f-';
 
-    const context = { dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: isKiritoVR, headPiece, starMult, rankData, isAbility, maxPts };
+    const context = { dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: isKiritoVR, headPiece, starMult, rankData, isAbility, maxPts, upgradeLevel };
     return { effectiveStats, traitObj, context, isKiritoVR, suffix, modeTag };
 }
 

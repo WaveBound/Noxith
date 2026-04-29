@@ -28,6 +28,16 @@ const SUB_NAMES = {
 
 const patchNotesData = [
     {
+        version: "v5.1",
+        date: "Apr 29, 2026",
+        changes: [
+            { type: "Relics", text: "<b>New Sets:</b> Added <b>Sorcerer Hunter</b> (+15% True Damage) and <b>Strongest Sorcerer</b> sets." },
+            { type: "Relics", text: "<b>New Heads:</b> Added <b>Sorcerer Hunter Spirit</b> (Disables Crits, +60% Dmg) and <b>Strongest Glasses</b>." },
+            { type: "Math", text: "<b>King Sailor:</b> Implemented custom <b>Baal's Lightning</b> math (5 ticks of 20% damage with crit support)." },
+            { type: "UI", text: "<b>Renaming:</b> Renamed 'Enlightened God' to <b>Water God</b> consistently across the app." }
+        ]
+    },
+    {
         version: "v5.0",
         date: "Apr 25, 2026",
         changes: [
@@ -285,6 +295,8 @@ const setBonuses = {
     rebellious_set: { dmg: 0, spa: 0, cf: 0, cm: 0, range: 0 },
     reanimated_ninja: { dmg: 10, spa: 0, cf: 0, cm: 0, range: 0, dot: 30 },
     great_mage: { dmg: 0, spa: 0, cf: 0, cm: 0, range: 10 },
+    sorcerer_hunter: { dmg: 10, spa: 7.5, cf: 0, cm: 0, range: 0 },
+    strongest_sorcerer: { dmg: 10, spa: 0, cf: 0, cm: 0, range: 5 },
     none: { dmg: 0, spa: 0, cf: 0, cm: 0, range: 0 }
 };
 
@@ -309,7 +321,9 @@ const SETS = [
     { id: "biju_set", name: "Biju Set", bonus: { dmg: 10 } },
     { id: "rebellious_set", name: "Rebellious Shinobi", bonus: { dmg: 0 } },
     { id: "reanimated_ninja", name: "Reanimated Ninja", bonus: { dmg: 10, dot: 30 } },
-    { id: "great_mage", name: "Great Mage", bonus: { range: 10 } }
+    { id: "great_mage", name: "Great Mage", bonus: { range: 10 } },
+    { id: "sorcerer_hunter", name: "Sorcerer Hunter", bonus: { dmg: 10, spa: 7.5 } },
+    { id: "strongest_sorcerer", name: "Strongest Sorcerer", bonus: { dmg: 10, range: 5 } }
 ];
 
 const globalBuilds = SETS.flatMap(set =>

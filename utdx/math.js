@@ -278,6 +278,12 @@ function _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats) {
         if (isMage) {
             headDmgBuff = 24; headCalc.type = 'great_mage';
         }
+    } else if (headPiece === 'sorcerer_hunter_spirit') {
+        headDmgBuff = 60; headCalc.type = 'sorcerer_hunter';
+        headCalc.noCrits = true;
+    } else if (headPiece === 'strongest_sorcerer_glasses') {
+        headDmgBuff = 0; headCalc.type = 'strongest_sorcerer';
+        // Future: add timestop enemy count context here
     }
     return { headDmgBuff, headDotBuff, headCalc };
 }
@@ -444,7 +450,9 @@ function calculateDPS(uStats, relicStats, context) {
     const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1);
 
     const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + amCritDmg + ksCdmg;
-    const finalCritRate = Math.min(uStats.crit + traitCritRate + amCritRate + ksCrit + mageGroundCrit + ((uStats.id === 'kirito') ? 0 : (baseR_Cf + (sBonus.cf || 0))), 100);
+    let finalCritRate = Math.min(uStats.crit + traitCritRate + amCritRate + ksCrit + mageGroundCrit + ((uStats.id === 'kirito') ? 0 : (baseR_Cf + (sBonus.cf || 0))), 100);
+    if (headPiece === 'sorcerer_hunter_spirit') finalCritRate = 0;
+
     const avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
     const avgHit = finalDmg * avgCritMult;
 
@@ -524,7 +532,25 @@ function calculateDPS(uStats, relicStats, context) {
             extra: 1,
             attacksNeeded: 1,
             mult: attackMultiplier,
-            label: `Enlightened God Follow-up (${effectiveSpaCap}s window)`
+            label: `Water God Follow-up (${effectiveSpaCap}s window)`
+        };
+    } else if (uStats.id === 'king_sailor') {
+        // Baal's Lightning: 5 ticks of 20% damage each.
+        const tickCount = 5;
+        const tickDmg = 0.20;
+        
+        attackMultiplier = 1 + (tickCount * tickDmg);
+        
+        extraAttacksData = {
+            req: "Baal's Lightning",
+            hits: `1 + ${tickCount} Ticks`,
+            extra: tickCount * tickDmg,
+            attacksNeeded: 1,
+            mult: attackMultiplier,
+            label: "Chain Lightning",
+            tickDmgVal: finalDmg * tickDmg,
+            avgTick: (finalDmg * tickDmg) * avgCritMult,
+            totalChain: (finalDmg * tickDmg * tickCount) * avgCritMult
         };
     } else if (uStats.followUp) {
         attackMultiplier = 1 + (uStats.followUp / 100);
@@ -545,8 +571,14 @@ function calculateDPS(uStats, relicStats, context) {
         }
     }
 
-
-    const hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
+    let hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
+    
+    // Sorcerer Hunter Set Perk: 1.15x True Damage (Multiplicative after everything, excluding DoT/Summon)
+    let trueDmgMult = 1;
+    if (relicStats.set === 'sorcerer_hunter') {
+        trueDmgMult = 1.15;
+    }
+    const finalHitDps = hitDpsTotal * trueDmgMult;
 
     // Nutaru E4: Clones gain +25% Damage in Beast Mode
     const summonDmgBase = (uStats.id === 'nutaru_beast' && isAbility) ? finalDmg * 1.25 : finalDmg;
@@ -559,8 +591,10 @@ function calculateDPS(uStats, relicStats, context) {
     const finalSummonDps = summonDpsTotal;
 
     return {
-        total: (hitDpsTotal + finalDotDps + finalSummonDps),
-        hit: hitDpsTotal,
+        total: (finalHitDps + finalDotDps + finalSummonDps),
+        hit: finalHitDps,
+        baseHitDps: hitDpsTotal,
+        trueDmgMult,
         dot: finalDotDps,
         summon: finalSummonDps,
         summonData,

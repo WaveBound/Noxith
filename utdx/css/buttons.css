@@ -70,19 +70,19 @@
 
 .info-btn {
     position: relative;
-    width: 16px;
-    height: 16px;
-    font-size: 0.65rem;
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid #555;
-    color: #aaa;
+    background: #1a1d26;
+    border: 1px solid #333;
+    color: #ccc;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10;
-    transition: background 0.15s, color 0.15s;
+    transition: all 0.2s ease;
     line-height: 1;
     font-family: serif;
     font-style: italic;
@@ -90,9 +90,10 @@
 }
 
 .info-btn:hover {
-    background: var(--accent-start);
+    background: #3b82f6;
     color: #fff;
-    border-color: var(--accent-start);
+    border-color: #60a5fa;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
 }
 
 .sub-list-btn {

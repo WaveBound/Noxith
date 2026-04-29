@@ -4,20 +4,178 @@
     left: 50%;
     transform: translateX(-50%);
     background: #0a0b0e;
-    /* Non-transparent solid color */
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 20px;
-    padding: 16px;
+    border-radius: 24px;
+    padding: 0;
     display: flex;
-    gap: 16px;
+    align-items: stretch;
+    gap: 0;
     z-index: 2000;
     box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 820px;
+    overflow: visible;
+}
+
+.hotbar-left-wrapper {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 10px;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.02);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    width: 155px;
+    justify-content: center;
+    border-radius: 24px 0 0 24px;
+}
+
+.hotbar-stats-box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 6px 8px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hotbar-stat-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 4px;
+    /* Reduced gap */
+}
+
+.stat-label {
+    font-size: 8px;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    text-transform: uppercase;
+}
+
+.stat-value-box {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(248, 113, 113, 0.1);
+    padding: 3px 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(248, 113, 113, 0.2);
+    min-width: 62px;
+    justify-content: flex-start;
+}
+
+.stat-value-box span {
+    font-size: 10px;
+    font-weight: 900;
+    color: #fff;
+    flex: 1;
+    text-align: right;
+}
+
+.dps-value-box {
+    background: rgba(96, 165, 250, 0.1);
+    border-color: rgba(96, 165, 250, 0.2);
+}
+
+/* Fusion Active Badge State */
+.fusion-badge.fused-active {
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    border-color: rgba(34, 197, 94, 0.6) !important;
+    color: #fff !important;
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
+    animation: none;
+}
+
+.fusion-badge.fused-active:hover {
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 0 18px rgba(34, 197, 94, 0.7);
+}
+
+.hotbar-stats-box.fusion-active {
+    border-color: rgba(34, 197, 94, 0.3);
+    box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.06);
+}
+
+/* Fused slot glow */
+.fused-slot.fusion-glow {
+    border-color: rgba(34, 197, 94, 0.4) !important;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.2) !important;
+}
+
+/* FUSE / UNFUSE Button in Modal */
+.fusion-toggle-btn {
+    position: absolute;
+    bottom: -65px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    padding: 8px 32px;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+    z-index: 25;
+}
+
+.fusion-btn-fuse {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
+}
+
+.fusion-btn-fuse:hover {
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 6px 25px rgba(34, 197, 94, 0.6);
+}
+
+.fusion-btn-unfuse {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+}
+
+.fusion-btn-unfuse:hover {
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 6px 25px rgba(239, 68, 68, 0.6);
+}
+
+
+.hotbar-center-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    position: relative;
+    padding: 0 20px;
+}
+
+
+
+.hotbar-slots-wrapper {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5px;
+    /* Centered in the shorter hotbar */
 }
 
 .hotbar-slot {
-    width: 80px;
-    height: 80px;
+    width: 74px;
+    height: 74px;
     background: #15171e;
     border: 2px solid rgba(255, 255, 255, 0.05);
     border-radius: 14px;
@@ -65,9 +223,9 @@
     position: absolute;
     top: -6px;
     right: -6px;
-    width: 20px;
+    width: 18px;
     /* Slightly smaller */
-    height: 20px;
+    height: 18px;
     /* Slightly smaller */
     background: #ff3e3e;
     color: white;
@@ -75,7 +233,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 900;
     font-family: Arial, sans-serif;
     line-height: 1;
@@ -101,9 +259,9 @@
     transform: translateX(-50%);
     background: #1a1d26;
     color: rgba(255, 255, 255, 0.5);
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 800;
-    padding: 2px 8px;
+    padding: 1px 6px;
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 5;
@@ -123,11 +281,17 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-left: 12px;
+    padding: 12px 10px;
+    background: rgba(255, 255, 255, 0.02);
     border-left: 1px solid rgba(255, 255, 255, 0.1);
-    padding-left: 16px;
     justify-content: center;
+    width: 120px;
+    /* Narrower to prevent overextension */
+    box-sizing: border-box;
+    border-radius: 0 24px 24px 0;
 }
+
+
 
 .hotbar-extra-container {
     position: relative;
@@ -138,15 +302,15 @@
 .hotbar-extra-btn {
     border: none;
     color: white;
-    padding: 8px 16px;
+    padding: 6px 12px;
     border-radius: 8px;
     font-weight: 800;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     cursor: pointer;
     transition: all 0.2s ease;
     text-transform: uppercase;
     letter-spacing: 1px;
-    width: 100px;
+    width: 90px;
 }
 
 .farms-btn {
@@ -191,7 +355,8 @@
     transform: translateY(10px);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-    z-index: 2100;
+    z-index: 2300;
+    /* Higher than buff bar (2200) */
 }
 
 .hotbar-extra-menu.active {
@@ -266,7 +431,7 @@
     color: white;
     font-size: 8px;
     font-weight: 900;
-    padding: 2px 6px;
+    padding: 1px 4px;
     border-radius: 4px;
     letter-spacing: 1px;
     z-index: 15;
@@ -364,17 +529,17 @@
 
 .fusion-stats-box-full-build {
     position: absolute;
-    bottom: 6px;
+    bottom: -5px;
     left: 50%;
     transform: translateX(-50%);
-    width: 308px;
+    width: 313px;
     background: #0a0a0c;
-    border-radius: 10px;
-    padding: 10px;
+    border-radius: 12px;
+    padding: 0;
     border: none;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0;
     z-index: 20;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8);
 }
@@ -548,4 +713,31 @@
         font-size: 6px;
         bottom: -6px;
     }
+}
+
+
+
+
+
+.hotbar-info-btn {
+    background: #6366f1 !important;
+    border-color: #818cf8 !important;
+    text-transform: uppercase;
+    font-size: 9px !important;
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 1px;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    box-shadow: none !important;
+    width: 100%;
+    cursor: pointer;
+    color: #fff;
+    border: 1px solid transparent;
+    margin-top: 0;
+}
+
+.hotbar-info-btn:hover {
+    background: #4f46e5 !important;
+    transform: translateY(-1px);
 }

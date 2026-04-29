@@ -3,25 +3,25 @@
 // ============================================================================
 
 function initApp() {
-    // 1. Inject Buff Buttons Efficiently via DocumentFragment batching
+    // 1. Initialize Hotbar
+    if (typeof ENABLE_HOTBAR !== 'undefined' && ENABLE_HOTBAR && typeof initHotbar === 'function') {
+        initHotbar();
+    }
+
+    // 2. Inject Buff Buttons Efficiently via DocumentFragment batching
     injectBuffButtons();
 
-    // 2. Render Content
+    // 3. Render Content
     if (typeof renderCredits === 'function') {
         renderCredits();
     }
 
-    // 3. Initialize Database
+    // 4. Initialize Database
     renderDatabase();
 
-    // 4. Initialize Inventory
+    // 5. Initialize Inventory
     if (typeof initInventory === 'function') {
         initInventory();
-    }
-
-    // 5. Initialize Hotbar
-    if (typeof ENABLE_HOTBAR !== 'undefined' && ENABLE_HOTBAR && typeof initHotbar === 'function') {
-        initHotbar();
     }
 
 
@@ -89,7 +89,7 @@ function injectBuffButtons() {
 
     const buffs = [
         { id: 'MikuBuff', text: 'Miku Buff', title: "Apply Miku's +100% Damage Buff", fn: 'toggleMikuBuff' },
-        { id: 'WaterGodBuff', text: 'Enlightened God', title: "Apply Enlightened God's +20% Dmg, -20% SPA, +20% Range Buff", fn: 'toggleWaterGodBuff' },
+        { id: 'WaterGodBuff', text: 'Water God', title: "Apply Water God's +20% Dmg, -20% SPA, +20% Range Buff", fn: 'toggleWaterGodBuff' },
         { id: 'BijuuBuff', text: 'Bijuu Link', title: "Apply Bijuu Link: +25% Dmg, +25% Range, -15% SPA", fn: 'toggleBijuuLink' },
         { id: 'AMSupport', text: 'Ancient Mage', title: "Apply Ancient Mage Buff: +20% Crit Rate/Dmg", fn: 'toggleAncientMageSupport' },
         { id: 'KSBuff', text: 'King Sailor', title: "Apply King Sailor Buff: +10% Crit Rate, +20% Crit Damage", fn: 'toggleKingSailorBuff' },
@@ -97,8 +97,8 @@ function injectBuffButtons() {
         { id: 'MageGroundBuff', text: 'Fern(Ground)', title: "Apply Fern (Ground) Buff: +45% Crit Rate (Ground Only)", fn: 'toggleMageGroundBuff' }
     ];
 
-    const createBtn = (buff, isGlobal) => {
-        const fullId = (isGlobal ? 'global' : 'guide') + buff.id;
+    const createBtn = (buff, prefix) => {
+        const fullId = prefix + buff.id;
         const label = document.createElement('label');
         label.className = 'nav-toggle-label miku-btn-label';
         label.setAttribute('for', fullId);
@@ -108,17 +108,24 @@ function injectBuffButtons() {
         label.innerHTML = `<div class="toggle-wrapper" style="gap: 6px;"><input type="checkbox" id="${fullId}" style="cursor: pointer;"><div class="mini-switch"></div><span${buff.id === 'MikuBuff' ? '' : ' style="white-space: nowrap;"'}>${buff.text}</span></div>`;
 
         const input = label.querySelector('input');
-        input.addEventListener('change', function () { if (typeof window[buff.fn] === 'function') window[buff.fn](this); });
+        input.addEventListener('change', function () { 
+            // Sync all inputs for this buff id
+            const allInputs = document.querySelectorAll(`input[id$="${buff.id}"]`);
+            allInputs.forEach(inp => {
+                if (inp !== this) inp.checked = this.checked;
+            });
+            if (typeof window[buff.fn] === 'function') window[buff.fn](this); 
+        });
 
         return label;
     };
 
-    const insertBatch = (containerId, targetId, isGlobal) => {
+    const insertBatch = (containerId, targetId, prefix) => {
         const container = document.getElementById(containerId);
         if (!container) return;
 
         const frag = document.createDocumentFragment();
-        buffs.forEach(buff => frag.appendChild(createBtn(buff, isGlobal)));
+        buffs.forEach(buff => frag.appendChild(createBtn(buff, prefix)));
 
         const target = document.getElementById(targetId);
         if (target) {
@@ -131,5 +138,6 @@ function injectBuffButtons() {
         container.appendChild(frag);
     };
 
-    insertBatch('dbInjector', 'invModeToggle', true);
+    insertBatch('dbInjector', 'invModeToggle', 'global');
+    insertBatch('hotbar-buffs-container', null, 'hotbar');
 }

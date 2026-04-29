@@ -424,7 +424,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                 ? [...(typeof customTraits !== 'undefined' ? customTraits : []), ...(unitSpecificTraits[unit.id] || [])]
                 : null;
 
-            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
+            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
 
             if (dynamicResults.length > 0) {
                 const seen = new Set(calculatedResults.map(r => r.id));
@@ -578,6 +578,8 @@ function renderDatabase() {
                                 <option value="Rebellious Shinobi">Sets: Rebellious</option>
                                 <option value="Reanimated Ninja">Sets: Reanimated</option>
                                 <option value="Great Mage">Sets: Great Mage</option>
+                                <option value="Sorcerer Hunter">Sets: S. Hunter</option>
+                                <option value="Strongest Sorcerer">Sets: Strongest</option>
                             </select>
                             <select onchange="filterList(this)" data-filter="head" class="search-select">
                                 <option value="all">Heads: All</option>
@@ -590,6 +592,8 @@ function renderDatabase() {
                                 <option value="rebellious_head">Heads: Rebellious</option>
                                 <option value="reanimated_head">Heads: Reanimated</option>
                                 <option value="mage_head">Heads: Great Mage</option>
+                                <option value="sorcerer_hunter_spirit">Heads: S. Hunter Spirit</option>
+                                <option value="strongest_sorcerer_glasses">Heads: Strongest Glasses</option>
                                 <option value="none">Heads: None</option>
                             </select>
                         </div>
@@ -712,7 +716,7 @@ function openTraitBestList(unitId) {
         tagsHtml += `<span style="background: rgba(74, 222, 128, 0.2); color: #4ade80; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(74, 222, 128, 0.3);">Miku Buff ON</span>`;
     }
     if (window.waterGodBuffActive) {
-        tagsHtml += `<span style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(251, 191, 36, 0.3);">Enlightened God ON</span>`;
+        tagsHtml += `<span style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(251, 191, 36, 0.3);">Water God ON</span>`;
     }
     if (window.mageHillBuffActive) {
         tagsHtml += `<span style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(251, 146, 60, 0.3);">Fern (Hill) ON</span>`;

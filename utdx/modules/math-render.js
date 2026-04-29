@@ -118,7 +118,7 @@ function renderSourceTotalsSection(data) {
                     ${abilityDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Active Ability</span><span class="text-white">${fmt.pct(abilityDmg)}</span></div>` : ''}
                     ${accessoryDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Accessory</span><span class="text-white">${fmt.pct(accessoryDmg)}</span></div>` : ''}
                     ${mikuDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fbbf24;"><span>↳ Miku Buff</span><span>${fmt.pct(mikuDmg)}</span></div>` : ''}
-                    ${waterGodDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fbbf24;"><span>↳ Enlightened God</span><span>${fmt.pct(waterGodDmg)}</span></div>` : ''}
+                    ${waterGodDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fbbf24;"><span>↳ Water God</span><span>${fmt.pct(waterGodDmg)}</span></div>` : ''}
                     ${bijuuDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fbbf24;"><span>↳ Bijuu Link</span><span>${fmt.pct(bijuuDmg)}</span></div>` : ''}
                     ${kingMarkDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fbbf24;"><span>↳ Unrivaled Mark</span><span>${fmt.pct(kingMarkDmg)}</span></div>` : ''}
                     ${data.amSupportActive ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #60a5fa;"><span>↳ Ancient Mage</span><span>Active</span></div>` : ''}
@@ -140,7 +140,7 @@ function renderActiveBuffsSection(data) {
 
     // 1. Global Buffs
     if (data.mikuBuff > 0) buffs.push({ name: "Miku Buff", desc: "Active: +100% Damage", color: "#4ade80" });
-    if (data.waterGodBuff > 0) buffs.push({ name: "Enlightened God", desc: "Active: +20% Dmg, -20% SPA, +20% Range", color: "#fbbf24" });
+    if (data.waterGodBuff > 0) buffs.push({ name: "Water God", desc: "Active: +20% Dmg, -20% SPA, +20% Range", color: "#fbbf24" });
     if (data.bijuuBuff > 0) buffs.push({ name: "Bijuu Link", desc: "Active: +25% Dmg, +25% Range, -15% SPA", color: "#f87171" });
     if (data.amSupportActive) buffs.push({ name: "Ancient Mage", desc: "Active: +20% Crit Rate/Dmg", color: "#60a5fa" });
     if (data.ksCrit > 0) buffs.push({ name: "King Sailor", desc: "Active: +10% Crit Rate, +20% Crit Dmg", color: "#60a5fa" });
@@ -228,7 +228,7 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, h
                     ${(data.abilityBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-custom opacity-70">↳ Ability Buffs</td><td class="mt-cell-formula text-custom">${fmt.pct(data.abilityBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
 
                     ${(data.mikuBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-accent-end opacity-70">↳ Miku Buff</td><td class="mt-cell-formula text-accent-end">${fmt.pct(data.mikuBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${(data.waterGodBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Enlightened God</td><td class="mt-cell-formula text-gold">${fmt.pct(data.waterGodBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.waterGodBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Water God</td><td class="mt-cell-formula text-gold">${fmt.pct(data.waterGodBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.bijuuBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-error opacity-70">↳ Bijuu Link</td><td class="mt-cell-formula text-error">${fmt.pct(data.bijuuBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
 
                     ${data.conditionalData ? `
@@ -282,7 +282,7 @@ function renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa) {
                     <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base</td><td class="mt-cell-formula">-${fmt.fix(baseSetSpa, 1)}%</td><td class="mt-cell-val"></td></tr>
                     ${tagSpa !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonuses</td><td class="mt-cell-formula">-${fmt.fix(tagSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${passiveSpa > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">-${fmt.fix(passiveSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${(data.waterGodSpa || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Enlightened God</td><td class="mt-cell-formula text-gold">-${fmt.fix(data.waterGodSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.waterGodSpa || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Water God</td><td class="mt-cell-formula text-gold">-${fmt.fix(data.waterGodSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.bijuuSpa || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-error opacity-70">↳ Bijuu Link</td><td class="mt-cell-formula text-error">-${fmt.fix(data.bijuuSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.mageHillSpa || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:#fb923c">↳ Fern (Hill)</td><td class="mt-cell-formula" style="color:#fb923c">-${fmt.fix(data.mageHillSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
 
@@ -590,7 +590,7 @@ function renderMathContent(data) {
             ${renderCritSection(data, setTagCfTotal, setTagCmTotal)}
             ${renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa)}
             ${renderRangeSection(data)}
-            ${data.extraAttacks ? `<div class="dd-section"><div class="dd-title mt-text-green"><span>5. Attack Rate Multiplier</span> <button class="calc-info-btn" onclick="openInfoPopup('attack_rate')">?</button></div><table class="calc-table"><tr><td class="mt-cell-label">Hits Per Attack</td><td class="mt-cell-val">${data.extraAttacks.hits}</td></tr><tr><td class="mt-cell-label">Crits Req. for Extra</td><td class="mt-cell-val">${data.extraAttacks.req}</td></tr><tr><td class="mt-cell-label">Attacks needed to Trig</td><td class="mt-cell-val">${fmt.fix(data.extraAttacks.attacksNeeded, 2)}</td></tr><tr><td class="mt-cell-label">Final Dps Mult</td><td class="mt-cell-val calc-highlight">x${fmt.fix(data.extraAttacks.mult, 3)}</td></tr></table></div>` : ''}
+            ${renderAttackRateSection(data)}
             ${renderDotSection(data, headDotRow)}
             ${renderSummonSection(data)}
             ${renderFinalSection(data)}
@@ -621,6 +621,40 @@ function renderSummonSection(data) {
     </div>`;
 }
 
+function renderAttackRateSection(data) {
+    if (!data.extraAttacks) return '';
+    const isKS = data.baseStats.id === 'king_sailor';
+    
+    let detailRows = '';
+    if (isKS) {
+        detailRows = `
+            <tr class="mt-border-top"><td class="mt-cell-label mt-pt-md">Chain Logic</td><td class="mt-cell-formula mt-pt-md">5 Ticks × 20%</td><td class="mt-cell-val mt-pt-md"></td></tr>
+            <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Base Tick Dmg</td><td class="mt-cell-formula"></td><td class="mt-cell-val">${fmt.num(data.extraAttacks.tickDmgVal)}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Avg Tick (w/ Crit)</td><td class="mt-cell-formula"><span class="op">×</span>${fmt.fix(data.critData.avgMult, 3)}</td><td class="mt-cell-val text-accent-start">${fmt.num(data.extraAttacks.avgTick)}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Total Chain Output</td><td class="mt-cell-formula"><span class="op">×</span>5</td><td class="mt-cell-val text-gold">${fmt.num(data.extraAttacks.totalChain)}</td></tr>
+        `;
+    }
+
+    const extraHits = (data.extraAttacks ? data.extraAttacks.extra : 0);
+
+    return `
+        <div class="dd-section" style="border-left: 3px solid #4ade80;">
+            <div class="dd-title mt-text-green"><span>5. Attack Rate Multiplier</span> <button class="calc-info-btn" onclick="openInfoPopup('attack_rate')">?</button></div>
+            <table class="calc-table">
+                <tr><td class="mt-cell-label">Primary Target Hits</td><td class="mt-cell-formula"></td><td class="mt-cell-val">1.0</td></tr>
+                ${extraHits > 0 ? `<tr><td class="mt-cell-label">Extra Hits (Equiv)</td><td class="mt-cell-formula">+</td><td class="mt-cell-val">${fmt.fix(extraHits, 2)}</td></tr>` : ''}
+                
+                ${detailRows}
+
+                <tr class="mt-border-top">
+                    <td class="mt-cell-label mt-pt-sm text-white">Final Attack Mult</td>
+                    <td class="mt-cell-formula"></td>
+                    <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size: 1.1rem; color: #4ade80;">x${fmt.fix(data.extraAttacks ? data.extraAttacks.mult : 1, 3)}</td>
+                </tr>
+            </table>
+        </div>`;
+}
+
 function renderFinalSection(data) {
     const hitLabel = data.placement > 1 ? `Hit DPS (x${data.placement} Units)` : `Hit DPS`;
     const hitFormula = data.placement > 1 ? `<span class="op">×</span>${data.placement}` : ``;
@@ -630,7 +664,8 @@ function renderFinalSection(data) {
             <div class="dd-section border-l-gold">
                 <div class="dd-title text-gold">Final Synthesis</div>
                 <table class="calc-table">
-                    <tr><td class="mt-cell-label">${hitLabel}</td><td class="mt-cell-formula">${hitFormula}</td><td class="mt-cell-val calc-highlight">${fmt.num(data.hit)}</td></tr>
+                    <tr><td class="mt-cell-label">${hitLabel}</td><td class="mt-cell-formula">${hitFormula}</td><td class="mt-cell-val calc-highlight">${fmt.num(data.trueDmgMult > 1 ? data.baseHitDps : data.hit)}</td></tr>
+                    ${data.trueDmgMult > 1 ? `<tr><td class="mt-cell-label text-accent-start">Sorcerer Hunter (True Dmg)</td><td class="mt-cell-formula"><span class="op">×</span>1.15</td><td class="mt-cell-val text-accent-start">${fmt.num(data.hit)}</td></tr>` : ''}
                     ${data.dot > 0 ? `<tr><td class="mt-cell-label">DoT DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-end">${fmt.num(data.dot)}</td></tr>` : ''}
                     ${data.summon > 0 ? `<tr><td class="mt-cell-label">${isNutaru ? 'Clone' : 'Plane'} DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-start">${fmt.num(data.summon)}</td></tr>` : ''}
                     <tr>
@@ -671,7 +706,7 @@ function renderRangeSection(data) {
                 ${setRange > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Bonus</td><td class="mt-cell-formula">${fmt.pct(setRange)}</td><td class="mt-cell-val"></td></tr>` : ''}
                 ${basePassiveRange > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${fmt.pct(basePassiveRange)}</td><td class="mt-cell-val"></td></tr>` : ''}
                 ${(data.eternalRangeBuff > 0) ? `<tr><td class="mt-cell-label mt-pl-md text-accent-start opacity-70">↳ Eternal Stacks</td><td class="mt-cell-formula text-accent-start">${fmt.pct(data.eternalRangeBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
-                ${(data.waterGodBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Enlightened God</td><td class="mt-cell-formula text-gold">${fmt.pct(data.waterGodBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                ${(data.waterGodBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Water God</td><td class="mt-cell-formula text-gold">${fmt.pct(data.waterGodBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
                 ${(data.bijuuBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-error opacity-70">↳ Bijuu Link</td><td class="mt-cell-formula text-error">${fmt.pct(data.bijuuBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
 
                 <tr class="mt-border-top"><td class="mt-cell-label mt-pt-sm text-white">Final Range Result</td><td class="mt-cell-formula"></td><td class="mt-cell-val mt-pt-sm mt-text-bold" style="color: #fbbf24">${fmt.fix(data.range, 2)}</td></tr>
