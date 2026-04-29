@@ -40,7 +40,7 @@ window.toggleModal = (modalId, show = true) => {
 /**
  * Opens the single Universal Modal with dynamic content.
  */
-function showUniversalModal({ title, content, footerButtons = '', size = '', headerClass = '' }) {
+function showUniversalModal({ title, content, footerButtons = '', size = '', headerClass = '', boxClass = '', footerClass = '' }) {
     const modal = document.getElementById('universalModal');
     const box = modal.querySelector('.modal-box');
     const titleEl = modal.querySelector('.modal-title');
@@ -49,8 +49,9 @@ function showUniversalModal({ title, content, footerButtons = '', size = '', hea
     const headerEl = modal.querySelector('.modal-header');
 
     // Reset Classes
-    box.className = 'modal-box ' + size;
+    box.className = 'modal-box ' + size + ' ' + boxClass;
     headerEl.className = 'modal-header ' + headerClass;
+    footerEl.className = 'modal-footer ' + footerClass;
 
     // Set Content
     titleEl.innerHTML = title;

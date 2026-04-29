@@ -46,7 +46,7 @@ body.dashboard-layout { flex-direction: row; height: 100vh; overflow: hidden; al
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: color 0.15s, background 0.15s, padding-left 0.15s;
     border-bottom: 1px solid var(--card-border);
     background: rgba(255, 255, 255, 0.02);
 }
@@ -58,7 +58,7 @@ body.dashboard-layout { flex-direction: row; height: 100vh; overflow: hidden; al
 }
 
 .back-to-hub svg {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.15s, color 0.15s;
     color: var(--accent-start);
     filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.2));
 }
@@ -151,7 +151,7 @@ h1 { font-size: 2.5rem; margin: 0; font-weight: 900; text-transform: uppercase; 
     border-radius: 8px; 
     padding: 0;
     cursor: pointer; 
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+    transition: background 0.15s, border-color 0.15s, transform 0.15s; 
     user-select: none; 
     overflow: hidden;
     height: 32px;
@@ -275,13 +275,12 @@ body.header-collapsed .header-toggle-btn { transform: rotate(180deg); }
     top: 0;
     z-index: 1000;
     width: 100%;
-    background: rgba(5, 5, 5, 0.97);
+    background: #050505;
     border-bottom: 1px solid var(--card-border);
     box-shadow: 0 4px 30px rgba(0,0,0,0.5);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    backdrop-filter: blur(12px);
 }
 .sticky-toolbar-container .injector-panel { transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease; max-height: 200vh; opacity: 1; }
 
@@ -373,7 +372,7 @@ body.header-collapsed .header-toggle-btn { transform: rotate(180deg); }
     justify-content: flex-start;
     gap: 10px;
     white-space: nowrap;
-    transition: 0.3s;
+    transition: opacity 0.15s;
     box-sizing: border-box;
     flex-wrap: nowrap;
     position: relative;
@@ -497,7 +496,7 @@ body.header-collapsed .header-toggle-btn { transform: rotate(180deg); }
     background: #333;
     border-radius: 20px;
     position: relative;
-    transition: 0.3s;
+    transition: background 0.15s;
     display: inline-block;
     vertical-align: middle;
     flex-shrink: 0;
@@ -509,12 +508,12 @@ body.header-collapsed .header-toggle-btn { transform: rotate(180deg); }
     width: 14px; height: 14px;
     background: #fff;
     border-radius: 50%;
-    transition: 0.3s;
+    transition: transform 0.15s;
 }
 input:checked + .mini-switch { background: var(--accent-start); }
 input:checked + .mini-switch::after { transform: translateX(16px); }
 
-.pages-container { width: 100%; padding: 20px; box-sizing: border-box; }
+.pages-container { width: 100%; padding: 20px 20px 140px 20px; box-sizing: border-box; }
 .page { display: none; width: 100%; animation: fadeIn 0.4s ease; }
 .page.active { display: grid; }
 .db-grid { grid-template-columns: repeat(auto-fill, minmax(370px, 1fr)); gap: 18px; width: 100%; }

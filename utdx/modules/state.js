@@ -2,6 +2,9 @@
 // STATE.JS - Global Application State
 // ============================================================================
 
+// --- FEATURE FLAGS ---
+const ENABLE_HOTBAR = false; // Set to true to enable the hotbar, false to hide it
+
 // Data & Cache
 let customTraits = [];
 let unitSpecificTraits = {};
@@ -9,8 +12,6 @@ let activeAbilityIds = new Set(['phantom_captain', 'megumin', 'ancient_shinob'])
 let cachedResults = {};
 let unitBuildsCache = {};
 
-// Mode & Configuration
-let currentGuideMode = 'current';
 let inventoryMode = false; // Toggle state for Inventory calculation
 
 const kiritoState = {
@@ -29,11 +30,6 @@ const robot1718State = {
 const ancientMageState = {
     mode: "DPS"
 };
-
-// Caches for performance optimization
-let guideUnitSelection = new Set(['all']); // Persistent selection for Guide view
-let tempGuideUnitSet = new Set(['all']);   // Temporary selection inside Config Modal
-let tempGuideTrait = 'auto';
 
 let currentCalcUnitId = null;
 

@@ -338,10 +338,10 @@ window.toggleAncientMageSupport = (checkbox) => {
     window.triggerGlobalBuffUpdate();
 };
 
-// Add a global state for Water God buff
+// Add a global state for Enlightened God buff
 window.waterGodBuffActive = false;
 
-// Toggle Water God Buff
+// Toggle Enlightened God Buff
 window.toggleWaterGodBuff = (checkbox) => {
     const isChecked = checkbox.checked;
     if (window.waterGodBuffActive === isChecked) return;

@@ -3,15 +3,8 @@
 // ============================================================================
 
 function initApp() {
-    // 1. Setup Guide Dropdowns
-    if (typeof populateGuideDropdowns === 'function') {
-        populateGuideDropdowns();
-    }
-
-    // Inject Buff Buttons Efficiently via DocumentFragment batching
+    // 1. Inject Buff Buttons Efficiently via DocumentFragment batching
     injectBuffButtons();
-
-    setGuideMode('current');
 
     // 2. Render Content
     if (typeof renderCredits === 'function') {
@@ -26,7 +19,13 @@ function initApp() {
         initInventory();
     }
 
-    // 5. End of Life Notice
+    // 5. Initialize Hotbar
+    if (typeof ENABLE_HOTBAR !== 'undefined' && ENABLE_HOTBAR && typeof initHotbar === 'function') {
+        initHotbar();
+    }
+
+
+    // 6. End of Life Notice
     if (!localStorage.getItem('eol_notice_hidden_v2')) {
         setTimeout(() => {
             if (typeof showUniversalModal === 'function') {
@@ -90,7 +89,7 @@ function injectBuffButtons() {
 
     const buffs = [
         { id: 'MikuBuff', text: 'Miku Buff', title: "Apply Miku's +100% Damage Buff", fn: 'toggleMikuBuff' },
-        { id: 'WaterGodBuff', text: 'Water God', title: "Apply Water God's +20% Dmg, -20% SPA, +20% Range Buff", fn: 'toggleWaterGodBuff' },
+        { id: 'WaterGodBuff', text: 'Enlightened God', title: "Apply Enlightened God's +20% Dmg, -20% SPA, +20% Range Buff", fn: 'toggleWaterGodBuff' },
         { id: 'BijuuBuff', text: 'Bijuu Link', title: "Apply Bijuu Link: +25% Dmg, +25% Range, -15% SPA", fn: 'toggleBijuuLink' },
         { id: 'AMSupport', text: 'Ancient Mage', title: "Apply Ancient Mage Buff: +20% Crit Rate/Dmg", fn: 'toggleAncientMageSupport' },
         { id: 'KSBuff', text: 'King Sailor', title: "Apply King Sailor Buff: +10% Crit Rate, +20% Crit Damage", fn: 'toggleKingSailorBuff' },
@@ -133,5 +132,4 @@ function injectBuffButtons() {
     };
 
     insertBatch('dbInjector', 'invModeToggle', true);
-    insertBatch('guidesToolbar', 'guideInventoryMode', false);
 }

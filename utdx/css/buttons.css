@@ -9,7 +9,7 @@
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.9rem;
-    transition: 0.3s;
+    transition: color 0.15s, background 0.15s;
 }
 
 .nav-btn:hover {
@@ -56,7 +56,7 @@
     font-weight: 800;
     text-transform: uppercase;
     cursor: pointer;
-    transition: 0.2s;
+    transition: background 0.15s, color 0.15s;
     display: flex;
     align-items: center;
     gap: 5px;
@@ -82,7 +82,7 @@
     align-items: center;
     justify-content: center;
     z-index: 10;
-    transition: 0.2s;
+    transition: background 0.15s, color 0.15s;
     line-height: 1;
     font-family: serif;
     font-style: italic;
@@ -93,8 +93,6 @@
     background: var(--accent-start);
     color: #fff;
     border-color: var(--accent-start);
-    transform: scale(1.1);
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
 }
 
 .sub-list-btn {
@@ -110,7 +108,7 @@
     justify-content: center;
     font-size: 1rem;
     line-height: 0;
-    transition: 0.2s;
+    transition: background 0.15s, color 0.15s;
     margin-left: auto;
 }
 
@@ -134,11 +132,10 @@
     padding: 4px 10px;
     border-radius: 6px;
     cursor: pointer;
-    transition: 0.2s;
+    transition: background 0.15s, color 0.15s;
     display: flex;
     align-items: center;
     gap: 6px;
-    backdrop-filter: blur(4px);
 }
 
 .trait-guide-btn:hover {
@@ -157,11 +154,11 @@
     font-weight: 800;
     border-radius: 8px;
     cursor: pointer;
-    transition: 0.2s;
+    transition: background 0.15s, opacity 0.15s;
 }
 
 .action-btn:hover {
-    filter: brightness(1.1);
+    opacity: 0.9;
 }
 
 .action-btn.secondary {
@@ -197,7 +194,7 @@
     color: var(--text-secondary);
     cursor: pointer;
     font-size: 0.9rem;
-    transition: 0.3s;
+    transition: color 0.15s;
     line-height: 1;
     padding: 0;
 }
@@ -219,7 +216,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: 0.2s;
+    transition: background 0.15s, color 0.15s;
     margin-left: 5px;
 }
 
@@ -311,7 +308,7 @@
     font-size: 0.75rem;
     font-weight: 900;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s;
     border: 1px solid transparent;
     opacity: 0.6;
 }

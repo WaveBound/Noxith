@@ -359,6 +359,7 @@ if (isMainThread) {
                     
                     let isBetter = false;
                     if (!currentBest) isBetter = true;
+                    // TIE BREAKER LOGIC ADDED HERE:
                     else if (pc.opt === 'range') isBetter = (res.range > currentBest.res.range) || (res.range === currentBest.res.range && res.total > currentBest.res.total);
                     else if (pc.opt === 'raw_dmg') isBetter = (res.dmgVal > currentBest.res.dmgVal) || (res.dmgVal === currentBest.res.dmgVal && res.total > currentBest.res.total);
                     else isBetter = (res.total > currentBest.res.total);
@@ -396,18 +397,17 @@ if (isMainThread) {
         if(u.id === 'kirito' && isCard) baseKey = 'kirito_card';
         
         const types = u.ability ? ['base', 'abil'] : ['base'];
-        const isSjw = u.id === 'sjw';
         const isLaw = u.id === 'law';
         
+        // TIE BREAKER LOGIC FOR LIST TRIMMING ADDED HERE:
         const sortFn = isLaw 
-            ? (a, b) => (b.range || 0) - (a.range || 0)
+            ? (a, b) => {
+                if (b.range !== a.range) return (b.range || 0) - (a.range || 0);
+                return (b.dps || 0) - (a.dps || 0);
+            }
             : (a, b) => {
-                let wa = 1.0, wb = 1.0;
-                if (isSjw) {
-                    if (a.mainStats.body === 'dmg' && a.mainStats.legs === 'dmg') wa = 1.3;
-                    if (b.mainStats.body === 'dmg' && b.mainStats.legs === 'dmg') wb = 1.3;
-                }
-                return (b.dps * wb) - (a.dps * wa);
+                if (b.dps !== a.dps) return (b.dps || 0) - (a.dps || 0);
+                return (b.dmgVal || 0) - (a.dmgVal || 0);
             };
 
         types.forEach(type => {

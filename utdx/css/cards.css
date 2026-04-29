@@ -5,15 +5,14 @@
     border-radius: 16px;
     overflow: hidden;
     position: relative;
-    transition: all 0.2s;
+    transition: border-color 0.15s, transform 0.15s;
     display: flex;
     flex-direction: column;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     height: 500px;
     content-visibility: auto;
     contain-intrinsic-size: 500px;
-    contain: paint;
-    will-change: transform, opacity;
+    contain: layout paint style;
 }
 
 /* Added Animation Delay Variable */
@@ -135,7 +134,7 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.03);
     color: rgba(255, 255, 255, 0.2);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
     text-align: center;
     display: flex;
     align-items: center;
@@ -160,11 +159,7 @@
     background: #10b981;
     border-color: #10b981;
     color: #000;
-    box-shadow:
-        0 0 10px rgba(16, 185, 129, 0.4),
-        0 0 20px rgba(16, 185, 129, 0.2),
-        inset 0 0 4px rgba(255, 255, 255, 0.3);
-    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
 }
 
 /* Yellow (Special: AOE, Type, etc.) */
@@ -178,15 +173,11 @@
     background: #eab308;
     border-color: #eab308;
     color: #000;
-    box-shadow:
-        0 0 10px rgba(234, 179, 8, 0.5),
-        0 0 20px rgba(234, 179, 8, 0.2),
-        inset 0 0 4px rgba(255, 255, 255, 0.3);
-    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
 }
 
 .e-pill.active:hover {
-    filter: brightness(1.1);
+    opacity: 0.9;
 }
 
 .unit-toolbar .bambi-label {
@@ -252,7 +243,7 @@
     background: #111;
     color: #fff;
     font-size: 0.8rem;
-    transition: 0.2s;
+    transition: border-color 0.15s;
 }
 
 .search-input:focus {
@@ -271,7 +262,7 @@
     font-weight: 700;
     text-transform: uppercase;
     cursor: pointer;
-    transition: 0.2s;
+    transition: background 0.15s, color 0.15s;
     white-space: nowrap;
     display: flex;
     align-items: center;
@@ -485,7 +476,7 @@
     margin-bottom: 8px;
     border-radius: 8px;
     border-left: 3px solid transparent;
-    transition: 0.2s;
+    transition: background 0.15s;
     overflow: hidden;
     scroll-snap-align: start;
     scroll-snap-stop: normal;

@@ -146,7 +146,10 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
         });
 
         strategies.forEach(strat => {
-            let testBuild = { ...build };
+            let testBuild = { dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0 };
+            if (build.bodyType) testBuild[build.bodyType] = (testBuild[build.bodyType] || 0) + (MAIN_STAT_VALS.body[build.bodyType] || 0);
+            if (build.legType) testBuild[build.legType] = (testBuild[build.legType] || 0) + (MAIN_STAT_VALS.legs[build.legType] || 0);
+
             let currentAssignments = {};
             if (actualIncludeHead) {
                 const res = applyContextualStats(testBuild, 'head', null, strat.p, strat.s, strat.ratio);
@@ -521,7 +524,7 @@ function calculateDPS(uStats, relicStats, context) {
             extra: 1,
             attacksNeeded: 1,
             mult: attackMultiplier,
-            label: `Water God Follow-up (${effectiveSpaCap}s window)`
+            label: `Enlightened God Follow-up (${effectiveSpaCap}s window)`
         };
     } else if (uStats.followUp) {
         attackMultiplier = 1 + (uStats.followUp / 100);

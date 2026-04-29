@@ -173,7 +173,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
                     <div class="fs-col-header">CURRENT</div>
                     <div class="fs-col-header">${nextLevel > maxLevel ? 'STATUS' : 'NEXT UPGRADE'}</div>
 
-<div class="fs-item-lg dmg-row">
+                    <div class="fs-item-lg dmg-row">
                         <span class="fs-icon-box dmg-bg"><svg viewBox="0 0 290.226 290.226" fill="currentColor"><path d="M63.951,243.575c-1.945-3.578-4.401-6.907-7.363-9.869c-3.106-3.102-6.626-5.633-10.4-7.63 c-4.51-2.387-0.945-7.5-0.945-7.5c4.616-7.023,8.825-14.079,12.305-20.226l-23.363-23.344H11.504c-4.362,0-7.898-3.539-7.898-7.902 c0-4.361,3.536-7.9,7.898-7.9h25.947c2.1,0,4.107,0.832,5.588,2.312l85.379,85.291c1.483,1.483,2.315,3.495,2.315,5.589v26.073 c0,4.365-3.537,7.897-7.9,7.897c-4.367,0-7.904-3.531-7.904-7.897v-22.798l-23.27-23.24c-6.281,3.707-13.582,8.252-20.816,13.25 C70.842,245.679,66.698,248.629,63.951,243.575z"/><path d="M26.61,237.102c-7.106,0-13.784,2.764-18.812,7.784c-5.019,5.015-7.782,11.686-7.782,18.778 c0,7.097,2.764,13.762,7.782,18.776c5.027,5.016,11.706,7.783,18.812,7.785c7.102,0,13.781-2.77,18.804-7.785 c5.023-5.015,7.79-11.682,7.79-18.776c0-7.093-2.768-13.764-7.79-18.778C40.392,239.866,33.712,237.102,26.61,237.102z"/><path d="M100.985,182.318c-3.502,3.499-9.232,3.499-12.734,0.001l-8.81-8.801c-3.502-3.498-3.502-9.223,0-12.721L229.832,10.564 c3.502-3.498,10.401-6.727,15.33-7.175l36.862-3.352c4.93-0.448,8.596,3.218,8.148,8.148l-3.346,36.791 c-0.448,4.93-3.68,11.825-7.182,15.324l-150.4,150.251c-3.502,3.498-9.232,3.498-12.734,0l-8.822-8.813 c-3.502-3.498-3.502-9.223,0-12.722L233.608,63.213c1.854-1.848,1.856-4.852,0.003-6.702c-1.848-1.853-4.853-1.853-6.709-0.002 L100.985,182.318z"/></svg></span>
                         <span class="fs-val val-dmg">${format(r.dmgVal || 0)}</span>
                     </div>
@@ -217,7 +217,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     let unitCost = unitObj ? (unitObj.totalCost || 50000) : 50000;
 
-    // If upgrades have individual costs, accurately calculate cumulative cost
     if (unitObj && unitObj.upgrades && unitObj.upgrades.length > 0) {
         let placementCost = unitObj.upgrades[0].cost || 0;
 
@@ -236,7 +235,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const unitPlace = unitObj ? (unitObj.placement || 1) : 1;
 
     const activeMode = 'fixed';
-    const activeCfg = 0; // Hardcoded to 0 for Max Potential DB
     const activeType = activeAbilityIds.has(unitId) && unitObj && unitObj.ability ? 'abil' : 'base';
 
     let benchmarkDps = 0;
@@ -282,7 +280,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             };
         }
 
-        // ALWAYS re-calculate to ensure stats reflect the current unified math
         if (typeof reconstructMathData === 'function') {
             try {
                 const fullMath = reconstructMathData(res);
@@ -297,9 +294,8 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     res.subStats.finalCf = fullMath.critData ? fullMath.critData.rate : 0;
                     res.subStats.finalCm = fullMath.critData ? fullMath.critData.cdmg : 0;
                 }
-                // Math is always maxed now, so sortDps is just dps
                 res.sortDps = res.dps;
-                res.baseStats = null; // No next upgrade comparison needed
+                res.baseStats = null;
             } catch (e) {
                 console.warn("Hydration Math Error for", res.id, e);
             }
@@ -325,14 +321,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         if (prioSelect === 'all') {
             const uniqueMap = new Map();
             filtered.forEach(r => {
-                const getW = (x) => {
-                    let w = 1.0;
-                    if (unitId === 'sjw' && x.headUsed === 'sun_god') w *= 1.05;
-                    if (unitId.includes('sasuke') && x.headUsed === 'biju_head') w *= 1.2;
-                    if (unitId === 'sjw' && sortSelect === 'damage' && x.mainStats.body === 'dmg' && x.mainStats.legs === 'dmg') w *= 1.3;
-                    return w;
-                };
-                const weight = getW(r);
                 const key = r.setName + r.traitName + (r.headUsed || 'none');
 
                 let isBetter = false;
@@ -340,10 +328,13 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     isBetter = true;
                 } else {
                     const currentBest = uniqueMap.get(key);
-                    const currentWeight = getW(currentBest);
-                    if (sortSelect === 'damage') isBetter = (r.dmgVal * weight > currentBest.dmgVal * currentWeight);
+                    // FIX: Tie-Break sorting to match DB Engine
+                    if (sortSelect === 'damage') {
+                        if (r.dmgVal > currentBest.dmgVal) isBetter = true;
+                        else if (r.dmgVal === currentBest.dmgVal && r.sortDps > currentBest.sortDps) isBetter = true;
+                    }
                     else if (sortSelect === 'range') isBetter = (r.range > currentBest.range);
-                    else isBetter = (r.sortDps * weight > currentBest.sortDps * currentWeight);
+                    else isBetter = (r.sortDps > currentBest.sortDps);
                 }
                 if (isBetter) uniqueMap.set(key, r);
             });
@@ -353,23 +344,19 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         if (filtered.length === 0) return '<div class="msg-empty">No matches found.</div>';
 
         filtered.sort((a, b) => {
-            const getWeight = (x) => {
-                let w = 1.0;
-                if (unitId === 'sjw' && x.headUsed === 'sun_god') w *= 1.05;
-                if (unitId.includes('sasuke') && x.headUsed === 'biju_head') w *= 1.2;
-                if (unitId === 'sjw' && sortSelect === 'damage' && x.mainStats.body === 'dmg' && x.mainStats.legs === 'dmg') w *= 1.3;
-                return w;
-            };
             if (sortSelect === 'range') return (b.range || 0) - (a.range || 0);
-            if (sortSelect === 'damage') return (b.dmgVal * getWeight(b)) - (a.dmgVal * getWeight(a));
-            return (b.sortDps * getWeight(b)) - (a.sortDps * getWeight(a));
+            if (sortSelect === 'damage') {
+                // FIX: Tie-Break sorting to match DB Engine
+                if (b.dmgVal !== a.dmgVal) return (b.dmgVal || 0) - (a.dmgVal || 0);
+                return (b.sortDps || 0) - (a.sortDps || 0);
+            }
+            return (b.sortDps || 0) - (a.sortDps || 0);
         });
 
         const slice = filtered.slice(0, limit);
         return slice.map((r, i) => generateBuildRowHTML(r, i, { totalCost: unitCost, placement: unitPlace, sortMode: sortSelect, unitId, benchmarkDps: benchmarkDps })).join('');
     };
 
-    // Card div structure hardcoded to cfg-0 now
     const container = document.getElementById(`results-${activeType}-${activeMode}-0-${unitId}`);
     if (!container) return;
 
@@ -403,7 +390,6 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
         };
     }
 
-    // Only 1 configuration
     const CONFIGS = [{ head: true, subs: true }];
 
     const performCalcSet = (mode, useAbility, targetCache) => {
@@ -412,7 +398,6 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
 
         const useInventory = (inventoryMode === true);
 
-        // Fixed to 1 iteration
         for (let i = 0; i < 1; i++) {
             if (targetCache[i] !== null) continue;
 
@@ -435,11 +420,28 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
 
             calculatedResults.forEach(r => { if (r.id) window.cachedResults[r.id] = r; });
 
-            const traitsForCalc = (calculatedResults.length > 0 && !unit.id.includes('sasuke')) ? [...(typeof customTraits !== 'undefined' ? customTraits : []), ...(unitSpecificTraits[unit.id] || [])] : null;
-            if (traitsForCalc === null || traitsForCalc.length > 0 || useInventory) {
-                const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
-                calculatedResults = [...calculatedResults, ...dynamicResults];
+            const traitsForCalc = (calculatedResults.length > 0 && !unit.id.includes('sasuke'))
+                ? [...(typeof customTraits !== 'undefined' ? customTraits : []), ...(unitSpecificTraits[unit.id] || [])]
+                : null;
+
+            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
+
+            if (dynamicResults.length > 0) {
+                const seen = new Set(calculatedResults.map(r => r.id));
+                dynamicResults.forEach(r => {
+                    if (!seen.has(r.id)) {
+                        calculatedResults.push(r);
+                        seen.add(r.id);
+                    }
+                });
             }
+
+            const unitId = unit.id.toLowerCase();
+            const sortFn = (unitId === 'law')
+                ? (a, b) => (b.range || 0) - (a.range || 0)
+                : (a, b) => (b.dps || 0) - (a.dps || 0);
+
+            calculatedResults.sort(sortFn);
             targetCache[i] = calculatedResults;
         }
     };
@@ -459,7 +461,6 @@ window.getQuickScore = (unit) => {
     const dbKey = baseKey + (isAbility ? '_abil' : '');
 
     if (window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {
-        // Look at config 0 now
         const list = window.STATIC_BUILD_DB[dbKey]['fixed']?.[0];
         if (list && list.length > 0) {
             return unit.id === 'law' ? (list[0].range || 0) : list[0].dps;
@@ -501,7 +502,6 @@ function renderDatabase() {
         while (renderQueueIndex < sortedUnits.length) {
             const unit = sortedUnits[renderQueueIndex].unit;
 
-            // Initialize default upgrade level to MAX if not already set
             if (window.unitELevels[unit.id] === undefined && unit.upgrades && unit.upgrades.length > 0) {
                 window.unitELevels[unit.id] = unit.upgrades.length - 1;
             }
@@ -612,7 +612,6 @@ function renderDatabase() {
                 </div>` : ''}`;
 
             let mainContent = '';
-            // Generate only cfg-0 divs
             ['base', 'abil'].forEach(type => { const mode = 'fixed'; mainContent += `<div class="top-builds-list build-list-container mode-${type} mode-${mode} cfg-0" id="results-${type}-${mode}-0-${unit.id}"></div>`; });
 
             const card = createBaseUnitCard(unit, {
@@ -665,228 +664,6 @@ function renderDatabase() {
     processNextChunk();
 }
 
-function setGuideMode(mode) {
-    currentGuideMode = mode;
-    const warning = document.getElementById('guideWarning');
-    if (warning) warning.classList[mode === 'current' ? 'remove' : 'add']('hidden');
-}
-
-function populateGuideDropdowns() {
-    const unitSelect = document.getElementById('guideUnitSelect');
-    const traitSelect = document.getElementById('guideTraitSelect');
-    if (!unitSelect || !traitSelect) return;
-    unitSelect.innerHTML = '<option value="all">All Units</option>';
-    traitSelect.innerHTML = '<option value="auto">Auto (Best Trait)</option>';
-    unitDatabase.forEach(unit => unitSelect.add(new Option(unit.name, unit.id)));
-    traitsList.forEach(trait => { if (trait.id !== 'none') traitSelect.add(new Option(trait.name, trait.id)); });
-}
-
-function openGuideConfig() {
-    tempGuideUnitSet = new Set(guideUnitSelection);
-    tempGuideTrait = document.getElementById('guideTraitSelect').value;
-    renderGuideConfigUI();
-    toggleModal('guideConfigModal', true);
-}
-
-const closeGuideConfig = () => toggleModal('guideConfigModal', false);
-
-const selectGuideUnit = (id) => {
-    if (id === 'all') {
-        tempGuideUnitSet.clear();
-        tempGuideUnitSet.add('all');
-    } else {
-        if (tempGuideUnitSet.has('all')) tempGuideUnitSet.delete('all');
-        if (tempGuideUnitSet.has(id)) tempGuideUnitSet.delete(id); else tempGuideUnitSet.add(id);
-        if (tempGuideUnitSet.size === 0) tempGuideUnitSet.add('all');
-    }
-    renderGuideConfigUI();
-};
-
-const selectGuideTrait = (id) => { tempGuideTrait = id; renderGuideConfigUI(); };
-
-function renderGuideConfigUI() {
-    const unitGrid = document.getElementById('guideConfigUnitGrid');
-    const traitList = document.getElementById('guideConfigTraitList');
-    const isAll = tempGuideUnitSet.has('all');
-
-    let unitsHtml = `<div class="config-item ${isAll ? 'selected' : ''}" onclick="selectGuideUnit('all')"><div class="cp-avatar-placeholder">ALL</div><span>All Units</span></div>`;
-    unitDatabase.forEach(u => {
-        const isSelected = tempGuideUnitSet.has(u.id);
-        unitsHtml += `<div class="config-item ${isSelected ? 'selected' : ''}" onclick="selectGuideUnit('${u.id}')">${getUnitImgHtml(u, '', 'small')}<span>${u.name}</span></div>`;
-    });
-    unitGrid.innerHTML = unitsHtml;
-
-    let availableTraits = [...traitsList, ...customTraits];
-    if (!isAll && tempGuideUnitSet.size === 1) {
-        const singleId = Array.from(tempGuideUnitSet)[0];
-        if (unitSpecificTraits[singleId]) availableTraits = [...availableTraits, ...unitSpecificTraits[singleId]];
-    }
-    availableTraits = availableTraits.filter((t, index, self) => index === self.findIndex((x) => x.id === t.id) && t.id !== 'none');
-
-    let traitsHtml = `<div class="config-chip ${tempGuideTrait === 'auto' ? 'selected' : ''}" onclick="selectGuideTrait('auto')">Auto (Best)</div>`;
-    availableTraits.forEach(t => traitsHtml += `<div class="config-chip ${tempGuideTrait === t.id ? 'selected' : ''}" onclick="selectGuideTrait('${t.id}')">${t.name}</div>`);
-    traitList.innerHTML = traitsHtml;
-}
-
-const applyGuideConfig = () => {
-    guideUnitSelection = new Set(tempGuideUnitSet);
-    const unitSelect = document.getElementById('guideUnitSelect');
-    if (guideUnitSelection.has('all')) {
-        unitSelect.innerHTML = '<option value="all">All Units</option>';
-        unitSelect.value = 'all';
-    } else {
-        const count = guideUnitSelection.size;
-        const text = count === 1 ? unitDatabase.find(u => u.id === Array.from(guideUnitSelection)[0]).name : `${count} Units Selected`;
-        unitSelect.innerHTML = `<option value="multi">${text}</option>`;
-        unitSelect.value = 'multi';
-    }
-    document.getElementById('guideTraitSelect').value = tempGuideTrait;
-    if (document.getElementById('guidesPage').classList.contains('active')) {
-        renderGuides();
-    }
-    closeGuideConfig();
-};
-
-function getGuideBuildsFromCache(unit, mode, configIndex) {
-    if (!unitBuildsCache || !unitBuildsCache[unit.id]) return [];
-    let source = unitBuildsCache[unit.id].base;
-    if (unit.ability !== undefined && activeAbilityIds.has(unit.id) && unitBuildsCache[unit.id].abil && unitBuildsCache[unit.id].abil[mode]) source = unitBuildsCache[unit.id].abil;
-    return source?.[mode]?.[configIndex] || [];
-}
-
-function processGuideTop3(rawBuilds, unit, traitFilterId) {
-    if (!rawBuilds || rawBuilds.length === 0) return [];
-    let filtered = [...rawBuilds];
-    if (traitFilterId && traitFilterId !== 'auto') {
-        const tObj = getTraitById(traitFilterId, unit.id);
-        const targetName = tObj ? tObj.name : "";
-        if (targetName) filtered = filtered.filter(b => b.traitName === targetName);
-    }
-
-    const getWeight = (b) => {
-        if (unit.id === 'sjw' && b.headUsed === 'sun_god') return 1.05;
-        if (unit.id.includes('sasuke') && b.headUsed === 'biju_head') return 1.2;
-        return 1.0;
-    };
-
-    if (unit.id === 'law') {
-        filtered.sort((a, b) => (b.range || 0) - (a.range || 0));
-    } else if (['sjw', 'esdeath', 'sasuke_great_war'].includes(unit.id)) {
-        filtered.sort((a, b) => {
-            const scoreA = (a.dmgVal || 0) * (a.mainStats.body === 'dmg' && a.mainStats.legs === 'dmg' ? 1.2 : 1) * getWeight(a);
-            const scoreB = (b.dmgVal || 0) * (b.mainStats.body === 'dmg' && b.mainStats.legs === 'dmg' ? 1.2 : 1) * getWeight(b);
-            return scoreB - scoreA;
-        });
-    } else {
-        filtered.sort((a, b) => (b.dps * getWeight(b)) - (a.dps * getWeight(a)));
-    }
-    return filtered.slice(0, 3);
-}
-
-function createGuideCard(unitObj, modeClass) {
-    const bannerContent = `<div class="mp-container is-dps" id="guide-mp-${unitObj.id}"><span class="mp-label">Max Potential</span><span class="mp-val">...</span></div>
-        ${getUnitImgHtml(unitObj, 'unit-avatar')}<div class="unit-title"><h2>${unitObj.name}</h2><span>${unitObj.role}</span></div>`;
-
-    const mainContent = `<div class="top-builds-list guide-list-wrapper" id="guide-list-${unitObj.id}"><div class="msg-empty">Loading builds...</div></div>`;
-
-    return createBaseUnitCard(unitObj, {
-        id: 'card-' + unitObj.id,
-        additionalClasses: `calc-guide-card lazy-guide-load ${modeClass}`,
-        bannerContent,
-        tagsContent: `<span class="guide-trait-tag text-xs-plus" id="guide-trait-${unitObj.id}">Best: ...</span>`,
-        mainContent
-    });
-}
-
-function updateGuideBuilds(unitId) {
-    const unit = unitDatabase.find(u => u.id === unitId);
-    if (!unit) return;
-
-    const activeMode = 'fixed';
-    const activeCfg = 0; // Forced to Max Potential
-    const filterTraitId = document.getElementById('guideTraitSelect').value;
-
-    if (!unitBuildsCache[unitId]) processUnitCache(unit, null, null);
-    const builds = processGuideTop3(getGuideBuildsFromCache(unit, activeMode, activeCfg), unit, filterTraitId);
-
-    const mpLabel = document.getElementById(`guide-mp-${unitId}`);
-    const traitLabel = document.getElementById(`guide-trait-${unitId}`);
-    const listContainer = document.getElementById(`guide-list-${unitId}`);
-
-    if (!builds || builds.length === 0) {
-        if (listContainer) listContainer.innerHTML = '<div class="msg-empty">No builds found.</div>';
-        return;
-    }
-
-    const best = builds[0];
-    const isRange = unit.id === 'law';
-    if (mpLabel) {
-        mpLabel.className = `mp-container ${isRange ? 'is-range' : 'is-dps'}`;
-        mpLabel.querySelector('.mp-label').innerText = isRange ? 'Max Range' : 'Max Potential';
-        mpLabel.querySelector('.mp-val').innerText = isRange ? (best.range || 0).toFixed(1) : format(best.dps || 0);
-    }
-    if (traitLabel) traitLabel.innerText = `Best: ${best.traitName}`;
-    if (listContainer) {
-        listContainer.innerHTML = builds.map((b, i) => generateBuildRowHTML(b, i, { totalCost: unit.totalCost || 50000, placement: unit.placement || 1, sortMode: 'dps', unitId: unit.id })).join('');
-    }
-}
-
-function renderGuides() {
-    const guideGrid = document.getElementById('guideList');
-    if (!guideGrid) return;
-    guideGrid.innerHTML = '';
-
-    const filterTraitId = document.getElementById('guideTraitSelect').value;
-
-    let uName = 'All Units';
-    if (!guideUnitSelection.has('all')) {
-        if (guideUnitSelection.size === 1) {
-            uName = unitDatabase.find(u => u.id === Array.from(guideUnitSelection)[0])?.name || 'Unknown';
-        } else {
-            uName = `${guideUnitSelection.size} Units`;
-        }
-    }
-
-    let tName = 'Auto Trait';
-    if (filterTraitId !== 'auto') {
-        const found = getTraitById(filterTraitId);
-        if (found) tName = found.name;
-    }
-    document.getElementById('dispGuideUnit').innerText = uName;
-    document.getElementById('dispGuideTrait').innerText = tName;
-
-    const activeMode = 'fixed';
-    const activeCfg = 0; // Forced
-
-    const unitsToProcess = (guideUnitSelection.has('all')) ? [...unitDatabase] : unitDatabase.filter(u => guideUnitSelection.has(u.id));
-
-    unitsToProcess.sort((a, b) => getQuickScore(b) - getQuickScore(a));
-
-    const fragment = document.createDocumentFragment();
-    unitsToProcess.forEach(unit => {
-        fragment.appendChild(createGuideCard(unit, `mode-${activeMode} cfg-${activeCfg}`));
-    });
-    guideGrid.appendChild(fragment);
-
-    if (!window.guideLoadObserver) {
-        window.guideLoadObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const unitId = entry.target.id.replace('card-', '');
-                    updateGuideBuilds(unitId);
-                    window.guideLoadObserver.unobserve(entry.target);
-                    entry.target.classList.remove('lazy-guide-load');
-                }
-            });
-        }, { rootMargin: '200px' });
-    }
-
-    const newGuides = guideGrid.querySelectorAll('.lazy-guide-load');
-    newGuides.forEach(g => window.guideLoadObserver.observe(g));
-
-    if (guideGrid.children.length === 0) guideGrid.innerHTML = `<div class="msg-empty">No guides found. Database may still be calculating.</div>`;
-}
-
 function openTraitBestList(unitId) {
     const unit = typeof getUnitById === 'function' ? getUnitById(unitId) : unitDatabase.find(u => u.id === unitId);
     if (!unit) return;
@@ -935,7 +712,7 @@ function openTraitBestList(unitId) {
         tagsHtml += `<span style="background: rgba(74, 222, 128, 0.2); color: #4ade80; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(74, 222, 128, 0.3);">Miku Buff ON</span>`;
     }
     if (window.waterGodBuffActive) {
-        tagsHtml += `<span style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(251, 191, 36, 0.3);">Water God ON</span>`;
+        tagsHtml += `<span style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(251, 191, 36, 0.3);">Enlightened God ON</span>`;
     }
     if (window.mageHillBuffActive) {
         tagsHtml += `<span style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(251, 146, 60, 0.3);">Fern (Hill) ON</span>`;
