@@ -217,7 +217,7 @@ if (isMainThread) {
         const allowedHeads = cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head'] : ['none'];
         const traitGroups = {};
 
-        const maxPts = (unit.id === 'king_sailor') ? 129 : 99;
+        const maxPts = (unit.id === 'king_sailor' || unit.id === 'the_strongest_in_history') ? 129 : 99;
         const allowRange = RANGE_ENABLED_UNITS.has(unit.id);
 
         traitsForCalc.forEach(trait => {

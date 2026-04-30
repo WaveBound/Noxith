@@ -26,13 +26,13 @@ unitDatabase.push({
 
     // UPGRADES (dmg, spa, range, cost per level)
     upgrades: [
-        { dmg: 1000, spa: 6.6, range: 37, cost: 3000 },   // Up 0 (Base)
-        { dmg: 2900, spa: 6.6, range: 41, cost: 6000 },   // Up 1
-        { dmg: 4600, spa: 6.6, range: 47, cost: 9500 },   // Up 2
-        { dmg: 7100, spa: 6.6, range: 50, cost: 14000 },   // Up 3
-        { dmg: 10000, spa: 6.6, range: 54, cost: 20000 },   // Up 4
-        { dmg: 15000, spa: 6.6, range: 59, cost: 30000 },   // Up 5
-        { dmg: 18000, spa: 6.6, range: 63, cost: 35000 },   // Up 6
+        { dmg: 0, spa: 6.6, range: 37, cost: 3000 },   // Up 0 (Base)
+        { dmg: 0, spa: 6.6, range: 41, cost: 6000 },   // Up 1
+        { dmg: 0, spa: 6.6, range: 47, cost: 9500 },   // Up 2
+        { dmg: 0, spa: 6.6, range: 50, cost: 14000 },   // Up 3
+        { dmg: 0, spa: 6.6, range: 54, cost: 20000 },   // Up 4
+        { dmg: 0, spa: 6.6, range: 59, cost: 30000 },   // Up 5
+        { dmg: 6650, spa: 9, range: 63, cost: 35000 },   // Up 6
     ],
 
     // PASSIVES (displayed in unit info panel)

@@ -112,7 +112,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
         });
     }
 
-    let maxPts = (unit.id === 'king_sailor') ? 129 : 99;
+    let maxPts = (unit.id === 'king_sailor' || unit.id === 'the_strongest_in_history') ? 129 : 99;
     options.dmgPoints = Math.min(options.dmgPoints || 0, maxPts);
     options.spaPoints = Math.min(options.spaPoints || 0, maxPts);
     options.rangePoints = Math.min(options.rangePoints || 0, maxPts);
