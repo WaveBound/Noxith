@@ -3,7 +3,7 @@
 // ============================================================================
 
 // --- FEATURE FLAGS ---
-const ENABLE_HOTBAR = false; // Set to true to enable the hotbar, false to hide it
+const ENABLE_HOTBAR = true; // Set to true to enable the hotbar, false to hide it
 
 // Data & Cache
 let customTraits = [];

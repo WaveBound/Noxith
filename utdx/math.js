@@ -392,8 +392,8 @@ function calculateDPS(uStats, relicStats, context) {
     // For now, let's assume it's handled upstream or passed in uStats if needed.
     // if (traitObj.isEternal) { const waveCap = Math.min(wave, 12); eternalDmgBuff = waveCap * 5; passivePcent += eternalDmgBuff; eternalRangeBuff = waveCap * 2.5; }
 
-    const waterGodBuff = (typeof window !== 'undefined' && window.waterGodBuffActive) ? 20 : 0;
-    const waterGodSpa = (typeof window !== 'undefined' && window.waterGodBuffActive) ? 20 : 0;
+    const enlightenedGodBuff = (typeof window !== 'undefined' && window.enlightenedGodBuffActive) ? 20 : 0;
+    const enlightenedGodSpa = (typeof window !== 'undefined' && window.enlightenedGodBuffActive) ? 20 : 0;
     const bijuuBuff = (typeof window !== 'undefined' && window.bijuuLinkActive) ? 25 : 0;
     const bijuuSpa = (typeof window !== 'undefined' && window.bijuuLinkActive) ? 15 : 0;
 
@@ -422,10 +422,10 @@ function calculateDPS(uStats, relicStats, context) {
     const mageGroundBuffActive = (typeof window !== 'undefined' && window.mageGroundBuffActive);
     const mageGroundCrit = (mageGroundBuffActive && (uType === 'ground' || uType === 'hybrid')) ? 45 : 0;
 
-    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + waterGodBuff + (bijuuBuff > 0 ? 25 : 0) + (uStats.id === 'king_sailor' ? 10 : 0);
+    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + enlightenedGodBuff + (bijuuBuff > 0 ? 25 : 0) + (uStats.id === 'king_sailor' ? 10 : 0);
     const finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
 
-    const setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + waterGodSpa + bijuuSpa + kmSpa + mageHillSpa;
+    const setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + enlightenedGodSpa + bijuuSpa + kmSpa + mageHillSpa;
 
     // Great Mage Accessory: -20% SPA (Uptime ~60% from kill trigger)
     const mageSpaMult = (headPiece === 'mage_head') ? 0.88 : 1; // -20% * 0.6 uptime
@@ -440,11 +440,11 @@ function calculateDPS(uStats, relicStats, context) {
     const { headDmgBuff, headDotBuff, headCalc } = _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats);
     const mikuBuff = (typeof window !== 'undefined' && window.mikuBuffActive) ? 100 : 0;
 
-    let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBuff + mikuBuff + waterGodBuff + bijuuBuff + kmDmg;
+    let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBuff + mikuBuff + enlightenedGodBuff + bijuuBuff + kmDmg;
 
     // Junior Ninja: 1.1x Multiplier to Miku Buff and Passives (WATER GOD ONLY)
     if (headPiece === 'junior' && uStats.id === 'water_god') {
-        additiveTotal = ((sBonus.dmg || 0) + passivePcent + headDmgBuff + mikuBuff + waterGodBuff + bijuuBuff + kmDmg) * 1.1;
+        additiveTotal = ((sBonus.dmg || 0) + passivePcent + headDmgBuff + mikuBuff + enlightenedGodBuff + bijuuBuff + kmDmg) * 1.1;
     }
 
     const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1);
@@ -610,8 +610,8 @@ function calculateDPS(uStats, relicStats, context) {
         totalSetStats: sBonus,
         tagBuffs,
         mikuBuff: mikuBuff,
-        waterGodBuff: waterGodBuff,
-        waterGodSpa: waterGodSpa,
+        enlightenedGodBuff: enlightenedGodBuff,
+        enlightenedGodSpa: enlightenedGodSpa,
         bijuuBuff: bijuuBuff,
         bijuuSpa: bijuuSpa,
         kingMarkDmg: kmDmg,

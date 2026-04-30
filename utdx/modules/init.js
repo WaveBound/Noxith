@@ -89,7 +89,7 @@ function injectBuffButtons() {
 
     const buffs = [
         { id: 'MikuBuff', text: 'Miku Buff', title: "Apply Miku's +100% Damage Buff", fn: 'toggleMikuBuff' },
-        { id: 'WaterGodBuff', text: 'Enlightened God', title: "Apply Enlightened God's +20% Dmg, -20% SPA, +20% Range Buff", fn: 'toggleWaterGodBuff' },
+        { id: 'EnlightenedGodBuff', text: 'Enlightened God', title: "Apply Enlightened God's +20% Dmg, -20% SPA, +20% Range Buff", fn: 'toggleEnlightenedGodBuff' },
         { id: 'BijuuBuff', text: 'Bijuu Link', title: "Apply Bijuu Link: +25% Dmg, +25% Range, -15% SPA", fn: 'toggleBijuuLink' },
         { id: 'AMSupport', text: 'Ancient Mage', title: "Apply Ancient Mage Buff: +20% Crit Rate/Dmg", fn: 'toggleAncientMageSupport' },
         { id: 'KSBuff', text: 'King Sailor', title: "Apply King Sailor Buff: +10% Crit Rate, +20% Crit Damage", fn: 'toggleKingSailorBuff' },

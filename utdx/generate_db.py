@@ -41,7 +41,7 @@ global.window = global;
 
 // Map Python configs to Window States
 window.mikuBuffActive = buffConfig.miku === '1';
-window.waterGodBuffActive = buffConfig.watergod === '1';
+window.enlightenedGodBuffActive = buffConfig.enlightenedgod === '1';
 window.bijuuLinkActive = buffConfig.bijuu === '1';
 window.ancientMageSupportActive = buffConfig.amage === '1';
 window.kingSailorMarkActive = buffConfig.ksailor === '1';
@@ -459,7 +459,7 @@ if (isMainThread) {
 def get_db_name(combo):
     parts = []
     if combo[0] == '1': parts.append('miku')
-    if combo[1] == '1': parts.append('watergod')
+    if combo[1] == '1': parts.append('enlightenedgod')
     if combo[2] == '1': parts.append('bijuu')
     if combo[3] == '1': parts.append('amage')
     if combo[4] == '1': parts.append('ksailor')
@@ -475,9 +475,7 @@ def run_combo(args):
     """Run a single buff combination as a subprocess. Safe to call in parallel."""
     i, combo, total_runs, temp_runner = args
     buff_config = {
-        'miku': combo[0],
-        'watergod': combo[1],
-        'bijuu': combo[2],
+        'enlightenedgod': combo[1],
         'amage': combo[3],
         'ksailor': combo[4],
         'mage': combo[5]
@@ -547,11 +545,11 @@ def main():
         f.write(combined_js)
 
     # Calculate combinations:
-    # miku (2), watergod (2), bijuu (2), amage (2), ksailor (2), mage exclusive (3: none, hill, ground)
+    # miku (2), enlightenedgod (2), bijuu (2), amage (2), ksailor (2), mage exclusive (3: none, hill, ground)
     # Total = 2 * 2 * 2 * 2 * 2 * 3 = 96 permutations
     combinations = list(itertools.product(
         ['0', '1'], # Miku
-        ['0', '1'], # Water God
+        ['0', '1'], # Enlightened God
         ['0', '1'], # Bijuu
         ['0', '1'], # Ancient Mage
         ['0', '1'], # King Sailor
