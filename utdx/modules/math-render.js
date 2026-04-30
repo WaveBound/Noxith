@@ -118,7 +118,7 @@ function renderSourceTotalsSection(data) {
                     ${abilityDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Active Ability</span><span class="text-white">${fmt.pct(abilityDmg)}</span></div>` : ''}
                     ${accessoryDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Accessory</span><span class="text-white">${fmt.pct(accessoryDmg)}</span></div>` : ''}
                     ${mikuDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fbbf24;"><span>↳ Miku Buff</span><span>${fmt.pct(mikuDmg)}</span></div>` : ''}
-                    ${waterGodDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fbbf24;"><span>↳ Water God</span><span>${fmt.pct(waterGodDmg)}</span></div>` : ''}
+                    ${waterGodDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fbbf24;"><span>↳ Enlightened God</span><span>${fmt.pct(waterGodDmg)}</span></div>` : ''}
                     ${bijuuDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fbbf24;"><span>↳ Bijuu Link</span><span>${fmt.pct(bijuuDmg)}</span></div>` : ''}
                     ${kingMarkDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fbbf24;"><span>↳ Unrivaled Mark</span><span>${fmt.pct(kingMarkDmg)}</span></div>` : ''}
                     ${data.amSupportActive ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #60a5fa;"><span>↳ Ancient Mage</span><span>Active</span></div>` : ''}
@@ -140,7 +140,7 @@ function renderActiveBuffsSection(data) {
 
     // 1. Global Buffs
     if (data.mikuBuff > 0) buffs.push({ name: "Miku Buff", desc: "Active: +100% Damage", color: "#4ade80" });
-    if (data.waterGodBuff > 0) buffs.push({ name: "Water God", desc: "Active: +20% Dmg, -20% SPA, +20% Range", color: "#fbbf24" });
+    if (data.waterGodBuff > 0) buffs.push({ name: "Enlightened God", desc: "Active: +20% Dmg, -20% SPA, +20% Range", color: "#fbbf24" });
     if (data.bijuuBuff > 0) buffs.push({ name: "Bijuu Link", desc: "Active: +25% Dmg, +25% Range, -15% SPA", color: "#f87171" });
     if (data.amSupportActive) buffs.push({ name: "Ancient Mage", desc: "Active: +20% Crit Rate/Dmg", color: "#60a5fa" });
     if (data.ksCrit > 0) buffs.push({ name: "King Sailor", desc: "Active: +10% Crit Rate, +20% Crit Dmg", color: "#60a5fa" });
@@ -228,7 +228,7 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, h
                     ${(data.abilityBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-custom opacity-70">↳ Ability Buffs</td><td class="mt-cell-formula text-custom">${fmt.pct(data.abilityBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
 
                     ${(data.mikuBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-accent-end opacity-70">↳ Miku Buff</td><td class="mt-cell-formula text-accent-end">${fmt.pct(data.mikuBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${(data.waterGodBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Water God</td><td class="mt-cell-formula text-gold">${fmt.pct(data.waterGodBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.waterGodBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Enlightened God</td><td class="mt-cell-formula text-gold">${fmt.pct(data.waterGodBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.bijuuBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-error opacity-70">↳ Bijuu Link</td><td class="mt-cell-formula text-error">${fmt.pct(data.bijuuBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
 
                     ${data.conditionalData ? `
@@ -282,7 +282,7 @@ function renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa) {
                     <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base</td><td class="mt-cell-formula">-${fmt.fix(baseSetSpa, 1)}%</td><td class="mt-cell-val"></td></tr>
                     ${tagSpa !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonuses</td><td class="mt-cell-formula">-${fmt.fix(tagSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${passiveSpa > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">-${fmt.fix(passiveSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${(data.waterGodSpa || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Water God</td><td class="mt-cell-formula text-gold">-${fmt.fix(data.waterGodSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.waterGodSpa || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Enlightened God</td><td class="mt-cell-formula text-gold">-${fmt.fix(data.waterGodSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.bijuuSpa || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-error opacity-70">↳ Bijuu Link</td><td class="mt-cell-formula text-error">-${fmt.fix(data.bijuuSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.mageHillSpa || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:#fb923c">↳ Fern (Hill)</td><td class="mt-cell-formula" style="color:#fb923c">-${fmt.fix(data.mageHillSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
 
@@ -706,7 +706,7 @@ function renderRangeSection(data) {
                 ${setRange > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Bonus</td><td class="mt-cell-formula">${fmt.pct(setRange)}</td><td class="mt-cell-val"></td></tr>` : ''}
                 ${basePassiveRange > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${fmt.pct(basePassiveRange)}</td><td class="mt-cell-val"></td></tr>` : ''}
                 ${(data.eternalRangeBuff > 0) ? `<tr><td class="mt-cell-label mt-pl-md text-accent-start opacity-70">↳ Eternal Stacks</td><td class="mt-cell-formula text-accent-start">${fmt.pct(data.eternalRangeBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
-                ${(data.waterGodBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Water God</td><td class="mt-cell-formula text-gold">${fmt.pct(data.waterGodBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                ${(data.waterGodBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Enlightened God</td><td class="mt-cell-formula text-gold">${fmt.pct(data.waterGodBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
                 ${(data.bijuuBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-error opacity-70">↳ Bijuu Link</td><td class="mt-cell-formula text-error">${fmt.pct(data.bijuuBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
 
                 <tr class="mt-border-top"><td class="mt-cell-label mt-pt-sm text-white">Final Range Result</td><td class="mt-cell-formula"></td><td class="mt-cell-val mt-pt-sm mt-text-bold" style="color: #fbbf24">${fmt.fix(data.range, 2)}</td></tr>

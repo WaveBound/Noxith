@@ -131,7 +131,7 @@ function initHotbar() {
 
         const bufferUnits = [
             { id: 'miku', name: 'Miku', img: 'images/units/Miku.png' },
-            { id: 'water_god', name: 'Water God', img: 'images/units/EnlightenedGod.png' }
+            { id: 'enlightened_god', name: 'Enlightened God', img: 'images/units/EnlightenedGod.png' }
         ];
 
         bufferUnits.forEach(buff => {
