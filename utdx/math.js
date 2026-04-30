@@ -538,9 +538,9 @@ function calculateDPS(uStats, relicStats, context) {
         // Baal's Lightning: 5 ticks of 20% damage each.
         const tickCount = 5;
         const tickDmg = 0.20;
-        
+
         attackMultiplier = 1 + (tickCount * tickDmg);
-        
+
         extraAttacksData = {
             req: "Baal's Lightning",
             hits: `1 + ${tickCount} Ticks`,
@@ -572,7 +572,7 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     let hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
-    
+
     // Sorcerer Hunter Set Perk: 1.15x True Damage (Multiplicative after everything, excluding DoT/Summon)
     let trueDmgMult = 1;
     if (relicStats.set === 'sorcerer_hunter') {

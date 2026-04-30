@@ -295,13 +295,15 @@ function openUnitInfo(unitId) {
                 <ul class="info-list">${etherealHtml}</ul>
             </div>
             ${unit.ability ? `
-            <div class="info-section section-ability">
-                <div class="info-sec-title">Active Ability: ${unit.ability.abilityName}</div>
-                <ul class="info-list">
-                    ${unit.ability.cooldown ? `<li><span>Cooldown:</span> <span class="text-gold">${unit.ability.cooldown}s</span></li>` : ''}
-                    <li class="info-ability-desc-item"><span class="info-ability-desc">${unit.ability.desc || 'No description available.'}</span></li>
-                </ul>
-            </div>` : ''}
+<div class="info-section section-ability">
+    ${(Array.isArray(unit.ability) ? unit.ability : [unit.ability]).map(ab => `
+        <div class="info-sec-title">Active Ability: ${ab.abilityName}</div>
+        <ul class="info-list">
+            ${ab.cooldown ? `<li><span>Cooldown:</span> <span class="text-gold">${ab.cooldown}s</span></li>` : ''}
+            <li class="info-ability-desc-item"><span class="info-ability-desc">${ab.desc || 'No description available.'}</span></li>
+        </ul>
+    `).join('')}
+</div>` : ''}
             ${modesHtml ? `<div class="info-section section-modes">
                 <div class="info-sec-title">Class Details (Battle Adaptation)</div>
                 <ul class="info-list">${modesHtml}</ul>

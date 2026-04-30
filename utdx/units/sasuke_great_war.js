@@ -45,3 +45,4 @@ unitDatabase.push({
             "Full Susanoo: Damage Bonus increased to +150%."
         ]
 });
+    

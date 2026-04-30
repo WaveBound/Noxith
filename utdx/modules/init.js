@@ -24,7 +24,6 @@ function initApp() {
         initInventory();
     }
 
-
     // 6. End of Life Notice
     if (!localStorage.getItem('eol_notice_hidden_v2')) {
         setTimeout(() => {
@@ -65,11 +64,15 @@ function initApp() {
     }
 }
 
-// Ensure the app initializes immediately when the DOM is ready, rather than waiting for all images/resources to load (onload)
+// Wait for DOMContentLoaded AND all unit scripts before initialising.
+function _bootstrap() {
+    (window.__unitsReady || Promise.resolve()).then(initApp);
+}
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initApp);
+    document.addEventListener('DOMContentLoaded', _bootstrap);
 } else {
-    initApp();
+    _bootstrap();
 }
 
 // Batch DOM operations to avoid layout thrashing and unnecessary reflows
@@ -87,57 +90,45 @@ function injectBuffButtons() {
         document.head.appendChild(style);
     }
 
-    const buffs = [
-        { id: 'MikuBuff', text: 'Miku Buff', title: "Apply Miku's +100% Damage Buff", fn: 'toggleMikuBuff' },
-        { id: 'EnlightenedGodBuff', text: 'Enlightened God', title: "Apply Enlightened God's +20% Dmg, -20% SPA, +20% Range Buff", fn: 'toggleEnlightenedGodBuff' },
-        { id: 'BijuuBuff', text: 'Bijuu Link', title: "Apply Bijuu Link: +25% Dmg, +25% Range, -15% SPA", fn: 'toggleBijuuLink' },
-        { id: 'AMSupport', text: 'Ancient Mage', title: "Apply Ancient Mage Buff: +20% Crit Rate/Dmg", fn: 'toggleAncientMageSupport' },
-        { id: 'KSBuff', text: 'King Sailor', title: "Apply King Sailor Buff: +10% Crit Rate, +20% Crit Damage", fn: 'toggleKingSailorBuff' },
-        { id: 'MageHillBuff', text: 'Fern(Hill)', title: "Apply Fern (Hill) Buff: -30% SPA (Hill Only)", fn: 'toggleMageHillBuff' },
-        { id: 'MageGroundBuff', text: 'Fern(Ground)', title: "Apply Fern (Ground) Buff: +45% Crit Rate (Ground Only)", fn: 'toggleMageGroundBuff' }
-    ];
-
-    const createBtn = (buff, prefix) => {
-        const fullId = prefix + buff.id;
+    // DYNAMIC BUTTON GENERATOR using the Single Source of Truth
+    const createBtn = (configKey, config) => {
         const label = document.createElement('label');
         label.className = 'nav-toggle-label miku-btn-label';
-        label.setAttribute('for', fullId);
-        label.title = buff.title;
+        label.title = config.desc; // Dynamic tooltip
 
-        // Preserve original styling
-        label.innerHTML = `<div class="toggle-wrapper" style="gap: 6px;"><input type="checkbox" id="${fullId}" style="cursor: pointer;"><div class="mini-switch"></div><span${buff.id === 'MikuBuff' ? '' : ' style="white-space: nowrap;"'}>${buff.text}</span></div>`;
+        label.innerHTML = `
+            <div class="toggle-wrapper" style="gap: 6px;">
+                <input type="checkbox" data-buff="${configKey}" style="cursor: pointer;">
+                <div class="mini-switch"></div>
+                <span style="white-space: nowrap;">${config.name}</span>
+            </div>`;
 
         const input = label.querySelector('input');
-        input.addEventListener('change', function () { 
-            // Sync all inputs for this buff id
-            const allInputs = document.querySelectorAll(`input[id$="${buff.id}"]`);
-            allInputs.forEach(inp => {
-                if (inp !== this) inp.checked = this.checked;
-            });
-            if (typeof window[buff.fn] === 'function') window[buff.fn](this); 
+        input.addEventListener('change', function () {
+            if (typeof window.handleBuffToggle === 'function') {
+                window.handleBuffToggle(configKey, this);
+            }
         });
 
         return label;
     };
 
-    const insertBatch = (containerId, targetId, prefix) => {
-        const container = document.getElementById(containerId);
-        if (!container) return;
+    const container = document.getElementById('dbInjector');
+    if (!container) return;
 
-        const frag = document.createDocumentFragment();
-        buffs.forEach(buff => frag.appendChild(createBtn(buff, prefix)));
+    // Find the target element to insert the buttons after (e.g. Inventory toggle)
+    const target = document.getElementById('invModeToggle');
+    const frag = document.createDocumentFragment();
 
-        const target = document.getElementById(targetId);
-        if (target) {
-            const label = target.closest('label') || target.parentElement;
-            if (label && container.contains(label)) {
-                label.after(frag);
-                return;
-            }
-        }
+    if (window.GLOBAL_BUFF_DATA) {
+        Object.entries(window.GLOBAL_BUFF_DATA).forEach(([key, config]) => {
+            frag.appendChild(createBtn(key, config));
+        });
+    }
+
+    if (target) {
+        target.after(frag);
+    } else {
         container.appendChild(frag);
-    };
-
-    insertBatch('dbInjector', 'invModeToggle', 'global');
-    insertBatch('hotbar-buffs-container', null, 'hotbar');
+    }
 }

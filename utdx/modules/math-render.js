@@ -1,3 +1,7 @@
+// ============================================================================
+// MATH-RENDER.JS - UI Rendering for DPS Calculations
+// ============================================================================
+
 //Helpers for formatting
 const fmt = {
     pct: (n) => `${(n || 0) >= 0 ? '+' : ''}${parseFloat((n || 0).toFixed(1))}%`,
@@ -51,20 +55,52 @@ function renderSourceTotalsSection(data) {
     const traitCrit = data.traitObj.critRate || 0;
 
     // 3. Passive & Global Breakdown (Isolate specific sources)
-    const unitInnateDmg = (data.passiveBuff || 0) - (data.headBuffs.dmg || 0) - (data.abilityBuff || 0);
+    const eternalDmg = data.eternalBuff || 0;
+    const unitInnateDmg = (data.passiveBuff || 0) - (data.headBuffs.dmg || 0) - (data.abilityBuff || 0) - eternalDmg;
     const abilityDmg = data.abilityBuff || 0;
     const accessoryDmg = data.headBuffs.dmg || 0;
-    const mikuDmg = data.mikuBuff || 0;
-    const enlightenedGodDmg = data.enlightenedGodBuff || 0;
-    const bijuuDmg = data.bijuuBuff || 0;
-    const kingMarkDmg = data.kingMarkDmg || 0;
-    const passiveTotalDmg = unitInnateDmg + abilityDmg + accessoryDmg + mikuDmg + enlightenedGodDmg + bijuuDmg + kingMarkDmg;
 
-    const passiveTotalSpa = (data.passiveSpaBuff || 0) + (data.enlightenedGodSpa || 0) + (data.bijuuSpa || 0) + (data.kingMarkSpa || 0) + (data.mageHillSpa || 0);
-    const passiveTotalRange = (data.baseStats.passiveRange || 0) + (data.eternalRangeBuff || 0) + (data.enlightenedGodBuff || 0) + (data.bijuuBuff || 0);
-    const passiveTotalCrit = (data.amCritRate || 0) + (data.ksCrit || 0) + (data.mageGroundCrit || 0);
-    const passiveTotalCdmg = (data.amCritDmg || 0) + (data.ksCdmg || 0);
+    let globalPassiveDmg = 0;
+    let globalPassiveSpa = 0;
+    let globalPassiveRange = 0;
+    let globalPassiveCrit = 0;
+    let globalPassiveCdmg = 0;
 
+    let globalBuffsDmgHtml = '';
+    let globalBuffsSpaHtml = '';
+    let globalBuffsCritHtml = '';
+
+    // Dynamically aggregate ALL active buffs for the breakdown
+    if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
+        Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
+            const bData = data.activeGlobalBuffs[buff.id];
+            if (bData) {
+                if (bData.dmg) {
+                    globalPassiveDmg += bData.dmg;
+                    globalBuffsDmgHtml += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: ${buff.color};"><span>↳ ${buff.name}</span><span>${fmt.pct(bData.dmg)}</span></div>`;
+                }
+                if (bData.spa) {
+                    globalPassiveSpa += bData.spa;
+                    globalBuffsSpaHtml += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: ${buff.color};"><span>↳ ${buff.name}</span><span>Active</span></div>`;
+                }
+                if (bData.range) globalPassiveRange += bData.range;
+
+                if (bData.crit || bData.cdmg) {
+                    if (bData.crit) globalPassiveCrit += bData.crit;
+                    if (bData.cdmg) globalPassiveCdmg += bData.cdmg;
+                    if (!bData.spa && !bData.dmg) {
+                        globalBuffsCritHtml += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: ${buff.color};"><span>↳ ${buff.name}</span><span>Active</span></div>`;
+                    }
+                }
+            }
+        });
+    }
+
+    const passiveTotalDmg = unitInnateDmg + abilityDmg + accessoryDmg + globalPassiveDmg + eternalDmg;
+    const passiveTotalSpa = (data.passiveSpaBuff || 0) + globalPassiveSpa;
+    const passiveTotalRange = (data.baseStats.passiveRange || 0) + (data.eternalRangeBuff || 0) + globalPassiveRange;
+    const passiveTotalCrit = globalPassiveCrit;
+    const passiveTotalCdmg = globalPassiveCdmg;
 
     return `
         <div class="math-section" style="border-color: rgba(255, 255, 255, 0.15); background: #000; flex: 1; margin-bottom: 0; padding: 14px; border-radius: 8px; box-shadow: inset 0 0 20px rgba(255,255,255,0.02);">
@@ -117,13 +153,9 @@ function renderSourceTotalsSection(data) {
                     `) + `
                     ${abilityDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Active Ability</span><span class="text-white">${fmt.pct(abilityDmg)}</span></div>` : ''}
                     ${accessoryDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Accessory</span><span class="text-white">${fmt.pct(accessoryDmg)}</span></div>` : ''}
-                    ${mikuDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fbbf24;"><span>↳ Miku Buff</span><span>${fmt.pct(mikuDmg)}</span></div>` : ''}
-                    ${enlightenedGodDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fbbf24;"><span>↳ Enlightened God</span><span>${fmt.pct(enlightenedGodDmg)}</span></div>` : ''}
-                    ${bijuuDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fbbf24;"><span>↳ Bijuu Link</span><span>${fmt.pct(bijuuDmg)}</span></div>` : ''}
-                    ${kingMarkDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fbbf24;"><span>↳ Unrivaled Mark</span><span>${fmt.pct(kingMarkDmg)}</span></div>` : ''}
-                    ${data.amSupportActive ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #60a5fa;"><span>↳ Ancient Mage</span><span>Active</span></div>` : ''}
-                    ${(data.mageHillSpa || 0) > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #fb923c;"><span>↳ Fern (Hill)</span><span>Active</span></div>` : ''}
-                    ${(data.mageGroundCrit || 0) > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #f472b6;"><span>↳ Fern (Ground)</span><span>Active</span></div>` : ''}
+                    ${globalBuffsDmgHtml}
+                    ${globalBuffsSpaHtml}
+                    ${globalBuffsCritHtml}
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 0.65rem; color: #777;">
                     <div style="display:flex; justify-content:space-between;"><span>SPA Red.</span><b class="text-white">-${passiveTotalSpa.toFixed(1)}%</b></div>
@@ -138,14 +170,18 @@ function renderSourceTotalsSection(data) {
 function renderActiveBuffsSection(data) {
     const buffs = [];
 
-    // 1. Global Buffs
-    if (data.mikuBuff > 0) buffs.push({ name: "Miku Buff", desc: "Active: +100% Damage", color: "#4ade80" });
-    if (data.enlightenedGodBuff > 0) buffs.push({ name: "Enlightened God", desc: "Active: +20% Dmg, -20% SPA, +20% Range", color: "#fbbf24" });
-    if (data.bijuuBuff > 0) buffs.push({ name: "Bijuu Link", desc: "Active: +25% Dmg, +25% Range, -15% SPA", color: "#f87171" });
-    if (data.amSupportActive) buffs.push({ name: "Ancient Mage", desc: "Active: +20% Crit Rate/Dmg", color: "#60a5fa" });
-    if (data.ksCrit > 0) buffs.push({ name: "King Sailor", desc: "Active: +10% Crit Rate, +20% Crit Dmg", color: "#60a5fa" });
-    if (data.mageHillSpa > 0) buffs.push({ name: "Fern (Hill)", desc: "Active: -30% SPA", color: "#fb923c" });
-    if (data.mageGroundCrit > 0) buffs.push({ name: "Fern (Ground)", desc: "Active: +45% Crit Rate", color: "#f472b6" });
+    // 1. Automatically fetch active Global Buffs
+    if (window.GLOBAL_BUFF_DATA) {
+        Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
+            if (window[buff.stateKey]) {
+                buffs.push({
+                    name: buff.name,
+                    desc: buff.renderLabel,
+                    color: buff.color
+                });
+            }
+        });
+    }
 
     // 2. Trait "Passives"
     if (data.traitObj.isEternal) buffs.push({ name: "Eternal Stacks", desc: "Applied: +5% Dmg & +2.5% Rng / Wave (Max 12)", color: "#c084fc" });
@@ -202,6 +238,16 @@ function renderQuickBreakdownSection(data, avgHitPerUnit, dotColorClass) {
 }
 
 function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, headDmgHtml, preConditionalDmg, baseSetDmg, tagDmg, passiveDmg, eternalDmg, statPointsHtml) {
+    let globalDmgBreakdownHtml = '';
+    if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
+        Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
+            const bData = data.activeGlobalBuffs[buff.id];
+            if (bData && bData.dmg > 0) {
+                globalDmgBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color: ${buff.color};">↳ ${buff.name}</td><td class="mt-cell-formula" style="color: ${buff.color};">${fmt.pct(bData.dmg)}</td><td class="mt-cell-val"></td></tr>`;
+            }
+        });
+    }
+
     return `
             <div class="dd-section">
                 <div class="dd-title mt-text-red"><span>1. Base Damage Calculation</span></div>
@@ -227,9 +273,7 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, h
                     ${eternalDmg > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-accent-start opacity-70">↳ Eternal Stacks (Wave 12+)</td><td class="mt-cell-formula text-accent-start">${fmt.pct(eternalDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.abilityBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-custom opacity-70">↳ Ability Buffs</td><td class="mt-cell-formula text-custom">${fmt.pct(data.abilityBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
 
-                    ${(data.mikuBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-accent-end opacity-70">↳ Miku Buff</td><td class="mt-cell-formula text-accent-end">${fmt.pct(data.mikuBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${(data.enlightenedGodBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Enlightened God</td><td class="mt-cell-formula text-gold">${fmt.pct(data.enlightenedGodBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${(data.bijuuBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-error opacity-70">↳ Bijuu Link</td><td class="mt-cell-formula text-error">${fmt.pct(data.bijuuBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${globalDmgBreakdownHtml}
 
                     ${data.conditionalData ? `
                     <tr><td class="mt-cell-label mt-pt-md mt-text-orange mt-text-bold">${data.conditionalData.name}</td><td class="mt-cell-formula mt-pt-md mt-text-orange mt-text-bold">x${data.conditionalData.mult.toFixed(2)}</td><td class="mt-cell-val calc-highlight mt-pt-md">${fmt.num(data.dmgVal)}</td></tr>` : ''}
@@ -238,6 +282,19 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, h
 }
 
 function renderCritSection(data, setTagCfTotal, setTagCmTotal) {
+    let globalCritBreakdownHtml = '';
+    let globalCdmgBreakdownHtml = '';
+
+    if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
+        Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
+            const bData = data.activeGlobalBuffs[buff.id];
+            if (bData) {
+                if (bData.crit > 0) globalCritBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs" style="color:${buff.color}">• ${buff.name}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs" style="color:${buff.color}">+${fmt.fix(bData.crit, 1)}%</td></tr>`;
+                if (bData.cdmg > 0) globalCdmgBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs" style="color:${buff.color}">• ${buff.name}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs" style="color:${buff.color}">+${fmt.fix(bData.cdmg, 1)}%</td></tr>`;
+            }
+        });
+    }
+
     return `
             <div class="dd-section">
                 <div class="dd-title" style="color: #c084fc"><span>2. Crit Averaging</span> <button class="calc-info-btn" onclick="openInfoPopup('crit_avg')">?</button></div>
@@ -249,15 +306,15 @@ function renderCritSection(data, setTagCfTotal, setTagCmTotal) {
                     ${(data.traitObj.critRate || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs">• Trait (${data.traitObj.name})</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">${fmt.fix(data.traitObj.critRate, 1)}%</td></tr>` : ''}
                     ${data.relicBuffs.cf > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs">• Relics (Main+Sub)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">${fmt.fix(data.relicBuffs.cf, 1)}%</td></tr>` : ''}
                     ${setTagCfTotal > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs">• Set Bonus & Tags</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">${fmt.fix(setTagCfTotal, 1)}%</td></tr>` : ''}
-                    ${(data.mageGroundCrit || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs" style="color:#f472b6">• Fern (Ground)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs" style="color:#f472b6">+${fmt.fix(data.mageGroundCrit, 1)}%</td></tr>` : ''}
+                    ${globalCritBreakdownHtml}
                     
                     <tr><td class="mt-cell-label mt-pl-sm text-gray">↳ CDmg Base</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-gray font-normal">${fmt.fix(data.critData.baseCdmg, 0)}</td></tr>
                     ${data.relicBuffs.cm > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs">• Relics</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">+${fmt.fix(data.relicBuffs.cm, 1)}%</td></tr>` : ''}
                     ${setTagCmTotal > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs">• Set & Tags</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">+${fmt.fix(setTagCmTotal, 1)}%</td></tr>` : ''}
+                    ${globalCdmgBreakdownHtml}
 
                     <tr><td class="mt-cell-label">Total Crit Damage</td><td class="mt-cell-formula">=</td><td class="mt-cell-val calc-highlight">${fmt.fix(data.critData.cdmg, 0)}%</td></tr>
                     
-                    <!-- UPDATED: Avg Damage Row without border/block (Relies on new CSS) -->
                     <tr>
                         <td class="mt-cell-label text-right pr-2">Avg Damage Per Hit</td>
                         <td class="mt-cell-formula"></td>
@@ -268,6 +325,16 @@ function renderCritSection(data, setTagCfTotal, setTagCmTotal) {
 }
 
 function renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa) {
+    let globalSpaBreakdownHtml = '';
+    if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
+        Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
+            const bData = data.activeGlobalBuffs[buff.id];
+            if (bData && bData.spa > 0) {
+                globalSpaBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:${buff.color};">↳ ${buff.name}</td><td class="mt-cell-formula" style="color:${buff.color};">-${fmt.fix(bData.spa, 1)}%</td><td class="mt-cell-val"></td></tr>`;
+            }
+        });
+    }
+
     return `
             <div class="dd-section">
                 <div class="dd-title mt-text-custom"><span>3. SPA (Speed) Calculation</span> <button class="calc-info-btn" onclick="openInfoPopup('spa_calc')">?</button></div>
@@ -282,9 +349,7 @@ function renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa) {
                     <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base</td><td class="mt-cell-formula">-${fmt.fix(baseSetSpa, 1)}%</td><td class="mt-cell-val"></td></tr>
                     ${tagSpa !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonuses</td><td class="mt-cell-formula">-${fmt.fix(tagSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${passiveSpa > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">-${fmt.fix(passiveSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${(data.enlightenedGodSpa || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Enlightened God</td><td class="mt-cell-formula text-gold">-${fmt.fix(data.enlightenedGodSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${(data.bijuuSpa || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-error opacity-70">↳ Bijuu Link</td><td class="mt-cell-formula text-error">-${fmt.fix(data.bijuuSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${(data.mageHillSpa || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:#fb923c">↳ Fern (Hill)</td><td class="mt-cell-formula" style="color:#fb923c">-${fmt.fix(data.mageHillSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${globalSpaBreakdownHtml}
 
                     <tr><td class="mt-cell-label">Cap Check (${data.spaCap}s)</td><td class="mt-cell-formula">MAX</td><td class="mt-cell-val calc-result">${fmt.fix(data.spa, 3)}s</td></tr>
                 </table>
@@ -300,31 +365,25 @@ function renderDotSection(data, headDotRow) {
         return `<span class="text-dim">(${fmt.num(total)} / ${fmt.fix(time, 1)}s ${label})</span>`;
     };
 
-    // Breakdown Logic
     const baseDot = data.baseStats.dot || 0;
     const traitDot = data.traitObj.dotBuff || 0;
     const setDot = data.totalSetStats.dot || 0;
     const headDot = data.headBuffs.dot || 0;
     const relicDot = data.relicBuffs.dot || 0;
 
-    // REFINED LOGIC: Base % * (1 + Trait/100) * (1 + Gear/100)
     const gearBonus = relicDot + setDot + headDot;
     const traitMultiplier = 1 + (traitDot / 100);
     const gearMultiplier = 1 + (gearBonus / 100);
     const finalTickPct = baseDot * traitMultiplier * gearMultiplier;
 
-    // --- RE-DEFINE HEAD ROW LOGIC HERE TO MATCH SUN GOD STYLE ---
     if (data.headBuffs && data.headBuffs.type === 'ninja') {
         const uptimePct = (data.headBuffs.uptime || 0);
-
-        // This structure now matches the Sun God box layout exactly
         headDotRow = `
         <tr class="mt-row-ninja"><td colspan="3" class="p-2">
             <div class="mt-flex-between mb-2">
                 <span class="text-custom mt-text-bold text-xs tracking-sm">NINJA HEAD PASSIVE</span>
                 <button class="calc-info-btn" onclick="openInfoPopup('ninja_passive')">?</button>
             </div>
-            
             <div class="mt-flex-between text-xs text-white mb-1">
                 <span class="opacity-70">Active Duration:</span>
                 <span class="mt-font-mono mt-text-right text-white">10.0s</span>
@@ -333,26 +392,21 @@ function renderDotSection(data, headDotRow) {
                 <span class="opacity-70">Uptime:</span>
                 <span class="mt-font-mono mt-text-right ${uptimePct >= 1 ? 'mt-text-green' : 'mt-text-orange'}">${fmt.fix(uptimePct * 100, 1)}%</span>
             </div>
-
             <div class="mt-flex-between mt-border-top mt-pt-sm">
                 <span class="text-white text-xs text-bold">Avg DoT Buff</span>
                 <span class="text-custom text-sm mt-text-bold"> +${fmt.fix(data.headBuffs.dot, 2)}%</span>
             </div>
         </td></tr>`;
     }
-    // -----------------------------------------------------------
 
-    // --- REANIMATED HEAD PASSIVE (DoT Section) ---
     if (data.headBuffs && data.headBuffs.type === 'reanimated') {
         const uptimePct = (data.headBuffs.uptime || 0);
-
         headDotRow = `
         <tr class="mt-row-sungod"><td colspan="3" class="p-2">
             <div class="mt-flex-between mb-2">
                 <span class="text-accent-end mt-text-bold text-xs tracking-sm">REANIMATED NINJA PASSIVE</span>
                 <button class="calc-info-btn" onclick="openInfoPopup('reanimated_passive')">?</button>
             </div>
-            
             <div class="mt-flex-between text-xs text-white mb-1">
                 <span class="opacity-70">Range Stat:</span>
                 <span class="mt-font-mono mt-text-right mt-text-range">${fmt.fix(data.range, 1)}</span>
@@ -369,14 +423,12 @@ function renderDotSection(data, headDotRow) {
                 <span class="opacity-70">Uptime:</span>
                 <span class="mt-font-mono mt-text-right ${uptimePct >= 1 ? 'mt-text-green' : 'mt-text-orange'}">${fmt.fix(uptimePct * 100, 1)}%</span>
             </div>
-
             <div class="mt-flex-between mt-border-top mt-pt-sm">
                 <span class="text-white text-xs text-bold">Avg DoT Buff</span>
                 <span class="text-accent-end text-sm mt-text-bold"> +${fmt.fix(data.headBuffs.dot, 2)}%</span>
             </div>
         </td></tr>`;
     }
-    // -----------------------------------------------------------
 
     return `
     <div class="dd-section">
@@ -387,17 +439,10 @@ function renderDotSection(data, headDotRow) {
             ${headDotRow}
 
             ${db.nativeDps > 0 ? `
-            <!-- Native DoT Breakdown -->
             <tr><td class="mt-cell-label mt-pt-md mt-text-bold">Native Tick % Calculation</td><td class="mt-cell-formula mt-pt-md"></td><td class="mt-cell-val mt-pt-md mt-text-bold">${fmt.fix(finalTickPct, 1)}%</td></tr>
-            
             ${baseDot > 0 ? `<tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ Unit Base</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">${fmt.num(baseDot)}%</td></tr>` : ''}
-            
-            <!-- Trait Stage -->
             <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-custom">1. Trait Multiplier (${data.traitObj.name})</td><td class="mt-cell-formula mt-text-bold text-custom"><span class="op">×</span>${fmt.fix(traitMultiplier, 2)}</td><td class="mt-cell-val text-custom text-bold">${fmt.pct(traitDot)}</td></tr>
-            
-            <!-- Gear Stage -->
             <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-accent-end">2. Gear Multiplier (Relics/Set/Head)</td><td class="mt-cell-formula mt-text-bold text-accent-end"><span class="op">×</span>${fmt.fix(gearMultiplier, 2)}</td><td class="mt-cell-val text-accent-end text-bold">${fmt.pct(gearBonus)}</td></tr>
-            
             ${relicDot > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">• Relic Stats (Main+Sub)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-dim">${fmt.pct(relicDot)}</td></tr>` : ''}
             ${setDot > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">• Set Bonus</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-dim">${fmt.pct(setDot)}</td></tr>` : ''}
             ${headDot > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">• Head Passive</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-dim">${fmt.pct(headDot)}</td></tr>` : ''}
@@ -520,7 +565,6 @@ function renderMathContent(data) {
         </td></tr>`;
     }
 
-    // --- NINJA HTML (DoT Section) ---
     let headDotRow = '';
 
     const statPointsHtml = (data.dmgPoints !== undefined) ? `
@@ -624,7 +668,7 @@ function renderSummonSection(data) {
 function renderAttackRateSection(data) {
     if (!data.extraAttacks) return '';
     const isKS = data.baseStats.id === 'king_sailor';
-    
+
     let detailRows = '';
     if (isKS) {
         detailRows = `
@@ -680,7 +724,20 @@ function renderFinalSection(data) {
 function renderRangeSection(data) {
     const mTrait = 1 + (data.traitBuffs.range / 100);
     const mRelic = 1 + (data.relicBuffs.range / 100);
-    const totalAdditiveRange = (data.totalSetStats.range || 0) + (data.passiveRange || 0) + (data.enlightenedGodBuff || 0);
+
+    let globalRangeBreakdownHtml = '';
+    let globalRangeTotal = 0;
+    if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
+        Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
+            const bData = data.activeGlobalBuffs[buff.id];
+            if (bData && bData.range > 0) {
+                globalRangeTotal += bData.range;
+                globalRangeBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:${buff.color}">↳ ${buff.name}</td><td class="mt-cell-formula" style="color:${buff.color}">${fmt.pct(bData.range)}</td><td class="mt-cell-val"></td></tr>`;
+            }
+        });
+    }
+
+    const totalAdditiveRange = (data.totalSetStats.range || 0) + (data.passiveRange || 0) + globalRangeTotal;
     const mAdditive = 1 + (totalAdditiveRange / 100);
     const basePassiveRange = (data.passiveRange || 0) - (data.eternalRangeBuff || 0);
     const setRange = data.totalSetStats.range || 0;
@@ -706,8 +763,7 @@ function renderRangeSection(data) {
                 ${setRange > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Bonus</td><td class="mt-cell-formula">${fmt.pct(setRange)}</td><td class="mt-cell-val"></td></tr>` : ''}
                 ${basePassiveRange > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${fmt.pct(basePassiveRange)}</td><td class="mt-cell-val"></td></tr>` : ''}
                 ${(data.eternalRangeBuff > 0) ? `<tr><td class="mt-cell-label mt-pl-md text-accent-start opacity-70">↳ Eternal Stacks</td><td class="mt-cell-formula text-accent-start">${fmt.pct(data.eternalRangeBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
-                ${(data.enlightenedGodBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-gold opacity-70">↳ Enlightened God</td><td class="mt-cell-formula text-gold">${fmt.pct(data.enlightenedGodBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
-                ${(data.bijuuBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-error opacity-70">↳ Bijuu Link</td><td class="mt-cell-formula text-error">${fmt.pct(data.bijuuBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                ${globalRangeBreakdownHtml}
 
                 <tr class="mt-border-top"><td class="mt-cell-label mt-pt-sm text-white">Final Range Result</td><td class="mt-cell-formula"></td><td class="mt-cell-val mt-pt-sm mt-text-bold" style="color: #fbbf24">${fmt.fix(data.range, 2)}</td></tr>
             </table>

@@ -2,6 +2,99 @@
 // DATA.JS - Static Data & Configuration
 // ============================================================================
 
+// --- THE SINGLE SOURCE OF TRUTH FOR ALL GLOBAL BUFFS ---
+// Add a new buff here and the UI, Math Engine, and Python Generator update automatically.
+window.GLOBAL_BUFF_DATA = {
+    miku: {
+        id: 'miku',                 // Used for DB filename (db_miku_...)
+        stateKey: 'mikuActive',     // window.mikuActive
+        name: 'Miku Buff',
+        desc: "Apply Miku's +100% Damage Buff",
+        color: '#4ade80',           // Color used in UI and math renders
+        math: (uStats) => ({ dmg: 100 }), // The actual math applied
+        renderLabel: "Active: +100% Damage",
+        genType: 'boolean'          // Tells Python to generate ON/OFF states
+    },
+    enlightenedGod: {
+        id: 'enlightenedgod',
+        stateKey: 'enlightenedGodActive',
+        name: 'Enlightened God',
+        desc: "Apply Enlightened God's +20% Dmg, -20% SPA, +20% Range Buff",
+        color: '#fbbf24',
+        math: (uStats) => ({ dmg: 20, spa: 20, range: 20 }),
+        renderLabel: "Active: +20% Dmg, -20% SPA, +20% Range",
+        genType: 'boolean'
+    },
+    bijuu: {
+        id: 'bijuu',
+        stateKey: 'bijuuActive',
+        name: 'Bijuu Link',
+        desc: "Apply Bijuu Link: +25% Dmg, +25% Range, -15% SPA",
+        color: '#f87171',
+        math: (uStats) => ({ dmg: 25, spa: 15, range: 25 }),
+        renderLabel: "Active: +25% Dmg, +25% Range, -15% SPA",
+        genType: 'boolean'
+    },
+    ancientMage: {
+        id: 'amage',
+        stateKey: 'ancientMageActive',
+        name: 'Ancient Mage',
+        desc: "Apply Ancient Mage Buff: +20% Crit Rate/Dmg",
+        color: '#60a5fa',
+        math: (uStats) => ({ crit: 20, cdmg: 20 }),
+        renderLabel: "Active: +20% Crit Rate/Dmg",
+        genType: 'boolean'
+    },
+    kingSailor: {
+        id: 'ksailor',
+        stateKey: 'kingSailorActive',
+        name: 'King Sailor',
+        desc: "Apply King Sailor Buff: +10% Crit Rate, +20% Crit Damage",
+        color: '#60a5fa',
+        math: (uStats) => {
+            let b = {};
+            // Global buff to everyone else
+            if (uStats.id !== 'king_sailor') { b.crit = 10; b.cdmg = 20; }
+            // Specific buff logic based on tags
+            const tags = uStats.tags || [];
+            if (tags.includes('Magi')) { b.dmg = 50; b.spa = 15; }
+            else if (tags.includes('Uncontrollable Power')) { b.dmg = 30; b.spa = 10; }
+            else if (uStats.element === 'Water') { b.dmg = 20; b.spa = 10; }
+            return b;
+        },
+        renderLabel: "Active: +10% Crit Rate, +20% Crit Dmg (Plus Mark)",
+        genType: 'boolean'
+    },
+    mageHill: {
+        id: 'magehill',
+        stateKey: 'fernHillActive',
+        name: 'Fern (Hill)',
+        desc: "Apply Fern (Hill) Buff: -30% SPA (Hill Only)",
+        color: '#fb923c',
+        excludes: 'mageGround', // Automatically disables mageGround if checked
+        math: (uStats) => {
+            const uType = (uStats.placementType || 'Ground').toLowerCase();
+            return (uType === 'hill' || uType === 'hybrid') ? { spa: 30 } : {};
+        },
+        renderLabel: "Active: -30% SPA",
+        genType: 'exclusive:fern' // Tells Python these are mutually exclusive
+    },
+    mageGround: {
+        id: 'mageground',
+        stateKey: 'fernGroundActive',
+        name: 'Fern (Ground)',
+        desc: "Apply Fern (Ground) Buff: +45% Crit Rate (Ground Only)",
+        color: '#f472b6',
+        excludes: 'mageHill', // Automatically disables mageHill if checked
+        math: (uStats) => {
+            const uType = (uStats.placementType || 'Ground').toLowerCase();
+            return (uType === 'ground' || uType === 'hybrid') ? { crit: 45 } : {};
+        },
+        renderLabel: "Active: +45% Crit Rate",
+        genType: 'exclusive:fern'
+    },
+};
+
 const GAME_STATE = {
     BUG_DOT_RELICS: false,  // Set to true if Relic DoT is currently broken/ignored in-game
     BUG_CRIT_RELICS: false  // Set to true if Relic Crit is currently broken (Fixed in v2.4)
@@ -269,7 +362,8 @@ const guideData = [
     { unit: "nutaru_beast", img: "images/units/NutaruBeast.png", isCalculated: true },
     { unit: "Crow Shinobi", img: "images/units/CrowShinobi.png", isCalculated: true },
     { unit: "ant_king_savage", img: "images/units/AntKing.png", isCalculated: true },
-    { unit: "prodigy_mage", img: "images/units/ProdigyMage.png", isCalculated: true }
+    { unit: "prodigy_mage", img: "images/units/ProdigyMage.png", isCalculated: true },
+    { unit: "the_strongest_in_history", img: "images/units/UnitName.png", isCalculated: true }
 ];
 
 const BAMBIETTA_MODES = {
@@ -297,6 +391,7 @@ const setBonuses = {
     great_mage: { dmg: 0, spa: 0, cf: 0, cm: 0, range: 10 },
     sorcerer_hunter: { dmg: 10, spa: 7.5, cf: 0, cm: 0, range: 0 },
     strongest_sorcerer: { dmg: 10, spa: 0, cf: 0, cm: 0, range: 5 },
+    monarch: { dmg: 40, spa: 0, cf: 0, cm: 0, range: 0 },
     none: { dmg: 0, spa: 0, cf: 0, cm: 0, range: 0 }
 };
 
@@ -323,7 +418,8 @@ const SETS = [
     { id: "reanimated_ninja", name: "Reanimated Ninja", bonus: { dmg: 10, dot: 30 } },
     { id: "great_mage", name: "Great Mage", bonus: { range: 10 } },
     { id: "sorcerer_hunter", name: "Sorcerer Hunter", bonus: { dmg: 10, spa: 7.5 } },
-    { id: "strongest_sorcerer", name: "Strongest Sorcerer", bonus: { dmg: 10, range: 5 } }
+    { id: "strongest_sorcerer", name: "Strongest Sorcerer", bonus: { dmg: 10, range: 5 } },
+    { id: "monarch", name: "Monarch", bonus: { dmg: 40 } }
 ];
 
 const globalBuilds = SETS.flatMap(set =>
@@ -370,3 +466,69 @@ const creditsData = [
     { role: "Owner", name: "xKing.", id: "xking.", userId: "347578773857632258", pfp: "images/pfp/xking.png", type: "owner" },
     { role: "Helper", name: "xAuroraFlare", id: "xauroraflare", userId: "216293393888837632", pfp: "images/pfp/xauroraflare.gif", type: "helper" }
 ];
+
+// ============================================================================
+// UNIT FILE MANIFEST
+// To add a new unit: add its filename to this array. That's it.
+// ============================================================================
+const UNIT_FILES = [
+    'sukuna.js',
+    'jingliu.js',
+    'maid.js',
+    'ace.js',
+    'akainu.js',
+    'ancient_mage.js',
+    'ancient_shinob.js',
+    'ant_king_savage.js',
+    'bambietta.js',
+    'cell.js',
+    'crow_shinobi.js',
+    'esdeath.js',
+    'first_emperor.js',
+    'genos.js',
+    'grimjaw.js',
+    'harribel.js',
+    'ichigo.js',
+    'kenpachi.js',
+    'king_sailor.js',
+    'kirito.js',
+    'law.js',
+    'majestic_armor.js',
+    'megumin.js',
+    'mob.js',
+    'nutaru_beast.js',
+    'phantom_captain.js',
+    'prodigy_mage.js',
+    'ragna.js',
+    'rohan.js',
+    'sasuke.js',
+    'sasuke_great_war.js',
+    'shanks.js',
+    'sharpshooter.js',
+    'sjw.js',
+    'stark.js',
+    'super_roku.js',
+    'trunks.js',
+    'ulquiorra.js',
+    'underworld_god.js',
+    'unparalleled_armor.js',
+    'vegeta.js',
+    'water_god.js',
+];
+
+// Resolves after every unit script has loaded (or errored).
+// init.js waits on this before calling initApp().
+window.__unitsReady = new Promise(function (resolve) {
+    let remaining = UNIT_FILES.length;
+    if (remaining === 0) { resolve(); return; }
+
+    function done() { if (--remaining === 0) resolve(); }
+
+    UNIT_FILES.forEach(function (file) {
+        const s = document.createElement('script');
+        s.src = 'units/' + file;
+        s.onload = done;
+        s.onerror = done; // count errors so we never hang
+        document.head.appendChild(s);
+    });
+});

@@ -2,6 +2,39 @@
 window.unitBuildsCache = window.unitBuildsCache || {};
 window.cachedResults = window.cachedResults || {};
 
+// Single Source of Truth for Head Item UI mapping in rendering
+const HEAD_CONFIG = {
+    'sun_god': { name: 'Sun God', search: 'Sun God', cls: 'sungod' },
+    'ninja': { name: 'Junior Ninja', search: 'Junior Ninja', cls: 'ninja' },
+    'reaper_necklace': { name: 'Reaper', search: 'Reaper', cls: 'reaper' },
+    'shadow_reaper_necklace': { name: 'S. Reaper', search: 'Shadow Reaper', cls: 'sreaper' },
+    'junior': { name: 'Junior Ninja', search: 'Junior', cls: 'ninja' },
+    'biju_head': { name: 'Biju', search: 'Biju', cls: 'sungod' },
+    'rebellious_head': { name: 'Rebellious', search: 'Rebellious', cls: 'ninja' },
+    'reanimated_head': { name: 'Reanimated', search: 'Reanimated', cls: 'reaper' },
+    'mage_head': { name: 'Great Mage', search: 'Great Mage', cls: 'dmg' },
+    'sorcerer_hunter_spirit': { name: 'S.H. Spirit', search: 'S. Hunter', cls: 'custom' },
+    'strongest_sorcerer_glasses': { name: 'Strongest', search: 'Strongest', cls: 'custom' }
+};
+
+// Config for Custom Ability Buttons
+const TOGGLE_OVERRIDES = {
+    'phantom_captain': { label: 'Planes' },
+    'megumin': { label: 'Passive' },
+    'vegeta': { label: 'Boss Stacks' },
+    'nutaru_beast': { label: 'Beast Mode' },
+    'ancient_shinob': { label: 'Reanimation' },
+    'super_roku': { label: 'Same Enemy' },
+    'ancient_mage': {
+        dynamicLabel: (isChecked) => isChecked ? 'DPS' : 'Specialist',
+        script: `this.parentElement.previousElementSibling.innerText = this.checked ? 'DPS' : 'Specialist';`
+    },
+    'cell': {
+        dynamicLabel: (isChecked) => isChecked ? 'Perfect Form' : 'True Form',
+        script: `this.parentElement.previousElementSibling.innerText = this.checked ? 'Perfect Form' : 'True Form'; this.closest('.unit-toolbar').firstElementChild.style.gap = '2px';`
+    }
+};
+
 const unitControls = {
     kirito: (unit) => {
         const { realm, card } = kiritoState;
@@ -55,8 +88,9 @@ function calculateBuildEfficiency(build, unitCost, unitMaxPlacement, unitId) {
         traitLimit = foundTrait.limitPlace;
     }
 
-    if (build.id && build.id.includes('ABILITY') && unitObj && unitObj.ability && unitObj.ability.limitPlace) {
-        traitLimit = traitLimit ? Math.min(traitLimit, unitObj.ability.limitPlace) : unitObj.ability.limitPlace;
+    const abilityRef = Array.isArray(unitObj.ability) ? unitObj.ability[0] : unitObj.ability;
+    if (build.id && build.id.includes('ABILITY') && unitObj && unitObj.ability && abilityRef.limitPlace) {
+        traitLimit = traitLimit ? Math.min(traitLimit, abilityRef.limitPlace) : abilityRef.limitPlace;
     }
 
     const actualPlacement = traitLimit ? Math.min(unitMaxPlacement, traitLimit) : unitMaxPlacement;
@@ -67,19 +101,8 @@ function calculateBuildEfficiency(build, unitCost, unitMaxPlacement, unitId) {
 
 function getHeadBadgeHtml(headUsed) {
     if (!headUsed || headUsed === 'none') return '';
-    const config = {
-        'sun_god': { name: 'Sun God', border: 'border-sungod', text: 'text-sungod' },
-        'ninja': { name: 'Junior Ninja', border: 'border-ninja', text: 'text-ninja' },
-        'reaper_necklace': { name: 'Reaper', border: 'border-reaper', text: 'text-reaper' },
-        'shadow_reaper_necklace': { name: 'S. Reaper', border: 'border-sreaper', text: 'text-sreaper' },
-        'junior': { name: 'Junior Ninja', border: 'border-ninja', text: 'text-ninja' },
-        'biju_head': { name: 'Biju', border: 'border-sungod', text: 'text-sungod' },
-        'rebellious_head': { name: 'Rebellious', border: 'border-ninja', text: 'text-ninja' },
-        'reanimated_head': { name: 'Reanimated', border: 'border-reaper', text: 'text-reaper' },
-        'mage_head': { name: 'Great Mage', border: 'border-dmg', text: 'text-dmg' }
-    };
-    const h = config[headUsed] || { name: 'Unknown', border: 'border-unknown', text: 'text-unknown' };
-    return `<div class="stat-line"><span class="sl-label">HEAD</span><div class="badge-base ${h.border}"><span class="${h.text}">${h.name}</span></div></div>`;
+    const h = HEAD_CONFIG[headUsed] || { name: 'Unknown', cls: 'unknown' };
+    return `<div class="stat-line"><span class="sl-label">HEAD</span><div class="badge-base border-${h.cls}"><span class="text-${h.cls}">${h.name}</span></div></div>`;
 }
 
 function generateBuildRowHTML(r, i, unitConfig = {}) {
@@ -313,7 +336,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             if (setSelect !== 'all' && r.setName !== setSelect) return false;
             if (headSelect !== 'all' && (r.headUsed || 'none') !== headSelect) return false;
 
-            let hSearch = ({ 'sun_god': 'Sun God', 'ninja': 'Junior Ninja', 'reaper_necklace': 'Reaper', 'shadow_reaper_necklace': 'Shadow Reaper', 'junior': 'Junior', 'biju_head': 'Biju', 'rebellious_head': 'Rebellious', 'reanimated_head': 'Reanimated', 'mage_head': 'Great Mage' })[r.headUsed] || '';
+            let hSearch = HEAD_CONFIG[r.headUsed]?.search || '';
             const searchText = `${r.traitName} ${r.setName} ${r.prio} ${hSearch}`.toLowerCase();
             return searchText.includes(searchInput);
         });
@@ -328,7 +351,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     isBetter = true;
                 } else {
                     const currentBest = uniqueMap.get(key);
-                    // FIX: Tie-Break sorting to match DB Engine
                     if (sortSelect === 'damage') {
                         if (r.dmgVal > currentBest.dmgVal) isBetter = true;
                         else if (r.dmgVal === currentBest.dmgVal && r.sortDps > currentBest.sortDps) isBetter = true;
@@ -346,7 +368,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         filtered.sort((a, b) => {
             if (sortSelect === 'range') return (b.range || 0) - (a.range || 0);
             if (sortSelect === 'damage') {
-                // FIX: Tie-Break sorting to match DB Engine
                 if (b.dmgVal !== a.dmgVal) return (b.dmgVal || 0) - (a.dmgVal || 0);
                 return (b.sortDps || 0) - (a.sortDps || 0);
             }
@@ -508,24 +529,17 @@ function renderDatabase() {
 
             renderQueueIndex++;
 
-            let abilityLabel = (unit.ability && unit.ability.abilityName) ? unit.ability.abilityName : 'Ability';
+            const abilityObj = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
+            let abilityLabel = (abilityObj && abilityObj.abilityName) ? abilityObj.abilityName : 'Ability';
             let toggleScript = '';
 
-            if (unit.id === 'phantom_captain') abilityLabel = 'Planes';
-            else if (unit.id === 'megumin') abilityLabel = 'Passive';
-            else if (unit.id === 'vegeta') abilityLabel = 'Boss Stacks';
-            else if (unit.id === 'nutaru_beast') abilityLabel = 'Beast Mode';
-            else if (unit.id === 'ancient_shinob') abilityLabel = 'Reanimation';
-            else if (unit.id === 'super_roku') abilityLabel = 'Same Enemy';
-            else if (unit.id === 'ancient_mage') {
-                const isToggled = activeAbilityIds.has(unit.id);
-                abilityLabel = isToggled ? 'DPS' : 'Specialist';
-                toggleScript = `; this.parentElement.previousElementSibling.innerText = this.checked ? 'DPS' : 'Specialist';`;
-            }
-            else if (unit.id === 'cell') {
-                const isToggled = activeAbilityIds.has(unit.id);
-                abilityLabel = isToggled ? 'Perfect Form' : 'True Form';
-                toggleScript = `; this.parentElement.previousElementSibling.innerText = this.checked ? 'Perfect Form' : 'True Form'; this.closest('.unit-toolbar').firstElementChild.style.gap = '2px';`;
+            // Using our new unified TOGGLE_OVERRIDES object
+            const isToggled = activeAbilityIds.has(unit.id);
+            const override = TOGGLE_OVERRIDES[unit.id];
+
+            if (override) {
+                abilityLabel = override.dynamicLabel ? override.dynamicLabel(isToggled) : override.label;
+                toggleScript = override.script ? `; ${override.script}` : '';
             }
 
             const currentLevel = (window.unitELevels && window.unitELevels[unit.id]) || 0;
@@ -543,7 +557,7 @@ function renderDatabase() {
                 }
             }
 
-            const abilityToggleHtml = (unit.ability && !unit.ability.noToggle) ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${activeAbilityIds.has(unit.id) ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>` : '<div></div>';
+            const abilityToggleHtml = (unit.ability && !abilityObj.noToggle) ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>` : '<div></div>';
             const topControls = `<div class="unit-toolbar"><div class="ut-actions"><button class="calc-btn ut-btn-compact" onclick="openCalc('${unit.id}')">🖩 Custom</button><button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">📊 Traits</button><button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">ⓘ Info</button></div>${abilityToggleHtml}</div>`;
 
             let defaultSort = 'dps';
@@ -711,19 +725,18 @@ function openTraitBestList(unitId) {
         return valB - valA;
     });
 
+    // DYNAMIC TAG GENERATION using GLOBAL_BUFF_DATA
     let tagsHtml = '';
-    if (window.mikuBuffActive) {
-        tagsHtml += `<span style="background: rgba(74, 222, 128, 0.2); color: #4ade80; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(74, 222, 128, 0.3);">Miku Buff ON</span>`;
+    if (window.GLOBAL_BUFF_DATA) {
+        Object.values(window.GLOBAL_BUFF_DATA).forEach(config => {
+            if (window[config.stateKey]) {
+                // Generate pill styling automatically based on the config color
+                tagsHtml += `<span style="background: ${config.color}33; color: ${config.color}; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid ${config.color}4D;">${config.tagLabel}</span>`;
+            }
+        });
     }
-    if (window.enlightenedGodBuffActive) {
-        tagsHtml += `<span style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(251, 191, 36, 0.3);">Enlightened God ON</span>`;
-    }
-    if (window.mageHillBuffActive) {
-        tagsHtml += `<span style="background: rgba(251, 146, 60, 0.2); color: #fb923c; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(251, 146, 60, 0.3);">Fern (Hill) ON</span>`;
-    }
-    if (window.mageGroundBuffActive) {
-        tagsHtml += `<span style="background: rgba(244, 114, 182, 0.2); color: #f472b6; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(244, 114, 182, 0.3);">Fern (Ground) ON</span>`;
-    }
+
+    // Ability Active is unit-specific, so it stays separate
     if (activeAbilityIds.has(unitId) && unit.ability) {
         tagsHtml += `<span style="background: rgba(168, 85, 247, 0.2); color: #c084fc; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(168, 85, 247, 0.3);">Ability Active</span>`;
     }
@@ -770,7 +783,7 @@ function openTraitBestList(unitId) {
         const tObj = getTraitByName(b.traitName, unitId);
         const traitImg = tObj ? `<div class="trait-img-rainbow" style="width: 22px; height: 22px; margin-right: 10px; flex-shrink: 0;"><img src="images/traits/${tObj.name}.png" onerror="this.parentElement.style.display='none'"></div>` : '';
 
-        let headText = (b.headUsed && b.headUsed !== 'none') ? ` + ${({ 'sun_god': 'Sun God', 'ninja': 'Ninja', 'reaper_necklace': 'Reaper', 'shadow_reaper_necklace': 'S.Reaper' })[b.headUsed] || 'Head'}` : '';
+        let headText = (b.headUsed && b.headUsed !== 'none') ? ` + ${HEAD_CONFIG[b.headUsed]?.name || 'Head'}` : '';
         const setupText = `<b class="text-white">${b.setName}</b> <span class="text-dim text-xs">(${mapStat(b.mainStats.body)}/${mapStat(b.mainStats.legs)})</span>${headText}`;
 
         let rowStyle = '';

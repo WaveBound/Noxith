@@ -1,5 +1,5 @@
 unitDatabase.push({
-    id: "Jingliu",
+    id: "jingliu",
     name: "Jangluu",
     img: "images/units/Jingliu.png",
     placement: 3,
