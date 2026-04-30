@@ -584,13 +584,11 @@ class GeneratorApp:
         return "Started"
 
     def stop_generation(self):
-        if not self.is_running: return
         self.is_running = False
         if self.process:
-            try:
-                self.process.kill()
-            except:
-                pass
+            try: self.process.kill()
+            except: pass
+            self.process = None
         if self.temp_dir and os.path.exists(self.temp_dir):
             tmp = self.temp_dir
             self.temp_dir = None
@@ -666,13 +664,8 @@ class GeneratorApp:
                             self.window.evaluate_js(f"updateProgress(100.0, 'Finalizing saving process...')")
                             break
 
-            if self.process:
-                self.process.wait()
-            
-            if self.is_running:
-                self.window.evaluate_js(f"onComplete({time.time() - overall_start})")
-            else:
-                self.window.evaluate_js("onCancelled()")
+            self.process.wait()
+            if self.is_running: self.window.evaluate_js(f"onComplete({time.time() - overall_start})")
         except Exception as e:
             if self.is_running: 
                 safe_err = str(e).replace("'", "\\'")
@@ -813,17 +806,6 @@ HTML = """
                 document.getElementById('progress-fill').style.width = '0%';
                 document.getElementById('progress-status').innerText = '0.0%';
             }, 3000);
-        }
-
-        function onCancelled() {
-            document.getElementById('progress-title').innerText = 'Generation Stopped';
-            document.getElementById('progress-log').innerText = 'The process was cancelled by the user.';
-            document.getElementById('stop-gen-btn').style.display = 'none';
-            setTimeout(() => {
-                document.getElementById('overlay').style.display = 'none';
-                document.getElementById('progress-fill').style.width = '0%';
-                document.getElementById('progress-status').innerText = '0.0%';
-            }, 2000);
         }
     </script>
 </body>
