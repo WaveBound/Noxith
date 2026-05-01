@@ -165,9 +165,19 @@
 
     <!-- 1. THE UNIVERSAL MODAL (Replaces Math, Patch, Compare, SubPrio, Guide) -->
     <div id="universalModal" class="modal-overlay" onclick="closeModal('universalModal')">
+        <aside class="modal-side-panel left-panel hidden" onclick="event.stopPropagation()"></aside>
+        
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h2 class="modal-title">TITLE</h2>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button id="toggleLeftPanelBtn" class="panel-toggle-btn hidden" onclick="toggleFloatingPanel('left')" title="Toggle Summons Panel">
+                        <span class="icon">▤</span>
+                    </button>
+                    <h2 class="modal-title">TITLE</h2>
+                </div>
+                <div class="header-actions">
+                    <!-- Additional actions could go here -->
+                </div>
             </div>
             <div class="modal-body">
                 <!-- Content Injected via JS -->
@@ -176,6 +186,8 @@
                 <button class="action-btn" onclick="closeModal('universalModal')">Close</button>
             </div>
         </div>
+
+        <aside class="modal-side-panel right-panel hidden" onclick="event.stopPropagation()"></aside>
     </div>
 
     <!-- 2. CALCULATOR MODAL (Kept separate for complex form handling) -->
@@ -232,6 +244,7 @@
                                     <option value="junior">Junior Ninja</option>
                                     <option value="sorcerer_hunter_spirit">S. Hunter Spirit</option>
                                     <option value="strongest_sorcerer_glasses">Strongest Glasses</option>
+                                    <option value="monarch">Monarch Crown</option>
                                 </select>
                                 <select id="calcHeadStars" class="gear-main-select opt-gold w-65px hidden">
                                     <option value="1">1★</option>

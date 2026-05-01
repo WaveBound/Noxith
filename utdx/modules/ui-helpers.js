@@ -378,6 +378,45 @@ window.swapBreakdownPanels = (btn) => {
     }
 };
 
+window.toggleTopPanel = (btn) => {
+    const container = btn.closest('.breakdown-top-panels');
+    if (!container) return;
+    const left = container.querySelector('.breakdown-panel--left');
+    const right = container.querySelector('.breakdown-panel--right');
+    if (!left || !right) return;
+
+    const isShowingLeft = !left.classList.contains('hidden');
+    const label = btn.querySelector('span');
+
+    if (isShowingLeft) {
+        left.classList.add('hidden');
+        right.classList.remove('hidden');
+        right.style.display = 'block';
+        if (label) label.textContent = 'VIEW SOURCE TOTALS';
+    } else {
+        left.classList.remove('hidden');
+        right.classList.add('hidden');
+        right.style.display = 'none';
+        if (label) label.textContent = 'VIEW SUMMARY & BUFFS';
+    }
+};
+
+window.toggleSummonDesc = (btn) => {
+    const headerRow = btn.closest('tr');
+    const descRow = headerRow.nextElementSibling;
+    if (!descRow) return;
+
+    if (descRow.classList.contains('hidden')) {
+        descRow.classList.remove('hidden');
+        btn.textContent = 'HIDE INFO';
+        btn.style.background = 'rgba(96, 165, 250, 0.2)';
+    } else {
+        descRow.classList.add('hidden');
+        btn.textContent = 'VIEW INFO';
+        btn.style.background = '';
+    }
+};
+
 window.toggleHeader = () => document.body.classList.toggle('header-collapsed');
 
 window.toggleFilterTab = (btn) => {

@@ -40,13 +40,17 @@ window.toggleModal = (modalId, show = true) => {
 /**
  * Opens the single Universal Modal with dynamic content.
  */
-function showUniversalModal({ title, content, footerButtons = '', size = '', headerClass = '', boxClass = '', footerClass = '' }) {
+function showUniversalModal({ title, content, leftPanel = '', rightPanel = '', footerButtons = '', size = '', headerClass = '', boxClass = '', footerClass = '' }) {
     const modal = document.getElementById('universalModal');
     const box = modal.querySelector('.modal-box');
     const titleEl = modal.querySelector('.modal-title');
     const bodyEl = modal.querySelector('.modal-body');
     const footerEl = modal.querySelector('.modal-footer');
     const headerEl = modal.querySelector('.modal-header');
+    
+    const leftEl = modal.querySelector('.left-panel');
+    const rightEl = modal.querySelector('.right-panel');
+    const leftToggle = document.getElementById('toggleLeftPanelBtn');
 
     // Reset Classes
     box.className = 'modal-box ' + size + ' ' + boxClass;
@@ -57,6 +61,29 @@ function showUniversalModal({ title, content, footerButtons = '', size = '', hea
     titleEl.innerHTML = title;
     bodyEl.innerHTML = content;
 
+    // Handle Left Panel
+    if (leftPanel) {
+        leftEl.innerHTML = leftPanel;
+        if (leftToggle) {
+            leftToggle.classList.remove('hidden');
+            leftToggle.classList.add('active'); // Start open for better UX
+        }
+        leftEl.classList.remove('hidden');
+    } else {
+        leftEl.innerHTML = '';
+        if (leftToggle) leftToggle.classList.add('hidden');
+        leftEl.classList.add('hidden');
+    }
+
+    // Handle Right Panel
+    if (rightPanel) {
+        rightEl.innerHTML = rightPanel;
+        rightEl.classList.remove('hidden');
+    } else {
+        rightEl.innerHTML = '';
+        rightEl.classList.add('hidden');
+    }
+
     // Default Close Button if no footer provided, or append custom buttons
     if (!footerButtons) {
         footerEl.innerHTML = `<button class="action-btn" onclick="closeModal('universalModal')">Close</button>`;
@@ -66,6 +93,20 @@ function showUniversalModal({ title, content, footerButtons = '', size = '', hea
 
     toggleModal('universalModal', true);
 }
+
+window.toggleFloatingPanel = (side) => {
+    const panel = document.querySelector(`.${side}-panel`);
+    const btn = document.getElementById(`toggle${side.charAt(0).toUpperCase() + side.slice(1)}PanelBtn`);
+    if (!panel) return;
+
+    if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        if (btn) btn.classList.add('active');
+    } else {
+        panel.classList.add('hidden');
+        if (btn) btn.classList.remove('active');
+    }
+};
 
 // Global closer helper
 window.closeModal = (id) => toggleModal(id, false);
@@ -104,13 +145,28 @@ const showMath = (id) => {
         } catch (e) { console.error(e); return; }
     }
 
-    const htmlContent = renderMathContent(data);
+    const hasSummons = !!data.summonData;
+    const isSplit = window.innerWidth > 992 && hasSummons;
+    const mathResult = renderMathContent(data, isSplit);
+    
+    const title = `<span class="text-white">DPS BREAKDOWN</span>`;
+    const size = 'modal-md'; // Standardized width for all units
 
-    showUniversalModal({
-        title: `<span class="text-white">DPS BREAKDOWN</span>`,
-        content: htmlContent,
-        size: 'modal-md'
-    });
+    if (isSplit) {
+        showUniversalModal({
+            title,
+            content: mathResult.content,
+            leftPanel: mathResult.leftPanel,
+            rightPanel: mathResult.rightPanel,
+            size
+        });
+    } else {
+        showUniversalModal({
+            title,
+            content: mathResult,
+            size
+        });
+    }
 };
 window.showMath = showMath; // Expose global
 

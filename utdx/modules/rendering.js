@@ -14,7 +14,8 @@ const HEAD_CONFIG = {
     'reanimated_head': { name: 'Reanimated', search: 'Reanimated', cls: 'reaper' },
     'mage_head': { name: 'Great Mage', search: 'Great Mage', cls: 'dmg' },
     'sorcerer_hunter_spirit': { name: 'S.H. Spirit', search: 'S. Hunter', cls: 'custom' },
-    'strongest_sorcerer_glasses': { name: 'Strongest', search: 'Strongest', cls: 'custom' }
+    'strongest_sorcerer_glasses': { name: 'Strongest', search: 'Strongest', cls: 'custom' },
+    'monarch': { name: 'Monarch Crown', search: 'Monarch', cls: 'custom' }
 };
 
 // Config for Custom Ability Buttons
@@ -293,7 +294,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 spa: r.sp || r.spa || 0,
                 range: r.ra || r.range || 0,
                 prio: r.p || r.prio || 'dmg',
-                headUsed: (typeof r.h === 'number' ? (['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head'][r.h]) : (r.headUsed || r.h)) || 'none',
+                headUsed: (typeof r.h === 'number' ? (['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'][r.h]) : (r.headUsed || r.h)) || 'none',
                 isCustom: !!(r.c || r.isCustom),
                 subStats: r.ss || r.subStats || {},
                 mainStats: r.ms || r.mainStats || {
@@ -445,7 +446,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                 ? [...(typeof customTraits !== 'undefined' ? customTraits : []), ...(unitSpecificTraits[unit.id] || [])]
                 : null;
 
-            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
+            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
 
             if (dynamicResults.length > 0) {
                 const seen = new Set(calculatedResults.map(r => r.id));
@@ -594,6 +595,7 @@ function renderDatabase() {
                                 <option value="Great Mage">Sets: Great Mage</option>
                                 <option value="Sorcerer Hunter">Sets: S. Hunter</option>
                                 <option value="Strongest Sorcerer">Sets: Strongest</option>
+                                <option value="Monarch">Sets: Monarch</option>
                             </select>
                             <select onchange="filterList(this)" data-filter="head" class="search-select">
                                 <option value="all">Heads: All</option>
@@ -608,6 +610,7 @@ function renderDatabase() {
                                 <option value="mage_head">Heads: Great Mage</option>
                                 <option value="sorcerer_hunter_spirit">Heads: S. Hunter Spirit</option>
                                 <option value="strongest_sorcerer_glasses">Heads: Strongest Glasses</option>
+                                <option value="monarch">Heads: Monarch Crown</option>
                                 <option value="none">Heads: None</option>
                             </select>
                         </div>

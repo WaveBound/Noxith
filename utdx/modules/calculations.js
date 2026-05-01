@@ -72,6 +72,8 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     effectiveStats.id = unit.id;
     effectiveStats.placementType = unit.placementType;
     if (unit.tags) effectiveStats.tags = unit.tags;
+    if (unit.customSummons) effectiveStats.customSummons = unit.customSummons;
+    if (unit.stats && unit.stats.customFollowUp) effectiveStats.customFollowUp = unit.stats.customFollowUp;
 
     // Resolve Placement (limited by Trait or Ability)
     let actualPlacement = unit.placement;
@@ -556,10 +558,18 @@ function calculateDPS(uStats, relicStats, context) {
         });
     }
 
+    // Magi Tag: Permanent +50% Damage, -15% SPA
+    const tags = uStats.tags || [];
+    let magiDmg = 0, magiSpa = 0;
+    if (tags.includes('Magi')) {
+        magiDmg = 50;
+        magiSpa = 15;
+    }
+
     const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (uStats.id === 'king_sailor' ? 10 : 0);
     const finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
 
-    const setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa;
+    const setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa + magiSpa;
 
     // Great Mage Accessory: -20% SPA (Uptime ~60% from kill trigger)
     const mageSpaMult = (headPiece === 'mage_head') ? 0.88 : 1; // -20% * 0.6 uptime
@@ -573,7 +583,7 @@ function calculateDPS(uStats, relicStats, context) {
 
     const { headDmgBuff, headDotBuff, headCalc } = _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats);
 
-    let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBuff + globalDmg;
+    let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBuff + globalDmg + magiDmg;
 
     // Junior Ninja: 1.1x Multiplier to all additive buffs (WATER GOD ONLY)
     if (headPiece === 'junior' && uStats.id === 'water_god') {
@@ -582,8 +592,8 @@ function calculateDPS(uStats, relicStats, context) {
 
     const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1);
 
-    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg;
-    let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + ((uStats.id === 'kirito') ? 0 : (baseR_Cf + (sBonus.cf || 0))), 100);
+    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cdmg || 0);
+    let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + ((uStats.id === 'kirito') ? 0 : (baseR_Cf + (sBonus.cf || 0))), 100);
     if (headPiece === 'sorcerer_hunter_spirit') finalCritRate = 0;
 
     const avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
@@ -642,19 +652,44 @@ function calculateDPS(uStats, relicStats, context) {
             label: `Water God Follow-up (${effectiveSpaCap}s window)`
         };
     } else if (uStats.id === 'king_sailor') {
-        const tickCount = 5;
-        const tickDmg = 0.20;
-        attackMultiplier = 1 + (tickCount * tickDmg);
+        const tickCount = 1;
+        const tickDmg = 1.00;
+        attackMultiplier = 1; // Base attacks don't get multiplied here since lightning bypasses true dmg
         extraAttacksData = {
             req: "Baal's Lightning",
-            hits: `1 + ${tickCount} Ticks`,
+            hits: `1 + ${tickCount} Tick`,
             extra: tickCount * tickDmg,
             attacksNeeded: 1,
-            mult: attackMultiplier,
+            mult: 2.00, // For UI display only
             label: "Chain Lightning",
             tickDmgVal: finalDmg * tickDmg,
-            avgTick: (finalDmg * tickDmg) * avgCritMult,
-            totalChain: (finalDmg * tickDmg * tickCount) * avgCritMult
+            avgTick: (finalDmg * tickDmg) * avgCritMult, // CAN crit
+            totalChain: (finalDmg * tickDmg * tickCount) * avgCritMult // CAN crit
+        };
+    } else if (uStats.customFollowUp) {
+        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+        let chance = uStats.customFollowUp.chance;
+        if (eLevel >= uStats.customFollowUp.eLevelReq) chance = uStats.customFollowUp.eLevelChance;
+
+        const atkAnim = uStats.spaCap || 0.1;
+        const fuaAnim = uStats.customFollowUp.fuaAnimation || 0;
+        
+        // Cycle time accounting for animation delay (Poseidon-style)
+        // If FUA triggers, the cycle is capped by (atkAnim + fuaAnim)
+        const timeIfFua = Math.max(finalSpa, atkAnim + fuaAnim);
+        const timeIfNoFua = Math.max(finalSpa, atkAnim);
+        usedSpa = (chance / 100) * timeIfFua + (1 - (chance / 100)) * timeIfNoFua;
+
+        const avgExtraHits = (chance / 100) * uStats.customFollowUp.dmgMult;
+        attackMultiplier = 1 + avgExtraHits;
+        extraAttacksData = {
+            req: `Follow-Up (${chance}%)`,
+            hits: `1 + ${uStats.customFollowUp.dmgMult}x`,
+            extra: avgExtraHits,
+            attacksNeeded: 1,
+            mult: attackMultiplier,
+            label: "Shadow Emerge",
+            usedSpa: usedSpa // Store for math rendering
         };
     } else if (uStats.followUp) {
         attackMultiplier = 1 + (uStats.followUp / 100);
@@ -675,15 +710,80 @@ function calculateDPS(uStats, relicStats, context) {
     if (relicStats.set === 'sorcerer_hunter') {
         trueDmgMult = 1.15;
     }
-    const finalHitDps = hitDpsTotal * trueDmgMult;
+    let finalHitDps = hitDpsTotal * trueDmgMult;
+    
+    // Add King Sailor's Chain Lightning DPS (Can Crit, No True Damage)
+    if (uStats.id === 'king_sailor') {
+        // avgHit already includes crit multiplier
+        const chainLightningDps = ((avgHit * 1.00) / usedSpa) * placement;
+        finalHitDps += chainLightningDps;
+    }
 
     const summonDmgBase = (uStats.id === 'nutaru_beast' && isAbility) ? finalDmg * 1.25 : finalDmg;
-    const { summonDpsTotal, summonData } = _calcSummonDPS(uStats, summonDmgBase, finalSpa, placement);
+    let { summonDpsTotal, summonData } = _calcSummonDPS(uStats, summonDmgBase, finalSpa, placement);
+
+    if (uStats.customSummons && uStats.customSummons.length > 0) {
+        const upLevel = context.upgradeLevel !== undefined ? context.upgradeLevel : 6;
+        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+        
+        if (!summonData) summonData = {};
+        summonData.isCustom = true;
+        summonData.summons = [];
+        let cDpsTotal = 0;
+
+        uStats.customSummons.forEach(s => {
+            if (upLevel >= s.reqUp) {
+                let sDmgMult = s.dmgMult;
+                if (eLevel >= 6 && s.e6DmgMult) sDmgMult = s.e6DmgMult;
+                
+                let sAvgMult = s.avgMult || 1.0;
+                if (eLevel >= 6 && s.e6AvgMult) sAvgMult = s.e6AvgMult;
+                
+                let sHitDmg = finalDmg * sDmgMult;
+                let sAvgDmg = sHitDmg * sAvgMult;
+                let sDps = sAvgDmg / s.spa;
+                
+                cDpsTotal += sDps;
+                summonData.summons.push({
+                    name: s.name,
+                    hitDmg: sHitDmg,
+                    avgDmg: sAvgDmg,
+                    avgMult: sAvgMult, // ADDED: to show in UI
+                    spa: s.spa,
+                    dps: sDps,
+                    desc: s.desc,
+                    color: s.color || "#ffffff"
+                });
+            }
+        });
+        summonDpsTotal += cDpsTotal;
+    }
 
     const gearDotBonus = baseR_Dot + headDotBuff + (sBonus.dot || 0);
     const { dotDpsTotal, dotBreakdown } = _calcDoTDPS(uStats, traitObj, traitDotBuff, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult);
 
-    const finalDotDps = dotDpsTotal;
+    let finalDotDps = dotDpsTotal;
+
+    if (uStats.customFollowUp) {
+        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+        let chance = uStats.customFollowUp.chance;
+        if (eLevel >= uStats.customFollowUp.eLevelReq) chance = uStats.customFollowUp.eLevelChance;
+        
+        // FUA DoT: dotPct is TOTAL bleed damage (not per-tick), DoT doesn't crit so use finalDmg
+        let followUpDotDmg = finalDmg * (uStats.customFollowUp.dotPct / 100);
+        let followUpDotDpsPerCycle = (followUpDotDmg * (chance / 100)) / usedSpa;
+        finalDotDps += followUpDotDpsPerCycle * placement;
+
+        // Add to breakdown for UI rendering
+        if (dotBreakdown) {
+            dotBreakdown.fuaDotDps = followUpDotDpsPerCycle;
+            dotBreakdown.fuaDotTotalDmg = followUpDotDmg;
+            dotBreakdown.fuaDotDuration = uStats.customFollowUp.dotDuration;
+            dotBreakdown.fuaChance = chance;
+            dotBreakdown.fuaLabel = "Shadow Emerge (FUA)";
+        }
+    }
+
     const finalSummonDps = summonDpsTotal;
 
     return {

@@ -9,7 +9,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.6); /* Reduced opacity for better visibility */
+    background: rgba(0, 0, 0, 0.7);
     z-index: 2000;
     display: flex;
     align-items: center;
@@ -47,6 +47,76 @@
 .modal-overlay.is-visible .modal-box,
 .info-popup-overlay.is-visible .modal-box {
     transform: scale(1) translateY(0);
+}
+
+/* --- NEW: FLOATING SIDE PANELS --- */
+.modal-side-panel {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(145deg, #0f1014 0%, #050505 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    width: 420px; /* Increased to fit text better */
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 24px;
+    flex-shrink: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    scrollbar-width: thin;
+    scrollbar-color: #333 transparent;
+    z-index: 10;
+}
+
+.modal-side-panel.left-panel {
+    right: calc(50% + 320px); /* Positioned left of modal-md (600px/2 + 20px) */
+}
+
+.modal-side-panel.right-panel {
+    left: calc(50% + 320px); /* Positioned right of modal-md */
+}
+
+.modal-side-panel.hidden {
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-side-panel::-webkit-scrollbar { width: 4px; }
+.modal-side-panel::-webkit-scrollbar-thumb { background-color: #333; border-radius: 10px; }
+
+/* Panel Toggle Button */
+.panel-toggle-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.panel-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--accent-start);
+}
+
+.panel-toggle-btn.active {
+    background: var(--accent-start);
+    color: #000;
+}
+
+/* Mobile Adjustments for Floating Panels */
+@media (max-width: 1400px) {
+    /* If screen is too narrow for absolute positioning on sides */
+    .modal-overlay { flex-direction: column; gap: 15px; overflow-y: auto; justify-content: flex-start; padding-top: 50px; }
+    .modal-side-panel { position: static; transform: none; width: 100% !important; max-width: 600px; max-height: none; order: 2; }
+    .modal-box { order: 1; }
 }
 
 /* Size Variants */

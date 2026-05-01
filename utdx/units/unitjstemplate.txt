@@ -22,6 +22,12 @@ unitDatabase.push({
         spaCap: 3, crit: 0, cdmg: 150,             // spaCap = min SPA | cdmg 150 = standard
         dot: 0, dotDuration: 0, dotStacks: 1,       // dot = % per tick | duration = # of ticks
         element: "None", passiveDmg: 0,             // "Fire","Ice","Water","Dark","Light","Rose","Wind"
+        // customFollowUp: {                        // (Optional) Follow up attack stats
+        //     chance: 70,                          // Base % chance to trigger
+        //     dmgMult: 1.0,                        // Multiplier of host's damage
+        //     dotPct: 15,                          // DoT damage % per tick (optional)
+        //     dotDuration: 3                       // DoT duration in ticks (optional)
+        // }
     },
 
     // UPGRADES (dmg, spa, range, cost per level)
@@ -56,6 +62,22 @@ unitDatabase.push({
     // ability: [
     //     { buffDmg: 0, abilityName: "Ability One", noToggle: false, cooldown: 0, desc: "Description." },
     //     { buffDmg: 0, abilityName: "Ability Two", noToggle: false, cooldown: 0, desc: "Description." },
+    // ],
+
+    // CUSTOM SUMMONS (Independent units spawned by this unit)
+    // customSummons: [
+    //     {
+    //         name: "Summon Name",
+    //         reqUp: 0,                   // Requires Upgrade Level 0+
+    //         spa: 10,                    // Locked SPA
+    //         dmgMult: 1.0,               // Multiplier of host's damage
+    //         e6DmgMult: 1.5,             // Multiplier at Etherealization 6 (optional)
+    //         avgMult: 1.0,               // Average damage multiplier per attack cycle (optional)
+    //         e6AvgMult: 1.0,             // Average mult at Etherealization 6 (optional)
+    //         canCrit: false,             // Optional: whether summon can crit
+    //         desc: ["Bullet 1", "Bullet 2"], // Description array for deep dive
+    //         color: "#ffffff"            // Hex color for UI styling
+    //     }
     // ],
 
     // ETHEREALIZATION (E1-E6 upgrade descriptions)

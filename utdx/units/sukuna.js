@@ -20,8 +20,15 @@ unitDatabase.push({
     // BASE STATS
     stats: {
         spaCap: 2, crit: 0, cdmg: 150,             // spaCap = min SPA | cdmg 150 = standard
-        dot: 15, dotDuration: 3, dotStacks: 1,       // dot = % per tick | duration = # of ticks
-        element: "Dark", passiveDmg: 50,             // "Fire","Ice","Water","Dark","Light","Rose","Wind"
+        dot: 0, dotDuration: 0, dotStacks: 1,       // dot = % per tick | duration = # of ticks
+        element: "Dark", passiveDmg: 50, passiveSpa: 0, // "Fire","Ice","Water","Dark","Light","Rose","Wind"
+        customFollowUp: {
+            chance: 70,
+            dmgMult: 1.0,
+            dotPct: 15,
+            dotDuration: 3,
+            fuaAnimation: 2
+        }
     },
 
     // UPGRADES (dmg, spa, range, cost per level)
@@ -37,7 +44,7 @@ unitDatabase.push({
 
     // PASSIVES (displayed in unit info panel)
     passives: [
-        { name: "Shadow Emerge", desc: "On each attack, if the enemy hit is marked by 'The Shadows': 45% chance (E2: 70%) to trigger a Follow-Up Attack dealing 100% Damage and inflicting Bleed for 15% Damage over 3 ticks. Each Follow-Up Attack permanently grants +5% Damage (cap: +50%)." },
+        { name: "Shadow Emerge", desc: "70% chance on attack to trigger a Follow-Up Attack dealing 100% Damage (can crit). The Follow-Up also inflicts Bleed for 15% Damage over 3s. Each Follow-Up permanently grants +5% Damage (cap: +50%)." },
         { name: "The Shadows", desc: "Every attack permanently marks the enemy hit and increases their Damage Taken based on total marked enemies in range — 1–10: +15%, 11–20: +20%, 21+: +25%. At 21+ marked enemies, both Ten Umbra summons may be placed simultaneously and enemies are Slowed by 10%.<br><br>E4: 26+ marked enemies increases Damage Taken to +35%, Stuns all marked enemies for 0.5s (cooldown of 30s), Slows by 15%, and reduces all mark thresholds by 5. Every 20 marked enemies defeated triggers a random Ten Umbra summon attack." },
         { name: "Adaptive Wheel", desc: "Once activated, this unit gains permanent immunity to Stun and debuffs after 60 seconds from first application. (E6: Ability is automatically activated upon placement.)" }
     ],
@@ -57,6 +64,38 @@ unitDatabase.push({
             cooldown: 0,
             desc: "PERFECT CURSE (Unlocks at Upgrade 4): Summons a tower that copies 50% of this unit's Damage and Range (E6: 65%) with a fixed SPA of 12. On each attack, randomly applies one of the following: Stun 5 enemies in range for 3s, 40% Bleed for 6s, 20% Radiation with +15% increased damage taken for 6s, or buff nearby allies with +10% Damage, +10% Range, and -5% SPA for 6s.<br><br>ADAPTIVE CURSE (Unlocks at Max Upgrade): Summons a tower that copies 100% of this unit's Damage and Range with a fixed SPA of 12. Gains the Adaptive Wheel passive — any immunity this tower acquires is also applied to The Strongest in History. Every 5 attacks (E6: every 3 attacks), casts World Cutting Slash, dealing 150% Damage in a 180° cone AoE."
         },
+    ],
+
+    // CUSTOM SUMMONS (Independent units spawned by this unit)
+    customSummons: [
+        {
+            name: "Perfect Curse",
+            reqUp: 4,
+            spa: 12,
+            dmgMult: 0.65,
+            canCrit: false,
+            desc: [
+                "Chance on attack to apply:",
+                "• Stun 5 random enemies in range for 3s",
+                "• 40% Bleed for 6s",
+                "• 20% Radiation (+15% Dmg Taken) for 6s",
+                "• Ally Buff: +10% Dmg/Range, -5% SPA for 6s"
+            ],
+            color: "#c084fc"
+        },
+        {
+            name: "Adaptive Curse",
+            reqUp: 6,
+            spa: 12,
+            dmgMult: 1.0,
+            avgMult: (1 + 1 + 1 + 1.5) / 3,
+            canCrit: false,
+            desc: [
+                "Every 3rd attack does 1 attack for 150%:",
+                "• World Cutting Slash (1.5x Dmg in 180° cone)"
+            ],
+            color: "#f87171"
+        }
     ],
 
     // ETHEREALIZATION (E0-E5 upgrade descriptions)

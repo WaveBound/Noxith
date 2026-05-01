@@ -12,14 +12,33 @@ const fmt = {
 function renderOverviewSection(data) {
     const isNutaru = data.baseStats.id === 'nutaru_beast';
     return `
-        <div class="math-section" style="border-color: rgba(251, 191, 36, 0.3);">
-            <div class="math-header">Snapshot Overview</div>
-            <div class="math-row"><span>Active Trait</span><b class="text-custom">${data.traitObj.name}</b></div>
-            <div class="math-row"><span>Total DPS</span><b class="math-val-gold">${fmt.num(data.total)}</b></div>
-            ${data.summon > 0 ? `<div class="math-row"><span>${isNutaru ? 'Clones' : 'Planes'} Active</span><b class="text-accent-start">${fmt.fix(data.summonData.count, 1)}</b></div>` : ''}
-            <div class="math-row"><span>Placement</span><b>${data.placement} Unit(s)</b></div>
-            <div class="math-row"><span>Unit Type</span><b class="text-custom">${data.baseStats.placementType || 'Ground'}</b></div>
-            <div class="math-row"><span>Final Range</span><b class="math-val-range">${fmt.fix(data.range, 1)}</b></div>
+        <div class="math-section" style="border: 1px solid rgba(251, 191, 36, 0.2); border-left: 4px solid #fbbf24; padding: 8px 12px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, rgba(255,255,255,0) 100%);">
+            <div class="math-header" style="font-size: 0.5rem; margin-bottom: 10px; letter-spacing: 1px; opacity: 0.6; font-weight: 900; color: #fbbf24;">SNAPSHOT OVERVIEW</div>
+            <div class="math-row" style="margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px;">
+                <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">ACTIVE TRAIT</span>
+                <b class="text-custom" style="font-size: 0.7rem; letter-spacing: 0.5px;">${data.traitObj.name}</b>
+            </div>
+            <div class="math-row" style="margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px;">
+                <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">TOTAL DPS</span>
+                <b class="math-val-gold" style="font-size: 0.85rem;">${fmt.num(data.total)}</b>
+            </div>
+            ${(data.summon > 0 && (!data.summonData || !data.summonData.isCustom)) ? `
+            <div class="math-row" style="margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px;">
+                <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">${isNutaru ? 'CLONES' : 'PLANES'} ACTIVE</span>
+                <b class="text-accent-start" style="font-size: 0.7rem;">${fmt.fix(data.summonData.count, 1)}</b>
+            </div>` : ''}
+            <div class="math-row" style="margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px;">
+                <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">PLACEMENT</span>
+                <b style="font-size: 0.7rem;">${data.placement} Unit(s)</b>
+            </div>
+            <div class="math-row" style="margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px;">
+                <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">UNIT TYPE</span>
+                <b class="text-custom" style="font-size: 0.7rem;">${data.baseStats.placementType || 'Ground'}</b>
+            </div>
+            <div class="math-row">
+                <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">FINAL RANGE</span>
+                <b class="math-val-range" style="font-size: 0.8rem;">${fmt.fix(data.range, 1)}</b>
+            </div>
         </div>`;
 }
 
@@ -27,13 +46,28 @@ function renderBuffSummarySection(data) {
     const statPointsPct = (data.lvStats.dmgMult - 1) * 100;
     const totalMult = data.dmgVal / data.baseStats.dmg;
     return `
-        <div class="math-section" style="border-color: rgba(74, 222, 128, 0.3);">
-            <div class="math-header">Total Buff Summary</div>
-            <div class="math-row"><span>Relic Stats</span><b class="text-accent-end">${fmt.pct(data.relicBuffs.dmg)}</b></div>
-            <div class="math-row"><span>Trait Bonus</span><b class="text-custom">${fmt.pct(data.traitBuffs.dmg)}</b></div>
-            <div class="math-row"><span>Stat Points</span><b class="text-white">${fmt.pct(statPointsPct)}</b></div>
-            <div class="math-row"><span>Additive Bucket</span><b class="mt-text-gold">${fmt.pct(data.totalAdditivePct)}</b></div>
-            <div class="math-row mt-border-top mt-pt-sm"><span>Total Multiplier</span><b class="text-white">x${fmt.fix(totalMult, 2)}</b></div>
+        <div class="math-section" style="border: 1px solid rgba(74, 222, 128, 0.2); border-left: 4px solid #4ade80; padding: 8px 12px; background: linear-gradient(135deg, rgba(74, 222, 128, 0.05) 0%, rgba(255,255,255,0) 100%);">
+            <div class="math-header" style="font-size: 0.5rem; margin-bottom: 10px; letter-spacing: 1px; opacity: 0.6; font-weight: 900; color: #4ade80;">TOTAL BUFF SUMMARY</div>
+            <div class="math-row" style="margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 3px;">
+                <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">RELIC STATS</span>
+                <b class="text-accent-end" style="font-size: 0.7rem;">${fmt.pct(data.relicBuffs.dmg)}</b>
+            </div>
+            <div class="math-row" style="margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 3px;">
+                <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">TRAIT BONUS</span>
+                <b class="text-custom" style="font-size: 0.7rem;">${fmt.pct(data.traitBuffs.dmg)}</b>
+            </div>
+            <div class="math-row" style="margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 3px;">
+                <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">STAT POINTS</span>
+                <b class="text-white" style="font-size: 0.7rem;">${fmt.pct(statPointsPct)}</b>
+            </div>
+            <div class="math-row" style="margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 3px;">
+                <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">ADDITIVE BUCKET</span>
+                <b class="mt-text-gold" style="font-size: 0.7rem;">${fmt.pct(data.totalAdditivePct)}</b>
+            </div>
+            <div class="math-row mt-pt-sm">
+                <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">TOTAL MULTIPLIER</span>
+                <b class="text-white" style="font-size: 0.75rem;">x${fmt.fix(totalMult, 2)}</b>
+            </div>
         </div>`;
 }
 
@@ -103,18 +137,18 @@ function renderSourceTotalsSection(data) {
     const passiveTotalCdmg = globalPassiveCdmg;
 
     return `
-        <div class="math-section" style="border-color: rgba(255, 255, 255, 0.15); background: #000; flex: 1; margin-bottom: 0; padding: 14px; border-radius: 8px; box-shadow: inset 0 0 20px rgba(255,255,255,0.02);">
-            <div class="math-header" style="color: #fff; font-size: 0.85rem; margin-bottom: 15px; letter-spacing: 1.5px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">SOURCE TOTALS</div>
+        <div class="math-section" style="border: 1px solid rgba(255, 255, 255, 0.1); background: #000; flex: 1; margin-bottom: 0; padding: 10px 12px; border-radius: 8px; background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%); border-top: 2px solid rgba(255,255,255,0.15);">
+            <div class="math-header" style="color: #fff; font-size: 0.55rem; margin-bottom: 12px; letter-spacing: 1.5px; font-weight: 900; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; opacity: 0.8;">SOURCE TOTALS</div>
             
             <div style="margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #f472b6; padding-left: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-size: 0.75rem; font-weight: 800; color: #f472b6; letter-spacing: 0.5px;">RELICS & TAGS</span>
-                    <b style="color: #f472b6; font-size: 0.9rem;">${fmt.pct(gearTotalDmg)}</b>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 0.68rem; font-weight: 800; color: #f472b6; letter-spacing: 0.5px;">RELICS & TAGS</span>
+                    <b style="color: #f472b6; font-size: 0.8rem;">${fmt.pct(gearTotalDmg)}</b>
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 3px; margin-bottom: 6px;">
-                    <div style="display:flex; justify-content:space-between; font-size: 0.7rem; color: #999;"><span>Gear Main + Subs</span><span class="text-white">${fmt.pct(relicMainSub)}</span></div>
-                    <div style="display:flex; justify-content:space-between; font-size: 0.7rem; color: #999;"><span>Relic Set Base</span><span class="text-white">${fmt.pct(setBaseDmg)}</span></div>
-                    ${tagDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.7rem; color: #f472b6; font-weight: 700;"><span>Unit Tag Bonuses</span><span>${fmt.pct(tagDmg)}</span></div>` : ''}
+                <div style="display: flex; flex-direction: column; gap: 3px; margin-bottom: 5px;">
+                    <div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Gear Main + Subs</span><span class="text-white">${fmt.pct(relicMainSub)}</span></div>
+                    <div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Relic Set Base</span><span class="text-white">${fmt.pct(setBaseDmg)}</span></div>
+                    ${tagDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #f472b6; font-weight: 700;"><span>Unit Tag Bonuses</span><span>${fmt.pct(tagDmg)}</span></div>` : ''}
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 0.65rem; color: #777; border-top: 1px solid rgba(244, 114, 182, 0.1); padding-top: 4px;">
                     <div style="display:flex; justify-content:space-between;"><span>SPA</span><b class="text-white">-${gearSpa.toFixed(1)}%</b></div>
@@ -124,10 +158,11 @@ function renderSourceTotalsSection(data) {
             </div>
 
             <div style="margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); border-left: 3px solid #4ade80; padding-left: 10px; background: rgba(74, 222, 128, 0.02); padding-top: 4px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">                    <span style="font-size: 0.75rem; font-weight: 800; color: #4ade80; letter-spacing: 0.5px;">TRAIT: ${data.traitObj.name.toUpperCase()}</span>
-                    <b style="color: #4ade80; font-size: 0.85rem;">${fmt.pct(traitDmg)}</b>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 0.68rem; font-weight: 800; color: #4ade80; letter-spacing: 0.5px;">TRAIT: ${data.traitObj.name.toUpperCase()}</span>
+                    <b style="color: #4ade80; font-size: 0.8rem;">${fmt.pct(traitDmg)}</b>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 0.7rem; color: #999;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; font-size: 0.6rem; color: #999;">
                     <div style="display:flex; justify-content:space-between;"><span>SPA</span><b class="text-white">-${traitSpa.toFixed(1)}%</b></div>
                     <div style="display:flex; justify-content:space-between;"><span>Range</span><b class="text-white">${fmt.pct(traitRange)}</b></div>
                     ${traitCrit > 0 ? `<div style="display:flex; justify-content:space-between;"><span>Crit</span><b class="text-white">+${traitCrit}%</b></div>` : ''}
@@ -135,10 +170,10 @@ function renderSourceTotalsSection(data) {
             </div>
 
             <div style="border-left: 3px solid #fbbf24; padding-left: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-size: 0.75rem; font-weight: 800; color: #fbbf24; letter-spacing: 0.5px;">PASSIVES & GLOBAL</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 0.68rem; font-weight: 800; color: #fbbf24; letter-spacing: 0.5px;">PASSIVES & GLOBAL</span>
                     <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
-                        <b style="color: #fbbf24; font-size: 0.9rem;">${fmt.pct(passiveTotalDmg)}</b>
+                        <b style="color: #fbbf24; font-size: 0.8rem;">${fmt.pct(passiveTotalDmg)}</b>
                     </div>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px;">` +
@@ -151,8 +186,8 @@ function renderSourceTotalsSection(data) {
                     ` : `
                         ${unitInnateDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Unit Passive</span><span class="text-white">${fmt.pct(unitInnateDmg)}</span></div>` : ''}
                     `) + `
-                    ${abilityDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Active Ability</span><span class="text-white">${fmt.pct(abilityDmg)}</span></div>` : ''}
-                    ${accessoryDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Accessory</span><span class="text-white">${fmt.pct(accessoryDmg)}</span></div>` : ''}
+                    ${abilityDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Active Ability</span><span class="text-white">${fmt.pct(abilityDmg)}</span></div>` : ''}
+                    ${accessoryDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Accessory</span><span class="text-white">${fmt.pct(accessoryDmg)}</span></div>` : ''}
                     ${globalBuffsDmgHtml}
                     ${globalBuffsSpaHtml}
                     ${globalBuffsCritHtml}
@@ -232,7 +267,7 @@ function renderQuickBreakdownSection(data, avgHitPerUnit, dotColorClass) {
                 <div style="border-color: rgba(251, 191, 36, 0.3);"><div class="mq-label mt-text-gold">Hit DPS</div><div class="mq-val mt-text-gold">${fmt.num(data.hit)}</div><div class="mq-sub">(${fmt.num(avgHitPerUnit)} avg ÷ ${fmt.fix(data.spa, 2)}s) × ${data.placement}</div></div>
                 <div style="border-color: ${data.dot > 0 ? 'rgba(192, 132, 252, 0.3)' : '#333'};"><div class="mq-label ${dotLabelClass}">DoT DPS</div><div class="mq-val ${dotColorClass}">${data.dot > 0 ? fmt.num(data.dot) : '-'}</div><div class="mq-sub">${data.dot > 0 ? (data.hasStackingDoT ? `Stacking: x${data.placement} units` : `Limited: x1 unit only`) : 'No DoT'}</div></div>
                 <div style="border-color: rgba(216, 180, 254, 0.3);"><div class="mq-label text-custom">Crit Rate / Dmg</div><div class="mq-val text-custom">${fmt.fix(data.critData.rate, 0)}% <span class="color-dim">|</span> x${fmt.fix(data.critData.cdmg / 100, 2)}</div><div class="mq-sub">Avg Mult: x${fmt.fix(data.critData.avgMult, 3)}</div></div>
-                ${data.summon > 0 ? `<div style="border-color: rgba(96, 165, 250, 0.3);"><div class="mq-label text-accent-start">${isNutaru ? 'Clone' : 'Plane'} DPS</div><div class="mq-val text-accent-start">${fmt.num(data.summon)}</div><div class="mq-sub">Independent of Host Stats</div></div>` : `<div style="border-color: rgba(96, 165, 250, 0.3);"><div class="mq-label text-accent-start">Attack Rate</div><div class="mq-val text-accent-start">${fmt.fix(data.spa, 2)}s</div><div class="mq-sub">Base: ${data.baseStats.spa}s (Current Cap: ${data.spaCap}s)</div></div>`}
+                ${data.summon > 0 ? `<div style="border-color: rgba(96, 165, 250, 0.3);"><div class="mq-label text-accent-start">${isNutaru ? 'Clone' : (data.summonData?.isCustom ? 'Custom Summon' : 'Plane')} DPS</div><div class="mq-val text-accent-start">${fmt.num(data.summon)}</div><div class="mq-sub">Independent of Host Stats</div></div>` : `<div style="border-color: rgba(96, 165, 250, 0.3);"><div class="mq-label text-accent-start">Attack Rate</div><div class="mq-val text-accent-start">${fmt.fix(data.spa, 2)}s</div><div class="mq-sub">Base: ${data.baseStats.spa}s (Current Cap: ${data.spaCap}s)</div></div>`}
             </div>
         </div>`;
 }
@@ -469,10 +504,16 @@ function renderDotSection(data, headDotRow) {
             </tr>
             ` : ''}
 
+            ${db.fuaDotDps > 0 ? `
+            <tr><td class="mt-cell-label mt-pt-md mt-text-bold" style="color: #60a5fa">${db.fuaLabel || 'Follow-Up DoT'}</td><td class="mt-cell-formula mt-pt-md"></td><td class="mt-cell-val mt-pt-md mt-text-bold" style="color: #60a5fa">${fmt.num(db.fuaDotDps)}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-sm text-dim text-xs">• Trigger Chance</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">${db.fuaChance}%</td></tr>
+            <tr><td class="mt-cell-label mt-pl-sm text-dim text-xs">• Damage Per Proc</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">${fmt.num(db.fuaDotTotalDmg)}</td></tr>
+            ` : ''}
+
             <tr class="mt-border-top">
                 <td class="mt-cell-label text-white mt-pt-md">Total DoT (1 Unit)</td>
                 <td class="mt-cell-formula mt-pt-md"></td>
-                <td class="mt-cell-val text-white mt-pt-md">${fmt.num(db.nativeDps + db.radDps)}</td>
+                <td class="mt-cell-val text-white mt-pt-md">${fmt.num(db.nativeDps + db.radDps + (db.fuaDotDps || 0))}</td>
             </tr>
             ${data.placement > 1 ? `
             <tr>
@@ -484,7 +525,7 @@ function renderDotSection(data, headDotRow) {
     </div>`;
 }
 
-function renderMathContent(data) {
+function renderMathContent(data, isSplit = false) {
     if (!data || !data.lvStats || !data.critData) return '<div class="msg-empty">Data incomplete.</div>';
 
     // BUILD IDENTITY SECTION
@@ -582,68 +623,179 @@ function renderMathContent(data) {
 
     const dotColorClass = data.dot > 0 ? 'text-accent-end' : 'text-dark-dim';
 
-    return identityHtml + `
-        <div class="breakdown-top-wrapper" style="position:relative; margin-bottom: 4px;">
-            <div class="breakdown-top-panels" style="display: flex; gap: 12px; align-items: stretch;">
-                <div class="breakdown-panel breakdown-panel--left" style="flex:1; min-width:0;">${renderSourceTotalsSection(data)}</div>
-                <div class="breakdown-panel breakdown-panel--right" style="display: flex; flex-direction: column; gap: 4px; flex: 1.1; min-width:0;">
-                    ${renderOverviewSection(data)}
-                    ${renderBuffSummarySection(data)}
-                </div>
+    const leftPanelHtml = (data.summonData) ? `
+        <div class="modal-side-content">
+            <div class="math-header" style="font-size: 0.55rem; color: #fff; opacity: 0.5; margin-bottom: 12px; letter-spacing: 1px; padding-left: 4px;">
+                ${data.summonData.isCustom ? 'UNIT SUMMONS' : (data.baseStats.id === 'nutaru_beast' ? 'CLONE LOGIC' : 'PLANE LOGIC')}
             </div>
-            <button class="breakdown-swap-btn" onclick="swapBreakdownPanels(this)" title="Toggle panel view" aria-label="Swap panels">
-                <span class="swap-icon" style="display:inline-flex;align-items:center;gap:4px;">&#8644; <span class="swap-label">Details</span></span>
-            </button>
+            
+            ${data.summonData.isCustom ? 
+                data.summonData.summons.map(s => `
+                <div class="math-section" style="border: 1px solid ${s.color}44; border-left: 4px solid ${s.color}; padding: 10px 14px; background: linear-gradient(135deg, ${s.color}15 0%, rgba(0,0,0,0) 100%); margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                    <div class="math-header" style="font-size: 0.5rem; margin-bottom: 12px; letter-spacing: 1px; opacity: 0.8; font-weight: 900; color: ${s.color};">${s.name.toUpperCase()}</div>
+                    <div class="math-row" style="margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
+                        <span style="font-size: 0.5rem; font-weight: 700; opacity: 0.7;">HIT DAMAGE</span>
+                        <b class="text-white" style="font-size: 0.75rem;">${fmt.num(s.hitDmg)}</b>
+                    </div>
+                    <div class="math-row" style="margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
+                        <span style="font-size: 0.5rem; font-weight: 700; opacity: 0.7;">LOCKED SPA</span>
+                        <b class="text-white" style="font-size: 0.75rem;">${fmt.fix(s.spa, 2)}s</b>
+                    </div>
+                    <div class="math-row">
+                        <span style="font-size: 0.5rem; font-weight: 700; opacity: 0.7;">SUMMON DPS</span>
+                        <b class="math-val-gold" style="font-size: 0.8rem;">${fmt.num(s.dps)}</b>
+                    </div>
+                </div>`).join('')
+            : ''}
+            
+            ${data.summonData.isCustom ? `
+                <div class="math-section" style="border: 1px solid rgba(251, 191, 36, 0.3); border-left: 4px solid #fbbf24; padding: 10px 14px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(0,0,0,0) 100%); margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                    <div class="math-header" style="font-size: 0.5rem; margin-bottom: 6px; letter-spacing: 1px; opacity: 0.8; font-weight: 900; color: #fbbf24;">TOTAL (WITH SUMMONS)</div>
+                    <div class="math-row">
+                        <span style="font-size: 0.5rem; font-weight: 700; opacity: 0.7;">TOTAL DPS</span>
+                        <b class="math-val-gold" style="font-size: 0.9rem;">${fmt.num(data.total)}</b>
+                    </div>
+                </div>
+            ` : ''}
+
+            <div style="margin-top: 10px;">
+                ${renderSummonSection(data)}
+            </div>
         </div>
-        <style>
-            .breakdown-swap-btn {
-                display: none;
-                position: absolute;
-                top: 8px;
-                right: 8px;
-                background: rgba(255,255,255,0.08);
-                border: 1px solid rgba(255,255,255,0.15);
-                color: #ddd;
-                font-size: 0.7rem;
-                font-weight: 700;
-                letter-spacing: 0.5px;
-                padding: 4px 10px;
-                border-radius: 20px;
-                cursor: pointer;
-                z-index: 10;
-                transition: background 0.2s;
-            }
-            .breakdown-swap-btn:hover { background: rgba(255,255,255,0.15); }
-            @media (max-width: 500px) {
-                .breakdown-swap-btn { display: inline-flex; align-items: center; }
-                .breakdown-top-panels { flex-direction: column !important; }
-                .breakdown-panel { width: 100% !important; }
-                .breakdown-panel--right { display: none !important; }
-                .breakdown-panel--left { display: block !important; }
-                .breakdown-panel.is-hidden { display: none !important; }
-                .breakdown-panel.is-visible { display: flex !important; }
-                .breakdown-panel--right.is-visible { display: flex !important; flex-direction: column; gap: 12px; }
-                .breakdown-panel--left.is-visible { display: block !important; }
-            }
-        </style>
-        ${renderQuickBreakdownSection(data, avgHitPerUnit, dotColorClass)}
-        ${renderActiveBuffsSection(data)}
-        <div class="deep-dive-trigger" onclick="toggleDeepDive(this)"><span>Full Calculation Log</span><span class="dd-arrow text-accent-start">▼</span></div>
-        <div class="deep-dive-content hidden">
-            ${renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, headDmgHtml, preConditionalDmg, baseSetDmg, tagDmg, passiveDmg, eternalDmg, statPointsHtml)}
-            ${renderCritSection(data, setTagCfTotal, setTagCmTotal)}
-            ${renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa)}
-            ${renderRangeSection(data)}
-            ${renderAttackRateSection(data)}
-            ${renderDotSection(data, headDotRow)}
-            ${renderSummonSection(data)}
-            ${renderFinalSection(data)}
+    ` : '';
+
+    // No more right panel - merged into main panel toggle
+    const rightPanelHtml = '';
+
+    const summarySection = `
+        <div class="modal-side-content">
+            <div style="margin-bottom: 12px;">${renderOverviewSection(data)}</div>
+            <div style="margin-bottom: 12px;">${renderBuffSummarySection(data)}</div>
         </div>
     `;
+
+    const mainContent = `
+        <div class="breakdown-wrapper">
+            ${identityHtml}
+            <div class="breakdown-top-panels" style="position: relative; margin-bottom: 15px;">
+                ${!isSplit && leftPanelHtml ? `<div class="breakdown-panel" style="margin-bottom: 12px;">${leftPanelHtml}</div>` : ''}
+                
+                <div class="top-toggle-container" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+                    <button class="top-view-btn" onclick="toggleTopPanel(this)" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-size: 0.55rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; cursor: pointer; letter-spacing: 1px;">
+                        <span>VIEW SUMMARY & BUFFS</span>
+                    </button>
+                </div>
+
+                <div class="breakdown-panel breakdown-panel--left" style="display: block;">
+                    ${renderSourceTotalsSection(data)}
+                </div>
+
+                <div class="breakdown-panel breakdown-panel--right hidden" style="display: none;">
+                    ${summarySection}
+                </div>
+            </div>
+            
+            <style>
+                .hidden { display: none !important; }
+                .top-view-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+                @media (max-width: 992px) {
+                    .top-toggle-container { display: flex !important; margin-top: 8px; }
+                    /* Ensure panels respect the .hidden class on mobile instead of being forced hidden/visible */
+                    .breakdown-panel--right:not(.hidden) { display: block !important; }
+                    .breakdown-panel--left:not(.hidden) { display: block !important; }
+                }
+            </style>
+
+            ${renderQuickBreakdownSection(data, avgHitPerUnit, dotColorClass)}
+            ${renderActiveBuffsSection(data)}
+            <div class="deep-dive-trigger" onclick="toggleDeepDive(this)"><span>Full Calculation Log</span><span class="dd-arrow text-accent-start">▼</span></div>
+            <div class="deep-dive-content hidden">
+                ${renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, headDmgHtml, preConditionalDmg, baseSetDmg, tagDmg, passiveDmg, eternalDmg, statPointsHtml)}
+                ${renderCritSection(data, setTagCfTotal, setTagCmTotal)}
+                ${renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa)}
+                ${renderRangeSection(data)}
+                ${renderAttackRateSection(data)}
+                ${renderDotSection(data, headDotRow)}
+                ${!isSplit ? renderSummonSection(data) : ''}
+                ${renderFinalSection(data)}
+            </div>
+        </div>
+    `;
+
+    if (isSplit) {
+        return { content: mainContent, leftPanel: leftPanelHtml, rightPanel: rightPanelHtml };
+    }
+    return mainContent;
 }
 
 function renderSummonSection(data) {
     if (!data.summonData) return '';
+    if (data.summonData && data.summonData.isCustom && data.summonData.summons && data.summonData.summons.length > 0) {
+        let summonsHtml = data.summonData.summons.map(s => `
+                <tr class="summon-header-row">
+                    <td class="mt-cell-label mt-text-bold" style="color: ${s.color}; font-size: 0.85rem;">
+                        ${s.name}
+                    </td>
+                    <td class="mt-cell-val" style="vertical-align: bottom;">
+                        <button class="summon-info-btn" onclick="toggleSummonDesc(this)">VIEW INFO</button>
+                    </td>
+                </tr>
+                <tr class="summon-desc-row hidden">
+                    <td colspan="2" class="mt-cell-label" style="padding: 12px 15px; background: rgba(0,0,0,0.25); border-radius: 8px; margin: 5px 0;">
+                        ${s.desc && s.desc.length > 0 ? `
+                            <div class="summon-desc-grid">
+                                ${s.desc.map(item => `
+                                    <div class="summon-desc-tag">
+                                        <span class="tag-bullet">•</span> ${item.replace('•', '').trim()}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : '<div class="text-dim">No additional description available.</div>'}
+                    </td>
+                </tr>
+                <tr><td class="mt-cell-label mt-pl-sm">Base Hit Damage</td><td class="mt-cell-val">${fmt.num(s.hitDmg)}</td></tr>
+                ${s.avgMult && s.avgMult !== 1 ? `<tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ Avg Multiplier (Cycle)</td><td class="mt-cell-val opacity-70">x${fmt.fix(s.avgMult, 3)}</td></tr>` : ''}
+                ${s.avgMult && s.avgMult !== 1 ? `<tr><td class="mt-cell-label mt-pl-sm text-accent-start">Avg Cycle Damage</td><td class="mt-cell-val text-accent-start">${fmt.num(s.avgDmg)}</td></tr>` : ''}
+                <tr><td class="mt-cell-label mt-pl-sm">Attack Speed (SPA)</td><td class="mt-cell-val">${fmt.fix(s.spa, 2)}s</td></tr>
+                <tr class="mt-border-top"><td class="mt-cell-label mt-pl-sm text-gold">Final Summon DPS</td><td class="mt-cell-val text-gold text-bold">${fmt.num(s.dps)}</td></tr>
+                <tr><td colspan="2" style="height: 12px;"></td></tr>
+        `).join('');
+
+        return `
+        <div class="dd-section" style="border-left: 3px solid #60a5fa;">
+            <div class="dd-title mt-text-blue"><span>Custom Summon Analysis</span></div>
+            <table class="calc-table sidebar-table">
+                ${summonsHtml}
+                <tr class="mt-border-top"><td class="mt-cell-label text-white mt-pt-md" style="font-size: 0.8rem;">TOTAL SUMMON DPS</td><td class="mt-cell-val mt-pt-md text-accent-start text-bold" style="font-size: 0.9rem;">${fmt.num(data.summon)}</td></tr>
+            </table>
+        </div>
+        <style>
+            .summon-info-btn {
+                background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+                color: #60a5fa; font-size: 0.5rem; font-weight: 800; padding: 2px 6px;
+                border-radius: 3px; cursor: pointer; letter-spacing: 0.5px; white-space: nowrap;
+            }
+            .summon-info-btn:hover { background: rgba(96, 165, 250, 0.1); border-color: #60a5fa; }
+            .sidebar-table { width: 100%; }
+            .sidebar-table td { padding: 3px 6px !important; }
+            .summon-desc-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                color: #94a3b8;
+                font-size: 0.62rem;
+                line-height: 1.3;
+            }
+            .summon-desc-tag {
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.05);
+                padding: 3px 8px;
+                border-radius: 4px;
+                white-space: nowrap;
+            }
+            .tag-bullet { color: #60a5fa; font-weight: bold; margin-right: 4px; }
+        </style>`;
+    }
     const isNutaru = data.baseStats.id === 'nutaru_beast';
     return `
     <div class="dd-section">
@@ -672,10 +824,9 @@ function renderAttackRateSection(data) {
     let detailRows = '';
     if (isKS) {
         detailRows = `
-            <tr class="mt-border-top"><td class="mt-cell-label mt-pt-md">Chain Logic</td><td class="mt-cell-formula mt-pt-md">5 Ticks × 20%</td><td class="mt-cell-val mt-pt-md"></td></tr>
+            <tr class="mt-border-top"><td class="mt-cell-label mt-pt-md">Chain Logic</td><td class="mt-cell-formula mt-pt-md">1 Tick × 20%</td><td class="mt-cell-val mt-pt-md"></td></tr>
             <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Base Tick Dmg</td><td class="mt-cell-formula"></td><td class="mt-cell-val">${fmt.num(data.extraAttacks.tickDmgVal)}</td></tr>
-            <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Avg Tick (w/ Crit)</td><td class="mt-cell-formula"><span class="op">×</span>${fmt.fix(data.critData.avgMult, 3)}</td><td class="mt-cell-val text-accent-start">${fmt.num(data.extraAttacks.avgTick)}</td></tr>
-            <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Total Chain Output</td><td class="mt-cell-formula"><span class="op">×</span>5</td><td class="mt-cell-val text-gold">${fmt.num(data.extraAttacks.totalChain)}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Total Chain Output</td><td class="mt-cell-formula"><span class="op">×</span>1</td><td class="mt-cell-val text-gold">${fmt.num(data.extraAttacks.totalChain)}</td></tr>
         `;
     }
 
@@ -686,7 +837,10 @@ function renderAttackRateSection(data) {
             <div class="dd-title mt-text-green"><span>5. Attack Rate Multiplier</span> <button class="calc-info-btn" onclick="openInfoPopup('attack_rate')">?</button></div>
             <table class="calc-table">
                 <tr><td class="mt-cell-label">Primary Target Hits</td><td class="mt-cell-formula"></td><td class="mt-cell-val">1.0</td></tr>
-                ${extraHits > 0 ? `<tr><td class="mt-cell-label">Extra Hits (Equiv)</td><td class="mt-cell-formula">+</td><td class="mt-cell-val">${fmt.fix(extraHits, 2)}</td></tr>` : ''}
+                ${extraHits > 0 ? `<tr><td class="mt-cell-label">${data.baseStats.customFollowUp ? 'Follow-Up Multiplier' : 'Extra Hits (Equiv)'}</td><td class="mt-cell-formula">+</td><td class="mt-cell-val">${fmt.fix(extraHits, 2)}</td></tr>` : ''}
+                ${data.extraAttacks && data.extraAttacks.usedSpa ? `
+                <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Animation Adj. SPA</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-start">${fmt.fix(data.extraAttacks.usedSpa, 3)}s</td></tr>
+                ` : ''}
                 
                 ${detailRows}
 
@@ -711,7 +865,7 @@ function renderFinalSection(data) {
                     <tr><td class="mt-cell-label">${hitLabel}</td><td class="mt-cell-formula">${hitFormula}</td><td class="mt-cell-val calc-highlight">${fmt.num(data.trueDmgMult > 1 ? data.baseHitDps : data.hit)}</td></tr>
                     ${data.trueDmgMult > 1 ? `<tr><td class="mt-cell-label text-accent-start">Sorcerer Hunter (True Dmg)</td><td class="mt-cell-formula"><span class="op">×</span>1.15</td><td class="mt-cell-val text-accent-start">${fmt.num(data.hit)}</td></tr>` : ''}
                     ${data.dot > 0 ? `<tr><td class="mt-cell-label">DoT DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-end">${fmt.num(data.dot)}</td></tr>` : ''}
-                    ${data.summon > 0 ? `<tr><td class="mt-cell-label">${isNutaru ? 'Clone' : 'Plane'} DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-start">${fmt.num(data.summon)}</td></tr>` : ''}
+                    ${data.summon > 0 ? `<tr><td class="mt-cell-label">${isNutaru ? 'Clone' : (data.summonData?.isCustom ? 'Custom Summon' : 'Plane')} DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-start">${fmt.num(data.summon)}</td></tr>` : ''}
                     <tr>
                         <td class="mt-cell-label text-white mt-pt-md" style="font-size: 1.1rem; font-weight: 800;">TOTAL DPS</td>
                         <td class="mt-cell-formula"></td>

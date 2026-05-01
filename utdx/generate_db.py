@@ -136,6 +136,8 @@ if (isMainThread) {
         const cands = allowDot
             ? ['dmg', 'spa', 'cm', 'cf', 'dot', ...(allowRange ? ['range'] : [])]
             : ['dmg', 'spa', 'cm', 'cf', ...(allowRange ? ['range'] : [])];
+        // For S.H. Spirit head, remove crit subs since it disables crits
+        const noCritCands = cands.filter(c => c !== 'cf' && c !== 'cm');
         const baseBuilds = globalBuilds.filter(b => allowDot || b.dot === 0);
 
         let strategies = [];
@@ -149,6 +151,20 @@ if (isMainThread) {
                 const [c1, c2] = pair;
                 if (cands.includes(c1) && cands.includes(c2)) ratios.forEach(r => strategies.push({ p: c1, s: c2, ratio: r }));
             });
+        }
+
+        // Separate strategies for no-crit heads (S.H. Spirit)
+        let noCritStrategies = [];
+        if (includeSubs) {
+            noCritCands.forEach(c => noCritStrategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
+            const noCritPairs = [['dmg', 'spa'], ...(allowRange ? [['dmg', 'range'], ['spa', 'range']] : [])];
+            const ratios = [{ p: 4, s: 3 }, { p: 3, s: 4 }, { p: 5, s: 2 }, { p: 2, s: 5 }];
+            noCritPairs.forEach(pair => {
+                const [c1, c2] = pair;
+                if (noCritCands.includes(c1) && noCritCands.includes(c2)) ratios.forEach(r => noCritStrategies.push({ p: c1, s: c2, ratio: r }));
+            });
+        } else {
+            noCritStrategies.push({ p: null, s: null, ratio: { p: 0, s: 0 } });
         }
 
         const applyContextualStats = (b, pieceName, mainStat, pStat, sStat, ratio, cands) => {
@@ -181,13 +197,16 @@ if (isMainThread) {
             allowedHeads.forEach(headType => {
                 if(!allowDot && headType === 'ninja') return; 
 
-                strategies.forEach(strat => {
+                const activeStrategies = (headType === 'sorcerer_hunter_spirit') ? noCritStrategies : strategies;
+                const activeCands = (headType === 'sorcerer_hunter_spirit') ? noCritCands : cands;
+
+                activeStrategies.forEach(strat => {
                     let totalStats = { ...build };
                     let currentAssignments = {};
 
-                    if (headType !== 'none') currentAssignments.head = formatAssignment(applyContextualStats(totalStats, 'head', null, strat.p, strat.s, strat.ratio, cands));
-                    currentAssignments.body = formatAssignment(applyContextualStats(totalStats, 'body', build.bodyType, strat.p, strat.s, strat.ratio, cands));
-                    currentAssignments.legs = formatAssignment(applyContextualStats(totalStats, 'legs', build.legType, strat.p, strat.s, strat.ratio, cands));
+                    if (headType !== 'none') currentAssignments.head = formatAssignment(applyContextualStats(totalStats, 'head', null, strat.p, strat.s, strat.ratio, activeCands));
+                    currentAssignments.body = formatAssignment(applyContextualStats(totalStats, 'body', build.bodyType, strat.p, strat.s, strat.ratio, activeCands));
+                    currentAssignments.legs = formatAssignment(applyContextualStats(totalStats, 'legs', build.legType, strat.p, strat.s, strat.ratio, activeCands));
                     currentAssignments.selectedHead = headType;
 
                     const splitIdx = build.name.indexOf('(');
@@ -214,7 +233,7 @@ if (isMainThread) {
         const { effectiveStats, isKiritoVR, suffix } = buildCalculationContext(unit, 'ruler', { isAbility, upgradeLevel });
         const hasNativeDoT = (effectiveStats.dot > 0) || (effectiveStats.burnMultiplier > 0) || isKiritoVR;
 
-        const allowedHeads = cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head'] : ['none'];
+        const allowedHeads = cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'] : ['none'];
         const traitGroups = {};
 
         const maxPts = (unit.id === 'king_sailor' || unit.id === 'the_strongest_in_history') ? 129 : 99;
@@ -304,7 +323,7 @@ if (isMainThread) {
         const MAP_PRIO = { 'dmg': 0, 'spa': 1, 'range': 2, 'raw_dmg': 3 };
         const MAP_BODY = { 'dmg': 0, 'dot': 1, 'cm': 2 };
         const MAP_LEGS = { 'dmg': 0, 'spa': 1, 'cf': 2, 'range': 3 };
-        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'rebellious_head': 7, 'reanimated_head': 8, 'mage_head': 9 };
+        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'rebellious_head': 7, 'reanimated_head': 8, 'mage_head': 9, 'sorcerer_hunter_spirit': 10, 'strongest_sorcerer_glasses': 11, 'monarch': 12 };
 
         const stringPool = new Map(); const stringArr = [""]; 
         const subPool = new Map(); const subArr = [null]; 
@@ -385,7 +404,7 @@ if (isMainThread) {
     const S = RAW.s; const P = RAW.p; const D = RAW.d;
     const PRIO = ['dmg', 'spa', 'range', 'raw_dmg'];
     const BODY = ['dmg', 'dot', 'cm']; const LEGS = ['dmg', 'spa', 'cf', 'range'];
-    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head'];
+    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'];
     const DESC_BODY = ['Dmg', 'DoT', 'Crit Dmg']; const DESC_LEGS = ['Dmg', 'Spa', 'Crit Rate', 'Range'];
     const ROW_SIZE = 18;
 

@@ -391,7 +391,7 @@ const setBonuses = {
     great_mage: { dmg: 0, spa: 0, cf: 0, cm: 0, range: 10 },
     sorcerer_hunter: { dmg: 10, spa: 7.5, cf: 0, cm: 0, range: 0 },
     strongest_sorcerer: { dmg: 10, spa: 0, cf: 0, cm: 0, range: 5 },
-    monarch: { dmg: 40, spa: 0, cf: 0, cm: 0, range: 0 },
+    monarch: { dmg: 0, spa: 0, cf: 0, cm: 0, range: 0 }, // Dynamic bonus handled in math.js
     none: { dmg: 0, spa: 0, cf: 0, cm: 0, range: 0 }
 };
 
@@ -419,7 +419,7 @@ const SETS = [
     { id: "great_mage", name: "Great Mage", bonus: { range: 10 } },
     { id: "sorcerer_hunter", name: "Sorcerer Hunter", bonus: { dmg: 10, spa: 7.5 } },
     { id: "strongest_sorcerer", name: "Strongest Sorcerer", bonus: { dmg: 10, range: 5 } },
-    { id: "monarch", name: "Monarch", bonus: { dmg: 40 } }
+    { id: "monarch", name: "Monarch", bonus: { dmg: "Up to +40% (Summon Based)" } }
 ];
 
 const globalBuilds = SETS.flatMap(set =>

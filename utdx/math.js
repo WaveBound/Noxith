@@ -134,14 +134,19 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
             return;
         }
 
+        // If this head disables crits, remove crit subs from candidates
+        const activeCandidates = (headType === 'sorcerer_hunter_spirit')
+            ? candidates.filter(c => c !== 'cf' && c !== 'cm')
+            : candidates;
+
         let strategies = [];
-        candidates.forEach(c => strategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
+        activeCandidates.forEach(c => strategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
         const pairs = [['dmg', 'cf'], ['dmg', 'spa'], ['dmg', 'range'], ['dmg', 'cm'], ['cf', 'cm'], ['spa', 'range']];
         const ratios = [{ p: 4, s: 3 }, { p: 3, s: 4 }, { p: 5, s: 2 }, { p: 2, s: 5 }];
 
         pairs.forEach(pair => {
             const [c1, c2] = pair;
-            if (!candidates.includes(c1) || !candidates.includes(c2)) return;
+            if (!activeCandidates.includes(c1) || !activeCandidates.includes(c2)) return;
             ratios.forEach(r => strategies.push({ p: c1, s: c2, ratio: r }));
         });
 
@@ -224,6 +229,26 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece) {
     // NEW SET TAG PERKS
     applyTagBuff('rebellious_set', 'Ninjaverse', { cf: 15, cm: 20 });
     applyTagBuff('rebellious_set', 'Bloodline', { dmg: 15, range: 20 });
+
+    // Monarch Dynamic Bonus (Set)
+    if (relicStats.set === 'monarch') {
+        const summonCount = (uStats.customSummons ? uStats.customSummons.length : 0) + (uStats.summonStats ? 1 : 0);
+        if (summonCount > 0) {
+            sBonus.dmg += Math.min(40, summonCount * 10);
+        }
+    }
+
+    // FULL SET TAG PERKS (Top/Bottom) - Only for Monarch Set
+    if (relicStats.set === 'monarch') {
+        if (tags.includes('Leveling')) {
+            sBonus.dmg += 20; tagBuffs.dmg += 20;
+        }
+        if (tags.includes('King')) {
+            sBonus.dmg += 15; tagBuffs.dmg += 15;
+            sBonus.dot += 20; tagBuffs.dot += 20;
+        }
+    }
+
     return { sBonus, tagBuffs };
 }
 
@@ -285,6 +310,30 @@ function _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats) {
         headDmgBuff = 0; headCalc.type = 'strongest_sorcerer';
         // Future: add timestop enemy count context here
     }
+
+    // Monarch Accessory Bonus
+    if (headPiece === 'monarch_head' || headPiece === 'monarch') {
+        const summonCount = (uStats.customSummons ? uStats.customSummons.length : 0) + (uStats.summonStats ? 1 : 0);
+        if (summonCount > 0) {
+            headDmgBuff += Math.min(60, summonCount * 10);
+        }
+        headCalc.type = 'monarch';
+    }
+
+    // FULL SET TAG PERKS (Head Piece) - Only for Monarch Head
+    const tags = uStats.tags || [];
+    if (headPiece === 'monarch_head' || headPiece === 'monarch') {
+        if (tags.includes('Leveling')) {
+            headDmgBuff += 20;
+            headCalc.crit = (headCalc.crit || 0) + 5;
+            headCalc.cdmg = (headCalc.cdmg || 0) + 15;
+        }
+        if (tags.includes('King')) {
+            headDmgBuff += 15;
+            headDotBuff -= 12.5;
+        }
+    }
+
     return { headDmgBuff, headDotBuff, headCalc };
 }
 
@@ -397,13 +446,19 @@ function calculateDPS(uStats, relicStats, context) {
     const bijuuBuff = (typeof window !== 'undefined' && window.bijuuLinkActive) ? 25 : 0;
     const bijuuSpa = (typeof window !== 'undefined' && window.bijuuLinkActive) ? 15 : 0;
 
-    // King Sailor Global Buffs
+    // King Sailor / Magi Tag Buffs
     const tags = uStats.tags || [];
-    const kingMark = (typeof window !== 'undefined' && window.kingSailorMarkActive);
     let kmDmg = 0, kmSpa = 0;
+
+    // Magi Tag: Permanent +50% Damage, -15% SPA
+    if (tags.includes('Magi')) {
+        kmDmg += 50;
+        kmSpa += 15;
+    }
+
+    const kingMark = (typeof window !== 'undefined' && window.kingSailorMarkActive);
     if (kingMark) {
-        if (tags.includes('Magi')) { kmDmg += 50; kmSpa += 15; }
-        else if (tags.includes('Uncontrollable Power')) { kmDmg += 30; kmSpa += 10; }
+        if (tags.includes('Uncontrollable Power')) { kmDmg += 30; kmSpa += 10; }
         else if (uStats.element === 'Water') { kmDmg += 20; kmSpa += 10; }
     }
 
@@ -535,22 +590,37 @@ function calculateDPS(uStats, relicStats, context) {
             label: `Water God Follow-up (${effectiveSpaCap}s window)`
         };
     } else if (uStats.id === 'king_sailor') {
-        // Baal's Lightning: 5 ticks of 20% damage each.
-        const tickCount = 5;
-        const tickDmg = 0.20;
+        // Baal's Lightning: 1 tick of 100% damage.
+        const tickCount = 1;
+        const tickDmg = 1.00;
 
-        attackMultiplier = 1 + (tickCount * tickDmg);
+        attackMultiplier = 1; // Base attacks don't get multiplied here since lightning bypasses true dmg
 
         extraAttacksData = {
             req: "Baal's Lightning",
-            hits: `1 + ${tickCount} Ticks`,
+            hits: `1 + ${tickCount} Tick`,
             extra: tickCount * tickDmg,
             attacksNeeded: 1,
-            mult: attackMultiplier,
+            mult: 2.00, // UI display only
             label: "Chain Lightning",
             tickDmgVal: finalDmg * tickDmg,
-            avgTick: (finalDmg * tickDmg) * avgCritMult,
-            totalChain: (finalDmg * tickDmg * tickCount) * avgCritMult
+            avgTick: (finalDmg * tickDmg) * avgCritMult, // CAN crit
+            totalChain: (finalDmg * tickDmg * tickCount) * avgCritMult // CAN crit
+        };
+    } else if (uStats.customFollowUp) {
+        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+        let chance = uStats.customFollowUp.chance;
+        if (eLevel >= uStats.customFollowUp.eLevelReq) chance = uStats.customFollowUp.eLevelChance;
+
+        const avgExtraHits = (chance / 100) * uStats.customFollowUp.dmgMult;
+        attackMultiplier = 1 + avgExtraHits;
+        extraAttacksData = {
+            req: `Follow-Up (${chance}%)`,
+            hits: `1 + ${uStats.customFollowUp.dmgMult}x`,
+            extra: avgExtraHits,
+            attacksNeeded: 1,
+            mult: attackMultiplier,
+            label: "Shadow Emerge"
         };
     } else if (uStats.followUp) {
         attackMultiplier = 1 + (uStats.followUp / 100);
@@ -573,21 +643,76 @@ function calculateDPS(uStats, relicStats, context) {
 
     let hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
 
-    // Sorcerer Hunter Set Perk: 1.15x True Damage (Multiplicative after everything, excluding DoT/Summon)
+    // Sorcerer Hunter Set Perk: 1.15x True Damage
     let trueDmgMult = 1;
     if (relicStats.set === 'sorcerer_hunter') {
         trueDmgMult = 1.15;
     }
-    const finalHitDps = hitDpsTotal * trueDmgMult;
+    let finalHitDps = hitDpsTotal * trueDmgMult;
+
+    // Add King Sailor's Chain Lightning DPS (Can Crit, No True Damage)
+    if (uStats.id === 'king_sailor') {
+        // avgHit already includes crit multiplier
+        const chainLightningDps = ((avgHit * 1.00) / usedSpa) * placement;
+        finalHitDps += chainLightningDps;
+    }
 
     // Nutaru E4: Clones gain +25% Damage in Beast Mode
     const summonDmgBase = (uStats.id === 'nutaru_beast' && isAbility) ? finalDmg * 1.25 : finalDmg;
 
-    const { summonDpsTotal, summonData } = _calcSummonDPS(uStats, summonDmgBase, finalSpa, placement);
+    let { summonDpsTotal, summonData } = _calcSummonDPS(uStats, summonDmgBase, finalSpa, placement);
+
+    if (uStats.customSummons && uStats.customSummons.length > 0) {
+        const upLevel = context.upgradeLevel !== undefined ? context.upgradeLevel : 6;
+        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+
+        if (!summonData) summonData = {};
+        summonData.isCustom = true;
+        summonData.summons = [];
+        let cDpsTotal = 0;
+
+        uStats.customSummons.forEach(s => {
+            if (upLevel >= s.reqUp) {
+                let sDmgMult = s.dmgMult;
+                if (eLevel >= 6 && s.e6DmgMult) sDmgMult = s.e6DmgMult;
+
+                let sAvgMult = s.avgMult || 1.0;
+                if (eLevel >= 6 && s.e6AvgMult) sAvgMult = s.e6AvgMult;
+
+                let sHitDmg = finalDmg * sDmgMult;
+                let sAvgDmg = sHitDmg * sAvgMult;
+                let sDps = sAvgDmg / s.spa;
+
+                cDpsTotal += sDps;
+                summonData.summons.push({
+                    name: s.name,
+                    hitDmg: sHitDmg,
+                    avgDmg: sAvgDmg,
+                    spa: s.spa,
+                    dps: sDps,
+                    desc: s.desc,
+                    color: s.color || "#ffffff"
+                });
+            }
+        });
+        summonDpsTotal += cDpsTotal;
+    }
+
     const gearDotBonus = baseR_Dot + headDotBuff + (sBonus.dot || 0);
     const { dotDpsTotal, dotBreakdown } = _calcDoTDPS(uStats, traitObj, traitDotBuff, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult);
 
-    const finalDotDps = dotDpsTotal;
+    let finalDotDps = dotDpsTotal;
+
+    if (uStats.customFollowUp) {
+        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+        let chance = uStats.customFollowUp.chance;
+        if (eLevel >= uStats.customFollowUp.eLevelReq) chance = uStats.customFollowUp.eLevelChance;
+
+        let followUpDotDmg = avgHit * (uStats.customFollowUp.dotPct / 100);
+        let followUpDotDpsPerCycle = (followUpDotDmg * uStats.customFollowUp.dotDuration * (chance / 100)) / usedSpa;
+        finalDotDps += followUpDotDpsPerCycle * placement;
+    }
+
     const finalSummonDps = summonDpsTotal;
 
     return {
