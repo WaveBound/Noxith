@@ -1,0 +1,70 @@
+unitDatabase.push({
+    // IDENTITY
+    id: "unit_id",
+    name: "Unit Name",
+    img: "images/units/UnitName.png",
+    placement: 1,               // Max units placeable
+    placementType: "Ground",    // "Ground", "Hill", or "Hybrid"
+    role: "Damage",             // Role description shown in UI
+    tags: [],                   // e.g. ["Reaper", "Bloodline", "Ninjaverse"]
+
+    // META (Build Guide tab)
+    meta: {
+        short: "Trait",         // Best budget/quick trait
+        long: "Trait",          // Best max potential trait(s)
+        note: "Brief reasoning."
+    },
+
+    totalCost: 0,               // Total gold cost to max
+
+    // BASE STATS
+    stats: {
+        spaCap: 3, crit: 0, cdmg: 150,             // spaCap = min SPA | cdmg 150 = standard
+        dot: 0, dotDuration: 0, dotStacks: 1,       // dot = % per tick | duration = # of ticks
+        element: "None", passiveDmg: 0,             // "Fire","Ice","Water","Dark","Light","Rose","Wind"
+    },
+
+    // UPGRADES (dmg, spa, range, cost per level)
+    upgrades: [
+        { dmg: 0, spa: 0.0, range: 0, cost: 0 },   // Up 0 (Base)
+        { dmg: 0, spa: 0.0, range: 0, cost: 0 },   // Up 1
+        { dmg: 0, spa: 0.0, range: 0, cost: 0 },   // Up 2
+        { dmg: 0, spa: 0.0, range: 0, cost: 0 },   // Up 3
+        { dmg: 0, spa: 0.0, range: 0, cost: 0 },   // Up 4
+        { dmg: 0, spa: 0.0, range: 0, cost: 0 },   // Up 5
+        { dmg: 0, spa: 0.0, range: 0, cost: 0 },   // Up 6
+        { dmg: 0, spa: 0.0, range: 0, cost: 0 },   // Up 7
+        { dmg: 0, spa: 0.0, range: 0, cost: 0 },   // Up 8
+        { dmg: 0, spa: 0.0, range: 0, cost: 0 },   // Up 9 (Max)
+    ],
+
+    // PASSIVES (displayed in unit info panel)
+    passives: [
+        { name: "Passive Name", desc: "Passive description." },
+    ],
+
+    // ABILITY — omit entire block if unit has no ability
+    // Single ability: use object {}
+    // Multiple abilities: use array [{}. {}]
+    ability: {
+        buffDmg: 0,                     // % damage bonus while ability is active
+        abilityName: "Ability Name",    // Display name shown in UI
+        noToggle: false,                // true = always on, no manual toggle
+        cooldown: 0,                    // Cooldown in seconds (0 if none)
+        desc: "Ability description."    // Shown in unit info panel
+    },
+    // ability: [
+    //     { buffDmg: 0, abilityName: "Ability One", noToggle: false, cooldown: 0, desc: "Description." },
+    //     { buffDmg: 0, abilityName: "Ability Two", noToggle: false, cooldown: 0, desc: "Description." },
+    // ],
+
+    // ETHEREALIZATION (E1-E6 upgrade descriptions)
+    etherealization: [
+        "+10 Stat Points",          // E1
+        "Unlock description.",      // E2
+        "+10 Stat Points",          // E3
+        "Unlock description.",      // E4
+        "+10 Stat Points",          // E5
+        "Unlock description.",      // E6
+    ]
+});
