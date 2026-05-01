@@ -19,20 +19,20 @@ unitDatabase.push({
 
     // BASE STATS
     stats: {
-        spaCap: 3, crit: 0, cdmg: 150,             // spaCap = min SPA | cdmg 150 = standard
+        spaCap: 2, crit: 0, cdmg: 150,             // spaCap = min SPA | cdmg 150 = standard
         dot: 15, dotDuration: 3, dotStacks: 1,       // dot = % per tick | duration = # of ticks
         element: "Dark", passiveDmg: 50,             // "Fire","Ice","Water","Dark","Light","Rose","Wind"
     },
 
     // UPGRADES (dmg, spa, range, cost per level)
     upgrades: [
-        { dmg: 0, spa: 6.6, range: 37, cost: 3000 },   // Up 0 (Base)
-        { dmg: 0, spa: 6.6, range: 41, cost: 6000 },   // Up 1
-        { dmg: 0, spa: 6.6, range: 47, cost: 9500 },   // Up 2
-        { dmg: 0, spa: 6.6, range: 50, cost: 14000 },   // Up 3
-        { dmg: 0, spa: 6.6, range: 54, cost: 20000 },   // Up 4
-        { dmg: 0, spa: 6.6, range: 59, cost: 30000 },   // Up 5
-        { dmg: 6650, spa: 9, range: 63, cost: 35000 },   // Up 6
+        { dmg: 300, spa: 9, range: 25, cost: 3000 },   // Up 0 (Base)
+        { dmg: 850, spa: 9, range: 28, cost: 6000 },   // Up 1
+        { dmg: 1350, spa: 9, range: 32, cost: 9500 },   // Up 2
+        { dmg: 2100, spa: 9, range: 34, cost: 14000 },   // Up 3
+        { dmg: 3000, spa: 9, range: 37, cost: 20000 },   // Up 4
+        { dmg: 4500, spa: 9, range: 40, cost: 30000 },   // Up 5
+        { dmg: 5500, spa: 9, range: 43, cost: 35000 },   // Up 6
     ],
 
     // PASSIVES (displayed in unit info panel)
