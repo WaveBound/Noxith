@@ -590,9 +590,9 @@ function calculateDPS(uStats, relicStats, context) {
             label: `Water God Follow-up (${effectiveSpaCap}s window)`
         };
     } else if (uStats.id === 'king_sailor') {
-        // Baal's Lightning: 1 tick of 100% damage.
+        // Baal's Lightning: 1 tick of 20% non-critical damage.
         const tickCount = 1;
-        const tickDmg = 1.00;
+        const tickDmg = 0.20;
 
         attackMultiplier = 1; // Base attacks don't get multiplied here since lightning bypasses true dmg
 
@@ -601,11 +601,11 @@ function calculateDPS(uStats, relicStats, context) {
             hits: `1 + ${tickCount} Tick`,
             extra: tickCount * tickDmg,
             attacksNeeded: 1,
-            mult: 2.00, // UI display only
+            mult: 1.20, // UI display only
             label: "Chain Lightning",
             tickDmgVal: finalDmg * tickDmg,
-            avgTick: (finalDmg * tickDmg) * avgCritMult, // CAN crit
-            totalChain: (finalDmg * tickDmg * tickCount) * avgCritMult // CAN crit
+            avgTick: (finalDmg * tickDmg), // NO crit
+            totalChain: (finalDmg * tickDmg * tickCount) // NO crit
         };
     } else if (uStats.customFollowUp) {
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
@@ -650,10 +650,10 @@ function calculateDPS(uStats, relicStats, context) {
     }
     let finalHitDps = hitDpsTotal * trueDmgMult;
 
-    // Add King Sailor's Chain Lightning DPS (Can Crit, No True Damage)
+    // Add King Sailor's Chain Lightning DPS (NO Crit, No True Damage)
     if (uStats.id === 'king_sailor') {
-        // avgHit already includes crit multiplier
-        const chainLightningDps = ((avgHit * 1.00) / usedSpa) * placement;
+        // Chain lightning does NOT crit and does NOT benefit from true damage
+        const chainLightningDps = ((finalDmg * 0.20) / usedSpa) * placement;
         finalHitDps += chainLightningDps;
     }
 

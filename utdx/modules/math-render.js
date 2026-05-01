@@ -824,7 +824,7 @@ function renderAttackRateSection(data) {
     let detailRows = '';
     if (isKS) {
         detailRows = `
-            <tr class="mt-border-top"><td class="mt-cell-label mt-pt-md">Chain Logic</td><td class="mt-cell-formula mt-pt-md">1 Tick × 20%</td><td class="mt-cell-val mt-pt-md"></td></tr>
+            <tr class="mt-border-top"><td class="mt-cell-label mt-pt-md">Chain Logic</td><td class="mt-cell-formula mt-pt-md">1 Tick × 20% (Non-Crit)</td><td class="mt-cell-val mt-pt-md"></td></tr>
             <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Base Tick Dmg</td><td class="mt-cell-formula"></td><td class="mt-cell-val">${fmt.num(data.extraAttacks.tickDmgVal)}</td></tr>
             <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Total Chain Output</td><td class="mt-cell-formula"><span class="op">×</span>1</td><td class="mt-cell-val text-gold">${fmt.num(data.extraAttacks.totalChain)}</td></tr>
         `;
