@@ -48,7 +48,7 @@ if (isMainThread) {
     unitDatabase.forEach(u => {
         if (targetUnits.length === 0 || targetSet.has(u.id)) {
             tasksForCounting.push(u.name);
-            if (u.id === 'kirito') tasksForCounting.push('Kirito (Card)');
+            if (isUnit(u.id, 'kirito')) tasksForCounting.push('Kirito (Card)');
         }
     });
 
@@ -236,7 +236,7 @@ if (isMainThread) {
         const allowedHeads = cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'] : ['none'];
         const traitGroups = {};
 
-        const maxPts = (unit.id === 'king_sailor' || unit.id === 'the_strongest_in_history') ? 129 : 99;
+        const maxPts = (isUnit(unit.id, 'king_sailor') || isUnit(unit.id, 'sukuna')) ? 129 : 99;
         const allowRange = RANGE_ENABLED_UNITS.has(unit.id);
 
         traitsForCalc.forEach(trait => {
@@ -383,8 +383,8 @@ if (isMainThread) {
         const allPossibleKeys = new Set();
         unitDatabase.forEach(u => {
             allPossibleKeys.add(u.id);
-            if(u.id === 'kirito') allPossibleKeys.add('kirito_card');
-            if(u.ability) { allPossibleKeys.add(u.id + '_abil'); if(u.id === 'kirito') allPossibleKeys.add('kirito_card_abil'); }
+            if(isUnit(u.id, 'kirito')) allPossibleKeys.add('kirito_card');
+            if(u.ability) { allPossibleKeys.add(u.id + '_abil'); if(isUnit(u.id, 'kirito')) allPossibleKeys.add('kirito_card_abil'); }
         });
 
         for (const key of allPossibleKeys) {
@@ -509,16 +509,16 @@ if (isMainThread) {
             unitDatabase.forEach(u => {
                 if (targetUnits.length === 0 || targetSet.has(u.id)) {
                     tasks.push({ u, isCard: false });
-                    if(u.id === 'kirito') tasks.push({ u, isCard: true });
+                    if(isUnit(u.id, 'kirito')) tasks.push({ u, isCard: true });
                 }
             });
 
             let workerDb = {};
             tasks.forEach(task => {
                 const { u, isCard } = task;
-                let baseKey = u.id === 'kirito' && isCard ? 'kirito_card' : u.id;
+                let baseKey = isUnit(u.id, 'kirito') && isCard ? 'kirito_card' : u.id;
                 const types = u.ability ? ['base', 'abil'] : ['base'];
-                const isLaw = u.id === 'law';
+                const isLaw = isUnit(u.id, 'law');
                 
                 const sortFn = isLaw 
                     ? (a, b) => b.range !== a.range ? (b.range || 0) - (a.range || 0) : (b.dps || 0) - (a.dps || 0)
@@ -530,9 +530,9 @@ if (isMainThread) {
                     const finalKey = type === 'abil' ? `${baseKey}_abil` : baseKey;
                     workerDb[finalKey] = { fixed: [], bugged: [] }; 
 
-                    if (u.id === 'bambietta') bambiettaState.element = "Dark"; 
-                    if (u.id === 'robot1718') robot1718State.mode = "Robot 17";
-                    if (u.id === 'kirito') { kiritoState.realm = true; kiritoState.card = isCard; }
+                    if (isUnit(u.id, 'bambietta')) bambiettaState.element = "Dark"; 
+                    if (isUnit(u.id, 'robot1718')) robot1718State.mode = "Robot 17";
+                    if (isUnit(u.id, 'kirito')) { kiritoState.realm = true; kiritoState.card = isCard; }
 
                     const isAbility = type === 'abil';
 
@@ -635,6 +635,10 @@ class GeneratorApp:
             if os.path.exists(units_dir):
                 for u_file in sorted(os.listdir(units_dir)):
                     if u_file.endswith('.js'):
+                        # Inject the filename into the math engine memory before loading the unit
+                        clean_name = u_file.replace('.js', '')
+                        combined_js_parts.append(f"global.__currentUnitFile = '{clean_name}';\n")
+                        
                         with open(os.path.join(units_dir, u_file), "r", encoding="utf-8") as f: combined_js_parts.append(f.read() + "\n")
 
             combined_js_parts.append(GENERATOR_SCRIPT)

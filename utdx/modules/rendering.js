@@ -64,7 +64,8 @@ const unitControls = {
 };
 
 function getUnitControlsHtml(unit) {
-    return unitControls[unit.id] ? unitControls[unit.id](unit) : '';
+    const fileKey = window.getFileName(unit.id);
+    return unitControls[fileKey] ? unitControls[fileKey](unit) : '';
 }
 
 function createBaseUnitCard(unit, options = {}) {
@@ -264,7 +265,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     let benchmarkDps = 0;
     try {
         if (inventoryMode && window.STATIC_BUILD_DB) {
-            let dbKey = (unitId === 'kirito' && kiritoState.card) ? 'kirito_card' : unitId;
+            let dbKey = (isUnit(unitId, 'kirito') && kiritoState.card) ? 'kirito_card' : unitId;
             if (activeType === 'abil') dbKey += '_abil';
             const dbEntry = window.STATIC_BUILD_DB[dbKey] || {};
             const modeData = dbEntry[activeMode] || dbEntry[activeMode === 'fixed' ? 'f' : 'b'];
@@ -385,8 +386,8 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     let buildData = window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0];
 
     if (!buildData && !inventoryMode && unitObj) {
-        const isBambiAlt = (unitId === 'bambietta' && bambiettaState.element !== 'Dark');
-        const isRobotAlt = (unitId === 'robot1718' && robot1718State.mode !== 'Robot 17');
+        const isBambiAlt = (isUnit(unitId, 'bambietta') && bambiettaState.element !== 'Dark');
+        const isRobotAlt = (isUnit(unitId, 'robot1718') && robot1718State.mode !== 'Robot 17');
         if (!isBambiAlt && !isRobotAlt) {
             processUnitCache(unitObj, 0, activeType, false);
             buildData = window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0];
@@ -415,7 +416,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
     const CONFIGS = [{ head: true, subs: true }];
 
     const performCalcSet = (mode, useAbility, targetCache) => {
-        let dbKey = (unit.id === 'kirito' && kiritoState.card) ? 'kirito_card' : unit.id;
+        let dbKey = (window.isUnit(unit.id, 'kirito') && kiritoState.card) ? 'kirito_card' : unit.id;
         if (useAbility && unit.ability) dbKey += '_abil';
 
         const useInventory = (inventoryMode === true);
@@ -427,8 +428,8 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
             let calculatedResults = [];
 
             if (!useInventory) {
-                const isBambiAlt = (unit.id === 'bambietta' && bambiettaState.element !== 'Dark');
-                const isRobotAlt = (unit.id === 'robot1718' && robot1718State.mode !== 'Robot 17');
+                const isBambiAlt = (isUnit(unit.id, 'bambietta') && bambiettaState.element !== 'Dark');
+                const isRobotAlt = (isUnit(unit.id, 'robot1718') && robot1718State.mode !== 'Robot 17');
                 const canUseStatic = !isBambiAlt && !isRobotAlt;
 
                 if (canUseStatic && window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {
@@ -479,16 +480,16 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
 
 window.getQuickScore = (unit) => {
     const isAbility = activeAbilityIds.has(unit.id) && unit.ability;
-    let baseKey = (unit.id === 'kirito' && kiritoState.card) ? 'kirito_card' : unit.id;
+    let baseKey = (window.isUnit(unit.id, 'kirito') && kiritoState.card) ? 'kirito_card' : unit.id;
     const dbKey = baseKey + (isAbility ? '_abil' : '');
 
     if (window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {
         const list = window.STATIC_BUILD_DB[dbKey]['fixed']?.[0];
         if (list && list.length > 0) {
-            return unit.id === 'law' ? (list[0].range || 0) : list[0].dps;
+            return window.isUnit(unit.id, 'law') ? (list[0].range || 0) : list[0].dps;
         }
     }
-    if (unit.id === 'law') {
+    if (window.isUnit(unit.id, 'law')) {
         if (unit.stats.range) return unit.stats.range;
         if (unit.upgrades && unit.upgrades.length > 0) return unit.upgrades[unit.upgrades.length - 1].range || 0;
         return 0;
@@ -536,7 +537,7 @@ function renderDatabase() {
 
             // Using our new unified TOGGLE_OVERRIDES object
             const isToggled = activeAbilityIds.has(unit.id);
-            const override = TOGGLE_OVERRIDES[unit.id];
+            const override = TOGGLE_OVERRIDES[window.getFileName(unit.id)];
 
             if (override) {
                 abilityLabel = override.dynamicLabel ? override.dynamicLabel(isToggled) : override.label;
@@ -562,8 +563,8 @@ function renderDatabase() {
             const topControls = `<div class="unit-toolbar"><div class="ut-actions"><button class="calc-btn ut-btn-compact" onclick="openCalc('${unit.id}')">🖩 Custom</button><button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">📊 Traits</button><button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">ⓘ Info</button></div>${abilityToggleHtml}</div>`;
 
             let defaultSort = 'dps';
-            if (['sjw', 'esdeath'].includes(unit.id)) defaultSort = 'damage';
-            else if (unit.id === 'law') defaultSort = 'range';
+            if (isAnyUnit(unit.id, ['sjw', 'esdeath'])) defaultSort = 'damage';
+            else if (isUnit(unit.id, 'law')) defaultSort = 'range';
 
             const bottomControls = `
                 <div class="search-container">

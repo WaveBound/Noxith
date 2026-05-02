@@ -2,11 +2,11 @@
 // UTILS.JS - Shared Helper Functions
 // ============================================================================
 
-const format = (n) => 
-    n >= 1e9 ? (n/1e9).toFixed(2) + 'B' : 
-    n >= 1e6 ? (n/1e6).toFixed(2) + 'M' : 
-    n >= 1e3 ? (n/1e3).toFixed(1).replace(/\.0$/, '') + 'k' : 
-    n.toLocaleString(undefined, {maximumFractionDigits:0});
+const format = (n) =>
+    n >= 1e9 ? (n / 1e9).toFixed(2) + 'B' :
+        n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' :
+            n >= 1e3 ? (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'k' :
+                n.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
 const fix1 = (n) => parseFloat((n || 0).toFixed(1));
 const fix2 = (n) => parseFloat((n || 0).toFixed(2));
@@ -16,23 +16,23 @@ const fix2 = (n) => parseFloat((n || 0).toFixed(2));
 function getStatType(key) {
     if (!key) return 'dmg';
     let k = key.toLowerCase();
-    
+
     // Normalize Input IDs (subDmg -> dmg)
     if (k.startsWith('sub')) k = k.substring(3);
 
     if (k === 'potency' || k.includes('potency')) return 'potency';
     if (k === 'elemental' || k.includes('elem')) return 'elemental';
-    
+
     if (k === 'dmg' || k === 'damage') return 'dmg';
     if (k === 'spa') return 'spa';
-    
+
     // FIX: Map to 'cdmg' and 'crit' for CSS/Labels
     if (k === 'cm' || k.includes('crit dmg') || k.includes('crit damage') || k === 'cdmg') return 'cdmg';
     if (k === 'cf' || k.includes('crit rate') || k.includes('crit') || k === 'crit') return 'crit';
-    
+
     if (k === 'dot') return 'dot';
     if (k.includes('range') || k === 'rng') return 'range';
-    
+
     return 'dmg';
 }
 
@@ -40,21 +40,21 @@ function getStatType(key) {
 function normalizeStatKey(key) {
     const type = getStatType(key);
     // Return keys matching MAX_SUB_STAT_VALUES in constants.js
-    if (type === 'cdmg') return 'cm'; 
-    if (type === 'crit') return 'cf'; 
+    if (type === 'cdmg') return 'cm';
+    if (type === 'crit') return 'cf';
     return type;
 }
 
 // Generate HTML badge for a single stat (MAIN STAT)
 function getBadgeHtml(statKeyOrName, value = null) {
     if (!statKeyOrName || statKeyOrName === 'none' || statKeyOrName === 'null') return '<span class="badge-empty">-</span>';
-    
+
     const type = getStatType(statKeyOrName);
-    
-    const borderClass = `border-${type}`; 
-    const gradClass = `grad-${type}`;     
+
+    const borderClass = `border-${type}`;
+    const gradClass = `grad-${type}`;
     const label = STAT_LABELS[type] || type.toUpperCase();
-    
+
     const labelHtml = `<span class="${gradClass}">${label}</span>`;
 
     let valueHtml = '';
@@ -68,7 +68,7 @@ function getBadgeHtml(statKeyOrName, value = null) {
 // Generate HTML for multi-stat sub-stats (SUB STAT / RICH BADGE)
 function getRichBadgeHtml(statsArray) {
     if (!statsArray || statsArray.length === 0) return '<span class="badge-empty">None</span>';
-    
+
     // Sort logic (Priority: Dmg > Range > Spa > Others)
     const priority = { 'dmg': 1, 'damage': 1, 'range': 2, 'spa': 3 };
     statsArray.sort((a, b) => {
@@ -84,9 +84,9 @@ function getRichBadgeHtml(statsArray) {
         const type = getStatType(stat.type);
         const valStr = fix1(stat.val) + '%';
         const label = STAT_LABELS[type] || type;
-        const textClass = `text-${type}`; 
-        const gradClass = `grad-${type}`; 
-        
+        const textClass = `text-${type}`;
+        const gradClass = `grad-${type}`;
+
         return `<span class="${textClass} rb-inner" onclick="event.stopPropagation(); openInfoPopup('stat_${type}')"><span class="${gradClass}">${label}</span><span class="badge-val val-sub">${valStr}</span></span>`;
     });
 
@@ -117,7 +117,7 @@ function trackBaseStatValue(input, currentStarMult) {
         return;
     }
     const baseVal = val / (currentStarMult || 1);
-    input.dataset.baseVal = baseVal.toFixed(6); 
+    input.dataset.baseVal = baseVal.toFixed(6);
 }
 
 /**
@@ -125,7 +125,7 @@ function trackBaseStatValue(input, currentStarMult) {
  */
 function applyStarScalingToInput(input, newStarMult) {
     if (!input.dataset.baseVal && input.value !== '') {
-        trackBaseStatValue(input, 1); 
+        trackBaseStatValue(input, 1);
     }
     const base = parseFloat(input.dataset.baseVal);
     if (isNaN(base)) return;
@@ -139,13 +139,13 @@ function attachStatScaler(inputElement, getStarMultFn) {
     inputElement.oninput = () => {
         let value = parseFloat(inputElement.value);
         if (value < 0 || isNaN(value)) {
-             if(value < 0) { inputElement.value = 0; value = 0; }
+            if (value < 0) { inputElement.value = 0; value = 0; }
         }
 
         // Determine Stat Key (Handle 'data-stat' vs 'id')
         let rawKey = inputElement.dataset.stat || inputElement.id;
         const statKey = normalizeStatKey(rawKey);
-        
+
         const baseMaxValue = MAX_SUB_STAT_VALUES[statKey];
         const starMult = getStarMultFn();
         const dynamicMaxValue = baseMaxValue * starMult;
@@ -166,7 +166,7 @@ function attachStatScaler(inputElement, getStarMultFn) {
 
 function getTraitById(traitId, unitId = null) {
     if (!traitId || traitId === 'none') return traitsList.find(t => t.id === 'none');
-    
+
     // 1. Global Standard
     let t = traitsList.find(t => t.id === traitId);
     if (t) return t;
@@ -182,13 +182,13 @@ function getTraitById(traitId, unitId = null) {
         t = unitSpecificTraits[unitId].find(t => t.id === traitId);
         if (t) return t;
     }
-    
+
     return null;
 }
 
 function getTraitByName(traitName, unitId = null) {
     if (!traitName) return null;
-    
+
     // 1. Global Standard
     let t = traitsList.find(t => t.name === traitName);
     if (t) return t;
@@ -217,3 +217,38 @@ function getTraitByName(traitName, unitId = null) {
 
     return null;
 }
+
+// ============================================================================
+// UNIT REFERENCE HELPERS (Uses JS Filename as the Source of Truth)
+// ============================================================================
+
+/** Gets the current unit.id by passing the JS filename (e.g. 'water_god') */
+window.getUnitId = function (fileName) {
+    if (!fileName) return null;
+    if (typeof unitDatabase !== 'undefined') {
+        const unit = unitDatabase.find(u => u._fileName === fileName || u.id === fileName);
+        if (unit) return unit.id;
+    }
+    return fileName;
+};
+
+/** Checks if a unit matches a filename. Usage: if (isUnit(uStats.id, 'water_god')) */
+window.isUnit = function (currentId, fileName) {
+    if (!currentId) return false;
+    return currentId === window.getUnitId(fileName);
+};
+
+/** Checks if a unit matches ANY filename in an array. */
+window.isAnyUnit = function (currentId, fileNamesArray) {
+    if (!currentId || !fileNamesArray) return false;
+    return fileNamesArray.some(fName => currentId === window.getUnitId(fName));
+};
+
+/** Gets the permanent JS filename from a dynamic unit ID. Useful for UI mappings. */
+window.getFileName = function (currentId) {
+    if (typeof unitDatabase !== 'undefined') {
+        const unit = unitDatabase.find(u => u.id === currentId);
+        if (unit && unit._fileName) return unit._fileName;
+    }
+    return currentId;
+};

@@ -199,12 +199,12 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece) {
 
     // Rebellious Shinobi: +30% Dmg on CC Application (Uptime ~75% for CC units)
     const hasCC = (uStats.role && (uStats.role.includes("Slow") || uStats.role.includes("Debuff"))) ||
-        ['ancient_shinob', 'water_god', 'first_emperor'].includes(uStats.id);
+        isAnyUnit(uStats.id, ['ancient_shinob', 'water_god', 'first_emperor']);
     if (relicStats.set === 'rebellious_set' && hasCC) {
         sBonus.dmg += 22.5;
     }
 
-    const isMage = ['ancient_mage', 'megumin', 'maid', 'water_god'].includes(uStats.id) || (uStats.name && uStats.name.includes('Mage'));
+    const isMage = isAnyUnit(uStats.id, ['ancient_mage', 'megumin', 'maid', 'water_god']) || (uStats.name && uStats.name.includes('Mage'));
 
     // Great Mage: +20% Dmg on Type Advantage Hit (Uptime ~90%)
     if (relicStats.set === 'great_mage' && isMage) {
@@ -255,7 +255,7 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece) {
 function _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats) {
     let headDmgBuff = 0, headDotBuff = 0;
     let headCalc = { type: headPiece, uptime: 1, trigger: 0, duration: 0, attacks: 0 };
-    const isMage = ['ancient_mage', 'megumin', 'maid', 'water_god'].includes(uStats.id) || (uStats.name && uStats.name.includes('Mage'));
+    const isMage = isAnyUnit(uStats.id, ['ancient_mage', 'megumin', 'maid', 'water_god']) || (uStats.name && uStats.name.includes('Mage'));
 
     if (headPiece === 'sun_god') {
         headCalc.attacks = 6; headCalc.duration = 7;
@@ -278,7 +278,7 @@ function _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats) {
         headDmgBuff = 0; headCalc.type = 'junior'; headCalc.multiplier = 1.1;
     } else if (headPiece === 'biju_head') {
         // Sasuke Units: +70% Dmg (Trigger: 3 attacks, Duration: 10s, non-stacking)
-        if (uStats.id && uStats.id.includes('sasuke')) {
+        if (uStats.id && window.getFileName(uStats.id).includes('sasuke')) {
             headCalc.attacks = 3;
             headCalc.duration = 10;
             const timeToTrigger = headCalc.attacks * finalSpa;
@@ -472,7 +472,7 @@ function calculateDPS(uStats, relicStats, context) {
 
     const isKsBuffActive = (typeof window !== 'undefined' && window.kingSailorBuffActive);
     let ksCrit = 0, ksCdmg = 0;
-    if (isKsBuffActive && uStats.id !== 'king_sailor') { ksCrit = 10; ksCdmg = 20; }
+    if (isKsBuffActive && !isUnit(uStats.id, 'king_sailor')) { ksCrit = 10; ksCdmg = 20; }
 
     const amSupportActive = (typeof window !== 'undefined' && window.ancientMageSupportActive);
     const amCritRate = amSupportActive ? 20 : 0;
@@ -485,7 +485,7 @@ function calculateDPS(uStats, relicStats, context) {
     const mageGroundBuffActive = (typeof window !== 'undefined' && window.mageGroundBuffActive);
     const mageGroundCrit = (mageGroundBuffActive && (uType === 'ground' || uType === 'hybrid')) ? 45 : 0;
 
-    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + enlightenedGodBuff + (bijuuBuff > 0 ? 25 : 0) + (uStats.id === 'king_sailor' ? 10 : 0);
+    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + enlightenedGodBuff + (bijuuBuff > 0 ? 25 : 0) + (isUnit(uStats.id, 'king_sailor') ? 10 : 0);
     const finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
 
     const setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + enlightenedGodSpa + bijuuSpa + kmSpa + mageHillSpa;
@@ -494,7 +494,7 @@ function calculateDPS(uStats, relicStats, context) {
     const mageSpaMult = (headPiece === 'mage_head') ? 0.88 : 1; // -20% * 0.6 uptime
 
     // Nutaru (Beast) dynamic SPA Cap override
-    const effectiveSpaCap = (isAbility && uStats.id === 'nutaru_beast') ? 3.0 : (uStats.spaCap || 0.1);
+    const effectiveSpaCap = (isAbility && isUnit(uStats.id, 'nutaru_beast')) ? 3.0 : (uStats.spaCap || 0.1);
 
     const spaAfterRelic = lvStats.spa * (1 - traitSpaPct / 100) * (1 - baseR_Spa / 100) * mageSpaMult;
     const rawFinalSpa = spaAfterRelic * (1 - setAndPassiveSpa / 100);
@@ -506,14 +506,14 @@ function calculateDPS(uStats, relicStats, context) {
     let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBuff + mikuBuff + enlightenedGodBuff + bijuuBuff + kmDmg;
 
     // Junior Ninja: 1.1x Multiplier to Miku Buff and Passives (WATER GOD ONLY)
-    if (headPiece === 'junior' && uStats.id === 'water_god') {
+    if (headPiece === 'junior' && window.isUnit(uStats.id, 'water_god')) {
         additiveTotal = ((sBonus.dmg || 0) + passivePcent + headDmgBuff + mikuBuff + enlightenedGodBuff + bijuuBuff + kmDmg) * 1.1;
     }
 
     const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1);
 
     const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + amCritDmg + ksCdmg;
-    let finalCritRate = Math.min(uStats.crit + traitCritRate + amCritRate + ksCrit + mageGroundCrit + ((uStats.id === 'kirito') ? 0 : (baseR_Cf + (sBonus.cf || 0))), 100);
+    let finalCritRate = Math.min(uStats.crit + traitCritRate + amCritRate + ksCrit + mageGroundCrit + (isUnit(uStats.id, 'kirito') ? 0 : (baseR_Cf + (sBonus.cf || 0))), 100);
     if (headPiece === 'sorcerer_hunter_spirit') finalCritRate = 0;
 
     const avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
@@ -524,7 +524,7 @@ function calculateDPS(uStats, relicStats, context) {
     let extraAttacksData = null;
     let usedSpa = finalSpa;
 
-    if (uStats.id === 'rohan') {
+    if (isUnit(uStats.id, 'rohan')) {
         const probs = [0.40, 0.35, 0.30, 0.25, 0.20];
         let cumulativeProbs = [];
         let currentProb = 1.0;
@@ -559,7 +559,7 @@ function calculateDPS(uStats, relicStats, context) {
             mult: attackMultiplier,
             label: "Rohan Mechanics"
         };
-    } else if (uStats.id === 'super_roku' && isAbility) {
+    } else if (isUnit(uStats.id, 'super_roku') && isAbility) {
         // "Every other attack does only 30% of his damage"
         // Avg = (1.0 + 0.3) / 2 = 0.65
         attackMultiplier = 0.65;
@@ -571,7 +571,7 @@ function calculateDPS(uStats, relicStats, context) {
             mult: 0.65,
             label: "Combo Decay"
         };
-    } else if (uStats.id === 'cell' && !isAbility) {
+    } else if (isUnit(uStats.id, 'cell') && !isAbility) {
         // Every attack has a follow-up for 50% damage.
         usedSpa = finalSpa + 1.5;
         attackMultiplier = 1.5;
@@ -582,7 +582,7 @@ function calculateDPS(uStats, relicStats, context) {
             attacksNeeded: 1,
             mult: 1.5,
         };
-    } else if (uStats.id === 'water_god' && uStats.followUp) {
+    } else if (isUnit(uStats.id, 'water_god') && uStats.followUp) {
         // Every attack fires a follow-up after one spaCap window (3.5s).
         // The full cycle = max(finalSpa, spaCap*2).
         // At cap (3.5s SPA): each hit takes 3.5s → 2 hits per 7s, always.
@@ -597,7 +597,7 @@ function calculateDPS(uStats, relicStats, context) {
             mult: attackMultiplier,
             label: `Water God Follow-up (${effectiveSpaCap}s window)`
         };
-    } else if (uStats.id === 'king_sailor') {
+    } else if (isUnit(uStats.id, 'king_sailor')) {
         // Baal's Lightning: 1 tick of 20% non-critical damage.
         const tickCount = 1;
         const tickDmg = 0.20;
@@ -659,14 +659,14 @@ function calculateDPS(uStats, relicStats, context) {
     let finalHitDps = hitDpsTotal * trueDmgMult;
 
     // Add King Sailor's Chain Lightning DPS (NO Crit, No True Damage)
-    if (uStats.id === 'king_sailor') {
+    if (isUnit(uStats.id, 'king_sailor')) {
         // Chain lightning does NOT crit and does NOT benefit from true damage
         const chainLightningDps = ((finalDmg * 0.20) / usedSpa) * placement;
         finalHitDps += chainLightningDps;
     }
 
     // Nutaru E4: Clones gain +25% Damage in Beast Mode
-    const summonDmgBase = (uStats.id === 'nutaru_beast' && isAbility) ? finalDmg * 1.25 : finalDmg;
+    const summonDmgBase = (isUnit(uStats.id, 'nutaru_beast') && isAbility) ? finalDmg * 1.25 : finalDmg;
 
     let { summonDpsTotal, summonData } = _calcSummonDPS(uStats, summonDmgBase, finalSpa, placement);
 

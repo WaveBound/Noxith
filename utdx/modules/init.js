@@ -3,6 +3,12 @@
 // ============================================================================
 
 function initApp() {
+    // 0. Populate default abilities safely regardless of current IDs
+    ['phantom_captain', 'megumin', 'ancient_shinob'].forEach(file => {
+        const dynamicId = window.getUnitId(file);
+        if (dynamicId) activeAbilityIds.add(dynamicId);
+    });
+
     // 1. Initialize Hotbar
     if (typeof ENABLE_HOTBAR !== 'undefined' && ENABLE_HOTBAR && typeof initHotbar === 'function') {
         initHotbar();

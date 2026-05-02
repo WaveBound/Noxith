@@ -10,7 +10,7 @@ const fmt = {
 };
 
 function renderOverviewSection(data) {
-    const isNutaru = data.baseStats.id === 'nutaru_beast';
+    const isNutaru = window.isUnit(data.baseStats.id, 'nutaru_beast');
     return `
         <div class="math-section" style="border: 1px solid rgba(251, 191, 36, 0.2); border-left: 4px solid #fbbf24; padding: 8px 12px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, rgba(255,255,255,0) 100%);">
             <div class="math-header" style="font-size: 0.5rem; margin-bottom: 10px; letter-spacing: 1px; opacity: 0.6; font-weight: 900; color: #fbbf24;">SNAPSHOT OVERVIEW</div>
@@ -177,7 +177,7 @@ function renderSourceTotalsSection(data) {
                     </div>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px;">` +
-        (data.baseStats.id === 'nutaru_beast' ? `
+        (window.isUnit(data.baseStats.id, 'nutaru_beast') ? `
                         <div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Clone Despawn</span><span class="text-white">+40.0%</span></div>
                         ${data.isAbility ? `
                             <div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Beast Form</span><span class="text-white">+30.0%</span></div>
@@ -259,7 +259,7 @@ function renderActiveBuffsSection(data) {
 
 function renderQuickBreakdownSection(data, avgHitPerUnit, dotColorClass) {
     const dotLabelClass = data.dot > 0 ? 'text-accent-end' : '';
-    const isNutaru = data.baseStats.id === 'nutaru_beast';
+    const isNutaru = window.isUnit(data.baseStats.id, 'nutaru_beast');
     return `
         <div class="math-section no-border-bottom" style="margin-bottom: 4px;">
             <div class="math-header opacity-70">Quick Breakdown</div>
@@ -627,7 +627,7 @@ function renderMathContent(data, isSplit = false) {
     const leftPanelHtml = (data.summonData) ? `
         <div class="modal-side-content">
             <div class="math-header" style="font-size: 0.55rem; color: #fff; opacity: 0.5; margin-bottom: 12px; letter-spacing: 1px; padding-left: 4px;">
-                ${data.summonData.isCustom ? 'UNIT SUMMONS' : (data.baseStats.id === 'nutaru_beast' ? 'CLONE LOGIC' : 'PLANE LOGIC')}
+                ${data.summonData.isCustom ? 'UNIT SUMMONS' : (window.isUnit(data.baseStats.id, 'nutaru_beast') ? 'CLONE LOGIC' : 'PLANE LOGIC')}
             </div>
             
             ${data.summonData.isCustom ? 
@@ -797,7 +797,7 @@ function renderSummonSection(data) {
             .tag-bullet { color: #60a5fa; font-weight: bold; margin-right: 4px; }
         </style>`;
     }
-    const isNutaru = data.baseStats.id === 'nutaru_beast';
+    const isNutaru = window.isUnit(data.baseStats.id, 'nutaru_beast');
     return `
     <div class="dd-section">
         <div class="dd-title text-accent-start"><span>${isNutaru ? 'Clones' : 'Summon Logic (Planes)'}</span></div>
@@ -820,7 +820,7 @@ function renderSummonSection(data) {
 
 function renderAttackRateSection(data) {
     if (!data.extraAttacks) return '';
-    const isKS = data.baseStats.id === 'king_sailor';
+    const isKS = window.isUnit(data.baseStats.id, 'king_sailor');
 
     let detailRows = '';
     if (isKS) {
@@ -857,7 +857,7 @@ function renderAttackRateSection(data) {
 function renderFinalSection(data) {
     const hitLabel = data.placement > 1 ? `Hit DPS (x${data.placement} Units)` : `Hit DPS`;
     const hitFormula = data.placement > 1 ? `<span class="op">×</span>${data.placement}` : ``;
-    const isNutaru = data.baseStats.id === 'nutaru_beast';
+    const isNutaru = window.isUnit(data.baseStats.id, 'nutaru_beast');
 
     return `
             <div class="dd-section border-l-gold">

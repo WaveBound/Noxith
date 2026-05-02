@@ -54,7 +54,7 @@ window.GLOBAL_BUFF_DATA = {
         math: (uStats) => {
             let b = {};
             // Global buff to everyone else
-            if (uStats.id !== 'king_sailor') { b.crit = 10; b.cdmg = 20; }
+            if (!window.isUnit(uStats.id, 'king_sailor')) { b.crit = 10; b.cdmg = 20; }
             // Specific buff logic based on tags
             const tags = uStats.tags || [];
             if (tags.includes('Magi')) { b.dmg = 50; b.spa = 15; }
@@ -461,6 +461,19 @@ const elementIcons = {
 };
 
 const unitDatabase = [];
+const _originalPush = unitDatabase.push;
+unitDatabase.push = function (unit) {
+    // 1. Browser: Grab the filename from the currently loading <script> tag
+    if (typeof document !== 'undefined' && document.currentScript && document.currentScript.src) {
+        const parts = document.currentScript.src.split('/');
+        unit._fileName = parts[parts.length - 1].replace('.js', '');
+    }
+    // 2. Python Generator: Grab the filename from the injected global variable
+    else if (typeof global !== 'undefined' && global.__currentUnitFile) {
+        unit._fileName = global.__currentUnitFile;
+    }
+    return _originalPush.call(this, unit);
+};
 
 const creditsData = [
     { role: "Owner", name: "xKing.", id: "xking.", userId: "347578773857632258", pfp: "images/pfp/xking.png", type: "owner" },

@@ -431,13 +431,13 @@ function openTraitTierList() {
     // Helper to get DPS score for sorting
     const getUnitScore = (u) => {
         if (window.STATIC_BUILD_DB) {
-            const isAbility = (u.id !== 'genos' && activeAbilityIds.has(u.id)) && u.ability;
-            const isKiritoCard = u.id === 'kirito' && kiritoState && kiritoState.card;
+            const isAbility = (!window.isUnit(u.id, 'genos') && activeAbilityIds.has(u.id)) && u.ability;
+            const isKiritoCard = window.isUnit(u.id, 'kirito') && kiritoState && kiritoState.card;
             const dbKey = u.id + (isKiritoCard ? 'kirito_card' : '') + (isAbility ? '_abil' : '');
             // Use fixed mode, config 0 (Max Potential)
             const list = window.STATIC_BUILD_DB[dbKey]?.['fixed']?.[0];
             if (list && list.length > 0) {
-                return u.id === 'law' ? (list[0].range || 0) : list[0].dps;
+                return window.isUnit(u.id, 'law') ? (list[0].range || 0) : list[0].dps;
             }
         }
         return u.stats.dmg || 0;

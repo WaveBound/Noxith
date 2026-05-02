@@ -8,7 +8,7 @@ const ENABLE_HOTBAR = false; // Set to true to enable the hotbar, false to hide 
 // Data & Cache
 let customTraits = [];
 let unitSpecificTraits = {};
-let activeAbilityIds = new Set(['phantom_captain', 'megumin', 'ancient_shinob']);
+let activeAbilityIds = new Set();
 let cachedResults = {};
 let unitBuildsCache = {};
 

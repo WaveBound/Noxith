@@ -187,32 +187,28 @@ function addUnitToHotbar(unit, forceAdd = false) {
     const unitIds = slots.filter(u => u !== null).map(u => u.id);
 
     // Special Case: Unparalleled Armor
-    if (unit.id === 'unparalleled_armor') {
-        const setIds = ['ancient_shinob', 'nutaru_beast'];
-        const hasShinobi = unitIds.includes('ancient_shinob');
-        const hasNutaru = unitIds.includes('nutaru_beast');
+    if (window.isUnit(unit.id, 'unparalleled_armor')) {
+        const hasShinobi = unitIds.includes(window.getUnitId('ancient_shinob'));
+        const hasNutaru = unitIds.includes(window.getUnitId('nutaru_beast'));
         const isComplete = hasShinobi && hasNutaru;
 
         if (isComplete && !forceAdd) {
-            // Remove logic: Only remove if not needed by other set
-            // Nutaru is needed by Majestic if Sasuke is present
-            const hasSasuke = unitIds.includes('sasuke_great_war');
+            const hasSasuke = unitIds.includes(window.getUnitId('sasuke_great_war'));
 
-            const idxShinobi = slots.findIndex(s => s && s.id === 'ancient_shinob');
+            const idxShinobi = slots.findIndex(s => s && window.isUnit(s.id, 'ancient_shinob'));
             if (idxShinobi !== -1) clearHotbarSlot(idxShinobi);
 
             if (!hasSasuke) {
-                const idxNutaru = slots.findIndex(s => s && s.id === 'nutaru_beast');
+                const idxNutaru = slots.findIndex(s => s && window.isUnit(s.id, 'nutaru_beast'));
                 if (idxNutaru !== -1) clearHotbarSlot(idxNutaru);
             }
         } else {
-            // Add missing logic
             if (!hasShinobi) {
-                const u = unitDatabase.find(x => x.id === 'ancient_shinob');
+                const u = unitDatabase.find(x => window.isUnit(x.id, 'ancient_shinob'));
                 if (u) _executeAddUnit(u, true);
             }
             if (!hasNutaru) {
-                const u = unitDatabase.find(x => x.id === 'nutaru_beast');
+                const u = unitDatabase.find(x => window.isUnit(x.id, 'nutaru_beast'));
                 if (u) _executeAddUnit(u, true);
             }
         }
@@ -220,31 +216,28 @@ function addUnitToHotbar(unit, forceAdd = false) {
     }
 
     // Special Case: Majestic Armor
-    if (unit.id === 'majestic_armor') {
-        const setIds = ['sasuke_great_war', 'nutaru_beast'];
-        const hasSasuke = unitIds.includes('sasuke_great_war');
-        const hasNutaru = unitIds.includes('nutaru_beast');
+    if (window.isUnit(unit.id, 'majestic_armor')) {
+        const hasSasuke = unitIds.includes(window.getUnitId('sasuke_great_war'));
+        const hasNutaru = unitIds.includes(window.getUnitId('nutaru_beast'));
         const isComplete = hasSasuke && hasNutaru;
 
         if (isComplete && !forceAdd) {
-            // Remove logic: Nutaru is needed by Unparalleled if Shinobi is present
-            const hasShinobi = unitIds.includes('ancient_shinob');
+            const hasShinobi = unitIds.includes(window.getUnitId('ancient_shinob'));
 
-            const idxSasuke = slots.findIndex(s => s && s.id === 'sasuke_great_war');
+            const idxSasuke = slots.findIndex(s => s && window.isUnit(s.id, 'sasuke_great_war'));
             if (idxSasuke !== -1) clearHotbarSlot(idxSasuke);
 
             if (!hasShinobi) {
-                const idxNutaru = slots.findIndex(s => s && s.id === 'nutaru_beast');
+                const idxNutaru = slots.findIndex(s => s && window.isUnit(s.id, 'nutaru_beast'));
                 if (idxNutaru !== -1) clearHotbarSlot(idxNutaru);
             }
         } else {
-            // Add missing
             if (!hasSasuke) {
-                const u = unitDatabase.find(x => x.id === 'sasuke_great_war');
+                const u = unitDatabase.find(x => window.isUnit(x.id, 'sasuke_great_war'));
                 if (u) _executeAddUnit(u, true);
             }
             if (!hasNutaru) {
-                const u = unitDatabase.find(x => x.id === 'nutaru_beast');
+                const u = unitDatabase.find(x => window.isUnit(x.id, 'nutaru_beast'));
                 if (u) _executeAddUnit(u, true);
             }
         }
@@ -285,9 +278,9 @@ function showFusionImages(armorIds) {
     if (!armorIds || armorIds.length === 0) return;
 
     const bestBuilds = {
-        'unparalleled_armor': { dmg: '251.2k', spa: '5.39s', range: '75.2', crit: '77.5%', cdmg: '189%', dot: '0' },
-        'majestic_armor': { dmg: '132.4k', spa: '7.12s', range: '52.5', crit: '95%', cdmg: '284%', dot: '0' },
-        'sjw': { dmg: '312.5k', spa: '3.82s', range: '82.4', crit: '85%', cdmg: '215%', dot: '0' }
+        [window.getUnitId('unparalleled_armor')]: { dmg: '251.2k', spa: '5.39s', range: '75.2', crit: '77.5%', cdmg: '189%', dot: '0' },
+        [window.getUnitId('majestic_armor')]: { dmg: '132.4k', spa: '7.12s', range: '52.5', crit: '95%', cdmg: '284%', dot: '0' },
+        [window.getUnitId('sjw')]: { dmg: '312.5k', spa: '3.82s', range: '82.4', crit: '85%', cdmg: '215%', dot: '0' }
     };
 
     let contentHtml = '';
@@ -362,14 +355,14 @@ function updateHotbarUI() {
 
     // 1. Detect Fusions dynamically
     const unitIdsInHotbar = hotbarState.slots.filter(u => u !== null).map(u => u.id);
-    const hasNutaru = unitIdsInHotbar.includes('nutaru_beast');
-    const hasShinobi = unitIdsInHotbar.includes('ancient_shinob');
-    const hasSasuke = unitIdsInHotbar.includes('sasuke_great_war');
+    const hasNutaru = unitIdsInHotbar.includes(window.getUnitId('nutaru_beast'));
+    const hasShinobi = unitIdsInHotbar.includes(window.getUnitId('ancient_shinob'));
+    const hasSasuke = unitIdsInHotbar.includes(window.getUnitId('sasuke_great_war'));
 
     // Detect available fusions
     const activeFusions = [];
-    if (hasNutaru && hasShinobi) activeFusions.push({ id: 'unparalleled_armor', components: ['nutaru_beast', 'ancient_shinob'] });
-    if (hasNutaru && hasSasuke) activeFusions.push({ id: 'majestic_armor', components: ['nutaru_beast', 'sasuke_great_war'] });
+    if (hasNutaru && hasShinobi) activeFusions.push({ id: window.getUnitId('unparalleled_armor'), components: [window.getUnitId('nutaru_beast'), window.getUnitId('ancient_shinob')] });
+    if (hasNutaru && hasSasuke) activeFusions.push({ id: window.getUnitId('majestic_armor'), components: [window.getUnitId('nutaru_beast'), window.getUnitId('sasuke_great_war')] });
 
     // Auto-disable fusion mode if no fusions available
     if (activeFusions.length === 0) hotbarState.fusionMode = false;
@@ -437,15 +430,21 @@ function updateHotbarUI() {
 
     // Fusion Map: Unit ID -> Array of Armor IDs
     const fusionMap = new Map();
+    const nutaruId = window.getUnitId('nutaru_beast');
+    const shinobiId = window.getUnitId('ancient_shinob');
+    const sasukeId = window.getUnitId('sasuke_great_war');
+    const unparalleledId = window.getUnitId('unparalleled_armor');
+    const majesticId = window.getUnitId('majestic_armor');
+
     if (hasNutaru && hasShinobi) {
-        if (!fusionMap.has('nutaru_beast')) fusionMap.set('nutaru_beast', []);
-        fusionMap.get('nutaru_beast').push('unparalleled_armor');
-        fusionMap.set('ancient_shinob', ['unparalleled_armor']);
+        if (!fusionMap.has(nutaruId)) fusionMap.set(nutaruId, []);
+        fusionMap.get(nutaruId).push(unparalleledId);
+        fusionMap.set(shinobiId, [unparalleledId]);
     }
     if (hasNutaru && hasSasuke) {
-        if (!fusionMap.has('nutaru_beast')) fusionMap.set('nutaru_beast', []);
-        fusionMap.get('nutaru_beast').push('majestic_armor');
-        fusionMap.set('sasuke_great_war', ['majestic_armor']);
+        if (!fusionMap.has(nutaruId)) fusionMap.set(nutaruId, []);
+        fusionMap.get(nutaruId).push(majesticId);
+        fusionMap.set(sasukeId, [majesticId]);
     }
 
     const slots = hotbar.querySelectorAll('.hotbar-slot');

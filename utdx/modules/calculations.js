@@ -103,7 +103,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
             if (!upgrade) return;
             const lowU = upgrade.toLowerCase();
 
-            if (unit.id === 'water_god' && i === 0) {
+            if (isUnit(unit.id, 'water_god') && i === 0) {
                 effectiveStats.followUp = true;
                 effectiveStats.passiveDotBuff = (effectiveStats.passiveDotBuff || 0) + 10;
             }
@@ -114,24 +114,24 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
         });
     }
 
-    let maxPts = (unit.id === 'king_sailor' || unit.id === 'the_strongest_in_history') ? 129 : 99;
+    let maxPts = (isUnit(unit.id, 'king_sailor') || isUnit(unit.id, 'sukuna')) ? 129 : 99;
     options.dmgPoints = Math.min(options.dmgPoints || 0, maxPts);
     options.spaPoints = Math.min(options.spaPoints || 0, maxPts);
     options.rangePoints = Math.min(options.rangePoints || 0, maxPts);
 
-    const isKiritoVR = (unit.id === 'kirito' && kiritoState.realm);
-    if (unit.id === 'kirito' && isKiritoVR && kiritoState.card) { effectiveStats.dot = 200; effectiveStats.dotDuration = 4; effectiveStats.dotStacks = 1; }
-    if (unit.id === 'bambietta' && typeof BAMBIETTA_MODES !== 'undefined') {
+    const isKiritoVR = (isUnit(unit.id, 'kirito') && kiritoState.realm);
+    if (isUnit(unit.id, 'kirito') && isKiritoVR && kiritoState.card) { effectiveStats.dot = 200; effectiveStats.dotDuration = 4; effectiveStats.dotStacks = 1; }
+    if (isUnit(unit.id, 'bambietta') && typeof BAMBIETTA_MODES !== 'undefined') {
         const currentEl = bambiettaState.element || "Dark";
         const modeStats = BAMBIETTA_MODES[currentEl];
         if (modeStats) Object.assign(effectiveStats, modeStats);
     }
-    if (unit.id === 'robot1718' && unit.modes) {
+    if (isUnit(unit.id, 'robot1718') && unit.modes) {
         const currentMode = robot1718State.mode || "Robot 17";
         const modeStats = unit.modes[currentMode];
         if (modeStats) Object.assign(effectiveStats, modeStats);
     }
-    if (unit.id === 'ancient_mage' && typeof ancientMageState !== 'undefined') {
+    if (isUnit(unit.id, 'ancient_mage') && typeof ancientMageState !== 'undefined') {
         const currentMode = ancientMageState.mode || "Specialist";
         const modeStats = unit.modes ? unit.modes[currentMode] : null;
         if (modeStats) Object.assign(effectiveStats, modeStats);
@@ -146,7 +146,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     }
 
     let suffix = isAbility ? '-ABILITY' : '-BASE';
-    if (unit.id === 'kirito') { if (kiritoState.realm) suffix += '-VR'; if (kiritoState.card) suffix += '-CARD'; }
+    if (isUnit(unit.id, 'kirito')) { if (kiritoState.realm) suffix += '-VR'; if (kiritoState.card) suffix += '-CARD'; }
     const modeTag = (mode === 'bugged') ? '-b-' : '-f-';
 
     const context = { dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: isKiritoVR, headPiece, starMult, rankData, isAbility, maxPts, upgradeLevel };
@@ -577,7 +577,7 @@ function calculateDPS(uStats, relicStats, context) {
         magiSpa = 15;
     }
 
-    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (uStats.id === 'king_sailor' ? 10 : 0);
+    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (isUnit(uStats.id, 'king_sailor') ? 10 : 0);
     const finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
 
     const setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa + magiSpa;
@@ -586,7 +586,7 @@ function calculateDPS(uStats, relicStats, context) {
     const mageSpaMult = (headPiece === 'mage_head') ? 0.88 : 1; // -20% * 0.6 uptime
 
     // Nutaru (Beast) dynamic SPA Cap override
-    const effectiveSpaCap = (isAbility && uStats.id === 'nutaru_beast') ? 3.0 : (uStats.spaCap || 0.1);
+    const effectiveSpaCap = (isAbility && isUnit(uStats.id, 'nutaru_beast')) ? 3.0 : (uStats.spaCap || 0.1);
 
     const spaAfterRelic = lvStats.spa * (1 - traitSpaPct / 100) * (1 - baseR_Spa / 100) * mageSpaMult;
     const rawFinalSpa = spaAfterRelic * (1 - setAndPassiveSpa / 100);
@@ -597,14 +597,14 @@ function calculateDPS(uStats, relicStats, context) {
     let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBuff + globalDmg + magiDmg;
 
     // Junior Ninja: 1.1x Multiplier to all additive buffs (WATER GOD ONLY)
-    if (headPiece === 'junior' && uStats.id === 'water_god') {
+    if (headPiece === 'junior' && isUnit(uStats.id, 'water_god')) {
         additiveTotal = ((sBonus.dmg || 0) + passivePcent + headDmgBuff + globalDmg) * 1.1;
     }
 
     const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1);
 
     const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cdmg || 0);
-    let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + ((uStats.id === 'kirito') ? 0 : (baseR_Cf + (sBonus.cf || 0))), 100);
+    let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + (isUnit(uStats.id, 'kirito') ? 0 : (baseR_Cf + (sBonus.cf || 0))), 100);
     if (headPiece === 'sorcerer_hunter_spirit') finalCritRate = 0;
 
     const avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
@@ -615,7 +615,7 @@ function calculateDPS(uStats, relicStats, context) {
     let extraAttacksData = null;
     let usedSpa = finalSpa;
 
-    if (uStats.id === 'rohan') {
+    if (isUnit(uStats.id, 'rohan')) {
         const probs = [0.40, 0.35, 0.30, 0.25, 0.20];
         let cumulativeProbs = [];
         let currentProb = 1.0;
@@ -644,14 +644,14 @@ function calculateDPS(uStats, relicStats, context) {
             mult: attackMultiplier,
             label: "Rohan Mechanics"
         };
-    } else if (uStats.id === 'super_roku' && isAbility) {
+    } else if (isUnit(uStats.id, 'super_roku') && isAbility) {
         attackMultiplier = 0.65;
         extraAttacksData = { req: "Same Target", hits: "Avg 65% Dmg", extra: 0, attacksNeeded: 1, mult: 0.65, label: "Combo Decay" };
-    } else if (uStats.id === 'cell' && !isAbility) {
+    } else if (isUnit(uStats.id, 'cell') && !isAbility) {
         usedSpa = finalSpa + 1.5;
         attackMultiplier = 1.5;
         extraAttacksData = { req: "Follow-up hit", hits: "1.5x Dmg / Cycle", extra: 0, attacksNeeded: 1, mult: 1.5 };
-    } else if (uStats.id === 'water_god' && uStats.followUp) {
+    } else if (isUnit(uStats.id, 'water_god') && uStats.followUp) {
         usedSpa = Math.max(finalSpa, effectiveSpaCap * 2);
         attackMultiplier = 2;
         extraAttacksData = {
@@ -662,7 +662,7 @@ function calculateDPS(uStats, relicStats, context) {
             mult: attackMultiplier,
             label: `Water God Follow-up (${effectiveSpaCap}s window)`
         };
-    } else if (uStats.id === 'king_sailor') {
+    } else if (isUnit(uStats.id, 'king_sailor')) {
         const tickCount = 1;
         const tickDmg = 0.20;
         attackMultiplier = 1; // Base attacks don't get multiplied here since lightning bypasses true dmg
@@ -724,13 +724,13 @@ function calculateDPS(uStats, relicStats, context) {
     let finalHitDps = hitDpsTotal * trueDmgMult;
     
     // Add King Sailor's Chain Lightning DPS (NO Crit, No True Damage)
-    if (uStats.id === 'king_sailor') {
+    if (isUnit(uStats.id, 'king_sailor')) {
         // Chain lightning does NOT crit and does NOT benefit from true damage
         const chainLightningDps = ((finalDmg * 0.20) / usedSpa) * placement;
         finalHitDps += chainLightningDps;
     }
 
-    const summonDmgBase = (uStats.id === 'nutaru_beast' && isAbility) ? finalDmg * 1.25 : finalDmg;
+    const summonDmgBase = (isUnit(uStats.id, 'nutaru_beast') && isAbility) ? finalDmg * 1.25 : finalDmg;
     let { summonDpsTotal, summonData } = _calcSummonDPS(uStats, summonDmgBase, finalSpa, placement);
 
     if (uStats.customSummons && uStats.customSummons.length > 0) {

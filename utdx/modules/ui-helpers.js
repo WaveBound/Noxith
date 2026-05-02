@@ -203,13 +203,13 @@ function handleUnitModeChange(unitId, updateStateCallback) {
     }, 10);
 }
 
-window.setBambiettaElement = (element) => handleUnitModeChange('bambietta', () => bambiettaState.element = element);
-window.setRobot1718Mode = (mode) => handleUnitModeChange('robot1718', () => robot1718State.mode = mode);
-window.setAncientMageMode = (mode) => handleUnitModeChange('ancient_mage', () => ancientMageState.mode = mode);
-window.toggleAMSpecialist = (cb) => handleUnitModeChange('ancient_mage', () => ancientMageState.mode = cb.checked ? "DPS" : "Specialist");
+window.setBambiettaElement = (element) => handleUnitModeChange(window.getUnitId('bambietta'), () => bambiettaState.element = element);
+window.setRobot1718Mode = (mode) => handleUnitModeChange(window.getUnitId('robot1718'), () => robot1718State.mode = mode);
+window.setAncientMageMode = (mode) => handleUnitModeChange(window.getUnitId('ancient_mage'), () => ancientMageState.mode = mode);
+window.toggleAMSpecialist = (cb) => handleUnitModeChange(window.getUnitId('ancient_mage'), () => ancientMageState.mode = cb.checked ? "DPS" : "Specialist");
 
 window.toggleKiritoMode = (mode, checkbox) => {
-    handleUnitModeChange('kirito', () => {
+    handleUnitModeChange(window.getUnitId('kirito'), () => {
         if (mode === 'realm') {
             kiritoState.realm = checkbox.checked;
             if (!checkbox.checked) kiritoState.card = false;
@@ -218,8 +218,8 @@ window.toggleKiritoMode = (mode, checkbox) => {
         }
     });
 
-    const unit = typeof getUnitById === 'function' ? getUnitById('kirito') : null;
-    const card = document.getElementById('card-kirito');
+    const unit = typeof getUnitById === 'function' ? getUnitById(window.getUnitId('kirito')) : null;
+    const card = document.getElementById('card-' + window.getUnitId('kirito'));
     if (card && unit && typeof getKiritoControlsHtml === 'function') {
         card.querySelectorAll('.unit-toolbar').forEach(tb => {
             if (tb.innerText.includes('Virtual Realm')) tb.outerHTML = getKiritoControlsHtml(unit);
@@ -340,6 +340,31 @@ window.switchPage = function (pid) {
 window.resetAndOpenInventory = function () {
     if (typeof clearInventoryHighlights === 'function') clearInventoryHighlights();
     window.switchPage('inventory');
+};
+
+window.getQuickScore = (unit) => {
+    const isAbility = activeAbilityIds.has(unit.id) && unit.ability;
+    let baseKey = (window.isUnit(unit.id, 'kirito') && kiritoState.card) ? 'kirito_card' : unit.id;
+    const dbKey = baseKey + (isAbility ? '_abil' : '');
+
+    if (window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {
+        const list = window.STATIC_BUILD_DB[dbKey]['fixed']?.[0];
+        if (list && list.length > 0) {
+            return window.isUnit(unit.id, 'law') ? (list[0].range || 0) : list[0].dps;
+        }
+    }
+    if (window.isUnit(unit.id, 'law')) {
+        if (unit.stats.range) return unit.stats.range;
+        if (unit.upgrades && unit.upgrades.length > 0) return unit.upgrades[unit.upgrades.length - 1].range || 0;
+        return 0;
+    }
+    let d = unit.stats.dmg, s = unit.stats.spa;
+    if ((!d || !s) && unit.upgrades && unit.upgrades.length > 0) {
+        const last = unit.upgrades[unit.upgrades.length - 1];
+        d = d || last.dmg;
+        s = s || last.spa;
+    }
+    return ((d || 0) / (s || 1)) * 35;
 };
 
 window.toggleDeepDive = (btn) => {
