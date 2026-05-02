@@ -80,6 +80,12 @@ unitDatabase.push({
     //     }
     // ],
 
+    // MODES (Interactive form switching)
+    // modes: [
+    //     { name: "Mode One", img: "images/units/UnitName/mode1.png" },
+    //     { name: "Mode Two", img: "images/units/UnitName/mode2.png" },
+    // ],
+
     // ETHEREALIZATION (E1-E6 upgrade descriptions)
     etherealization: [
         "+10 Stat Points",          // E1

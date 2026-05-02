@@ -74,6 +74,12 @@
     align-items: center;
 }
 
+.ut-toggle-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .ut-btn-compact {
     padding: 2px 5px;
     font-size: 0.65rem;

@@ -402,6 +402,74 @@ function openUnitInfo(unitId) {
     document.body.appendChild(overlay);
 }
 window.openUnitInfo = openUnitInfo;
+window.unitModesState = window.unitModesState || {};
+
+function openUnitModes(unitId) {
+    const unit = getUnitById(unitId);
+    if (!unit || !unit.modes) return;
+
+    const overlay = document.getElementById('modesOverlay');
+    const grid = document.getElementById('modesOverlayGrid');
+    
+    if (!overlay || !grid) return;
+
+    const currentMode = window.unitModesState[unitId] || 0;
+
+    const modesHtml = unit.modes.map((mode, idx) => `
+        <div class="mode-card-large ${currentMode === idx ? 'active' : ''}" 
+             style="transition-delay: ${idx * 0.05}s"
+             onclick="selectUnitMode('${unitId}', ${idx})">
+            <div class="mode-img-container-large">
+                <img src="${mode.img}" alt="${mode.name}">
+            </div>
+        </div>
+    `).join('');
+
+    grid.innerHTML = modesHtml;
+    
+    overlay.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+}
+window.openUnitModes = openUnitModes;
+
+function selectUnitMode(unitId, modeIdx) {
+    window.unitModesState[unitId] = modeIdx;
+    
+    // Update UI in overlay
+    const cards = document.querySelectorAll('.mode-card-large');
+    cards.forEach((card, idx) => {
+        if (idx === modeIdx) card.classList.add('active');
+        else card.classList.remove('active');
+    });
+    
+    console.log(`Selected mode ${modeIdx} for ${unitId}`);
+    
+    // Auto close after selection for better UX
+    setTimeout(() => {
+        closeModesOverlay();
+    }, 300);
+}
+window.selectUnitMode = selectUnitMode;
+
+function closeModesOverlay() {
+    const overlay = document.getElementById('modesOverlay');
+    if (!overlay) return;
+
+    overlay.classList.add('closing');
+
+    // Wait for the exit animation to complete before hiding
+    setTimeout(() => {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('closing');
+
+        // Only remove modal-open if no other modals are active
+        const otherModals = document.querySelectorAll('.modal-overlay.is-visible');
+        if (otherModals.length === 0) {
+            document.body.classList.remove('modal-open');
+        }
+    }, 400); 
+}
+window.closeModesOverlay = closeModesOverlay;
 
 /**
  * Shows Trait Tier List (All Units)

@@ -68,6 +68,18 @@
     box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
 }
 
+.modes-btn {
+    background: rgba(168, 85, 247, 0.1) !important;
+    border: 1px solid rgba(168, 85, 247, 0.3) !important;
+    color: #c084fc !important;
+}
+
+.modes-btn:hover {
+    background: #a855f7 !important;
+    color: #fff !important;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.4) !important;
+}
+
 .info-btn {
     position: relative;
     width: 18px;

@@ -527,6 +527,7 @@ const UNIT_FILES = [
     'unparalleled_armor.js',
     'vegeta.js',
     'water_god.js',
+    'devil_hunter.js',
 ];
 
 // Resolves after every unit script has loaded (or errored).
