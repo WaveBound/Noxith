@@ -7,47 +7,48 @@ unitDatabase.push({
     role: "DPS / Ground",
     tags: ["Leveling", "King"],
     meta: {
-            short: "Ruler",
-            long: "Ruler",
-            note: "Predatory Gluttony: Gain +30% True Damage and +30% (+50% at E6) Damage via kill-stacking. Reset after 10s without kill."
-       
+        short: "Ruler",
+        long: "Ruler",
+        note: "Predatory Gluttony: Gain +30% True Damage and +30% (+50% at E6) Damage via kill-stacking. Reset after 10s without kill."
+
     },
     totalCost: 63000,
     stats: {
-            spaCap: 5.5,
-            crit: 0, cdmg: 150,
-            dot: 80, dotDuration: 6, dotStacks: 1,
-            element: "Dark",
-            passiveDmg: 50, // Max Gluttony Stacks
-            hyper: 30       // True Damage
-        },
+        spaCap: 5.5,
+        crit: 0, cdmg: 150,
+        dot: 80, dotDuration: 6, dotStacks: 1,
+        element: "Dark",
+        passiveDmg: 50, // Max Gluttony Stacks
+        hyper: 30       // True Damage
+    },
 
     upgrades: [
-            { dmg: 250, spa: 8, range: 30, cost: 2000 }, // Up 0
-            { dmg: 600, spa: 8, range: 31, cost: 5000 }, // Up 1
-            { dmg: 1150, spa: 8, range: 33, cost: 7500 }, // Up 2
-            { dmg: 2000, spa: 8, range: 34, cost: 9500 }, // Up 3
-            { dmg: 3800, spa: 8, range: 37, cost: 14000 }, // Up 4
-            { dmg: 4300, spa: 8, range: 40, cost: 25000 } // Up 5
-        ],
+        { dmg: 250, spa: 8, range: 30, cost: 2000 }, // Up 0
+        { dmg: 600, spa: 8, range: 31, cost: 5000 }, // Up 1
+        { dmg: 1150, spa: 8, range: 33, cost: 7500 }, // Up 2
+        { dmg: 2000, spa: 8, range: 34, cost: 9500 }, // Up 3
+        { dmg: 3800, spa: 8, range: 37, cost: 14000 }, // Up 4
+        { dmg: 5160, spa: 8, range: 40, cost: 25000 } // Up 5
+    ],
     passives: [
-            { name: "Predatory Gluttony", desc: "Gain +30% True Damage. Every Kill: Gain +1% Damage (Cap +30% [+50% at E6]). Boss Kill instantly caps. Resets after 10s without getting a kill." },
-            { name: "Paralyzing Venom", desc: "Applies Radiation for 80% Damage over 6 ticks. Applies 15% (20% at E2) Slow while active." },
-            { name: "Monarch's Devotion", desc: "When 'Jinoo' is in range: +20% Damage, +10% Range. [On E4]: Buffs all other units in range by +10% Damage." }
-        ],
+        { name: "Predatory Gluttony", desc: "Gain +30% True Damage. Every Kill: Gain +1% Damage (Cap +30% [+50% at E6]). Boss Kill instantly caps. Resets after 10s without getting a kill." },
+        { name: "Paralyzing Venom", desc: "Applies Radiation for 80% Damage over 6 ticks. Applies 15% (20% at E2) Slow while active." },
+        { name: "Monarch's Devotion", desc: "When 'Jinoo' is in range: +20% Damage, +10% Range. [On E4]: Buffs all other units in range by +10% Damage." }
+    ],
     ability: {
-            abilityName: "Monarch's Devotion",
-            desc: "Simulate 'Jinoo' presence in range: +20% Damage, +10% Range.",
-            buffDmg: 20,
-            passiveRange: 10,
-            hasToggle: true
-        },
+        abilityName: "Monarch's Devotion",
+        desc: "Simulate 'Jinoo' presence in range: +20% Damage, +10% Range, +50% DoT Damage.",
+        buffDmg: 20,
+        passiveRange: 10,
+        dotBuff: 50,
+        hasToggle: true
+    },
     etherealization: [
-            "+10 Stat Points",
-            "\"Paralyzing Venom\" Slow increased to 20%.",
-            "+10 Stat Points",
-            "\"Monarch's Devotion\" gives all units in range +10% Damage.",
-            "+10 Stat Points",
-            "\"Predatory Gluttony\" Damage Cap increased to +50%."
-        ]
+        "+10 Stat Points",
+        "\"Paralyzing Venom\" Slow increased to 20%.",
+        "+10 Stat Points",
+        "\"Monarch's Devotion\" gives all units in range +10% Damage.",
+        "+10 Stat Points",
+        "\"Predatory Gluttony\" Damage Cap increased to +50%."
+    ]
 });

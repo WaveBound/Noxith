@@ -193,7 +193,7 @@ function renderSourceTotalsSection(data) {
                     ${globalBuffsCritHtml}
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 0.65rem; color: #777;">
-                    <div style="display:flex; justify-content:space-between;"><span>SPA Red.</span><b class="text-white">-${passiveTotalSpa.toFixed(1)}%</b></div>
+                    <div style="display:flex; justify-content:space-between;"><span>SPA Reduction</span><b class="text-white">${passiveTotalSpa >= 0 ? '-' : '+'}${Math.abs(passiveTotalSpa).toFixed(1)}%</b></div>
                     <div style="display:flex; justify-content:space-between;"><span>Range</span><b class="text-white">${fmt.pct(passiveTotalRange)}</b></div>
                     ${passiveTotalCrit > 0 ? `<div style="display:flex; justify-content:space-between;"><span>Crit Rate</span><b style="color:#60a5fa;">+${passiveTotalCrit}%</b></div>` : ''}
                     ${passiveTotalCdmg > 0 ? `<div style="display:flex; justify-content:space-between;"><span>Crit Dmg</span><b style="color:#60a5fa;">+${passiveTotalCdmg}%</b></div>` : ''}
@@ -303,6 +303,7 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, h
                         <td class="mt-cell-val calc-highlight mt-pt-md">${fmt.num(preConditionalDmg)}</td>
                     </tr>
                     <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base</td><td class="mt-cell-formula">${fmt.pct(baseSetDmg)}</td><td class="mt-cell-val"></td></tr>
+                    ${(data.headBuffs.dmg || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Accessory</td><td class="mt-cell-formula">${fmt.pct(data.headBuffs.dmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${tagDmg !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonuses</td><td class="mt-cell-formula">${fmt.pct(tagDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${passiveDmg > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${fmt.pct(passiveDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${eternalDmg > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-accent-start opacity-70">↳ Eternal Stacks (Wave 12+)</td><td class="mt-cell-formula text-accent-start">${fmt.pct(eternalDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
@@ -380,10 +381,10 @@ function renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa) {
                     ${traitRowsSpa}
                     
                     <tr><td class="mt-cell-label mt-pt-md">Relic Multiplier</td><td class="mt-cell-formula mt-pt-md">-${fmt.fix(data.relicBuffs.spa, 1)}%</td><td class="mt-cell-val mt-pt-md">${fmt.fix(data.spaAfterRelic, 3)}s</td></tr>
-                    <tr><td class="mt-cell-label mt-pt-md">Set Bonus + Passive + Abilities <button class="calc-info-btn" onclick="openInfoPopup('tag_logic')">?</button></td><td class="mt-cell-formula mt-pt-md">-${fmt.fix(data.setAndPassiveSpa, 1)}%</td><td class="mt-cell-val mt-pt-md">${fmt.fix(data.rawFinalSpa, 3)}s</td></tr>
+                    <tr><td class="mt-cell-label mt-pt-md">Set Bonus + Passive + Abilities <button class="calc-info-btn" onclick="openInfoPopup('tag_logic')">?</button></td><td class="mt-cell-formula mt-pt-md">${data.setAndPassiveSpa >= 0 ? '-' : '+'}${Math.abs(fmt.fix(data.setAndPassiveSpa, 1))}%</td><td class="mt-cell-val mt-pt-md">${fmt.fix(data.rawFinalSpa, 3)}s</td></tr>
                     <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base</td><td class="mt-cell-formula">-${fmt.fix(baseSetSpa, 1)}%</td><td class="mt-cell-val"></td></tr>
                     ${tagSpa !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonuses</td><td class="mt-cell-formula">-${fmt.fix(tagSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${passiveSpa > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">-${fmt.fix(passiveSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${passiveSpa !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${passiveSpa > 0 ? '+' : ''}${fmt.fix(passiveSpa, 1)}% ${passiveSpa > 0 ? 'Speed' : 'Slow'}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${globalSpaBreakdownHtml}
 
                     <tr><td class="mt-cell-label">Cap Check (${data.spaCap}s)</td><td class="mt-cell-formula">MAX</td><td class="mt-cell-val calc-result">${fmt.fix(data.spa, 3)}s</td></tr>

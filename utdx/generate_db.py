@@ -620,7 +620,7 @@ class GeneratorApp:
             combined_js_parts = [
                 "if (typeof window === 'undefined') { global.window = global; }\n",
                 "if (typeof document === 'undefined') { global.document = { createElement: () => ({}), head: { appendChild: () => {} } }; }\n",
-                "global.unitDatabase = global.unitDatabase || []; global.unitSpecificTraits = global.unitSpecificTraits || {}; global.bambiettaState = global.bambiettaState || {element:'Dark'}; global.robot1718State = global.robot1718State || {mode:'Robot 17'}; global.kiritoState = global.kiritoState || {realm:true, card:false};\n",
+                "global.unitDatabase = global.unitDatabase || []; global.unitSpecificTraits = global.unitSpecificTraits || {}; global.bambiettaState = global.bambiettaState || {element:'Dark'}; global.robot1718State = global.robot1718State || {mode:'Robot 17'}; global.kiritoState = global.kiritoState || {realm:true, card:false}; global.ancientMageState = global.ancientMageState || {mode:'Specialist'};\n",
             ]
             
             for filename in REQUIRED_FILES:

@@ -206,7 +206,7 @@ function handleUnitModeChange(unitId, updateStateCallback) {
 window.setBambiettaElement = (element) => handleUnitModeChange('bambietta', () => bambiettaState.element = element);
 window.setRobot1718Mode = (mode) => handleUnitModeChange('robot1718', () => robot1718State.mode = mode);
 window.setAncientMageMode = (mode) => handleUnitModeChange('ancient_mage', () => ancientMageState.mode = mode);
-window.toggleAMSpecialist = (cb) => handleUnitModeChange('ancient_mage', () => ancientMageState.mode = cb.checked ? "Specialist" : "DPS");
+window.toggleAMSpecialist = (cb) => handleUnitModeChange('ancient_mage', () => ancientMageState.mode = cb.checked ? "DPS" : "Specialist");
 
 window.toggleKiritoMode = (mode, checkbox) => {
     handleUnitModeChange('kirito', () => {

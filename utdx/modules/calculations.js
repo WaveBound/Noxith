@@ -119,8 +119,6 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     options.spaPoints = Math.min(options.spaPoints || 0, maxPts);
     options.rangePoints = Math.min(options.rangePoints || 0, maxPts);
 
-    if (isAbility && unit.ability) Object.assign(effectiveStats, unit.ability);
-
     const isKiritoVR = (unit.id === 'kirito' && kiritoState.realm);
     if (unit.id === 'kirito' && isKiritoVR && kiritoState.card) { effectiveStats.dot = 200; effectiveStats.dotDuration = 4; effectiveStats.dotStacks = 1; }
     if (unit.id === 'bambietta' && typeof BAMBIETTA_MODES !== 'undefined') {
@@ -132,6 +130,19 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
         const currentMode = robot1718State.mode || "Robot 17";
         const modeStats = unit.modes[currentMode];
         if (modeStats) Object.assign(effectiveStats, modeStats);
+    }
+    if (unit.id === 'ancient_mage' && typeof ancientMageState !== 'undefined') {
+        const currentMode = ancientMageState.mode || "Specialist";
+        const modeStats = unit.modes ? unit.modes[currentMode] : null;
+        if (modeStats) Object.assign(effectiveStats, modeStats);
+    }
+
+    if (isAbility && unit.ability) {
+        if (Array.isArray(unit.ability)) {
+            unit.ability.forEach(abil => Object.assign(effectiveStats, abil));
+        } else {
+            Object.assign(effectiveStats, unit.ability);
+        }
     }
 
     let suffix = isAbility ? '-ABILITY' : '-BASE';
@@ -517,7 +528,7 @@ function calculateDPS(uStats, relicStats, context) {
 
     const totalBossDmg = (uStats.bossDmg || 0) + (traitObj.bossDmg || 0);
     let traitDmgPct = traitObj.dmg + (totalBossDmg && isBoss ? totalBossDmg : 0), traitSpaPct = traitObj.spa;
-    let traitCritRate = traitObj.critRate || 0, traitRangePct = traitObj.range || 0, traitDotBuff = traitObj.dotBuff || 0;
+    let traitCritRate = traitObj.critRate || 0, traitRangePct = traitObj.range || 0, traitDotBuff = (traitObj.dotBuff || 0) + (uStats.dotBuff || 0);
 
     let eternalDmgBuff = 0, eternalRangeBuff = 0;
     if (traitObj.isEternal) { const waveCap = Math.min(wave, 12); eternalDmgBuff = waveCap * 5; passivePcent += eternalDmgBuff; eternalRangeBuff = waveCap * 2.5; }

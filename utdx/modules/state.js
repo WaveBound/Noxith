@@ -27,7 +27,7 @@ const robot1718State = {
     mode: "Robot 17"
 };
 
-const ancientMageState = {
+window.ancientMageState = {
     mode: "DPS"
 };
 

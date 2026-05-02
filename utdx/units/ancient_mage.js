@@ -18,7 +18,7 @@ unitDatabase.push({
         crit: 0, cdmg: 150, dot: 60, dotDuration: 10,
         element: "Light",
         passiveDmg: 20,  // Base Experience (20)
-        passiveSpa: 0,
+        passiveSpa: 0,   // Base SPA buff/penalty (0 = No change)
         bossDmg: 0,
         dotBuff: 40,     // Specialist focus (+40% DoT)
         hyper: 50        // Specialist focus (+50% True Dmg)
@@ -38,19 +38,31 @@ unitDatabase.push({
     ],
     ability: {
         abilityName: "DPS",
-        desc: "Combat focus: +20% Dmg, -40% Atk Speed, +50% Boss Dmg. Applies Wind Shear (60% DoT over 10s).",
-        passiveDmg: 40,  // Base Experience (20) + DPS (20)
-        passiveSpa: -40, // Atk Speed Penalty
-        bossDmg: 50,     // Boss Killer
-        dotBuff: 0,      // Reset Specialist buff
-        hyper: 0,        // Reset Specialist buff
+        desc: "Combat focus: +20% Dmg, +40% Slow, +50% Boss Dmg. Applies Wind Shear (60% DoT over 10s).",
+        passiveDmg: 20, 
+        passiveSpa: -40,
+        bossDmg: 50,
+        dotBuff: 0,
+        hyper: 0,
         cooldown: 60
     },
     modes: {
-        "DPS": { desc: "Combat focus: +20% Dmg, -40% Atk Speed, +50% Boss Dmg. Applies Wind Shear (60% DoT over 10s)." },
-        "Specialist": { desc: "Magic focus: +40% DoT, +50% True Damage. Swaps Wind Shear for Burn (60% DoT over 10s)." },
-        "Support": { desc: "Stop attacking and buffs units in range: +15% Effect Res, +20% Crit Damage, +20% Crit Rate. When buffed unit attacks: Follow-up attack (Follow Up Cooldown: 30s)." },
-        "Utility": { desc: "Attack apply stun for 2s. If already stunned: Enemies will take +20% damage (cannot apply multiple times). Apply slow (75% Speed for 5s)." }
+        "DPS": { 
+            desc: "Combat focus: +20% Dmg, +40% Slow, +50% Boss Dmg. Applies Wind Shear (60% DoT over 10s).",
+            passiveDmg: 20, 
+            passiveSpa: -40,
+            bossDmg: 50,
+            dotBuff: 0,
+            hyper: 0
+        },
+        "Specialist": { 
+            desc: "Magic focus: +40% DoT, +50% True Damage. Swaps Wind Shear for Burn (60% DoT over 10s).",
+            passiveDmg: 0,
+            passiveSpa: 0,
+            bossDmg: 0,
+            dotBuff: 40,
+            hyper: 50
+        }
     },
     etherealization: [
         "+10 Stat Points",

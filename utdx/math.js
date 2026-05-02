@@ -395,6 +395,14 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         dotBreakdown.nativeTotalDmg = totalNativeDmg; dotBreakdown.nativeInterval = interval; dotBreakdown.nativeDps = totalNativeDmg / interval;
     }
 
+    if (traitObj.hasRadiation) {
+        const radPct = (traitObj.radiationPct || 20) * traitMultiplier * gearMultiplier;
+        const totalRadDmg = finalDmg * (radPct / 100);
+        dotBreakdown.radTotalDmg = totalRadDmg;
+        dotBreakdown.radInterval = 10; // Standard Radiation interval
+        dotBreakdown.radDps = totalRadDmg / 10;
+    }
+
     dotDpsTotal = (dotBreakdown.nativeDps + dotBreakdown.radDps) * (canStack ? placement : 1);
     return { dotDpsTotal, dotBreakdown };
 }
@@ -414,7 +422,7 @@ function calculateDPS(uStats, relicStats, context) {
 
     const totalBossDmg = (uStats.bossDmg || 0) + (traitObj.bossDmg || 0);
     let traitDmgPct = traitObj.dmg + (totalBossDmg && isBoss ? totalBossDmg : 0), traitSpaPct = traitObj.spa;
-    let traitCritRate = traitObj.critRate || 0, traitRangePct = traitObj.range || 0, traitDotBuff = traitObj.dotBuff || 0;
+    let traitCritRate = traitObj.critRate || 0, traitRangePct = traitObj.range || 0, traitDotBuff = (traitObj.dotBuff || 0) + (uStats.dotBuff || 0);
 
     let eternalDmgBuff = 0, eternalRangeBuff = 0;
     if (traitObj.isEternal) { const waveCap = Math.min(wave, 12); eternalDmgBuff = waveCap * 5; passivePcent += eternalDmgBuff; eternalRangeBuff = waveCap * 2.5; }

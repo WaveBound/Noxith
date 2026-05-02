@@ -28,7 +28,7 @@ const TOGGLE_OVERRIDES = {
     'super_roku': { label: 'Same Enemy' },
     'ancient_mage': {
         dynamicLabel: (isChecked) => isChecked ? 'DPS' : 'Specialist',
-        script: `this.parentElement.previousElementSibling.innerText = this.checked ? 'DPS' : 'Specialist';`
+        script: `this.parentElement.previousElementSibling.innerText = this.checked ? 'DPS' : 'Specialist'; toggleAMSpecialist(this);`
     },
     'cell': {
         dynamicLabel: (isChecked) => isChecked ? 'Perfect Form' : 'True Form',
@@ -57,7 +57,7 @@ const unitControls = {
         const currentMode = robot1718State.mode;
         if (!unit.modes) return '';
         const options = Object.keys(unit.modes).map(k =>
-            `<option value="${k}" ${currentMode === k ? 'selected' : ''}>${k} (${unit.modes[k].desc})</option>`
+            `<option value="${k}" ${currentMode === k ? 'selected' : ''}>${k} (${unit.modes[k].desc || k})</option>`
         ).join('');
         return `<div class="unit-toolbar custom-toolbar"><div class="bambi-wrapper" style="display: flex; align-items: center; width: 100%;"><span class="bambi-label" style="margin-right: 6px;">Form:</span><select onchange="setRobot1718Mode(this.value, this)" class="bambi-select" style="flex: 1;">${options}</select></div></div>`;
     },
