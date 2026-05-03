@@ -126,15 +126,43 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
         const modeStats = BAMBIETTA_MODES[currentEl];
         if (modeStats) Object.assign(effectiveStats, modeStats);
     }
-    if (isUnit(unit.id, 'robot1718') && unit.modes) {
-        const currentMode = robot1718State.mode || "Robot 17";
-        const modeStats = unit.modes[currentMode];
-        if (modeStats) Object.assign(effectiveStats, modeStats);
-    }
-    if (isUnit(unit.id, 'ancient_mage') && typeof ancientMageState !== 'undefined') {
-        const currentMode = ancientMageState.mode || "Specialist";
-        const modeStats = unit.modes ? unit.modes[currentMode] : null;
-        if (modeStats) Object.assign(effectiveStats, modeStats);
+    // --- UNIVERSAL MODES SUPPORT ---
+    if (unit.modes) {
+        let modeData = null;
+        if (Array.isArray(unit.modes)) {
+            const modeIdx = (window.unitModesState && window.unitModesState[unit.id]) || 0;
+            modeData = unit.modes[modeIdx];
+        } else if (typeof unit.modes === 'object') {
+            // Fallback for older object-based modes (e.g. Ancient Mage / Robot 1718)
+            let currentModeName = "";
+            if (isUnit(unit.id, 'ancient_mage')) currentModeName = (typeof ancientMageState !== 'undefined') ? ancientMageState.mode : "Specialist";
+            else if (isUnit(unit.id, 'robot1718')) currentModeName = (typeof robot1718State !== 'undefined') ? robot1718State.mode : "Robot 17";
+
+            modeData = unit.modes[currentModeName];
+        }
+
+        if (modeData) {
+            // Apply mode stats to the effective stats with normalization
+            const normalizedStats = {};
+            for (const key in modeData) {
+                // Skip display-only fields
+                if (['name', 'img', 'desc', 'Mode'].includes(key)) continue;
+
+                let targetKey = key.toLowerCase();
+                // Map specific keys to match engine expectations
+                if (targetKey === 'dotduration') targetKey = 'dotDuration';
+                else if (targetKey === 'spacap' || targetKey === 'spa cap') targetKey = 'spaCap';
+                else if (targetKey === 'passivedmg') targetKey = 'passiveDmg';
+                else if (targetKey === 'passivespa') targetKey = 'passiveSpa';
+                else if (targetKey === 'bossdmg') targetKey = 'bossDmg';
+                else if (targetKey === 'dotbuff') targetKey = 'dotBuff';
+
+                normalizedStats[targetKey] = modeData[key];
+            }
+            Object.assign(effectiveStats, normalizedStats);
+
+
+        }
     }
 
     if (isAbility && unit.ability) {
@@ -533,7 +561,7 @@ function calculateDPS(uStats, relicStats, context) {
     let eternalDmgBuff = 0, eternalRangeBuff = 0;
     if (traitObj.isEternal) { const waveCap = Math.min(wave, 12); eternalDmgBuff = waveCap * 5; passivePcent += eternalDmgBuff; eternalRangeBuff = waveCap * 2.5; }
 
-    let { sBonus, tagBuffs } = _calcSetAndTagBonuses(relicStats, uStats, headPiece);
+    let { sBonus, tagBuffs, setPerkDmg } = _calcSetAndTagBonuses(relicStats, uStats, headPiece, context);
     if (starMult && starMult !== 1) { for (let key in sBonus) { if (typeof sBonus[key] === 'number') sBonus[key] *= starMult; } }
 
     const getRelicStat = (stat, apply) => apply ? relicStats[stat] : 0;
@@ -569,42 +597,63 @@ function calculateDPS(uStats, relicStats, context) {
         });
     }
 
-    // Magi Tag: Permanent +50% Damage, -15% SPA
     const tags = uStats.tags || [];
-    let magiDmg = 0, magiSpa = 0;
-    if (tags.includes('Magi')) {
-        magiDmg = 50;
-        magiSpa = 15;
-    }
 
-    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (isUnit(uStats.id, 'king_sailor') ? 10 : 0);
+    const isKsBuffActive = (typeof window !== 'undefined' && window.kingSailorBuffActive);
+    let ksCrit = 0, ksCdmg = 0;
+    if (isKsBuffActive && uStats.id !== 'king_sailor') { ksCrit = 10; ksCdmg = 20; }
+
+    const amSupportActive = (typeof window !== 'undefined' && window.ancientMageSupportActive);
+    const amCritRate = amSupportActive ? 20 : 0;
+    const amCritDmg = amSupportActive ? 20 : 0;
+
+    const mageHillBuffActive = (typeof window !== 'undefined' && window.mageHillBuffActive);
+    const uType = (uStats.placementType || 'Ground').toLowerCase();
+    const mageHillSpa = (mageHillBuffActive && (uType === 'hill' || uType === 'hybrid')) ? 30 : 0;
+
+    const mageGroundBuffActive = (typeof window !== 'undefined' && window.mageGroundBuffActive);
+    const mageGroundCrit = (mageGroundBuffActive && (uType === 'ground' || uType === 'hybrid')) ? 45 : 0;
+
+    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (uStats.id === 'king_sailor' ? 10 : 0);
     const finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
 
-    const setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa + magiSpa;
+    const setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa + mageHillSpa;
 
-    // Great Mage Accessory: -20% SPA (Uptime ~60% from kill trigger)
-    const mageSpaMult = (headPiece === 'mage_head') ? 0.88 : 1; // -20% * 0.6 uptime
 
     // Nutaru (Beast) dynamic SPA Cap override
-    const effectiveSpaCap = (isAbility && isUnit(uStats.id, 'nutaru_beast')) ? 3.0 : (uStats.spaCap || 0.1);
+    const effectiveSpaCap = (isAbility && uStats.id === 'nutaru_beast') ? 3.0 : (uStats.spaCap || 0.1);
 
-    const spaAfterRelic = lvStats.spa * (1 - traitSpaPct / 100) * (1 - baseR_Spa / 100) * mageSpaMult;
+    const spaAfterRelic = lvStats.spa * (1 - traitSpaPct / 100) * (1 - baseR_Spa / 100);
     const rawFinalSpa = spaAfterRelic * (1 - setAndPassiveSpa / 100);
     const finalSpa = Math.max(rawFinalSpa, effectiveSpaCap);
 
-    const { headDmgBuff, headDotBuff, headCalc } = _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats);
+    const { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc } = _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicStats, context);
 
-    let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBuff + globalDmg + magiDmg;
+    const additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassive + headDmgTag + globalDmg;
+
+    // Detailed breakdown for UI
+    const detailedBuffs = {
+        setBase: (sBonus.dmg || 0) - (tagBuffs.dmg || 0) - setPerkDmg,
+        setPerk: setPerkDmg + headDmgPassive,
+        tagBonus: (tagBuffs.dmg || 0) + headDmgTag,
+        unitPassive: passivePcent,
+        accessoryBase: headDmgBase,
+        globalBuffs: globalDmg
+    };
 
     // Junior Ninja: 1.1x Multiplier to all additive buffs (WATER GOD ONLY)
-    if (headPiece === 'junior' && isUnit(uStats.id, 'water_god')) {
-        additiveTotal = ((sBonus.dmg || 0) + passivePcent + headDmgBuff + globalDmg) * 1.1;
+    if (headPiece === 'junior' && uStats.id === 'water_god') {
+        additiveTotal = ((sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassive + headDmgTag + globalDmg) * 1.1;
     }
 
     const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1);
 
-    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cdmg || 0);
-    let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + (isUnit(uStats.id, 'kirito') ? 0 : (baseR_Cf + (sBonus.cf || 0))), 100);
+    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cdmg || 0) + amCritDmg + ksCdmg;
+    let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + amCritRate + ksCrit + mageGroundCrit + baseR_Cf + (sBonus.cf || 0), 100);
+    if (uStats.id === 'kirito' || uStats.id === 'the_strongest_of_today') {
+        finalCritRate = Math.min(finalCritRate, uStats.crit);
+    }
+
     if (headPiece === 'sorcerer_hunter_spirit') finalCritRate = 0;
 
     const avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
@@ -615,7 +664,7 @@ function calculateDPS(uStats, relicStats, context) {
     let extraAttacksData = null;
     let usedSpa = finalSpa;
 
-    if (isUnit(uStats.id, 'rohan')) {
+    if (uStats.id === 'rohan') {
         const probs = [0.40, 0.35, 0.30, 0.25, 0.20];
         let cumulativeProbs = [];
         let currentProb = 1.0;
@@ -644,14 +693,14 @@ function calculateDPS(uStats, relicStats, context) {
             mult: attackMultiplier,
             label: "Rohan Mechanics"
         };
-    } else if (isUnit(uStats.id, 'super_roku') && isAbility) {
+    } else if (uStats.id === 'super_roku' && isAbility) {
         attackMultiplier = 0.65;
         extraAttacksData = { req: "Same Target", hits: "Avg 65% Dmg", extra: 0, attacksNeeded: 1, mult: 0.65, label: "Combo Decay" };
-    } else if (isUnit(uStats.id, 'cell') && !isAbility) {
+    } else if (uStats.id === 'cell' && !isAbility) {
         usedSpa = finalSpa + 1.5;
         attackMultiplier = 1.5;
         extraAttacksData = { req: "Follow-up hit", hits: "1.5x Dmg / Cycle", extra: 0, attacksNeeded: 1, mult: 1.5 };
-    } else if (isUnit(uStats.id, 'water_god') && uStats.followUp) {
+    } else if (uStats.id === 'water_god' && uStats.followUp) {
         usedSpa = Math.max(finalSpa, effectiveSpaCap * 2);
         attackMultiplier = 2;
         extraAttacksData = {
@@ -662,7 +711,7 @@ function calculateDPS(uStats, relicStats, context) {
             mult: attackMultiplier,
             label: `Water God Follow-up (${effectiveSpaCap}s window)`
         };
-    } else if (isUnit(uStats.id, 'king_sailor')) {
+    } else if (uStats.id === 'king_sailor') {
         const tickCount = 1;
         const tickDmg = 0.20;
         attackMultiplier = 1; // Base attacks don't get multiplied here since lightning bypasses true dmg
@@ -684,7 +733,7 @@ function calculateDPS(uStats, relicStats, context) {
 
         const atkAnim = uStats.spaCap || 0.1;
         const fuaAnim = uStats.customFollowUp.fuaAnimation || 0;
-        
+
         // Cycle time accounting for animation delay (Poseidon-style)
         // If FUA triggers, the cycle is capped by (atkAnim + fuaAnim)
         const timeIfFua = Math.max(finalSpa, atkAnim + fuaAnim);
@@ -722,21 +771,21 @@ function calculateDPS(uStats, relicStats, context) {
         trueDmgMult = 1.15;
     }
     let finalHitDps = hitDpsTotal * trueDmgMult;
-    
+
     // Add King Sailor's Chain Lightning DPS (NO Crit, No True Damage)
-    if (isUnit(uStats.id, 'king_sailor')) {
+    if (uStats.id === 'king_sailor') {
         // Chain lightning does NOT crit and does NOT benefit from true damage
         const chainLightningDps = ((finalDmg * 0.20) / usedSpa) * placement;
         finalHitDps += chainLightningDps;
     }
 
-    const summonDmgBase = (isUnit(uStats.id, 'nutaru_beast') && isAbility) ? finalDmg * 1.25 : finalDmg;
+    const summonDmgBase = (uStats.id === 'nutaru_beast' && isAbility) ? finalDmg * 1.25 : finalDmg;
     let { summonDpsTotal, summonData } = _calcSummonDPS(uStats, summonDmgBase, finalSpa, placement);
 
     if (uStats.customSummons && uStats.customSummons.length > 0) {
         const upLevel = context.upgradeLevel !== undefined ? context.upgradeLevel : 6;
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
-        
+
         if (!summonData) summonData = {};
         summonData.isCustom = true;
         summonData.summons = [];
@@ -746,14 +795,14 @@ function calculateDPS(uStats, relicStats, context) {
             if (upLevel >= s.reqUp) {
                 let sDmgMult = s.dmgMult;
                 if (eLevel >= 6 && s.e6DmgMult) sDmgMult = s.e6DmgMult;
-                
+
                 let sAvgMult = s.avgMult || 1.0;
                 if (eLevel >= 6 && s.e6AvgMult) sAvgMult = s.e6AvgMult;
-                
+
                 let sHitDmg = finalDmg * sDmgMult;
                 let sAvgDmg = sHitDmg * sAvgMult;
                 let sDps = sAvgDmg / s.spa;
-                
+
                 cDpsTotal += sDps;
                 summonData.summons.push({
                     name: s.name,
@@ -779,7 +828,7 @@ function calculateDPS(uStats, relicStats, context) {
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
         let chance = uStats.customFollowUp.chance;
         if (eLevel >= uStats.customFollowUp.eLevelReq) chance = uStats.customFollowUp.eLevelChance;
-        
+
         // FUA DoT: dotPct is TOTAL bleed damage (not per-tick), DoT doesn't crit so use finalDmg
         let followUpDotDmg = finalDmg * (uStats.customFollowUp.dotPct / 100);
         let followUpDotDpsPerCycle = (followUpDotDmg * (chance / 100)) / usedSpa;
@@ -805,6 +854,7 @@ function calculateDPS(uStats, relicStats, context) {
         dot: finalDotDps,
         summon: finalSummonDps,
         summonData,
+        detailedBuffs: detailedBuffs,
         spa: usedSpa,
         spaCap: effectiveSpaCap,
         range: finalRange,
@@ -817,13 +867,13 @@ function calculateDPS(uStats, relicStats, context) {
         totalSetStats: sBonus,
         tagBuffs,
         activeGlobalBuffs,
-        passiveBuff: passivePcent + headDmgBuff,
+        passiveBuff: passivePcent + headDmgBase + headDmgPassive + headDmgTag,
         passiveSpaBuff: passiveSpaPcent,
         eternalBuff: eternalDmgBuff,
         eternalRangeBuff: eternalRangeBuff,
         totalAdditivePct: additiveTotal,
         conditionalData: uStats.burnMultiplier ? { name: "Target: Burn", val: uStats.burnMultiplier, mult: (1 + uStats.burnMultiplier / 100) } : null,
-        headBuffs: { dmg: headDmgBuff, dot: headDotBuff, type: headPiece, ...headCalc },
+        headBuffs: { dmg: headDmgBase + headDmgPassive + headDmgTag, headBase: headDmgBase, passiveDmg: headDmgPassive, tagDmg: headDmgTag, dot: headDotBuff, type: headPiece, ...headCalc },
         dotData: dotBreakdown,
         critData: { rate: finalCritRate, cdmg: finalCdmgStat, baseCdmg: uStats.cdmg, relicCmPct: baseR_Cm, setCm: sBonus.cm, totalCmBuff: (sBonus.cm || 0) + baseR_Cm, preRelicCdmg: uStats.cdmg, avgMult: avgCritMult },
         placement,
@@ -838,6 +888,11 @@ function calculateDPS(uStats, relicStats, context) {
         singleUnitDoT: dotDpsTotal / (traitObj.allowDotStack || traitObj.allowPlacementStack ? placement : 1),
         hasStackingDoT: traitObj.allowDotStack || traitObj.allowPlacementStack,
         extraAttacks: extraAttacksData,
-        abilityBuff: uStats.buffDmg || 0
+        abilityBuff: uStats.buffDmg || 0,
+        amSupportActive,
+        amCritRate,
+        amCritDmg,
+        mageHillSpa,
+        mageGroundCrit
     };
 }

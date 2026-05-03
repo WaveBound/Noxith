@@ -3,39 +3,40 @@ unitDatabase.push({
     id: "devil_hunter",
     name: "Devil Hunter",
     img: "images/units/devil_hunter.png",
-    placement: 1,               // Max units placeable
+    placement: 3,               // Max units placeable
     placementType: "Ground",    // "Ground", "Hill", or "Hybrid"
-    role: "Damage",             // Role description shown in UI
+    role: "Dps / Ground",             // Role description shown in UI
     tags: [],                   // e.g. ["Reaper", "Bloodline", "Ninjaverse"]
 
     // META (Build Guide tab)
     meta: {
-        short: "Trait",         // Best budget/quick trait
-        long: "Trait",          // Best max potential trait(s)
-        note: "Brief reasoning."
+        short: "Astral",         // Best budget/quick trait
+        long: "Astral",          // Best max potential trait(s)
+        note: "."
     },
 
-    totalCost: 0,               // Total gold cost to max
+    totalCost: 66500,               // Total gold cost to max
 
     // BASE STATS
     stats: {
         spaCap: 2.5, crit: 0, cdmg: 150,             // spaCap = min SPA | cdmg 150 = standard
         dot: 0, dotDuration: 0, dotStacks: 1,       // dot = % per tick | duration = # of ticks
-        element: "None", passiveDmg: 0,             // "Fire","Ice","Water","Dark","Light","Rose","Wind"
+        element: "Fire", passiveDmg: 0,             // "Fire","Ice","Water","Dark","Light","Rose","Wind"
     },
 
     // UPGRADES (dmg, spa, range, cost per level)
     upgrades: [
-        { dmg: 360, spa: 8.0, range: 28, cost: 0 },   // Up 0 (Base)
-        { dmg: 660, spa: 8.0, range: 30, cost: 0 },   // Up 2
-        { dmg: 1200, spa: 8.0, range: 32, cost: 0 },   // Up 3
-        { dmg: 2160, spa: 8.0, range: 33, cost: 0 },   // Up 4
-        { dmg: 3360, spa: 8.0, range: 35, cost: 0 },   // Up 5
-        { dmg: 5400, spa: 8.0, range: 37, cost: 0 }    // Up 6
+        { dmg: 360, spa: 8.0, range: 28, cost: 1900 },   // Up 0 (Base)
+        { dmg: 660, spa: 8.0, range: 30, cost: 4500 },   // Up 2
+        { dmg: 1200, spa: 8.0, range: 32, cost: 9100 },   // Up 3
+        { dmg: 2160, spa: 8.0, range: 33, cost: 12000 },   // Up 4
+        { dmg: 3360, spa: 8.0, range: 35, cost: 19000 },   // Up 5
+        { dmg: 5400, spa: 8.0, range: 37, cost: 20000 }    // Up 6
     ],
 
     // PASSIVES (displayed in unit info panel)
     passives: [
+        { name: "Demonic Bloodline", desc: "Every 5 attacks, gain a burst of power (+50% Damage) for the next 10 attacks (33.3% average uptime)." },
         { name: "Supada's Power", desc: "Gain 10% Awakening per attack. Transforms at 100%. In 'Demon Awakened' form, gain +50% Damage. Meter depletes 10% per attack." },
         { name: "Freestyle", desc: "Gain style points after 10s of constant attacking. Each rank (D to SSS) increases damage by 5%. Resets after 5s of not attacking." },
     ],
@@ -51,10 +52,38 @@ unitDatabase.push({
 
     // MODES
     modes: [
-        { name: "Devil Sword", img: "images/units/dante/Devil Sword.png" },
-        { name: "Twin Guns", img: "images/units/dante/Twin Guns.png" },
-        { name: "Demoncycle", img: "images/units/dante/Demoncycle.png" },
-        { name: "Fancy Hat", img: "images/units/dante/Fancy Hat.png" }
+        {
+            name: "Devil Sword",
+            img: "images/units/dante/Devil Sword.png",
+            desc: "Sword focus: Burn on Bleed mechanics.",
+            dmg: 5400, spa: 8.0, range: 37, spaCap: 2.5,
+            crit: 0, cdmg: 150, dot: 80, dotDuration: 10,
+            passiveDmg: 68.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, hyper: 0, cooldown: 0
+        },
+        {
+            name: "Twin Guns",
+            img: "images/units/dante/Twin Guns.png",
+            desc: "Gun focus: -20% SPA.",
+            dmg: 5400, spa: 8.0, range: 37, spaCap: 3,
+            crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
+            passiveDmg: 68.3, passiveSpa: -20, bossDmg: 0, dotBuff: 0, hyper: 0, cooldown: 0
+        },
+        {
+            name: "Demoncycle",
+            img: "images/units/dante/Demoncycle.png",
+            desc: "Heavy focus: Stun per DoT mechanics.",
+            dmg: 5400, spa: 8.0, range: 37, spaCap: 4,
+            crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
+            passiveDmg: 68.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, hyper: 0, cooldown: 0
+        },
+        {
+            name: "Fancy Hat",
+            img: "images/units/dante/Fancy Hat.png",
+            desc: "High risk focus: +100% Damage, costs 3,000 ¥ per attack.",
+            dmg: 5400, spa: 8.0, range: 37, spaCap: 3.5,
+            crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
+            passiveDmg: 168.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, hyper: 0, cooldown: 0
+        }
     ],
 
     // ETHEREALIZATION (E1-E6 upgrade descriptions)

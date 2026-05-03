@@ -288,7 +288,11 @@ function openUnitInfo(unitId) {
     if (!passivesHtml) passivesHtml = '<li>None</li>';
 
     let modesHtml = '';
-    if (unit.modes && Object.keys(unit.modes).length > 0) {
+    if (unit.modes && Array.isArray(unit.modes)) {
+        modesHtml = unit.modes.map(mode =>
+            `<li class="info-passive-item"><strong class="text-custom">${mode.name}:</strong> <span class="info-passive-desc">${mode.desc}</span></li>`
+        ).join('');
+    } else if (unit.modes && typeof unit.modes === 'object') {
         modesHtml = Object.entries(unit.modes).map(([name, data]) =>
             `<li class="info-passive-item"><strong class="text-custom">${name}:</strong> <span class="info-passive-desc">${data.desc}</span></li>`
         ).join('');
@@ -422,10 +426,15 @@ function openUnitModes(unitId) {
             <div class="mode-img-container-large">
                 <img src="${mode.img}" alt="${mode.name}">
             </div>
+            <div class="mode-card-info">
+                <div class="mode-card-name">${mode.name}</div>
+                <div class="mode-card-desc">${mode.desc}</div>
+            </div>
         </div>
     `).join('');
 
     grid.innerHTML = modesHtml;
+    grid.className = 'modes-overlay-grid unit-' + unitId;
     
     overlay.classList.remove('hidden');
     document.body.classList.add('modal-open');
@@ -442,8 +451,16 @@ function selectUnitMode(unitId, modeIdx) {
         else card.classList.remove('active');
     });
     
-    console.log(`Selected mode ${modeIdx} for ${unitId}`);
+    // Clear caches for this unit as stats changed
+    if (window.unitBuildsCache) {
+        delete window.unitBuildsCache[unitId];
+    }
     
+    // Update the unit card display in the main database
+    if (typeof updateBuildListDisplay === 'function') {
+        updateBuildListDisplay(unitId, true);
+    }
+
     // Auto close after selection for better UX
     setTimeout(() => {
         closeModesOverlay();

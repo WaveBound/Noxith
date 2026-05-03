@@ -82,8 +82,15 @@ unitDatabase.push({
 
     // MODES (Interactive form switching)
     // modes: [
-    //     { name: "Mode One", img: "images/units/UnitName/mode1.png" },
-    //     { name: "Mode Two", img: "images/units/UnitName/mode2.png" },
+    //     { 
+    //         name: "Mode Name", 
+    //         img: "images/units/UnitName/mode1.png",
+    //         desc: "Description of the mode.",
+    //         dmg: 0, spa: 0, range: 0, spaCap: 0,
+    //         crit: 0, cdmg: 0, dot: 0, dotDuration: 0,
+    //         passiveDmg: 0, passiveSpa: 0, bossDmg: 0,
+    //         dotBuff: 0, hyper: 0, cooldown: 0
+    //     },
     // ],
 
     // ETHEREALIZATION (E1-E6 upgrade descriptions)

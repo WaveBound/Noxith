@@ -10,9 +10,7 @@ const HEAD_CONFIG = {
     'shadow_reaper_necklace': { name: 'S. Reaper', search: 'Shadow Reaper', cls: 'sreaper' },
     'junior': { name: 'Junior Ninja', search: 'Junior', cls: 'ninja' },
     'biju_head': { name: 'Biju', search: 'Biju', cls: 'sungod' },
-    'rebellious_head': { name: 'Rebellious', search: 'Rebellious', cls: 'ninja' },
     'reanimated_head': { name: 'Reanimated', search: 'Reanimated', cls: 'reaper' },
-    'mage_head': { name: 'Great Mage', search: 'Great Mage', cls: 'dmg' },
     'sorcerer_hunter_spirit': { name: 'S.H. Spirit', search: 'S. Hunter', cls: 'custom' },
     'strongest_sorcerer_glasses': { name: 'Strongest', search: 'Strongest', cls: 'custom' },
     'monarch': { name: 'Monarch Crown', search: 'Monarch', cls: 'custom' }
@@ -26,10 +24,6 @@ const TOGGLE_OVERRIDES = {
     'nutaru_beast': { label: 'Beast Mode' },
     'ancient_shinob': { label: 'Reanimation' },
     'super_roku': { label: 'Same Enemy' },
-    'ancient_mage': {
-        dynamicLabel: (isChecked) => isChecked ? 'DPS' : 'Specialist',
-        script: `this.parentElement.previousElementSibling.innerText = this.checked ? 'DPS' : 'Specialist'; toggleAMSpecialist(this);`
-    },
     'cell': {
         dynamicLabel: (isChecked) => isChecked ? 'Perfect Form' : 'True Form',
         script: `this.parentElement.previousElementSibling.innerText = this.checked ? 'Perfect Form' : 'True Form'; this.closest('.unit-toolbar').firstElementChild.style.gap = '2px';`
@@ -447,7 +441,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                 ? [...(typeof customTraits !== 'undefined' ? customTraits : []), ...(unitSpecificTraits[unit.id] || [])]
                 : null;
 
-            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
+            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
 
             if (dynamicResults.length > 0) {
                 const seen = new Set(calculatedResults.map(r => r.id));
@@ -607,9 +601,7 @@ function renderDatabase() {
                                 <option value="shadow_reaper_necklace">Heads: Shadow Reaper</option>
                                 <option value="junior">Heads: Junior Ninja</option>
                                 <option value="biju_head">Heads: Biju</option>
-                                <option value="rebellious_head">Heads: Rebellious</option>
                                 <option value="reanimated_head">Heads: Reanimated</option>
-                                <option value="mage_head">Heads: Great Mage</option>
                                 <option value="sorcerer_hunter_spirit">Heads: S. Hunter Spirit</option>
                                 <option value="strongest_sorcerer_glasses">Heads: Strongest Glasses</option>
                                 <option value="monarch">Heads: Monarch Crown</option>

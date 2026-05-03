@@ -17,10 +17,10 @@ unitDatabase.push({
         spaCap: 4,
         crit: 0, cdmg: 150, dot: 60, dotDuration: 10,
         element: "Light",
-        passiveDmg: 20,  // Base Experience (20)
+        passiveDmg: 0,  // Base Experience (20)
         passiveSpa: 0,   // Base SPA buff/penalty (0 = No change)
         bossDmg: 0,
-        dotBuff: 40,     // Specialist focus (+40% DoT)
+        dotBuff: 20,     // Specialist focus (+40% DoT)
         hyper: 50        // Specialist focus (+50% True Dmg)
     },
 
@@ -36,34 +36,44 @@ unitDatabase.push({
         { name: "Millennia Old Experience", desc: "Every attack: Enemies take +20% Damage (Debuff) and Wind Shear (60% Dmg over 10 ticks). Specialist Mode swaps Wind Shear for Burn and increases DoT effectiveness." },
         { name: "The Last Great Mage", desc: "Gains Stun Immunity while not attacking (Always active at E4)." }
     ],
-    ability: {
-        abilityName: "DPS",
-        desc: "Combat focus: +20% Dmg, +40% Slow, +50% Boss Dmg. Applies Wind Shear (60% DoT over 10s).",
-        passiveDmg: 20, 
-        passiveSpa: -40,
-        bossDmg: 50,
-        dotBuff: 0,
-        hyper: 0,
-        cooldown: 60
-    },
-    modes: {
-        "DPS": { 
-            desc: "Combat focus: +20% Dmg, +40% Slow, +50% Boss Dmg. Applies Wind Shear (60% DoT over 10s).",
-            passiveDmg: 20, 
-            passiveSpa: -40,
-            bossDmg: 50,
-            dotBuff: 0,
-            hyper: 0
+    modes: [
+        {
+            name: "DPS",
+            img: "images/units/AncientMage/dps.png",
+            desc: "Combat focus: +20% Dmg, +40% Slow (Penalty), +50% Boss Dmg. Applies Wind Shear (60% DoT over 10s).",
+            dmg: 5500, spa: 8, range: 45, spaCap: 4,
+            crit: 0, cdmg: 150, dot: 60, dotDuration: 10,
+            passiveDmg: 20, passiveSpa: -40, bossDmg: 50,
+            dotBuff: 0, hyper: 0, cooldown: 0
         },
-        "Specialist": { 
+        {
+            name: "Specialist",
+            img: "images/units/AncientMage/Specialist.png",
             desc: "Magic focus: +40% DoT, +50% True Damage. Swaps Wind Shear for Burn (60% DoT over 10s).",
-            passiveDmg: 0,
-            passiveSpa: 0,
-            bossDmg: 0,
-            dotBuff: 40,
-            hyper: 50
+            dmg: 5500, spa: 8, range: 45, spaCap: 4,
+            crit: 0, cdmg: 150, dot: 60, dotDuration: 10,
+            passiveDmg: 0, passiveSpa: 0, bossDmg: 0,
+            dotBuff: 40, hyper: 50, cooldown: 0
+        },
+        {
+            name: "Support",
+            img: "images/units/AncientMage/Support.png",
+            desc: "Blessing focus: Stop attacking to buff units in range: +15% Effect Res, +20% Crit Rate, +20% Crit Damage.",
+            dmg: 0, spa: 8, range: 45, spaCap: 4,
+            crit: 0, cdmg: 0, dot: 0, dotDuration: 0,
+            passiveDmg: 0, passiveSpa: 0, bossDmg: 0,
+            dotBuff: 0, hyper: 0, cooldown: 0
+        },
+        {
+            name: "Utility",
+            img: "images/units/AncientMage/Utility.png",
+            desc: "Control focus: Attacks apply Stun (2s) and Heavy Slow (75%). If already stunned: enemies take +20% extra damage.",
+            dmg: 5500, spa: 8, range: 45, spaCap: 4,
+            crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
+            passiveDmg: 0, passiveSpa: 0, bossDmg: 0,
+            dotBuff: 0, hyper: 0, cooldown: 0
         }
-    },
+    ],
     etherealization: [
         "+10 Stat Points",
         "Gain +20% DOT effectiveness.",

@@ -25,7 +25,7 @@ unitDatabase.push({
         { dmg: 1500, spa: 10, range: 33, cost: 13500 }, // Up 3
         { dmg: 2120, spa: 10, range: 36, cost: 18000 }, // Up 4
         { dmg: 2575, spa: 10, range: 40, cost: 20000 }, // Up 5
-        { dmg: 6325, spa: 15, range: 45, cost: 22000 } // Up 6
+        { dmg: 7650, spa: 15, range: 45, cost: 22000 } // Up 6
     ],
     passives: [
         { name: "Manipulator of Fate", desc: "Gain +50% Damage and -25% Attack Speed based on shared tags with allies." },

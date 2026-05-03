@@ -74,9 +74,10 @@ function renderBuffSummarySection(data) {
 function renderSourceTotalsSection(data) {
     // 1. Relic & Tag Breakdown
     const relicMainSub = data.relicBuffs.dmg || 0;
-    const setBaseDmg = (data.totalSetStats.dmg || 0) - (data.tagBuffs.dmg || 0);
-    const tagDmg = data.tagBuffs.dmg || 0;
-    const gearTotalDmg = relicMainSub + setBaseDmg + tagDmg;
+    const setBaseDmg = data.detailedBuffs ? data.detailedBuffs.setBase : ((data.totalSetStats.dmg || 0) - (data.tagBuffs.dmg || 0));
+    const tagDmg = data.detailedBuffs ? data.detailedBuffs.tagBonus : (data.tagBuffs.dmg || 0);
+    const setPerkTotal = data.detailedBuffs ? data.detailedBuffs.setPerk : 0;
+    const gearTotalDmg = relicMainSub + setBaseDmg + tagDmg + setPerkTotal;
 
     const gearSpa = (data.relicBuffs.spa || 0) + (data.totalSetStats.spa || 0);
     const gearRange = (data.relicBuffs.range || 0) + (data.totalSetStats.range || 0);
@@ -90,9 +91,9 @@ function renderSourceTotalsSection(data) {
 
     // 3. Passive & Global Breakdown (Isolate specific sources)
     const eternalDmg = data.eternalBuff || 0;
-    const unitInnateDmg = (data.passiveBuff || 0) - (data.headBuffs.dmg || 0) - (data.abilityBuff || 0) - eternalDmg;
+    const unitInnateDmg = data.detailedBuffs ? data.detailedBuffs.unitPassive : ((data.passiveBuff || 0) - (data.headBuffs.dmg || 0) - (data.abilityBuff || 0) - eternalDmg);
     const abilityDmg = data.abilityBuff || 0;
-    const accessoryDmg = data.headBuffs.dmg || 0;
+    const accessoryBaseDmg = data.detailedBuffs ? data.detailedBuffs.accessoryBase : 0;
 
     let globalPassiveDmg = 0;
     let globalPassiveSpa = 0;
@@ -130,7 +131,7 @@ function renderSourceTotalsSection(data) {
         });
     }
 
-    const passiveTotalDmg = unitInnateDmg + abilityDmg + accessoryDmg + globalPassiveDmg + eternalDmg;
+    const passiveTotalDmg = unitInnateDmg + abilityDmg + accessoryBaseDmg + globalPassiveDmg + eternalDmg;
     const passiveTotalSpa = (data.passiveSpaBuff || 0) + globalPassiveSpa;
     const passiveTotalRange = (data.baseStats.passiveRange || 0) + (data.eternalRangeBuff || 0) + globalPassiveRange;
     const passiveTotalCrit = globalPassiveCrit;
@@ -147,8 +148,9 @@ function renderSourceTotalsSection(data) {
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 3px; margin-bottom: 5px;">
                     <div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Gear Main + Subs</span><span class="text-white">${fmt.pct(relicMainSub)}</span></div>
-                    <div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Relic Set Base</span><span class="text-white">${fmt.pct(setBaseDmg)}</span></div>
-                    ${tagDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #f472b6; font-weight: 700;"><span>Unit Tag Bonuses</span><span>${fmt.pct(tagDmg)}</span></div>` : ''}
+                    <div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Set Bonus</span><span class="text-white">${fmt.pct(setBaseDmg)}</span></div>
+                    ${setPerkTotal > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Set Perks</span><span class="text-white">${fmt.pct(setPerkTotal)}</span></div>` : ''}
+                    ${tagDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #f472b6; font-weight: 700;"><span>Tag Bonuses</span><span>${fmt.pct(tagDmg)}</span></div>` : ''}
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 0.65rem; color: #777; border-top: 1px solid rgba(244, 114, 182, 0.1); padding-top: 4px;">
                     <div style="display:flex; justify-content:space-between;"><span>SPA</span><b class="text-white">-${gearSpa.toFixed(1)}%</b></div>
@@ -187,7 +189,7 @@ function renderSourceTotalsSection(data) {
                         ${unitInnateDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Unit Passive</span><span class="text-white">${fmt.pct(unitInnateDmg)}</span></div>` : ''}
                     `) + `
                     ${abilityDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Active Ability</span><span class="text-white">${fmt.pct(abilityDmg)}</span></div>` : ''}
-                    ${accessoryDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Accessory</span><span class="text-white">${fmt.pct(accessoryDmg)}</span></div>` : ''}
+                    ${accessoryBaseDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Accessory Base</span><span class="text-white">${fmt.pct(accessoryBaseDmg)}</span></div>` : ''}
                     ${globalBuffsDmgHtml}
                     ${globalBuffsSpaHtml}
                     ${globalBuffsCritHtml}
@@ -302,10 +304,11 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, h
                         <td class="mt-cell-formula mt-pt-md mt-text-gold mt-text-bold">${fmt.pct(data.totalAdditivePct)}</td>
                         <td class="mt-cell-val calc-highlight mt-pt-md">${fmt.num(preConditionalDmg)}</td>
                     </tr>
-                    <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base</td><td class="mt-cell-formula">${fmt.pct(baseSetDmg)}</td><td class="mt-cell-val"></td></tr>
-                    ${(data.headBuffs.dmg || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Accessory</td><td class="mt-cell-formula">${fmt.pct(data.headBuffs.dmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${tagDmg !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonuses</td><td class="mt-cell-formula">${fmt.pct(tagDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${passiveDmg > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${fmt.pct(passiveDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg) !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Bonus</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.detailedBuffs ? data.detailedBuffs.tagBonus : tagDmg) !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonus</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs ? data.detailedBuffs.tagBonus : tagDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.detailedBuffs ? data.detailedBuffs.setPerk : 0) !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Perks</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.setPerk)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.detailedBuffs ? data.detailedBuffs.unitPassive : passiveDmg) > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs ? data.detailedBuffs.unitPassive : passiveDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.detailedBuffs ? data.detailedBuffs.accessoryBase : 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Accessory Base</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.accessoryBase)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${eternalDmg > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-accent-start opacity-70">↳ Eternal Stacks (Wave 12+)</td><td class="mt-cell-formula text-accent-start">${fmt.pct(eternalDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.abilityBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-custom opacity-70">↳ Ability Buffs</td><td class="mt-cell-formula text-custom">${fmt.pct(data.abilityBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
 
@@ -384,7 +387,7 @@ function renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa) {
                     <tr><td class="mt-cell-label mt-pt-md">Set Bonus + Passive + Abilities <button class="calc-info-btn" onclick="openInfoPopup('tag_logic')">?</button></td><td class="mt-cell-formula mt-pt-md">${data.setAndPassiveSpa >= 0 ? '-' : '+'}${Math.abs(fmt.fix(data.setAndPassiveSpa, 1))}%</td><td class="mt-cell-val mt-pt-md">${fmt.fix(data.rawFinalSpa, 3)}s</td></tr>
                     <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base</td><td class="mt-cell-formula">-${fmt.fix(baseSetSpa, 1)}%</td><td class="mt-cell-val"></td></tr>
                     ${tagSpa !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonuses</td><td class="mt-cell-formula">-${fmt.fix(tagSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${passiveSpa !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${passiveSpa > 0 ? '+' : ''}${fmt.fix(passiveSpa, 1)}% ${passiveSpa > 0 ? 'Speed' : 'Slow'}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${passiveSpa !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${passiveSpa > 0 ? '-' : '+'}${Math.abs(fmt.fix(passiveSpa, 1))}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${globalSpaBreakdownHtml}
 
                     <tr><td class="mt-cell-label">Cap Check (${data.spaCap}s)</td><td class="mt-cell-formula">MAX</td><td class="mt-cell-val calc-result">${fmt.fix(data.spa, 3)}s</td></tr>
@@ -571,10 +574,12 @@ function renderMathContent(data, isSplit = false) {
     }
 
     const dmgAfterRelic = runningDmg * (1 + data.relicBuffs.dmg / 100);
-    const baseSetDmg = (data.totalSetStats.dmg || 0) - (data.tagBuffs.dmg || 0);
-    const tagDmg = (data.tagBuffs.dmg || 0);
+    const baseSetDmg = data.detailedBuffs ? data.detailedBuffs.setBase : ((data.totalSetStats.dmg || 0) - (data.tagBuffs.dmg || 0));
+    const tagDmg = data.detailedBuffs ? data.detailedBuffs.tagBonus : (data.tagBuffs.dmg || 0);
+    const setPerkDmg = data.detailedBuffs ? data.detailedBuffs.setPerk : 0;
     const eternalDmg = data.eternalBuff || 0;
-    const passiveDmg = (data.passiveBuff || 0) - (data.headBuffs.dmg || 0) - (data.abilityBuff || 0) - eternalDmg;
+    const passiveDmg = data.detailedBuffs ? data.detailedBuffs.unitPassive : ((data.passiveBuff || 0) - (data.headBuffs.dmg || 0) - (data.abilityBuff || 0) - eternalDmg);
+    const accessoryBaseDmg = data.detailedBuffs ? data.detailedBuffs.accessoryBase : 0;
     const baseSetSpa = (data.totalSetStats.spa || 0) - (data.tagBuffs.spa || 0);
     const tagSpa = (data.tagBuffs.spa || 0);
     const passiveSpa = (data.passiveSpaBuff || 0);
@@ -924,3 +929,17 @@ function renderRangeSection(data) {
             </table>
         </div>`;
 }
+
+function toggleDeepDive(btn) {
+    const content = btn.nextElementSibling;
+    const arrow = btn.querySelector('.dd-arrow');
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        arrow.style.transform = 'rotate(180deg)';
+    } else {
+        content.classList.add('hidden');
+        arrow.style.transform = 'rotate(0deg)';
+    }
+}
+
+window.toggleDeepDive = toggleDeepDive;

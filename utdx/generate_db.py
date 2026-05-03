@@ -136,6 +136,7 @@ if (isMainThread) {
         const cands = allowDot
             ? ['dmg', 'spa', 'cm', 'cf', 'dot', ...(allowRange ? ['range'] : [])]
             : ['dmg', 'spa', 'cm', 'cf', ...(allowRange ? ['range'] : [])];
+            
         // For S.H. Spirit head, remove crit subs since it disables crits
         const noCritCands = cands.filter(c => c !== 'cf' && c !== 'cm');
         const baseBuilds = globalBuilds.filter(b => allowDot || b.dot === 0);
@@ -233,7 +234,7 @@ if (isMainThread) {
         const { effectiveStats, isKiritoVR, suffix } = buildCalculationContext(unit, 'ruler', { isAbility, upgradeLevel });
         const hasNativeDoT = (effectiveStats.dot > 0) || (effectiveStats.burnMultiplier > 0) || isKiritoVR;
 
-        const allowedHeads = cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'] : ['none'];
+        const allowedHeads = cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'] : ['none'];
         const traitGroups = {};
 
         const maxPts = (isUnit(unit.id, 'king_sailor') || isUnit(unit.id, 'sukuna')) ? 129 : 99;
@@ -251,8 +252,20 @@ if (isMainThread) {
                 templates = generateTemplates(cfg.subs, allowedHeads, isDotPossible, allowRange);
                 PRECALC_TEMPLATES[templatesKey] = templates;
             }
+            
+            // Filter out 'cf' candidates for units that shouldn't get them (Kirito, Gojo)
+            const excludeRelicCrit = (isUnit(unit.id, 'kirito') || isUnit(unit.id, 'the_strongest_of_today'));
+            let unitTemplates = templates;
+            if (excludeRelicCrit) {
+                unitTemplates = templates.filter(t => {
+                    const h = t.meta.assignments.head || [];
+                    const b = t.meta.assignments.body || [];
+                    const l = t.meta.assignments.legs || [];
+                    return !h.some(a => a.type === 'cf') && !b.some(a => a.type === 'cf') && !l.some(a => a.type === 'cf');
+                });
+            }
 
-            const tmplLen = templates.length;
+            const tmplLen = unitTemplates.length;
             if (!traitGroups[trait.name]) traitGroups[trait.name] = [];
 
             const pushBest = (map, prio) => {
@@ -268,52 +281,58 @@ if (isMainThread) {
                 }
             };
 
-            // Pass 1: dmg points — track dps-best AND raw_dmg-best simultaneously (same context)
-            context.dmgPoints = maxPts; context.spaPoints = 0; context.rangePoints = 0;
-            effectiveStats.context = context;
-            const bestDps = new Map(), bestRaw = new Map();
-            for (let i = 0; i < tmplLen; i++) {
-                const t = templates[i]; context.headPiece = t.meta.headUsed;
-                const res = calculateDPS(effectiveStats, t.stats, context);
-                if (isNaN(res.total)) continue;
-                const key = t.meta.key;
-                const cd = bestDps.get(key);
-                if (!cd || res.total > cd.res.total) bestDps.set(key, { res, meta: t.meta });
-                const cr = bestRaw.get(key);
-                if (!cr || res.dmgVal > cr.res.dmgVal || (res.dmgVal === cr.res.dmgVal && res.total > cr.res.total)) bestRaw.set(key, { res, meta: t.meta });
-            }
-            pushBest(bestDps, 'dmg');
-            pushBest(bestRaw, 'raw_dmg');
-
-            // Pass 2: spa points
-            context.dmgPoints = 0; context.spaPoints = maxPts; context.rangePoints = 0;
-            effectiveStats.context = context;
-            const bestSpa = new Map();
-            for (let i = 0; i < tmplLen; i++) {
-                const t = templates[i]; context.headPiece = t.meta.headUsed;
-                const res = calculateDPS(effectiveStats, t.stats, context);
-                if (isNaN(res.total)) continue;
-                const key = t.meta.key;
-                const c = bestSpa.get(key);
-                if (!c || res.total > c.res.total) bestSpa.set(key, { res, meta: t.meta });
-            }
-            pushBest(bestSpa, 'spa');
-
-            // Pass 3: range points (only for range-enabled units)
-            if (allowRange) {
-                context.dmgPoints = 0; context.spaPoints = 0; context.rangePoints = 99;
+            try {
+                // Pass 1: dmg points — track dps-best AND raw_dmg-best simultaneously (same context)
+                context.dmgPoints = maxPts; context.spaPoints = 0; context.rangePoints = 0;
                 effectiveStats.context = context;
-                const bestRange = new Map();
+                const bestDps = new Map(), bestRaw = new Map();
                 for (let i = 0; i < tmplLen; i++) {
-                    const t = templates[i]; context.headPiece = t.meta.headUsed;
+                    const t = unitTemplates[i]; context.headPiece = t.meta.headUsed;
                     const res = calculateDPS(effectiveStats, t.stats, context);
                     if (isNaN(res.total)) continue;
                     const key = t.meta.key;
-                    const c = bestRange.get(key);
-                    if (!c || res.range > c.res.range || (res.range === c.res.range && res.total > c.res.total)) bestRange.set(key, { res, meta: t.meta });
+                    const cd = bestDps.get(key);
+                    if (!cd || res.total > cd.res.total) bestDps.set(key, { res, meta: t.meta });
+                    const cr = bestRaw.get(key);
+                    if (!cr || res.dmgVal > cr.res.dmgVal || (res.dmgVal === cr.res.dmgVal && res.total > cr.res.total)) bestRaw.set(key, { res, meta: t.meta });
                 }
-                pushBest(bestRange, 'range');
-            }
+                pushBest(bestDps, 'dmg');
+                pushBest(bestRaw, 'raw_dmg');
+            } catch (err) { console.error(`Error calculating dmg points for ${unit.id}:`, err); }
+
+            try {
+                // Pass 2: spa points
+                context.dmgPoints = 0; context.spaPoints = maxPts; context.rangePoints = 0;
+                effectiveStats.context = context;
+                const bestSpa = new Map();
+                for (let i = 0; i < tmplLen; i++) {
+                    const t = unitTemplates[i]; context.headPiece = t.meta.headUsed;
+                    const res = calculateDPS(effectiveStats, t.stats, context);
+                    if (isNaN(res.total)) continue;
+                    const key = t.meta.key;
+                    const c = bestSpa.get(key);
+                    if (!c || res.total > c.res.total) bestSpa.set(key, { res, meta: t.meta });
+                }
+                pushBest(bestSpa, 'spa');
+            } catch (err) { console.error(`Error calculating spa points for ${unit.id}:`, err); }
+
+            try {
+                // Pass 3: range points (only for range-enabled units)
+                if (allowRange) {
+                    context.dmgPoints = 0; context.spaPoints = 0; context.rangePoints = 99;
+                    effectiveStats.context = context;
+                    const bestRange = new Map();
+                    for (let i = 0; i < tmplLen; i++) {
+                        const t = unitTemplates[i]; context.headPiece = t.meta.headUsed;
+                        const res = calculateDPS(effectiveStats, t.stats, context);
+                        if (isNaN(res.total)) continue;
+                        const key = t.meta.key;
+                        const c = bestRange.get(key);
+                        if (!c || res.range > c.res.range || (res.range === c.res.range && res.total > c.res.total)) bestRange.set(key, { res, meta: t.meta });
+                    }
+                    pushBest(bestRange, 'range');
+                }
+            } catch (err) { console.error(`Error calculating range points for ${unit.id}:`, err); }
         });
         
         return traitGroups;
@@ -323,7 +342,7 @@ if (isMainThread) {
         const MAP_PRIO = { 'dmg': 0, 'spa': 1, 'range': 2, 'raw_dmg': 3 };
         const MAP_BODY = { 'dmg': 0, 'dot': 1, 'cm': 2 };
         const MAP_LEGS = { 'dmg': 0, 'spa': 1, 'cf': 2, 'range': 3 };
-        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'rebellious_head': 7, 'reanimated_head': 8, 'mage_head': 9, 'sorcerer_hunter_spirit': 10, 'strongest_sorcerer_glasses': 11, 'monarch': 12 };
+        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'reanimated_head': 7, 'sorcerer_hunter_spirit': 8, 'strongest_sorcerer_glasses': 9, 'monarch': 10 };
 
         const stringPool = new Map(); const stringArr = [""]; 
         const subPool = new Map(); const subArr = [null]; 
@@ -404,7 +423,7 @@ if (isMainThread) {
     const S = RAW.s; const P = RAW.p; const D = RAW.d;
     const PRIO = ['dmg', 'spa', 'range', 'raw_dmg'];
     const BODY = ['dmg', 'dot', 'cm']; const LEGS = ['dmg', 'spa', 'cf', 'range'];
-    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'];
+    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'];
     const DESC_BODY = ['Dmg', 'DoT', 'Crit Dmg']; const DESC_LEGS = ['Dmg', 'Spa', 'Crit Rate', 'Range'];
     const ROW_SIZE = 18;
 

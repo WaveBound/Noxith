@@ -39,7 +39,7 @@ unitDatabase.push({
         { dmg: 2100, spa: 9, range: 34, cost: 14000 },   // Up 3
         { dmg: 3000, spa: 9, range: 37, cost: 20000 },   // Up 4
         { dmg: 4500, spa: 9, range: 40, cost: 30000 },   // Up 5
-        { dmg: 5500, spa: 9, range: 43, cost: 35000 },   // Up 6
+        { dmg: 6650, spa: 9, range: 43, cost: 35000 },   // Up 6
     ],
 
     // PASSIVES (displayed in unit info panel)
