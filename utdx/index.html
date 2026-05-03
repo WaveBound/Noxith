@@ -53,9 +53,9 @@
             <button class="nav-btn active"
                 onclick="switchPage('db'); window.toggleMobileMenu && window.toggleMobileMenu(false)">Unit
                 Database</button>
-            <button class="nav-btn"
+            <button class="nav-btn" style="opacity: 0.6;"
                 onclick="resetAndOpenInventory(); window.toggleMobileMenu && window.toggleMobileMenu(false)">Relic
-                Inventory</button>
+                Inventory <span style="color: #ff4d4d; font-size: 10px;">(Broken)</span></button>
             <button class="nav-btn mobile-only-btn"
                 onclick="openTraitTierList(); window.toggleMobileMenu && window.toggleMobileMenu(false)">Trait Tier
                 List</button>
@@ -71,9 +71,9 @@
                 onclick="openCustomPairModal(); window.toggleMobileMenu && window.toggleMobileMenu(false)">+ Add Custom
                 Pair</button>
 
-            <label class="nav-toggle-label sidebar-toggle">
-                <input type="checkbox" id="sidebarInventoryMode" onchange="toggleInventoryMode(this)">
-                <span>Inventory Mode</span>
+            <label class="nav-toggle-label sidebar-toggle" style="opacity: 0.5;">
+                <input type="checkbox" id="sidebarInventoryMode" onchange="toggleInventoryMode(this)" disabled>
+                <span>Inventory Mode <span style="color: #ff4d4d; font-size: 10px;">(Broken)</span></span>
                 <div class="mini-switch"></div>
             </label>
 
@@ -105,11 +105,11 @@
             <div id="dbInjector" class="injector-panel">
                 <!-- Left side controls -->
                 <div class="injector-left">
-                    <button class="nav-btn add-btn" onclick="openCustomPairModal(); toggleMobileMenu(false)">+ Add
-                        Custom Pair</button>
-                    <label id="invModeToggle" class="nav-toggle-label" title="Calculate using Inventory">
-                        <input type="checkbox" id="globalInventoryMode" onchange="toggleInventoryMode(this)">
-                        <span id="invLabel" class="text-accent-start">Inventory Mode</span>
+                    <button class="nav-btn add-btn" style="opacity: 0.6;" onclick="openCustomPairModal(); toggleMobileMenu(false)">+ Add
+                        Custom Pair <span style="color: #ff4d4d; font-size: 10px;">(Broken)</span></button>
+                    <label id="invModeToggle" class="nav-toggle-label" title="Calculate using Inventory" style="opacity: 0.5;">
+                        <input type="checkbox" id="globalInventoryMode" onchange="toggleInventoryMode(this)" disabled>
+                        <span id="invLabel" class="text-accent-start">Inventory Mode <span style="color: #ff4d4d; font-size: 10px;">(Broken)</span></span>
                         <div class="mobile-switch-visual"></div>
                     </label>
 
