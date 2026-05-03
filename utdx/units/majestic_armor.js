@@ -2,6 +2,7 @@ unitDatabase.push({
         id: "majestic_armor",
         name: "Majestic Armor (Syncro)",
         img: "images/units/MajesticArmor.png",
+        level: 70,
         placement: 2,
         placementType: "Ground",
         role: "Damage / DoT",

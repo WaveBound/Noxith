@@ -2,6 +2,7 @@ unitDatabase.push({
     id: "jingliu",
     name: "Jangluu",
     img: "images/units/Jingliu.png",
+    level: 70,
     placement: 3,
     placementType: "Hill",
     role: "Damage",

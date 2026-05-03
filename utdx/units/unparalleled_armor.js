@@ -2,6 +2,7 @@ unitDatabase.push({
         id: "unparalleled_armor",
         name: "Unparalleled Armor (Syncro)",
         img: "images/units/UnparalleledArmor.png",
+        level: 70,
         placement: 1,
         placementType: "Ground",
         role: "Damage / Buffer",

@@ -2,6 +2,7 @@ unitDatabase.push({
     id: "kirito",
     name: "Kriatu",
     img: "images/units/Kirito.png",
+    level: 70,
     placement: 3,
     placementType: "Ground",
     role: "Burst / Crit",

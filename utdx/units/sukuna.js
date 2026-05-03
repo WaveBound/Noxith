@@ -3,6 +3,7 @@ unitDatabase.push({
     id: "the_strongest_in_history",
     name: "The Strongest in History",
     img: "images/units/Sukuna.png",
+    level: 100,
     placement: 1,               // Max units placeable
     placementType: "Ground",    // "Ground", "Hill", or "Hybrid"
     role: "Damage",             // Role description shown in UI

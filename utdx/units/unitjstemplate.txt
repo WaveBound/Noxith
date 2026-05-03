@@ -3,6 +3,7 @@ unitDatabase.push({
     id: "unit_id",
     name: "Unit Name",
     img: "images/units/UnitName.png",
+    level: 70,                 // Current level
     placement: 1,               // Max units placeable
     placementType: "Ground",    // "Ground", "Hill", or "Hybrid"
     role: "Damage",             // Role description shown in UI

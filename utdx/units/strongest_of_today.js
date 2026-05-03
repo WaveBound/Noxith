@@ -3,6 +3,7 @@ unitDatabase.push({
     id: "the_strongest_of_today",
     name: "The Strongest of Today",
     img: "images/units/Gojo.png",
+    level: 100,
     placement: 1,               // Max units placeable
     placementType: "Ground",    // "Ground", "Hill", or "Hybrid"
     role: "Utility",   // Role description shown in UI

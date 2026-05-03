@@ -114,7 +114,8 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
         });
     }
 
-    let maxPts = (isUnit(unit.id, 'king_sailor') || isUnit(unit.id, 'sukuna')) ? 129 : 99;
+    // Requirement: Points = (Level - 1) + 30
+    const maxPts = ((unit.level || 1) - 1) + 30;
     options.dmgPoints = Math.min(options.dmgPoints || 0, maxPts);
     options.spaPoints = Math.min(options.spaPoints || 0, maxPts);
     options.rangePoints = Math.min(options.rangePoints || 0, maxPts);

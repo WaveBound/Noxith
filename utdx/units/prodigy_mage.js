@@ -2,6 +2,7 @@ unitDatabase.push({
     id: "prodigy_mage",
     name: "Prodigy Mage",
     img: "images/units/ProdigyMage.png",
+    level: 70,
     placement: 3,
     placementType: "Hill",
     role: "Support / Hill",

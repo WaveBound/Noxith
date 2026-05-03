@@ -2,6 +2,7 @@ unitDatabase.push({
     id: "bambietta",
     name: "Bambee",
     img: "images/units/Bambietta.png",
+    level: 70,
     placement: 3,
     placementType: "Ground",
     role: "Damage / (Support/Dot)",

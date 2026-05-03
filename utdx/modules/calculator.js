@@ -172,9 +172,18 @@ function openCalc(unitId) {
     bodyStarsSelect.onchange = () => { scaleCardSubs(1, parseFloat(bodyStarsSelect.value)||1); updateCalcUI(); };
     legsStarsSelect.onchange = () => { scaleCardSubs(2, parseFloat(legsStarsSelect.value)||1); updateCalcUI(); };
 
-    document.getElementById('calcDmgPoints').value = 0;
-    document.getElementById('calcSpaPoints').value = 0;
-    document.getElementById('calcRangePoints').value = 0; 
+    const dP = document.getElementById('calcDmgPoints');
+    const sP = document.getElementById('calcSpaPoints');
+    const rP = document.getElementById('calcRangePoints');
+    
+    const calcPts = ((unit.level || 1) - 1) + 30;
+    dP.max = calcPts;
+    sP.max = calcPts;
+    rP.max = calcPts;
+    
+    dP.value = 0;
+    sP.value = 0;
+    rP.value = 0; 
     document.getElementById('calcRankDmg').value = 20;
     document.getElementById('calcRankSpa').value = 8;
     document.getElementById('calcRankRange').value = 20;

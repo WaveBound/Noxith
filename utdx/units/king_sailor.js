@@ -2,6 +2,7 @@ unitDatabase.push({
     id: "king_sailor",
     name: "King Sailor",
     img: "images/units/KingSailor.png",
+    level: 100,
     placement: 2,
     placementType: "Ground",
     role: "Utility / Ground",

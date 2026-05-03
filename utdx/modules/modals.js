@@ -323,6 +323,8 @@ function openUnitInfo(unitId) {
             <div class="info-section section-discovery">
                 <div class="info-sec-title">Unit Discovery</div>
                 <ul class="info-list">
+                    <li><span>Level:</span> <span class="text-white">${unit.level || 1}</span></li>
+                    <li><span>Total Stat Points:</span> <span class="text-gold">${((unit.level || 1) - 1) + 30}</span></li>
                     <li><span>Role:</span> <span>${unit.role}</span></li>
                     <li><span>Placement Type:</span> <span class="${unit.placementType === 'Hill' ? 'text-gold' : (unit.placementType === 'Hybrid' ? 'text-white' : 'text-custom')}">${unit.placementType || 'Ground'}</span></li>
                     <li><span>Element:</span> <span class="text-custom">${unit.stats.element}</span></li>

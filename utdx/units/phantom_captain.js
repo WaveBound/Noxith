@@ -2,6 +2,7 @@ unitDatabase.push({
     id: "phantom_captain",
     name: "Phantom Captain",
     img: "images/units/Phantom.png",
+    level: 70,
     placement: 1,
     placementType: "Ground",
     role: "Summon / Dmg",

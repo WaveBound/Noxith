@@ -2,6 +2,7 @@ unitDatabase.push({
     id: "sasuke",
     name: "Sasuke (Chakra)",
     img: "images/units/Sasuke.png",
+    level: 70,
     placement: 2,
     placementType: "Ground",
     role: "Damage",

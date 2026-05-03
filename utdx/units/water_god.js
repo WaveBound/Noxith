@@ -2,6 +2,7 @@ unitDatabase.push({
     id: "water_god",
     name: "Water God",
     img: "images/units/WaterGod.png",
+    level: 70,
     placement: 3,
     placementType: "Ground",
     role: "Utility Ground",
