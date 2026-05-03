@@ -32,7 +32,7 @@ unitDatabase.push({
         { dmg: 1440, spa: 9, range: 32, cost: 6000 },   // Up 2
         { dmg: 2280, spa: 9, range: 36, cost: 9000 },   // Up 3
         { dmg: 4320, spa: 9, range: 38, cost: 12000 },  // Up 4
-        { dmg: 5880, spa: 9, range: 41, cost: 20000 },  // Up 5
+        { dmg: 5880, spa: 9, range: 41, cost: 20000, spaCap: 3 },  // Up 5
         { dmg: 6840, spa: 9, range: 45, cost: 25000 },  // Up 6
     ],
 

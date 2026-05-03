@@ -94,6 +94,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
         if (upStats.passiveDmg !== undefined) effectiveStats.passiveDmg = upStats.passiveDmg;
         if (upStats.passiveSpa !== undefined) effectiveStats.passiveSpa = upStats.passiveSpa;
         if (upStats.passiveRange !== undefined) effectiveStats.passiveRange = upStats.passiveRange;
+        if (upStats.spaCap !== undefined) effectiveStats.spaCap = upStats.spaCap;
     }
 
     // --- APPLY PASSIVES / ETHEREALIZATION ---
