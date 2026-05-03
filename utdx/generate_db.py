@@ -498,7 +498,7 @@ if (isMainThread) {
             const outName = getDbName(combo);
             const outPath = outDir + '/' + outName;
 
-            window.mikuActive = combo[0] === '1'; window.waterGodActive = combo[1] === '1';
+            window.mikuActive = combo[0] === '1'; window.enlightenedGodActive = combo[1] === '1';
             window.bijuuActive = combo[2] === '1'; window.ancientMageActive = combo[3] === '1';
             window.kingSailorActive = combo[4] === '1'; window.fernHillActive = combo[5] === 'hill';
             window.fernGroundActive = combo[5] === 'ground';

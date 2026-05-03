@@ -167,11 +167,8 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     }
 
     if (isAbility && unit.ability) {
-        if (Array.isArray(unit.ability)) {
-            unit.ability.forEach(abil => Object.assign(effectiveStats, abil));
-        } else {
-            Object.assign(effectiveStats, unit.ability);
-        }
+        const ab = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
+        Object.assign(effectiveStats, ab);
     }
 
     let suffix = isAbility ? '-ABILITY' : '-BASE';
@@ -432,8 +429,8 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined) {
     const unit = unitDatabase.find(u => u.id === unitId);
     if (!unit) return null;
 
-    // 1. Identify Context from ID Tags
-    const isAbility = liteData.id.includes('ABILITY');
+    // 1. Identify Context from ID Tags (Support both Static ID and Live Toggle)
+    const isAbility = liteData.id.includes('ABILITY') || (typeof activeAbilityIds !== 'undefined' && activeAbilityIds.has(unitId));
     const isBuggedMode = liteData.id.includes('-b-');
     const isFixedMode = liteData.id.includes('-f-');
     const isNoSubsMode = liteData.id.includes('-NOSUBS');
@@ -553,7 +550,7 @@ function calculateDPS(uStats, relicStats, context) {
     if (rSpa !== 0) lvStats.spa *= (1 - rSpa / 100);
     if (rRange !== 0) lvStats.range *= (1 + rRange / 100);
 
-    let passivePcent = (uStats.passiveDmg || 0) + (uStats.buffDmg || 0), passiveSpaPcent = uStats.passiveSpa || 0;
+    let passivePcent = (uStats.passiveDmg || 0), passiveSpaPcent = uStats.passiveSpa || 0;
 
     const totalBossDmg = (uStats.bossDmg || 0) + (traitObj.bossDmg || 0);
     let traitDmgPct = traitObj.dmg + (totalBossDmg && isBoss ? totalBossDmg : 0), traitSpaPct = traitObj.spa;
@@ -600,25 +597,12 @@ function calculateDPS(uStats, relicStats, context) {
 
     const tags = uStats.tags || [];
 
-    const isKsBuffActive = (typeof window !== 'undefined' && window.kingSailorBuffActive);
-    let ksCrit = 0, ksCdmg = 0;
-    if (isKsBuffActive && uStats.id !== 'king_sailor') { ksCrit = 10; ksCdmg = 20; }
 
-    const amSupportActive = (typeof window !== 'undefined' && window.ancientMageSupportActive);
-    const amCritRate = amSupportActive ? 20 : 0;
-    const amCritDmg = amSupportActive ? 20 : 0;
-
-    const mageHillBuffActive = (typeof window !== 'undefined' && window.mageHillBuffActive);
-    const uType = (uStats.placementType || 'Ground').toLowerCase();
-    const mageHillSpa = (mageHillBuffActive && (uType === 'hill' || uType === 'hybrid')) ? 30 : 0;
-
-    const mageGroundBuffActive = (typeof window !== 'undefined' && window.mageGroundBuffActive);
-    const mageGroundCrit = (mageGroundBuffActive && (uType === 'ground' || uType === 'hybrid')) ? 45 : 0;
 
     const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (uStats.id === 'king_sailor' ? 10 : 0);
     const finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
 
-    const setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa + mageHillSpa;
+    const setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa;
 
 
     // Nutaru (Beast) dynamic SPA Cap override
@@ -630,7 +614,13 @@ function calculateDPS(uStats, relicStats, context) {
 
     const { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc } = _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicStats, context);
 
-    let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassive + headDmgTag + globalDmg;
+    let abilityDmg = 0;
+    if (isAbility && uStats.ability) {
+        const ab = Array.isArray(uStats.ability) ? uStats.ability[0] : uStats.ability;
+        if (ab.buffDmg) abilityDmg = ab.buffDmg;
+    }
+
+    let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassive + headDmgTag + globalDmg + abilityDmg;
 
     // Detailed breakdown for UI
     const detailedBuffs = {
@@ -638,6 +628,7 @@ function calculateDPS(uStats, relicStats, context) {
         setPerk: setPerkDmg + headDmgPassive,
         tagBonus: (tagBuffs.dmg || 0) + headDmgTag,
         unitPassive: passivePcent,
+        abilityBuff: abilityDmg,
         accessoryBase: headDmgBase,
         globalBuffs: globalDmg
     };
@@ -647,10 +638,10 @@ function calculateDPS(uStats, relicStats, context) {
         additiveTotal = ((sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassive + headDmgTag + globalDmg) * 1.1;
     }
 
-    const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1);
+    const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1);
 
-    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cdmg || 0) + amCritDmg + ksCdmg;
-    let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + amCritRate + ksCrit + mageGroundCrit + baseR_Cf + (sBonus.cf || 0), 100);
+    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cdmg || 0);
+    let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0), 100);
     if (uStats.id === 'kirito' || uStats.id === 'the_strongest_of_today') {
         finalCritRate = Math.min(finalCritRate, uStats.crit);
     }
@@ -751,6 +742,26 @@ function calculateDPS(uStats, relicStats, context) {
             mult: attackMultiplier,
             label: "Shadow Emerge",
             usedSpa: usedSpa // Store for math rendering
+        };
+    } else if (uStats.id === 'alpha_devil') {
+        // Phantom Swords: 2 swords, 10% dmg/tick, 10 ticks, 20s Cooldown. Can Crit.
+        const swordCount = 2;
+        const swordDmgPct = 0.10;
+        const swordTicks = 10;
+        const swordCooldown = 20;
+
+        // Average DPS = (Count * Ticks * DmgPct * avgHit) / Cooldown
+        const avgSwordDps = (swordCount * swordTicks * swordDmgPct * avgHit) / swordCooldown;
+        
+        attackMultiplier = 1 + (avgSwordDps * usedSpa / avgHit);
+        extraAttacksData = {
+            req: "Phantom Swords (On Crit)",
+            hits: `${swordCount} Swords / 20s`,
+            extra: avgSwordDps * usedSpa / avgHit,
+            attacksNeeded: 1,
+            mult: attackMultiplier,
+            label: "Show me your motivation",
+            swordDps: avgSwordDps
         };
     } else if (uStats.followUp) {
         attackMultiplier = 1 + (uStats.followUp / 100);
@@ -868,7 +879,8 @@ function calculateDPS(uStats, relicStats, context) {
         totalSetStats: sBonus,
         tagBuffs,
         activeGlobalBuffs,
-        passiveBuff: passivePcent + headDmgBase + headDmgPassive + headDmgTag,
+        detailedBuffs,
+        passiveBuff: passivePcent + headDmgBase + headDmgPassive + headDmgTag + abilityDmg,
         passiveSpaBuff: passiveSpaPcent,
         eternalBuff: eternalDmgBuff,
         eternalRangeBuff: eternalRangeBuff,
@@ -889,11 +901,11 @@ function calculateDPS(uStats, relicStats, context) {
         singleUnitDoT: dotDpsTotal / (traitObj.allowDotStack || traitObj.allowPlacementStack ? placement : 1),
         hasStackingDoT: traitObj.allowDotStack || traitObj.allowPlacementStack,
         extraAttacks: extraAttacksData,
-        abilityBuff: uStats.buffDmg || 0,
-        amSupportActive,
-        amCritRate,
-        amCritDmg,
-        mageHillSpa,
-        mageGroundCrit
+        abilityBuff: (uStats.buffDmg || 0) + abilityDmg,
+        amSupportActive: (typeof window !== 'undefined' && window.ancientMageActive),
+        amCritRate: (typeof window !== 'undefined' && window.ancientMageActive) ? 20 : 0,
+        amCritDmg: (typeof window !== 'undefined' && window.ancientMageActive) ? 20 : 0,
+        mageHillSpa: (typeof window !== 'undefined' && window.fernHillActive) ? 30 : 0,
+        mageGroundCrit: (typeof window !== 'undefined' && window.fernGroundActive) ? 45 : 0
     };
 }

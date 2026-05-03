@@ -245,6 +245,7 @@ window.toggleAbility = function (unitId, checkbox) {
         activeAbilityIds.delete(unitId);
     }
     if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(unitId);
+    if (typeof resortUnitCards === 'function') resortUnitCards();
 };
 
 window.toggleInventoryMode = (checkbox) => {

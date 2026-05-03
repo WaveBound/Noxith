@@ -45,11 +45,11 @@ unitDatabase.push({
     // ABILITY
     ability: [
         {
-            buffDmg: 0,
-            abilityName: "Infinite Purple",
+            finalMult: 3,
+            abilityName: "TS Enemy",
             noToggle: false,
             cooldown: 0,
-            desc: "Active Ability unlocked on the final Upgrade: Deal 300% Damage to all Enemies on the Map."
+            desc: "Active Ability: When toggled, this unit deals 3x Damage to all enemies."
         },
         {
             buffDmg: 0,

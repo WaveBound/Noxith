@@ -121,6 +121,13 @@ const SUB_NAMES = {
 
 const patchNotesData = [
     {
+        version: "v5.2",
+        date: "May 03, 2026",
+        changes: [
+            { type: "Relics", text: "<b>Monarch Set:</b> <b>Phantom Captain</b> planes now count as summons in all forms." }
+        ]
+    },
+    {
         version: "v5.1",
         date: "Apr 29, 2026",
         changes: [
@@ -529,6 +536,7 @@ const UNIT_FILES = [
     'water_god.js',
     'devil_hunter.js',
     'strongest_of_today.js',
+    'alpha_devil.js',
 ];
 
 // Resolves after every unit script has loaded (or errored).

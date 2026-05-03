@@ -2,18 +2,18 @@ unitDatabase.push({
     // IDENTITY
     id: "devil_hunter",
     name: "Devil Hunter",
-    img: "images/units/devil_hunter.png",
+    img: "images/units/DevilHunter.png",
     level: 70,
-placement: 3,               // Max units placeable
+    placement: 3,               // Max units placeable
     placementType: "Ground",    // "Ground", "Hill", or "Hybrid"
     role: "Dps / Ground",             // Role description shown in UI
     tags: [],                   // e.g. ["Reaper", "Bloodline", "Ninjaverse"]
 
     // META (Build Guide tab)
     meta: {
-        short: "Astral",         // Best budget/quick trait
-        long: "Astral",          // Best max potential trait(s)
-        note: "."
+        short: "Astral/Eternal",         // Best budget/quick trait
+        long: "Astral/Eternal",          // Best max potential trait(s)
+        note: "Astral only works if paired with 'Alpha Devil'"
     },
 
     totalCost: 66500,               // Total gold cost to max
@@ -56,8 +56,8 @@ placement: 3,               // Max units placeable
         {
             name: "Devil Sword",
             img: "images/units/dante/Devil Sword.png",
-    level: 70,
-desc: "Sword focus: Burn on Bleed mechanics.",
+            level: 70,
+            desc: "Sword focus: Burn on Bleed mechanics.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 2.5,
             crit: 0, cdmg: 150, dot: 80, dotDuration: 10,
             passiveDmg: 68.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, hyper: 0, cooldown: 0
@@ -65,8 +65,8 @@ desc: "Sword focus: Burn on Bleed mechanics.",
         {
             name: "Twin Guns",
             img: "images/units/dante/Twin Guns.png",
-    level: 70,
-desc: "Gun focus: -20% SPA.",
+            level: 70,
+            desc: "Gun focus: -20% SPA.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 3,
             crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
             passiveDmg: 68.3, passiveSpa: -20, bossDmg: 0, dotBuff: 0, hyper: 0, cooldown: 0
@@ -74,8 +74,8 @@ desc: "Gun focus: -20% SPA.",
         {
             name: "Demoncycle",
             img: "images/units/dante/Demoncycle.png",
-    level: 70,
-desc: "Heavy focus: Stun per DoT mechanics.",
+            level: 70,
+            desc: "Heavy focus: Stun per DoT mechanics.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 4,
             crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
             passiveDmg: 68.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, hyper: 0, cooldown: 0
@@ -83,8 +83,8 @@ desc: "Heavy focus: Stun per DoT mechanics.",
         {
             name: "Fancy Hat",
             img: "images/units/dante/Fancy Hat.png",
-    level: 70,
-desc: "High risk focus: +100% Damage, costs 3,000 ¥ per attack.",
+            level: 70,
+            desc: "High risk focus: +100% Damage, costs 3,000 ¥ per attack.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 3.5,
             crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
             passiveDmg: 168.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, hyper: 0, cooldown: 0

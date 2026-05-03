@@ -13,7 +13,7 @@ const HEAD_CONFIG = {
     'reanimated_head': { name: 'Reanimated', search: 'Reanimated', cls: 'reaper' },
     'sorcerer_hunter_spirit': { name: 'S.H. Spirit', search: 'S. Hunter', cls: 'custom' },
     'strongest_sorcerer_glasses': { name: 'Strongest', search: 'Strongest', cls: 'custom' },
-    'monarch': { name: 'Monarch Crown', search: 'Monarch', cls: 'custom' }
+    'monarch': { name: 'Monarch Cape', search: 'Monarch', cls: 'custom' }
 };
 
 // Config for Custom Ability Buttons
@@ -379,6 +379,12 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     let buildData = window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0];
 
+    // Fallback: If Ability mode is active but no builds were pre-generated, show Base builds 
+    // (they will be re-calculated with the Ability multiplier by reconstructMathData)
+    if (!buildData && activeType === 'abil') {
+        buildData = window.unitBuildsCache[unitId]?.['base']?.[activeMode]?.[0];
+    }
+
     if (!buildData && !inventoryMode && unitObj) {
         const isBambiAlt = (isUnit(unitId, 'bambietta') && bambiettaState.element !== 'Dark');
         const isRobotAlt = (isUnit(unitId, 'robot1718') && robot1718State.mode !== 'Robot 17');
@@ -477,12 +483,20 @@ window.getQuickScore = (unit) => {
     let baseKey = (window.isUnit(unit.id, 'kirito') && kiritoState.card) ? 'kirito_card' : unit.id;
     const dbKey = baseKey + (isAbility ? '_abil' : '');
 
+    let score = 0;
     if (window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {
         const list = window.STATIC_BUILD_DB[dbKey]['fixed']?.[0];
         if (list && list.length > 0) {
-            return window.isUnit(unit.id, 'law') ? (list[0].range || 0) : list[0].dps;
+            score = window.isUnit(unit.id, 'law') ? (list[0].range || 0) : list[0].dps;
         }
     }
+
+    // Live Fallback for Ability Multipliers (Ensure Gojo sorts to top instantly)
+    if (isAbility && unit.id === 'the_strongest_of_today' && score < 150000) {
+        score *= 3;
+    }
+
+    if (score > 0) return score;
     if (window.isUnit(unit.id, 'law')) {
         if (unit.stats.range) return unit.stats.range;
         if (unit.upgrades && unit.upgrades.length > 0) return unit.upgrades[unit.upgrades.length - 1].range || 0;
@@ -495,6 +509,32 @@ window.getQuickScore = (unit) => {
         s = s || last.spa;
     }
     return ((d || 0) / (s || 1)) * 35;
+};
+
+window.resortUnitCards = function() {
+    const container = document.getElementById('dbPage');
+    if (!container) return;
+    
+    const cards = Array.from(container.querySelectorAll('.unit-card'));
+    if (cards.length === 0) return;
+
+    const sorted = cards.sort((a, b) => {
+        const idA = a.id.replace('card-', '');
+        const idB = b.id.replace('card-', '');
+        const unitA = window.getUnitById(idA);
+        const unitB = window.getUnitById(idB);
+        if (!unitA || !unitB) return 0;
+        return getQuickScore(unitB) - getQuickScore(unitA);
+    });
+
+    // Re-attach in sorted order
+    sorted.forEach(card => container.appendChild(card));
+
+    // Update Rank Badges
+    sorted.forEach((card, i) => {
+        const badge = card.querySelector('.placement-badge[style*="DPS Rank"]');
+        if (badge) badge.innerText = `DPS Rank: #${i + 1}`;
+    });
 };
 
 
@@ -610,7 +650,7 @@ function renderDatabase() {
                                 <option value="reanimated_head">Heads: Reanimated</option>
                                 <option value="sorcerer_hunter_spirit">Heads: S. Hunter Spirit</option>
                                 <option value="strongest_sorcerer_glasses">Heads: Strongest Glasses</option>
-                                <option value="monarch">Heads: Monarch Crown</option>
+                                <option value="monarch">Heads: Monarch Cape</option>
                                 <option value="none">Heads: None</option>
                             </select>
                         </div>
@@ -704,8 +744,18 @@ window.globalFilterUnits = (term) => {
         const title = card.querySelector('h2')?.innerText.toLowerCase() || '';
         const role = card.querySelector('.unit-title span')?.innerText.toLowerCase() || '';
         const id = card.id.replace('card-', '').toLowerCase();
+        
+        // Find the placement badge text (Ground, Hill, or Hybrid)
+        const placement = card.querySelector('.placement-badge[class*="is-"]')?.innerText.toLowerCase() || '';
+        
+        let matches = title.includes(searchTerm) || role.includes(searchTerm) || id.includes(searchTerm) || placement.includes(searchTerm);
 
-        if (title.includes(searchTerm) || role.includes(searchTerm) || id.includes(searchTerm)) {
+        // Special handling: If searching for 'ground' or 'hill', also include 'hybrid' units
+        if (!matches && (searchTerm === 'ground' || searchTerm === 'hill')) {
+            if (placement === 'hybrid') matches = true;
+        }
+
+        if (matches) {
             card.style.display = '';
         } else {
             card.style.display = 'none';
