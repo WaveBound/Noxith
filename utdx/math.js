@@ -88,7 +88,7 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
     if (mode === false) mode = 'none';
 
     let headOptions = (mode === 'auto')
-        ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'biju_head', 'reanimated_head']
+        ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'biju_head', 'reanimated_head', 'rebellious_head']
         : (mode && mode !== 'none' ? [mode] : ['none']);
 
     let globalBestRes = { total: -1, range: -1 };
@@ -198,13 +198,14 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
     if (relicStats.set === 'ninja' && ["Dark", "Rose", "Fire"].includes(unitElement)) sBonus.dmg += 10;
     else if (relicStats.set === 'sun_god' && ["Ice", "Light", "Water"].includes(unitElement)) sBonus.dmg += 10;
 
-    // Crown Control (formerly Rebellious Shinobi): +30% Dmg on CC Application
+    // Rebellious Shinobi: +30% Dmg on CC Application
     const hasSlow = (uStats.role && uStats.role.includes("Slow")) || (uStats.passives && uStats.passives.some(p => p.desc.includes("Slow"))) || (uStats.ability && (Array.isArray(uStats.ability) ? uStats.ability.some(a => a.desc.includes("Slow")) : uStats.ability.desc.includes("Slow")));
     const hasStun = (uStats.role && uStats.role.includes("Stun")) || (uStats.passives && uStats.passives.some(p => p.desc.includes("Stun"))) || (uStats.ability && (Array.isArray(uStats.ability) ? uStats.ability.some(a => a.desc.includes("Stun")) : uStats.ability.desc.includes("Stun")));
     const hasTimestop = (uStats.role && uStats.role.includes("Timestop")) || (uStats.passives && uStats.passives.some(p => p.desc.includes("Timestop"))) || (uStats.ability && (Array.isArray(uStats.ability) ? uStats.ability.some(a => a.desc.includes("Timestop")) : uStats.ability.desc.includes("Timestop")));
+    const hasConfuse = (uStats.role && uStats.role.includes("Confuse")) || (uStats.passives && uStats.passives.some(p => p.desc.includes("Confuse"))) || (uStats.ability && (Array.isArray(uStats.ability) ? uStats.ability.some(a => a.desc.includes("Confuse")) : uStats.ability.desc.includes("Confuse")));
     
     const _CC_UNITS = { 'ancient_shinob': 1, 'water_god': 1, 'first_emperor': 1 };
-    const hasCC = hasSlow || hasStun || hasTimestop || !!_CC_UNITS[uStats.id];
+    const hasCC = hasSlow || hasStun || hasTimestop || hasConfuse || !!_CC_UNITS[uStats.id];
     
     if (relicStats.set === 'rebellious_set' && hasCC) {
         sBonus.dmg += 30; // +30% Dmg over next 10s (Assume high uptime for CC units)
@@ -240,7 +241,7 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
 
     // NEW SET TAG PERKS
     applyTagBuff('rebellious_set', 'Ninjaverse', { cf: 15, cm: 20 });
-    applyTagBuff('rebellious_set', 'Bloodline', { dmg: 15, range: 20 });
+    applyTagBuff('rebellious_set', 'Sage', { bossDmg: 20 });
 
     // Universal Magi Tag Buff
     if (tags.includes('Magi')) {
@@ -333,6 +334,11 @@ function _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicSta
             headDmgPassive = 50;
         }
         headCalc.type = 'strongest_sorcerer';
+    } else if (headPiece === 'rebellious_head') {
+        // Rebellious Shinobi Accessory: 5% dmg per mode swap, up to 6 stacks (30%)
+        // Assume max stacks (30% permanent damage) for simplicity in DPS calculation
+        headDmgPassive = 30;
+        headCalc.type = 'rebellious';
     }
 
     // Monarch Accessory Bonus (Requires Monarch Set)
