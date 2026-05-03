@@ -68,6 +68,8 @@ function initApp() {
             }
         }, 1200);
     }
+
+
 }
 
 // Wait for DOMContentLoaded AND all unit scripts before initialising.

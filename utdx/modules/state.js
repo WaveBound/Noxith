@@ -37,5 +37,7 @@ let currentCalcUnitId = null;
 let renderQueueIndex = 0;
 let renderQueueId = null;
 
+
 // Inventory
 let relicInventory = [];
+    

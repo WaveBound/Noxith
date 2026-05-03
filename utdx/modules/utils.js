@@ -219,15 +219,43 @@ function getTraitByName(traitName, unitId = null) {
 }
 
 // ============================================================================
-// UNIT REFERENCE HELPERS (Uses JS Filename as the Source of Truth)
+// UNIT REFERENCE HELPERS (Uses Map-based caching for performance)
 // ============================================================================
+
+window.unitMap = new Map();
+
+/** Internal helper to ensure the unitMap is populated */
+function _ensureUnitMap() {
+    if (window.unitMap.size === 0 && typeof unitDatabase !== 'undefined' && unitDatabase.length > 0) {
+        unitDatabase.forEach(u => {
+            window.unitMap.set(u.id, u);
+            if (u._fileName) window.unitMap.set(u._fileName, u);
+        });
+    }
+}
+
+/** Gets the unit object by ID (O(1)) */
+window.getUnitById = function (id) {
+    if (!id) return null;
+    _ensureUnitMap();
+    return window.unitMap.get(id) || unitDatabase.find(u => u.id === id);
+};
 
 /** Gets the current unit.id by passing the JS filename (e.g. 'water_god') */
 window.getUnitId = function (fileName) {
     if (!fileName) return null;
+    _ensureUnitMap();
+    const unit = window.unitMap.get(fileName);
+    if (unit) return unit.id;
+    
+    // Fallback search
     if (typeof unitDatabase !== 'undefined') {
-        const unit = unitDatabase.find(u => u._fileName === fileName || u.id === fileName);
-        if (unit) return unit.id;
+        const found = unitDatabase.find(u => u._fileName === fileName || u.id === fileName);
+        if (found) {
+            window.unitMap.set(found.id, found);
+            if (found._fileName) window.unitMap.set(found._fileName, found);
+            return found.id;
+        }
     }
     return fileName;
 };
@@ -241,14 +269,21 @@ window.isUnit = function (currentId, fileName) {
 /** Checks if a unit matches ANY filename in an array. */
 window.isAnyUnit = function (currentId, fileNamesArray) {
     if (!currentId || !fileNamesArray) return false;
-    return fileNamesArray.some(fName => currentId === window.getUnitId(fName));
+    const targetId = currentId;
+    return fileNamesArray.some(fName => targetId === window.getUnitId(fName));
 };
 
 /** Gets the permanent JS filename from a dynamic unit ID. Useful for UI mappings. */
 window.getFileName = function (currentId) {
+    if (!currentId) return "";
+    _ensureUnitMap();
+    const unit = window.unitMap.get(currentId);
+    if (unit && unit._fileName) return unit._fileName;
+    
+    // Fallback search
     if (typeof unitDatabase !== 'undefined') {
-        const unit = unitDatabase.find(u => u.id === currentId);
-        if (unit && unit._fileName) return unit._fileName;
+        const found = unitDatabase.find(u => u.id === currentId);
+        if (found && found._fileName) return found._fileName;
     }
     return currentId;
 };

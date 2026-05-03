@@ -75,7 +75,7 @@ function createBaseUnitCard(unit, options = {}) {
 
 function calculateBuildEfficiency(build, unitCost, unitMaxPlacement, unitId) {
     const foundTrait = getTraitByName(build.traitName, unitId);
-    const unitObj = unitDatabase.find(u => u.id === unitId);
+    const unitObj = window.getUnitById(unitId);
 
     let traitLimit = null;
     if (build.traitName && build.traitName.includes('Ruler')) {
@@ -106,7 +106,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
 
     const currentLevel = (window.unitELevels && window.unitELevels[unitId]) || 0;
     const nextLevel = currentLevel + 1;
-    const unitObj = unitDatabase ? unitDatabase.find(u => u.id === unitId) : null;
+    const unitObj = window.getUnitById(unitId);
     const maxLevel = (unitObj && unitObj.upgrades) ? unitObj.upgrades.length - 1 : 0;
     let nextStats = { dmgVal: 0, spa: 0, range: 0 };
     if (nextLevel <= maxLevel) {
@@ -231,7 +231,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
 function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const card = document.getElementById('card-' + unitId);
     if (!card) return;
-    const unitObj = unitDatabase.find(u => u.id === unitId);
+    const unitObj = window.getUnitById(unitId);
     const currentUpgrade = (window.unitELevels && window.unitELevels[unitId]) || 0;
 
     let unitCost = unitObj ? (unitObj.totalCost || 50000) : 50000;
@@ -437,7 +437,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
 
             calculatedResults.forEach(r => { if (r.id) window.cachedResults[r.id] = r; });
 
-            const traitsForCalc = (calculatedResults.length > 0 && !unit.id.includes('sasuke'))
+            const traitsForCalc = (calculatedResults.length > 0)
                 ? [...(typeof customTraits !== 'undefined' ? customTraits : []), ...(unitSpecificTraits[unit.id] || [])]
                 : null;
 
@@ -497,18 +497,24 @@ window.getQuickScore = (unit) => {
     return ((d || 0) / (s || 1)) * 35;
 };
 
+
 function renderDatabase() {
     const container = document.getElementById('dbPage');
-    if (renderQueueIndex === 0) {
-        container.innerHTML = '';
-        if (!window.STATIC_BUILD_DB) window.cachedResults = {};
-        window.unitBuildsCache = {};
-    }
-    if (renderQueueId) { cancelAnimationFrame(renderQueueId); renderQueueId = null; }
+    if (!container) return;
 
+    // Reset rendering state
+    if (renderQueueId) { cancelAnimationFrame(renderQueueId); renderQueueId = null; }
+    renderQueueIndex = 0;
+    
+    // Clear and prepare for pagination
+    if (!window.STATIC_BUILD_DB) window.cachedResults = {};
+    window.unitBuildsCache = {};
+    
     const sortedUnits = unitDatabase.map(unit => {
         return { unit, maxScore: getQuickScore(unit) };
     }).sort((a, b) => b.maxScore - a.maxScore);
+
+    container.innerHTML = '';
 
     function processNextChunk() {
         const startTime = performance.now();
@@ -518,6 +524,7 @@ function renderDatabase() {
 
         while (renderQueueIndex < sortedUnits.length) {
             const unit = sortedUnits[renderQueueIndex].unit;
+            const absoluteIndex = renderQueueIndex + 1; // Rank based on sorted list
 
             if (window.unitELevels[unit.id] === undefined && unit.upgrades && unit.upgrades.length > 0) {
                 window.unitELevels[unit.id] = unit.upgrades.length - 1;
@@ -529,7 +536,6 @@ function renderDatabase() {
             let abilityLabel = (abilityObj && abilityObj.abilityName) ? abilityObj.abilityName : 'Ability';
             let toggleScript = '';
 
-            // Using our new unified TOGGLE_OVERRIDES object
             const isToggled = activeAbilityIds.has(unit.id);
             const override = TOGGLE_OVERRIDES[window.getFileName(unit.id)];
 
@@ -635,7 +641,7 @@ function renderDatabase() {
                 bannerContent: `<div class="banner-badges">
                     <div class="placement-badge">Max Place: ${unit.placement}</div>
                     <div class="placement-badge is-${(unit.placementType || 'Ground').toLowerCase()}">${unit.placementType || 'Ground'}</div>
-                    <div class="placement-badge" style="color: #4ade80; border-color: rgba(74, 222, 128, 0.3);">DPS Rank: #${renderQueueIndex}</div>
+                    <div class="placement-badge" style="color: #4ade80; border-color: rgba(74, 222, 128, 0.3);">DPS Rank: #${absoluteIndex}</div>
                 </div>${getUnitImgHtml(unit, 'unit-avatar')}<div class="unit-title"><h2>${unit.name}</h2><span>${unit.role}</span></div>${unit.meta ? `<button class="trait-guide-btn" onclick="openTraitGuide('${unit.id}')">📋 Rec. Traits</button>` : ''}`,
                 topControls, bottomControls, mainContent
             });
@@ -654,7 +660,7 @@ function renderDatabase() {
                         const unitId = entry.target.id.replace('card-', '');
                         if (entry.isIntersecting) {
                             window.visibleUnitIds.add(unitId);
-                            const unit = unitDatabase.find(u => u.id === unitId);
+                            const unit = window.getUnitById(unitId);
                             if (unit) {
                                 updateBuildListDisplay(unitId, false, 100);
                             }
@@ -680,7 +686,7 @@ function renderDatabase() {
 }
 
 function openTraitBestList(unitId) {
-    const unit = typeof getUnitById === 'function' ? getUnitById(unitId) : unitDatabase.find(u => u.id === unitId);
+    const unit = window.getUnitById(unitId);
     if (!unit) return;
 
     const mode = 'fixed';
