@@ -121,11 +121,9 @@ function injectBuffButtons() {
         return label;
     };
 
-    const container = document.getElementById('dbInjector');
+    const container = document.getElementById('globalBuffsPanel');
     if (!container) return;
 
-    // Find the target element to insert the buttons after (e.g. Inventory toggle)
-    const target = document.getElementById('invModeToggle');
     const frag = document.createDocumentFragment();
 
     if (window.GLOBAL_BUFF_DATA) {
@@ -134,9 +132,5 @@ function injectBuffButtons() {
         });
     }
 
-    if (target) {
-        target.after(frag);
-    } else {
-        container.appendChild(frag);
-    }
+    container.appendChild(frag);
 }

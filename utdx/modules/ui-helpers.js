@@ -56,7 +56,13 @@ window.triggerGlobalBuffUpdate = () => {
     buffUpdateTimer = setTimeout(() => {
         window.loadDatabaseForCurrentBuffs(() => {
             window.resetCachesForBuffChange();
-            if (typeof updateAllUnitsBuilds === 'function') window.updateAllUnitsBuilds();
+            // Re-render full database to cleanly resort by DPS ranking with buffs
+            if (typeof renderDatabase === 'function') {
+                renderDatabase();
+            } else if (typeof updateAllUnitsBuilds === 'function') {
+                window.updateAllUnitsBuilds();
+            }
+
             const guidesPage = document.getElementById('guidesPage');
             if (guidesPage && guidesPage.classList.contains('active') && typeof renderGuides === 'function') renderGuides();
         });
@@ -443,6 +449,22 @@ window.toggleSummonDesc = (btn) => {
 };
 
 window.toggleHeader = () => document.body.classList.toggle('header-collapsed');
+
+// --- 7. PANEL TOGGLERS ---
+window.toggleGlobalBuffs = function (btn) {
+    const panel = document.getElementById('globalBuffsPanel');
+    if (!panel) return;
+
+    if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        btn.innerHTML = 'Buffs ▲';
+        btn.classList.add('active');
+    } else {
+        panel.classList.add('hidden');
+        btn.innerHTML = 'Buffs ▼';
+        btn.classList.remove('active');
+    }
+};
 
 window.toggleFilterTab = (btn) => {
     const content = btn.closest('.search-container').querySelector('.filter-tab-content');

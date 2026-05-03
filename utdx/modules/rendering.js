@@ -680,10 +680,46 @@ function renderDatabase() {
         if (renderQueueIndex < sortedUnits.length) renderQueueId = requestAnimationFrame(processNextChunk);
         else {
             renderQueueId = null;
+            // Apply current search filter after full render completes
+            const currentSearch = document.getElementById('globalSearch')?.value;
+            if (currentSearch) globalFilterUnits(currentSearch);
         }
     }
     processNextChunk();
 }
+
+window.globalFilterUnits = (term) => {
+    const searchTerm = (term || '').toLowerCase();
+    const cards = document.querySelectorAll('#dbPage .unit-card');
+    const clearBtn = document.getElementById('globalSearchClear');
+    
+    if (clearBtn) clearBtn.style.display = searchTerm ? 'flex' : 'none';
+
+    cards.forEach(card => {
+        if (!searchTerm) {
+            card.style.display = '';
+            return;
+        }
+
+        const title = card.querySelector('h2')?.innerText.toLowerCase() || '';
+        const role = card.querySelector('.unit-title span')?.innerText.toLowerCase() || '';
+        const id = card.id.replace('card-', '').toLowerCase();
+
+        if (title.includes(searchTerm) || role.includes(searchTerm) || id.includes(searchTerm)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+};
+
+window.clearGlobalSearch = () => {
+    const input = document.getElementById('globalSearch');
+    if (input) {
+        input.value = '';
+        globalFilterUnits('');
+    }
+};
 
 function openTraitBestList(unitId) {
     const unit = window.getUnitById(unitId);

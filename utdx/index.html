@@ -112,10 +112,29 @@
                         <span id="invLabel" class="text-accent-start">Inventory Mode</span>
                         <div class="mobile-switch-visual"></div>
                     </label>
+
+                    <!-- NEW BUFFS TOGGLE BUTTON -->
+                    <button id="globalBuffsToggleBtn" class="filter-tab-btn" onclick="toggleGlobalBuffs(this)"
+                        style="height: 34px; margin-left: 5px;">Buffs ▼</button>
                 </div>
+
                 <!-- Center controls -->
                 <div class="injector-center">
+                    <div class="global-search-container">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="globalSearch" placeholder="Search units by name or role..."
+                            oninput="globalFilterUnits(this.value)">
+                        <button id="globalSearchClear" class="search-clear-btn" style="display: none;"
+                            onclick="clearGlobalSearch()">×</button>
+                    </div>
                 </div>
+
+                <!-- NEW BUFFS PANEL (Injected here via JS) -->
+                <div id="globalBuffsPanel" class="global-buffs-panel hidden"></div>
             </div>
 
             <!-- Guides Toolbar -->
@@ -166,11 +185,12 @@
     <!-- 1. THE UNIVERSAL MODAL (Replaces Math, Patch, Compare, SubPrio, Guide) -->
     <div id="universalModal" class="modal-overlay" onclick="closeModal('universalModal')">
         <aside class="modal-side-panel left-panel hidden" onclick="event.stopPropagation()"></aside>
-        
+
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <button id="toggleLeftPanelBtn" class="panel-toggle-btn hidden" onclick="toggleFloatingPanel('left')" title="Toggle Summons Panel">
+                    <button id="toggleLeftPanelBtn" class="panel-toggle-btn hidden"
+                        onclick="toggleFloatingPanel('left')" title="Toggle Summons Panel">
                         <span class="icon">▤</span>
                     </button>
                     <h2 class="modal-title">TITLE</h2>
