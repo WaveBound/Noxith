@@ -11,8 +11,8 @@ unitDatabase.push({
 
     // META (Build Guide tab)
     meta: {
-        short: "Astral/Eternal",         // Best budget/quick trait
-        long: "Astral/Eternal",          // Best max potential trait(s)
+        short: "Astral/Sacred",         // Best budget/quick trait
+        long: "Astral/Sacred",          // Best max potential trait(s)
         note: "Astral only works if paired with 'Alpha Devil'"
     },
 
