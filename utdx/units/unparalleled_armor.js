@@ -17,7 +17,7 @@ unitDatabase.push({
         stats: {
                 dmg: 24000, spa: 12, range: 35, spaCap: 4,
                 crit: 0, cdmg: 150, dot: 0,
-                element: "Water", passiveDmg: 0, hyper: 60
+                element: "Water", passiveDmg: 0, trueDmg: 60
         },
 
         passives: [

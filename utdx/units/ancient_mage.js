@@ -22,7 +22,7 @@ placement: 1,
         passiveSpa: 0,   // Base SPA buff/penalty (0 = No change)
         bossDmg: 0,
         dotBuff: 20,     // Specialist focus (+40% DoT)
-        hyper: 50        // Specialist focus (+50% True Dmg)
+        trueDmg: 50        // Specialist focus (+50% True Dmg)
     },
 
     upgrades: [
@@ -46,7 +46,7 @@ desc: "Combat focus: +20% Dmg, +40% Slow (Penalty), +50% Boss Dmg. Applies Wind 
             dmg: 5500, spa: 8, range: 45, spaCap: 4,
             crit: 0, cdmg: 150, dot: 60, dotDuration: 10,
             passiveDmg: 20, passiveSpa: -40, bossDmg: 50,
-            dotBuff: 0, hyper: 0, cooldown: 0
+            dotBuff: 0, trueDmg: 0, cooldown: 0
         },
         {
             name: "Specialist",
@@ -56,7 +56,7 @@ desc: "Magic focus: +40% DoT, +50% True Damage. Swaps Wind Shear for Burn (60% D
             dmg: 5500, spa: 8, range: 45, spaCap: 4,
             crit: 0, cdmg: 150, dot: 60, dotDuration: 10,
             passiveDmg: 0, passiveSpa: 0, bossDmg: 0,
-            dotBuff: 40, hyper: 50, cooldown: 0
+            dotBuff: 40, trueDmg: 50, cooldown: 0
         },
         {
             name: "Support",
@@ -66,7 +66,7 @@ desc: "Blessing focus: Stop attacking to buff units in range: +15% Effect Res, +
             dmg: 0, spa: 8, range: 45, spaCap: 4,
             crit: 0, cdmg: 0, dot: 0, dotDuration: 0,
             passiveDmg: 0, passiveSpa: 0, bossDmg: 0,
-            dotBuff: 0, hyper: 0, cooldown: 0
+            dotBuff: 0, trueDmg: 0, cooldown: 0
         },
         {
             name: "Utility",

@@ -1,6 +1,6 @@
 unitDatabase.push({
     id: "megumin",
-    name: "Migumen",
+    name: "Megumin",
     img: "images/units/Megumin.png",
     level: 70,
     placement: 1,
@@ -10,7 +10,7 @@ unitDatabase.push({
     meta: {
         short: "Ruler",
         long: "Ruler",
-        note: "Ruler is strictly best due to 1 placement count."
+        note: "Ruler is strictly best due to 1 placement count. Has innate 100% True Damage."
     },
     totalCost: 136000,
     stats: {
@@ -21,7 +21,8 @@ unitDatabase.push({
         spaCap: 4,
         passiveDmg: 0,
         element: "Fire",
-        dotDuration: 10
+        dotDuration: 10,
+        trueDmg: 100
     },
 
     upgrades: [

@@ -20,7 +20,7 @@ placement: 2,
         dot: 80, dotDuration: 6, dotStacks: 1,
         element: "Dark",
         passiveDmg: 50, // Max Gluttony Stacks
-        hyper: 30       // True Damage
+        trueDmg: 30
     },
 
     upgrades: [

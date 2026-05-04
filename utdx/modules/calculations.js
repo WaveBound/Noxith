@@ -779,9 +779,9 @@ function calculateDPS(uStats, relicStats, context) {
     let hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
 
     // Sorcerer Hunter Set Perk: 1.15x True Damage
-    let trueDmgMult = 1;
+    let trueDmgMult = 1 + ((uStats.trueDmg || 0) / 100);
     if (relicStats.set === 'sorcerer_hunter') {
-        trueDmgMult = 1.15;
+        trueDmgMult += 0.15;
     }
     let finalHitDps = hitDpsTotal * trueDmgMult;
 

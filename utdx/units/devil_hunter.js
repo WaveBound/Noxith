@@ -60,7 +60,7 @@ unitDatabase.push({
             desc: "Sword focus: Burn on Bleed mechanics.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 2.5,
             crit: 0, cdmg: 150, dot: 80, dotDuration: 10,
-            passiveDmg: 68.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, hyper: 0, cooldown: 0
+            passiveDmg: 68.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, trueDmg: 0, cooldown: 0
         },
         {
             name: "Twin Guns",
@@ -69,7 +69,7 @@ unitDatabase.push({
             desc: "Gun focus: -20% SPA.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 3,
             crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
-            passiveDmg: 68.3, passiveSpa: -20, bossDmg: 0, dotBuff: 0, hyper: 0, cooldown: 0
+            passiveDmg: 68.3, passiveSpa: -20, bossDmg: 0, dotBuff: 0, trueDmg: 0, cooldown: 0
         },
         {
             name: "Demoncycle",
@@ -78,7 +78,7 @@ unitDatabase.push({
             desc: "Heavy focus: Stun per DoT mechanics.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 4,
             crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
-            passiveDmg: 68.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, hyper: 0, cooldown: 0
+            passiveDmg: 68.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, trueDmg: 0, cooldown: 0
         },
         {
             name: "Fancy Hat",
@@ -87,7 +87,7 @@ unitDatabase.push({
             desc: "High risk focus: +100% Damage, costs 3,000 ¥ per attack.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 3.5,
             crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
-            passiveDmg: 168.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, hyper: 0, cooldown: 0
+            passiveDmg: 168.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, trueDmg: 0, cooldown: 0
         }
     ],
 

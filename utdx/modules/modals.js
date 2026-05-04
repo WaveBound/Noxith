@@ -276,6 +276,7 @@ function openUnitInfo(unitId) {
     if (s.passiveDmg) innateStatsHtml += `<li><span>Passive Damage:</span> <span class="text-white">+${s.passiveDmg}%</span></li>`;
     if (s.passiveSpa) innateStatsHtml += `<li><span>Passive SPA:</span> <span class="text-white">-${s.passiveSpa}%</span></li>`;
     if (s.passiveRange) innateStatsHtml += `<li><span>Passive Range:</span> <span class="text-white">+${s.passiveRange}%</span></li>`;
+    if (s.trueDmg) innateStatsHtml += `<li><span>True Dmg:</span> <span class="text-white">+${s.trueDmg}%</span></li>`;
     if (s.hyper) innateStatsHtml += `<li><span>Hyper Dmg:</span> <span class="text-white">+${s.hyper}%</span></li>`;
 
     if (unit.passives && Array.isArray(unit.passives)) {

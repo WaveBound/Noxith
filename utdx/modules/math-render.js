@@ -875,7 +875,7 @@ function renderFinalSection(data) {
                 <div class="dd-title text-gold">Final Synthesis</div>
                 <table class="calc-table">
                     <tr><td class="mt-cell-label">${hitLabel}</td><td class="mt-cell-formula">${hitFormula}</td><td class="mt-cell-val calc-highlight">${fmt.num(data.trueDmgMult > 1 ? data.baseHitDps : data.hit)}</td></tr>
-                    ${data.trueDmgMult > 1 ? `<tr><td class="mt-cell-label text-accent-start">Sorcerer Hunter (True Dmg)</td><td class="mt-cell-formula"><span class="op">×</span>1.15</td><td class="mt-cell-val text-accent-start">${fmt.num(data.hit)}</td></tr>` : ''}
+                    ${data.trueDmgMult > 1 ? `<tr><td class="mt-cell-label text-accent-start">True Damage Bonus</td><td class="mt-cell-formula"><span class="op">×</span>${data.trueDmgMult.toFixed(2)}</td><td class="mt-cell-val text-accent-start">${fmt.num(data.hit)}</td></tr>` : ''}
                     ${data.dot > 0 ? `<tr><td class="mt-cell-label">DoT DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-end">${fmt.num(data.dot)}</td></tr>` : ''}
                     ${data.summon > 0 ? `<tr><td class="mt-cell-label">${isNutaru ? 'Clone' : (data.summonData?.isCustom ? 'Custom Summon' : 'Plane')} DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-start">${fmt.num(data.summon)}</td></tr>` : ''}
                     <tr>
