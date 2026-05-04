@@ -121,6 +121,21 @@ const SUB_NAMES = {
 
 const patchNotesData = [
     {
+        version: "v5.3",
+        date: "May 04, 2026",
+        changes: [
+            { type: "Fix", text: "<b>Buffs:</b> Fixed <b>Reaper</b> and <b>S.Reaper</b> Necklace stacking buff logic." },
+            { type: "Fix", text: "<b>Performance:</b> Resolved UI lagging/stuttering when scrolling past Sasuke units." },
+            { type: "Unit", text: "<b>New Units:</b> Added <b>Sukuna (The Strongest in History)</b> and <b>Gojo (The Strongest of Today)</b>." },
+            { type: "Unit", text: "<b>New Units:</b> Added <b>Devil Hunter</b> and <b>Alpha Devil</b>." },
+            { type: "UI", text: "<b>DPS Breakdown:</b> Improved visual elements and clarity in the math breakdown modal." },
+            { type: "UI", text: "<b>Navigation:</b> Moved global buffs to a dedicated <b>Buffs Button</b> to declutter the toolbar." },
+            { type: "UI", text: "<b>Search:</b> Added a <b>Search Bar</b> to quickly find units by name, role, or type." },
+            { type: "Math", text: "<b>Ranking:</b> Enabling a buff now dynamically re-orders all units by their new DPS rank." },
+            { type: "Feature", text: "<b>Unit Modes:</b> Added a <b>Modes Button</b> to select unit forms visually using card images." }
+        ]
+    },
+    {
         version: "v5.2",
         date: "May 03, 2026",
         changes: [
@@ -133,7 +148,7 @@ const patchNotesData = [
         changes: [
             { type: "Relics", text: "<b>New Sets:</b> Added <b>Sorcerer Hunter</b> (+15% True Damage) and <b>Strongest Sorcerer</b> sets." },
             { type: "Relics", text: "<b>New Heads:</b> Added <b>Sorcerer Hunter Spirit</b> (Disables Crits, +60% Dmg) and <b>Strongest Glasses</b>." },
-            { type: "Math", text: "<b>King Sailor:</b> Implemented custom <b>Baal's Lightning</b> math (5 ticks of 20% damage with crit support)." },
+            { type: "Math", text: "<b>King Sailor:</b> Implemented custom <b>Baal's Lightning</b> math." },
             { type: "UI", text: "<b>Renaming:</b> Renamed 'Enlightened God' to <b>Water God</b> consistently across the app." }
         ]
     },
@@ -370,7 +385,10 @@ const guideData = [
     { unit: "Crow Shinobi", img: "images/units/CrowShinobi.png", isCalculated: true },
     { unit: "ant_king_savage", img: "images/units/AntKing.png", isCalculated: true },
     { unit: "prodigy_mage", img: "images/units/ProdigyMage.png", isCalculated: true },
-    { unit: "the_strongest_in_history", img: "images/units/UnitName.png", isCalculated: true }
+    { unit: "the_strongest_in_history", img: "images/units/Sukuna.png", isCalculated: true },
+    { unit: "the_strongest_of_today", img: "images/units/Gojo.png", isCalculated: true },
+    { unit: "devil_hunter", img: "images/units/DevilHunter.png", isCalculated: true },
+    { unit: "alpha_devil", img: "images/units/AlphaDevil.png", isCalculated: true }
 ];
 
 const BAMBIETTA_MODES = {
