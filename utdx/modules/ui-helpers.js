@@ -350,9 +350,8 @@ window.resetAndOpenInventory = function () {
 };
 
 window.getQuickScore = (unit) => {
-    const isAbility = activeAbilityIds.has(unit.id) && unit.ability;
-    let baseKey = (window.isUnit(unit.id, 'kirito') && kiritoState.card) ? 'kirito_card' : unit.id;
-    const dbKey = baseKey + (isAbility ? '_abil' : '');
+    // ALWAYS use base key for ranking to maintain consistent spot
+    let dbKey = (window.isUnit(unit.id, 'kirito') && kiritoState.card) ? 'kirito_card' : unit.id;
 
     if (window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {
         const list = window.STATIC_BUILD_DB[dbKey]['fixed']?.[0];

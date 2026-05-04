@@ -792,8 +792,7 @@ function calculateDPS(uStats, relicStats, context) {
         finalHitDps += chainLightningDps;
     }
 
-    const summonDmgBase = (uStats.id === 'nutaru_beast' && isAbility) ? finalDmg * 1.25 : finalDmg;
-    let { summonDpsTotal, summonData } = _calcSummonDPS(uStats, summonDmgBase, finalSpa, placement);
+    let { summonDpsTotal, summonData } = _calcSummonDPS(uStats, finalDmg, finalSpa, placement);
 
     if (uStats.customSummons && uStats.customSummons.length > 0) {
         const upLevel = context.upgradeLevel !== undefined ? context.upgradeLevel : 6;

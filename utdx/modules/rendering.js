@@ -479,9 +479,8 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
 }
 
 window.getQuickScore = (unit) => {
-    const isAbility = activeAbilityIds.has(unit.id) && unit.ability;
-    let baseKey = (window.isUnit(unit.id, 'kirito') && kiritoState.card) ? 'kirito_card' : unit.id;
-    const dbKey = baseKey + (isAbility ? '_abil' : '');
+    // ALWAYS use base key for ranking to maintain consistent spot
+    let dbKey = (window.isUnit(unit.id, 'kirito') && kiritoState.card) ? 'kirito_card' : unit.id;
 
     let score = 0;
     if (window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {
@@ -489,11 +488,6 @@ window.getQuickScore = (unit) => {
         if (list && list.length > 0) {
             score = window.isUnit(unit.id, 'law') ? (list[0].range || 0) : list[0].dps;
         }
-    }
-
-    // Live Fallback for Ability Multipliers (Ensure Gojo sorts to top instantly)
-    if (isAbility && unit.id === 'the_strongest_of_today' && score < 150000) {
-        score *= 3;
     }
 
     if (score > 0) return score;

@@ -18,7 +18,8 @@ unitDatabase.push({
         spaCap: 2.5,
         crit: 0, cdmg: 150, dot: 0,
         element: "Wind",
-        passiveDmg: 40 // Average uptime for clone disappearance buff
+        passiveDmg: 40,
+        summonStats: { attacksToSpawn: 8, maxCount: 3, dmgPct: 100, buffWindow: 0, planeA: { spa: 6, duration: 50 }, planeB: { spa: 6, duration: 50 } }
     },
 
     upgrades: [
@@ -31,21 +32,21 @@ unitDatabase.push({
         { dmg: 3300, spa: 8, range: 45, cost: 20500 }   // Up 6
     ],
     passives: [
-        { name: "Shadow Clone", desc: "Every 8 attacks, summon a clone (Max 3 at E2) for 20s. Clones deal 75% Dmg. Gain +20% Dmg (Max 40%) when clones expire." },
+        { name: "Shadow Clone", desc: "Every 8 attacks, summon a clone (Max 3) for 50s. Clones deal 100% Dmg. Gain +20% Dmg (Max 40%) when clones expire." },
         { name: "Chakra Control", desc: "+5% Chakra per attack. Auto-enters Beast Mode at 100%. Beast Mode lasts 100s." },
         { name: "Beast Cycle", desc: "Cycles: Beast Slam -> Beast Ball -> Massive Beast Ball. Completion grants +50% Damage for the mode duration." }
     ],
     ability: {
         abilityName: "Beast Mode",
-        desc: "[E6] Unleash the Beast: +30% Dmg, +50% CDmg, +35% Crit Rate, +50% Cycle Dmg. SPA Cap: 3.0s. Clones deal 25% more Damage.",
+        desc: "[E6] Unleash the Beast: +30% Dmg, +50% CDmg, +35% Crit Rate, +50% Cycle Dmg. SPA Cap: 3.0s. Clones active.",
         passiveDmg: 120, // 30 (Beast) + 40 (Clone Loss) + 50 (Cycle)
         crit: 35,
         cdmg: 200,
         spaCap: 3.0,
         summonStats: {
-            attacksToSpawn: 8, maxCount: 3, dmgPct: 75, buffWindow: 0,
-            planeA: { spa: 8, duration: 20 },
-            planeB: { spa: 8, duration: 20 }
+            attacksToSpawn: 8, maxCount: 3, dmgPct: 100, buffWindow: 0,
+            planeA: { spa: 6, duration: 50 },
+            planeB: { spa: 6, duration: 50 }
         }
     },
     etherealization: [
