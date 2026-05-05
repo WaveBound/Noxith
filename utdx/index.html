@@ -126,7 +126,8 @@
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
-                        <input type="text" id="globalSearch" placeholder="Search by name, role, or type (ground/hill)..."
+                        <input type="text" id="globalSearch"
+                            placeholder="Search by name, role, or type (ground/hill)..."
                             oninput="globalFilterUnits(this.value)">
                         <button id="globalSearchClear" class="search-clear-btn" style="display: none;"
                             onclick="clearGlobalSearch()">×</button>
@@ -528,6 +529,8 @@
     <script src="modules/inventory.js"></script>
     <script src="modules/feedback.js"></script>
     <script src="modules/hotbar.js"></script>
+    <!-- Add this line: -->
+    <script src="modules/tutorials.js"></script>
     <script src="modules/init.js"></script>
 
 </body>
