@@ -452,7 +452,7 @@ const SETS = [
     { id: "super_roku", name: "Super Roku", bonus: { dmg: 10, cf: 15 } },
     { id: "bio_android", name: "Bio-Android", bonus: { dmg: 10, spa: 5, range: 5, cf: 5, cm: 15 } },
     { id: "biju_set", name: "Biju Set", bonus: { dmg: 10 } },
-    { id: "rebellious_set", name: "Rebellious Shinobi", bonus: { dmg: 0 } },
+    { id: "rebellious_set", name: "Rebellious Shinobi", bonus: { dmg: "Dynamic (CC/Tags)" } },
     { id: "reanimated_ninja", name: "Reanimated Ninja", bonus: { dmg: 10, dot: 30 } },
     { id: "great_mage", name: "Great Mage", bonus: { range: 10 } },
     { id: "sorcerer_hunter", name: "Sorcerer Hunter", bonus: { dmg: 10, spa: 7.5 } },

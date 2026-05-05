@@ -241,6 +241,8 @@ function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsT
         relevantBuilds.forEach(build => {
             let relevantHeads = headsToProcess;
             if (!isDotPossible) relevantHeads = headsToProcess.filter(h => h !== 'ninja');
+            // Rebellious head only works for CC units
+            if (!window.unitHasCC(effectiveStats)) relevantHeads = relevantHeads.filter(h => h !== 'rebellious_head');
 
             relevantHeads.forEach(headMode => {
                 const runOpt = (dmgP, spaP, rangeP, optType) => {
