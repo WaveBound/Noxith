@@ -2,535 +2,880 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal TD Optimizer</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>noxith</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080808;
+      --card: #111111;
+      --border: #222222;
+      --accent: #e0e0e0;
+      --accent-glow: rgba(255, 255, 255, 0.15);
+      --accent-lt: #ffffff;
+      --text: #f0f0f0;
+      --muted: #666666;
+      --sub: #333333;
+    }
 
-    <meta name="description"
-        content="The Universal TD Optimizer. Calculate and optimize the best DPS, Range, and SPA builds for your units. Discover meta traits, relic combinations, and tier lists.">
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    <!-- CSS IMPORTS -->
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/buttons.css">
-    <link rel="stylesheet" href="css/cards.css">
-    <link rel="stylesheet" href="css/forms.css">
-    <link rel="stylesheet" href="css/modals.css">
-    <link rel="stylesheet" href="css/utilities.css">
-    <link rel="stylesheet" href="css/logic.css">
-    <link rel="stylesheet" href="css/mobile.css">
-    <link rel="stylesheet" href="css/inventory.css">
-    <link rel="stylesheet" href="css/hotbar.css">
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ── THE BACKGROUND — black with white diagonal lines ── */
+    .hero-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: linear-gradient(160deg, #080808 0%, #0d0d0d 40%, #101010 70%, #080808 100%);
+      transform: translateZ(0);
+    }
+
+    .hero-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(120deg,
+          transparent 0px, transparent 40px,
+          rgba(255, 255, 255, 0.025) 40px, rgba(255, 255, 255, 0.025) 41px);
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8, 8, 8, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-inner {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding: 0 64px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.1em;
+      color: var(--accent-lt);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-transform: uppercase;
+    }
+
+    .logo-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+      animation: pulse 2.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.4;
+        transform: scale(0.65);
+      }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.86rem;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding: 104px 64px 69px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: rise 0.75s ease 0.2s forwards;
+    }
+
+    @keyframes rise {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.6rem, 6vw, 4rem);
+      font-weight: 800;
+      line-height: 1.06;
+      letter-spacing: -0.025em;
+      color: var(--text);
+      margin-bottom: 19px;
+    }
+
+    .hero-title em {
+      font-style: normal;
+      background: linear-gradient(115deg, #aaaaaa 0%, #ffffff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 1.02rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    /* ── PROJECTS ── */
+    .projects {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding: 0 64px 109px;
+      opacity: 0;
+      animation: rise 0.7s ease 0.5s forwards;
+    }
+
+    .projects-heading {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--sub);
+      margin-bottom: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 26px 26px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.22s, transform 0.22s, box-shadow 0.22s;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at top left, rgba(255, 255, 255, 0.04) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+    }
+
+    .card-status-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent-glow);
+      animation: pulse 2.6s ease-in-out infinite;
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .card-desc {
+      font-size: 0.88rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.7;
+      flex: 1;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .tag {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.28);
+    }
+
+    .card-footer {
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-updated {
+      font-size: 0.75rem;
+      color: var(--sub);
+      font-weight: 300;
+    }
+
+    .btn-visit {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 15px;
+      background: var(--accent);
+      color: #000;
+      border-radius: 7px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover .btn-visit {
+      background: #ffffff;
+      color: #000;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-arrow {
+      transition: transform 0.2s;
+    }
+
+    .card:hover .btn-arrow {
+      transform: translateX(3px);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 25px 32px;
+      opacity: 0;
+      animation: rise 0.6s ease 0.85s forwards;
+      margin-top: auto;
+    }
+
+    .footer-inner {
+      width: 100%;
+      padding: 0 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .footer-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-lt);
+    }
+
+    .footer-copy {
+      font-size: 0.76rem;
+      color: var(--sub);
+      font-weight: 300;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: #111;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 440px;
+      padding: 32px;
+      transform: translateY(20px);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.active .modal-box {
+      transform: translateY(0);
+    }
+
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .modal-sub {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--sub);
+      margin-bottom: 8px;
+    }
+
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+      border-color: var(--muted);
+    }
+
+    .form-textarea {
+      height: 100px;
+      resize: none;
+    }
+
+    .modal-footer-btns {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .btn-submit {
+      flex: 1;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-submit:hover {
+      background: #fff;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .status-msg {
+      margin-top: 14px;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .status-msg.error {
+      color: #ff5f5f;
+    }
+
+    .status-msg.success {
+      color: #5fff8f;
+    }
+
+    /* ── DISCORD BADGES ── */
+    .credits-badges {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .credit-badge {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      overflow: hidden;
+      height: 32px;
+    }
+
+    .credit-badge:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--muted);
+      transform: translateY(-2px);
+    }
+
+    .badge-role {
+      font-size: 0.6rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 0 10px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      letter-spacing: 1px;
+      border-right: 1px solid var(--border);
+    }
+
+    .credit-badge.owner .badge-role {
+      color: #a855f7;
+      background: rgba(168, 85, 247, 0.05);
+    }
+
+    .credit-badge.helper .badge-role {
+      color: #3b82f6;
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .badge-content {
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      gap: 8px;
+    }
+
+    .badge-pfp {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .badge-name {
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .discord-link-btn {
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px;
+      transition: all 0.2s ease;
+    }
+
+    .discord-link-btn:hover {
+      color: #fff;
+    }
+
+    /* Toast Notification */
+    .custom-toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 50px;
+      z-index: 10000;
+      font-size: 0.85rem;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      animation: toast-in 0.3s forwards, toast-out 0.3s 2.7s forwards;
+    }
+
+    @keyframes toast-in {
+      from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
+    @keyframes toast-out {
+      from {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      to {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .hero {
+        padding: 70px 24px 56px;
+      }
+
+      .projects {
+        padding: 0 24px 80px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-links {
+        display: none;
+      }
+    }
+  </style>
 </head>
 
-<body class="show-fixed-relics dashboard-layout">
+<body>
 
-    <!-- SIDEBAR NAVIGATION -->
-    <aside class="dashboard-sidebar">
-        <!-- Back Button -->
-        <a href="https://noxith.com/" class="back-to-hub">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-            <span>Back to Hub</span>
-        </a>
+  <div class="hero-bg"></div>
 
-        <div id="headerTitleSection" class="header-wrapper">
-            <div class="header-inner">
-                <header id="mainHeader">
-                    <div id="headerContent">
-                        <h1>Meta Optimizer</h1>
-                        <div id="creditsContainer" class="credits-badges"></div>
-                    </div>
-                </header>
-            </div>
-        </div>
-
-        <!-- Primary nav -->
-        <div class="nav-bar">
-            <button class="nav-btn active"
-                onclick="switchPage('db'); window.toggleMobileMenu && window.toggleMobileMenu(false)">Unit
-                Database</button>
-            <button class="nav-btn" style="opacity: 0.6;"
-                onclick="resetAndOpenInventory(); window.toggleMobileMenu && window.toggleMobileMenu(false)">Relic
-                Inventory</button>
-            <button class="nav-btn mobile-only-btn"
-                onclick="openTraitTierList(); window.toggleMobileMenu && window.toggleMobileMenu(false)">Trait Tier
-                List</button>
-            <button class="nav-btn mobile-only-btn"
-                onclick="openAllTraitsGuide(); window.toggleMobileMenu && window.toggleMobileMenu(false)">Trait
-                Stats</button>
-        </div>
-
-        <!-- Mobile-Only Controls (Moved from Topbar) -->
-        <div class="sidebar-mobile-controls mobile-only-block">
-            <div class="sidebar-divider">Controls</div>
-            <button class="nav-btn sidebar-footer-btn"
-                onclick="openCustomPairModal(); window.toggleMobileMenu && window.toggleMobileMenu(false)">+ Add Custom
-                Pair</button>
-
-            <label class="nav-toggle-label sidebar-toggle">
-                <input type="checkbox" id="sidebarInventoryMode" onchange="toggleInventoryMode(this)">
-                <span>Inventory Mode</span>
-                <div class="mini-switch"></div>
-            </label>
-
-            <div class="sidebar-divider">Utility</div>
-        </div>
-
-        <!-- Bottom nav pinned to sidebar footer -->
-        <div class="sidebar-footer">
-            <button class="nav-btn sidebar-footer-btn"
-                onclick="openPatchNotes(); window.toggleMobileMenu && window.toggleMobileMenu(false)">Patch
-                Notes</button>
-            <button class="nav-btn sidebar-footer-btn"
-                onclick="openFeedbackModal(); window.toggleMobileMenu && window.toggleMobileMenu(false)">Report /
-                Suggest</button>
-            <button class="nav-btn sidebar-footer-btn" style="color: var(--accent-light, #fff); font-weight: 700;"
-                onclick="NoxithDonations.open(); window.toggleMobileMenu && window.toggleMobileMenu(false)">Donate</button>
-        </div>
-    </aside>
-
-    <script src="../donations/donations.js"></script>
-
-    <!-- MAIN CONTENT AREA -->
-    <main class="dashboard-main">
-        <!-- TOOLBAR SECTION -->
-        <div id="sticky-sentinel"></div>
-        <div id="headerToolbarSection" class="sticky-toolbar-container dashboard-topbar">
-            <div class="mobile-menu-handle" onclick="toggleMobileMenu()"></div>
-
-            <div id="dbInjector" class="injector-panel">
-                <!-- Left side controls -->
-                <div class="injector-left">
-                    <button class="nav-btn add-btn" onclick="openCustomPairModal(); toggleMobileMenu(false)">+ Add
-                        Custom Pair</button>
-                    <label id="invModeToggle" class="nav-toggle-label" title="Calculate using Inventory">
-                        <input type="checkbox" id="globalInventoryMode" onchange="toggleInventoryMode(this)">
-                        <span id="invLabel" class="text-accent-start">Inventory Mode</span>
-                        <div class="mobile-switch-visual"></div>
-                    </label>
-
-                    <!-- NEW BUFFS TOGGLE BUTTON -->
-                    <button id="globalBuffsToggleBtn" class="filter-tab-btn" onclick="toggleGlobalBuffs(this)"
-                        style="height: 34px; margin-left: 5px;">Buffs ▼</button>
-                </div>
-
-                <!-- Center controls -->
-                <div class="injector-center">
-                    <div class="global-search-container">
-                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                        <input type="text" id="globalSearch"
-                            placeholder="Search by name, role, or type (ground/hill)..."
-                            oninput="globalFilterUnits(this.value)">
-                        <button id="globalSearchClear" class="search-clear-btn" style="display: none;"
-                            onclick="clearGlobalSearch()">×</button>
-                    </div>
-                </div>
-
-                <!-- NEW BUFFS PANEL (Injected here via JS) -->
-                <div id="globalBuffsPanel" class="global-buffs-panel hidden"></div>
-            </div>
-
-            <!-- Guides Toolbar -->
-            <div id="guidesToolbar" class="injector-panel hidden">
-                <div class="injector-left">
-                    <select id="guideUnitSelect" class="hidden">
-                        <option value="all">All Units</option>
-                    </select>
-                    <select id="guideTraitSelect" class="hidden">
-                        <option value="auto">Auto</option>
-                    </select>
-                    <button class="nav-btn config-view-btn"
-                        onclick="openGuideConfig(); toggleMobileMenu(false)">Configure View</button>
-                    <label class="nav-toggle-label">
-                        <input type="checkbox" id="guideInventoryMode" onchange="toggleInventoryMode(this)">
-                        <span class="text-accent-start">Inventory Mode</span>
-                        <div class="mobile-switch-visual"></div>
-                    </label>
-                </div>
-            </div>
-
-            <div id="inventoryToolbar" class="injector-panel hidden">
-                <div class="injector-left">
-                    <button id="openAddRelicBtn" class="nav-btn add-btn" onclick="toggleMobileMenu(false)">+ Add
-                        Relic</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- PAGES -->
-        <div class="pages-container">
-            <div id="dbPage" class="page active db-grid"></div>
-            <div id="inventoryPage" class="page">
-                <div id="relicGrid" class="inventory-grid"></div>
-            </div>
-            <div id="guidesPage" class="page">
-                <div class="guide-container">
-                    <div id="activeGuideSelection" class="text-center mb-2 text-sm-dim">Showing: <b class="color-white"
-                            id="dispGuideUnit">All</b> with <b class="color-accent" id="dispGuideTrait">Auto</b></div>
-                    <div id="guideList" class="guide-grid"></div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- ================= MODALS ================= -->
-
-    <!-- 1. THE UNIVERSAL MODAL (Replaces Math, Patch, Compare, SubPrio, Guide) -->
-    <div id="universalModal" class="modal-overlay" onclick="closeModal('universalModal')">
-        <aside class="modal-side-panel left-panel hidden" onclick="event.stopPropagation()"></aside>
-
-        <div class="modal-box" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <button id="toggleLeftPanelBtn" class="panel-toggle-btn hidden"
-                        onclick="toggleFloatingPanel('left')" title="Toggle Summons Panel">
-                        <span class="icon">▤</span>
-                    </button>
-                    <h2 class="modal-title">TITLE</h2>
-                </div>
-                <div class="header-actions">
-                    <!-- Additional actions could go here -->
-                </div>
-            </div>
-            <div class="modal-body">
-                <!-- Content Injected via JS -->
-            </div>
-            <div class="modal-footer">
-                <button class="action-btn" onclick="closeModal('universalModal')">Close</button>
-            </div>
-        </div>
-
-        <aside class="modal-side-panel right-panel hidden" onclick="event.stopPropagation()"></aside>
+  <nav>
+    <div class="nav-inner">
+      <a class="logo" href="/">
+        <div class="logo-dot"></div>
+        noxith
+      </a>
+      <ul class="nav-links">
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="javascript:void(0)" onclick="openModal()">Contact</a></li>
+        <li><a href="javascript:void(0)" onclick="NoxithDonations.open()" style="color: var(--accent);">Donate</a></li>
+      </ul>
     </div>
+  </nav>
 
-    <!-- 2. CALCULATOR MODAL (Kept separate for complex form handling) -->
-    <div id="calcModal" class="modal-overlay" onclick="closeModal('calcModal')">
-        <div class="modal-box modal-xl" onclick="event.stopPropagation()">
-            <div class="calc-unit-header">
-                <!-- Simplified Header: Just Image and Name -->
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <img id="calcUnitImg" src="#" class="calc-avatar">
-                    <div class="calc-unit-details">
-                        <h2 id="calcUnitName" class="modal-title">Unit</h2>
-                        <span id="calcUnitRole" class="calc-unit-role">Role</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-body calc-scroll-bg">
-                <!-- Controls Moved Here -->
-                <div class="calc-global-controls">
-                    <div class="calc-stat-group group-wide">
-                        <label>Relic Set</label><select id="calcSet" class="c-input w-full"></select>
-                        <label class="mt-2">Trait</label><select id="calcTrait" class="c-input w-full"></select>
-                    </div>
-                    <div class="calc-stat-group">
-                        <label>Dmg Pts</label><input type="number" id="calcDmgPoints" class="c-input text-center"
-                            value="0" min="0" max="100">
-                        <label class="mt-2">Rank Dmg%</label><input type="number" id="calcRankDmg"
-                            class="c-input opt-gold text-center" value="20" min="0" max="20">
-                    </div>
-                    <div class="calc-stat-group">
-                        <label>Spa Pts</label><input type="number" id="calcSpaPoints" class="c-input text-center"
-                            value="0" min="0" max="100">
-                        <label class="mt-2">Rank Spa%</label><input type="number" id="calcRankSpa"
-                            class="c-input opt-gold text-center" value="8" min="0" max="8">
-                    </div>
-                    <div class="calc-stat-group">
-                        <label>Rng Pts</label><input type="number" id="calcRangePoints" class="c-input text-center"
-                            value="0" min="0" max="100">
-                        <label class="mt-2">Rank Rng%</label><input type="number" id="calcRankRange"
-                            class="c-input opt-gold text-center" value="20" min="0" max="20">
-                    </div>
-                </div>
+  <script src="./donations/donations.js"></script>
 
-                <div class="gear-grid-container">
-                    <!-- Gear Cards (Head/Body/Legs) - Contents managed by JS -->
-                    <div class="gear-card">
-                        <div class="gear-header"><span class="gear-title">Head Piece</span>
-                            <div class="flex-1 flex-between gap-md items-end">
-                                <select id="calcHead" class="gear-main-select">
-                                    <option value="none">None</option>
-                                    <option value="sun_god">Sun God</option>
-                                    <option value="ninja">Ninja</option>
-                                    <option value="reaper_necklace">Reaper</option>
-                                    <option value="shadow_reaper_necklace">S. Reaper</option>
-                                    <option value="junior">Junior Ninja</option>
-                                    <option value="sorcerer_hunter_spirit">S. Hunter Spirit</option>
-                                    <option value="strongest_sorcerer_glasses">Strongest Glasses</option>
-                                    <option value="monarch">Monarch Cape</option>
-                                </select>
-                                <select id="calcHeadStars" class="gear-main-select opt-gold w-65px hidden">
-                                    <option value="1">1★</option>
-                                    <option value="1.025">2★</option>
-                                    <option value="1.05">3★</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="gear-subs">
-                            <div class="sub-input-group"><span class="sub-label sub-dmg">Dmg</span><input type="number"
-                                    data-stat="dmg" class="sub-val-input" placeholder="0"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-spa">Spa</span><input type="number"
-                                    data-stat="spa" class="sub-val-input" placeholder="0"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-range">Rng</span><input
-                                    type="number" data-stat="range" class="sub-val-input" placeholder="0"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-cm">CDmg</span><input type="number"
-                                    data-stat="cm" class="sub-val-input" placeholder="0"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-cf">Crit</span><input type="number"
-                                    data-stat="cf" class="sub-val-input" placeholder="0"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-dot">DoT</span><input type="number"
-                                    data-stat="dot" class="sub-val-input" placeholder="0"></div>
-                        </div>
-                    </div>
-                    <!-- Body & Legs Cards identical structure... -->
-                    <div class="gear-card">
-                        <div class="gear-header"><span class="gear-title">Body Main</span>
-                            <div class="flex-1 flex-between gap-md items-end"><select id="calcBodyMain"
-                                    class="gear-main-select">
-                                    <option value="dmg">Damage</option>
-                                    <option value="dot">DoT</option>
-                                    <option value="cm">Crit Dmg</option>
-                                </select><select id="calcBodyStars" class="gear-main-select opt-gold w-65px hidden">
-                                    <option value="1">1★</option>
-                                    <option value="1.025">2★</option>
-                                    <option value="1.05">3★</option>
-                                </select></div>
-                        </div>
-                        <div class="gear-subs">
-                            <div class="sub-input-group"><span class="sub-label sub-dmg">Dmg</span><input type="number"
-                                    data-stat="dmg" class="sub-val-input"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-spa">Spa</span><input type="number"
-                                    data-stat="spa" class="sub-val-input"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-range">Rng</span><input
-                                    type="number" data-stat="range" class="sub-val-input"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-cm">CDmg</span><input type="number"
-                                    data-stat="cm" class="sub-val-input"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-cf">Crit</span><input type="number"
-                                    data-stat="cf" class="sub-val-input"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-dot">DoT</span><input type="number"
-                                    data-stat="dot" class="sub-val-input"></div>
-                        </div>
-                    </div>
-                    <div class="gear-card">
-                        <div class="gear-header"><span class="gear-title">Legs Main</span>
-                            <div class="flex-1 flex-between gap-md items-end"><select id="calcLegsMain"
-                                    class="gear-main-select">
-                                    <option value="dmg">Damage</option>
-                                    <option value="spa">SPA</option>
-                                    <option value="cf">Crit Rate</option>
-                                    <option value="range">Range</option>
-                                </select><select id="calcLegsStars" class="gear-main-select opt-gold w-65px hidden">
-                                    <option value="1">1★</option>
-                                    <option value="1.025">2★</option>
-                                    <option value="1.05">3★</option>
-                                </select></div>
-                        </div>
-                        <div class="gear-subs">
-                            <div class="sub-input-group"><span class="sub-label sub-dmg">Dmg</span><input type="number"
-                                    data-stat="dmg" class="sub-val-input"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-spa">Spa</span><input type="number"
-                                    data-stat="spa" class="sub-val-input"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-range">Rng</span><input
-                                    type="number" data-stat="range" class="sub-val-input"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-cm">CDmg</span><input type="number"
-                                    data-stat="cm" class="sub-val-input"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-cf">Crit</span><input type="number"
-                                    data-stat="cf" class="sub-val-input"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-dot">DoT</span><input type="number"
-                                    data-stat="dot" class="sub-val-input"></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="calcResultArea" class="calc-result-area hidden">
-                    <div id="calcResultContent"></div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="action-btn secondary btn-close-secondary"
-                    onclick="closeModal('calcModal')">Close</button>
-                <button class="action-btn btn-calc-execute" onclick="runCustomCalc()">Calculate DPS</button>
-            </div>
+  <section class="hero">
+    <h1 class="hero-title">noxith<br /><em>hub.</em></h1>
+    <p class="hero-sub">A home for tools and projects. Everything lives here.</p>
+    <div id="creditsContainer" class="credits-badges"></div>
+  </section>
+
+  <section class="projects" id="projects">
+    <p class="projects-heading">Recent Projects</p>
+    <div class="grid">
+
+      <a href="/wavebound/" class="card">
+        <div class="card-status">
+          <div class="card-status-dot"></div>
+          Active
         </div>
-    </div>
-
-    <!-- 3. ADD RELIC MODAL -->
-    <div id="addRelicModal" class="modal-overlay" onclick="closeModal('addRelicModal')">
-        <div class="modal-box modal-sm" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h2 class="modal-title">Add Relic</h2>
-            </div>
-            <div class="modal-body">
-                <!-- Inputs for Add Relic -->
-                <div class="gear-grid-container" style="grid-template-columns: 1fr; padding: 0;">
-                    <div class="gear-card">
-                        <div class="gear-header">
-                            <span class="gear-title">Relic Details</span>
-                            <div class="flex-1 flex-between gap-md items-end">
-                                <div style="display:flex; flex-direction:column; gap:5px; flex: 1;">
-                                    <label class="mq-label">Slot</label>
-                                    <select id="newRelicSlot" class="gear-main-select">
-                                        <option value="Head">Head</option>
-                                        <option value="Body">Body</option>
-                                        <option value="Legs">Legs</option>
-                                    </select>
-                                </div>
-                                <div style="display:flex; flex-direction:column; gap:5px; flex: 1;">
-                                    <label class="mq-label">Set</label>
-                                    <select id="newRelicSet" class="gear-main-select"></select>
-                                </div>
-                                <div style="display:flex; flex-direction:column; width:80px; gap:5px;">
-                                    <label class="mq-label">Stars</label>
-                                    <select id="newRelicStars" class="gear-main-select opt-gold"></select>
-                                </div>
-                            </div>
-                            <div style="display:flex; flex-direction:column; width:100%; gap:5px; margin-top:10px;">
-                                <label class="mq-label">Main Stat</label>
-                                <select id="newRelicMainStat" class="gear-main-select"></select>
-                            </div>
-                        </div>
-                        <div class="gear-subs" style="margin-top:0; border-radius:0;">
-                            <div class="sub-input-group"><span class="sub-label sub-dmg">Dmg</span><input type="number"
-                                    id="subDmg" class="sub-val-input" placeholder="0"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-spa">Spa</span><input type="number"
-                                    id="subSpa" class="sub-val-input" placeholder="0"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-range">Rng</span><input
-                                    type="number" id="subRange" class="sub-val-input" placeholder="0"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-cm">CDmg</span><input type="number"
-                                    id="subCdmg" class="sub-val-input" placeholder="0"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-cf">Crit</span><input type="number"
-                                    id="subCrit" class="sub-val-input" placeholder="0"></div>
-                            <div class="sub-input-group"><span class="sub-label sub-dot">DoT</span><input type="number"
-                                    id="subDot" class="sub-val-input" placeholder="0"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="addRelicCancelBtn" class="action-btn secondary"
-                    onclick="closeModal('addRelicModal')">Cancel</button>
-                <button id="addRelicConfirmBtn" class="action-btn">Add to Inventory</button>
-            </div>
+        <h2 class="card-title">Wavebound</h2>
+        <p class="card-desc">Game automation with sub-10ms timing, OCR screen reading, HSV color detection, and full
+          remote control.</p>
+        <div class="card-tags">
+          <span class="tag">automation</span>
+          <span class="tag">windows</span>
+          <span class="tag">ocr</span>
         </div>
-    </div>
-
-    <!-- 4. GUIDE CONFIG MODAL -->
-    <div id="guideConfigModal" class="modal-overlay" onclick="closeModal('guideConfigModal')">
-        <div class="modal-box modal-lg" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h2 class="modal-title">Guide Configuration</h2>
-            </div>
-            <div class="modal-body">
-                <div class="config-section">
-                    <div class="config-header">1. Select Unit</div>
-                    <div class="config-grid" id="guideConfigUnitGrid"></div>
-                </div>
-                <div class="config-section mt-4">
-                    <div class="config-header">2. Select Trait</div>
-                    <div class="config-chips" id="guideConfigTraitList"></div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="action-btn secondary" onclick="closeModal('guideConfigModal')">Cancel</button>
-                <button class="action-btn" onclick="applyGuideConfig()">Apply Settings</button>
-            </div>
+        <div class="card-footer">
+          <span class="card-updated">Updated recently</span>
+          <div class="btn-visit">Check it out <span class="btn-arrow">→</span></div>
         </div>
-    </div>
+      </a>
 
-    <!-- 5. CUSTOM PAIR MODAL -->
-    <div id="customPairModal" class="modal-overlay" onclick="closeModal('customPairModal')">
-        <div class="modal-box modal-lg" onclick="event.stopPropagation()">
-            <div class="modal-header cp-header">
-                <h2 class="modal-title">Create Custom Pair</h2>
-            </div>
-            <div class="modal-body">
-                <div class="config-section">
-                    <div class="config-header cp-section-header">1. Assign To Unit</div>
-                    <div class="config-grid" id="cpUnitGrid"></div>
-                </div>
-                <div class="config-section mt-4">
-                    <div class="config-header cp-section-header">2. Select First Trait</div>
-                    <div class="config-chips" id="cpTrait1List"></div>
-                </div>
-                <div class="config-section mt-4">
-                    <div class="config-header cp-section-header">3. Select Second Trait</div>
-                    <div class="config-chips" id="cpTrait2List"></div>
-                </div>
-                <div class="cp-preview-box"><span class="cp-preview-label">Creating Combination:</span><br><b
-                        class="cp-preview-val" id="cpPreviewText">Loading...</b></div>
-            </div>
-            <div class="modal-footer">
-                <button class="action-btn secondary" onclick="closeModal('customPairModal')">Cancel</button>
-                <button class="action-btn btn-cp-action" onclick="confirmAddCustomPair()">Create Pair</button>
-            </div>
+      <a href="/utdx/" class="card">
+        <div class="card-status">
+          <div class="card-status-dot"></div>
+          Active
         </div>
-    </div>
-
-    <!-- 6. FEEDBACK MODAL -->
-    <div id="feedbackModal" class="modal-overlay" onclick="closeModal('feedbackModal')">
-        <div class="modal-box modal-sm" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h2 class="modal-title">Feedback</h2>
-            </div>
-            <div class="modal-body">
-                <div class="feedback-form">
-                    <label><span class="mq-label">Type</span>
-                        <select id="feedbackType" class="gear-main-select mt-2">
-                            <option value="suggestion" selected>Suggestion</option>
-                            <option value="bug">Bug Report</option>
-                        </select>
-                    </label>
-
-                    <!-- UPDATED DISCORD INPUT -->
-                    <label>
-                        <div class="mq-label">Discord</div>
-                        <input type="text" id="feedbackContact" class="c-input mt-2 w-full"
-                            placeholder="Username or ID">
-                    </label>
-                    <label><span class="mq-label">Message</span>
-                        <textarea id="feedbackText" class="feedback-textarea"
-                            placeholder="Describe your suggestion or bug..."></textarea>
-                    </label>
-                    <div id="feedbackStatus"></div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="action-btn secondary" onclick="closeModal('feedbackModal')">Cancel</button>
-                <button id="feedbackSendBtn" class="action-btn" onclick="sendFeedback()">Send</button>
-            </div>
+        <h2 class="card-title">UTDX</h2>
+        <p class="card-desc">Advanced Unit Optimizer for UTDX. Optimize your units with the best traits, relics, and
+          more.</p>
+        <div class="card-tags">
+          <span class="tag">tool</span>
+          <span class="tag">optimizer</span>
         </div>
-    </div>
+        <div class="card-footer">
+          <span class="card-updated">Updated recently</span>
+          <div class="btn-visit">Check it out <span class="btn-arrow">→</span></div>
+        </div>
+      </a>
 
-    <!-- 7. MODES OVERLAY (Transparent Fullscreen) -->
-    <div id="modesOverlay" class="modes-overlay hidden" onclick="window.closeModesOverlay()">
-        <div id="modesOverlayGrid" class="modes-overlay-grid" onclick="event.stopPropagation()"></div>
     </div>
+  </section>
 
-    <!-- SCRIPTS -->
-    <script src="data.js"></script>
-    <script src="math.js"></script>
-    <script id="dynamic-db-script" src="databases/db_base.js"></script>
-    <script src="modules/state.js"></script>
-    <script src="modules/constants.js"></script>
-    <script src="modules/utils.js"></script>
-    <script src="modules/ui-helpers.js"></script>
-    <script src="modules/calculations.js"></script>
-    <script src="modules/rendering.js"></script>
-    <script src="modules/modals.js"></script>
-    <script src="modules/custom-pair.js"></script>
-    <script src="modules/calculator.js"></script>
-    <script src="modules/math-render.js"></script>
-    <script src="modules/inventory.js"></script>
-    <script src="modules/feedback.js"></script>
-    <script src="modules/hotbar.js"></script>
-    <!-- Add this line: -->
-    <script src="modules/tutorials.js"></script>
-    <script src="modules/init.js"></script>
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-logo">noxith</span>
+      <span class="footer-copy">&copy; 2026 — all rights reserved</span>
+    </div>
+  </footer>
+
+  <div class="modal-overlay" id="contactModal" onclick="closeModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <h2 class="modal-title">Contact us</h2>
+      <p class="modal-sub">Have a question or want to work with us? Drop a message below and we'll get back to you.</p>
+
+      <div class="form-group">
+        <label class="form-label">Your Discord</label>
+        <input type="text" id="contactDiscord" class="form-input" placeholder="e.g. username#0000">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Message</label>
+        <textarea id="contactMessage" class="form-textarea" placeholder="How can we help?"></textarea>
+      </div>
+
+      <div class="modal-footer-btns">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-submit" id="submitBtn" onclick="sendContact()">Send Message</button>
+      </div>
+
+      <div id="statusMsg" class="status-msg"></div>
+    </div>
+  </div>
+
+  <script>
+    // Trailing slash redirect
+    (function () {
+      const p = window.location.pathname;
+      if (p !== '/' && !p.endsWith('/') && !/\.[a-z]{2,5}$/i.test(p)) {
+        window.location.replace(p + '/' + window.location.search + window.location.hash);
+      }
+    })();
+
+    // Modal Logic
+    const modal = document.getElementById('contactModal');
+    const statusMsg = document.getElementById('statusMsg');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function openModal() {
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      statusMsg.textContent = '';
+      statusMsg.className = 'status-msg';
+    }
+
+    function closeModal(e) {
+      if (e && e.target !== modal && e.type === 'click') return;
+      modal.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    async function sendContact() {
+      const discord = document.getElementById('contactDiscord').value.trim();
+      const message = document.getElementById('contactMessage').value.trim();
+
+      if (!discord || !message) {
+        statusMsg.textContent = 'Please fill out all fields.';
+        statusMsg.className = 'status-msg error';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      statusMsg.textContent = 'Sending...';
+      statusMsg.className = 'status-msg';
+
+      try {
+        const response = await fetch("https://webhook.wavebound.workers.dev/", {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'contact_hub',
+            contact: discord,
+            message: message,
+            timestamp: new Date().toISOString()
+          })
+        });
+
+        if (response.ok) {
+          statusMsg.textContent = 'Sent successfully! Thank you.';
+          statusMsg.className = 'status-msg success';
+          setTimeout(() => {
+            closeModal();
+            document.getElementById('contactDiscord').value = '';
+            document.getElementById('contactMessage').value = '';
+          }, 2000);
+        } else {
+          throw new Error();
+        }
+      } catch (e) {
+        statusMsg.textContent = 'Failed to send. Please try again later.';
+        statusMsg.className = 'status-msg error';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    }
+
+    // Credits Data & Logic
+    const creditsData = [
+      { role: "Owner", name: "xAuroraFlare", id: "xauroraflare", userId: "216293393888837632", pfp: "pfp/xauroraflare.gif", type: "owner" },
+      { role: "Co-Owner", name: "xKing.", id: "xking.", userId: "347578773857632258", pfp: "pfp/xking.png", type: "owner" }
+    ];
+
+    function renderCredits() {
+      const container = document.getElementById('creditsContainer');
+      const discordLogo = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="color: #5865F2;"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037 13.486 13.486 0 0 0-.64 1.28 18.27 18.27 0 0 0-4.998 0 13.49 13.49 0 0 0-.644-1.28.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.118.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.419 0 1.334-.956 2.42-2.157 2.42zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.419 0 1.334-.946 2.42-2.157 2.42z"/></svg>`;
+      const linkIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>`;
+
+      container.innerHTML = creditsData.map(c => `
+        <div class="credit-badge ${c.type}" onclick="handleCreditClick('${c.id}', event)" title="Copy Username: ${c.id}">
+          <div class="badge-role">${c.role}</div>
+          <div class="badge-content">
+            <img src="${c.pfp}" class="badge-pfp" alt="${c.name}">
+            <span class="badge-name">${c.name}</span>
+            ${discordLogo}
+            <a href="https://discord.com/users/${c.userId}" target="_blank" class="discord-link-btn" onclick="handleDiscordLink('${c.userId}', event)" title="Open Discord Profile">${linkIcon}</a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function handleCreditClick(id, event) {
+      navigator.clipboard.writeText(id).then(() => {
+        showToast(`Copied "${id}" to clipboard!`);
+      });
+    }
+
+    function handleDiscordLink(userId, event) {
+      event.stopPropagation();
+      // On desktop, try to open the Discord App directly
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (!isMobile) {
+        window.location.href = `discord://-/users/${userId}`;
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'custom-toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', renderCredits);
+  </script>
 
 </body>
+
+</html>
