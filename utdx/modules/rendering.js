@@ -131,7 +131,8 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
         else if (optPct >= 80) { color = '#ffcc00'; glow = 'rgba(255, 204, 0, 0.15)'; }
         else { color = '#ff4d4d'; glow = 'rgba(255, 77, 77, 0.15)'; }
 
-        optimalityHtml = `<button class="optimality-badge clickable" onclick="showMathBreakdown('${r.id}')" title="View Optimality Breakdown" style="color: ${color}; border-color: ${color}33; --glow-color: ${glow};"><span class="opt-label" style="color: ${color}">OPTIMALITY</span><span class="opt-pct">${fix1(optPct)}%</span></button>`;
+        // Changed to a <div>, removed onclick, removed title, added cursor: default
+        optimalityHtml = `<div class="optimality-badge" style="color: ${color}; border-color: ${color}33; --glow-color: ${glow}; flex-direction: row; justify-content: center; gap: 6px; width: 100%; box-sizing: border-box; padding: 3px 8px; cursor: default;"><span class="opt-label" style="color: ${color}; margin-bottom: 0;">OPTIMALITY</span><span class="opt-pct">${fix1(optPct)}%</span></div>`;
     }
 
     const prioConfig = { 'spa': { label: 'SPA STAT', cls: 'prio-spa' }, 'range': { label: 'RANGE STAT', cls: 'prio-range' }, 'default': { label: 'DMG STAT', cls: 'prio-dmg' } };
@@ -166,9 +167,12 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
 
     return `
         <div class="build-row ${rankClass} ${sortMode === 'efficiency' ? 'is-efficiency-sort' : ''}">
-            <div class="br-header">
-                <div class="br-header-info"><span class="br-rank">#${i + 1}</span><span class="br-set">${r.setName}</span><span class="br-sep">/</span><span class="br-trait">${r.traitName}</span></div>
-                <div style="display:flex; gap:8px; align-items:center;">${mobileToggle}${optimalityHtml}${prioHtml}</div>
+            <div class="br-header" style="align-items: flex-start; padding-top: 6px;">
+                <div class="br-header-info" style="margin-top: 2px;"><span class="br-rank">#${i + 1}</span><span class="br-set">${r.setName}</span><span class="br-sep">/</span><span class="br-trait">${r.traitName}</span></div>
+                <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
+                    <div style="display:flex; gap:6px; align-items:center;">${mobileToggle}${prioHtml}</div>
+                    ${optimalityHtml}
+                </div>
             </div>
             <div class="br-grid">
                 <div class="br-col main"><div class="br-col-title">MAIN STAT</div>${headHtml}<div class="stat-line"><span class="sl-label">BODY</span> ${mainBodyBadge}</div><div class="stat-line"><span class="sl-label">LEGS</span> ${mainLegsBadge}</div></div>
@@ -271,14 +275,14 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             // The static DB only contains results for the "Base" form.
             if (forceSync && unitObj && unitObj.modes) {
                 const dynamicResults = calculateUnitBuilds(
-                    unitObj, 
-                    null, 
+                    unitObj,
+                    null,
                     null, // No filter
-                    ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'], 
-                    ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'], 
-                    true, 
-                    null, 
-                    activeType === 'abil', 
+                    ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'],
+                    ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'],
+                    true,
+                    null,
+                    activeType === 'abil',
                     activeMode
                 );
                 if (dynamicResults && dynamicResults.perfect && dynamicResults.perfect[0]) {
@@ -535,7 +539,7 @@ window.getQuickScore = (unit) => {
     return ((d || 0) / (s || 1)) * 35;
 };
 
-window.resortUnitCards = function() {
+window.resortUnitCards = function () {
     if (!paginatedSortedUnits || paginatedSortedUnits.length === 0) return;
     paginatedSortedUnits.sort((a, b) => getQuickScore(b.unit) - getQuickScore(a.unit));
     renderCurrentPage();
@@ -741,7 +745,7 @@ function renderCurrentPage() {
     container.querySelectorAll('.lazy-build-load').forEach(c => window.buildLoadObserver.observe(c));
 }
 
-window.goToPage = function(page) {
+window.goToPage = function (page) {
     const totalPages = Math.max(1, Math.ceil(paginatedSortedUnits.length / getUnitsPerPage()));
     if (page < 1 || page > totalPages) return;
     currentPage = page;
@@ -778,7 +782,7 @@ window.globalFilterUnits = (term) => {
             const role = unit.role.toLowerCase();
             const id = unit.id.toLowerCase();
             const placement = (unit.placementType || 'Ground').toLowerCase();
-            
+
             let matches = title.includes(searchTerm) || role.includes(searchTerm) || id.includes(searchTerm) || placement.includes(searchTerm);
             if (!matches && (searchTerm === 'ground' || searchTerm === 'hill')) {
                 if (placement === 'hybrid') matches = true;
