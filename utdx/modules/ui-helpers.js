@@ -117,6 +117,7 @@ window.unitELevels = window.unitELevels || {};
 
 window.resetAndRender = () => {
     renderQueueIndex = 0;
+    currentPage = 1;
     if (typeof renderDatabase === 'function') renderDatabase();
 };
 

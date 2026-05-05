@@ -506,220 +506,249 @@ window.getQuickScore = (unit) => {
 };
 
 window.resortUnitCards = function() {
-    const container = document.getElementById('dbPage');
-    if (!container) return;
-    
-    const cards = Array.from(container.querySelectorAll('.unit-card'));
-    if (cards.length === 0) return;
-
-    const sorted = cards.sort((a, b) => {
-        const idA = a.id.replace('card-', '');
-        const idB = b.id.replace('card-', '');
-        const unitA = window.getUnitById(idA);
-        const unitB = window.getUnitById(idB);
-        if (!unitA || !unitB) return 0;
-        return getQuickScore(unitB) - getQuickScore(unitA);
-    });
-
-    // Re-attach in sorted order
-    sorted.forEach(card => container.appendChild(card));
-
-    // Update Rank Badges
-    sorted.forEach((card, i) => {
-        const badge = card.querySelector('.placement-badge[style*="DPS Rank"]');
-        if (badge) badge.innerText = `DPS Rank: #${i + 1}`;
-    });
+    if (!paginatedSortedUnits || paginatedSortedUnits.length === 0) return;
+    paginatedSortedUnits.sort((a, b) => getQuickScore(b.unit) - getQuickScore(a.unit));
+    renderCurrentPage();
 };
 
+
+function renderUnitCard(unit, absoluteIndex) {
+    if (window.unitELevels[unit.id] === undefined && unit.upgrades && unit.upgrades.length > 0) {
+        window.unitELevels[unit.id] = unit.upgrades.length - 1;
+    }
+
+    const abilityObj = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
+    let abilityLabel = (abilityObj && abilityObj.abilityName) ? abilityObj.abilityName : 'Ability';
+    let toggleScript = '';
+    const isToggled = activeAbilityIds.has(unit.id);
+    const override = TOGGLE_OVERRIDES[window.getFileName(unit.id)];
+    if (override) {
+        abilityLabel = override.dynamicLabel ? override.dynamicLabel(isToggled) : override.label;
+        toggleScript = override.script ? `; ${override.script}` : '';
+    }
+
+    const currentLevel = (window.unitELevels && window.unitELevels[unit.id]) || 0;
+    let abilityUnlocked = true;
+    if (unit.upgrades && unit.upgrades.length > 0) {
+        const hasUnlockCondition = unit.upgrades.some(u => u.unlocksAbility);
+        if (hasUnlockCondition) {
+            abilityUnlocked = false;
+            for (let i = 0; i <= currentLevel; i++) {
+                if (unit.upgrades[i] && unit.upgrades[i].unlocksAbility) { abilityUnlocked = true; break; }
+            }
+        }
+    }
+
+    const abilityToggleHtml = (unit.ability && !abilityObj.noToggle) ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>` : '<div></div>';
+    const modesBtn = (unit.modes && Array.isArray(unit.modes)) ? `<button class="calc-btn ut-btn-compact modes-btn" onclick="openUnitModes('${unit.id}')" title="Change Mode">Modes</button>` : '';
+    const topControls = `<div class="unit-toolbar"><div class="ut-actions"><button class="calc-btn ut-btn-compact" style="opacity: 0.6;" onclick="openCalc('${unit.id}')">🖩 Custom <span style="color: #ff4d4d; font-size: 8px;">(Broken)</span></button><button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">📊 Traits</button><button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">ⓘ Info</button></div><div class="ut-toggle-area">${modesBtn}${abilityToggleHtml}</div></div>`;
+
+    let defaultSort = 'dps';
+    if (isAnyUnit(unit.id, ['sjw', 'esdeath'])) defaultSort = 'damage';
+    else if (isUnit(unit.id, 'law')) defaultSort = 'range';
+
+    const bottomControls = `
+        <div class="search-container">
+            <div class="search-row">
+                <input type="text" placeholder="Search..." class="search-input" onkeyup="filterList(this)">
+                <button class="filter-tab-btn" onclick="toggleFilterTab(this)">Filters ▼</button>
+            </div>
+            <div class="filter-tab-content hidden">
+                <div class="search-row">
+                    <select onchange="filterList(this)" data-filter="sort" class="search-select sort-select">
+                        <option value="dps" ${defaultSort === 'dps' ? 'selected' : ''}>Sort: DPS</option>
+                        <option value="damage" ${defaultSort === 'damage' ? 'selected' : ''}>Sort: Damage</option>
+                        <option value="range" ${defaultSort === 'range' ? 'selected' : ''}>Sort: Range</option>
+                        <option value="efficiency" ${defaultSort === 'efficiency' ? 'selected' : ''}>Sort: Efficiency</option>
+                    </select>
+                    <select onchange="filterList(this)" data-filter="set" class="search-select">
+                        <option value="all">Sets: All</option>
+                        <option value="Junior Ninja">Sets: Junior Ninja</option>
+                        <option value="Sun God">Sets: Sun God</option>
+                        <option value="Laughing Captain">Sets: Laughing</option>
+                        <option value="Ex Captain">Sets: Ex</option>
+                        <option value="Shadow Reaper">Sets: Shadow Reaper</option>
+                        <option value="Reaper Set">Sets: Reaper</option>
+                        <option value="Super Roku">Sets: Super Roku</option>
+                        <option value="Bio-Android">Sets: Bio-Android</option>
+                        <option value="Biju Set">Sets: Biju</option>
+                        <option value="Rebellious Shinobi">Sets: Rebellious</option>
+                        <option value="Reanimated Ninja">Sets: Reanimated</option>
+                        <option value="Great Mage">Sets: Great Mage</option>
+                        <option value="Sorcerer Hunter">Sets: S. Hunter</option>
+                        <option value="Strongest Sorcerer">Sets: Strongest</option>
+                        <option value="Monarch">Sets: Monarch</option>
+                    </select>
+                    <select onchange="filterList(this)" data-filter="head" class="search-select">
+                        <option value="all">Heads: All</option>
+                        <option value="sun_god">Heads: Sun God</option>
+                        <option value="ninja">Heads: Junior Ninja</option>
+                        <option value="reaper_necklace">Heads: Reaper</option>
+                        <option value="shadow_reaper_necklace">Heads: Shadow Reaper</option>
+                        <option value="junior">Heads: Junior Ninja</option>
+                        <option value="biju_head">Heads: Biju</option>
+                        <option value="reanimated_head">Heads: Reanimated</option>
+                        <option value="sorcerer_hunter_spirit">Heads: S. Hunter Spirit</option>
+                        <option value="strongest_sorcerer_glasses">Heads: Strongest Glasses</option>
+                        <option value="monarch">Heads: Monarch Cape</option>
+                        <option value="none">Heads: None</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        ${(unit.upgrades && unit.upgrades.length > 0) ? `
+        <div class="upgrade-toolbar">
+            ${unit.upgrades.map((u, idx) => {
+        const level = idx;
+        const isActive = (window.unitELevels[unit.id] || 0) === level;
+        const isUnlocked = (window.unitELevels[unit.id] || 0) >= level;
+        const isSpecial = (idx === unit.upgrades.length - 1);
+        return `<div class="e-pill ${isActive ? 'active' : ''} ${isUnlocked && (window.unitELevels[unit.id] || 0) > 0 ? 'e-unlocked' : ''} ${isSpecial ? 'is-special' : 'is-stat'}" 
+                                 onclick="selectELevel('${unit.id}', ${level})" 
+                                 data-level="${level}" 
+                                 title="Upgrade ${level}">${level}</div>`;
+    }).join('')}
+        </div>` : ''}`;
+
+    let mainContent = '';
+    ['base', 'abil'].forEach(type => { const mode = 'fixed'; mainContent += `<div class="top-builds-list build-list-container mode-${type} mode-${mode} cfg-0" id="results-${type}-${mode}-0-${unit.id}"></div>`; });
+
+    return createBaseUnitCard(unit, {
+        id: 'card-' + unit.id,
+        additionalClasses: (activeAbilityIds.has(unit.id) ? ' use-ability' : '') + ' lazy-build-load',
+        bannerContent: `<div class="banner-badges">
+            <div class="placement-badge">Max Place: ${unit.placement}</div>
+            <div class="placement-badge is-${(unit.placementType || 'Ground').toLowerCase()}">${unit.placementType || 'Ground'}</div>
+            <div class="placement-badge" style="color: #4ade80; border-color: rgba(74, 222, 128, 0.3);">DPS Rank: #${absoluteIndex}</div>
+        </div>${getUnitImgHtml(unit, 'unit-avatar')}<div class="unit-title"><h2>${unit.name}</h2><span>${unit.role}</span></div>${unit.meta ? `<button class="trait-guide-btn" onclick="openTraitGuide('${unit.id}')">📋 Rec. Traits</button>` : ''}`,
+        topControls, bottomControls, mainContent
+    });
+}
+
+function buildPaginationControls(totalUnits, activePage, totalPages) {
+    const upp = getUnitsPerPage();
+    const start = (activePage - 1) * upp + 1;
+    const end = Math.min(activePage * upp, totalUnits);
+
+    let pageButtons = '';
+    const maxVisible = 5;
+    let startPage = Math.max(1, activePage - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
+
+    if (startPage > 1) pageButtons += `<button class="pg-btn" onclick="goToPage(1)">1</button>`;
+    if (startPage > 2) pageButtons += `<span class="pg-ellipsis">…</span>`;
+
+    for (let p = startPage; p <= endPage; p++) {
+        pageButtons += `<button class="pg-btn${p === activePage ? ' pg-active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+    }
+
+    if (endPage < totalPages - 1) pageButtons += `<span class="pg-ellipsis">…</span>`;
+    if (endPage < totalPages) pageButtons += `<button class="pg-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+
+    return `<div class="pagination-bar">
+        <button class="pg-btn pg-nav" onclick="goToPage(${activePage - 1})" ${activePage <= 1 ? 'disabled' : ''}>‹ Prev</button>
+        <div class="pg-numbers">${pageButtons}</div>
+        <button class="pg-btn pg-nav" onclick="goToPage(${activePage + 1})" ${activePage >= totalPages ? 'disabled' : ''}>Next ›</button>
+        <span class="pg-info">Showing ${start}–${end} of ${totalUnits}</span>
+    </div>`;
+}
+
+function renderCurrentPage() {
+    const container = document.getElementById('dbPage');
+    if (!container) return;
+
+    // Disconnect old observers
+    if (window.buildLoadObserver) {
+        window.buildLoadObserver.disconnect();
+    }
+
+    const upp = getUnitsPerPage();
+    const totalUnits = paginatedSortedUnits.length;
+    const totalPages = Math.max(1, Math.ceil(totalUnits / upp));
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const startIdx = (currentPage - 1) * upp;
+    const endIdx = Math.min(startIdx + upp, totalUnits);
+    const pageUnits = paginatedSortedUnits.slice(startIdx, endIdx);
+
+    container.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+
+    pageUnits.forEach((entry, i) => {
+        const card = renderUnitCard(entry.unit, startIdx + i + 1);
+        card.style.setProperty('--stagger-delay', `${i * 50}ms`);
+        fragment.appendChild(card);
+    });
+
+    container.appendChild(fragment);
+
+    // Add pagination controls
+    const pgWrapper = document.createElement('div');
+    pgWrapper.className = 'pagination-wrapper';
+    pgWrapper.innerHTML = buildPaginationControls(totalUnits, currentPage, totalPages);
+    container.appendChild(pgWrapper);
+
+    // Setup IntersectionObserver for lazy build loading
+    if (!window.buildLoadObserver) {
+        window.buildLoadObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const unitId = entry.target.id.replace('card-', '');
+                if (entry.isIntersecting) {
+                    window.visibleUnitIds.add(unitId);
+                    const unit = window.getUnitById(unitId);
+                    if (unit) updateBuildListDisplay(unitId, false, 100);
+                    entry.target.classList.remove('lazy-build-load');
+                } else {
+                    window.visibleUnitIds.delete(unitId);
+                    entry.target.classList.add('lazy-build-load');
+                }
+            });
+        }, { rootMargin: '200px' });
+    }
+
+    container.querySelectorAll('.lazy-build-load').forEach(c => window.buildLoadObserver.observe(c));
+
+    // Apply global search if active
+    const currentSearch = document.getElementById('globalSearch')?.value;
+    if (currentSearch) globalFilterUnits(currentSearch);
+}
+
+window.goToPage = function(page) {
+    const totalPages = Math.max(1, Math.ceil(paginatedSortedUnits.length / getUnitsPerPage()));
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    renderCurrentPage();
+    // Scroll to top of the main content area
+    const main = document.querySelector('.dashboard-main');
+    if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
 function renderDatabase() {
     const container = document.getElementById('dbPage');
     if (!container) return;
 
-    // Reset rendering state
     if (renderQueueId) { cancelAnimationFrame(renderQueueId); renderQueueId = null; }
     renderQueueIndex = 0;
-    
-    // Clear and prepare for pagination
+
     if (!window.STATIC_BUILD_DB) window.cachedResults = {};
     window.unitBuildsCache = {};
-    
-    const sortedUnits = unitDatabase.map(unit => {
+
+    paginatedSortedUnits = unitDatabase.map(unit => {
         return { unit, maxScore: getQuickScore(unit) };
     }).sort((a, b) => b.maxScore - a.maxScore);
 
-    container.innerHTML = '';
-
-    function processNextChunk() {
-        const startTime = performance.now();
-        const fragment = document.createDocumentFragment();
-        let itemsAdded = 0;
-        let staggerIndex = 0;
-
-        while (renderQueueIndex < sortedUnits.length) {
-            const unit = sortedUnits[renderQueueIndex].unit;
-            const absoluteIndex = renderQueueIndex + 1; // Rank based on sorted list
-
-            if (window.unitELevels[unit.id] === undefined && unit.upgrades && unit.upgrades.length > 0) {
-                window.unitELevels[unit.id] = unit.upgrades.length - 1;
-            }
-
-            renderQueueIndex++;
-
-            const abilityObj = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
-            let abilityLabel = (abilityObj && abilityObj.abilityName) ? abilityObj.abilityName : 'Ability';
-            let toggleScript = '';
-
-            const isToggled = activeAbilityIds.has(unit.id);
-            const override = TOGGLE_OVERRIDES[window.getFileName(unit.id)];
-
-            if (override) {
-                abilityLabel = override.dynamicLabel ? override.dynamicLabel(isToggled) : override.label;
-                toggleScript = override.script ? `; ${override.script}` : '';
-            }
-
-            const currentLevel = (window.unitELevels && window.unitELevels[unit.id]) || 0;
-            let abilityUnlocked = true;
-            if (unit.upgrades && unit.upgrades.length > 0) {
-                const hasUnlockCondition = unit.upgrades.some(u => u.unlocksAbility);
-                if (hasUnlockCondition) {
-                    abilityUnlocked = false;
-                    for (let i = 0; i <= currentLevel; i++) {
-                        if (unit.upgrades[i] && unit.upgrades[i].unlocksAbility) {
-                            abilityUnlocked = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            const abilityToggleHtml = (unit.ability && !abilityObj.noToggle) ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>` : '<div></div>';
-            const modesBtn = (unit.modes && Array.isArray(unit.modes)) ? `<button class="calc-btn ut-btn-compact modes-btn" onclick="openUnitModes('${unit.id}')" title="Change Mode">Modes</button>` : '';
-            const topControls = `<div class="unit-toolbar"><div class="ut-actions"><button class="calc-btn ut-btn-compact" style="opacity: 0.6;" onclick="openCalc('${unit.id}')">🖩 Custom <span style="color: #ff4d4d; font-size: 8px;">(Broken)</span></button><button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">📊 Traits</button><button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">ⓘ Info</button></div><div class="ut-toggle-area">${modesBtn}${abilityToggleHtml}</div></div>`;
-
-            let defaultSort = 'dps';
-            if (isAnyUnit(unit.id, ['sjw', 'esdeath'])) defaultSort = 'damage';
-            else if (isUnit(unit.id, 'law')) defaultSort = 'range';
-
-            const bottomControls = `
-                <div class="search-container">
-                    <div class="search-row">
-                        <input type="text" placeholder="Search..." class="search-input" onkeyup="filterList(this)">
-                        <button class="filter-tab-btn" onclick="toggleFilterTab(this)">Filters ▼</button>
-                    </div>
-                    <div class="filter-tab-content hidden">
-                        <div class="search-row">
-                            <select onchange="filterList(this)" data-filter="sort" class="search-select sort-select">
-                                <option value="dps" ${defaultSort === 'dps' ? 'selected' : ''}>Sort: DPS</option>
-                                <option value="damage" ${defaultSort === 'damage' ? 'selected' : ''}>Sort: Damage</option>
-                                <option value="range" ${defaultSort === 'range' ? 'selected' : ''}>Sort: Range</option>
-                                <option value="efficiency" ${defaultSort === 'efficiency' ? 'selected' : ''}>Sort: Efficiency</option>
-                            </select>
-                            <select onchange="filterList(this)" data-filter="set" class="search-select">
-                                <option value="all">Sets: All</option>
-                                <option value="Junior Ninja">Sets: Junior Ninja</option>
-                                <option value="Sun God">Sets: Sun God</option>
-                                <option value="Laughing Captain">Sets: Laughing</option>
-                                <option value="Ex Captain">Sets: Ex</option>
-                                <option value="Shadow Reaper">Sets: Shadow Reaper</option>
-                                <option value="Reaper Set">Sets: Reaper</option>
-                                <option value="Super Roku">Sets: Super Roku</option>
-                                <option value="Bio-Android">Sets: Bio-Android</option>
-                                <option value="Biju Set">Sets: Biju</option>
-                                <option value="Rebellious Shinobi">Sets: Rebellious</option>
-                                <option value="Reanimated Ninja">Sets: Reanimated</option>
-                                <option value="Great Mage">Sets: Great Mage</option>
-                                <option value="Sorcerer Hunter">Sets: S. Hunter</option>
-                                <option value="Strongest Sorcerer">Sets: Strongest</option>
-                                <option value="Monarch">Sets: Monarch</option>
-                            </select>
-                            <select onchange="filterList(this)" data-filter="head" class="search-select">
-                                <option value="all">Heads: All</option>
-                                <option value="sun_god">Heads: Sun God</option>
-                                <option value="ninja">Heads: Junior Ninja</option>
-                                <option value="reaper_necklace">Heads: Reaper</option>
-                                <option value="shadow_reaper_necklace">Heads: Shadow Reaper</option>
-                                <option value="junior">Heads: Junior Ninja</option>
-                                <option value="biju_head">Heads: Biju</option>
-                                <option value="reanimated_head">Heads: Reanimated</option>
-                                <option value="sorcerer_hunter_spirit">Heads: S. Hunter Spirit</option>
-                                <option value="strongest_sorcerer_glasses">Heads: Strongest Glasses</option>
-                                <option value="monarch">Heads: Monarch Cape</option>
-                                <option value="none">Heads: None</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                ${(unit.upgrades && unit.upgrades.length > 0) ? `
-                <div class="upgrade-toolbar">
-                    ${unit.upgrades.map((u, idx) => {
-                const level = idx;
-                const isActive = (window.unitELevels[unit.id] || 0) === level;
-                const isUnlocked = (window.unitELevels[unit.id] || 0) >= level;
-
-                const isSpecial = (idx === unit.upgrades.length - 1);
-
-                return `<div class="e-pill ${isActive ? 'active' : ''} ${isUnlocked && (window.unitELevels[unit.id] || 0) > 0 ? 'e-unlocked' : ''} ${isSpecial ? 'is-special' : 'is-stat'}" 
-                                     onclick="selectELevel('${unit.id}', ${level})" 
-                                     data-level="${level}" 
-                                     title="Upgrade ${level}">${level}</div>`;
-            }).join('')}
-                </div>` : ''}`;
-
-            let mainContent = '';
-            ['base', 'abil'].forEach(type => { const mode = 'fixed'; mainContent += `<div class="top-builds-list build-list-container mode-${type} mode-${mode} cfg-0" id="results-${type}-${mode}-0-${unit.id}"></div>`; });
-
-            const card = createBaseUnitCard(unit, {
-                id: 'card-' + unit.id,
-                additionalClasses: (activeAbilityIds.has(unit.id) ? ' use-ability' : '') + ' lazy-build-load',
-                bannerContent: `<div class="banner-badges">
-                    <div class="placement-badge">Max Place: ${unit.placement}</div>
-                    <div class="placement-badge is-${(unit.placementType || 'Ground').toLowerCase()}">${unit.placementType || 'Ground'}</div>
-                    <div class="placement-badge" style="color: #4ade80; border-color: rgba(74, 222, 128, 0.3);">DPS Rank: #${absoluteIndex}</div>
-                </div>${getUnitImgHtml(unit, 'unit-avatar')}<div class="unit-title"><h2>${unit.name}</h2><span>${unit.role}</span></div>${unit.meta ? `<button class="trait-guide-btn" onclick="openTraitGuide('${unit.id}')">📋 Rec. Traits</button>` : ''}`,
-                topControls, bottomControls, mainContent
-            });
-
-            card.style.setProperty('--stagger-delay', `${staggerIndex * 50}ms`);
-            staggerIndex++; fragment.appendChild(card); itemsAdded++;
-            if (performance.now() - startTime > 12) break;
+    // Initialize upgrade levels for all units (needed for rank badges)
+    paginatedSortedUnits.forEach(entry => {
+        const unit = entry.unit;
+        if (window.unitELevels[unit.id] === undefined && unit.upgrades && unit.upgrades.length > 0) {
+            window.unitELevels[unit.id] = unit.upgrades.length - 1;
         }
+    });
 
-        if (itemsAdded > 0) {
-            container.appendChild(fragment);
-
-            if (!window.buildLoadObserver) {
-                window.buildLoadObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        const unitId = entry.target.id.replace('card-', '');
-                        if (entry.isIntersecting) {
-                            window.visibleUnitIds.add(unitId);
-                            const unit = window.getUnitById(unitId);
-                            if (unit) {
-                                updateBuildListDisplay(unitId, false, 100);
-                            }
-                            entry.target.classList.remove('lazy-build-load');
-                        } else {
-                            window.visibleUnitIds.delete(unitId);
-                            entry.target.classList.add('lazy-build-load');
-                        }
-                    });
-                }, { rootMargin: '200px' });
-            }
-
-            const newCards = container.querySelectorAll('.lazy-build-load');
-            newCards.forEach(c => window.buildLoadObserver.observe(c));
-        }
-
-        if (renderQueueIndex < sortedUnits.length) renderQueueId = requestAnimationFrame(processNextChunk);
-        else {
-            renderQueueId = null;
-            // Apply current search filter after full render completes
-            const currentSearch = document.getElementById('globalSearch')?.value;
-            if (currentSearch) globalFilterUnits(currentSearch);
-        }
-    }
-    processNextChunk();
+    currentPage = 1;
+    renderCurrentPage();
 }
 
 window.globalFilterUnits = (term) => {

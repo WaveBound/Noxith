@@ -818,3 +818,113 @@ input:checked+.mini-switch::after {
     background: rgba(255, 255, 255, 0.2);
     transform: scale(1.1);
 }
+
+/* ===== PAGINATION ===== */
+.pagination-wrapper {
+    grid-column: 1 / -1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 24px 0 8px;
+}
+
+.pagination-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 8px 14px;
+    backdrop-filter: blur(8px);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.pg-numbers {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pg-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #a0a0a8;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    letter-spacing: 0.3px;
+    min-width: 36px;
+    text-align: center;
+}
+
+.pg-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.pg-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.pg-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.pg-btn.pg-active {
+    background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(59, 130, 246, 0.3);
+}
+
+.pg-btn.pg-nav {
+    font-weight: 700;
+    padding: 6px 14px;
+    letter-spacing: 0.5px;
+}
+
+.pg-ellipsis {
+    color: #555;
+    padding: 0 4px;
+    font-size: 0.9rem;
+    user-select: none;
+}
+
+.pg-info {
+    color: #555;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-left: 8px;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .pagination-bar {
+        padding: 6px 10px;
+        gap: 4px;
+    }
+    .pg-btn {
+        padding: 5px 8px;
+        font-size: 0.75rem;
+        min-width: 30px;
+    }
+    .pg-btn.pg-nav {
+        padding: 5px 10px;
+    }
+    .pg-info {
+        width: 100%;
+        text-align: center;
+        margin-left: 0;
+        margin-top: 4px;
+    }
+}
