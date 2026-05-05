@@ -4,7 +4,7 @@ unitDatabase.push({
     img: "images/units/SuperRoku.png",
     level: 70,
     placement: 2,
-    placementType: "Hill",
+    placementType: "Ground",
     role: "Damage",
     tags: ["Saiyan"],
     meta: {

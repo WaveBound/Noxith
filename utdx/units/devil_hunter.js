@@ -55,7 +55,7 @@ unitDatabase.push({
     modes: [
         {
             name: "Devil Sword",
-            img: "images/units/dante/Devil Sword.png",
+            img: "images/units/DevilHunter/Devil Sword.png",
             level: 70,
             desc: "Sword focus: Burn on Bleed mechanics.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 2.5,
@@ -64,7 +64,7 @@ unitDatabase.push({
         },
         {
             name: "Twin Guns",
-            img: "images/units/dante/Twin Guns.png",
+            img: "images/units/DevilHunter/Twin Guns.png",
             level: 70,
             desc: "Gun focus: -20% SPA.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 3,
@@ -73,7 +73,7 @@ unitDatabase.push({
         },
         {
             name: "Demoncycle",
-            img: "images/units/dante/Demoncycle.png",
+            img: "images/units/DevilHunter/Demoncycle.png",
             level: 70,
             desc: "Heavy focus: Stun per DoT mechanics.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 4,
@@ -82,7 +82,7 @@ unitDatabase.push({
         },
         {
             name: "Fancy Hat",
-            img: "images/units/dante/Fancy Hat.png",
+            img: "images/units/DevilHunter/Fancy Hat.png",
             level: 70,
             desc: "High risk focus: +100% Damage, costs 3,000 ¥ per attack.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 3.5,

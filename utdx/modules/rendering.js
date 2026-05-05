@@ -739,10 +739,6 @@ function renderCurrentPage() {
     }
 
     container.querySelectorAll('.lazy-build-load').forEach(c => window.buildLoadObserver.observe(c));
-
-    // Apply global search if active
-    const currentSearch = document.getElementById('globalSearch')?.value;
-    if (currentSearch) globalFilterUnits(currentSearch);
 }
 
 window.goToPage = function(page) {
@@ -765,11 +761,38 @@ function renderDatabase() {
     if (!window.STATIC_BUILD_DB) window.cachedResults = {};
     window.unitBuildsCache = {};
 
-    paginatedSortedUnits = unitDatabase.map(unit => {
+    const currentSearch = document.getElementById('globalSearch')?.value || '';
+    globalFilterUnits(currentSearch);
+}
+
+window.globalFilterUnits = (term) => {
+    const searchTerm = (term || '').toLowerCase();
+    const clearBtn = document.getElementById('globalSearchClear');
+    if (clearBtn) clearBtn.style.display = searchTerm ? 'flex' : 'none';
+
+    // 1. Filter entire database
+    let filtered = unitDatabase;
+    if (searchTerm) {
+        filtered = unitDatabase.filter(unit => {
+            const title = unit.name.toLowerCase();
+            const role = unit.role.toLowerCase();
+            const id = unit.id.toLowerCase();
+            const placement = (unit.placementType || 'Ground').toLowerCase();
+            
+            let matches = title.includes(searchTerm) || role.includes(searchTerm) || id.includes(searchTerm) || placement.includes(searchTerm);
+            if (!matches && (searchTerm === 'ground' || searchTerm === 'hill')) {
+                if (placement === 'hybrid') matches = true;
+            }
+            return matches;
+        });
+    }
+
+    // 2. Prepare paginated list
+    paginatedSortedUnits = filtered.map(unit => {
         return { unit, maxScore: getQuickScore(unit) };
     }).sort((a, b) => b.maxScore - a.maxScore);
 
-    // Initialize upgrade levels for all units (needed for rank badges)
+    // 3. Initialize upgrade levels if needed
     paginatedSortedUnits.forEach(entry => {
         const unit = entry.unit;
         if (window.unitELevels[unit.id] === undefined && unit.upgrades && unit.upgrades.length > 0) {
@@ -777,43 +800,9 @@ function renderDatabase() {
         }
     });
 
+    // 4. Reset to page 1 and render
     currentPage = 1;
     renderCurrentPage();
-}
-
-window.globalFilterUnits = (term) => {
-    const searchTerm = (term || '').toLowerCase();
-    const cards = document.querySelectorAll('#dbPage .unit-card');
-    const clearBtn = document.getElementById('globalSearchClear');
-    
-    if (clearBtn) clearBtn.style.display = searchTerm ? 'flex' : 'none';
-
-    cards.forEach(card => {
-        if (!searchTerm) {
-            card.style.display = '';
-            return;
-        }
-
-        const title = card.querySelector('h2')?.innerText.toLowerCase() || '';
-        const role = card.querySelector('.unit-title span')?.innerText.toLowerCase() || '';
-        const id = card.id.replace('card-', '').toLowerCase();
-        
-        // Find the placement badge text (Ground, Hill, or Hybrid)
-        const placement = card.querySelector('.placement-badge[class*="is-"]')?.innerText.toLowerCase() || '';
-        
-        let matches = title.includes(searchTerm) || role.includes(searchTerm) || id.includes(searchTerm) || placement.includes(searchTerm);
-
-        // Special handling: If searching for 'ground' or 'hill', also include 'hybrid' units
-        if (!matches && (searchTerm === 'ground' || searchTerm === 'hill')) {
-            if (placement === 'hybrid') matches = true;
-        }
-
-        if (matches) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
-    });
 };
 
 window.clearGlobalSearch = () => {

@@ -400,7 +400,8 @@ const guideData = [
     { unit: "the_strongest_in_history", img: "images/units/Sukuna.png", isCalculated: true },
     { unit: "the_strongest_of_today", img: "images/units/Gojo.png", isCalculated: true },
     { unit: "devil_hunter", img: "images/units/DevilHunter.png", isCalculated: true },
-    { unit: "alpha_devil", img: "images/units/AlphaDevil.png", isCalculated: true }
+    { unit: "alpha_devil", img: "images/units/AlphaDevil.png", isCalculated: true },
+    { unit: "mimicry_sorcerer", img: "images/units/MimicrySorcerer.png", isCalculated: true }
 ];
 
 const BAMBIETTA_MODES = {
@@ -567,6 +568,7 @@ const UNIT_FILES = [
     'devil_hunter.js',
     'strongest_of_today.js',
     'alpha_devil.js',
+    'mimicry_sorcerer.js',
 ];
 
 // Resolves after every unit script has loaded (or errored).

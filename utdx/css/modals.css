@@ -2126,3 +2126,23 @@
         height: 160px;
     }
 }
+/* --- MIMICRY SORCERER SPECIFIC OVERRIDES --- */
+.unit-mimicry_sorcerer .mode-card-large {
+    margin: 0 10px; /* Added gap between cards */
+}
+
+.unit-mimicry_sorcerer .mode-img-container-large {
+    width: 320px;
+    height: 460px;
+}
+
+.unit-mimicry_sorcerer .mode-card-info {
+    width: 250px;
+    padding: 18px;
+    bottom: 25px;
+}
+
+.unit-mimicry_sorcerer .mode-card-name {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+}
