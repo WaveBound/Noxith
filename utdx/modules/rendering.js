@@ -11,6 +11,7 @@ const HEAD_CONFIG = {
     'junior': { name: 'Junior Ninja', search: 'Junior', cls: 'ninja' },
     'biju_head': { name: 'Biju', search: 'Biju', cls: 'sungod' },
     'reanimated_head': { name: 'Reanimated', search: 'Reanimated', cls: 'reaper' },
+    'rebellious_head': { name: 'Rebellious', search: 'Rebellious', cls: 'ninja' },
     'sorcerer_hunter_spirit': { name: 'S.H. Spirit', search: 'S. Hunter', cls: 'custom' },
     'strongest_sorcerer_glasses': { name: 'Strongest', search: 'Strongest', cls: 'custom' },
     'monarch': { name: 'Monarch Cape', search: 'Monarch', cls: 'custom' }
@@ -279,7 +280,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     null,
                     null, // No filter
                     ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'],
-                    ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'],
+                    ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'],
                     true,
                     null,
                     activeType === 'abil',
@@ -323,7 +324,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 spa: r.sp || r.spa || 0,
                 range: r.ra || r.range || 0,
                 prio: r.p || r.prio || 'dmg',
-                headUsed: (typeof r.h === 'number' ? (['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'mage_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'][r.h]) : (r.headUsed || r.h)) || 'none',
+                headUsed: (typeof r.h === 'number' ? (['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'][r.h]) : (r.headUsed || r.h)) || 'none',
                 isCustom: !!(r.c || r.isCustom),
                 subStats: r.ss || r.subStats || {},
                 mainStats: r.ms || r.mainStats || {
@@ -481,7 +482,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                 ? [...(typeof customTraits !== 'undefined' ? customTraits : []), ...(unitSpecificTraits[unit.id] || [])]
                 : null;
 
-            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
+            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
 
             if (dynamicResults.length > 0) {
                 const seen = new Set(calculatedResults.map(r => r.id));
@@ -622,6 +623,7 @@ function renderUnitCard(unit, absoluteIndex) {
                         <option value="junior">Heads: Junior Ninja</option>
                         <option value="biju_head">Heads: Biju</option>
                         <option value="reanimated_head">Heads: Reanimated</option>
+                        <option value="rebellious_head">Heads: Rebellious</option>
                         <option value="sorcerer_hunter_spirit">Heads: S. Hunter Spirit</option>
                         <option value="strongest_sorcerer_glasses">Heads: Strongest Glasses</option>
                         <option value="monarch">Heads: Monarch Cape</option>

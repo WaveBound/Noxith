@@ -591,14 +591,15 @@ function renderMathContent(data, isSplit = false) {
     const setTagCmTotal = baseSetCm + tagCm;
     const preConditionalDmg = data.dmgVal / (data.conditionalData ? data.conditionalData.mult : 1);
 
-    // --- SUN GOD HTML (Base Damage Section) ---
+    // --- HEAD PASSIVE RENDERING ---
     let headDmgHtml = '';
+
+    // Sun God
     if (data.headBuffs && data.headBuffs.type === 'sun_god') {
         const uptimePct = (data.headBuffs.uptime || 0);
-        headDmgHtml = `
+        headDmgHtml += `
         <tr class="mt-row-sungod"><td colspan="3" class="p-2">
             <div class="mt-flex-between mb-2"><span class="text-gold mt-text-bold text-xs tracking-sm">SUN GOD PASSIVE</span><button class="calc-info-btn" onclick="openInfoPopup('sungod_passive')">?</button></div>
-            
             <div class="mt-flex-between text-xs text-white mb-1">
                 <span class="opacity-70">Range Stat:</span>
                 <span class="mt-font-mono mt-text-right mt-text-range">${fmt.fix(data.range, 1)}</span>
@@ -607,8 +608,35 @@ function renderMathContent(data, isSplit = false) {
                 <span class="opacity-70">Uptime:</span>
                 <span class="mt-font-mono mt-text-right ${uptimePct >= 1 ? 'mt-text-green' : 'mt-text-orange'}">${fmt.fix(uptimePct * 100, 1)}%</span>
             </div>
-
             <div class="mt-flex-between mt-border-top mt-pt-sm"><span class="text-white text-xs text-bold">Avg Damage Buff</span><span class="text-gold text-sm mt-text-bold"> +${fmt.num(data.headBuffs.dmg)}%</span></div>
+        </td></tr>`;
+    }
+
+    // Rebellious CC
+    if (data.headBuffs && data.headBuffs.type === 'rebellious_cc') {
+        const uptimePct = (data.headBuffs.uptime || 0);
+        headDmgHtml += `
+        <tr class="mt-row-rebellious"><td colspan="3" class="p-2">
+            <div class="mt-flex-between mb-2">
+                <span class="text-custom mt-text-bold text-xs tracking-sm">REBELLIOUS SET PERK (CC)</span>
+                <button class="calc-info-btn" onclick="openInfoPopup('tag_logic')">?</button>
+            </div>
+            <div class="mt-flex-between text-xs text-white mb-1">
+                <span class="opacity-70">Condition:</span>
+                <span class="mt-font-mono mt-text-right text-white">Crowd Control Applied</span>
+            </div>
+            <div class="mt-flex-between text-xs text-white mb-1">
+                <span class="opacity-70">Buff Duration:</span>
+                <span class="mt-font-mono mt-text-right text-white">10.0s</span>
+            </div>
+            <div class="mt-flex-between text-xs text-white mb-3">
+                <span class="opacity-70">Uptime:</span>
+                <span class="mt-font-mono mt-text-right ${uptimePct >= 1 ? 'mt-text-green' : 'mt-text-orange'}">${fmt.fix(uptimePct * 100, 1)}%</span>
+            </div>
+            <div class="mt-flex-between mt-border-top mt-pt-sm">
+                <span class="text-white text-xs text-bold">Avg Damage Bonus</span>
+                <span class="text-custom text-sm mt-text-bold"> +${fmt.fix(data.headBuffs.ccBonus, 1)}%</span>
+            </div>
         </td></tr>`;
     }
 
