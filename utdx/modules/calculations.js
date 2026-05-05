@@ -827,8 +827,20 @@ function calculateDPS(uStats, relicStats, context) {
         summonData.summons = [];
         let cDpsTotal = 0;
 
-        uStats.customSummons.forEach(s => {
+        const state = (window.unitModesState || {})[uStats.id];
+        const activeModes = Array.isArray(state) ? state : (state !== undefined ? [state] : [0]);
+
+        uStats.customSummons.forEach((s, sIdx) => {
             if (upLevel >= s.reqUp) {
+                // Check if this summon is enabled by the current mode (for Sukuna)
+                let isEnabled = true;
+                if (uStats.id === 'the_strongest_in_history') {
+                    isEnabled = false;
+                    if (activeModes.includes(1) && sIdx === 0) isEnabled = true;
+                    if (activeModes.includes(2) && sIdx === 1) isEnabled = true;
+                }
+
+                if (!isEnabled) return;
                 let sDmgMult = s.dmgMult;
                 if (eLevel >= 6 && s.e6DmgMult) sDmgMult = s.e6DmgMult;
 

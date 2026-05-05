@@ -67,6 +67,13 @@ unitDatabase.push({
         },
     ],
 
+    modes: [
+        { name: "Adaptive Wheel", desc: "Base form with Stun Immunity enabled.", img: "images/units/Sukuna/AdaptiveWheel.png" },
+        { name: "Perfect Curse", desc: "Enables Perfect Curse summon.", img: "images/units/Sukuna/PerfectCurse.png" },
+        { name: "Adaptive Curse", desc: "Enables Adaptive Curse summon", img: "images/units/Sukuna/AdaptiveCurse.png" }
+    ],
+    allowMultipleModes: true,
+
     // CUSTOM SUMMONS (Independent units spawned by this unit)
     customSummons: [
         {
@@ -89,10 +96,10 @@ unitDatabase.push({
             reqUp: 6,
             spa: 12,
             dmgMult: 1.0,
-            avgMult: (1 + 1 + 1 + 1.5) / 3,
+            avgMult: 1.5, // (1 + 1 + 2.5) / 3
             canCrit: false,
             desc: [
-                "Every 3rd attack does 1 attack for 150%:",
+                "Every 3rd attack performs an extra hit:",
                 "• World Cutting Slash (1.5x Dmg in 180° cone)"
             ],
             color: "#f87171"

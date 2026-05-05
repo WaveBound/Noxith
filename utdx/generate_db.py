@@ -108,6 +108,7 @@ if (isMainThread) {
     
     // --- NODE.JS POLYFILLS ---
     global.window = global;
+    global.unitModesState = {}; // Fix for units with Modes (Sukuna, etc.)
     global.btoa = function(str) { return Buffer.from(str, 'binary').toString('base64'); };
     global.atob = function(str) { return Buffer.from(str, 'base64').toString('binary'); };
 
@@ -502,6 +503,9 @@ if (isMainThread) {
             window.bijuuActive = combo[2] === '1'; window.ancientMageActive = combo[3] === '1';
             window.kingSailorActive = combo[4] === '1'; window.fernHillActive = combo[5] === 'hill';
             window.fernGroundActive = combo[5] === 'ground';
+ 
+            // Assume full modes for Sukuna for DB ranking
+            window.unitModesState['the_strongest_in_history'] = [1, 2];
 
             statConfig.applyRelicDot = true; statConfig.applyRelicCrit = true; 
 
@@ -557,6 +561,19 @@ if (isMainThread) {
 
                     CONFIGS.forEach(cfg => {
                         const traitGroups = fastCalculateUnitBuilds(u, cfg, traitsForCalc, isAbility);
+ 
+                        if (u.id === 'the_strongest_in_history' && cfg.subs) {
+                            window.unitModesState['the_strongest_in_history'] = [1, 2];
+                            const monarchTrait = traitsForCalc.find(t => t.name === 'Ruler' || t.name === 'Godly');
+                            if (monarchTrait) {
+                                const mBuilds = fastCalculateUnitBuilds(u, { head: true, subs: true }, [monarchTrait], isAbility);
+                                if (mBuilds[monarchTrait.name]) {
+                                    if (!traitGroups[monarchTrait.name]) traitGroups[monarchTrait.name] = [];
+                                    traitGroups[monarchTrait.name].push(...mBuilds[monarchTrait.name]);
+                                }
+                            }
+                            window.unitModesState['the_strongest_in_history'] = [0];
+                        }
 
                         const guaranteedBuilds = [];
                         const remainingPool = [];

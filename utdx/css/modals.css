@@ -25,6 +25,7 @@
     visibility: visible;
 }
 
+
 /* --- 2. MODAL BOX STRUCTURE --- */
 .modal-box {
     background: linear-gradient(145deg, #0f1014 0%, #050505 100%);
@@ -1901,7 +1902,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: transparent;
+    background: rgba(0, 0, 0, 0.7);
     z-index: 4000;
     display: flex;
     align-items: center;
@@ -1930,7 +1931,7 @@
     border: none;
     padding: 0;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
     position: relative;
     margin: 0 -10px;
     flex-shrink: 0;
@@ -1957,14 +1958,78 @@
 }
 
 .mode-card-large.active {
-    filter: drop-shadow(0 0 40px #a855f7);
     transform: translateY(-10px);
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
 }
 
+
 /* Exit Animation */
-.modes-overlay.closing .mode-card-large {
-    animation: modeExit 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.modes-overlay-grid.closing .mode-card-large {
+    animation: modeExit 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* --- 13. CIRCULAR MODES LAYOUT (Sukuna Special) --- */
+.modes-overlay-grid.circular-layout {
+    display: block !important;
+    position: relative !important;
+    width: 900px;
+    height: 900px;
+    margin: 0 auto;
+}
+
+.modes-overlay-grid.circular-layout .mode-card-large {
+    position: absolute !important;
+    width: 400px !important;
+    height: auto !important;
+    margin: 0 !important;
+    transform: translate(-50%, -50%) !important;
+    animation: none !important; 
+    opacity: 1;
+}
+
+/* Position cards in a triangle */
+.modes-overlay-grid.circular-layout .mode-card-large:nth-child(1) {
+    top: 25%;
+    left: 50%;
+}
+
+.modes-overlay-grid.circular-layout .mode-card-large:nth-child(2) {
+    top: 60%;
+    left: 10%;
+}
+
+.modes-overlay-grid.circular-layout .mode-card-large:nth-child(3) {
+    top: 60%;
+    left: 90%;
+}
+
+.modes-overlay-grid.circular-layout .mode-card-large .mode-img-container-large {
+    width: 400px;
+    height: 550px;
+}
+
+.modes-overlay-grid.circular-layout .mode-card-large .mode-card-info {
+    bottom: -40px; 
+    width: 300px;
+}
+
+.modes-overlay-grid.circular-layout .mode-card-large.active img {
+    filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff);
+}
+
+.modes-overlay-grid.circular-layout .mode-card-large.active .mode-card-info {
+    border-color: #fff;
+}
+
+
+
+.modes-overlay-grid.circular-layout .mode-card-large:hover {
+    transform: translate(-50%, -55%) scale(1.05) !important;
+}
+
+
+
+
 
 @keyframes modeExit {
     from {

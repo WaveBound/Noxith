@@ -254,11 +254,22 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
     // Monarch Dynamic Bonus (Set)
     if (relicStats.set === 'monarch') {
         const upLevel = context.upgradeLevel !== undefined ? context.upgradeLevel : 6;
-        const activeSummons = (uStats.customSummons || []).filter(s => upLevel >= (s.reqUp || 0)).length;
-        let summonCount = activeSummons + (uStats.summonStats ? (uStats.summonStats.maxCount || 1) : 0);
-        
-        // Phantom Captain planes count as summons (even in base form)
-        if (uStats.id === 'phantom_captain' && summonCount === 0) summonCount = 9;
+        let summonCount = 0;
+
+        if (uStats.id === 'the_strongest_in_history') {
+            const state = (window.unitModesState || {})[uStats.id];
+            const activeModes = Array.isArray(state) ? state : (state !== undefined ? [state] : [0]);
+            // Only Perfect Curse (1) and Adaptive Curse (2) count as summons for Monarch (+10% each)
+            summonCount = activeModes.filter(m => m === 1 || m === 2).length;
+        } else {
+            const activeSummons = (uStats.customSummons || []).filter((s, sIdx) => {
+                if (upLevel < (s.reqUp || 0)) return false;
+                return true;
+            }).length;
+            summonCount = activeSummons + (uStats.summonStats ? (uStats.summonStats.maxCount || 1) : 0);
+            
+            if (uStats.id === 'phantom_captain' && summonCount === 0) summonCount = 9;
+        }
 
 
         if (summonCount > 0) {
@@ -351,11 +362,22 @@ function _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicSta
         
         // Full Set Summon Perk (Accessory): +10% per summon, cap 60%
         const upLevel = context.upgradeLevel !== undefined ? context.upgradeLevel : 6;
-        const activeSummons = (uStats.customSummons || []).filter(s => upLevel >= (s.reqUp || 0)).length;
-        let summonCount = activeSummons + (uStats.summonStats ? (uStats.summonStats.maxCount || 1) : 0);
-        
-        // Phantom Captain planes count as summons (even in base form)
-        if (uStats.id === 'phantom_captain' && summonCount === 0) summonCount = 9;
+        let summonCount = 0;
+
+        if (uStats.id === 'the_strongest_in_history') {
+            const state = (window.unitModesState || {})[uStats.id];
+            const activeModes = Array.isArray(state) ? state : (state !== undefined ? [state] : [0]);
+            // Only Perfect Curse (1) and Adaptive Curse (2) count as summons
+            summonCount = activeModes.filter(m => m === 1 || m === 2).length;
+        } else {
+            const activeSummons = (uStats.customSummons || []).filter((s, sIdx) => {
+                if (upLevel < (s.reqUp || 0)) return false;
+                return true;
+            }).length;
+            summonCount = activeSummons + (uStats.summonStats ? (uStats.summonStats.maxCount || 1) : 0);
+            
+            if (uStats.id === 'phantom_captain' && summonCount === 0) summonCount = 9;
+        }
 
 
         if (summonCount > 0) {

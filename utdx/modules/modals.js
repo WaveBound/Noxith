@@ -420,24 +420,31 @@ function openUnitModes(unitId) {
     
     if (!overlay || !grid) return;
 
-    const currentMode = window.unitModesState[unitId] || 0;
+    const state = window.unitModesState[unitId];
+    const isMulti = !!unit.allowMultipleModes;
+    const activeModes = isMulti ? (Array.isArray(state) ? state : [state || 0]) : (state !== undefined ? [state] : [0]);
 
-    const modesHtml = unit.modes.map((mode, idx) => `
-        <div class="mode-card-large ${currentMode === idx ? 'active' : ''}" 
-             style="transition-delay: ${idx * 0.05}s"
-             onclick="selectUnitMode('${unitId}', ${idx})">
-            <div class="mode-img-container-large">
-                <img src="${mode.img}" alt="${mode.name}">
+    const modesHtml = unit.modes.map((mode, idx) => {
+        const isActive = activeModes.includes(idx);
+        return `
+            <div class="mode-card-large ${isActive ? 'active' : ''}" 
+                 style="transition-delay: ${idx * 0.05}s"
+                 onclick="selectUnitMode('${unitId}', ${idx})">
+                <div class="mode-img-container-large">
+                    <img src="${mode.img}" alt="${mode.name}">
+                </div>
+                <div class="mode-card-info">
+                    <div class="mode-card-name">${mode.name}</div>
+                    <div class="mode-card-desc">${mode.desc}</div>
+                </div>
             </div>
-            <div class="mode-card-info">
-                <div class="mode-card-name">${mode.name}</div>
-                <div class="mode-card-desc">${mode.desc}</div>
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 
     grid.innerHTML = modesHtml;
     grid.className = 'modes-overlay-grid unit-' + unitId;
+    if (unit.allowMultipleModes) grid.classList.add('multi-select-modes');
+    if (unitId === 'the_strongest_in_history') grid.classList.add('circular-layout');
     
     overlay.classList.remove('hidden');
     document.body.classList.add('modal-open');
@@ -445,12 +452,39 @@ function openUnitModes(unitId) {
 window.openUnitModes = openUnitModes;
 
 function selectUnitMode(unitId, modeIdx) {
-    window.unitModesState[unitId] = modeIdx;
+    const unit = getUnitById(unitId);
+    if (!unit) return;
+
+    const isMulti = !!unit.allowMultipleModes;
+    if (isMulti) {
+        let state = window.unitModesState[unitId];
+        if (!Array.isArray(state)) state = [state || 0];
+        
+        if (state.includes(modeIdx)) {
+            // Prevent removing the last mode? 
+            // Or just allow removing all?
+            state = state.filter(i => i !== modeIdx);
+            if (state.length === 0) state = [0]; // Default back to Wheel
+        } else {
+            state.push(modeIdx);
+        }
+        window.unitModesState[unitId] = state;
+
+        // Auto-close Sukuna if both curses are selected
+        if (unitId === 'the_strongest_in_history' && state.includes(1) && state.includes(2)) {
+            setTimeout(() => closeModesOverlay(), 500);
+        }
+    } else {
+        window.unitModesState[unitId] = modeIdx;
+    }
     
     // Update UI in overlay
     const cards = document.querySelectorAll('.mode-card-large');
+    const newState = window.unitModesState[unitId];
+    const activeModes = isMulti ? newState : [newState];
+
     cards.forEach((card, idx) => {
-        if (idx === modeIdx) card.classList.add('active');
+        if (activeModes.includes(idx)) card.classList.add('active');
         else card.classList.remove('active');
     });
     
@@ -464,10 +498,12 @@ function selectUnitMode(unitId, modeIdx) {
         updateBuildListDisplay(unitId, true);
     }
 
-    // Auto close after selection for better UX
-    setTimeout(() => {
-        closeModesOverlay();
-    }, 300);
+    // Auto close after selection ONLY for single-select units
+    if (!isMulti) {
+        setTimeout(() => {
+            closeModesOverlay();
+        }, 100);
+    }
 }
 window.selectUnitMode = selectUnitMode;
 
@@ -487,7 +523,7 @@ function closeModesOverlay() {
         if (otherModals.length === 0) {
             document.body.classList.remove('modal-open');
         }
-    }, 400); 
+    }, 200); 
 }
 window.closeModesOverlay = closeModesOverlay;
 

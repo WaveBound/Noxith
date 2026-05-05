@@ -265,6 +265,36 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             const modeData = dbEntry[activeMode] || dbEntry[activeMode === 'fixed' ? 'f' : 'b'];
             const perfectBuilds = modeData ? modeData[0] : null;
             if (perfectBuilds && perfectBuilds.length > 0) benchmarkDps = perfectBuilds[0].dps || 0;
+
+            // NEW: If unit has modes and we are forcing a sync (from a mode change),
+            // re-calculate the best possible build dynamically. 
+            // The static DB only contains results for the "Base" form.
+            if (forceSync && unitObj && unitObj.modes) {
+                const dynamicResults = calculateUnitBuilds(
+                    unitObj, 
+                    null, 
+                    null, // No filter
+                    ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'], 
+                    ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'], 
+                    true, 
+                    null, 
+                    activeType === 'abil', 
+                    activeMode
+                );
+                if (dynamicResults && dynamicResults.perfect && dynamicResults.perfect[0]) {
+                    benchmarkDps = dynamicResults.perfect[0].dps || 0;
+                    // Cache this new benchmark for this unit/mode combo
+                    if (!window.modeBenchmarks) window.modeBenchmarks = {};
+                    const modeKey = `${unitId}-${JSON.stringify(window.unitModesState[unitId])}-${activeType}`;
+                    window.modeBenchmarks[modeKey] = benchmarkDps;
+                }
+            } else if (unitObj && unitObj.modes) {
+                // Check cache if not forcing sync
+                const modeKey = `${unitId}-${JSON.stringify(window.unitModesState[unitId])}-${activeType}`;
+                if (window.modeBenchmarks && window.modeBenchmarks[modeKey]) {
+                    benchmarkDps = window.modeBenchmarks[modeKey];
+                }
+            }
         }
     } catch (e) { console.warn("Benchmark error", e); }
 
