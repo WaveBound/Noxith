@@ -503,7 +503,7 @@ const TutorialSystem = (function () {
         ensureMikuOff();
 
         // Permanently sets local storage so it never auto-opens again
-        localStorage.setItem('hasSeenTutorial_v8', 'true');
+        localStorage.setItem('hasSeenTutorial_v9', 'true');
     };
 
     // Responsive abort: If the user resizes to mobile while tutorial is running, shut it down.
@@ -515,16 +515,24 @@ const TutorialSystem = (function () {
 
     // Silent Wait: Timeout fallback to guarantee tutorial starts even if DOM is weird
     const silentWait = async () => {
+
+        // 1. Give the init.js announcement modal time to spawn (it has a 1200ms delay)
+        // If they haven't seen it, we force a 1500ms wait to let it trigger first.
+        if (!localStorage.getItem('resume_notice_hidden_v8')) {
+            await new Promise(r => setTimeout(r, 1000));
+        }
+
+        // 2. Wait for the Unit Cards to load into the DOM
         let attempts = 0;
-        while (!document.querySelector('.unit-card .build-row') && attempts < 20) {
+        while (!document.querySelector('.unit-card .build-row') && attempts < 50) {
             await new Promise(r => setTimeout(r, 100));
             attempts++;
         }
 
-        attempts = 0;
-        while (document.querySelectorAll('.modal-overlay.is-visible').length > 0 && attempts < 20) {
-            await new Promise(r => setTimeout(r, 100));
-            attempts++;
+        // 3. Wait indefinitely while ANY modal is visible (like the announcement modal)
+        // This holds the tutorial back until the user actively clicks "Close" or "Awesome!"
+        while (document.querySelectorAll('.modal-overlay.is-visible').length > 0) {
+            await new Promise(r => setTimeout(r, 250));
         }
 
         await new Promise(r => setTimeout(r, 500));

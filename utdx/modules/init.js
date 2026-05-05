@@ -64,7 +64,7 @@ function initApp() {
                     size: 'modal-sm'
                 });
             }
-        }, 1200);
+        }, 500);
     }
 
 }
