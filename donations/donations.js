@@ -3,7 +3,7 @@
  * Highly portable script to inject a donation modal into any page.
  */
 
-(function() {
+(function () {
     // Prevent multiple injections
     if (window.NoxithDonations) return;
 
@@ -95,13 +95,15 @@
             filter: brightness(1.1);
         }
         .nox-don-paypal {
-            background: rgba(255, 255, 255, 0.03);
-            color: #555;
-            border: 1px solid #222;
-            cursor: not-allowed;
-            pointer-events: none;
-            filter: grayscale(1);
-            opacity: 0.6;
+            background: linear-gradient(135deg, #0070f3 0%, #003087 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 112, 243, 0.15);
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .nox-don-paypal:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 112, 243, 0.3);
+            filter: brightness(1.1);
         }
         .nox-badge {
             font-size: 0.65rem;
@@ -115,6 +117,10 @@
         .nox-don-cashapp .nox-badge {
             background: rgba(0, 0, 0, 0.1);
             color: rgba(0, 0, 0, 0.6);
+        }
+        .nox-don-paypal .nox-badge {
+            background: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.8);
         }
         .nox-modal-close {
             margin-top: 32px;
@@ -153,13 +159,13 @@
                         <span class="nox-badge">Active</span>
                     </a>
                     
-                    <div class="nox-don-btn nox-don-paypal">
+                    <a href="https://www.paypal.com/donate/?hosted_button_id=YWVJECVJFVFKA" target="_blank" class="nox-don-btn nox-don-paypal">
                         <div class="nox-don-btn-content">
                             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.641.641 0 0 1 .632-.54h7.49c1.97 0 3.504.425 4.562 1.265.986.782 1.488 1.93 1.488 3.41 0 1.238-.344 2.39-1.023 3.424-.658.995-1.597 1.812-2.79 2.427-1.192.615-2.58.924-4.124.924h-1.63a.641.641 0 0 0-.633.541l-.94 6.126a.641.641 0 0 1-.632.54z"/></svg>
                             <span>PayPal</span>
                         </div>
-                        <span class="nox-badge">Soon</span>
-                    </div>
+                        <span class="nox-badge">Active</span>
+                    </a>
                 </div>
                 
                 <button class="nox-modal-close" onclick="NoxithDonations.close()">Return to site</button>
@@ -180,21 +186,21 @@
         document.body.appendChild(modalElement);
 
         // Close on overlay click
-        modalElement.addEventListener('click', function(e) {
+        modalElement.addEventListener('click', function (e) {
             if (e.target === this) window.NoxithDonations.close();
         });
     }
 
     // Public API
     window.NoxithDonations = {
-        open: function() {
+        open: function () {
             const modal = document.getElementById('noxDonationModal');
             if (modal) {
                 modal.classList.add('active');
                 document.body.style.overflow = 'hidden';
             }
         },
-        close: function() {
+        close: function () {
             const modal = document.getElementById('noxDonationModal');
             if (modal) {
                 modal.classList.remove('active');
