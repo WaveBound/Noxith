@@ -121,6 +121,17 @@ const SUB_NAMES = {
 
 const patchNotesData = [
     {
+        version: "v5.4",
+        date: "May 05, 2026",
+        changes: [
+            { type: "Fix", text: "<b>Custom Pair:</b> Restored full functionality and fixed Trait combination logic." },
+            { type: "Fix", text: "<b>Relic Inventory:</b> Major performance optimization; resolved UI hangs during massive inventory calculations." },
+            { type: "UI", text: "<b>Inventory Mode:</b> Fixed unit cards getting stuck on 'Calculating...' state." },
+            { type: "UI", text: "<b>Optimality Badge:</b> Improved design (smaller, better hover) and added click-to-view breakdown functionality." },
+            { type: "UI", text: "<b>Relic Bag:</b> Added interactive hover effect for the inventory bag icon." }
+        ]
+    },
+    {
         version: "v5.3",
         date: "May 04, 2026",
         changes: [
@@ -128,6 +139,7 @@ const patchNotesData = [
             { type: "Fix", text: "<b>Performance:</b> Resolved UI lagging/stuttering when scrolling past Sasuke units." },
             { type: "Unit", text: "<b>New Units:</b> Added <b>Sukuna (The Strongest in History)</b> and <b>Gojo (The Strongest of Today)</b>." },
             { type: "Unit", text: "<b>New Units:</b> Added <b>Devil Hunter</b> and <b>Alpha Devil</b>." },
+            { type: "UI", text: "<b>Pages:</b> Added page list, should help with any lag/slow rendering." },
             { type: "UI", text: "<b>DPS Breakdown:</b> Improved visual elements and clarity in the math breakdown modal." },
             { type: "UI", text: "<b>Navigation:</b> Moved global buffs to a dedicated <b>Buffs Button</b> to declutter the toolbar." },
             { type: "UI", text: "<b>Search:</b> Added a <b>Search Bar</b> to quickly find units by name, role, or type." },

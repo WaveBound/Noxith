@@ -131,7 +131,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
         else if (optPct >= 80) { color = '#ffcc00'; glow = 'rgba(255, 204, 0, 0.15)'; }
         else { color = '#ff4d4d'; glow = 'rgba(255, 77, 77, 0.15)'; }
 
-        optimalityHtml = `<div class="optimality-badge" style="color: ${color}; border-color: ${color}66; --glow-color: ${glow};"><span class="opt-label" style="color: ${color}">OPTIMALITY</span><span class="opt-pct">${fix1(optPct)}%</span></div>`;
+        optimalityHtml = `<button class="optimality-badge clickable" onclick="showMathBreakdown('${r.id}')" title="View Optimality Breakdown" style="color: ${color}; border-color: ${color}33; --glow-color: ${glow};"><span class="opt-label" style="color: ${color}">OPTIMALITY</span><span class="opt-pct">${fix1(optPct)}%</span></button>`;
     }
 
     const prioConfig = { 'spa': { label: 'SPA STAT', cls: 'prio-spa' }, 'range': { label: 'RANGE STAT', cls: 'prio-range' }, 'default': { label: 'DMG STAT', cls: 'prio-dmg' } };
@@ -385,7 +385,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         buildData = window.unitBuildsCache[unitId]?.['base']?.[activeMode]?.[0];
     }
 
-    if (!buildData && !inventoryMode && unitObj) {
+    if (!buildData && unitObj) {
         const isBambiAlt = (isUnit(unitId, 'bambietta') && bambiettaState.element !== 'Dark');
         const isRobotAlt = (isUnit(unitId, 'robot1718') && robot1718State.mode !== 'Robot 17');
         if (!isBambiAlt && !isRobotAlt) {
@@ -541,7 +541,7 @@ function renderUnitCard(unit, absoluteIndex) {
 
     const abilityToggleHtml = (unit.ability && !abilityObj.noToggle) ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>` : '<div></div>';
     const modesBtn = (unit.modes && Array.isArray(unit.modes)) ? `<button class="calc-btn ut-btn-compact modes-btn" onclick="openUnitModes('${unit.id}')" title="Change Mode">Modes</button>` : '';
-    const topControls = `<div class="unit-toolbar"><div class="ut-actions"><button class="calc-btn ut-btn-compact" style="opacity: 0.6;" onclick="openCalc('${unit.id}')">🖩 Custom <span style="color: #ff4d4d; font-size: 8px;">(Broken)</span></button><button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">📊 Traits</button><button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">ⓘ Info</button></div><div class="ut-toggle-area">${modesBtn}${abilityToggleHtml}</div></div>`;
+    const topControls = `<div class="unit-toolbar"><div class="ut-actions"><button class="calc-btn ut-btn-compact" onclick="openCalc('${unit.id}')">🖩 Custom</button><button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">📊 Traits</button><button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">ⓘ Info</button></div><div class="ut-toggle-area">${modesBtn}${abilityToggleHtml}</div></div>`;
 
     let defaultSort = 'dps';
     if (isAnyUnit(unit.id, ['sjw', 'esdeath'])) defaultSort = 'damage';

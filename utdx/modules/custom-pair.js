@@ -1,4 +1,3 @@
-// Changed from single string to Set for multi-select
 let cpUnitSelection = new Set(['all']);
 let cpT1 = 'ruler';
 let cpT2 = 'none';
@@ -143,7 +142,8 @@ function confirmAddCustomPair() {
 
         // Refresh UI
         resetAndRender();
-        if (document.getElementById('guidesPage').classList.contains('active')) renderGuides();
+        const guidesPage = document.getElementById('guidesPage');
+        if (guidesPage && guidesPage.classList.contains('active') && typeof renderGuides === 'function') renderGuides();
 
         closeModal('customPairModal');
     }

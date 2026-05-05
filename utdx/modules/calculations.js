@@ -319,6 +319,8 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
 
     const cfgTag = `-${allowHeads ? 'H' : 'nH'}-${includeSubs ? 'S' : 'nS'}`;
 
+    const bestMap = new Map();
+
     activeTraits.forEach(trait => {
         if (trait.id === 'none') return;
 
@@ -383,41 +385,63 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
 
                         let res = calculateDPS(effectiveStats, totalStats, context);
 
-                        const uniqueCombId = `${head.id}_${body.id}_${leg.id}`;
-                        const id = `${unit.id}${suffix}-${trait.id}-INV-${uniqueCombId}${modeTag}${cfgTag}-${prio.id}`;
+                        // OPTIMIZATION: Only keep the best for this Trait + Priority + Set combination
+                        // This prevents results from exploding into tens of thousands of entries
+                        const bestKey = `${trait.id}-${prio.id}-${activeSetKey}-${head.setKey}`;
+                        const currentBest = bestMap.get(bestKey);
 
-                        // UI Formatting
-                        const formatSubs = (relic) => Object.entries(relic.subs).map(([k, v]) => ({ type: k, val: v }));
-                        let subStatsUI = {
-                            head: (includeSubs && head.id !== 'none') ? formatSubs(head) : null,
-                            body: (includeSubs && body.id !== 'none-b') ? formatSubs(body) : null,
-                            legs: (includeSubs && leg.id !== 'none-l') ? formatSubs(leg) : null,
-                            selectedHead: head.setKey
-                        };
+                        if (!currentBest || res.total > currentBest.res.total) {
+                            const entryId = `${unit.id}${suffix}-${trait.id}-INV-${head.id}_${body.id}_${leg.id}${modeTag}${cfgTag}-${prio.id}`;
 
-                        const setName = activeSetKey !== 'none' ? SETS.find(s => s.id === activeSetKey)?.name : "Mixed Set";
+                            // UI Formatting
+                            const formatSubs = (relic) => Object.entries(relic.subs).map(([k, v]) => ({ type: k, val: v }));
+                            let subStatsUI = {
+                                head: (includeSubs && head.id !== 'none') ? formatSubs(head) : null,
+                                body: (includeSubs && body.id !== 'none-b') ? formatSubs(body) : null,
+                                legs: (includeSubs && leg.id !== 'none-l') ? formatSubs(leg) : null,
+                                selectedHead: head.setKey
+                            };
 
-                        const entry = createResultEntry({
-                            id: id,
-                            buildName: setName,
-                            traitName: trait.name,
-                            res: res,
-                            prio: prio.id,
-                            mainStats: { body: body.mainStat, legs: leg.mainStat },
-                            subStats: subStatsUI,
-                            headUsed: head.setKey,
-                            isCustom: trait.isCustom,
-                            relicIds: { head: head.id, body: body.id, legs: leg.id }
-                        });
+                            const setName = activeSetKey !== 'none' ? SETS.find(s => s.id === activeSetKey)?.name : "Mixed Set";
 
-                        window.cachedResults[id] = entry;
-                        unitResults.push(entry);
+                            bestMap.set(bestKey, {
+                                entryId,
+                                setName,
+                                traitName: trait.name,
+                                res,
+                                prioId: prio.id,
+                                bodyMain: body.mainStat,
+                                legMain: leg.mainStat,
+                                subStatsUI,
+                                headSet: head.setKey,
+                                isCustom: trait.isCustom,
+                                relicIds: { head: head.id, body: body.id, legs: leg.id }
+                            });
+                        }
                     }); // end variation loop
 
                 }); // end leg
             }); // end body
         }); // end head
     }); // end trait
+
+    // Finalize Results
+    bestMap.forEach(v => {
+        const entry = createResultEntry({
+            id: v.entryId,
+            buildName: v.setName,
+            traitName: v.traitName,
+            res: v.res,
+            prio: v.prioId,
+            mainStats: { body: v.bodyMain, legs: v.legMain },
+            subStats: v.subStatsUI,
+            headUsed: v.headSet,
+            isCustom: v.isCustom,
+            relicIds: v.relicIds
+        });
+        window.cachedResults[v.entryId] = entry;
+        unitResults.push(entry);
+    });
 
     unitResults.sort((a, b) => b.dps - a.dps);
     return unitResults;
