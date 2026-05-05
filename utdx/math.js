@@ -203,10 +203,10 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
     const hasStun = (uStats.role && uStats.role.includes("Stun")) || (uStats.passives && uStats.passives.some(p => p.desc.includes("Stun"))) || (uStats.ability && (Array.isArray(uStats.ability) ? uStats.ability.some(a => a.desc.includes("Stun")) : uStats.ability.desc.includes("Stun")));
     const hasTimestop = (uStats.role && uStats.role.includes("Timestop")) || (uStats.passives && uStats.passives.some(p => p.desc.includes("Timestop"))) || (uStats.ability && (Array.isArray(uStats.ability) ? uStats.ability.some(a => a.desc.includes("Timestop")) : uStats.ability.desc.includes("Timestop")));
     const hasConfuse = (uStats.role && uStats.role.includes("Confuse")) || (uStats.passives && uStats.passives.some(p => p.desc.includes("Confuse"))) || (uStats.ability && (Array.isArray(uStats.ability) ? uStats.ability.some(a => a.desc.includes("Confuse")) : uStats.ability.desc.includes("Confuse")));
-    
+
     const _CC_UNITS = { 'ancient_shinob': 1, 'water_god': 1, 'first_emperor': 1 };
     const hasCC = hasSlow || hasStun || hasTimestop || hasConfuse || !!_CC_UNITS[uStats.id];
-    
+
     if (relicStats.set === 'rebellious_set' && hasCC) {
         sBonus.dmg += 30; // +30% Dmg over next 10s (Assume high uptime for CC units)
         setPerkDmg += 30;
@@ -223,9 +223,9 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
 
     const applyTagBuff = (bonusName, tagName, stats) => {
         if (relicStats.set === bonusName && tags.includes(tagName)) {
-            for (let k in stats) { 
-                sBonus[k] = (sBonus[k] || 0) + stats[k]; 
-                tagBuffs[k] = (tagBuffs[k] || 0) + stats[k]; 
+            for (let k in stats) {
+                sBonus[k] = (sBonus[k] || 0) + stats[k];
+                tagBuffs[k] = (tagBuffs[k] || 0) + stats[k];
             }
         }
     };
@@ -267,7 +267,7 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
                 return true;
             }).length;
             summonCount = activeSummons + (uStats.summonStats ? (uStats.summonStats.maxCount || 1) : 0);
-            
+
             if (uStats.id === 'phantom_captain' && summonCount === 0) summonCount = 9;
         }
 
@@ -277,7 +277,7 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
             sBonus.dmg += perk;
             setPerkDmg += perk;
         }
-        
+
         // Full Set Tag Perks (Top & Bottom)
         if (tags.includes('Leveling')) {
             sBonus.dmg += 20; // +20% Damage
@@ -359,7 +359,7 @@ function _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicSta
     // Monarch Cape Accessory Bonus (Requires Monarch Set)
     if ((headPiece === 'monarch_cape' || headPiece === 'monarch_head' || headPiece === 'monarch') && relicStats.set === 'monarch') {
         headDmgBase = 0; // No base dmg
-        
+
         // Full Set Summon Perk (Accessory): +10% per summon, cap 60%
         const upLevel = context.upgradeLevel !== undefined ? context.upgradeLevel : 6;
         let summonCount = 0;
@@ -375,7 +375,7 @@ function _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicSta
                 return true;
             }).length;
             summonCount = activeSummons + (uStats.summonStats ? (uStats.summonStats.maxCount || 1) : 0);
-            
+
             if (uStats.id === 'phantom_captain' && summonCount === 0) summonCount = 9;
         }
 
@@ -564,7 +564,7 @@ function calculateDPS(uStats, relicStats, context) {
 
     const { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc } = _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicStats, context);
     const mikuBuff = (typeof window !== 'undefined' && window.mikuActive) ? 100 : 0;
-    
+
     let abilityDmg = 0;
     if (isAbility && uStats.ability) {
         const ab = Array.isArray(uStats.ability) ? uStats.ability[0] : uStats.ability;
@@ -592,14 +592,14 @@ function calculateDPS(uStats, relicStats, context) {
     const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.finalMult || 1) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1);
 
     const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + amCritDmg + ksCdmg;
-    
+
     // Kirito and Gojo are hard-capped to their base crit rate (50%) and cannot receive buffs or relic stats
     let finalCritRate = Math.min(uStats.crit + traitCritRate + amCritRate + ksCrit + mageGroundCrit + baseR_Cf + (sBonus.cf || 0), 100);
-    
+
     if (uStats.id === 'kirito' || uStats.id === 'the_strongest_of_today') {
         finalCritRate = Math.min(finalCritRate, uStats.crit);
     }
-    
+
     if (headPiece === 'sorcerer_hunter_spirit') finalCritRate = 0;
 
     const avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
@@ -646,7 +646,7 @@ function calculateDPS(uStats, relicStats, context) {
 
         // Average DPS = (Count * Ticks * DmgPct * avgHit) / Cooldown
         const avgSwordDps = (swordCount * swordTicks * swordDmgPct * avgHit) / swordCooldown;
-        
+
         // Integrate into attackMultiplier for consistency
         attackMultiplier = 1 + (avgSwordDps * usedSpa / avgHit);
         extraAttacksData = { type: 'Phantom Swords (Crit)', hits: swordCount, mult: attackMultiplier };

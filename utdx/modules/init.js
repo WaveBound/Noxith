@@ -30,37 +30,35 @@ function initApp() {
         initInventory();
     }
 
-    // 6. End of Life Notice
-    if (!localStorage.getItem('eol_notice_hidden_v2')) {
+    // 6. Development Resumed Notice
+    if (!localStorage.getItem('resume_notice_hidden_v8')) {
         setTimeout(() => {
             if (typeof showUniversalModal === 'function') {
                 showUniversalModal({
-                    title: '<span style="color: var(--text-color, #fff); font-size: 1.1rem; letter-spacing: 1px; font-weight: 600;">Development Update</span>',
+                    title: '<span style="color: #a855f7; font-size: 0.75rem; letter-spacing: 2px; font-weight: 900; text-transform: uppercase;">Site Announcement</span>',
                     content: `
-                        <div style="text-align: center; padding: 25px 20px 10px; color: #e0e0e0; font-family: var(--font-main);">
-                            <div style="margin-bottom: 24px; color: #fff;">
-                                <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display: block; margin: 0 auto; filter: drop-shadow(0 0 12px rgba(255,255,255,0.15)); opacity: 0.9;">
-                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                                    <line x1="12" y1="9" x2="12" y2="13"></line>
-                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                                </svg>
-                            </div>
+                        <div style="text-align: center; padding: 10px 10px 5px;">
                             
-                            <h3 style="font-size: 1.35rem; font-weight: 700; font-family: var(--font-header); margin-bottom: 16px; color: #ffffff;">Development Paused</h3>
+                            <!-- Gradient Headline -->
+                            <h3 style="font-size: 1.6rem; font-weight: 900; margin: 10px 0 14px; background: linear-gradient(to right, #e9d5ff, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 0.5px;">Updates Are Back!</h3>
                             
-                            <p style="font-size: 0.95rem; color: #a0a0a5; margin: 0 auto 16px auto; line-height: 1.6;">
-                                Heads up: this tool is no longer actively maintained. We likely won't be pushing any new features or adding new units going forward.
+                            <p style="font-size: 0.95rem; color: #94a3b8; line-height: 1.6; margin-bottom: 20px;">
+                                We previously put this tool on hold because the game's future was looking a bit uncertain. Now that things have stabilized, <strong style="color: #e2e8f0;">active development on this site has officially resumed!</strong>
                             </p>
 
-                            <p style="font-size: 0.9rem; color: #808088; max-width: 90%; margin: 0 auto; line-height: 1.6;">
-                                Thanks to everyone who supported the site and used it along the way.
-                            </p>
+                            <!-- Premium Callout Box -->
+                            <div style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(0, 0, 0, 0.2) 100%); border: 1px solid rgba(168, 85, 247, 0.15); border-left: 3px solid #a855f7; border-radius: 8px; padding: 16px; margin-bottom: 5px; text-align: left;">
+                                <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.6; margin: 0;">
+                                    <strong style="color: #c084fc; font-weight: 800; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">What to expect:</strong><br>
+                                    While we'll be maintaining the site again, please note that adding new units might take a little time after they release in-game. A huge thank you to everyone who stuck around!
+                                </p>
+                            </div>
                         </div>
                     `,
                     footerButtons: `
-                        <div style="display: flex; gap: 12px; width: 100%; margin-top: 10px;">
-                            <button class="action-btn secondary" style="flex: 1; border-radius: 8px; font-weight: 600;" onclick="closeModal('universalModal')">Close</button>
-                            <button class="action-btn" style="flex: 1.25; border-radius: 8px; font-weight: 600;" onclick="localStorage.setItem('eol_notice_hidden_v2', 'true'); closeModal('universalModal')">Don't Show Again</button>
+                        <div style="display: flex; gap: 12px; width: 100%; margin-top: 5px;">
+                            <button class="action-btn secondary" style="flex: 1; border-radius: 8px; font-weight: 700; letter-spacing: 0.5px;" onclick="closeModal('universalModal')">Close</button>
+                            <button class="action-btn" style="flex: 1.5; border-radius: 8px; font-weight: 800; background: linear-gradient(135deg, #a855f7, #7e22ce); border: none; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3); letter-spacing: 1px;" onclick="localStorage.setItem('resume_notice_hidden_v8', 'true'); closeModal('universalModal')">Awesome!</button>
                         </div>
                     `,
                     size: 'modal-sm'
@@ -68,7 +66,6 @@ function initApp() {
             }
         }, 1200);
     }
-
 
 }
 

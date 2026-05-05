@@ -84,7 +84,7 @@ unitDatabase.push({
             name: "Mirage Barrage",
             img: "images/units/AlphaDevil/Mirage_Barrage.png",
             desc: "-80% Damage, +1,000% Range. Rapid continuous attacks.",
-            dmg: 6000, spa: 9, range: 60, spaCap: 4,
+            dmg: 6000, spa: 1, range: 60, spaCap: 4,
             passiveDmg: -26.7
         }
     ],

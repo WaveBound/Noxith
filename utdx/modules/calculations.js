@@ -158,6 +158,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
                 else if (targetKey === 'passivespa') targetKey = 'passiveSpa';
                 else if (targetKey === 'bossdmg') targetKey = 'bossDmg';
                 else if (targetKey === 'dotbuff') targetKey = 'dotBuff';
+                else if (targetKey === 'truedmg') targetKey = 'trueDmg'; // <--- ADD THIS LINE
 
                 normalizedStats[targetKey] = modeData[key];
             }
@@ -777,7 +778,7 @@ function calculateDPS(uStats, relicStats, context) {
 
         // Average DPS = (Count * Ticks * DmgPct * avgHit) / Cooldown
         const avgSwordDps = (swordCount * swordTicks * swordDmgPct * avgHit) / swordCooldown;
-        
+
         attackMultiplier = 1 + (avgSwordDps * usedSpa / avgHit);
         extraAttacksData = {
             req: "Phantom Swords (On Crit)",
