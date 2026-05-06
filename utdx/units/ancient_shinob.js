@@ -22,6 +22,7 @@ unitDatabase.push({
         dotDuration: 6,
         dotStacks: 1,
         element: "Water",
+        support: "Stun, Confuse"
     },
 
     upgrades: [

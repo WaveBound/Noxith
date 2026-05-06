@@ -18,7 +18,7 @@ unitDatabase.push({
                 dmg: 24000, spa: 12, range: 35, spaCap: 4,
                 crit: 0, cdmg: 150, dot: 0,
                 element: "Water", passiveDmg: 0, trueDmg: 0,
-                support: "Confuse"
+                support: "Stun, Confuse"
         },
 
         passives: [
