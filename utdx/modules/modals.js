@@ -556,6 +556,7 @@ function closeModesOverlay() {
         }
     }, 200); 
 }
+
 window.closeModesOverlay = closeModesOverlay;
 
 function renderShadowMonarchSpecialUI(unit, grid, overlay) {
@@ -565,30 +566,12 @@ function renderShadowMonarchSpecialUI(unit, grid, overlay) {
 
     const html = `
     <div class="sm-special-ui">
-        <div class="sm-header-banner">
-            <img src="images/units/Jinoo/TheSystemSummons.png" class="sm-header-img">
-            <div class="sm-close-x" onclick="closeModesOverlay()">
-                <img src="images/units/Jinoo/X.png" style="width: 100%; height: 100%; object-fit: contain;">
-            </div>
+        <img src="images/units/Jinoo/main_ui.png" class="sm-main-bg" alt="Main UI">
+        <div class="sm-close-btn" onclick="closeModesOverlay()">
+            <img src="images/units/Jinoo/X.png" alt="Close">
         </div>
         
-        <div class="sm-top-controls">
-            <div class="sm-level-display">
-                <div class="sm-lvl-label">Level</div>
-                <div class="sm-lvl-val">${sysLvl}</div>
-            </div>
-            <div class="sm-xp-area">
-                <div class="sm-xp-bar-wrap">
-                    <div class="sm-xp-label-top">XP</div>
-                    <div class="sm-xp-progress">
-                        <div class="sm-xp-fill" style="width: 85%"></div>
-                    </div>
-                </div>
-                <div class="sm-xp-pct">0%</div>
-            </div>
-        </div>
-
-        <div class="sm-shadows-row">
+        <div class="sm-cards-row">
             ${unit.customSummons.map((s, idx) => {
                 const isActive = activeModes.includes(idx);
                 let isUnlocked = true;
@@ -599,24 +582,16 @@ function renderShadowMonarchSpecialUI(unit, grid, overlay) {
                 if (idx === 4) reqLvl = 100;
                 if (sysLvl < reqLvl) isUnlocked = false;
 
+                const btnImg = isActive ? 'btn_disable.png' : 'btn_enable.png';
+
                 return `
-                <div class="sm-shadow-box ${isActive ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}" 
-                     onclick="${isUnlocked ? `selectUnitMode('${unit.id}', ${idx})` : ''}">
-                    <div class="sm-s-name">${s.name.toUpperCase()}</div>
-                    <div class="sm-s-body">
-                        <div class="sm-s-img-wrap">
-                            <img src="${unit.modes[idx].img}" alt="${s.name}" style="${!isUnlocked ? 'filter: grayscale(1) brightness(0.5);' : ''}">
-                        </div>
-                        <div class="sm-s-stats">
-                            <div class="sm-stat-status" style="${!isUnlocked ? 'color: #f87171;' : ''}">
-                                ${isUnlocked ? (isActive ? 'ENABLED' : 'DISABLED') : `LOCKED (LVL ${reqLvl})`}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="sm-enable-btn-wrap">
-                        <button class="sm-btn" ${!isUnlocked ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : ''}>
-                            ${isActive ? 'DISABLE' : 'ENABLE'}
-                        </button>
+                <div class="sm-card-slot ${!isUnlocked ? 'locked' : ''}">
+                    <div class="sm-card-inner">
+                        <img src="${unit.modes[idx].img}" alt="${s.name}" class="sm-card-image">
+                        <img src="images/units/Jinoo/${btnImg}" 
+                             class="sm-toggle-btn" 
+                             onclick="${isUnlocked ? `event.stopPropagation(); selectUnitMode('${unit.id}', ${idx})` : ''}"
+                             alt="Toggle">
                     </div>
                 </div>
                 `;

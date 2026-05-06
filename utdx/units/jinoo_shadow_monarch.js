@@ -30,11 +30,11 @@ unitDatabase.push({
     },
 
     modes: [
-        { name: "Shadow Legion", img: "images/units/Jinoo/ShadowLegion.png", desc: "Enable Shadow Legion summon." },
-        { name: "Shadow Bear", img: "images/units/Jinoo/ShadowBear.png", desc: "Enable Shadow Bear summon." },
-        { name: "Shadow Dragon", img: "images/units/Jinoo/ShadowDragon.png", desc: "Enable Shadow Dragon summon." },
-        { name: "Shadow Knight", img: "images/units/Jinoo/ShadowKnight.png", desc: "Enable Shadow Knight summon." },
-        { name: "Ant King", img: "images/units/Jinoo/AntKing.png", desc: "Enable Ant King summon." }
+        { name: "Shadow Legion", img: "images/units/Jinoo/shadow_legion.png", desc: "Enable Shadow Legion summon." },
+        { name: "Shadow Bear", img: "images/units/Jinoo/shadow_bear.png", desc: "Enable Shadow Bear summon." },
+        { name: "Shadow Dragon", img: "images/units/Jinoo/shadow_dragon.png", desc: "Enable Shadow Dragon summon." },
+        { name: "Shadow Knight", img: "images/units/Jinoo/shadow_knight.png", desc: "Enable Shadow Knight summon." },
+        { name: "Ant King", img: "images/units/Jinoo/ant_king.png", desc: "Enable Ant King summon." }
     ],
     allowMultipleModes: true,
     modesLabel: "Summons",
