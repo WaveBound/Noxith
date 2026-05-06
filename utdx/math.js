@@ -553,8 +553,8 @@ function calculateDPS(uStats, relicStats, context) {
     // For now, let's assume it's handled upstream or passed in uStats if needed.
     // if (traitObj.isEternal) { const waveCap = Math.min(wave, 12); eternalDmgBuff = waveCap * 5; passivePcent += eternalDmgBuff; eternalRangeBuff = waveCap * 2.5; }
 
-    const enlightenedGodBuff = (typeof window !== 'undefined' && window.enlightenedGodActive) ? 20 : 0;
-    const enlightenedGodSpa = (typeof window !== 'undefined' && window.enlightenedGodActive) ? 20 : 0;
+    let enlightenedGodBuff = (typeof window !== 'undefined' && window.enlightenedGodActive) ? 20 : 0;
+    let enlightenedGodSpa = (typeof window !== 'undefined' && window.enlightenedGodActive) ? 20 : 0;
     const bijuuBuff = (typeof window !== 'undefined' && window.bijuuActive) ? 25 : 0;
     const bijuuSpa = (typeof window !== 'undefined' && window.bijuuActive) ? 15 : 0;
 
@@ -572,6 +572,34 @@ function calculateDPS(uStats, relicStats, context) {
     if (kingMark) {
         if (tags.includes('Uncontrollable Power')) { kmDmg += 30; kmSpa += 10; }
         else if (uStats.element === 'Water') { kmDmg += 20; kmSpa += 10; }
+    }
+
+    let mikuBuff = (typeof window !== 'undefined' && window.mikuActive) ? 100 : 0;
+
+    // Apply Junior Ninja 1.1x Multiplier BEFORE values are consumed by totals
+    if (headPiece === 'junior') {
+        if (uStats.id === 'king_sailor') {
+            // Manipulator of Fate +50% Dmg / 25% SPA
+            passivePcent += 5; // 50 -> 55
+            passiveSpaPcent += 2.5; // 25 -> 27.5
+        }
+        
+        if (tagBuffs.dmg) {
+            const extraTagDmg = tagBuffs.dmg * 0.1;
+            tagBuffs.dmg += extraTagDmg;
+            sBonus.dmg = (sBonus.dmg || 0) + extraTagDmg;
+        }
+        if (tagBuffs.spa) {
+            const extraTagSpa = tagBuffs.spa * 0.1;
+            tagBuffs.spa += extraTagSpa;
+            sBonus.spa = (sBonus.spa || 0) + extraTagSpa;
+        }
+
+        kmDmg *= 1.1;
+        kmSpa *= 1.1;
+        mikuBuff *= 1.1;
+        enlightenedGodBuff *= 1.1;
+        enlightenedGodSpa *= 1.1;
     }
 
     const isKsBuffActive = (typeof window !== 'undefined' && window.kingSailorActive);
@@ -603,8 +631,6 @@ function calculateDPS(uStats, relicStats, context) {
     const finalSpa = Math.max(rawFinalSpa, effectiveSpaCap);
 
     const { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc } = _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicStats, context);
-    const mikuBuff = (typeof window !== 'undefined' && window.mikuActive) ? 100 : 0;
-
     let abilityDmg = 0;
     if (isAbility && uStats.ability) {
         const ab = Array.isArray(uStats.ability) ? uStats.ability[0] : uStats.ability;
@@ -624,10 +650,6 @@ function calculateDPS(uStats, relicStats, context) {
         globalBuffs: mikuBuff + enlightenedGodBuff + bijuuBuff + kmDmg
     };
 
-    // Junior Ninja: 1.1x Multiplier to Miku Buff and Passives (WATER GOD ONLY)
-    if (headPiece === 'junior' && uStats.id === 'water_god') {
-        additiveTotal = ((sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassive + headDmgTag + mikuBuff + enlightenedGodBuff + bijuuBuff + kmDmg) * 1.1;
-    }
 
     const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.finalMult || 1) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1);
 

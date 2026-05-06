@@ -31,7 +31,11 @@ window.GLOBAL_BUFF_DATA = {
         name: 'Bijuu Link',
         desc: "Apply Bijuu Link: +25% Dmg, +25% Range, -15% SPA",
         color: '#f87171',
-        math: (uStats) => ({ dmg: 25, spa: 15, range: 25 }),
+        math: (uStats) => {
+            // Bijuu Link comes from Unparalleled Armor — can't buff itself
+            if (window.isUnit(uStats.id, 'unparalleled_armor')) return {};
+            return { dmg: 25, spa: 15, range: 25 };
+        },
         renderLabel: "Active: +25% Dmg, +25% Range, -15% SPA",
         genType: 'boolean'
     },
@@ -41,7 +45,11 @@ window.GLOBAL_BUFF_DATA = {
         name: 'Ancient Mage',
         desc: "Apply Ancient Mage Buff: +20% Crit Rate/Dmg",
         color: '#60a5fa',
-        math: (uStats) => ({ crit: 20, cdmg: 20 }),
+        math: (uStats) => {
+            // Ancient Mage buff can't apply to Ancient Mage itself
+            if (window.isUnit(uStats.id, 'ancient_mage')) return {};
+            return { crit: 20, cdmg: 20 };
+        },
         renderLabel: "Active: +20% Crit Rate/Dmg",
         genType: 'boolean'
     },
@@ -52,9 +60,9 @@ window.GLOBAL_BUFF_DATA = {
         desc: "Apply King Sailor Buff: +10% Crit Rate, +20% Crit Damage",
         color: '#60a5fa',
         math: (uStats) => {
-            let b = {};
-            // Global buff to everyone else
-            if (!window.isUnit(uStats.id, 'king_sailor')) { b.crit = 10; b.cdmg = 20; }
+            // King Sailor buff can't apply to King Sailor itself
+            if (window.isUnit(uStats.id, 'king_sailor')) return {};
+            let b = { crit: 10, cdmg: 20 };
             // Specific buff logic based on tags
             const tags = uStats.tags || [];
             if (tags.includes('Magi')) { b.dmg = 50; b.spa = 15; }

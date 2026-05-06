@@ -613,6 +613,13 @@ function calculateDPS(uStats, relicStats, context) {
         Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
             if (window[buff.stateKey]) {
                 const buffStats = buff.math(uStats);
+                
+                // JUNIOR NINJA 1.1x Multiplier for specific global buffs
+                if (headPiece === 'junior' && ['miku', 'enlightenedgod', 'ksailor'].includes(buff.id)) {
+                    if (buffStats.dmg) buffStats.dmg *= 1.1;
+                    if (buffStats.spa) buffStats.spa *= 1.1;
+                }
+                
                 activeGlobalBuffs[buff.id] = buffStats;
                 if (buffStats.dmg) globalDmg += buffStats.dmg;
                 if (buffStats.spa) globalSpa += buffStats.spa;
@@ -621,6 +628,26 @@ function calculateDPS(uStats, relicStats, context) {
                 if (buffStats.cdmg) globalCdmg += buffStats.cdmg;
             }
         });
+    }
+
+    // Apply Junior Ninja 1.1x Multiplier to Passives & Tags BEFORE values are consumed by totals
+    if (headPiece === 'junior') {
+        if (uStats.id === 'king_sailor') {
+            // Manipulator of Fate +50% Dmg / 25% SPA
+            passivePcent += 5; // 50 -> 55
+            passiveSpaPcent += 2.5; // 25 -> 27.5
+        }
+        
+        if (tagBuffs.dmg) {
+            const extraTagDmg = tagBuffs.dmg * 0.1;
+            tagBuffs.dmg += extraTagDmg;
+            sBonus.dmg = (sBonus.dmg || 0) + extraTagDmg;
+        }
+        if (tagBuffs.spa) {
+            const extraTagSpa = tagBuffs.spa * 0.1;
+            tagBuffs.spa += extraTagSpa;
+            sBonus.spa = (sBonus.spa || 0) + extraTagSpa;
+        }
     }
 
     const tags = uStats.tags || [];
@@ -661,10 +688,7 @@ function calculateDPS(uStats, relicStats, context) {
         globalBuffs: globalDmg
     };
 
-    // Junior Ninja: 1.1x Multiplier to all additive buffs (WATER GOD ONLY)
-    if (headPiece === 'junior' && uStats.id === 'water_god') {
-        additiveTotal = ((sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassive + headDmgTag + globalDmg) * 1.1;
-    }
+
 
     const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1);
 
