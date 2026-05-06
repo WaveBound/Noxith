@@ -566,9 +566,9 @@ function renderShadowMonarchSpecialUI(unit, grid, overlay) {
     const html = `
     <div class="sm-special-ui">
         <div class="sm-header-banner">
-            <img src="images/units/jinoo/TheSystemSummons.png" class="sm-header-img">
+            <img src="images/units/Jinoo/TheSystemSummons.png" class="sm-header-img">
             <div class="sm-close-x" onclick="closeModesOverlay()">
-                <img src="images/units/jinoo/X.png" style="width: 100%; height: 100%; object-fit: contain;">
+                <img src="images/units/Jinoo/X.png" style="width: 100%; height: 100%; object-fit: contain;">
             </div>
         </div>
         
