@@ -341,12 +341,12 @@ function openUnitInfo(unitId) {
                 </div>
             </div>` : ''}
             <div class="info-section section-stats">
-                <div class="info-sec-title">Base Statistics (Lv 1)</div>
+                <div class="info-sec-title">Maximum Statistics (Lv 1)</div>
                 <ul class="info-list">
-                    <li><span>Damage:</span> <span class="text-white">${(unit.stats.dmg || (unit.upgrades && unit.upgrades[0] ? unit.upgrades[0].dmg : 0)).toLocaleString()}</span></li>
-                    <li><span>SPA:</span> <span class="text-white">${unit.stats.spa || (unit.upgrades && unit.upgrades[0] ? unit.upgrades[0].spa : 0)}s</span></li>
-                    <li><span>Range:</span> <span class="text-white">${unit.stats.range || (unit.upgrades && unit.upgrades[0] ? unit.upgrades[0].range : 0)}</span></li>
-                    <li><span>SPA Cap:</span> <span class="text-white">${unit.stats.spaCap}s</span></li>
+                    <li><span>Damage:</span> <span class="text-white">${(unit.stats.dmg || (unit.upgrades && unit.upgrades.length > 0 ? unit.upgrades[unit.upgrades.length - 1].dmg : 0)).toLocaleString()}</span></li>
+                    <li><span>SPA:</span> <span class="text-white">${unit.stats.spa || (unit.upgrades && unit.upgrades.length > 0 ? unit.upgrades[unit.upgrades.length - 1].spa : 0)}s</span></li>
+                    <li><span>Range:</span> <span class="text-white">${unit.stats.range || (unit.upgrades && unit.upgrades.length > 0 ? unit.upgrades[unit.upgrades.length - 1].range : 0)}</span></li>
+                    <li><span>Animation Cap:</span> <span class="text-white">${unit.stats.spaCap}s</span></li>
                 </ul>
             </div>
             <div class="info-section section-passives">
@@ -555,9 +555,7 @@ function openTraitTierList() {
     // Helper to get DPS score for sorting
     const getUnitScore = (u) => {
         if (window.STATIC_BUILD_DB) {
-            const isKiritoCard = window.isUnit(u.id, 'kirito') && kiritoState && kiritoState.card;
-            // ALWAYS use base key for ranking to maintain consistent spot
-            const dbKey = u.id + (isKiritoCard ? 'kirito_card' : '');
+            const dbKey = u.id;
             // Use fixed mode, config 0 (Max Potential)
             const list = window.STATIC_BUILD_DB[dbKey]?.['fixed']?.[0];
             if (list && list.length > 0) {

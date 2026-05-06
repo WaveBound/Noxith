@@ -86,26 +86,16 @@ const checkIsBetter = (res, currentBest, optimizeFor) => {
 // Strict whitelist of units whose primary role includes Crowd Control.
 // Used to restrict Rebellious head piece to CC-capable units only.
 // Units with summon-based CC (e.g. Sukuna's Ten Umbra stun) are NOT included.
-const _CC_UNIT_IDS = {
-    'ancient_shinob': 1,    // Confuse + Stun (Ancient Techniques)
-    'water_god': 1,         // Slow
-    'first_emperor': 1,     // Slow + Stun + Confuse
-    'ancient_mage': 1,      // Stun + Slow
-    'prodigy_mage': 1,      // Slow + Stun
-    'crow_shinobi': 1,      // Confuse + Stun + Slow
-    'strongest_of_today': 1, // Slow + Stun + Timestop (Gojo)
-    'devil_hunter': 1,      // Stun
-    'alpha_devil': 1,       // Stun + Timestop
-    'mimicry_sorcerer': 1,  // Stun + Slow
-    'kenpachi': 1,          // Slow
-    'ant_king_savage': 1,   // Slow (Paralyzing Venom)
-    'underworld_god': 1,    // Slow (Primordial Power)
-    'unparalleled_armor': 1, // Stun + Confuse (Power of ancient shinobi)
-};
+
 
 window.unitHasCC = function(uStats) {
     if (!uStats) return false;
-    return !!_CC_UNIT_IDS[uStats.id];
+    // Check for dynamic support tags in the unit definition
+    if (uStats.support) {
+        const s = uStats.support.toLowerCase();
+        return s.includes('slow') || s.includes('stun') || s.includes('confuse') || s.includes('timestop');
+    }
+    return false;
 };
 
 const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optimizeFor = 'dps') => {
@@ -271,7 +261,8 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
     applyTagBuff('rebellious_set', 'Bloodline', { dmg: 15, range: 20 });
 
     // Universal Magi Tag Buff
-    if (tags.includes('Magi')) {
+    // (King Sailor is excluded because he gets this natively via his unit passives)
+    if (tags.includes('Magi') && uStats.id !== 'king_sailor') {
         sBonus.dmg = (sBonus.dmg || 0) + 50;
         sBonus.spa = (sBonus.spa || 0) + 15;
         tagBuffs.dmg = (tagBuffs.dmg || 0) + 50;
@@ -512,7 +503,7 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
 }
 
 function calculateDPS(uStats, relicStats, context) {
-    const { dmgPoints, spaPoints, rangePoints, wave, isBoss, traitObj, placement, isSSS, headPiece, isVirtualRealm, starMult, isAbility } = context;
+    const { dmgPoints, spaPoints, rangePoints, wave, isBoss, traitObj, placement, isSSS, headPiece, starMult, isAbility } = context;
 
     let lvStats = getLevelStats(uStats.dmg, uStats.spa, uStats.range || 0, dmgPoints, spaPoints, rangePoints);
     let rDmg = 0, rSpa = 0, rRange = 0;
@@ -522,7 +513,68 @@ function calculateDPS(uStats, relicStats, context) {
     if (rSpa !== 0) lvStats.spa *= (1 - rSpa / 100);
     if (rRange !== 0) lvStats.range *= (1 + rRange / 100);
 
-    let passivePcent = (uStats.passiveDmg || 0) + (uStats.buffDmg || 0), passiveSpaPcent = uStats.passiveSpa || 0;
+    let passivePcent = (uStats.buffDmg || 0);
+    let passiveSpaPcent = 0;
+    let passiveRangePcent = 0;
+    let trueDmgFromPassives = 0;
+    let passiveCritFromPassives = 0;
+    let passiveCdmgFromPassives = 0;
+    let passiveDotFromPassives = 0;
+    let passiveBreakdown = [];
+
+    if (uStats.passiveDmg) passivePcent += uStats.passiveDmg;
+    if (uStats.passiveSpa) passiveSpaPcent += uStats.passiveSpa;
+    if (uStats.passiveRange) passiveRangePcent += uStats.passiveRange;
+    if (uStats.passiveCrit) passiveCritFromPassives += uStats.passiveCrit;
+    if (uStats.passiveCdmg) passiveCdmgFromPassives += uStats.passiveCdmg;
+
+    // Attribute root-level passives to breakdown
+    if (uStats.passiveDmg || uStats.passiveSpa || uStats.passiveRange || uStats.passiveCrit || uStats.passiveCdmg) {
+        passiveBreakdown.push({
+            name: "Unit Base (Passive)",
+            dmg: uStats.passiveDmg || 0,
+            spa: uStats.passiveSpa || 0,
+            range: uStats.passiveRange || 0,
+            crit: uStats.passiveCrit || 0,
+            cdmg: uStats.passiveCdmg || 0,
+            trueDmg: 0,
+            dot: 0
+        });
+    }
+
+    if (uStats.passives && Array.isArray(uStats.passives)) {
+        uStats.passives.forEach(p => {
+            let pDmg = p.passiveDmg || 0;
+            let pSpa = p.passiveSpa || 0;
+            let pRange = p.passiveRange || 0;
+            let pTrue = p.trueDmg || 0;
+            let pCrit = p.passiveCrit || 0;
+            let pCdmg = p.passiveCdmg || 0;
+            let pDot = p.dot || 0;
+            
+            if (p.buffedByJunior && headPiece === 'junior') {
+                pDmg *= 1.1;
+                pSpa *= 1.1;
+                pTrue *= 1.1;
+                pCrit *= 1.1;
+                pCdmg *= 1.1;
+                pDot *= 1.1;
+            }
+            
+            if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0) {
+                passivePcent += pDmg;
+                passiveSpaPcent += pSpa;
+                passiveRangePcent += pRange;
+                trueDmgFromPassives += pTrue;
+                passiveCritFromPassives += pCrit;
+                passiveCdmgFromPassives += pCdmg;
+                passiveDotFromPassives += pDot;
+                // Inherit DoT duration from passive if the unit doesn't have a base one
+                if (p.dotDuration && !uStats.dotDuration) uStats.dotDuration = p.dotDuration;
+                passiveBreakdown.push({ name: p.name, dmg: pDmg, spa: pSpa, range: pRange, trueDmg: pTrue, crit: pCrit, cdmg: pCdmg, dot: pDot });
+            }
+        });
+    }
 
     const totalBossDmg = (uStats.bossDmg || 0) + (traitObj.bossDmg || 0);
     let traitDmgPct = traitObj.dmg + (totalBossDmg && isBoss ? totalBossDmg : 0), traitSpaPct = traitObj.spa;
@@ -562,27 +614,26 @@ function calculateDPS(uStats, relicStats, context) {
     const tags = uStats.tags || [];
     let kmDmg = 0, kmSpa = 0;
 
-    // Magi Tag: Permanent +50% Damage, -15% SPA
-    if (tags.includes('Magi')) {
-        kmDmg += 50;
-        kmSpa += 15;
-    }
+    // Apply global tag buffs ONLY if this isn't King Sailor himself
+    // (King Sailor gets his native buffs via his unit passives array)
+    if (uStats.id !== 'king_sailor') {
+        // Magi Tag: Permanent +50% Damage, -15% SPA
+        if (tags.includes('Magi')) {
+            kmDmg += 50;
+            kmSpa += 15;
+        }
 
-    const kingMark = (typeof window !== 'undefined' && window.kingSailorActive);
-    if (kingMark) {
-        if (tags.includes('Uncontrollable Power')) { kmDmg += 30; kmSpa += 10; }
-        else if (uStats.element === 'Water') { kmDmg += 20; kmSpa += 10; }
+        const kingMark = (typeof window !== 'undefined' && window.kingSailorActive);
+        if (kingMark) {
+            if (tags.includes('Uncontrollable Power')) { kmDmg += 30; kmSpa += 10; }
+            else if (uStats.element === 'Water') { kmDmg += 20; kmSpa += 10; }
+        }
     }
 
     let mikuBuff = (typeof window !== 'undefined' && window.mikuActive) ? 100 : 0;
 
     // Apply Junior Ninja 1.1x Multiplier BEFORE values are consumed by totals
     if (headPiece === 'junior') {
-        if (uStats.id === 'king_sailor') {
-            // Manipulator of Fate +50% Dmg / 25% SPA
-            passivePcent += 5; // 50 -> 55
-            passiveSpaPcent += 2.5; // 25 -> 27.5
-        }
         
         if (tagBuffs.dmg) {
             const extraTagDmg = tagBuffs.dmg * 0.1;
@@ -647,16 +698,17 @@ function calculateDPS(uStats, relicStats, context) {
         unitPassive: passivePcent,
         abilityBuff: abilityDmg,
         accessoryBase: headDmgBase,
-        globalBuffs: mikuBuff + enlightenedGodBuff + bijuuBuff + kmDmg
+        globalBuffs: mikuBuff + enlightenedGodBuff + bijuuBuff + kmDmg,
+        passiveBreakdown: passiveBreakdown
     };
 
 
     const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.finalMult || 1) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1);
 
-    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + amCritDmg + ksCdmg;
+    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + amCritDmg + ksCdmg + passiveCdmgFromPassives;
 
     // Kirito and Gojo are hard-capped to their base crit rate (50%) and cannot receive buffs or relic stats
-    let finalCritRate = Math.min(uStats.crit + traitCritRate + amCritRate + ksCrit + mageGroundCrit + baseR_Cf + (sBonus.cf || 0), 100);
+    let finalCritRate = Math.min(uStats.crit + traitCritRate + amCritRate + ksCrit + mageGroundCrit + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
 
     if (uStats.id === 'kirito' || uStats.id === 'the_strongest_of_today') {
         finalCritRate = Math.min(finalCritRate, uStats.crit);
@@ -715,7 +767,7 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     const { summonDpsTotal, summonData } = _calcSummonDPS(uStats, finalDmg, finalSpa, placement);
-    const { dotDpsTotal, dotBreakdown } = _calcDoTDPS(uStats, traitObj, traitDotBuff, baseR_Dot + (sBonus.dot || 0) + headDotBuff, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult);
+    const { dotDpsTotal, dotBreakdown } = _calcDoTDPS({ ...uStats, dot: (uStats.dot || 0) + passiveDotFromPassives }, traitObj, traitDotBuff, baseR_Dot + (sBonus.dot || 0) + headDotBuff, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult);
 
     const hitDps = (avgHit / usedSpa) * placement * attackMultiplier;
     const totalDps = hitDps + (summonDpsTotal || 0) + (dotDpsTotal || 0);

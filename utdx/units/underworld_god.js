@@ -19,9 +19,10 @@ unitDatabase.push({
         dot: 0,
         dotStacks: 1,
         spaCap: 4,
-        passiveDmg: 90,
-        passiveSpa: 15,
-        element: "Wind"
+        passiveDmg: 0,
+        passiveSpa: 0,
+        element: "Wind",
+        support: "Slow"
     },
 
     upgrades: [
@@ -37,9 +38,9 @@ unitDatabase.push({
     ],
     passives: [
         { name: "Divine Blood", desc: "Whenever Underworld God receives a negative buff, he converts it into a positive buff. [On E4]: These buffs last indefinitely." },
-        { name: "As The Eldest Brother", desc: "Each unit with the 'Divinity' tag in range buffs this unit by +15% Damage, up to 60% (90% on E2)." },
+        { name: "As The Eldest Brother", passiveDmg: 90, desc: "Each unit with the 'Divinity' tag in range buffs this unit by +15% Damage, up to 60% (90% on E2)." },
         { name: "Sibling Combined Might", desc: "Passively has +35% (+60% on E6) Hyper Armor Damage. Performs a 75% Damage follow-up attack when hitting an Armored Enemy for the first time." },
-        { name: "Primordial Power", desc: "Passively applies +20% DoT and Affliction Time. Inflicts 'Time Snail' (3s): +20% DoT Duration, 30% Slow, and +1% Attack Speed per afflicted enemy in range (max 15%)." }
+        { name: "Primordial Power", passiveDmg: 15, desc: "Passively applies +20% DoT and Affliction Time. Inflicts 'Time Snail' (3s): +20% DoT Duration, 30% Slow, and -1% Attack Speed per afflicted enemy in range (max 15%)." }
     ],
     etherealization: [
         "+10 Stat Points",

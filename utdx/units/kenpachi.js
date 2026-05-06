@@ -19,7 +19,8 @@ unitDatabase.push({
         dot: 0,
         dotStacks: 1,
         spaCap: 2.0,
-        element: "Light"
+        element: "Light",
+        support: "Slow"
     },
 
     upgrades: [

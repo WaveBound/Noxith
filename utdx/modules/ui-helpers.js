@@ -210,30 +210,6 @@ function handleUnitModeChange(unitId, updateStateCallback) {
     }, 10);
 }
 
-window.setBambiettaElement = (element) => handleUnitModeChange(window.getUnitId('bambietta'), () => bambiettaState.element = element);
-window.setRobot1718Mode = (mode) => handleUnitModeChange(window.getUnitId('robot1718'), () => robot1718State.mode = mode);
-window.setAncientMageMode = (mode) => handleUnitModeChange(window.getUnitId('ancient_mage'), () => ancientMageState.mode = mode);
-window.toggleAMSpecialist = (cb) => handleUnitModeChange(window.getUnitId('ancient_mage'), () => ancientMageState.mode = cb.checked ? "DPS" : "Specialist");
-
-window.toggleKiritoMode = (mode, checkbox) => {
-    handleUnitModeChange(window.getUnitId('kirito'), () => {
-        if (mode === 'realm') {
-            kiritoState.realm = checkbox.checked;
-            if (!checkbox.checked) kiritoState.card = false;
-        } else if (mode === 'card') {
-            kiritoState.card = checkbox.checked;
-        }
-    });
-
-    const unit = typeof getUnitById === 'function' ? getUnitById(window.getUnitId('kirito')) : null;
-    const card = document.getElementById('card-' + window.getUnitId('kirito'));
-    if (card && unit && typeof getKiritoControlsHtml === 'function') {
-        card.querySelectorAll('.unit-toolbar').forEach(tb => {
-            if (tb.innerText.includes('Virtual Realm')) tb.outerHTML = getKiritoControlsHtml(unit);
-        });
-    }
-};
-
 window.toggleAbility = function (unitId, checkbox) {
     const card = document.getElementById('card-' + unitId);
     if (!card) return;
@@ -351,8 +327,14 @@ window.resetAndOpenInventory = function () {
 };
 
 window.getQuickScore = (unit) => {
-    // ALWAYS use base key for ranking to maintain consistent spot
-    let dbKey = (window.isUnit(unit.id, 'kirito') && kiritoState.card) ? 'kirito_card' : unit.id;
+    // Prefer _abil key for units with noToggle abilities (always-on power)
+    let dbKey = unit.id;
+    if (unit.ability) {
+        const ab = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
+        if (ab.noToggle && window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[unit.id + "_abil"]) {
+            dbKey = unit.id + "_abil";
+        }
+    }
 
     if (window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {
         const list = window.STATIC_BUILD_DB[dbKey]['fixed']?.[0];

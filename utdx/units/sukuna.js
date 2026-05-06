@@ -22,7 +22,7 @@ unitDatabase.push({
     stats: {
         spaCap: 2, crit: 0, cdmg: 150,             // spaCap = min SPA | cdmg 150 = standard
         dot: 0, dotDuration: 0, dotStacks: 1,       // dot = % per tick | duration = # of ticks
-        element: "Dark", passiveDmg: 50, passiveSpa: 0, // "Fire","Ice","Water","Dark","Light","Rose","Wind"
+        element: "Dark", passiveDmg: 0, passiveSpa: 0, // "Fire","Ice","Water","Dark","Light","Rose","Wind"
         customFollowUp: {
             chance: 70,
             dmgMult: 1.0,
@@ -45,7 +45,7 @@ unitDatabase.push({
 
     // PASSIVES (displayed in unit info panel)
     passives: [
-        { name: "Shadow Emerge", desc: "70% chance on attack to trigger a Follow-Up Attack dealing 100% Damage (can crit). The Follow-Up also inflicts Bleed for 15% Damage over 3s. Each Follow-Up permanently grants +5% Damage (cap: +50%)." },
+        { name: "Shadow Emerge", passiveDmg: 50, desc: "70% chance on attack to trigger a Follow-Up Attack dealing 100% Damage (can crit). The Follow-Up also inflicts Bleed for 15% Damage over 3s. Each Follow-Up permanently grants +5% Damage (cap: +50%)." },
         { name: "The Shadows", desc: "Every attack permanently marks the enemy hit and increases their Damage Taken based on total marked enemies in range — 1–10: +15%, 11–20: +20%, 21+: +25%. At 21+ marked enemies, both Ten Umbra summons may be placed simultaneously and enemies are Slowed by 10%.<br><br>E4: 26+ marked enemies increases Damage Taken to +35%, Stuns all marked enemies for 0.5s (cooldown of 30s), Slows by 15%, and reduces all mark thresholds by 5. Every 20 marked enemies defeated triggers a random Ten Umbra summon attack." },
         { name: "Adaptive Wheel", desc: "Once activated, this unit gains permanent immunity to Stun and debuffs after 60 seconds from first application. (E6: Ability is automatically activated upon placement.)" }
     ],

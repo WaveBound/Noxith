@@ -3,7 +3,7 @@ unitDatabase.push({
     name: "Crow Shinobi",
     img: "images/units/CrowShinobi.png",
     level: 70,
-placement: 3,
+    placement: 3,
     placementType: "Hill",
     role: "DPS / Hill",
     tags: ["Ninjaverse", "Bloodline", "Hero"],
@@ -15,8 +15,9 @@ placement: 3,
     totalCost: 68450,
     stats: {
         spaCap: 2.5,
-        crit: 0, cdmg: 150, dot: 60, dotDuration: 10, dotStacks: 1,
-        element: "Fire"
+        crit: 0, cdmg: 150, dot: 0, dotDuration: 0, dotStacks: 1,
+        element: "Fire",
+        support: "Stun, Slow, Confuse"
     },
 
     upgrades: [
@@ -30,7 +31,7 @@ placement: 3,
     passives: [
         { name: "Elusive Crow Distraction", desc: "Every 5 attacks (4 at E2) confuses enemies for 2 seconds (3s at E2)." },
         { name: "Flame Sealing Technique", desc: "On Kill (Enemy with Black Burn): 30% chance to stun nearby enemies for 4s." },
-        { name: "Amaterasu", desc: "Attacks apply Black Burn (60% Dmg over 10 ticks). Re-applying to a burning target inflicts 'Time Snail': +20% DoT/Affliction and 30% Slow. Enemies below 60% HP take 3% (6% at E6) unit damage per second until death." }
+        { name: "Amaterasu", dot: 60, dotDuration: 10, desc: "Attacks apply Black Burn (60% Dmg over 10 ticks). Re-applying to a burning target inflicts 'Time Snail': +20% DoT/Affliction and 30% Slow. Enemies below 60% HP take 3% (6% at E6) unit damage per second until death." }
     ],
     ability: {
         abilityName: "Moon God: Counter Crash",

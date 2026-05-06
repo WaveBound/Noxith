@@ -22,7 +22,8 @@ unitDatabase.push({
     stats: {
         spaCap: 2.5, crit: 0, cdmg: 150,             // spaCap = min SPA | cdmg 150 = standard
         dot: 0, dotDuration: 0, dotStacks: 1,       // dot = % per tick | duration = # of ticks
-        element: "Fire", passiveDmg: 0,             // "Fire","Ice","Water","Dark","Light","Rose","Wind"
+        element: "Fire", passiveDmg: 0,
+        support: "Stun"
     },
 
     // UPGRADES (dmg, spa, range, cost per level)
@@ -37,9 +38,9 @@ unitDatabase.push({
 
     // PASSIVES (displayed in unit info panel)
     passives: [
-        { name: "Demonic Bloodline", desc: "Every 5 attacks, gain a burst of power (+50% Damage) for the next 10 attacks (33.3% average uptime)." },
-        { name: "Supada's Power", desc: "Gain 10% Awakening per attack. Transforms at 100%. In 'Demon Awakened' form, gain +50% Damage. Meter depletes 10% per attack." },
-        { name: "Freestyle", desc: "Gain style points after 10s of constant attacking. Each rank (D to SSS) increases damage by 5%. Resets after 5s of not attacking." },
+        { name: "Demonic Arsenal", desc: "This unit has an arsenal of weapons to pick from, each with its own unique effect. The placement weapon is Devil Sword.<br><br>Devil Sword:<br>Attacking an enemy with Bleed already applied on them will apply 80% Burn over 10 ticks.<br><br>Twin Guns:<br>Attacks faster at -20% SPA.<br><br>Demoncycle:<br>Any enemy that has a DoT applied on them while they are hit by this variant will be stunned by 2 seconds per DoT.<br><br>Fancy Hat:<br>Each attack in this variant costs 3,000 YEN. Gain +100% Damage and stop attacking when the player doesn’t have at least 3,000 YEN" },
+        { name: "Supada's Power", passiveDmg: 33.3, desc: "Gain 10% Awakening per attack. Transforms at 100%. In 'Demon Awakened' form, gain +50% Damage. Meter depletes 10% per attack." },
+        { name: "Freestyle", passiveDmg: 35, desc: "Gain style points after 10s of constant attacking. Each rank (D to SSS) increases damage by 5%. Resets after 5s of not attacking." },
     ],
 
     // ABILITY
@@ -48,7 +49,7 @@ unitDatabase.push({
         abilityName: "Demonic Arsenal",
         noToggle: true,
         cooldown: 10,
-        desc: "Pick from multiple weapons: Devil Sword (Burn on Bleed), Twin Guns (-20% SPA), Demoncycle (Stun per DoT), Fancy Hat (+100% Dmg, costs 3,000 ¥ per attack)."
+        desc: "This unit has an arsenal of weapons to pick from, each with its own unique effect. The placement weapon is Devil Sword.<br><br>Devil Sword:<br>Attacking an enemy with Bleed already applied on them will apply 80% Burn over 10 ticks.<br><br>Twin Guns:<br>Attacks faster at -20% SPA.<br><br>Demoncycle:<br>Any enemy that has a DoT applied on them while they are hit by this variant will be stunned by 2 seconds per DoT.<br><br>Fancy Hat:<br>Each attack in this variant costs 3,000 YEN. Gain +100% Damage and stop attacking when the player doesn’t have at least 3,000 YEN"
     },
 
     // MODES
@@ -60,7 +61,7 @@ unitDatabase.push({
             desc: "Sword focus: Burn on Bleed mechanics.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 2.5,
             crit: 0, cdmg: 150, dot: 80, dotDuration: 10,
-            passiveDmg: 68.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, trueDmg: 0, cooldown: 0
+            passiveDmg: 0, passiveSpa: 0, bossDmg: 0, dotBuff: 0, trueDmg: 0, cooldown: 0
         },
         {
             name: "Twin Guns",
@@ -69,7 +70,7 @@ unitDatabase.push({
             desc: "Gun focus: -20% SPA.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 3,
             crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
-            passiveDmg: 68.3, passiveSpa: -20, bossDmg: 0, dotBuff: 0, trueDmg: 0, cooldown: 0
+            passiveDmg: 0, passiveSpa: -20, bossDmg: 0, dotBuff: 0, trueDmg: 0, cooldown: 0
         },
         {
             name: "Demoncycle",
@@ -78,7 +79,7 @@ unitDatabase.push({
             desc: "Heavy focus: Stun per DoT mechanics.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 4,
             crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
-            passiveDmg: 68.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, trueDmg: 0, cooldown: 0
+            passiveDmg: 0, passiveSpa: 0, bossDmg: 0, dotBuff: 0, trueDmg: 0, cooldown: 0
         },
         {
             name: "Fancy Hat",
@@ -87,7 +88,7 @@ unitDatabase.push({
             desc: "High risk focus: +100% Damage, costs 3,000 ¥ per attack.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 3.5,
             crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
-            passiveDmg: 168.3, passiveSpa: 0, bossDmg: 0, dotBuff: 0, trueDmg: 0, cooldown: 0
+            passiveDmg: 100, passiveSpa: 0, bossDmg: 0, dotBuff: 0, trueDmg: 0, cooldown: 0
         }
     ],
 

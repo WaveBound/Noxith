@@ -3,7 +3,7 @@ unitDatabase.push({
     name: "Ant King (Savage)",
     img: "images/units/AntKing.png",
     level: 70,
-placement: 2,
+    placement: 2,
     placementType: "Ground",
     role: "DPS / Ground",
     tags: ["Leveling", "King"],
@@ -17,10 +17,10 @@ placement: 2,
     stats: {
         spaCap: 5.5,
         crit: 0, cdmg: 150,
-        dot: 80, dotDuration: 6, dotStacks: 1,
+        dot: 0, dotDuration: 0, dotStacks: 1,
         element: "Dark",
-        passiveDmg: 50, // Max Gluttony Stacks
-        trueDmg: 30
+        passiveDmg: 0, // Max Gluttony Stacks
+        trueDmg: 0,
     },
 
     upgrades: [
@@ -32,8 +32,8 @@ placement: 2,
         { dmg: 5160, spa: 8, range: 40, cost: 25000 } // Up 5
     ],
     passives: [
-        { name: "Predatory Gluttony", desc: "Gain +30% True Damage. Every Kill: Gain +1% Damage (Cap +30% [+50% at E6]). Boss Kill instantly caps. Resets after 10s without getting a kill." },
-        { name: "Paralyzing Venom", desc: "Applies Radiation for 80% Damage over 6 ticks. Applies 15% (20% at E2) Slow while active." },
+        { name: "Predatory Gluttony", trueDmg: 30, passiveDmg: 50, desc: "Gain +30% True Damage. Every Kill: Gain +1% Damage (Cap +30% [+50% at E6]). Boss Kill instantly caps. Resets after 10s without getting a kill." },
+        { name: "Paralyzing Venom", dot: 80, dotDuration: 6, desc: "Applies Radiation for 80% Damage over 6 ticks. Applies 15% (20% at E2) Slow while active." },
         { name: "Monarch's Devotion", desc: "When 'Jinoo' is in range: +20% Damage, +10% Range. [On E4]: Buffs all other units in range by +10% Damage." }
     ],
     ability: {

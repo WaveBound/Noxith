@@ -24,7 +24,11 @@ unitDatabase.push({
         crit: 0,
         cdmg: 150,
         element: "Dark",
-        passiveDmg: 33.3
+        passiveDmg: 0,
+        passiveSpa: 0,
+        passiveCrit: 0,
+        passiveCdmg: 0,
+        support: "Stun, Timestop"
     },
 
     // UPGRADES (dmg, spa, range, cost per level)
@@ -52,7 +56,7 @@ unitDatabase.push({
             desc: "On Crit: Toss 2 phantom swords that deal 10% Damage each every second for 10 seconds. Cooldown: 20s."
         },
         {
-            name: "This is Power!",
+            name: "This is Power!", passiveDmg: 33.3,
             desc: "Motivation meter fills by 10% per attack. Once filled (100%), transforms into 'Demon Awakened' mode (+50% Damage). Meter depletes by 10% per attack until returning to base form."
         }
     ],
@@ -64,28 +68,28 @@ unitDatabase.push({
             img: "images/units/AlphaDevil/Katana.png",
             desc: "Standard swordsman stance. Deal 1.5x Damage to enemies with Timestop.",
             dmg: 6000, spa: 9, range: 34, spaCap: 4,
-            passiveDmg: 33.3, burnMultiplier: 50
+            passiveDmg: 0, burnMultiplier: 50
         },
         {
             name: "Demonic Gauntlet",
             img: "images/units/AlphaDevil/Demonic_Gauntlets.png",
             desc: "Heavy strikes: +50% Damage, +50% SPA Speed, -30% Range.",
             dmg: 6000, spa: 9, range: 23.8, spaCap: 6.5,
-            passiveDmg: 83.3, passiveSpa: -50
+            passiveDmg: 50, passiveSpa: -50
         },
         {
             name: "Phantom Sword",
             img: "images/units/AlphaDevil/Phantom_Sword.png",
             desc: "Applies 80% Bleed for 8 ticks to afflicted enemies.",
             dmg: 6000, spa: 9, range: 34, spaCap: 6,
-            passiveDmg: 33.3, dot: 80, dotDuration: 8
+            passiveDmg: 0, dot: 80, dotDuration: 8
         },
         {
             name: "Mirage Barrage",
             img: "images/units/AlphaDevil/Mirage_Barrage.png",
             desc: "-80% Damage, +1,000% Range. Rapid continuous attacks.",
             dmg: 6000, spa: 1, range: 60, spaCap: 4,
-            passiveDmg: -26.7
+            passiveDmg: -60
         }
     ],
 

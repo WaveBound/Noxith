@@ -73,6 +73,8 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     effectiveStats.placementType = unit.placementType;
     if (unit.tags) effectiveStats.tags = unit.tags;
     if (unit.customSummons) effectiveStats.customSummons = unit.customSummons;
+    if (unit.summonStats) effectiveStats.summonStats = unit.summonStats;
+    if (unit.passives) effectiveStats.passives = unit.passives;
     if (unit.stats && unit.stats.customFollowUp) effectiveStats.customFollowUp = unit.stats.customFollowUp;
 
     // Resolve Placement (limited by Trait or Ability)
@@ -121,31 +123,19 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     options.spaPoints = Math.min(options.spaPoints || 0, maxPts);
     options.rangePoints = Math.min(options.rangePoints || 0, maxPts);
 
-    const isKiritoVR = (isUnit(unit.id, 'kirito') && kiritoState.realm);
-    if (isUnit(unit.id, 'kirito') && isKiritoVR && kiritoState.card) { effectiveStats.dot = 200; effectiveStats.dotDuration = 4; effectiveStats.dotStacks = 1; }
-    if (isUnit(unit.id, 'bambietta') && typeof BAMBIETTA_MODES !== 'undefined') {
-        const currentEl = bambiettaState.element || "Dark";
-        const modeStats = BAMBIETTA_MODES[currentEl];
-        if (modeStats) Object.assign(effectiveStats, modeStats);
-    }
     // --- UNIVERSAL MODES SUPPORT ---
     if (unit.modes) {
         let modeData = null;
         if (Array.isArray(unit.modes)) {
             const modeIdx = (window.unitModesState && window.unitModesState[unit.id]) || 0;
             modeData = unit.modes[modeIdx];
-        } else if (typeof unit.modes === 'object') {
-            // Fallback for older object-based modes (e.g. Ancient Mage / Robot 1718)
-            let currentModeName = "";
-            if (isUnit(unit.id, 'ancient_mage')) currentModeName = (typeof ancientMageState !== 'undefined') ? ancientMageState.mode : "Specialist";
-            else if (isUnit(unit.id, 'robot1718')) currentModeName = (typeof robot1718State !== 'undefined') ? robot1718State.mode : "Robot 17";
-
-            modeData = unit.modes[currentModeName];
         }
 
         if (modeData) {
             // Apply mode stats to the effective stats with normalization
             const normalizedStats = {};
+            let modePassiveObj = null;
+
             for (const key in modeData) {
                 // Skip display-only fields
                 if (['name', 'img', 'desc', 'Mode'].includes(key)) continue;
@@ -154,31 +144,64 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
                 // Map specific keys to match engine expectations
                 if (targetKey === 'dotduration') targetKey = 'dotDuration';
                 else if (targetKey === 'spacap' || targetKey === 'spa cap') targetKey = 'spaCap';
-                else if (targetKey === 'passivedmg') targetKey = 'passiveDmg';
-                else if (targetKey === 'passivespa') targetKey = 'passiveSpa';
                 else if (targetKey === 'bossdmg') targetKey = 'bossDmg';
                 else if (targetKey === 'dotbuff') targetKey = 'dotBuff';
-                else if (targetKey === 'truedmg') targetKey = 'trueDmg'; // <--- ADD THIS LINE
+
+                // Attribute passive stats to the mode's name in the passives array!
+                if (['passivedmg', 'passivespa', 'passivecrit', 'passivecdmg', 'truedmg'].includes(targetKey)) {
+                    if (!modePassiveObj) modePassiveObj = { name: modeData.name || "Mode Bonus" };
+                    if (targetKey === 'passivedmg') modePassiveObj.passiveDmg = modeData[key];
+                    if (targetKey === 'passivespa') modePassiveObj.passiveSpa = modeData[key];
+                    if (targetKey === 'passivecrit') modePassiveObj.passiveCrit = modeData[key];
+                    if (targetKey === 'passivecdmg') modePassiveObj.passiveCdmg = modeData[key];
+                    if (targetKey === 'truedmg') modePassiveObj.trueDmg = modeData[key];
+                    continue;
+                }
 
                 normalizedStats[targetKey] = modeData[key];
             }
             Object.assign(effectiveStats, normalizedStats);
 
-
+            if (modePassiveObj) {
+                if (!effectiveStats.passives) effectiveStats.passives = [];
+                // Shallow copy so we don't permanently mutate the base unit definition
+                else effectiveStats.passives = [...effectiveStats.passives];
+                
+                effectiveStats.passives.push(modePassiveObj);
+            }
         }
     }
 
     if (isAbility && unit.ability) {
         const ab = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
         Object.assign(effectiveStats, ab);
+
+        // If the ability has a name that matches an existing passive, attribute the stats to that passive for breakdown visibility
+        if (ab.abilityName && effectiveStats.passives) {
+            // Create a deep copy of passives to avoid mutating unitDatabase
+            effectiveStats.passives = effectiveStats.passives.map(p => {
+                if (p.name === ab.abilityName) {
+                    const newP = { ...p };
+                    // Map ability keys to passive breakdown keys
+                    if (ab.buffDmg) newP.passiveDmg = (newP.passiveDmg || 0) + ab.buffDmg;
+                    if (ab.buffSpa) newP.passiveSpa = (newP.passiveSpa || 0) + ab.buffSpa;
+                    if (ab.passiveRange) newP.passiveRange = (newP.passiveRange || 0) + ab.passiveRange;
+                    if (ab.dotBuff) newP.dot = (newP.dot || 0) + ab.dotBuff;
+                    if (ab.trueDmg) newP.trueDmg = (newP.trueDmg || 0) + ab.trueDmg;
+                    if (ab.passiveCrit) newP.passiveCrit = (newP.passiveCrit || 0) + ab.passiveCrit;
+                    if (ab.passiveCdmg) newP.passiveCdmg = (newP.passiveCdmg || 0) + ab.passiveCdmg;
+                    return newP;
+                }
+                return p;
+            });
+        }
     }
 
     let suffix = isAbility ? '-ABILITY' : '-BASE';
-    if (isUnit(unit.id, 'kirito')) { if (kiritoState.realm) suffix += '-VR'; if (kiritoState.card) suffix += '-CARD'; }
     const modeTag = (mode === 'bugged') ? '-b-' : '-f-';
 
-    const context = { dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: isKiritoVR, headPiece, starMult, rankData, isAbility, maxPts, upgradeLevel };
-    return { effectiveStats, traitObj, context, isKiritoVR, suffix, modeTag };
+    const context = { dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: false, headPiece, starMult, rankData, isAbility, maxPts, upgradeLevel };
+    return { effectiveStats, traitObj, context, isKiritoVR: false, suffix, modeTag };
 }
 
 function createResultEntry({ id, buildName, traitName, res, prio, mainStats, subStats, headUsed, isCustom, relicIds = null, baseRes = null }) {
@@ -578,7 +601,67 @@ function calculateDPS(uStats, relicStats, context) {
     if (rSpa !== 0) lvStats.spa *= (1 - rSpa / 100);
     if (rRange !== 0) lvStats.range *= (1 + rRange / 100);
 
-    let passivePcent = (uStats.passiveDmg || 0), passiveSpaPcent = uStats.passiveSpa || 0;
+    let passivePcent = (uStats.buffDmg || 0);
+    let passiveSpaPcent = 0;
+    let passiveRangePcent = 0;
+    let trueDmgFromPassives = 0;
+    let passiveCritFromPassives = 0;
+    let passiveCdmgFromPassives = 0;
+    let passiveDotFromPassives = 0;
+    let passiveBreakdown = [];
+
+    if (uStats.passiveDmg) passivePcent += uStats.passiveDmg;
+    if (uStats.passiveSpa) passiveSpaPcent += uStats.passiveSpa;
+    if (uStats.passiveRange) passiveRangePcent += uStats.passiveRange;
+    if (uStats.passiveCrit) passiveCritFromPassives += uStats.passiveCrit;
+    if (uStats.passiveCdmg) passiveCdmgFromPassives += uStats.passiveCdmg;
+
+    // Attribute root-level passives to breakdown
+    if (uStats.passiveDmg || uStats.passiveSpa || uStats.passiveRange || uStats.passiveCrit || uStats.passiveCdmg) {
+        passiveBreakdown.push({
+            name: "Unit Base (Passive)",
+            dmg: uStats.passiveDmg || 0,
+            spa: uStats.passiveSpa || 0,
+            range: uStats.passiveRange || 0,
+            crit: uStats.passiveCrit || 0,
+            cdmg: uStats.passiveCdmg || 0,
+            trueDmg: 0,
+            dot: 0
+        });
+    }
+
+    if (uStats.passives && Array.isArray(uStats.passives)) {
+        uStats.passives.forEach(p => {
+            let pDmg = p.passiveDmg || 0;
+            let pSpa = p.passiveSpa || 0;
+            let pRange = p.passiveRange || 0;
+            let pTrue = p.trueDmg || 0;
+            let pCrit = p.passiveCrit || 0;
+            let pCdmg = p.passiveCdmg || 0;
+            let pDot = p.dot || 0;
+            
+            if (p.buffedByJunior && headPiece === 'junior') {
+                pDmg *= 1.1;
+                pSpa *= 1.1;
+                pTrue *= 1.1;
+                pCrit *= 1.1;
+                pCdmg *= 1.1;
+                pDot *= 1.1;
+            }
+            
+            if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0) {
+                passivePcent += pDmg;
+                passiveSpaPcent += pSpa;
+                passiveRangePcent += pRange;
+                trueDmgFromPassives += pTrue;
+                passiveCritFromPassives += pCrit;
+                passiveCdmgFromPassives += pCdmg;
+                passiveDotFromPassives += pDot;
+                if (p.dotDuration && !uStats.dotDuration) uStats.dotDuration = p.dotDuration;
+                passiveBreakdown.push({ name: p.name, dmg: pDmg, spa: pSpa, range: pRange, trueDmg: pTrue, crit: pCrit, cdmg: pCdmg, dot: pDot });
+            }
+        });
+    }
 
     const totalBossDmg = (uStats.bossDmg || 0) + (traitObj.bossDmg || 0);
     let traitDmgPct = traitObj.dmg + (totalBossDmg && isBoss ? totalBossDmg : 0), traitSpaPct = traitObj.spa;
@@ -632,12 +715,6 @@ function calculateDPS(uStats, relicStats, context) {
 
     // Apply Junior Ninja 1.1x Multiplier to Passives & Tags BEFORE values are consumed by totals
     if (headPiece === 'junior') {
-        if (uStats.id === 'king_sailor') {
-            // Manipulator of Fate +50% Dmg / 25% SPA
-            passivePcent += 5; // 50 -> 55
-            passiveSpaPcent += 2.5; // 25 -> 27.5
-        }
-        
         if (tagBuffs.dmg) {
             const extraTagDmg = tagBuffs.dmg * 0.1;
             tagBuffs.dmg += extraTagDmg;
@@ -685,15 +762,16 @@ function calculateDPS(uStats, relicStats, context) {
         unitPassive: passivePcent,
         abilityBuff: abilityDmg,
         accessoryBase: headDmgBase,
-        globalBuffs: globalDmg
+        globalBuffs: globalDmg,
+        passiveBreakdown: passiveBreakdown
     };
 
 
 
     const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1);
 
-    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cdmg || 0);
-    let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0), 100);
+    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cdmg || 0) + passiveCdmgFromPassives;
+    let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
     if (uStats.id === 'kirito' || uStats.id === 'the_strongest_of_today') {
         finalCritRate = Math.min(finalCritRate, uStats.crit);
     }
@@ -830,7 +908,7 @@ function calculateDPS(uStats, relicStats, context) {
     let hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
 
     // Sorcerer Hunter Set Perk: 1.15x True Damage
-    let trueDmgMult = 1 + ((uStats.trueDmg || 0) / 100);
+    let trueDmgMult = 1 + ((uStats.trueDmg || 0) + trueDmgFromPassives) / 100;
     if (relicStats.set === 'sorcerer_hunter') {
         trueDmgMult += 0.15;
     }
@@ -895,7 +973,7 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     const gearDotBonus = baseR_Dot + headDotBuff + (sBonus.dot || 0);
-    const { dotDpsTotal, dotBreakdown } = _calcDoTDPS(uStats, traitObj, traitDotBuff, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult);
+    const { dotDpsTotal, dotBreakdown } = _calcDoTDPS({ ...uStats, dot: (uStats.dot || 0) + passiveDotFromPassives }, traitObj, traitDotBuff, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult);
 
     let finalDotDps = dotDpsTotal;
 

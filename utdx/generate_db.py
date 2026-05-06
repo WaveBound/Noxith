@@ -48,7 +48,6 @@ if (isMainThread) {
     unitDatabase.forEach(u => {
         if (targetUnits.length === 0 || targetSet.has(u.id)) {
             tasksForCounting.push(u.name);
-            if (isUnit(u.id, 'kirito')) tasksForCounting.push('Kirito (Card)');
         }
     });
 
@@ -233,7 +232,8 @@ if (isMainThread) {
     function fastCalculateUnitBuilds(unit, cfg, traitsForCalc, isAbility) {
         const upgradeLevel = (unit.upgrades && unit.upgrades.length > 0) ? unit.upgrades.length - 1 : 0;
         const { effectiveStats, isKiritoVR, suffix } = buildCalculationContext(unit, 'ruler', { isAbility, upgradeLevel });
-        const hasNativeDoT = (effectiveStats.dot > 0) || (effectiveStats.burnMultiplier > 0) || isKiritoVR;
+        const hasPassiveDoT = effectiveStats.passives && effectiveStats.passives.some(p => p.dot && p.dot > 0);
+        const hasNativeDoT = (effectiveStats.dot > 0) || (effectiveStats.burnMultiplier > 0) || isKiritoVR || hasPassiveDoT;
 
         let allowedHeads = cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'] : ['none'];
         // Rebellious head only for CC units
@@ -533,15 +533,14 @@ if (isMainThread) {
             const tasks = [];
             unitDatabase.forEach(u => {
                 if (targetUnits.length === 0 || targetSet.has(u.id)) {
-                    tasks.push({ u, isCard: false });
-                    if(isUnit(u.id, 'kirito')) tasks.push({ u, isCard: true });
+                    tasks.push({ u });
                 }
             });
 
             let workerDb = {};
             tasks.forEach(task => {
-                const { u, isCard } = task;
-                let baseKey = isUnit(u.id, 'kirito') && isCard ? 'kirito_card' : u.id;
+                const { u } = task;
+                let baseKey = u.id;
                 const types = u.ability ? ['base', 'abil'] : ['base'];
                 const isLaw = isUnit(u.id, 'law');
                 
@@ -555,9 +554,7 @@ if (isMainThread) {
                     const finalKey = type === 'abil' ? `${baseKey}_abil` : baseKey;
                     workerDb[finalKey] = { fixed: [], bugged: [] }; 
 
-                    if (isUnit(u.id, 'bambietta')) bambiettaState.element = "Dark"; 
-                    if (isUnit(u.id, 'robot1718')) robot1718State.mode = "Robot 17";
-                    if (isUnit(u.id, 'kirito')) { kiritoState.realm = true; kiritoState.card = isCard; }
+
 
                     const isAbility = type === 'abil';
 
@@ -592,7 +589,7 @@ if (isMainThread) {
                 });
                 
                 // Immediately notify python/UI so it ticks visually per-unit
-                parentPort.postMessage({ type: 'unit_done', outName, unitName: isCard ? u.name + " (Card)" : u.name });
+                parentPort.postMessage({ type: 'unit_done', outName, unitName: u.name });
             });
 
             parentPort.postMessage({ type: 'log', outName, data: 'Writing database file to disk...' });
@@ -658,7 +655,7 @@ class GeneratorApp:
             combined_js_parts = [
                 "if (typeof window === 'undefined') { global.window = global; }\n",
                 "if (typeof document === 'undefined') { global.document = { createElement: () => ({}), head: { appendChild: () => {} } }; }\n",
-                "global.unitDatabase = global.unitDatabase || []; global.unitSpecificTraits = global.unitSpecificTraits || {}; global.bambiettaState = global.bambiettaState || {element:'Dark'}; global.robot1718State = global.robot1718State || {mode:'Robot 17'}; global.kiritoState = global.kiritoState || {realm:true, card:false}; global.ancientMageState = global.ancientMageState || {mode:'Specialist'};\n",
+                "global.unitDatabase = global.unitDatabase || []; global.unitSpecificTraits = global.unitSpecificTraits || {};\n",
             ]
             
             for filename in REQUIRED_FILES:

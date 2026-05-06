@@ -129,6 +129,15 @@ const SUB_NAMES = {
 
 const patchNotesData = [
     {
+        version: "v5.5",
+        date: "May 06, 2026",
+        changes: [
+            { type: "UI", text: "<b>Unit Info:</b> Now displays <b>Maximum Upgrade Statistics</b> by default to better reflect a unit's endgame potential." },
+            { type: "UI", text: "<b>Passive Attribution:</b> Unit passives now display their explicit stat bonuses (e.g., [Applied: +50% Crit]) in the calculation breakdown for easier troubleshooting." },
+            { type: "UI", text: "<b>Renaming:</b> Renamed 'SPA Cap' to <b>Animation Cap</b> across the entire application for improved clarity." }
+        ]
+    },
+    {
         version: "v5.4",
         date: "May 05, 2026",
         changes: [
@@ -312,7 +321,7 @@ const patchNotesData = [
         changes: [
             { type: "Ui", text: "<b>Mobile:</b> Added a mobile menu toggle button and improved responsive layout." },
             { type: "Feature", text: "<b>Efficiency Score:</b> Added an 'Efficiency' metric to all builds. This displays <b>DPS per Cost</b> (Efficiency), helping to identify the most economic builds." },
-            { type: "Fix", text: "<b>Bambietta Logic:</b> Fixed the Element Selector. Switching elements now instantly recalculates stats and updates the build list correctly." }
+
         ]
     },
     {
@@ -412,15 +421,7 @@ const guideData = [
     { unit: "mimicry_sorcerer", img: "images/units/MimicrySorcerer.png", isCalculated: true }
 ];
 
-const BAMBIETTA_MODES = {
-    "Water": { element: "Water", dot: 0, desc: "Slow", dotDuration: 0 },
-    "Wind": { element: "Wind", dot: 50, dotDuration: 5, desc: "Windsheer" },
-    "Rose": { element: "Rose", dot: 50, dotDuration: 5, desc: "Bleed" },
-    "Fire": { element: "Fire", dot: 50, dotDuration: 5, desc: "Burn" },
-    "Light": { element: "Light", dot: 50, dotDuration: 5, desc: "Radiation" },
-    "Dark": { element: "Dark", dot: 0, desc: "Stun", dotDuration: 0 },
-    "Ice": { element: "Ice", dot: 0, desc: "Freeze", dotDuration: 0 }
-};
+
 
 const setBonuses = {
     laughing: { dmg: 5, spa: 5, cf: 0, cm: 0, range: 0 },
@@ -539,7 +540,6 @@ const UNIT_FILES = [
     'ancient_mage.js',
     'ancient_shinob.js',
     'ant_king_savage.js',
-    'bambietta.js',
     'cell.js',
     'crow_shinobi.js',
     'esdeath.js',

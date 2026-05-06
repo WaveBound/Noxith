@@ -16,17 +16,17 @@ unitDatabase.push({
         totalCost: 140910,
         stats: {
                 dmg: 13000, spa: 12, range: 40, spaCap: 5,
-                crit: 50, // 0 + 50 from Passive
-                cdmg: 250, // 150 + 100 from Passive
-                dot: 60,
-                dotDuration: 6,
+                crit: 0, // 0 + 50 from Passive
+                cdmg: 150, // 150 + 100 from Passive
+                dot: 0,
+                dotDuration: 0,
                 dotStacks: 1,
                 element: "Dark",
                 passiveDmg: 0
         },
 
         passives: [
-                { name: "Combined Might", desc: "On attack apply either black burn or wind shear for 60% over 6 ticks." },
-                { name: "Unlikely Alliance", desc: "On placement gain +50% Crit rate and +100% Critical damage." }
+                { name: "Combined Might", dot: 60, dotDuration: 6, desc: "On attack apply either black burn or wind shear for 60% over 6 ticks." },
+                { name: "Unlikely Alliance", passiveCrit: 50, passiveCdmg: 100, desc: "On placement gain +50% Crit rate and +100% Critical damage." }
         ]
 });

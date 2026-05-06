@@ -16,13 +16,14 @@ unitDatabase.push({
     totalCost: 66700,
     stats: {
         spaCap: 2,
-        crit: 0, cdmg: 150, dot: 60, dotDuration: 10,
+        crit: 0, cdmg: 150,
         element: "Light",
         passiveDmg: 0,  // Base Experience (20)
         passiveSpa: 0,   // Base SPA buff/penalty (0 = No change)
         bossDmg: 0,
         dotBuff: 20,     // Specialist focus (+40% DoT)
-        trueDmg: 0        // Specialist focus (+50% True Dmg)
+        trueDmg: 0,        // Specialist focus (+50% True Dmg)
+        support: "Stun, Slow"
     },
 
     upgrades: [
@@ -34,7 +35,7 @@ unitDatabase.push({
         { dmg: 6650, spa: 7, range: 45, cost: 22500 }  // Up 5
     ],
     passives: [
-        { name: "Millennia Old Experience", desc: "Every attack: Enemies take +20% Damage (Debuff) and Wind Shear (60% Dmg over 10 ticks). Specialist Mode swaps Wind Shear for Burn and increases DoT effectiveness." },
+        { name: "Millennia Old Experience", dot: 60, dotDuration: 10, desc: "Every attack: Enemies take +20% Damage (Debuff) and Wind Shear (60% Dmg over 10 ticks). Specialist Mode swaps Wind Shear for Burn and increases DoT effectiveness." },
         { name: "The Last Great Mage", desc: "Gains Stun Immunity while not attacking (Always active at E4)." }
     ],
     modes: [
@@ -44,7 +45,7 @@ unitDatabase.push({
             level: 70,
             desc: "Combat focus: +20% Dmg, +40% Slow (Penalty), +50% Boss Dmg. Applies Wind Shear (60% DoT over 10s).",
             dmg: 6650, spa: 7, range: 45, spaCap: 2,
-            crit: 0, cdmg: 150, dot: 60, dotDuration: 10,
+            crit: 0, cdmg: 150,
             passiveDmg: 20, passiveSpa: -40, bossDmg: 50,
             dotBuff: 0, trueDmg: 0, cooldown: 0
         },
@@ -54,7 +55,7 @@ unitDatabase.push({
             level: 70,
             desc: "Magic focus: +40% DoT, +50% True Damage. Swaps Wind Shear for Burn (60% DoT over 10s).",
             dmg: 6650, spa: 7, range: 45, spaCap: 2,
-            crit: 0, cdmg: 150, dot: 60, dotDuration: 10,
+            crit: 0, cdmg: 150,
             passiveDmg: 0, passiveSpa: 0, bossDmg: 0,
             dotBuff: 40, trueDmg: 50, cooldown: 0
         },

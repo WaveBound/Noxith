@@ -21,7 +21,8 @@ unitDatabase.push({
         spaCap: 3,
         passiveDmg: 0,
         element: "Rose",
-        dotDuration: 10
+        dotDuration: 10,
+        support: "Slow, Stun, Confuse"
     },
 
     upgrades: [

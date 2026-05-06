@@ -18,7 +18,7 @@ unitDatabase.push({
         spaCap: 2.5,
         crit: 0, cdmg: 150, dot: 0,
         element: "Wind",
-        passiveDmg: 40,
+        passiveDmg: 0,
         summonStats: { attacksToSpawn: 8, maxCount: 3, dmgPct: 100, buffWindow: 0, planeA: { spa: 6, duration: 50 }, planeB: { spa: 6, duration: 50 } }
     },
 
@@ -32,7 +32,7 @@ unitDatabase.push({
         { dmg: 3300, spa: 8, range: 45, cost: 20500 }   // Up 6
     ],
     passives: [
-        { name: "Shadow Clone", desc: "Every 8 attacks, summon a clone (Max 3) for 50s. Clones deal 100% Dmg. Gain +20% Dmg (Max 40%) when clones expire." },
+        { name: "Shadow Clone", passiveDmg: 40, desc: "Every 8 attacks, summon a clone (Max 3) for 50s. Clones deal 100% Dmg. Gain +20% Dmg (Max 40%) when clones expire." },
         { name: "Chakra Control", desc: "+5% Chakra per attack. Auto-enters Beast Mode at 100%. Beast Mode lasts 100s." },
         { name: "Beast Cycle", desc: "Cycles: Beast Slam -> Beast Ball -> Massive Beast Ball. Completion grants +50% Damage for the mode duration." }
     ],

@@ -22,7 +22,8 @@ unitDatabase.push({
     stats: {
         spaCap: 5, crit: 50, cdmg: 150,             // spaCap = min SPA | cdmg 150 = standard
         dot: 0, dotDuration: 0, dotStacks: 1,       // dot = % per tick | duration = # of ticks
-        element: "Light", passiveDmg: 0, passiveSpa: 0, // "Fire","Ice","Water","Dark","Light","Rose","Wind"
+        element: "Light", passiveDmg: 0, passiveSpa: 0,
+        support: "Slow, Timestop"
     },
 
     // UPGRADES (dmg, spa, range, cost per level)

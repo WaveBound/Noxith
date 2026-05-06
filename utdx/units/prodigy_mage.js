@@ -8,8 +8,8 @@ unitDatabase.push({
     role: "Support / Hill",
     tags: ["Hero"],
     meta: {
-        short: "Sacred/Eternal",
-        long: "Sacred/Eternal",
+        short: "Fission/Sacred",
+        long: "Fission/Sacred",
         note: "Battle Dominant: Applies powerful Slow and Wind Shear DoT. Party's Tactician allows flexible buffs for Hill or Ground allies."
     },
     totalCost: 46200,

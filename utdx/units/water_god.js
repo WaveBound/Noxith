@@ -15,14 +15,15 @@ unitDatabase.push({
     },
     totalCost: 72600,
     stats: {
-        crit: 50,
+        crit: 0,
         cdmg: 150,
         dot: 0,
         dotStacks: 1,
         spaCap: 3.5,
         passiveDmg: 0,
         element: "Water",
-        dotDuration: 0
+        dotDuration: 0,
+        support: "Slow"
     },
 
     upgrades: [
@@ -36,8 +37,8 @@ unitDatabase.push({
         { dmg: 2500, spa: 9, range: 30, cost: 17000 }  // Up 7
     ],
     passives: [
-        { name: "God Of The Seas", desc: "Applies +20% DoT and Affliction Time (+30% at E4). Increases Crit Rate by 5% per attack up to 30% (50% at E2). Performs FuA at cap." },
-        { name: "Primordial Power", desc: "Inflicts 'Time Snail' (3s): +20% DoT Duration, 30% Slow, and buffs Water God Damage by 5% per enemy effected (max +50%)." }
+        { name: "God Of The Seas", passiveCrit: 50, desc: "Applies +20% DoT and Affaiction Time (+30% at E4). Increases Crit Rate by 5% per attack up to 30% (50% at E2). Performs FuA at cap." },
+        { name: "Primordial Power", passiveDmg: 0, desc: "Inflicts 'Time Snail' (3s): +20% DoT Duration, 30% Slow, and buffs Water God Damage by 5% per enemy effected (max +50%)." }
     ],
     ability: { buffDmg: 50, abilityName: "Primordial Wave", noToggle: true, cooldown: 60, desc: "Water God summons a Primordial Wave down The Path that deals 200% Damage to all Enemies on That Path." },
     etherealization: [

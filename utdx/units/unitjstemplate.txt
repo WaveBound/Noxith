@@ -23,6 +23,7 @@ unitDatabase.push({
         spaCap: 3, crit: 0, cdmg: 150,             // spaCap = min SPA | cdmg 150 = standard
         dot: 0, dotDuration: 0, dotStacks: 1,       // dot = % per tick | duration = # of ticks
         element: "None", passiveDmg: 0,             // "Fire","Ice","Water","Dark","Light","Rose","Wind"
+        support: ""                                 // e.g. "Slow", "Stun", "Confuse", "Timestop" (Enables Rebellious)
         // customFollowUp: {                        // (Optional) Follow up attack stats
         //     chance: 70,                          // Base % chance to trigger
         //     dmgMult: 1.0,                        // Multiplier of host's damage

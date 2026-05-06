@@ -19,7 +19,7 @@ unitDatabase.push({
         crit: 0, cdmg: 150,
         dot: 60, dotDuration: 10, dotStacks: 1,
         element: "Dark",
-        passiveDmg: 50 // Avg: Clanhood (20%) + Spirited Cage (15%) + Hatred (15%)
+        passiveDmg: 0
     },
 
     upgrades: [

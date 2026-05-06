@@ -14,23 +14,6 @@ let unitBuildsCache = {};
 
 let inventoryMode = false; // Toggle state for Inventory calculation
 
-const kiritoState = {
-    realm: true,
-    card: false
-};
-
-const bambiettaState = {
-    element: "Dark"
-};
-
-const robot1718State = {
-    mode: "Robot 17"
-};
-
-window.ancientMageState = {
-    mode: "DPS"
-};
-
 let currentCalcUnitId = null;
 
 // Async Rendering State

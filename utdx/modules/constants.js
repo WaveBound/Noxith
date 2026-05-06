@@ -117,7 +117,7 @@ const infoDefinitions = {
     'spa_calc': {
         title: "SPA (Speed) Calculation",
         formula: `<span class="ip-var">Base</span> * <span class="ip-hl">LvScale</span> * (1 - <span class="ip-var">Trait</span>%) * (1 - <span class="ip-var">Relic</span>%)`,
-        desc: "Speed reductions are calculated in stages.<br>1. <b>Traits</b> are multiplicative reductions (stronger).<br>2. <b>Relics/Sets</b> are additive reductions (summed together first).<br>3. <b>Cap:</b> The final value cannot go lower than the unit's specific SPA Cap."
+        desc: "Speed reductions are calculated in stages.<br>1. <b>Traits</b> are multiplicative reductions (stronger).<br>2. <b>Relics/Sets</b> are additive reductions (summed together first).<br>3. <b>Cap:</b> The final value cannot go lower than the unit's specific Animation Cap."
     },
     'sungod_passive': {
         title: "Sun God Head Passive",

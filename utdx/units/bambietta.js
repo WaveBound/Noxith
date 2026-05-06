@@ -21,8 +21,7 @@ unitDatabase.push({
         spaCap: 2,
         passiveDmg: 0,
         element: "Dark",
-        dotDuration: 0,
-        hasElementSelect: true
+        dotDuration: 0
     },
 
     upgrades: [

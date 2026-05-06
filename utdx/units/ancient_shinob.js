@@ -17,11 +17,11 @@ unitDatabase.push({
         spaCap: 4,
         crit: 0,
         cdmg: 150,
-        passiveDmg: 50, // 30% (The Wisest) + 20% (Ancient Techniques Debuff)
+        passiveDmg: 0, // 30% (The Wisest) + 20% (Ancient Techniques Debuff)
         dot: 12.5,     // 25% Burn every other attack = 12.5% avg
         dotDuration: 6,
         dotStacks: 1,
-        element: "Water"
+        element: "Water",
     },
 
     upgrades: [
@@ -34,9 +34,9 @@ unitDatabase.push({
         { dmg: 14250, spa: 25, range: 45, cost: 23400, unlocksAbility: true } // Up 6
     ],
     passives: [
-        { name: "The Wisest", desc: "Every 5s gain +2% Damage (+5% at E4). Max: 30%." },
+        { name: "The Wisest", passiveDmg: 30, desc: "Every 5s gain +2% Damage (+5% at E4). Max: 30%." },
         { name: "Ancient Techniques of Old", desc: "Alternating attacks. Atk 1: Confuse (2s). Atk 2: Burn (25% Dmg over 6s). Enemies hit take +20% Damage." },
-        { name: "Samurai Technique", desc: "[E2] Gain +15% Damage for 15s upon use." },
+        { name: "Samurai Technique", passiveDmg: 15, desc: "[E2] Gain +15% Damage for 15s upon use. Changes Dmg 7500 -> 14250, Spa 14.5 -> 25." },
         { name: "Weapon Proficiency", desc: "Stun Immunity. Every 5 attacks cycles weapons (modifiers ignored in DPS calc)." }
     ],
     ability: {

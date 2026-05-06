@@ -31,32 +31,7 @@ const TOGGLE_OVERRIDES = {
     }
 };
 
-const unitControls = {
-    kirito: (unit) => {
-        const { realm, card } = kiritoState;
-        const labelClass = card ? 'color-custom font-bold' : 'color-gray';
-        const switchClass = card ? 'bg-custom' : '';
-        return `<div class="unit-toolbar custom-toolbar kirito-toolbar">
-            <div class="toggle-wrapper"><span>Virtual Realm</span><label><input type="checkbox" ${realm ? 'checked' : ''} onchange="toggleKiritoMode('realm', this)"><div class="mini-switch"></div></label></div>
-            ${realm ? `<div class="toggle-wrapper animate-fade"><span class="${labelClass}">Magician Card</span><label><input type="checkbox" ${card ? 'checked' : ''} onchange="toggleKiritoMode('card', this)"><div class="mini-switch ${switchClass}"></div></label></div>` : ''}
-        </div>`;
-    },
-    bambietta: (unit) => {
-        const currentEl = bambiettaState.element;
-        const options = Object.keys(BAMBIETTA_MODES).map(k =>
-            `<option value="${k}" ${currentEl === k ? 'selected' : ''}>${k} (${BAMBIETTA_MODES[k].desc})</option>`
-        ).join('');
-        return `<div class="unit-toolbar custom-toolbar"><div class="bambi-wrapper"><span class="bambi-label">Element:</span><select onchange="setBambiettaElement(this.value, this)" class="bambi-select">${options}</select></div></div>`;
-    },
-    robot1718: (unit) => {
-        const currentMode = robot1718State.mode;
-        if (!unit.modes) return '';
-        const options = Object.keys(unit.modes).map(k =>
-            `<option value="${k}" ${currentMode === k ? 'selected' : ''}>${k} (${unit.modes[k].desc || k})</option>`
-        ).join('');
-        return `<div class="unit-toolbar custom-toolbar"><div class="bambi-wrapper" style="display: flex; align-items: center; width: 100%;"><span class="bambi-label" style="margin-right: 6px;">Form:</span><select onchange="setRobot1718Mode(this.value, this)" class="bambi-select" style="flex: 1;">${options}</select></div></div>`;
-    },
-};
+const unitControls = {};
 
 function getUnitControlsHtml(unit) {
     const fileKey = window.getFileName(unit.id);
@@ -264,7 +239,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     let benchmarkDps = 0;
     try {
         if (inventoryMode && window.STATIC_BUILD_DB) {
-            let dbKey = (isUnit(unitId, 'kirito') && kiritoState.card) ? 'kirito_card' : unitId;
+            let dbKey = unitId;
             if (activeType === 'abil') dbKey += '_abil';
             const dbEntry = window.STATIC_BUILD_DB[dbKey] || {};
             const modeData = dbEntry[activeMode] || dbEntry[activeMode === 'fixed' ? 'f' : 'b'];
@@ -421,12 +396,8 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     }
 
     if (!buildData && unitObj) {
-        const isBambiAlt = (isUnit(unitId, 'bambietta') && bambiettaState.element !== 'Dark');
-        const isRobotAlt = (isUnit(unitId, 'robot1718') && robot1718State.mode !== 'Robot 17');
-        if (!isBambiAlt && !isRobotAlt) {
-            processUnitCache(unitObj, 0, activeType, false);
-            buildData = window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0];
-        }
+        processUnitCache(unitObj, 0, activeType, false);
+        buildData = window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0];
     }
 
     if (buildData) {
@@ -451,7 +422,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
     const CONFIGS = [{ head: true, subs: true }];
 
     const performCalcSet = (mode, useAbility, targetCache) => {
-        let dbKey = (window.isUnit(unit.id, 'kirito') && kiritoState.card) ? 'kirito_card' : unit.id;
+        let dbKey = unit.id;
         if (useAbility && unit.ability) dbKey += '_abil';
 
         const useInventory = (inventoryMode === true);
@@ -463,9 +434,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
             let calculatedResults = [];
 
             if (!useInventory) {
-                const isBambiAlt = (isUnit(unit.id, 'bambietta') && bambiettaState.element !== 'Dark');
-                const isRobotAlt = (isUnit(unit.id, 'robot1718') && robot1718State.mode !== 'Robot 17');
-                const canUseStatic = !isBambiAlt && !isRobotAlt;
+                const canUseStatic = true;
 
                 if (canUseStatic && window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {
                     const dbTable = window.STATIC_BUILD_DB[dbKey];
@@ -515,7 +484,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
 
 window.getQuickScore = (unit) => {
     // ALWAYS use base key for ranking to maintain consistent spot
-    let dbKey = (window.isUnit(unit.id, 'kirito') && kiritoState.card) ? 'kirito_card' : unit.id;
+    let dbKey = unit.id;
 
     let score = 0;
     if (window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {

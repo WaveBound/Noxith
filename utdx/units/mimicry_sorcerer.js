@@ -24,7 +24,7 @@ unitDatabase.push({
         crit: 0,
         cdmg: 150,
         element: "Rose",
-        passiveDmg: 0
+        passiveDmg: 0,
     },
 
     // UPGRADES (dmg, spa, range, cost per level)
