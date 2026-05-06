@@ -114,6 +114,28 @@ window.handleBuffToggle = function (configKey, checkbox) {
 
 // --- 3. UI STATE & LIST MANAGEMENT ---
 window.unitELevels = window.unitELevels || {};
+window.unitSystemLevels = window.unitSystemLevels || {};
+
+window.setSystemLevel = function (unitId, value) {
+    const unit = typeof getUnitById === 'function' ? getUnitById(unitId) : (typeof unitDatabase !== 'undefined' ? unitDatabase.find(u => u.id === unitId) : null);
+    const cfg = unit && unit.systemLevel;
+    if (!cfg) return;
+
+    let lvl = parseInt(value) || 0;
+    lvl = Math.max(cfg.min || 1, Math.min(cfg.max || 100, lvl));
+    window.unitSystemLevels[unitId] = lvl;
+
+    // Update input display
+    const input = document.querySelector(`#system-level-${unitId}`);
+    if (input && parseInt(input.value) !== lvl) input.value = lvl;
+
+    // Invalidate cache and re-render
+    if (window.unitBuildsCache && window.unitBuildsCache[unitId]) {
+        window.unitBuildsCache[unitId] = { base: { fixed: [null] }, abil: { fixed: [null] } };
+    }
+    if (typeof processUnitCache === 'function' && unit) processUnitCache(unit);
+    setTimeout(() => { if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(unitId); }, 10);
+};
 
 window.resetAndRender = () => {
     renderQueueIndex = 0;

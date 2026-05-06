@@ -280,11 +280,29 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
             // Only Perfect Curse (1) and Adaptive Curse (2) count as summons for Monarch (+10% each)
             summonCount = activeModes.filter(m => m === 1 || m === 2).length;
         } else {
-            const activeSummons = (uStats.customSummons || []).filter((s, sIdx) => {
-                if (upLevel < (s.reqUp || 0)) return false;
-                return true;
-            }).length;
-            summonCount = activeSummons + (uStats.summonStats ? (uStats.summonStats.maxCount || 1) : 0);
+            const state = (window.unitModesState || {})[uStats.id];
+            const isMulti = !!uStats.allowMultipleModes;
+            const activeModes = Array.isArray(state) ? state : (state !== undefined ? [state] : (isMulti ? (uStats.id === 'jinoo_shadow_monarch' ? [0] : []) : [0]));
+
+            const summonCountTotal = (uStats.customSummons || []).reduce((acc, s, sIdx) => {
+                if (upLevel < (s.reqUp || 0)) return acc;
+                if (!activeModes.includes(sIdx)) return acc;
+
+                // Requirement: System Level gating for Jinoo
+                if (uStats.id === 'jinoo_shadow_monarch') {
+                    const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels[uStats.id] !== undefined)
+                        ? window.unitSystemLevels[uStats.id]
+                        : (uStats.systemLevel ? (uStats.systemLevel.default || 100) : 100);
+                    
+                    if (sIdx === 1 && sysLvl < 40) return acc;
+                    if (sIdx === 2 && sysLvl < 60) return acc;
+                    if (sIdx === 3 && sysLvl < 80) return acc;
+                    if (sIdx === 4 && sysLvl < 100) return acc;
+                }
+
+                return acc + (s.count || 1);
+            }, 0);
+            summonCount = summonCountTotal + (uStats.summonStats ? (uStats.summonStats.maxCount || 1) : 0);
 
             if (uStats.id === 'phantom_captain' && summonCount === 0) summonCount = 9;
         }
@@ -401,11 +419,29 @@ function _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicSta
             // Only Perfect Curse (1) and Adaptive Curse (2) count as summons
             summonCount = activeModes.filter(m => m === 1 || m === 2).length;
         } else {
-            const activeSummons = (uStats.customSummons || []).filter((s, sIdx) => {
-                if (upLevel < (s.reqUp || 0)) return false;
-                return true;
-            }).length;
-            summonCount = activeSummons + (uStats.summonStats ? (uStats.summonStats.maxCount || 1) : 0);
+            const state = (window.unitModesState || {})[uStats.id];
+            const isMulti = !!uStats.allowMultipleModes;
+            const activeModes = Array.isArray(state) ? state : (state !== undefined ? [state] : (isMulti ? (uStats.id === 'jinoo_shadow_monarch' ? [0] : []) : [0]));
+
+            const summonCountTotal = (uStats.customSummons || []).reduce((acc, s, sIdx) => {
+                if (upLevel < (s.reqUp || 0)) return acc;
+                if (!activeModes.includes(sIdx)) return acc;
+
+                // Requirement: System Level gating for Jinoo
+                if (uStats.id === 'jinoo_shadow_monarch') {
+                    const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels[uStats.id] !== undefined)
+                        ? window.unitSystemLevels[uStats.id]
+                        : (uStats.systemLevel ? (uStats.systemLevel.default || 100) : 100);
+                    
+                    if (sIdx === 1 && sysLvl < 40) return acc;
+                    if (sIdx === 2 && sysLvl < 60) return acc;
+                    if (sIdx === 3 && sysLvl < 80) return acc;
+                    if (sIdx === 4 && sysLvl < 100) return acc;
+                }
+
+                return acc + (s.count || 1);
+            }, 0);
+            summonCount = summonCountTotal + (uStats.summonStats ? (uStats.summonStats.maxCount || 1) : 0);
 
             if (uStats.id === 'phantom_captain' && summonCount === 0) summonCount = 9;
         }
@@ -693,7 +729,8 @@ function calculateDPS(uStats, relicStats, context) {
     // Detailed breakdown for UI
     const detailedBuffs = {
         setBase: (sBonus.dmg || 0) - (tagBuffs.dmg || 0) - setPerkDmg,
-        setPerk: setPerkDmg + headDmgPassive,
+        setPerk: setPerkDmg,
+        accessoryPerk: headDmgPassive,
         tagBonus: (tagBuffs.dmg || 0) + headDmgTag,
         unitPassive: passivePcent,
         abilityBuff: abilityDmg,

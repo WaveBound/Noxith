@@ -77,7 +77,8 @@ function renderSourceTotalsSection(data) {
     const setBaseDmg = data.detailedBuffs ? data.detailedBuffs.setBase : ((data.totalSetStats.dmg || 0) - (data.tagBuffs.dmg || 0));
     const tagDmg = data.detailedBuffs ? data.detailedBuffs.tagBonus : (data.tagBuffs.dmg || 0);
     const setPerkTotal = data.detailedBuffs ? data.detailedBuffs.setPerk : 0;
-    const gearTotalDmg = relicMainSub + setBaseDmg + tagDmg + setPerkTotal;
+    const accessoryPerkTotal = data.detailedBuffs ? data.detailedBuffs.accessoryPerk : 0;
+    const gearTotalDmg = relicMainSub + setBaseDmg + tagDmg + setPerkTotal + accessoryPerkTotal;
 
     const gearSpa = (data.relicBuffs.spa || 0) + (data.totalSetStats.spa || 0);
     const gearRange = (data.relicBuffs.range || 0) + (data.totalSetStats.range || 0);
@@ -150,6 +151,7 @@ function renderSourceTotalsSection(data) {
                     <div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Gear Main + Subs</span><span class="text-white">${fmt.pct(relicMainSub)}</span></div>
                     <div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Set Bonus</span><span class="text-white">${fmt.pct(setBaseDmg)}</span></div>
                     ${setPerkTotal > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Set Perks</span><span class="text-white">${fmt.pct(setPerkTotal)}</span></div>` : ''}
+                    ${accessoryPerkTotal > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Accessory Perks</span><span class="text-white">${fmt.pct(accessoryPerkTotal)}</span></div>` : ''}
                     ${tagDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #f472b6; font-weight: 700;"><span>Tag Bonuses</span><span>${fmt.pct(tagDmg)}</span></div>` : ''}
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 0.65rem; color: #777; border-top: 1px solid rgba(244, 114, 182, 0.1); padding-top: 4px;">
@@ -854,7 +856,14 @@ function renderMathContent(data, isSplit = false) {
 
 function renderSummonSection(data) {
     if (!data.summonData) return '';
-    if (data.summonData && data.summonData.isCustom && data.summonData.summons && data.summonData.summons.length > 0) {
+    
+    // Check if it's a custom summon unit (like Jinoo or Sukuna)
+    if (data.summonData.isCustom) {
+        // If it's custom but has NO active summons, return empty instead of falling through to Planes
+        if (!data.summonData.summons || data.summonData.summons.length === 0) {
+            return '';
+        }
+        
         let summonsHtml = data.summonData.summons.map(s => `
                 <tr class="summon-header-row">
                     <td class="mt-cell-label mt-text-bold" style="color: ${s.color}; font-size: 0.85rem;">

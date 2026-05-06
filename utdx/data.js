@@ -577,6 +577,7 @@ const UNIT_FILES = [
     'strongest_of_today.js',
     'alpha_devil.js',
     'mimicry_sorcerer.js',
+    'jinoo_shadow_monarch.js',
 ];
 
 // Resolves after every unit script has loaded (or errored).

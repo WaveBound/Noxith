@@ -117,6 +117,55 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
         });
     }
 
+    // --- SYSTEM LEVEL SUPPORT (e.g. Jinoo's "The System") ---
+    if (unit.systemLevel) {
+        const cfg = unit.systemLevel;
+        const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels[unit.id] !== undefined)
+            ? window.unitSystemLevels[unit.id]
+            : (cfg.default || cfg.max || 100);
+
+        // Apply per-level bonuses
+        if (cfg.perLevel) {
+            if (cfg.perLevel.passiveDmg) {
+                const passiveName = cfg.passiveName || 'System Level';
+                // Find or create the passive to attribute stats
+                if (!effectiveStats.passives) effectiveStats.passives = [];
+                else effectiveStats.passives = [...effectiveStats.passives];
+                const existing = effectiveStats.passives.find(p => p.name === passiveName);
+                if (existing) {
+                    const idx = effectiveStats.passives.indexOf(existing);
+                    effectiveStats.passives[idx] = { ...existing, passiveDmg: (existing.passiveDmg || 0) + cfg.perLevel.passiveDmg * sysLvl };
+                } else {
+                    effectiveStats.passives.push({ name: passiveName, passiveDmg: cfg.perLevel.passiveDmg * sysLvl });
+                }
+            }
+        }
+
+        // Apply threshold bonuses
+        if (cfg.thresholds) {
+            cfg.thresholds.forEach(t => {
+                if (sysLvl >= t.level) {
+                    const passiveName = cfg.passiveName || 'System Level';
+                    if (!effectiveStats.passives) effectiveStats.passives = [];
+                    else if (!Array.isArray(effectiveStats.passives)) effectiveStats.passives = [...effectiveStats.passives];
+                    const existing = effectiveStats.passives.find(p => p.name === passiveName);
+                    if (existing) {
+                        const idx = effectiveStats.passives.indexOf(existing);
+                        const updated = { ...effectiveStats.passives[idx] };
+                        if (t.passiveSpa) updated.passiveSpa = (updated.passiveSpa || 0) + t.passiveSpa;
+                        if (t.passiveDmg) updated.passiveDmg = (updated.passiveDmg || 0) + t.passiveDmg;
+                        effectiveStats.passives[idx] = updated;
+                    } else {
+                        const newP = { name: passiveName };
+                        if (t.passiveSpa) newP.passiveSpa = t.passiveSpa;
+                        if (t.passiveDmg) newP.passiveDmg = t.passiveDmg;
+                        effectiveStats.passives.push(newP);
+                    }
+                }
+            });
+        }
+    }
+
     // Requirement: Points = (Level - 1) + 30
     const maxPts = ((unit.level || 1) - 1) + 30;
     options.dmgPoints = Math.min(options.dmgPoints || 0, maxPts);
@@ -127,8 +176,17 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     if (unit.modes) {
         let modeData = null;
         if (Array.isArray(unit.modes)) {
-            const modeIdx = (window.unitModesState && window.unitModesState[unit.id]) || 0;
-            modeData = unit.modes[modeIdx];
+            const state = (window.unitModesState && window.unitModesState[unit.id]);
+            const isMulti = !!unit.allowMultipleModes;
+
+            if (isMulti) {
+                // Multi-mode units (like Jinoo) handle their logic in customSummons loop,
+                // so we don't pick a single 'default' mode here.
+                modeData = null; 
+            } else {
+                const modeIdx = (state !== undefined) ? state : 0;
+                modeData = unit.modes[modeIdx];
+            }
         }
 
         if (modeData) {
@@ -933,7 +991,8 @@ function calculateDPS(uStats, relicStats, context) {
         let cDpsTotal = 0;
 
         const state = (window.unitModesState || {})[uStats.id];
-        const activeModes = Array.isArray(state) ? state : (state !== undefined ? [state] : [0]);
+        const isMulti = !!uStats.allowMultipleModes;
+        const activeModes = Array.isArray(state) ? state : (state !== undefined ? [state] : (isMulti ? (uStats.id === 'jinoo_shadow_monarch' ? [0] : []) : [0]));
 
         uStats.customSummons.forEach((s, sIdx) => {
             if (upLevel >= s.reqUp) {
@@ -943,27 +1002,45 @@ function calculateDPS(uStats, relicStats, context) {
                     isEnabled = false;
                     if (activeModes.includes(1) && sIdx === 0) isEnabled = true;
                     if (activeModes.includes(2) && sIdx === 1) isEnabled = true;
+                } else if (uStats.id === 'jinoo_shadow_monarch') {
+                    isEnabled = activeModes.includes(sIdx);
+                    // System Level requirements
+                    const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels[uStats.id] !== undefined)
+                        ? window.unitSystemLevels[uStats.id]
+                        : (uStats.systemLevel ? (uStats.systemLevel.default || 100) : 100);
+                    
+                    if (sIdx === 1 && sysLvl < 40) isEnabled = false;
+                    if (sIdx === 2 && sysLvl < 60) isEnabled = false;
+                    if (sIdx === 3 && sysLvl < 80) isEnabled = false;
+                    if (sIdx === 4 && sysLvl < 100) isEnabled = false;
                 }
 
                 if (!isEnabled) return;
                 let sDmgMult = s.dmgMult;
                 if (eLevel >= 6 && s.e6DmgMult) sDmgMult = s.e6DmgMult;
 
-                let sAvgMult = s.avgMult || 1.0;
-                if (eLevel >= 6 && s.e6AvgMult) sAvgMult = s.e6AvgMult;
+                // Requirement: Summons with HP contribute to DPS (0.5 hp = 50% dmg)
+                if (uStats.id === 'jinoo_shadow_monarch' && s.ui && s.ui.hp) {
+                    sDmgMult += (s.ui.hp / 100);
+                }
+
+                let sAvgMult = s.noCrit ? 1.0 : (s.avgMult || 1.0);
+                if (!s.noCrit && eLevel >= 6 && s.e6AvgMult) sAvgMult = s.e6AvgMult;
 
                 let sHitDmg = finalDmg * sDmgMult;
                 let sAvgDmg = sHitDmg * sAvgMult;
-                let sDps = sAvgDmg / s.spa;
+                let sDps = (sAvgDmg / s.spa) * (s.count || 1);
 
                 cDpsTotal += sDps;
                 summonData.summons.push({
                     name: s.name,
                     hitDmg: sHitDmg,
                     avgDmg: sAvgDmg,
-                    avgMult: sAvgMult, // ADDED: to show in UI
+                    avgMult: sAvgMult,
                     spa: s.spa,
                     dps: sDps,
+                    count: s.count || 1,
+                    isNoCrit: !!s.noCrit,
                     desc: s.desc,
                     color: s.color || "#ffffff"
                 });

@@ -212,6 +212,12 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const card = document.getElementById('card-' + unitId);
     if (!card) return;
     const unitObj = window.getUnitById(unitId);
+    
+    // NEW: Always force sync for multi-mode units like Jinoo to ensure 'None' is respected on load
+    if (!forceSync && unitObj && unitObj.allowMultipleModes) {
+        forceSync = true;
+    }
+
     const currentUpgrade = (window.unitELevels && window.unitELevels[unitId]) || 0;
 
     let unitCost = unitObj ? (unitObj.totalCost || 50000) : 50000;
@@ -261,8 +267,8 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     activeType === 'abil',
                     activeMode
                 );
-                if (dynamicResults && dynamicResults.perfect && dynamicResults.perfect[0]) {
-                    benchmarkDps = dynamicResults.perfect[0].dps || 0;
+                if (dynamicResults && dynamicResults.length > 0) {
+                    benchmarkDps = dynamicResults[0].dps || 0;
                     // Cache this new benchmark for this unit/mode combo
                     if (!window.modeBenchmarks) window.modeBenchmarks = {};
                     const modeKey = `${unitId}-${JSON.stringify(window.unitModesState[unitId])}-${activeType}`;
@@ -317,7 +323,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     res.dmgVal = fullMath.dmgVal;
                     res.spa = fullMath.spa;
                     res.range = fullMath.range;
-                    res.dot = fullMath.dot || 0;
+                    res.dot = fullMath.dot;
                     res.dotTotal = fullMath.dotData ? (fullMath.dotData.nativeTotalDmg + (fullMath.dotData.radTotalDmg || 0)) : 0;
                     if (!res.subStats) res.subStats = {};
                     res.subStats.finalCf = fullMath.critData ? fullMath.critData.rate : 0;
@@ -544,7 +550,7 @@ function renderUnitCard(unit, absoluteIndex) {
     }
 
     const abilityToggleHtml = (unit.ability && !abilityObj.noToggle) ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>` : '<div></div>';
-    const modesBtn = (unit.modes && Array.isArray(unit.modes)) ? `<button class="calc-btn ut-btn-compact modes-btn" onclick="openUnitModes('${unit.id}')" title="Change Mode">Modes</button>` : '';
+    const modesBtn = (unit.modes && Array.isArray(unit.modes)) ? `<button class="calc-btn ut-btn-compact modes-btn" onclick="openUnitModes('${unit.id}')" title="Change Mode">${unit.modesLabel || 'Modes'}</button>` : '';
     const topControls = `<div class="unit-toolbar"><div class="ut-actions"><button class="calc-btn ut-btn-compact" onclick="openCalc('${unit.id}')">🖩 Custom</button><button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">📊 Traits</button><button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">ⓘ Info</button></div><div class="ut-toggle-area">${modesBtn}${abilityToggleHtml}</div></div>`;
 
     let defaultSort = 'dps';
@@ -601,7 +607,7 @@ function renderUnitCard(unit, absoluteIndex) {
                 </div>
             </div>
         </div>
-        ${(unit.upgrades && unit.upgrades.length > 0) ? `
+              ${(unit.upgrades && unit.upgrades.length > 0) ? `
         <div class="upgrade-toolbar">
             ${unit.upgrades.map((u, idx) => {
         const level = idx;
@@ -613,7 +619,21 @@ function renderUnitCard(unit, absoluteIndex) {
                                  data-level="${level}" 
                                  title="Upgrade ${level}">${level}</div>`;
     }).join('')}
-        </div>` : ''}`;
+        </div>` : ''}
+        ${unit.systemLevel ? (() => {
+            const cfg = unit.systemLevel;
+            const currentSysLvl = (window.unitSystemLevels && window.unitSystemLevels[unit.id] !== undefined) ? window.unitSystemLevels[unit.id] : (cfg.default || cfg.max || 100);
+            if (window.unitSystemLevels[unit.id] === undefined) window.unitSystemLevels[unit.id] = currentSysLvl;
+            return `<div class="system-level-bar" style="display:flex; align-items:center; gap:8px; padding:4px 15px; background:rgba(99,102,241,0.06); border-bottom:1px solid var(--card-border);">
+                <span style="font-size:0.65rem; font-weight:700; color:#a5b4fc; text-transform:uppercase; letter-spacing:0.5px;">${cfg.label || 'System Level'}</span>
+                <input id="system-level-${unit.id}" type="number" min="${cfg.min || 1}" max="${cfg.max || 100}" value="${currentSysLvl}"
+                    style="width:45px; padding:1px 4px; background:rgba(0,0,0,0.4); border:1px solid rgba(99,102,241,0.3); border-radius:4px; color:#e0e7ff; font-size:0.8rem; font-weight:700; text-align:center;"
+                    onchange="setSystemLevel('${unit.id}', this.value)"
+                    onkeyup="if(event.key==='Enter') setSystemLevel('${unit.id}', this.value)">
+                <span style="font-size:0.65rem; color:rgba(165,180,252,0.4); margin-left: auto;">MAX LV. ${cfg.max || 100}</span>
+            </div>`;
+        })() : ''}
+        `;
 
     let mainContent = '';
     ['base', 'abil'].forEach(type => { const mode = 'fixed'; mainContent += `<div class="top-builds-list build-list-container mode-${type} mode-${mode} cfg-0" id="results-${type}-${mode}-0-${unit.id}"></div>`; });

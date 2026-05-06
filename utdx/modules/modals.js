@@ -420,9 +420,21 @@ function openUnitModes(unitId) {
     
     if (!overlay || !grid) return;
 
+    if (unitId === 'jinoo_shadow_monarch') {
+        if (!Array.isArray(window.unitModesState[unitId])) {
+            window.unitModesState[unitId] = [0]; // Shadow Legion enabled by default
+            // Trigger a card refresh immediately
+            if (typeof updateBuildListDisplay === 'function') {
+                updateBuildListDisplay(unitId, true);
+            }
+        }
+        renderShadowMonarchSpecialUI(unit, grid, overlay);
+        return;
+    }
+
     const state = window.unitModesState[unitId];
     const isMulti = !!unit.allowMultipleModes;
-    const activeModes = isMulti ? (Array.isArray(state) ? state : [state || 0]) : (state !== undefined ? [state] : [0]);
+    const activeModes = isMulti ? (Array.isArray(state) ? state : []) : (state !== undefined ? [state] : [0]);
 
     const modesHtml = unit.modes.map((mode, idx) => {
         const isActive = activeModes.includes(idx);
@@ -458,14 +470,29 @@ function selectUnitMode(unitId, modeIdx) {
     const isMulti = !!unit.allowMultipleModes;
     if (isMulti) {
         let state = window.unitModesState[unitId];
-        if (!Array.isArray(state)) state = [state || 0];
+        if (!Array.isArray(state)) {
+            state = (state !== undefined) ? [state] : [];
+        }
         
         if (state.includes(modeIdx)) {
-            // Prevent removing the last mode? 
-            // Or just allow removing all?
             state = state.filter(i => i !== modeIdx);
-            if (state.length === 0) state = [0]; // Default back to Wheel
+            // For Sukuna we might want to default back, but Jinoo should stay empty
+            if (state.length === 0 && unitId !== 'jinoo_shadow_monarch') state = [0];
         } else {
+            // Requirement: System Level verification for Jinoo
+            if (unitId === 'jinoo_shadow_monarch') {
+                const sysLvl = (window.unitSystemLevels && window.unitSystemLevels[unitId] !== undefined)
+                    ? window.unitSystemLevels[unitId]
+                    : (unit.systemLevel ? (unit.systemLevel.default || 100) : 100);
+                
+                let reqLvl = 0;
+                if (modeIdx === 1) reqLvl = 40;
+                if (modeIdx === 2) reqLvl = 60;
+                if (modeIdx === 3) reqLvl = 80;
+                if (modeIdx === 4) reqLvl = 100;
+                
+                if (sysLvl < reqLvl) return; // Prevent selection if locked
+            }
             state.push(modeIdx);
         }
         window.unitModesState[unitId] = state;
@@ -479,14 +506,18 @@ function selectUnitMode(unitId, modeIdx) {
     }
     
     // Update UI in overlay
-    const cards = document.querySelectorAll('.mode-card-large');
-    const newState = window.unitModesState[unitId];
-    const activeModes = isMulti ? newState : [newState];
+    if (unitId === 'jinoo_shadow_monarch') {
+        renderShadowMonarchSpecialUI(unit, document.getElementById('modesOverlayGrid'), document.getElementById('modesOverlay'));
+    } else {
+        const cards = document.querySelectorAll('.mode-card-large');
+        const newState = window.unitModesState[unitId];
+        const activeModes = isMulti ? newState : [newState];
 
-    cards.forEach((card, idx) => {
-        if (activeModes.includes(idx)) card.classList.add('active');
-        else card.classList.remove('active');
-    });
+        cards.forEach((card, idx) => {
+            if (activeModes.includes(idx)) card.classList.add('active');
+            else card.classList.remove('active');
+        });
+    }
     
     // Clear caches for this unit as stats changed
     if (window.unitBuildsCache) {
@@ -526,6 +557,79 @@ function closeModesOverlay() {
     }, 200); 
 }
 window.closeModesOverlay = closeModesOverlay;
+
+function renderShadowMonarchSpecialUI(unit, grid, overlay) {
+    const state = window.unitModesState[unit.id];
+    const activeModes = Array.isArray(state) ? state : [];
+    const sysLvl = (window.unitSystemLevels && window.unitSystemLevels[unit.id] !== undefined) ? window.unitSystemLevels[unit.id] : 100;
+
+    const html = `
+    <div class="sm-special-ui">
+        <div class="sm-header-banner">
+            <img src="images/units/jinoo/TheSystemSummons.png" class="sm-header-img">
+            <div class="sm-close-x" onclick="closeModesOverlay()">
+                <img src="images/units/jinoo/X.png" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+        </div>
+        
+        <div class="sm-top-controls">
+            <div class="sm-level-display">
+                <div class="sm-lvl-label">Level</div>
+                <div class="sm-lvl-val">${sysLvl}</div>
+            </div>
+            <div class="sm-xp-area">
+                <div class="sm-xp-bar-wrap">
+                    <div class="sm-xp-label-top">XP</div>
+                    <div class="sm-xp-progress">
+                        <div class="sm-xp-fill" style="width: 85%"></div>
+                    </div>
+                </div>
+                <div class="sm-xp-pct">0%</div>
+            </div>
+        </div>
+
+        <div class="sm-shadows-row">
+            ${unit.customSummons.map((s, idx) => {
+                const isActive = activeModes.includes(idx);
+                let isUnlocked = true;
+                let reqLvl = 0;
+                if (idx === 1) reqLvl = 40;
+                if (idx === 2) reqLvl = 60;
+                if (idx === 3) reqLvl = 80;
+                if (idx === 4) reqLvl = 100;
+                if (sysLvl < reqLvl) isUnlocked = false;
+
+                return `
+                <div class="sm-shadow-box ${isActive ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}" 
+                     onclick="${isUnlocked ? `selectUnitMode('${unit.id}', ${idx})` : ''}">
+                    <div class="sm-s-name">${s.name.toUpperCase()}</div>
+                    <div class="sm-s-body">
+                        <div class="sm-s-img-wrap">
+                            <img src="${unit.modes[idx].img}" alt="${s.name}" style="${!isUnlocked ? 'filter: grayscale(1) brightness(0.5);' : ''}">
+                        </div>
+                        <div class="sm-s-stats">
+                            <div class="sm-stat-status" style="${!isUnlocked ? 'color: #f87171;' : ''}">
+                                ${isUnlocked ? (isActive ? 'ENABLED' : 'DISABLED') : `LOCKED (LVL ${reqLvl})`}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sm-enable-btn-wrap">
+                        <button class="sm-btn" ${!isUnlocked ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : ''}>
+                            ${isActive ? 'DISABLE' : 'ENABLE'}
+                        </button>
+                    </div>
+                </div>
+                `;
+            }).join('')}
+        </div>
+    </div>
+    `;
+
+    grid.innerHTML = html;
+    grid.className = 'modes-overlay-grid sm-custom-layout';
+    overlay.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+}
 
 /**
  * Shows Trait Tier List (All Units)
