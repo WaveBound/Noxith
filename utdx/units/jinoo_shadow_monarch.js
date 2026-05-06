@@ -40,7 +40,7 @@ unitDatabase.push({
     modesLabel: "Summons",
 
     customSummons: [
-        { name: "Shadow Legion", reqUp: 0, spa: 30, dmgMult: 0.3, count: 3, noCrit: true, color: "#8b5cf6", ui: { cost: 50, hp: 50, cd: 30 }, desc: ["Summon 3 Soldiers, each dealing 20-40% Damage ONCE", "Cost: 50 Mana | Cooldown: 30s"] },
+        { name: "Shadow Legion", reqUp: 0, spa: 30, dmgMult: 0.3, count: 3, noCrit: true, color: "#8b5cf6", ui: { cost: 50, hp: 16.6, cd: 30 }, desc: ["Summon 3 Soldiers, each dealing 20-40% Damage ONCE", "Cost: 50 Mana | Cooldown: 30s"] },
         { name: "Shadow Bear", reqUp: 0, spa: 20, dmgMult: 0.0, noCrit: true, color: "#8b5cf6", ui: { cost: 50, hp: 300, cd: 20 }, desc: ["Tank: 300% Health, 0% Damage"] },
         { name: "Shadow Dragon", reqUp: 0, spa: 40, dmgMult: 0.8, noCrit: true, color: "#8b5cf6", ui: { cost: 80, hp: 60, cd: 40 }, desc: ["Air Unit: 80% Damage ONCE per spawn", "Cooldown: 40s"] },
         { name: "Shadow Knight", reqUp: 0, spa: 50, dmgMult: 1.5, noCrit: true, color: "#8b5cf6", ui: { cost: 120, hp: 85, cd: 50 }, desc: ["150% Damage and 2s Stun ONCE per spawn", "Cooldown: 50s"] },
