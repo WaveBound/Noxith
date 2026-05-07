@@ -56,14 +56,28 @@ unitDatabase.push({
             abilityName: "Domain Expansion",
             noToggle: true,
             cooldown: 300,
-            desc: "Every 0.5s, deals 20% Damage to all enemies in range. Enemies hit are Slowed by 20% and take +20% increased Damage from all sources for the duration. When the ability ends, this unit is Stunned for 10s. Boss Exception: If a Boss is hit, the stun is cancelled and this unit instead casts Fire Arrow — dealing 300% Damage in a circular AoE and applying Burn (50% Damage over 10 ticks).",
+            desc: `Every 0.5s, deals 20% Damage to all enemies in range. 
+
+Enemies hit are Slowed by 20% and take +20% increased Damage from all sources for the duration. 
+When the ability ends, this unit is Stunned for 10s. 
+
+Boss Exception: If a Boss is hit, the stun is cancelled and this unit instead casts Fire Arrow — dealing 300% Damage in a circular AoE and applying Burn (50% Damage over 10 ticks).`,
         },
         {
             buffDmg: 0,
             abilityName: "Ten Umbra",
             noToggle: true,
             cooldown: 0,
-            desc: "PERFECT CURSE (Unlocks at Upgrade 4): Summons a tower that copies 50% of this unit's Damage and Range (E6: 65%) with a fixed SPA of 12. On each attack, randomly applies one of the following: Stun 5 enemies in range for 3s, 40% Bleed for 6s, 20% Radiation with +15% increased damage taken for 6s, or buff nearby allies with +10% Damage, +10% Range, and -5% SPA for 6s.<br><br>ADAPTIVE CURSE (Unlocks at Max Upgrade): Summons a tower that copies 100% of this unit's Damage and Range with a fixed SPA of 12. Gains the Adaptive Wheel passive — any immunity this tower acquires is also applied to The Strongest in History. Every 5 attacks (E6: every 3 attacks), casts World Cutting Slash, dealing 150% Damage in a 180° cone AoE."
+            desc: `PERFECT CURSE (Unlocks at Upgrade 4): Summons a tower that copies 50% of this unit's Damage and Range (E6: 65%) with a fixed SPA of 12. 
+On each attack, randomly applies one of the following: 
+• Stun 5 enemies in range for 3s
+• 40% Bleed for 6s
+• 20% Radiation with +15% increased damage taken for 6s
+• Buff nearby allies with +10% Damage, +10% Range, and -5% SPA for 6s.
+
+ADAPTIVE CURSE (Unlocks at Max Upgrade): Summons a tower that copies 100% of this unit's Damage and Range with a fixed SPA of 12. 
+Gains the Adaptive Wheel passive — any immunity this tower acquires is also applied to The Strongest in History. 
+Every 5 attacks (E6: every 3 attacks), casts World Cutting Slash, dealing 150% Damage in a 180° cone AoE.`
         },
     ],
 

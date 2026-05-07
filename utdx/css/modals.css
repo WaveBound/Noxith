@@ -1678,8 +1678,6 @@
 
 .atg-value {
     color: #e2e8f0;
-    font-weight: 700;
-    font-family: 'Consolas', monospace;
 }
 
 /* --- 13. UNIT INFO MODAL --- */
@@ -1706,6 +1704,10 @@
     margin-bottom: 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 8px;
+}
+
+.info-sec-title:not(:first-child) {
+    margin-top: 25px;
 }
 
 .info-list {
@@ -1750,6 +1752,7 @@
     color: #60a5fa;
     opacity: 0.8;
 }
+
 
 .section-passives .info-sec-title {
     color: #f43f5e;
@@ -1808,6 +1811,7 @@
     font-weight: 400 !important;
     line-height: 1.4;
     display: block;
+    white-space: pre-wrap;
 }
 
 .info-ethereal-item {
@@ -1983,7 +1987,7 @@
     height: auto !important;
     margin: 0 !important;
     transform: translate(-50%, -50%) !important;
-    animation: none !important; 
+    animation: none !important;
     opacity: 1;
 }
 
@@ -2009,7 +2013,7 @@
 }
 
 .modes-overlay-grid.circular-layout .mode-card-large .mode-card-info {
-    bottom: -40px; 
+    bottom: -40px;
     width: 300px;
 }
 
@@ -2126,9 +2130,11 @@
         height: 160px;
     }
 }
+
 /* --- MIMICRY SORCERER SPECIFIC OVERRIDES --- */
 .unit-mimicry_sorcerer .mode-card-large {
-    margin: 0 10px; /* Added gap between cards */
+    margin: 0 10px;
+    /* Added gap between cards */
 }
 
 .unit-mimicry_sorcerer .mode-img-container-large {

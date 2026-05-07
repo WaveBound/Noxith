@@ -70,44 +70,60 @@ unitDatabase.push({
     passives: [
         {
             name: "Shadow Monarch",
-            desc: "This unit has a Mana bar that is used for his Summoning Abilities.\n\n" +
-                "Every second: Gain +3 [+5 on Etherealization 6] Mana.\n" +
-                "The Active Ability allows this unit to Summon an arsenal of Shadows:\n\n" +
-                "• Shadow Legion: Summon 3 Soldiers, dealing 20-40% Damage every 5s with 50% Health. Cost: 50 Mana. Cooldown: 30s.\n" +
-                "• Shadow Bear ('The System' Level 40+): Has no Attack, instead has 300% Health. Cost: 50 Mana. Cooldown: 20s.\n" +
-                "• Shadow Dragon ('The System' Level 60+): Deals 80% Damage every 7s with 60% Health. This Summon can only collide with Air Enemies and will fly over Ground Enemies. Cost: 80 Mana. Cooldown: 30s.\n" +
-                "• Shadow Knight ('The System' Level 80+): Deal 150% Damage and 2s Stun every 6s with 85% Health. Cost: 120 Mana. Cooldown: 50s.\n" +
-                "• Ant King ('The System' Level 100): Deal 100% Damage and 30% Bleed for 5s every 8s with 200% Health. Cost: 180 Mana. Cooldown: 6s."
+            desc: `This unit has a Mana bar that is used for his Summoning Abilities.
+
+Every second: Gain +3 [+5 on Etherealization 6] Mana.
+The Active Ability allows this unit to Summon an arsenal of Shadows:
+
+• Shadow Legion: Summon 3 Soldiers, dealing 20-40% Damage every 5s with 50% Health. Cost: 50 Mana. Cooldown: 30s.
+
+• Shadow Bear ('The System' Level 40+): Has no Attack, instead has 300% Health. Cost: 50 Mana. Cooldown: 20s.
+
+• Shadow Dragon ('The System' Level 60+): Deals 80% Damage every 7s with 60% Health. This Summon can only collide with Air Enemies and will fly over Ground Enemies. Cost: 80 Mana. Cooldown: 30s.
+
+• Shadow Knight ('The System' Level 80+): Deal 150% Damage and 2s Stun every 6s with 85% Health. Cost: 120 Mana. Cooldown: 50s.
+
+• Ant King ('The System' Level 100): Deal 100% Damage and 30% Bleed for 5s every 8s with 200% Health. Cost: 180 Mana. Cooldown: 6s.`
         },
         {
             name: "Strongest Hunter",
-            desc: "This unit applies a Buff to all units with the 'Leveling' tag (excluding itself).\n\n" +
-                "If unit is 'Shadow Knight':\n" +
-                "• +40% Damage\n" +
-                "• [Etherealization 4: +50% Damage]\n\n" +
-                "Otherwise:\n" +
-                "• +20% Damage\n" +
-                "• [Etherealization 4: +30% Damage]\n\n" +
-                "• -10% Cost"
+            desc: `This unit applies a Buff to all units with the 'Leveling' tag (excluding itself).
+
+If unit is 'Shadow Knight':
+• +40% Damage
+• [Etherealization 4: +50% Damage]
+
+Otherwise:
+• +20% Damage
+• [Etherealization 4: +30% Damage]
+
+• -10% Cost`
         },
         {
             name: "The System",
-            desc: "This unit has a Level and XP that allows it to get stronger and unlock new Abilities.\n\n" +
-                "On Attack: +50 [+75 on Etherealization 2] XP.\n" +
-                "On Takedown: +100 [+150 on Etherealization 2] XP.\n\n" +
-                "For every Level:\n" +
-                "• +1% Damage (Cap: Level 100)\n\n" +
-                "On Level 20:\n" +
-                "• -20% SPA\n\n" +
-                "On Level 40:\n" +
-                "• Unlock Summon: Shadow Bear\n\n" +
-                "On Level 60:\n" +
-                "• +25% Hyper Armor Damage\n" +
-                "• Unlock Summon: Shadow Dragon\n\n" +
-                "On Level 80:\n" +
-                "• Unlock Summon: Shadow Knight\n\n" +
-                "On Level 100:\n" +
-                "• Unlock Summon: Ant King"
+            desc: `This unit has a Level and XP that allows it to get stronger and unlock new Abilities.
+
+On Attack: +50 [+75 on Etherealization 2] XP.
+On Takedown: +100 [+150 on Etherealization 2] XP.
+
+For every Level:
+• +1% Damage (Cap: Level 100)
+
+On Level 20:
+• -20% SPA
+
+On Level 40:
+• Unlock Summon: Shadow Bear
+
+On Level 60:
+• +25% Hyper Armor Damage
+• Unlock Summon: Shadow Dragon
+
+On Level 80:
+• Unlock Summon: Shadow Knight
+
+On Level 100:
+• Unlock Summon: Ant King`
         },
     ],
 
