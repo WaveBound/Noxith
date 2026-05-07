@@ -90,12 +90,12 @@ const checkIsBetter = (res, currentBest, optimizeFor) => {
 
 window.unitHasCC = function(uStats) {
     if (!uStats) return false;
-    // Check for dynamic support tags in the unit definition
-    if (uStats.support) {
-        const s = uStats.support.toLowerCase();
-        return s.includes('slow') || s.includes('stun') || s.includes('confuse') || s.includes('timestop');
-    }
-    return false;
+    // Check for dynamic support tags in the unit definition or tags array
+    let s = "";
+    if (uStats.support) s += uStats.support.toLowerCase() + ",";
+    if (uStats.tags && Array.isArray(uStats.tags)) s += uStats.tags.join(',').toLowerCase();
+    
+    return s.includes('slow') || s.includes('stun') || s.includes('confuse') || s.includes('timestop');
 };
 
 const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optimizeFor = 'dps') => {

@@ -329,6 +329,7 @@ function openUnitInfo(unitId) {
                     <li><span>Role:</span> <span>${unit.role}</span></li>
                     <li><span>Placement Type:</span> <span class="${unit.placementType === 'Hill' ? 'text-gold' : (unit.placementType === 'Hybrid' ? 'text-white' : 'text-custom')}">${unit.placementType || 'Ground'}</span></li>
                     <li><span>Element:</span> <span class="text-custom">${unit.stats.element}</span></li>
+                    ${unit.stats.support ? `<li><span>Support:</span> <span class="text-custom">${unit.stats.support}</span></li>` : ''}
                     <li><span>Cost:</span> <span class="text-gold">${unit.totalCost.toLocaleString()}</span></li>
                     <li><span>Max Placements:</span> <span>${unit.placement}</span></li>
                 </ul>

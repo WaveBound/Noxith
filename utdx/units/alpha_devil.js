@@ -28,7 +28,7 @@ unitDatabase.push({
         passiveSpa: 0,
         passiveCrit: 0,
         passiveCdmg: 0,
-        support: "Stun, Timestop"
+        support: "Slow, Stun, Timestop"
     },
 
     // UPGRADES (dmg, spa, range, cost per level)

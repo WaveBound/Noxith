@@ -244,7 +244,6 @@ window.toggleAbility = function (unitId, checkbox) {
         activeAbilityIds.delete(unitId);
     }
     if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(unitId);
-    if (typeof resortUnitCards === 'function') resortUnitCards();
 };
 
 window.toggleInventoryMode = (checkbox) => {
@@ -350,10 +349,11 @@ window.resetAndOpenInventory = function () {
 
 window.getQuickScore = (unit) => {
     // Prefer _abil key for units with noToggle abilities (always-on power)
+    // EXCEPT for multi-mode units (Sukuna, Jinoo) where we want the baseline rank
     let dbKey = unit.id;
     if (unit.ability) {
         const ab = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
-        if (ab.noToggle && window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[unit.id + "_abil"]) {
+        if (ab.noToggle && !unit.allowMultipleModes && window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[unit.id + "_abil"]) {
             dbKey = unit.id + "_abil";
         }
     }

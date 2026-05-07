@@ -18,7 +18,8 @@ unitDatabase.push({
         crit: 0, cdmg: 150,
         dot: 0, dotDuration: 0, dotStacks: 0,
         element: "Rose",
-        passiveDmg: 0
+        passiveDmg: 0,
+        support: "Slow, Stun"
     },
 
     upgrades: [

@@ -52,7 +52,7 @@ unitDatabase.push({
         spaCap: 6.5, crit: 0, cdmg: 150,
         dot: 0, dotDuration: 0, dotStacks: 1,
         element: "Dark", passiveDmg: 0,
-        support: ""
+        support: "Slow, Stun"
     },
 
     // UPGRADES (dmg, spa, range, cost per level)

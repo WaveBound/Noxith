@@ -21,6 +21,7 @@ unitDatabase.push({
         element: "Dark",
         passiveDmg: 0, // Max Gluttony Stacks
         trueDmg: 0,
+        support: "Slow"
     },
 
     upgrades: [

@@ -50,14 +50,17 @@ unitDatabase.push({
             abilityName: "TS Enemy",
             noToggle: false,
             cooldown: 0,
-            desc: "Active Ability: When toggled, this unit deals 3x Damage to all enemies."
+            desc: `Active Ability: When toggled, this unit deals 3x Damage to all enemies.`
         },
         {
             buffDmg: 0,
             abilityName: "Domain Expansion",
             noToggle: false,
             cooldown: 360,
-            desc: "Active Ability unlocked on the final Upgrade: Inflict Timestop for 30s to all Enemies in Range. Enemies with Timestop take 150% Damage instead. Gain +1% Damage per Kill until the Ability ends."
+            desc: `Active Ability unlocked on the final Upgrade: Inflict Timestop for 30s to all Enemies in Range. 
+
+Enemies with Timestop take 150% Damage instead. 
+Gain +1% Damage per Kill until the Ability ends.`
         }
     ],
 

@@ -1,6 +1,11 @@
-// Ensure Global Caches are initialized
+// Ensure Global Caches and State are initialized
 window.unitBuildsCache = window.unitBuildsCache || {};
 window.cachedResults = window.cachedResults || {};
+window.unitELevels = window.unitELevels || {};
+window.unitSystemLevels = window.unitSystemLevels || {};
+window.unitTraits = window.unitTraits || {};
+window.unitHeads = window.unitHeads || {};
+window.unitModesState = window.unitModesState || {};
 
 // Single Source of Truth for Head Item UI mapping in rendering
 const HEAD_CONFIG = {
@@ -138,7 +143,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
 
     const mobileToggle = `<button class="mobile-stat-toggle" onclick="toggleRelicStatDisplay(this)"><span class="m-toggle-txt">Main</span><span class="m-toggle-txt">Sub</span></button>`;
 
-    let displayVal = format(r.dps || 0), displayLabel = "DPS";
+    let displayVal = format(r.sortDps || r.dps || 0), displayLabel = "DPS";
     if (sortMode === 'range') { displayVal = fix1(r.range || 0); displayLabel = "RNG"; }
 
     return `
@@ -329,6 +334,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     res.subStats.finalCf = fullMath.critData ? fullMath.critData.rate : 0;
                     res.subStats.finalCm = fullMath.critData ? fullMath.critData.cdmg : 0;
                 }
+                res.dps = res.dps || 0;
                 res.sortDps = res.dps;
                 res.baseStats = null;
             } catch (e) {
@@ -490,7 +496,15 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
 
 window.getQuickScore = (unit) => {
     // ALWAYS use base key for ranking to maintain consistent spot
+    // Prefer _abil key for units with noToggle abilities (always-on power)
+    // EXCEPT for multi-mode units (Sukuna, Jinoo) where we want the baseline rank
     let dbKey = unit.id;
+    if (unit.ability) {
+        const ab = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
+        if (ab.noToggle && !unit.allowMultipleModes && window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[unit.id + "_abil"]) {
+            dbKey = unit.id + "_abil";
+        }
+    }
 
     let score = 0;
     if (window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {
@@ -515,9 +529,66 @@ window.getQuickScore = (unit) => {
     return ((d || 0) / (s || 1)) * 35;
 };
 
+window.getLiveScore = (unit) => {
+    let unitId = unit.id;
+
+    const currentTrait = (window.unitTraits && window.unitTraits[unitId]);
+    const currentHead = (window.unitHeads && window.unitHeads[unitId]);
+    const activeType = (typeof activeAbilityIds !== 'undefined' && activeAbilityIds.has(unitId)) ? 'abil' : 'base';
+    
+    let dbKey = unitId;
+    if (activeType === 'abil' && !unit.allowMultipleModes) dbKey += '_abil';
+
+    const buildList = window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey] ? window.STATIC_BUILD_DB[dbKey]['fixed']?.[0] : null;
+
+    if (!buildList || buildList.length === 0) {
+        return window.getQuickScore(unit);
+    }
+
+    let maxScore = 0;
+
+    // To ensure UI and sorting perfectly match, we evaluate up to the top 20 builds from the DB
+    // to find the true maximum DPS under the current user-selected trait/head configuration.
+    const searchLimit = Math.min(20, buildList.length);
+    
+    for (let i = 0; i < searchLimit; i++) {
+        const sourceEntry = buildList[i];
+        const scoringEntry = { ...sourceEntry };
+        
+        // Unpack compact DB format
+        if (!scoringEntry.subStats && scoringEntry.ss) scoringEntry.subStats = scoringEntry.ss;
+        if (!scoringEntry.mainStats && scoringEntry.ms) scoringEntry.mainStats = scoringEntry.ms;
+        if (!scoringEntry.mainStats && (scoringEntry.b !== undefined || scoringEntry.l !== undefined)) {
+            scoringEntry.mainStats = {
+                body: (typeof scoringEntry.b === 'string' ? scoringEntry.b : (scoringEntry.b === 1 ? 'dot' : (scoringEntry.b === 2 ? 'cm' : 'dmg'))),
+                legs: (typeof scoringEntry.l === 'string' ? scoringEntry.l : (scoringEntry.l === 1 ? 'spa' : (scoringEntry.l === 2 ? 'cf' : (scoringEntry.l === 3 ? 'range' : 'dmg'))))
+            };
+        }
+
+        if (currentTrait) scoringEntry.traitName = currentTrait;
+        if (currentHead) scoringEntry.headUsed = currentHead;
+
+        try {
+            const res = window.reconstructMathData(scoringEntry);
+            if (res) {
+                let score = window.isUnit(unitId, 'law') ? (res.range || 0) : res.total;
+                if (score > maxScore) maxScore = score;
+            }
+        } catch (e) {
+            // Ignore individual build failures
+        }
+    }
+
+    if (maxScore === 0) {
+        return window.getQuickScore(unit);
+    }
+
+    return maxScore;
+};
+
 window.resortUnitCards = function () {
     if (!paginatedSortedUnits || paginatedSortedUnits.length === 0) return;
-    paginatedSortedUnits.sort((a, b) => getQuickScore(b.unit) - getQuickScore(a.unit));
+    paginatedSortedUnits.sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
     renderCurrentPage();
 };
 
@@ -782,9 +853,9 @@ window.globalFilterUnits = (term) => {
         });
     }
 
-    // 2. Prepare paginated list
+    // 2. Prepare paginated list using LIVE score (real-time math)
     paginatedSortedUnits = filtered.map(unit => {
-        return { unit, maxScore: getQuickScore(unit) };
+        return { unit, maxScore: getLiveScore(unit) };
     }).sort((a, b) => b.maxScore - a.maxScore);
 
     // 3. Initialize upgrade levels if needed
