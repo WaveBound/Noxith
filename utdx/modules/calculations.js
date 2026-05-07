@@ -320,10 +320,10 @@ function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsT
         const relevantBuilds = (!isDotPossible) ? filteredBuilds.filter(b => b.bodyType !== 'dot') : filteredBuilds;
 
         relevantBuilds.forEach(build => {
-            let relevantHeads = headsToProcess;
-            if (!isDotPossible) relevantHeads = headsToProcess.filter(h => h !== 'ninja');
-            // Rebellious head only works for CC units
-            if (!window.unitHasCC(effectiveStats)) relevantHeads = relevantHeads.filter(h => h !== 'rebellious_head');
+            let relevantHeads = headsToProcess.map(h => h === 'rebellious_head' ? 'bloodline_head' : h);
+            if (!isDotPossible) relevantHeads = relevantHeads.filter(h => h !== 'ninja');
+            // Bloodline head works for everyone now
+            // if (!window.unitHasCC(effectiveStats)) relevantHeads = relevantHeads.filter(h => h !== 'bloodline_head');
 
             relevantHeads.forEach(headMode => {
                 const runOpt = (dmgP, spaP, rangeP, optType) => {

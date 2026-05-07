@@ -107,10 +107,10 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
         ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch']
         : (mode && mode !== 'none' ? [mode] : ['none']);
 
-    // Filter rebellious_head for non-CC units
-    if (!window.unitHasCC(stats)) {
-        headOptions = headOptions.filter(h => h !== 'rebellious_head');
-    }
+    // Filter bloodline_head for non-CC units - REMOVED restriction
+    // if (!window.unitHasCC(stats)) {
+    //     headOptions = headOptions.filter(h => h !== 'rebellious_head');
+    // }
 
     let globalBestRes = { total: -1, range: -1 };
     let globalBestAssignments = {};
@@ -385,24 +385,11 @@ function _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicSta
             headDmgPassive = 50;
         }
         headCalc.type = 'strongest_sorcerer';
-    } else if (headPiece === 'rebellious_head' && context.hasCC) {
-        // Rebellious Shinobi Accessory: 5% dmg per mode swap, up to 6 stacks (30%)
-        // Restricted to CC units per request
-        headDmgPassive = 30;
-        headCalc.type = 'rebellious';
-
-        // Full Set CC Perk: +30% Dmg for 10s when CC is applied
-        if (context.rebelliousCCActive) {
-            headCalc.attacks = 1; // Applied on CC (usually every attack for CC units)
-            headCalc.duration = 10;
-            const buffedAttacks = Math.floor(headCalc.duration / finalSpa);
-            const totalCycleAttacks = headCalc.attacks + buffedAttacks;
-            headCalc.uptime = totalCycleAttacks > 0 ? buffedAttacks / totalCycleAttacks : 0;
-            headCalc.trigger = headCalc.attacks * finalSpa;
-            headDmgPassive += 30 * headCalc.uptime;
-            headCalc.ccBonus = 30 * headCalc.uptime;
-            headCalc.type = 'rebellious_cc';
-        }
+    } else if (headPiece === 'bloodline_head') {
+        const bloodlineUnits = ['alpha_devil', 'devil_hunter', 'ancient_mage', 'mimicry_sorcerer'];
+        const isBloodline = bloodlineUnits.includes(uStats.id);
+        headDmgPassive = isBloodline ? 30 : 0;
+        headCalc.type = isBloodline ? 'bloodline' : 'none';
     }
 
     // Monarch Cape Accessory Bonus (Requires Monarch Set)
@@ -718,13 +705,38 @@ function calculateDPS(uStats, relicStats, context) {
     const finalSpa = Math.max(rawFinalSpa, effectiveSpaCap);
 
     const { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc } = _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicStats, context);
+
+    // Rebellious Set CC Perk (Now independent of head piece)
+    let ccPerkDmg = 0;
+    if (context.rebelliousCCActive) {
+        const ccDuration = 10;
+        const buffedAttacks = Math.floor(ccDuration / finalSpa);
+        const totalCycleAttacks = 1 + buffedAttacks;
+        const uptime = totalCycleAttacks > 0 ? buffedAttacks / totalCycleAttacks : 0;
+        ccPerkDmg = 30 * uptime;
+        
+        // Add to set perks
+        setPerkDmg += ccPerkDmg;
+        
+        // Ensure UI can still render it by injecting it into headCalc if it's not being used by a real head
+        if (!headCalc.type || headCalc.type === 'none') {
+            headCalc.type = 'rebellious_cc';
+            headCalc.uptime = uptime;
+            headCalc.ccBonus = ccPerkDmg;
+        } else {
+            // If another head is used, we'll need to make sure the breakdown knows about this
+            // We'll add a specific field for set perks in calculateDPS return if needed
+            headCalc.ccBonus = ccPerkDmg;
+            headCalc.ccUptime = uptime;
+        }
+    }
     let abilityDmg = 0;
     if (isAbility && uStats.ability) {
         const ab = Array.isArray(uStats.ability) ? uStats.ability[0] : uStats.ability;
         if (ab.buffDmg) abilityDmg = ab.buffDmg;
     }
 
-    let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassive + headDmgTag + mikuBuff + enlightenedGodBuff + bijuuBuff + kmDmg + abilityDmg;
+    let additiveTotal = (sBonus.dmg || 0) + setPerkDmg + passivePcent + headDmgBase + headDmgPassive + headDmgTag + mikuBuff + enlightenedGodBuff + bijuuBuff + kmDmg + abilityDmg;
 
     // Detailed breakdown for UI
     const detailedBuffs = {

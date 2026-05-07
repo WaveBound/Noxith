@@ -704,9 +704,29 @@ function renderMathContent(data, isSplit = false) {
         </td></tr>`;
     }
 
-    // Rebellious CC
-    if (data.headBuffs && data.headBuffs.type === 'rebellious_cc') {
-        const uptimePct = (data.headBuffs.uptime || 0);
+    // Bloodline Passive
+    if (data.headBuffs && data.headBuffs.type === 'bloodline') {
+        headDmgHtml += `
+        <tr class="mt-row-rebellious"><td colspan="3" class="p-2">
+            <div class="mt-flex-between mb-2">
+                <span class="text-custom mt-text-bold text-xs tracking-sm">BLOODLINE PASSIVE</span>
+                <button class="calc-info-btn" onclick="openInfoPopup('mode_logic')">?</button>
+            </div>
+            <div class="mt-flex-between text-xs text-white mb-1">
+                <span class="opacity-70">Stacks:</span>
+                <span class="mt-font-mono mt-text-right text-white">6x Stacks (Max)</span>
+            </div>
+            <div class="mt-flex-between mt-border-top mt-pt-sm">
+                <span class="text-white text-xs text-bold">Total Passive Buff</span>
+                <span class="text-custom text-sm mt-text-bold"> +${fmt.fix(data.headBuffs.dmg, 0)}%</span>
+            </div>
+        </td></tr>`;
+    }
+
+    // Rebellious CC (Now can be separate from head)
+    if (data.headBuffs && (data.headBuffs.type === 'rebellious_cc' || data.headBuffs.ccBonus > 0)) {
+        const uptimePct = (data.headBuffs.ccUptime || data.headBuffs.uptime || 0);
+        const ccBonus = (data.headBuffs.ccBonus || 0);
         headDmgHtml += `
         <tr class="mt-row-rebellious"><td colspan="3" class="p-2">
             <div class="mt-flex-between mb-2">
@@ -727,7 +747,7 @@ function renderMathContent(data, isSplit = false) {
             </div>
             <div class="mt-flex-between mt-border-top mt-pt-sm">
                 <span class="text-white text-xs text-bold">Avg Damage Bonus</span>
-                <span class="text-custom text-sm mt-text-bold"> +${fmt.fix(data.headBuffs.ccBonus, 1)}%</span>
+                <span class="text-custom text-sm mt-text-bold"> +${fmt.fix(ccBonus, 1)}%</span>
             </div>
         </td></tr>`;
     }
