@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BloxMulti — Roblox Multi-Account Manager for Windows</title>
 
   <!-- Primary SEO -->
-  <meta name="description" content="BloxMulti is a free Windows app that lets you manage multiple Roblox accounts at once. Switch accounts instantly, launch any game by Place ID, and save private server codes — all in one app." />
-  <meta name="keywords" content="Roblox multi account manager, Roblox account switcher, BloxMulti, multiple Roblox accounts Windows, Roblox account manager app, Roblox private server codes, free Roblox multi account, launch multiple Roblox accounts simultaneously, Roblox alt account manager" />
+  <meta name="description"
+    content="BloxMulti is a free Windows app that lets you manage multiple Roblox accounts at once. Switch accounts instantly, launch any game by Place ID, and save private server codes — all in one app." />
+  <meta name="keywords"
+    content="Roblox multi account manager, Roblox account switcher, BloxMulti, multiple Roblox accounts Windows, Roblox account manager app, Roblox private server codes, free Roblox multi account, launch multiple Roblox accounts simultaneously, Roblox alt account manager" />
   <meta name="author" content="BloxMulti" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#9d6fff" />
@@ -17,14 +20,16 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://bloxmulti.app/" />
   <meta property="og:title" content="BloxMulti — Roblox Multi-Account Manager" />
-  <meta property="og:description" content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — free for Windows." />
+  <meta property="og:description"
+    content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — free for Windows." />
   <meta property="og:image" content="https://bloxmulti.app/og-image.png" />
   <meta property="og:site_name" content="BloxMulti" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="BloxMulti — Roblox Multi-Account Manager" />
-  <meta name="twitter:description" content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — free for Windows." />
+  <meta name="twitter:description"
+    content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — free for Windows." />
   <meta name="twitter:image" content="https://bloxmulti.app/og-image.png" />
 
   <!-- Structured Data -->
@@ -46,76 +51,102 @@
   }
   </script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap"
+    rel="stylesheet" />
+
   <style>
     :root {
-      --bg:          #06050d;
-      --surface:     #0f0e1c;
-      --surface-2:   #14132a;
-      --input-bg:    #0a0918;
-      --accent:      #9d6fff;
-      --accent-glow: rgba(157,111,255,0.35);
-      --accent-mid:  rgba(157,111,255,0.15);
-      --accent-light:#c4a0ff;
-      --red:         #ff3a5c;
-      --green:       #2af598;
-      --text:        #edeafa;
-      --muted:       #6a607e;
-      --border:      #1c1a30;
-      --border-hi:   #2a2642;
-      --font-body:   'Inter', sans-serif;
-      --font-display:'Syne', sans-serif;
+      --bg: #06050d;
+      --surface: #0f0e1c;
+      --surface-2: #14132a;
+      --input-bg: #0a0918;
+      --accent: #9d6fff;
+      --accent-glow: rgba(157, 111, 255, 0.35);
+      --accent-mid: rgba(157, 111, 255, 0.15);
+      --accent-light: #c4a0ff;
+      --red: #ff3a5c;
+      --green: #2af598;
+      --text: #edeafa;
+      --muted: #6a607e;
+      --border: #1c1a30;
+      --border-hi: #2a2642;
+      --font-body: 'Inter', sans-serif;
+      --font-display: 'Syne', sans-serif;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       font-family: var(--font-body);
       background: var(--bg);
       color: var(--text);
       overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 99px; }
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-hi);
+      border-radius: 99px;
+    }
 
     /* ── Background ── */
     .global-bg {
       position: fixed;
       inset: 0;
-      z-index: 0;
+      z-index: -1;
       pointer-events: none;
       background:
-        radial-gradient(ellipse 80% 60% at 75% 10%,  rgba(100,40,220,0.45) 0%, transparent 65%),
-        radial-gradient(ellipse 50% 40% at 15% 55%,  rgba(50,200,255,0.06) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 85% 85%,  rgba(200,50,255,0.10) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 60% at 75% 10%, rgba(100, 40, 220, 0.45) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 15% 55%, rgba(50, 200, 255, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 85% 85%, rgba(200, 50, 255, 0.10) 0%, transparent 55%),
         linear-gradient(160deg, #07051a 0%, #0d0820 40%, #120a28 70%, #08050f 100%);
     }
+
     .global-bg::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: repeating-linear-gradient(
-        120deg,
-        transparent 0px, transparent 40px,
-        rgba(157,111,255,0.015) 40px, rgba(157,111,255,0.015) 41px
-      );
+      background: repeating-linear-gradient(120deg,
+          transparent 0px, transparent 40px,
+          rgba(157, 111, 255, 0.015) 40px, rgba(157, 111, 255, 0.015) 41px);
     }
 
     /* ── Nav ── */
     nav {
       position: fixed;
-      top: 0; left: 0; right: 0;
+      top: 0;
+      left: 0;
+      right: 0;
       z-index: 100;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 18px 48px;
-      background: rgba(6,5,13,0.7);
+      padding: 16px 5%;
+      background: rgba(6, 5, 13, 0.75);
       backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(255,255,255,0.04);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     }
 
     .nav-logo {
@@ -124,46 +155,82 @@
       font-weight: 800;
       color: var(--text);
       letter-spacing: -0.5px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
       text-decoration: none;
     }
 
-
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
 
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 32px;
+      gap: 24px;
       list-style: none;
     }
 
     .nav-links a {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
       color: var(--muted);
       text-decoration: none;
-      transition: color 0.15s;
+      transition: color 0.2s;
     }
-    .nav-links a:hover { color: var(--text); }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-cta,
+    .btn-donate {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 38px;
+      padding: 0 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      gap: 8px;
+      transition: all 0.2s;
+    }
 
     .nav-cta {
       background: var(--accent);
-      color: #fff !important;
-      padding: 8px 20px;
-      border-radius: 8px;
-      font-weight: 600 !important;
+      color: #fff;
       box-shadow: 0 4px 16px var(--accent-glow);
-      transition: background 0.15s, box-shadow 0.15s !important;
-    }
-    .nav-cta:hover {
-      background: var(--accent-light) !important;
-      box-shadow: 0 6px 22px var(--accent-glow) !important;
     }
 
-    /* ── Sections ── */
-    section { position: relative; z-index: 1; }
+    .nav-cta:hover {
+      background: var(--accent-light);
+      box-shadow: 0 6px 22px var(--accent-glow);
+    }
+
+    .btn-donate {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      border: 1px solid var(--border-hi);
+    }
+
+    .btn-donate:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--muted);
+      transform: translateY(-1px);
+    }
+
+    .btn-donate.heart svg {
+      color: var(--red);
+      fill: rgba(255, 58, 92, 0.2);
+    }
 
     /* ── Hero ── */
     .hero {
@@ -173,25 +240,26 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 120px 24px 80px;
+      padding: 140px 20px 80px;
+      position: relative;
+      z-index: 1;
     }
 
     .hero-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(157,111,255,0.08);
-      border: 1px solid rgba(157,111,255,0.2);
+      background: rgba(157, 111, 255, 0.08);
+      border: 1px solid rgba(157, 111, 255, 0.2);
       border-radius: 99px;
-      padding: 5px 14px;
-      font-size: 11px;
+      padding: 6px 16px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--accent-light);
-      letter-spacing: 1.5px;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      margin-bottom: 28px;
-      opacity: 0;
-      animation: fade-up 0.6s ease forwards 0.1s;
+      margin-bottom: 24px;
+      animation: fade-up 0.6s ease both 0.1s;
     }
 
     .hero-badge-dot {
@@ -199,18 +267,17 @@
       height: 6px;
       border-radius: 50%;
       background: var(--green);
-      box-shadow: 0 0 8px rgba(42,245,152,0.7);
+      box-shadow: 0 0 8px rgba(42, 245, 152, 0.7);
     }
 
     .hero-title {
       font-family: var(--font-display);
-      font-size: clamp(52px, 8vw, 96px);
+      font-size: clamp(40px, 8vw, 96px);
       font-weight: 800;
-      line-height: 1;
-      letter-spacing: -3px;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
       color: var(--text);
-      opacity: 0;
-      animation: fade-up 0.7s ease forwards 0.2s;
+      animation: fade-up 0.7s ease both 0.2s;
     }
 
     .hero-title span {
@@ -222,13 +289,11 @@
 
     .hero-sub {
       margin-top: 20px;
-      font-size: 17px;
-      font-weight: 400;
+      font-size: clamp(15px, 3vw, 18px);
       color: var(--muted);
-      max-width: 520px;
-      line-height: 1.65;
-      opacity: 0;
-      animation: fade-up 0.7s ease forwards 0.35s;
+      max-width: 600px;
+      line-height: 1.6;
+      animation: fade-up 0.7s ease both 0.35s;
     }
 
     .hero-actions {
@@ -238,62 +303,63 @@
       gap: 16px;
       flex-wrap: wrap;
       justify-content: center;
-      opacity: 0;
-      animation: fade-up 0.7s ease forwards 0.5s;
+      animation: fade-up 0.7s ease both 0.5s;
+      width: 100%;
+      max-width: 500px;
     }
 
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--accent);
-      color: #fff;
-      padding: 14px 28px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      text-decoration: none;
-      box-shadow: 0 6px 28px var(--accent-glow);
-      transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
-      border: none;
-      cursor: pointer;
-    }
-    .btn-primary:hover {
-      background: var(--accent-light);
-      box-shadow: 0 8px 32px var(--accent-glow);
-      transform: translateY(-1px);
-    }
-    .btn-primary:active { transform: translateY(0) scale(0.99); }
-
+    .btn-primary,
     .btn-secondary {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      background: rgba(255,255,255,0.04);
-      color: var(--text);
-      padding: 14px 24px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 500;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 28px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
       text-decoration: none;
-      border: 1px solid var(--border-hi);
-      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+      flex: 1;
+      min-width: 220px;
     }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 6px 28px var(--accent-glow);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-light);
+      box-shadow: 0 8px 32px var(--accent-glow);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      border: 1px solid var(--border-hi);
+    }
+
     .btn-secondary:hover {
-      background: rgba(255,255,255,0.07);
+      background: rgba(255, 255, 255, 0.08);
       border-color: var(--muted);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
     }
 
     .hero-meta {
-      margin-top: 18px;
+      margin-top: 24px;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
+      justify-content: center;
       gap: 20px;
-      font-size: 12px;
+      font-size: 13px;
       color: var(--muted);
-      opacity: 0;
-      animation: fade-up 0.7s ease forwards 0.65s;
+      animation: fade-up 0.7s ease both 0.65s;
     }
 
     .hero-meta-item {
@@ -302,14 +368,18 @@
       gap: 6px;
     }
 
-    .hero-meta-item svg { color: var(--green); }
+    .hero-meta-item svg {
+      color: var(--green);
+    }
 
-    /* ── App Preview wrapper ── */
+    /* ── App Preview Image ── */
     .preview-wrap {
-      margin-top: 64px;
-      opacity: 0;
-      animation: fade-up 0.9s ease forwards 0.7s;
+      margin-top: 60px;
+      animation: fade-up 0.9s ease both 0.7s;
       position: relative;
+      width: 100%;
+      max-width: 1000px;
+      padding: 0 10px;
     }
 
     .preview-glow {
@@ -317,98 +387,139 @@
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      width: 700px;
-      height: 300px;
-      background: radial-gradient(ellipse, rgba(157,111,255,0.2) 0%, transparent 70%);
+      width: 80%;
+      height: 80%;
+      background: radial-gradient(ellipse, rgba(157, 111, 255, 0.3) 0%, transparent 70%);
       pointer-events: none;
       z-index: -1;
+      filter: blur(40px);
     }
 
     .preview-frame {
-      width: min(880px, 90vw);
-      background: rgba(10,9,20,0.82);
+      width: 100%;
+      background: rgba(10, 9, 20, 0.82);
       border: 1px solid var(--border-hi);
-      border-radius: 14px;
-      backdrop-filter: blur(20px);
-      box-shadow:
-        0 40px 80px rgba(0,0,0,0.6),
-        0 0 0 1px rgba(157,111,255,0.08),
-        inset 0 1px 0 rgba(255,255,255,0.06);
+      border-radius: 16px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(157, 111, 255, 0.08);
       overflow: hidden;
+      display: flex;
     }
 
-    .preview-titlebar {
-      background: rgba(6,5,14,0.9);
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+    .preview-image {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+
+    /* ── Stats ── */
+    .stats {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: rgba(10, 9, 20, 0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      flex: 1;
+      min-width: 250px;
       display: flex;
       align-items: center;
-      padding: 10px 14px;
-      gap: 8px;
+      gap: 16px;
+      padding: 32px;
+      border-right: 1px solid var(--border);
     }
 
-    .tb-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .tb-dot.red  { background: #ff3a5c; box-shadow: 0 0 6px rgba(255,58,92,0.4); }
-    .tb-dot.amber{ background: #ffb800; box-shadow: 0 0 6px rgba(255,184,0,0.4); }
-    .tb-dot.green{ background: #2af598; box-shadow: 0 0 6px rgba(42,245,152,0.4); }
+    .stat-item:last-child {
+      border-right: none;
+    }
 
-    .tb-title {
-      flex: 1;
-      text-align: center;
-      font-size: 11px;
-      font-weight: 600;
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(157, 111, 255, 0.1);
+      border: 1px solid rgba(157, 111, 255, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .stat-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-num {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-num span {
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 14px;
       color: var(--muted);
-      letter-spacing: 0.5px;
+      line-height: 1.4;
     }
-
-
 
     /* ── Features ── */
     .features {
-      padding: 100px 24px;
-      max-width: 1100px;
+      padding: 100px 20px;
+      max-width: 1200px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
 
     .section-label {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
-      letter-spacing: 2.5px;
+      letter-spacing: 2px;
       text-transform: uppercase;
       color: var(--accent);
       text-align: center;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       opacity: 0;
     }
 
     .section-title {
       font-family: var(--font-display);
-      font-size: clamp(32px, 5vw, 52px);
+      font-size: clamp(32px, 6vw, 48px);
       font-weight: 800;
       text-align: center;
-      letter-spacing: -1.5px;
-      line-height: 1.08;
+      letter-spacing: -1px;
+      line-height: 1.1;
       margin-bottom: 60px;
       opacity: 0;
     }
 
     .features-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-
-    @media (max-width: 768px) {
-      .features-grid { grid-template-columns: 1fr; }
-      nav { padding: 14px 20px; }
-      .nav-links { display: none; }
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
     }
 
     .feat-card {
-      background: rgba(10,9,20,0.6);
+      background: rgba(10, 9, 20, 0.6);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 28px 24px;
-      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+      border-radius: 16px;
+      padding: 32px 24px;
+      transition: all 0.3s ease;
       opacity: 0;
       position: relative;
       overflow: hidden;
@@ -417,114 +528,60 @@
     .feat-card::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0;
+      top: 0;
+      left: 0;
+      right: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(157,111,255,0.3), transparent);
+      background: linear-gradient(90deg, transparent, rgba(157, 111, 255, 0.4), transparent);
       opacity: 0;
-      transition: opacity 0.25s;
+      transition: opacity 0.3s;
     }
 
     .feat-card:hover {
-      border-color: rgba(157,111,255,0.25);
-      background: rgba(15,14,28,0.8);
-      transform: translateY(-2px);
+      border-color: rgba(157, 111, 255, 0.3);
+      background: rgba(15, 14, 28, 0.9);
+      transform: translateY(-4px);
     }
 
-    .feat-card:hover::before { opacity: 1; }
+    .feat-card:hover::before {
+      opacity: 1;
+    }
 
     .feat-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 11px;
-      background: rgba(157,111,255,0.1);
-      border: 1px solid rgba(157,111,255,0.2);
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(157, 111, 255, 0.1);
+      border: 1px solid rgba(157, 111, 255, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
       color: var(--accent);
     }
 
     .feat-title {
-      font-size: 15px;
+      font-size: 18px;
       font-weight: 700;
       color: var(--text);
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .feat-desc {
-      font-size: 13px;
+      font-size: 14px;
       color: var(--muted);
-      line-height: 1.65;
-    }
-
-    /* ── Stats bar ── */
-    .stats {
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      background: rgba(10,9,20,0.6);
-      backdrop-filter: blur(10px);
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-      position: relative;
-      z-index: 1;
-    }
-
-    .stat-item {
-      flex: 1;
-      max-width: 340px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 28px 32px;
-      border-right: 1px solid var(--border);
-    }
-    .stat-item:last-child { border-right: none; }
-
-    .stat-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: rgba(157,111,255,0.1);
-      border: 1px solid rgba(157,111,255,0.18);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent);
-      flex-shrink: 0;
-    }
-
-    .stat-text { display: flex; flex-direction: column; gap: 2px; }
-
-    .stat-num {
-      font-family: var(--font-body);
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.3px;
-      line-height: 1.2;
-    }
-
-    .stat-num span {
-      color: var(--accent);
-    }
-
-    .stat-label {
-      font-size: 12px;
-      font-weight: 400;
-      color: var(--muted);
-      line-height: 1.4;
+      line-height: 1.6;
     }
 
     /* ── Download CTA ── */
     .download {
-      padding: 120px 24px;
+      padding: 100px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
       position: relative;
+      z-index: 1;
     }
 
     .download-glow {
@@ -532,57 +589,60 @@
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      width: 600px;
+      width: 100%;
+      max-width: 600px;
       height: 400px;
-      background: radial-gradient(ellipse, rgba(100,40,220,0.25) 0%, transparent 70%);
+      background: radial-gradient(ellipse, rgba(100, 40, 220, 0.2) 0%, transparent 70%);
       pointer-events: none;
     }
 
     .download-title {
       font-family: var(--font-display);
-      font-size: clamp(36px, 5vw, 64px);
+      font-size: clamp(32px, 6vw, 56px);
       font-weight: 800;
-      letter-spacing: -2px;
-      line-height: 1.05;
+      letter-spacing: -1px;
       margin-bottom: 16px;
       opacity: 0;
     }
 
     .download-sub {
-      font-size: 16px;
+      font-size: clamp(15px, 3vw, 16px);
       color: var(--muted);
-      max-width: 460px;
-      line-height: 1.65;
+      max-width: 500px;
+      line-height: 1.6;
       margin-bottom: 40px;
       opacity: 0;
     }
 
     .download-box {
-      background: rgba(10,9,20,0.75);
+      background: rgba(10, 9, 20, 0.75);
       border: 1px solid var(--border-hi);
       border-radius: 16px;
-      padding: 32px 36px;
+      padding: 32px;
       backdrop-filter: blur(20px);
-      box-shadow: 0 32px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(157,111,255,0.06);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(157, 111, 255, 0.06);
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 20px;
-      min-width: 360px;
+      width: 100%;
+      max-width: 420px;
       opacity: 0;
     }
 
     .dl-platform {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 13px;
+      gap: 12px;
+      font-size: 14px;
       color: var(--muted);
+      font-weight: 500;
     }
 
     .dl-platform-icon {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       background: var(--surface-2);
       border-radius: 8px;
       display: flex;
@@ -592,16 +652,16 @@
     }
 
     .dl-version {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--muted);
-      background: rgba(255,255,255,0.04);
+      background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 4px 10px;
     }
 
     .dl-requirements {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--muted);
       text-align: center;
       line-height: 1.6;
@@ -610,397 +670,177 @@
     /* ── Footer ── */
     footer {
       border-top: 1px solid var(--border);
-      padding: 32px 48px;
+      padding: 32px 5%;
       display: flex;
       align-items: center;
       justify-content: space-between;
       position: relative;
       z-index: 1;
+      flex-wrap: wrap;
+      gap: 20px;
     }
 
     .footer-logo {
       font-family: var(--font-display);
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 800;
       color: var(--muted);
       letter-spacing: -0.5px;
     }
 
-    .footer-note {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
     .footer-links {
       display: flex;
-      gap: 20px;
+      gap: 24px;
+      align-items: center;
     }
 
     .footer-links a {
-      font-size: 12px;
+      font-size: 14px;
       color: var(--muted);
       text-decoration: none;
-      transition: color 0.15s;
+      transition: color 0.2s;
     }
-    .footer-links a:hover { color: var(--text); }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    /* ── Mobile Overrides ── */
+    @media (max-width: 768px) {
+      nav {
+        padding: 12px 20px;
+      }
+
+      .nav-links {
+        display: none;
+        /* Hide text links on mobile to save space */
+      }
+
+      .nav-actions {
+        gap: 8px;
+      }
+
+      .nav-btn-text {
+        display: none;
+        /* Hide text, keep icons for action buttons */
+      }
+
+      .nav-cta,
+      .btn-donate {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+      }
+
+      .hero {
+        padding: 120px 20px 60px;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+
+      .btn-primary,
+      .btn-secondary {
+        width: 100%;
+      }
+
+      .hero-meta {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .stat-item {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 24px 20px;
+      }
+
+      .stat-item:last-child {
+        border-bottom: none;
+      }
+
+      .features {
+        padding: 80px 20px;
+      }
+
+      footer {
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+      }
+    }
 
     /* ── Animations ── */
     @keyframes fade-up {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .animate { opacity: 0; transform: translateY(24px); transition: opacity 0.65s ease, transform 0.65s ease; }
-    .animate.in { opacity: 1 !important; transform: translateY(0) !important; }
-
-    /* stagger children */
-    .stagger > * { opacity: 0; transform: translateY(20px); transition: opacity 0.55s ease, transform 0.55s ease; }
-    .stagger.in > *:nth-child(1) { opacity:1; transform:none; transition-delay:0s; }
-    .stagger.in > *:nth-child(2) { opacity:1; transform:none; transition-delay:0.08s; }
-    .stagger.in > *:nth-child(3) { opacity:1; transform:none; transition-delay:0.16s; }
-    .stagger.in > *:nth-child(4) { opacity:1; transform:none; transition-delay:0.24s; }
-    .stagger.in > *:nth-child(5) { opacity:1; transform:none; transition-delay:0.32s; }
-    .stagger.in > *:nth-child(6) { opacity:1; transform:none; transition-delay:0.40s; }
-
-    /* avatar placeholders in mock */
-    .av-a { background: linear-gradient(135deg, #3a2266, #5c3399); }
-    .av-b { background: linear-gradient(135deg, #1a3060, #2a5099); }
-    .av-c { background: linear-gradient(135deg, #1e3d20, #2e6232); }
-
-    .mock-acct.av-a { background: linear-gradient(135deg, #3a2266, #5c3399); }
-    .mock-acct.av-b { background: linear-gradient(135deg, #1a3060, #2a5099); }
-    .mock-acct.av-c { background: linear-gradient(135deg, #1e3d20, #2e6232); }
-    .mock-chip-av   { background: linear-gradient(135deg, #3a2266, #5c3399); }
-
-    /* ── Real App UI Scoped Styles ── */
-    .app-ui {
-      display: flex;
-      height: 500px;
-      width: 100%;
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      color: #edeafa;
-      overflow: hidden;
-      position: relative;
+    .animate {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+      will-change: opacity, transform;
     }
 
-    /* Background layers inside preview */
-    .app-ui .au-bg {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 70% 30%, rgba(100,40,220,0.5) 0%, transparent 65%),
-        radial-gradient(ellipse 50% 40% at 20% 60%, rgba(50,200,255,0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 90% 80%, rgba(200,50,255,0.12) 0%, transparent 55%),
-        linear-gradient(160deg, #07051a 0%, #0d0820 40%, #120a28 70%, #08050f 100%);
-    }
-    .app-ui .au-bg::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(120deg, transparent 0px, transparent 40px, rgba(157,111,255,0.018) 40px, rgba(157,111,255,0.018) 41px);
+    .animate.in {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
     }
 
-    /* Sidebar */
-    .app-ui .au-sidebar {
-      position: relative;
-      z-index: 10;
-      width: 58px;
-      background: rgba(6,5,14,0.97);
-      border-right: 1px solid rgba(255,255,255,0.05);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 14px 0 12px;
-      gap: 0;
-      flex-shrink: 0;
-    }
-    .app-ui .au-acct-add {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #6a607e;
-      border: 1.5px dashed #2a2642;
-      flex-shrink: 0;
-    }
-    .app-ui .au-sep {
-      width: 24px;
-      height: 1px;
-      background: rgba(255,255,255,0.06);
-      margin: 12px 0;
-      flex-shrink: 0;
-    }
-    .app-ui .au-acct-list {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 9px;
-      flex: 1;
-      width: 100%;
-      padding: 0 9px;
-    }
-    .app-ui .au-acct {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 12px;
-      color: #c4a0ff;
-      cursor: default;
-      flex-shrink: 0;
-      border: 1.5px solid transparent;
-      position: relative;
-    }
-    .app-ui .au-acct.active {
-      border-color: #9d6fff;
-      box-shadow: 0 0 10px rgba(157,111,255,0.35);
-    }
-    .app-ui .au-acct.active::before {
-      content: '';
-      position: absolute;
-      left: -8px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 3px;
-      height: 16px;
-      background: #9d6fff;
-      border-radius: 0 3px 3px 0;
-      box-shadow: 0 0 6px rgba(157,111,255,0.35);
-    }
-    .app-ui .av-purple { background: linear-gradient(135deg, #3d1f7a, #6b35cc); }
-    .app-ui .av-blue   { background: linear-gradient(135deg, #1a3567, #2a5bb5); }
-    .app-ui .av-green  { background: linear-gradient(135deg, #1a4020, #2a6832); }
-
-    /* Main grid */
-    .app-ui .au-main {
-      flex: 1;
-      position: relative;
-      z-index: 2;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr 180px;
-      gap: 12px;
-      padding: 12px;
-      min-height: 0;
-      overflow: hidden;
+    .stagger>* {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+      will-change: opacity, transform;
     }
 
-    /* Panel */
-    .app-ui .au-panel {
-      background: rgba(10,9,20,0.72);
-      border: 1px solid #1c1a30;
-      border-radius: 12px;
-      padding: 14px;
-      backdrop-filter: blur(14px);
-      box-shadow: 0 16px 40px rgba(0,0,0,0.4);
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      overflow: hidden;
-      min-height: 0;
-    }
-    .app-ui .au-panel-title {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: #6a607e;
-      margin-bottom: 10px;
+    .stagger.in>*:nth-child(1) {
+      opacity: 1;
+      transform: none;
+      transition-delay: 0s;
     }
 
-    /* Chip */
-    .app-ui .au-chip {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #0f0e1c;
-      border: 1px solid #2a2642;
-      border-radius: 9px;
-      padding: 8px 11px;
-      margin-bottom: 10px;
-      flex-shrink: 0;
-    }
-    .app-ui .au-chip-av {
-      width: 30px;
-      height: 30px;
-      border-radius: 7px;
-      background: linear-gradient(135deg, #3d1f7a, #6b35cc);
-      border: 1.5px solid #9d6fff;
-      box-shadow: 0 0 8px rgba(157,111,255,0.35);
-      flex-shrink: 0;
-    }
-    .app-ui .au-chip-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: #edeafa;
-      line-height: 1.2;
-    }
-    .app-ui .au-chip-user {
-      font-size: 11px;
-      color: #6a607e;
-      margin-top: 1px;
+    .stagger.in>*:nth-child(2) {
+      opacity: 1;
+      transform: none;
+      transition-delay: 0.1s;
     }
 
-    /* Fields */
-    .app-ui .au-field { margin-bottom: 8px; }
-    .app-ui .au-label {
-      display: block;
-      font-size: 10px;
-      font-weight: 600;
-      color: #6a607e;
-      margin-bottom: 5px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .app-ui .au-input {
-      width: 100%;
-      background: #0a0918;
-      border: 1px solid #2a2642;
-      color: #6a607e;
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-family: 'Inter', sans-serif;
-      font-size: 12px;
+    .stagger.in>*:nth-child(3) {
+      opacity: 1;
+      transform: none;
+      transition-delay: 0.2s;
     }
 
-    /* Launch button */
-    .app-ui .au-btn-launch {
-      width: 100%;
-      margin-top: auto;
-      background: #9d6fff;
-      color: #fff;
-      border: none;
-      padding: 10px;
-      border-radius: 9px;
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      box-shadow: 0 4px 16px rgba(157,111,255,0.35);
-      flex-shrink: 0;
+    .stagger.in>*:nth-child(4) {
+      opacity: 1;
+      transform: none;
+      transition-delay: 0.3s;
     }
 
-    /* Saved games */
-    .app-ui .au-sg-row {
-      display: flex;
-      gap: 7px;
-      margin-bottom: 10px;
-      flex-shrink: 0;
-    }
-    .app-ui .au-sg-row .au-input { margin-bottom: 0; }
-    .app-ui .au-btn-sm {
-      background: #14132a;
-      border: 1px solid #2a2642;
-      color: #edeafa;
-      padding: 0 14px;
-      height: 36px;
-      border-radius: 8px;
-      font-family: 'Inter', sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      white-space: nowrap;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-    .app-ui .au-sg-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex: 1;
-      overflow: hidden;
-    }
-    .app-ui .au-sg-card {
-      background: #0f0e1c;
-      border: 1px solid #1c1a30;
-      border-radius: 8px;
-      padding: 8px 11px;
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      flex-shrink: 0;
-    }
-    .app-ui .au-sg-thumb {
-      width: 34px;
-      height: 34px;
-      border-radius: 6px;
-      background: #14132a;
-      border: 1px solid #2a2642;
-      flex-shrink: 0;
-    }
-    .app-ui .au-sg-thumb.t1 { background: linear-gradient(135deg, #2a1060, #5020a0); }
-    .app-ui .au-sg-thumb.t2 { background: linear-gradient(135deg, #0e1e50, #1a3488); }
-    .app-ui .au-sg-thumb.t3 { background: linear-gradient(135deg, #401010, #7a2020); }
-    .app-ui .au-sg-thumb.t4 { background: linear-gradient(135deg, #0a2830, #125060); }
-    .app-ui .au-sg-name {
-      font-size: 12px;
-      font-weight: 600;
-      color: #edeafa;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .app-ui .au-sg-id {
-      font-size: 10px;
-      color: #6a607e;
-      margin-top: 1px;
-    }
-    .app-ui .au-sg-play {
-      margin-left: auto;
-      color: #c4a0ff;
-      opacity: 0.4;
-      display: flex;
-      align-items: center;
-      flex-shrink: 0;
+    .stagger.in>*:nth-child(5) {
+      opacity: 1;
+      transform: none;
+      transition-delay: 0.4s;
     }
 
-    .app-ui .au-panel.full { grid-column: span 2; flex-direction: column; gap: 0; justify-content: center; }
-    .app-ui .au-ps-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-shrink: 0;
-    }
-    .app-ui .au-ps-row .au-input { flex: 1; height: 36px; display: flex; align-items: center; }
-    .app-ui .au-ps-row .au-input.short { flex: 0 0 150px; }
-    .app-ui .au-ps-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 10px;
-      flex: 1;
-      overflow: hidden;
-    }
-    .app-ui .au-ps-card {
-      background: #0f0e1c;
-      border: 1px solid #1c1a30;
-      border-radius: 8px;
-      padding: 8px 11px;
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      flex-shrink: 0;
-    }
-    .app-ui .au-ps-code {
-      font-size: 9px;
-      color: #6a607e;
-      margin-top: 1px;
-      opacity: 0.7;
+    .stagger.in>*:nth-child(6) {
+      opacity: 1;
+      transform: none;
+      transition-delay: 0.5s;
     }
   </style>
 </head>
+
 <body>
 
   <!-- Background -->
@@ -1008,16 +848,46 @@
 
   <!-- Nav -->
   <nav>
-    <a href="#" class="nav-logo">
-      
-      BloxMulti
-    </a>
-    <ul class="nav-links">
-      <li><a href="#features">Features</a></li>
-      <li><a href="#download">Download</a></li>
-      <li><a href="javascript:void(0)" onclick="NoxithDonations.open()">Donate</a></li>
-      <li><a href="#download" class="nav-cta">Get App</a></li>
-    </ul>
+    <a href="#" class="nav-logo">BloxMulti</a>
+
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#download">Download</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <!-- Donate -->
+        <a href="javascript:void(0)" onclick="NoxithDonations.open()" class="btn-donate heart" title="Donate">
+          <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+            </path>
+          </svg>
+          <span class="nav-btn-text">Donate</span>
+        </a>
+        <!-- Back to Hub -->
+        <a href="/" class="btn-donate" title="Back to Hub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span class="nav-btn-text">Hub</span>
+        </a>
+        <!-- Get App -->
+        <a href="#download" class="nav-cta" title="Get App">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          <span class="nav-btn-text">Get App</span>
+        </a>
+      </div>
+    </div>
   </nav>
 
   <!-- Hero -->
@@ -1032,159 +902,61 @@
     </h1>
 
     <p class="hero-sub">
-      Run multiple Roblox accounts at the same time — each with its own isolated session. Switch accounts instantly, launch games by Place ID, and save private server codes.
+      Run multiple Roblox accounts at the same time — each with its own isolated session. Switch accounts instantly,
+      launch games by Place ID, and save private server codes.
     </p>
 
     <div class="hero-actions">
       <a href="https://github.com/WaveBound/BloxMulti/releases/download/v1.0.0/BloxMulti.exe" class="btn-primary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
         Download for Windows
       </a>
       <a href="#features" class="btn-secondary">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
         See Features
       </a>
     </div>
 
     <div class="hero-meta">
       <div class="hero-meta-item">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
         Free forever
       </div>
       <div class="hero-meta-item">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
         No ads
       </div>
       <div class="hero-meta-item">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
         Windows 10 &amp; 11
       </div>
     </div>
 
-    <!-- App Preview — exact replica -->
+    <!-- App Preview Image -->
     <div class="preview-wrap">
       <div class="preview-glow"></div>
       <div class="preview-frame">
-
-        <!-- Title bar -->
-        <div class="preview-titlebar">
-          <div class="tb-title">BloxMulti</div>
-        </div>
-
-        <!-- Actual app UI -->
-        <div class="app-ui">
-          <div class="au-bg"></div>
-
-          <!-- Sidebar -->
-          <div class="au-sidebar">
-            <div class="au-acct-add">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
-            </div>
-            <div class="au-sep"></div>
-            <div class="au-acct-list">
-              <div class="au-acct av-purple active"></div>
-              <div class="au-acct av-blue"></div>
-              <div class="au-acct av-green"></div>
-            </div>
-          </div>
-
-          <!-- Main grid -->
-          <div class="au-main">
-
-            <!-- Launch Game panel -->
-            <div class="au-panel">
-              <div class="au-panel-title">Launch Game</div>
-
-              <div class="au-chip">
-                <div class="au-chip-av"></div>
-                <div>
-                  <div class="au-chip-name">Player One</div>
-                  <div class="au-chip-user">@playerone</div>
-                </div>
-              </div>
-
-              <div class="au-field">
-                <label class="au-label">Place ID</label>
-                <div class="au-input" style="color:#2e2b46;">e.g. 133732935655930</div>
-              </div>
-              <div class="au-field">
-                <label class="au-label">Private Server Code <span style="opacity:0.4;font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-                <div class="au-input" style="color:#2e2b46;">Leave blank for public</div>
-              </div>
-
-              <div class="au-btn-launch" style="margin-top:10px;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3" fill="white" stroke="none"/></svg>
-                Launch Game
-              </div>
-            </div>
-
-            <!-- Saved Games panel -->
-            <div class="au-panel">
-              <div class="au-panel-title">Saved Games</div>
-
-              <div class="au-sg-row">
-                <div class="au-input" style="flex:1;color:#2e2b46;">Enter Place ID to save...</div>
-                <div class="au-btn-sm">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
-                  Save
-                </div>
-              </div>
-
-              <div class="au-sg-list">
-                <div class="au-sg-card">
-                  <div class="au-sg-thumb t1"></div>
-                  <div style="flex:1;min-width:0;">
-                    <div class="au-sg-name">Natural Disaster</div>
-                    <div class="au-sg-id">ID: 189707</div>
-                  </div>
-                  <div class="au-sg-play"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
-                </div>
-                <div class="au-sg-card">
-                  <div class="au-sg-thumb t2"></div>
-                  <div style="flex:1;min-width:0;">
-                    <div class="au-sg-name">Jailbreak</div>
-                    <div class="au-sg-id">ID: 606849621</div>
-                  </div>
-                  <div class="au-sg-play"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
-                </div>
-                <div class="au-sg-card">
-                  <div class="au-sg-thumb t3"></div>
-                  <div style="flex:1;min-width:0;">
-                    <div class="au-sg-name">Blox Fruits</div>
-                    <div class="au-sg-id">ID: 2753915549</div>
-                  </div>
-                  <div class="au-sg-play"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Private Servers panel — full width -->
-            <div class="au-panel full" style="justify-content:flex-start;">
-              <div class="au-panel-title">Private Servers</div>
-              <div class="au-ps-row">
-                <div class="au-input short" style="color:#2e2b46;">Place ID...</div>
-                <div class="au-input" style="color:#2e2b46;">Server Code...</div>
-                <div class="au-btn-sm">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="4" x2="12" y2="20"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
-                  Save Private Server
-                </div>
-              </div>
-              <div class="au-ps-list">
-                <div class="au-ps-card">
-                  <div class="au-sg-thumb t1"></div>
-                  <div style="flex:1;min-width:0;">
-                    <div class="au-sg-name">Natural Disaster</div>
-                    <div class="au-ps-code">Code: abc123xyz</div>
-                  </div>
-                  <div class="au-sg-play"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
-                </div>
-              </div>
-            </div>
-
-          </div><!-- /au-main -->
-        </div><!-- /app-ui -->
-
-      </div><!-- /preview-frame -->
+        <img src="Preview.png" alt="BloxMulti Interface Preview" class="preview-image" />
+      </div>
     </div>
   </section>
 
@@ -1192,7 +964,11 @@
   <div class="stats" id="features">
     <div class="stat-item animate">
       <div class="stat-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+        </svg>
       </div>
       <div class="stat-text">
         <div class="stat-num"><span>Unlimited</span> accounts</div>
@@ -1201,7 +977,10 @@
     </div>
     <div class="stat-item animate" style="transition-delay:0.1s">
       <div class="stat-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 3 19 12 5 21 5 3" />
+        </svg>
       </div>
       <div class="stat-text">
         <div class="stat-num"><span>One-click</span> launch</div>
@@ -1210,7 +989,13 @@
     </div>
     <div class="stat-item animate" style="transition-delay:0.2s">
       <div class="stat-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+        </svg>
       </div>
       <div class="stat-text">
         <div class="stat-num"><span>Multi-account</span> launch</div>
@@ -1222,55 +1007,86 @@
   <!-- Features -->
   <section class="features">
     <div class="section-label animate">What's inside</div>
-    <h2 class="section-title animate">Everything you need<br/>to play smarter</h2>
+    <h2 class="section-title animate">Everything you need<br />to play smarter</h2>
 
     <div class="features-grid stagger">
       <div class="feat-card">
         <div class="feat-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+          </svg>
         </div>
         <div class="feat-title">Multi-Account Management</div>
-        <div class="feat-desc">Add and switch between multiple Roblox accounts instantly. Each account shows your avatar with a clean sidebar for quick selection.</div>
+        <div class="feat-desc">Add and switch between multiple Roblox accounts instantly. Each account shows your avatar
+          with a clean sidebar for quick selection.</div>
       </div>
 
       <div class="feat-card">
         <div class="feat-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
         </div>
         <div class="feat-title">One-Click Game Launch</div>
-        <div class="feat-desc">Enter a Place ID and launch directly into any Roblox game with a single click — no browser, no redirects, no friction.</div>
+        <div class="feat-desc">Enter a Place ID and launch directly into any Roblox game with a single click — no
+          browser, no redirects, no friction.</div>
       </div>
 
       <div class="feat-card">
         <div class="feat-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
         </div>
         <div class="feat-title">Saved Games Library</div>
-        <div class="feat-desc">Bookmark your favorite games with thumbnails. Pin the ones you play most to the top, and launch them instantly with one tap.</div>
+        <div class="feat-desc">Bookmark your favorite games with thumbnails. Pin the ones you play most to the top, and
+          launch them instantly with one tap.</div>
       </div>
 
       <div class="feat-card">
         <div class="feat-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M7 12h10M12 7v10"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="4" />
+            <path d="M7 12h10M12 7v10" />
+          </svg>
         </div>
         <div class="feat-title">Private Server Codes</div>
-        <div class="feat-desc">Save private server link codes alongside your favorite games. Jump straight into your crew's server without hunting for the link.</div>
+        <div class="feat-desc">Save private server link codes alongside your favorite games. Jump straight into your
+          crew's server without hunting for the link.</div>
       </div>
 
       <div class="feat-card">
         <div class="feat-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/><path d="M8 7V5a2 2 0 0 1 4 0"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" />
+            <path d="M16 7V5a2 2 0 0 0-4 0v2" />
+            <path d="M8 7V5a2 2 0 0 1 4 0" />
+          </svg>
         </div>
         <div class="feat-title">Multi-Account Launch</div>
-        <div class="feat-desc">Select multiple accounts at once and launch them all into the same game simultaneously, each staggered safely to avoid rate limits.</div>
+        <div class="feat-desc">Select multiple accounts at once and launch them all into the same game simultaneously,
+          each staggered safely to avoid rate limits.</div>
       </div>
 
       <div class="feat-card">
         <div class="feat-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+          </svg>
         </div>
         <div class="feat-title">Polished Dark UI</div>
-        <div class="feat-desc">A purpose-built interface with glass panels, smooth transitions, and a deep purple aesthetic designed for long sessions.</div>
+        <div class="feat-desc">A purpose-built interface with glass panels, smooth transitions, and a deep purple
+          aesthetic designed for long sessions.</div>
       </div>
     </div>
   </section>
@@ -1287,14 +1103,23 @@
     <div class="download-box animate" style="transition-delay:0.2s">
       <div class="dl-platform">
         <div class="dl-platform-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13.051-1.8"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13.051-1.8" />
+          </svg>
         </div>
         Windows 10 / 11
         <div class="dl-version">v1.0.0</div>
       </div>
 
-      <a href="https://github.com/WaveBound/BloxMulti/releases/download/v1.0.0/BloxMulti.exe" class="btn-primary" style="width: 100%; justify-content: center; font-size: 15px; padding: 16px;">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <a href="https://github.com/WaveBound/BloxMulti/releases/download/v1.0.0/BloxMulti.exe" class="btn-primary"
+        style="width: 100%;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
         Download BloxMulti.exe
       </a>
 
@@ -1307,16 +1132,19 @@
   <!-- Footer -->
   <footer>
     <div class="footer-logo">BloxMulti</div>
-    <div class="footer-note">Not affiliated with Roblox Corporation.</div>
     <div class="footer-links">
       <a href="https://github.com/WaveBound/BloxMulti">GitHub</a>
-      <a href="javascript:void(0)" onclick="NoxithDonations.open()">Donate</a>
     </div>
   </footer>
 
   <script src="../donations/donations.js"></script>
   <script>
     // Intersection Observer for scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
@@ -1324,9 +1152,20 @@
           observer.unobserve(e.target);
         }
       });
-    }, { threshold: 0.15 });
+    }, observerOptions);
 
     document.querySelectorAll('.animate, .stagger').forEach(el => observer.observe(el));
+
+    // Safety fallback: Ensure everything is visible after a short delay
+    // in case the IntersectionObserver doesn't trigger
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.querySelectorAll('.animate, .stagger').forEach(el => {
+          el.classList.add('in');
+        });
+      }, 1000);
+    });
   </script>
 </body>
+
 </html>
