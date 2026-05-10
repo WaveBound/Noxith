@@ -1,6 +1,6 @@
 // --- FEATURE FLAGS ---
-const ENABLE_HOTBAR = false;
-const ENABLE_LOADOUT_CLICKABLE = false;
+const ENABLE_HOTBAR = true;
+const ENABLE_LOADOUT_CLICKABLE = true;
 
 // Data & Cache
 let customTraits = [];
@@ -27,7 +27,7 @@ let currentPage = 1;
 function getUnitsPerPage() {
     // Check if mobile (matches CSS media query)
     if (window.innerWidth <= 768) {
-        return 8;
+        return 10;
     }
 
     // Desktop logic: Calculate based on columns

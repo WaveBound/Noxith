@@ -140,6 +140,12 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
                 effectiveStats.followUp = true;
             }
 
+            // Special Case: Underworld God + Water God Divinity Stack Fix
+            // "Water god placement - 1"
+            if (isUnit(unit.id, 'underworld_god')) {
+                 // We apply the logic in the calculateDPS loop instead of here to ensure it's dynamic
+            }
+
             // Special Case: Damage per placement
             if (lowU.includes('+75% damage per placement')) {
                 const totalPlacement = (unit.placement || 1) + (effectiveStats.extraPlacement || 0);
@@ -783,6 +789,32 @@ function calculateDPS(uStats, relicStats, context) {
             let pCrit = p.passiveCrit || 0;
             let pCdmg = p.passiveCdmg || 0;
             let pDot = p.dot || 0;
+
+            if (window.isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother") {
+                const hotbar = window.hotbarState;
+                if (hotbar && hotbar.slots) {
+                    let divinityCount = 0;
+                    hotbar.slots.forEach(slot => {
+                        if (!slot) return;
+                        const sUnit = window.getUnitById(slot.id);
+                        if (!sUnit) return;
+                        if (sUnit.tags && sUnit.tags.includes('Divinity')) {
+                            // Use the unit's actual placement count
+                            let count = sUnit.placement || 1;
+                            
+                            // Water God specific penalty: counts as placements - 1
+                            if (window.isUnit(sUnit.id, 'water_god')) {
+                                count = Math.max(0, count - 1);
+                            }
+                            
+                            divinityCount += count;
+                        }
+                    });
+                    
+                    const maxBuff = (context.upgradeLevel >= 2) ? 90 : 60;
+                    pDmg = Math.min(maxBuff, divinityCount * 15);
+                }
+            }
 
             // SPECIAL: King Sailor Loadout Mode Overrides
             if (window.CALCULATION_MODE === 'loadout' && window.isUnit(uStats.id, 'king_sailor')) {
