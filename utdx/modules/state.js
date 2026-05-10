@@ -1,6 +1,6 @@
 // --- FEATURE FLAGS ---
-const ENABLE_HOTBAR = true;
-const ENABLE_LOADOUT_CLICKABLE = true;
+const ENABLE_HOTBAR = false;
+const ENABLE_LOADOUT_CLICKABLE = false;
 
 // Data & Cache
 let customTraits = [];
