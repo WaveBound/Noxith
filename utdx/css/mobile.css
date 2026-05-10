@@ -23,7 +23,7 @@
     transform: scale(0.9);
 }
 
-/* NEW: Hide FAB when any modal is open */
+/* Hide FAB when any modal is open */
 body.modal-open .mobile-fab {
     display: none !important;
     opacity: 0;
@@ -77,14 +77,83 @@ body.menu-open::after {
 /* MEDIA QUERIES */
 @media (max-width: 768px) {
 
-    /* Page Adjustments */
-    .page {
-        padding: 0 8px 80px 8px;
-        margin-top: 5px;
+    /* --- FIXED TOPBAR FIXES --- */
+    .sticky-toolbar-container.dashboard-topbar {
+        display: flex !important;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: #08080a;
+        height: 60px;
+        /* Increased height for better clearance */
+        justify-content: center;
+        border-bottom: 1px solid var(--card-border);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     }
 
+    .injector-panel {
+        display: flex !important;
+        height: 100%;
+        padding: 0 5px !important;
+        border: none !important;
+        align-items: center;
+        width: 100%;
+    }
+
+    .injector-center {
+        flex: 1 !important;
+        display: flex !important;
+        justify-content: center !important;
+        margin: 0 !important;
+        width: 100%;
+    }
+
+    /* --- PAGINATION WRAPPING FIX --- */
+    .pagination-bar {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        gap: 4px !important;
+        flex-wrap: nowrap !important;
+        /* Prevents "Next" from dropping down */
+        width: 100%;
+        justify-content: center;
+    }
+
+    .pg-numbers {
+        gap: 3px !important;
+    }
+
+    .pg-btn {
+        min-width: 32px !important;
+        /* Slightly smaller for mobile width */
+        height: 34px !important;
+        padding: 0 6px !important;
+        font-size: 0.75rem !important;
+        border-radius: 6px !important;
+    }
+
+    .pg-btn.pg-nav {
+        min-width: 55px !important;
+        /* Ensure Prev/Next fit */
+        font-size: 0.7rem !important;
+    }
+
+    /* --- CONTENT OVERLAP FIX --- */
     .pages-container {
         padding: 0 !important;
+    }
+
+    .page {
+        padding: 15px 8px 120px 8px !important;
+        /* Increased top padding to clear header */
+        margin-top: 0 !important;
+    }
+
+    /* Side search container inside the menu drawer */
+    .sidebar-search-container {
+        display: block !important;
+        margin-top: 10px;
     }
 
     .db-grid,
@@ -102,7 +171,6 @@ body.menu-open::after {
         display: none !important;
     }
 
-    /* Force FAB display on mobile only */
     .mobile-fab {
         display: flex !important;
     }
@@ -110,8 +178,6 @@ body.menu-open::after {
     .mobile-menu-handle {
         display: flex;
     }
-
-
 
     /* Unit Card Mobile Polish */
     .unit-banner {
@@ -147,73 +213,7 @@ body.menu-open::after {
         border-radius: 4px;
     }
 
-    .ut-actions {
-        gap: 4px;
-        flex: 1;
-    }
-
-    .ut-btn-compact {
-        padding: 5px 8px;
-        font-size: 0.72rem;
-        min-height: 28px;
-        border-radius: 6px;
-        background: rgba(255, 255, 255, 0.05);
-    }
-
-    .ut-toggle-area {
-        gap: 8px;
-    }
-
-    .ut-ability-text {
-        font-size: 0.7rem;
-        max-width: 70px;
-    }
-
-    .search-container {
-        padding: 8px 12px;
-        gap: 6px;
-    }
-
-    .search-input {
-        font-size: 0.85rem;
-        padding: 8px 12px;
-    }
-
-    .filter-tab-btn {
-        font-size: 0.72rem;
-        padding: 8px 10px;
-    }
-
-    .upgrade-toolbar {
-        padding: 6px 12px;
-        gap: 4px;
-    }
-
-    .e-pill {
-        height: 22px;
-        font-size: 0.72rem;
-        border-radius: 6px;
-    }
-
-    /* Build Row Mobile Polish */
-    .br-header {
-        padding: 6px 12px;
-    }
-
-    .br-header-info {
-        gap: 6px;
-    }
-
-    .br-set,
-    .br-trait {
-        font-size: 0.75rem !important;
-    }
-
-    .build-dps {
-        font-size: 1.1rem;
-    }
-
-    /* Mobile Toggles */
+    /* Mobile Menu Buttons */
     .nav-toggle-label {
         display: flex;
         justify-content: space-between;

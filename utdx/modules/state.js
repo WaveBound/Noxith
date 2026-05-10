@@ -1,10 +1,6 @@
-// ============================================================================
-// STATE.JS - Global Application State
-// ============================================================================
-
 // --- FEATURE FLAGS ---
-const ENABLE_HOTBAR = false; // Set to true to enable the hotbar, false to hide it
-const ENABLE_LOADOUT_CLICKABLE = false; // Set to false to disable Loadout mode switching
+const ENABLE_HOTBAR = false;
+const ENABLE_LOADOUT_CLICKABLE = false;
 
 // Data & Cache
 let customTraits = [];
@@ -13,7 +9,7 @@ let activeAbilityIds = new Set();
 let cachedResults = {};
 let unitBuildsCache = {};
 
-let inventoryMode = false; // Toggle state for Inventory calculation
+let inventoryMode = false;
 
 let currentCalcUnitId = null;
 
@@ -23,16 +19,31 @@ let renderQueueId = null;
 
 // Pagination State
 let currentPage = 1;
+
+/**
+ * Requirement: Mobile pages should contain 8 characters a page.
+ * Desktop remains dynamic based on screen width.
+ */
 function getUnitsPerPage() {
+    // Check if mobile (matches CSS media query)
+    if (window.innerWidth <= 768) {
+        return 8;
+    }
+
+    // Desktop logic: Calculate based on columns
     const sidebar = 260;
     const padding = 50;
     const gap = 18;
     const availableWidth = (window.innerWidth || 1200) - sidebar - padding;
+
+    // 370 is the min-width of the cards defined in CSS
     const cols = Math.max(1, Math.floor((availableWidth + gap) / (370 + gap)));
+
+    // Returns 2 rows worth of units (e.g., if 3 columns, returns 6)
     return cols * 2;
 }
-let paginatedSortedUnits = []; // Full sorted list, shared across pagination functions
 
+let paginatedSortedUnits = [];
 
 // Inventory
 let relicInventory = [];

@@ -297,8 +297,22 @@
     color: var(--accent-start);
 }
 
-.nav-toggle-label input[type="checkbox"] {
-    display: none;
+/* PAGINATION BUTTON MOBILE Polish */
+@media (max-width: 768px) {
+    .pg-btn {
+        min-width: 42px !important;
+        /* Larger hit area for fingers */
+        height: 38px !important;
+        padding: 0 10px !important;
+        font-size: 0.85rem !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pg-btn.pg-nav {
+        min-width: 50px !important;
+    }
 }
 
 /* UPGRADE PILLS */

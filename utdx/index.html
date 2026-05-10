@@ -48,6 +48,19 @@
             </div>
         </div>
 
+        <!-- NEW: Sidebar Search (Mobile Menu Search) -->
+        <div class="sidebar-search-container mobile-only-block">
+            <div class="sidebar-search-wrapper">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="sidebarSearch" placeholder="Search units..."
+                    oninput="globalFilterUnits(this.value)">
+            </div>
+        </div>
+
         <!-- Primary nav -->
         <div class="nav-bar">
             <button class="nav-btn active"
@@ -64,7 +77,7 @@
                 Stats</button>
         </div>
 
-        <!-- Mobile-Only Controls (Moved from Topbar) -->
+        <!-- Mobile-Only Controls -->
         <div class="sidebar-mobile-controls mobile-only-block">
             <div class="sidebar-divider">Controls</div>
             <button class="nav-btn sidebar-footer-btn"
@@ -117,14 +130,15 @@
                     </label>
 
                     <!-- CALCULATION MODE SELECTOR -->
-                    <div class="mode-selector" style="display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 8px; margin-left: 10px; border: 1px solid rgba(255,255,255,0.05);">
-                        <button id="modeBtnPotential" class="filter-tab-btn active" onclick="toggleCalcMode('potential')"
+                    <div class="mode-selector"
+                        style="display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 8px; margin-left: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                        <button id="modeBtnPotential" class="filter-tab-btn active"
+                            onclick="toggleCalcMode('potential')"
                             style="height: 28px; font-size: 0.7rem; min-width: 80px; margin: 0; padding: 0 10px;">Potential</button>
                         <button id="modeBtnLoadout" class="filter-tab-btn" onclick="toggleCalcMode('loadout')"
                             style="height: 28px; font-size: 0.7rem; min-width: 80px; margin: 0; padding: 0 10px;">Loadout</button>
                     </div>
 
-                    <!-- NEW BUFFS TOGGLE BUTTON -->
                     <button id="globalBuffsToggleBtn" class="filter-tab-btn" onclick="toggleGlobalBuffs(this)"
                         style="height: 34px; margin-left: 8px;">Buffs ▼</button>
                 </div>
@@ -150,7 +164,6 @@
                     </div>
                 </div>
 
-                <!-- NEW BUFFS PANEL (Injected here via JS) -->
                 <div id="globalBuffsPanel" class="global-buffs-panel hidden"></div>
             </div>
 
@@ -197,12 +210,9 @@
         </div>
     </main>
 
-    <!-- ================= MODALS ================= -->
-
-    <!-- 1. THE UNIVERSAL MODAL (Replaces Math, Patch, Compare, SubPrio, Guide) -->
+    <!-- MODALS & OVERLAYS -->
     <div id="universalModal" class="modal-overlay" onclick="closeModal('universalModal')">
         <aside class="modal-side-panel left-panel hidden" onclick="event.stopPropagation()"></aside>
-
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -212,26 +222,18 @@
                     </button>
                     <h2 class="modal-title">TITLE</h2>
                 </div>
-                <div class="header-actions">
-                    <!-- Additional actions could go here -->
-                </div>
             </div>
-            <div class="modal-body">
-                <!-- Content Injected via JS -->
-            </div>
+            <div class="modal-body"></div>
             <div class="modal-footer">
                 <button class="action-btn" onclick="closeModal('universalModal')">Close</button>
             </div>
         </div>
-
         <aside class="modal-side-panel right-panel hidden" onclick="event.stopPropagation()"></aside>
     </div>
 
-    <!-- 2. CALCULATOR MODAL (Kept separate for complex form handling) -->
     <div id="calcModal" class="modal-overlay" onclick="closeModal('calcModal')">
         <div class="modal-box modal-xl" onclick="event.stopPropagation()">
             <div class="calc-unit-header">
-                <!-- Simplified Header: Just Image and Name -->
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <img id="calcUnitImg" src="#" class="calc-avatar">
                     <div class="calc-unit-details">
@@ -241,7 +243,6 @@
                 </div>
             </div>
             <div class="modal-body calc-scroll-bg">
-                <!-- Controls Moved Here -->
                 <div class="calc-global-controls">
                     <div class="calc-stat-group group-wide">
                         <label>Relic Set</label><select id="calcSet" class="c-input w-full"></select>
@@ -268,7 +269,6 @@
                 </div>
 
                 <div class="gear-grid-container">
-                    <!-- Gear Cards (Head/Body/Legs) - Contents managed by JS -->
                     <div class="gear-card">
                         <div class="gear-header"><span class="gear-title">Head Piece</span>
                             <div class="flex-1 flex-between gap-md items-end">
@@ -308,7 +308,6 @@
                                     data-stat="dot" class="sub-val-input" placeholder="0"></div>
                         </div>
                     </div>
-                    <!-- Body & Legs Cards identical structure... -->
                     <div class="gear-card">
                         <div class="gear-header"><span class="gear-title">Body Main</span>
                             <div class="flex-1 flex-between gap-md items-end"><select id="calcBodyMain"
@@ -379,14 +378,12 @@
         </div>
     </div>
 
-    <!-- 3. ADD RELIC MODAL -->
     <div id="addRelicModal" class="modal-overlay" onclick="closeModal('addRelicModal')">
         <div class="modal-box modal-sm" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <h2 class="modal-title">Add Relic</h2>
             </div>
             <div class="modal-body">
-                <!-- Inputs for Add Relic -->
                 <div class="gear-grid-container" style="grid-template-columns: 1fr; padding: 0;">
                     <div class="gear-card">
                         <div class="gear-header">
@@ -439,7 +436,6 @@
         </div>
     </div>
 
-    <!-- 4. GUIDE CONFIG MODAL -->
     <div id="guideConfigModal" class="modal-overlay" onclick="closeModal('guideConfigModal')">
         <div class="modal-box modal-lg" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -462,7 +458,6 @@
         </div>
     </div>
 
-    <!-- 5. CUSTOM PAIR MODAL -->
     <div id="customPairModal" class="modal-overlay" onclick="closeModal('customPairModal')">
         <div class="modal-box modal-lg" onclick="event.stopPropagation()">
             <div class="modal-header cp-header">
@@ -480,10 +475,12 @@
                 <div class="cp-preview-box"><span class="cp-preview-label">Creating Combination:</span><br><b
                         class="cp-preview-val" id="cpPreviewText">Loading...</b></div>
 
-                <div class="config-section mt-4" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+                <div class="config-section mt-4"
+                    style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
                     <div class="config-header cp-section-header">3. Assign To Unit</div>
                     <div class="cp-search-wrapper" style="padding: 0 10px 10px 10px;">
-                        <input type="text" id="cpUnitSearch" placeholder="Search units..." class="search-input" style="width: 100%;" onkeyup="handleCpSearch(this.value)">
+                        <input type="text" id="cpUnitSearch" placeholder="Search units..." class="search-input"
+                            style="width: 100%;" onkeyup="handleCpSearch(this.value)">
                     </div>
                     <div class="config-grid" id="cpUnitGrid"></div>
                 </div>
@@ -495,7 +492,6 @@
         </div>
     </div>
 
-    <!-- 6. FEEDBACK MODAL -->
     <div id="feedbackModal" class="modal-overlay" onclick="closeModal('feedbackModal')">
         <div class="modal-box modal-sm" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -510,7 +506,6 @@
                         </select>
                     </label>
 
-                    <!-- UPDATED DISCORD INPUT -->
                     <label>
                         <div class="mq-label">Discord</div>
                         <input type="text" id="feedbackContact" class="c-input mt-2 w-full"
@@ -530,7 +525,6 @@
         </div>
     </div>
 
-    <!-- 7. MODES OVERLAY (Transparent Fullscreen) -->
     <div id="modesOverlay" class="modes-overlay hidden" onclick="window.closeModesOverlay()">
         <div id="modesOverlayGrid" class="modes-overlay-grid" onclick="event.stopPropagation()"></div>
     </div>
@@ -552,7 +546,6 @@
     <script src="modules/inventory.js"></script>
     <script src="modules/feedback.js"></script>
     <script src="modules/hotbar.js"></script>
-    <!-- Add this line: -->
     <script src="modules/tutorials.js"></script>
     <script src="modules/init.js"></script>
 
