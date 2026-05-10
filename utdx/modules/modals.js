@@ -199,6 +199,29 @@ const openPatchNotes = () => {
     });
 };
 
+window.openComingSoon = () => {
+    if (typeof comingSoonData === 'undefined') return;
+
+    const html = comingSoonData.map(item => `
+        <div class="patch-entry">
+            <div class="patch-header">
+                <span class="patch-tag">${item.type}</span>
+                <span class="patch-version" style="font-size: 0.8rem;">Planned</span>
+            </div>
+            <div style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                <b style="color: var(--accent-light); display: block; margin-bottom: 4px; font-size: 0.95rem;">${item.title}</b>
+                <span style="font-size: 0.85rem; color: #9ca3af; line-height: 1.4;">${item.desc}</span>
+            </div>
+        </div>
+    `).join('');
+
+    showUniversalModal({
+        title: 'COMING SOON',
+        content: `<div class="patch-notes-container">${html}</div>`,
+        size: 'modal-md'
+    });
+};
+
 /**
  * Shows Trait Guide
  */

@@ -155,7 +155,22 @@ const SUB_NAMES = {
     dmg: "Dmg", spa: "SPA", cm: "Crit Dmg", cf: "Crit Rate", dot: "DoT", range: "Range"
 };
 
+const comingSoonData = [
+    { type: "Feature", title: "Relic Database", desc: "A dedicated page showing all relic stats, set bonuses, and specific drop locations/obtainable methods." },
+    { type: "Feature", title: "Mode Differentiation", desc: "Potential Mode will assume maximum possible stats and self-leading buffs. Loadout Mode will require meeting specific positional/team requirements." },
+    { type: "Feature", title: "Team Synergy Dashboard", desc: "Real-time summary of team-wide buffs, total team DPS, debuff contributions, and equipped synergy sets." }
+];
+
 const patchNotesData = [
+    {
+        version: "v5.6",
+        date: "May 09, 2026",
+        changes: [
+            { type: "Math", text: "<b>True Damage:</b> Refactored True Damage from a multiplicative bonus into a <b>percentage-based conversion</b> of total damage." },
+            { type: "Unit", text: "<b>King Sailor:</b> Added +20% Crit Rate to E2 (Etherealization 2) to better reflect in-game scaling." },
+            { type: "Buff", text: "<b>Bulma:</b> Added a dedicated 'Bulma Buff' button (+15% Crit Rate) to the global buffs panel." }
+        ]
+    },
     {
         version: "v5.5",
         date: "May 06, 2026",
