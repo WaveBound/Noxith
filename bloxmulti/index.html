@@ -14,15 +14,15 @@
   <meta name="author" content="BloxMulti" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#9d6fff" />
-  <link rel="canonical" href="https://bloxmulti.app/" />
+
 
   <!-- Open Graph (Facebook, Discord unfurls, etc.) -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://bloxmulti.app/" />
+
   <meta property="og:title" content="BloxMulti — Roblox Multi-Account Manager" />
   <meta property="og:description"
     content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — for Windows." />
-  <meta property="og:image" content="https://bloxmulti.app/og-image.png" />
+  <meta property="og:image" content="og-image.png" />
   <meta property="og:site_name" content="BloxMulti" />
 
   <!-- Twitter Card -->
@@ -30,7 +30,7 @@
   <meta name="twitter:title" content="BloxMulti — Roblox Multi-Account Manager" />
   <meta name="twitter:description"
     content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — for Windows." />
-  <meta name="twitter:image" content="https://bloxmulti.app/og-image.png" />
+  <meta name="twitter:image" content="og-image.png" />
 
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -46,8 +46,7 @@
       "priceCurrency": "USD"
     },
     "description": "BloxMulti is a powerful Windows desktop app for managing multiple Roblox accounts. Launch any game instantly by Place ID, save favorite games, and store private server codes.",
-    "url": "https://bloxmulti.app/",
-    "screenshot": "https://bloxmulti.app/og-image.png"
+    "screenshot": "og-image.png"
   }
   </script>
 
@@ -907,7 +906,7 @@
     </p>
 
     <div class="hero-actions">
-      <a href="https://github.com/WaveBound/BloxMulti/releases/download/v1.0.0/BloxMulti.exe" class="btn-primary">
+      <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-primary">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -1000,6 +999,20 @@
       <div class="stat-text">
         <div class="stat-num"><span>Multi-account</span> launch</div>
         <div class="stat-label">Fire multiple accounts into the same game at once</div>
+      </div>
+    </div>
+    <div class="stat-item animate" style="transition-delay:0.3s">
+      <div class="stat-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+      </div>
+      <div class="stat-text">
+        <div class="stat-num"><span id="stats-downloads">0</span>+ Downloads</div>
+        <div class="stat-label">Join users managing their accounts daily</div>
       </div>
     </div>
   </div>
@@ -1112,7 +1125,7 @@
         <div class="dl-version">v1.0.0</div>
       </div>
 
-      <a href="https://github.com/WaveBound/BloxMulti/releases/download/v1.0.0/BloxMulti.exe" class="btn-primary"
+      <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-primary"
         style="width: 100%;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
           stroke-linecap="round" stroke-linejoin="round">
@@ -1165,6 +1178,14 @@
         });
       }, 1000);
     });
+    // Fetch download count
+    fetch("https://bloxmulti-downloads.wavebound.workers.dev/count", { cache: "no-store" })
+      .then(r => r.text())
+      .then(count => {
+        const el = document.getElementById("stats-downloads");
+        if (el && count) el.innerText = count.trim();
+      })
+      .catch(err => console.error("Failed to fetch download count:", err));
   </script>
 </body>
 
