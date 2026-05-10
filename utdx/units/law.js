@@ -6,7 +6,7 @@ unitDatabase.push({
     placement: 3,
     placementType: "Ground",
     role: "Support",
-    tags: [],
+    tags: ["Piece"],
     meta: {
         short: "Ruler/Sacred",
         long: "Ruler/Sacred",

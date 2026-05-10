@@ -263,14 +263,15 @@ window.getUnitId = function (fileName) {
 /** Checks if a unit matches a filename. Usage: if (isUnit(uStats.id, 'water_god')) */
 window.isUnit = function (currentId, fileName) {
     if (!currentId) return false;
-    return currentId === window.getUnitId(fileName);
+    const baseId = currentId.split('-')[0];
+    return baseId === window.getUnitId(fileName);
 };
 
 /** Checks if a unit matches ANY filename in an array. */
 window.isAnyUnit = function (currentId, fileNamesArray) {
     if (!currentId || !fileNamesArray) return false;
-    const targetId = currentId;
-    return fileNamesArray.some(fName => targetId === window.getUnitId(fName));
+    const baseId = currentId.split('-')[0];
+    return fileNamesArray.some(fName => baseId === window.getUnitId(fName));
 };
 
 /** Gets the permanent JS filename from a dynamic unit ID. Useful for UI mappings. */

@@ -258,7 +258,7 @@ const TutorialSystem = (function () {
         },
         {
             title: "The Best Setup",
-            desc: "This area shows you the absolute best <b>Relic Set</b> and <b>Trait</b> to equip. The badge on the right tells you exactly which <b>Stat Points</b> to level up for this build.",
+            desc: "This area shows you the absolute best <b>Relic Set</b> to equip. The badge on the right tells you exactly which <b>Stat Points</b> to level up for this build.",
             selector: ".unit-card .build-row .br-header",
             position: "bottom",
             padding: 8,

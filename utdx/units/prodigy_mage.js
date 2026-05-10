@@ -5,7 +5,7 @@ unitDatabase.push({
     level: 70,
     placement: 3,
     placementType: "Hill",
-    role: "Support / Hill",
+    role: "Support",
     tags: ["Hero"],
     meta: {
         short: "Fission/Sacred",

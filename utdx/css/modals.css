@@ -2152,3 +2152,32 @@
     font-size: 1.1rem;
     margin-bottom: 6px;
 }
+
+/* --- ENLIGHTENED GOD SPECIFIC OVERRIDES --- */
+.unit-enlightenedgod {
+    gap: 60px !important;
+}
+
+.unit-enlightenedgod .mode-card-large {
+    margin: 0 !important;
+    min-width: 360px;
+}
+
+.unit-enlightenedgod .mode-img-container-large {
+    width: 360px;
+    height: 520px;
+}
+
+.unit-enlightenedgod .mode-card-info {
+    width: 320px;
+    padding: 20px;
+    bottom: 50px;
+}
+
+.unit-ancient_mage {
+    gap: 20px !important;
+}
+
+.unit-ancient_mage .mode-card-large {
+    margin: 0 !important;
+}

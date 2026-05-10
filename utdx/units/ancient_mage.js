@@ -5,7 +5,7 @@ unitDatabase.push({
     level: 70,
     placement: 1,
     placementType: "Ground",
-    role: "Utility / Ground",
+    role: "Utility",
     tags: ["Sage", "Bloodline", "Hero", "Main character"],
     meta: {
         short: "Ruler",
@@ -23,7 +23,6 @@ unitDatabase.push({
         bossDmg: 0,
         dotBuff: 20,     // Specialist focus (+40% DoT)
         trueDmg: 0,        // Specialist focus (+50% True Dmg)
-        support: "Stun, Slow"
     },
 
     upgrades: [
@@ -50,14 +49,14 @@ unitDatabase.push({
             dotBuff: 0, trueDmg: 0, cooldown: 0
         },
         {
-            name: "Specialist",
-            img: "images/units/AncientMage/Specialist.png",
+            name: "Utility",
+            img: "images/units/AncientMage/Utility.png",
             level: 70,
-            desc: "Magic focus: +40% DoT, +50% True Damage. Swaps Wind Shear for Burn (60% DoT over 10s).",
+            desc: "Control focus: Attacks apply Stun (2s) and Heavy Slow (75%). If already stunned: enemies take +20% extra damage.",
             dmg: 6650, spa: 7, range: 45, spaCap: 2,
-            crit: 0, cdmg: 150,
+            crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
             passiveDmg: 0, passiveSpa: 0, bossDmg: 0,
-            dotBuff: 40, trueDmg: 50, cooldown: 0
+            dotBuff: 0, hyper: 0, cooldown: 0
         },
         {
             name: "Support",
@@ -70,19 +69,19 @@ unitDatabase.push({
             dotBuff: 0, trueDmg: 0, cooldown: 0
         },
         {
-            name: "Utility",
-            img: "images/units/AncientMage/Utility.png",
+            name: "Specialist",
+            img: "images/units/AncientMage/Specialist.png",
             level: 70,
-            desc: "Control focus: Attacks apply Stun (2s) and Heavy Slow (75%). If already stunned: enemies take +20% extra damage.",
+            desc: "Magic focus: +40% DoT, +50% True Damage. Swaps Wind Shear for Burn (60% DoT over 10s).",
             dmg: 6650, spa: 7, range: 45, spaCap: 2,
-            crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
+            crit: 0, cdmg: 150,
             passiveDmg: 0, passiveSpa: 0, bossDmg: 0,
-            dotBuff: 0, hyper: 0, cooldown: 0
+            dotBuff: 40, trueDmg: 50, cooldown: 0
         }
     ],
     etherealization: [
         "+10 Stat Points",
-        "Gain +20% DOT effectiveness.",
+        { desc: "Gain +20% DOT effectiveness.", dotBuff: 20 },
         "+10 Stat Points",
         "The Last Great Mage: Stun Immunity is always active.",
         "+10 Stat Points",

@@ -6,7 +6,7 @@ unitDatabase.push({
 placement: 1,
     placementType: "Ground",
     role: "Damage / Support",
-    tags: [],
+    tags: ["Villain"],
     meta: {
         short: "Ruler",
         long: "Ruler",

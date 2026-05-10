@@ -6,7 +6,7 @@ unitDatabase.push({
     level: 100,
     placement: 1,
     placementType: "Ground",
-    role: "Specialist / Ground",
+    role: "Specialist",
     tags: ["Main Character", "Hero", "Leveling"],
 
     // META (Build Guide tab)

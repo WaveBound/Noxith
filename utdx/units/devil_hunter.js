@@ -6,7 +6,7 @@ unitDatabase.push({
     level: 70,
     placement: 3,               // Max units placeable
     placementType: "Ground",    // "Ground", "Hill", or "Hybrid"
-    role: "Dps / Ground",             // Role description shown in UI
+    role: "Dps",             // Role description shown in UI
     tags: [],                   // e.g. ["Reaper", "Bloodline", "Ninjaverse"]
 
     // META (Build Guide tab)

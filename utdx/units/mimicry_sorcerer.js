@@ -6,7 +6,7 @@ unitDatabase.push({
     level: 70,
     placement: 2,
     placementType: "Ground",
-    role: "DPS / Ground",
+    role: "DPS",
     tags: ["Sorcerer", "Hero",],
 
     // META (Build Guide tab)

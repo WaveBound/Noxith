@@ -302,12 +302,29 @@ function openUnitInfo(unitId) {
     let etherealHtml = '';
     if (unit.etherealization) {
         if (Array.isArray(unit.etherealization)) {
-            etherealHtml = unit.etherealization.map((text, idx) => `
+            etherealHtml = unit.etherealization.map((upgrade, idx) => {
+                let text = upgrade;
+                if (typeof upgrade === 'object') {
+                    text = upgrade.desc || "";
+                    const stats = [];
+                    if (upgrade.passiveDmg) stats.push(`+${upgrade.passiveDmg}% Dmg`);
+                    if (upgrade.passiveSpa) stats.push(`+${upgrade.passiveSpa}% SPA`);
+                    if (upgrade.passiveCrit) stats.push(`+${upgrade.passiveCrit}% Crit`);
+                    if (upgrade.passiveCdmg) stats.push(`+${upgrade.passiveCdmg}% CDmg`);
+                    if (upgrade.dotBuff) stats.push(`+${upgrade.dotBuff}% DoT`);
+                    if (upgrade.passiveRange) stats.push(`+${upgrade.passiveRange}% Rng`);
+                    if (upgrade.trueDmg) stats.push(`+${upgrade.trueDmg}% True`);
+                    if (stats.length > 0) {
+                        const statsStr = `(${stats.join(', ')})`;
+                        text = text ? `${text} <span class="text-custom">${statsStr}</span>` : statsStr;
+                    }
+                }
+                return `
                 <li class="info-ethereal-item">
                     <span class="info-ethereal-text">${text}</span>
                     <span class="e-badge">E${idx + 1}</span>
                 </li>
-            `).join('');
+            `;}).join('');
         } else {
             const e = unit.etherealization;
             if (e.dmg) etherealHtml += `<li><span>Damage:</span> <span>+${e.dmg}%</span></li>`;
@@ -506,6 +523,16 @@ function selectUnitMode(unitId, modeIdx) {
         window.unitModesState[unitId] = modeIdx;
     }
     
+    // Clear caches for this unit as stats changed
+    if (window.unitBuildsCache) {
+        delete window.unitBuildsCache[unitId];
+    }
+    
+    // Update the unit card display in the main database
+    if (typeof updateBuildListDisplay === 'function') {
+        updateBuildListDisplay(unitId, true);
+    }
+
     // Update UI in overlay
     if (unitId === 'jinoo_shadow_monarch') {
         renderShadowMonarchSpecialUI(unit, document.getElementById('modesOverlayGrid'), document.getElementById('modesOverlay'));
@@ -519,15 +546,10 @@ function selectUnitMode(unitId, modeIdx) {
             else card.classList.remove('active');
         });
     }
-    
-    // Clear caches for this unit as stats changed
-    if (window.unitBuildsCache) {
-        delete window.unitBuildsCache[unitId];
-    }
-    
-    // Update the unit card display in the main database
-    if (typeof updateBuildListDisplay === 'function') {
-        updateBuildListDisplay(unitId, true);
+
+    // Refresh hotbar stats if this unit is in the hotbar
+    if (typeof window.updateHotbarUI === 'function') {
+        window.updateHotbarUI();
     }
 
     // Auto close after selection ONLY for single-select units
@@ -565,9 +587,46 @@ function renderShadowMonarchSpecialUI(unit, grid, overlay) {
     const activeModes = Array.isArray(state) ? state : [];
     const sysLvl = (window.unitSystemLevels && window.unitSystemLevels[unit.id] !== undefined) ? window.unitSystemLevels[unit.id] : 100;
 
+    let dmgText = "0";
+    let dpsText = "0";
+
+    // 1. Prioritize currently rendered/calculated build for Jinoo (respects active modes)
+    const currentBuild = window.hotbarFilteredBuilds ? window.hotbarFilteredBuilds[unit.id] : null;
+    
+    if (currentBuild) {
+        dmgText = Math.floor(currentBuild.dmgVal || currentBuild.dmg || 0).toLocaleString();
+        dpsText = Math.floor(currentBuild.dps || 0).toLocaleString();
+    } 
+    // 2. Fallback to STATIC_BUILD_DB
+    else if (window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[unit.id] && window.STATIC_BUILD_DB[unit.id]['fixed']) {
+        const buildList = window.STATIC_BUILD_DB[unit.id]['fixed'][0];
+        if (buildList && buildList.length > 0) {
+            dmgText = Math.floor(buildList[0].dmgVal || buildList[0].dmg || 0).toLocaleString();
+            dpsText = Math.floor(buildList[0].dps).toLocaleString();
+        }
+    } else {
+        dmgText = Math.floor(unit.stats.dmg || 0).toLocaleString();
+        dpsText = Math.floor((unit.stats.dmg || 0) / (unit.stats.spa || 1)).toLocaleString();
+    }
+
     const html = `
     <div class="sm-special-ui">
         <img src="images/units/Jinoo/main_ui.png" class="sm-main-bg" alt="Main UI">
+        
+        <div class="sm-side-panel-container">
+            <img src="images/units/Jinoo/Side Panel.png" class="sm-side-panel-bg" alt="Side Panel">
+            <img src="images/units/Jinoo/Jinwo Side Panel.png" class="sm-side-character" alt="Jinwoo">
+            
+            <div class="sm-pill-dmg">
+                <span class="sm-pill-label">DMG:</span>
+                <span class="sm-pill-val">${dmgText}</span>
+            </div>
+            <div class="sm-pill-dps">
+                <span class="sm-pill-label">DPS:</span>
+                <span class="sm-pill-val">${dpsText}</span>
+            </div>
+        </div>
+
         <div class="sm-close-btn" onclick="closeModesOverlay()">
             <img src="images/units/Jinoo/X.png" alt="Close">
         </div>

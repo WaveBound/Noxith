@@ -1,12 +1,12 @@
 unitDatabase.push({
     id: "water_god",
-    name: "Water God",
+    name: "Water God (Primordial)",
     img: "images/units/WaterGod.png",
     level: 70,
     placement: 3,
     placementType: "Ground",
-    role: "Utility Ground",
-    tags: [],
+    role: "Utility",
+    tags: ["Divinity", "Historic Being"],
     meta: {
         short: "Ruler/Sacred",
         long: "Sacred/Fission",

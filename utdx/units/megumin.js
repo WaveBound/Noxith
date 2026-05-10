@@ -6,7 +6,7 @@ unitDatabase.push({
     placement: 1,
     placementType: "Hybrid",
     role: "Damage / Burn(Dot)",
-    tags: [],
+    tags: ["Hero"],
     meta: {
         short: "Ruler",
         long: "Ruler",

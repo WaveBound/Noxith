@@ -1,12 +1,21 @@
 let cpUnitSelection = new Set(['all']);
 let cpT1 = 'ruler';
 let cpT2 = 'none';
+let cpSearchQuery = '';
+
+function handleCpSearch(val) {
+    cpSearchQuery = val.toLowerCase();
+    renderCustomPairUI();
+}
 
 function openCustomPairModal() {
     // Reset to default state
     cpUnitSelection = new Set(['all']);
     cpT1 = 'ruler';
     cpT2 = 'none';
+    cpSearchQuery = '';
+    const searchInput = document.getElementById('cpUnitSearch');
+    if (searchInput) searchInput.value = '';
     renderCustomPairUI();
     toggleModal('customPairModal', true);
 }
@@ -54,6 +63,7 @@ function renderCustomPairUI() {
     let unitsHtml = `<div class="config-item ${isAll ? 'selected' : ''}" onclick="selectCpUnit('all')"><div class="cp-avatar-placeholder">ALL</div><span>All Units</span></div>`;
 
     unitDatabase.forEach(u => {
+        if (cpSearchQuery && !u.name.toLowerCase().includes(cpSearchQuery)) return;
         const isSelected = cpUnitSelection.has(u.id);
         unitsHtml += `<div class="config-item ${isSelected ? 'selected' : ''}" onclick="selectCpUnit('${u.id}')">${getUnitImgHtml(u, '', 'small')}<span>${u.name}</span></div>`;
     });

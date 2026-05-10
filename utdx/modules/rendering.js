@@ -217,7 +217,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const card = document.getElementById('card-' + unitId);
     if (!card) return;
     const unitObj = window.getUnitById(unitId);
-    
+
     // NEW: Always force sync for multi-mode units like Jinoo to ensure 'None' is respected on load
     if (!forceSync && unitObj && unitObj.allowMultipleModes) {
         forceSync = true;
@@ -252,7 +252,15 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         if (inventoryMode && window.STATIC_BUILD_DB) {
             let dbKey = unitId;
             if (activeType === 'abil') dbKey += '_abil';
-            const dbEntry = window.STATIC_BUILD_DB[dbKey] || {};
+            
+            // Try current buffed DB first
+            let dbEntry = window.STATIC_BUILD_DB[dbKey] || {};
+            
+            // FALLBACK: If unit not in current buffed DB (skipped by generator), try baseline DB
+            if (!dbEntry.fixed && window.GLOBAL_STATIC_BUILD_DB_BASE && window.GLOBAL_STATIC_BUILD_DB_BASE[dbKey]) {
+                dbEntry = window.GLOBAL_STATIC_BUILD_DB_BASE[dbKey];
+            }
+
             const modeData = dbEntry[activeMode] || dbEntry[activeMode === 'fixed' ? 'f' : 'b'];
             const perfectBuilds = modeData ? modeData[0] : null;
             if (perfectBuilds && perfectBuilds.length > 0) benchmarkDps = perfectBuilds[0].dps || 0;
@@ -322,7 +330,9 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
         if (typeof reconstructMathData === 'function') {
             try {
-                const fullMath = reconstructMathData(res);
+                const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unitId || s.id.split('-')[0] === unitId.split('-')[0]));
+                const isHotbar = card.parentElement?.id === 'hotbarHiddenRender' || !!card.closest('.team-summary-container') || isInHotbarState;
+                const fullMath = reconstructMathData(res, undefined, { isHotbar: isHotbar });
                 if (fullMath) {
                     res.dps = fullMath.total || fullMath.dps || 0;
                     res.dmgVal = fullMath.dmgVal;
@@ -330,6 +340,8 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     res.range = fullMath.range;
                     res.dot = fullMath.dot;
                     res.dotTotal = fullMath.dotData ? (fullMath.dotData.nativeTotalDmg + (fullMath.dotData.radTotalDmg || 0)) : 0;
+                    res.placement = fullMath.placement;
+                    res.detailedBuffs = fullMath.detailedBuffs;
                     if (!res.subStats) res.subStats = {};
                     res.subStats.finalCf = fullMath.critData ? fullMath.critData.rate : 0;
                     res.subStats.finalCm = fullMath.critData ? fullMath.critData.cdmg : 0;
@@ -393,6 +405,15 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         });
 
         const slice = filtered.slice(0, limit);
+
+        // EXPORT CURRENTLY FILTERED TOP BUILD
+        // This ensures the hotbar stats match exactly what the user sees on the card,
+        // respecting their set/priority filters instead of always picking the absolute best.
+        if (slice.length > 0) {
+            if (!window.hotbarFilteredBuilds) window.hotbarFilteredBuilds = {};
+            window.hotbarFilteredBuilds[unitId] = slice[0];
+        }
+
         return slice.map((r, i) => generateBuildRowHTML(r, i, { totalCost: unitCost, placement: unitPlace, sortMode: sortSelect, unitId, benchmarkDps: benchmarkDps })).join('');
     };
 
@@ -535,7 +556,7 @@ window.getLiveScore = (unit) => {
     const currentTrait = (window.unitTraits && window.unitTraits[unitId]);
     const currentHead = (window.unitHeads && window.unitHeads[unitId]);
     const activeType = (typeof activeAbilityIds !== 'undefined' && activeAbilityIds.has(unitId)) ? 'abil' : 'base';
-    
+
     let dbKey = unitId;
     if (activeType === 'abil' && !unit.allowMultipleModes) dbKey += '_abil';
 
@@ -550,11 +571,11 @@ window.getLiveScore = (unit) => {
     // To ensure UI and sorting perfectly match, we evaluate up to the top 20 builds from the DB
     // to find the true maximum DPS under the current user-selected trait/head configuration.
     const searchLimit = Math.min(20, buildList.length);
-    
+
     for (let i = 0; i < searchLimit; i++) {
         const sourceEntry = buildList[i];
         const scoringEntry = { ...sourceEntry };
-        
+
         // Unpack compact DB format
         if (!scoringEntry.subStats && scoringEntry.ss) scoringEntry.subStats = scoringEntry.ss;
         if (!scoringEntry.mainStats && scoringEntry.ms) scoringEntry.mainStats = scoringEntry.ms;
@@ -592,6 +613,17 @@ window.resortUnitCards = function () {
     renderCurrentPage();
 };
 
+// Re-orders card DOM elements in-place without clearing innerHTML (no flash/scroll reset).
+window.resortUnitCardsInPlace = function () {
+    if (!paginatedSortedUnits || paginatedSortedUnits.length === 0) return;
+    paginatedSortedUnits.sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
+    const container = document.getElementById('dbPage');
+    if (!container) return;
+    paginatedSortedUnits.forEach(entry => {
+        const card = document.getElementById('card-' + entry.unit.id);
+        if (card) container.appendChild(card); // moves existing card to new position
+    });
+};
 
 function renderUnitCard(unit, absoluteIndex) {
     if (window.unitELevels[unit.id] === undefined && unit.upgrades && unit.upgrades.length > 0) {
@@ -773,6 +805,12 @@ function renderCurrentPage() {
     const fragment = document.createDocumentFragment();
 
     pageUnits.forEach((entry, i) => {
+        // If it was in the hidden container, remove it first to avoid ID duplication
+        const existing = document.getElementById('card-' + entry.unit.id);
+        if (existing && existing.parentElement?.id === 'hotbarHiddenRender') {
+            existing.remove();
+        }
+
         const card = renderUnitCard(entry.unit, startIdx + i + 1);
         card.style.setProperty('--stagger-delay', `${i * 50}ms`);
         fragment.appendChild(card);
@@ -781,10 +819,23 @@ function renderCurrentPage() {
     container.appendChild(fragment);
 
     // Add pagination controls
+    const pgHtml = buildPaginationControls(totalUnits, currentPage, totalPages);
+
+    // Top Pagination (Toolbar)
+    const topPg = document.getElementById('topPagination');
+    if (topPg) {
+        topPg.innerHTML = pgHtml;
+        topPg.classList.toggle('hidden', totalPages <= 1);
+    }
+
+    // Bottom Pagination (Optional, user said 'instead of' but keeping a small one for accessibility is often good, 
+    // however I will follow the 'instead of' strictly if it feels better)
+    // For now, let's just use the top one as requested.
     const pgWrapper = document.createElement('div');
-    pgWrapper.className = 'pagination-wrapper';
-    pgWrapper.innerHTML = buildPaginationControls(totalUnits, currentPage, totalPages);
+    pgWrapper.className = 'pagination-wrapper bottom-pagination';
+    pgWrapper.innerHTML = pgHtml;
     container.appendChild(pgWrapper);
+    if (totalPages <= 1) pgWrapper.classList.add('hidden');
 
     // Setup IntersectionObserver for lazy build loading
     if (!window.buildLoadObserver) {
@@ -1014,3 +1065,9 @@ function openTraitBestList(unitId) {
     html += `</tbody></table>`;
     showUniversalModal({ title: `<span class="text-gold">TRAIT LEADERBOARD</span>`, content: html, size: 'modal-lg' });
 }
+
+// Global Exports
+window.processUnitCache = processUnitCache;
+window.renderUnitCard = renderUnitCard;
+window.renderListInternal = renderListInternal;
+window.updateBuildListDisplay = updateBuildListDisplay;

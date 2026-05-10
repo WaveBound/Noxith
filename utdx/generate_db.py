@@ -125,6 +125,8 @@ if (isMainThread) {
         if (combo[2] === '1') parts.push('bijuu');
         if (combo[3] === '1') parts.push('amage');
         if (combo[4] === '1') parts.push('ksailor');
+        if (combo[6] === '1') parts.push('bulma');
+        
         if (combo[5] === 'hill') parts.push('magehill');
         else if (combo[5] === 'ground') parts.push('mageground');
 
@@ -503,8 +505,8 @@ if (isMainThread) {
 
             window.mikuActive = combo[0] === '1'; window.enlightenedGodActive = combo[1] === '1';
             window.bijuuActive = combo[2] === '1'; window.ancientMageActive = combo[3] === '1';
-            window.kingSailorActive = combo[4] === '1'; window.fernHillActive = combo[5] === 'hill';
-            window.fernGroundActive = combo[5] === 'ground';
+            window.kingSailorActive = combo[4] === '1'; window.bulmaActive = combo[6] === '1';
+            window.fernHillActive = combo[5] === 'hill'; window.fernGroundActive = combo[5] === 'ground';
  
             // Assume full modes for Sukuna for DB ranking
             window.unitModesState['the_strongest_in_history'] = [1, 2];
@@ -533,6 +535,16 @@ if (isMainThread) {
             const tasks = [];
             unitDatabase.forEach(u => {
                 if (targetUnits.length === 0 || targetSet.has(u.id)) {
+                    // SMART SKIP: If Fern is the only active location buff and unit doesn't benefit, skip!
+                    const fernState = combo[5];
+                    const uType = (u.placementType || 'Ground').toLowerCase();
+                    const hasGlobalBuffs = combo[0] === '1' || combo[1] === '1' || combo[2] === '1' || combo[3] === '1' || combo[4] === '1' || combo[6] === '1';
+                    
+                    if (!hasGlobalBuffs) {
+                        if (fernState === 'hill' && uType === 'ground') return;
+                        if (fernState === 'ground' && uType === 'hill') return;
+                    }
+
                     tasks.push({ u });
                 }
             });
@@ -631,10 +643,10 @@ class GeneratorApp:
 
     def get_units(self): return self.units
 
-    def start_generation(self, selected_units, threads):
+    def start_generation(self, selected_units, threads, mode='all', buffs=None):
         if self.is_running: return "Already running"
         self.is_running = True
-        threading.Thread(target=self._run_logic, args=(selected_units, threads), daemon=True).start()
+        threading.Thread(target=self._run_logic, args=(selected_units, threads, mode, buffs), daemon=True).start()
         return "Started"
 
     def stop_generation(self):
@@ -648,7 +660,7 @@ class GeneratorApp:
             self.temp_dir = None
             threading.Thread(target=shutil.rmtree, args=(tmp,), kwargs={"ignore_errors": True}, daemon=True).start()
 
-    def _run_logic(self, selected_units, threads):
+    def _run_logic(self, selected_units, threads, mode='all', buffs=None):
         try:
             self.window.evaluate_js("updateStatus('Preparing highly optimized build scripts...')")
             
@@ -670,10 +682,8 @@ class GeneratorApp:
             if os.path.exists(units_dir):
                 for u_file in sorted(os.listdir(units_dir)):
                     if u_file.endswith('.js'):
-                        # Inject the filename into the math engine memory before loading the unit
                         clean_name = u_file.replace('.js', '')
                         combined_js_parts.append(f"global.__currentUnitFile = '{clean_name}';\n")
-                        
                         with open(os.path.join(units_dir, u_file), "r", encoding="utf-8") as f: combined_js_parts.append(f.read() + "\n")
 
             combined_js_parts.append(GENERATOR_SCRIPT)
@@ -681,9 +691,50 @@ class GeneratorApp:
             temp_runner = os.path.join(self.temp_dir, "db_runner.js")
             with open(temp_runner, "w", encoding="utf-8") as f: f.write(combined_js)
 
-            combinations = list(itertools.product(['0', '1'], ['0', '1'], ['0', '1'], ['0', '1'], ['0', '1'], ['none', 'hill', 'ground']))
+            # --- DYNAMIC COMBO GENERATION ---
+            def get_states(b_key, default_vals=['0', '1']):
+                if mode != 'custom' or not buffs: return default_vals
+                cfg = buffs.get(b_key, {'permute': True, 'force': False})
+                if cfg.get('force'): 
+                    return ['1'] if default_vals == ['0', '1'] else ['hill'] # Simplified for Fern example if needed, but Fern is special
+                if cfg.get('permute'): return default_vals
+                return [default_vals[0]] # Return '0' or 'none'
+
+            b_miku = get_states('miku')
+            b_enlightened = get_states('enlightenedgod')
+            b_bijuu = get_states('bijuu')
+            b_amage = get_states('amage')
+            b_ksailor = get_states('ksailor')
+            b_fern = get_states('fern', ['none', 'hill', 'ground'])
+            b_bulma = get_states('bulma')
+
+            all_combos = list(itertools.product(b_miku, b_enlightened, b_bijuu, b_amage, b_ksailor, b_fern, b_bulma))
             db_dir = "databases" if os.path.exists("modules") else os.path.join("utdx", "databases")
             os.makedirs(db_dir, exist_ok=True)
+
+            # Helper for name calculation (same logic as Node)
+            def get_name(c):
+                p = []
+                if c[0] == '1': p.append('miku')
+                if c[1] == '1': p.append('enlightenedgod')
+                if c[2] == '1': p.append('bijuu')
+                if c[3] == '1': p.append('amage')
+                if c[4] == '1': p.append('ksailor')
+                if c[6] == '1': p.append('bulma')
+                if c[5] == 'hill': p.append('magehill')
+                elif c[5] == 'ground': p.append('mageground')
+                return "db_base.js" if not p else "db_" + "_".join(p) + ".js"
+
+            if mode == 'missing':
+                combinations = [c for c in all_combos if not os.path.exists(os.path.join(db_dir, get_name(c)))]
+            else:
+                combinations = all_combos
+
+            if not combinations:
+                self.window.evaluate_js("updateStatus('All databases already exist. Nothing to generate.')")
+                self.window.evaluate_js("updateProgress(100, 'Done')")
+                self.is_running = False
+                return
 
             job_data = {
                 "combinations": combinations,
@@ -794,6 +845,59 @@ HTML = """
                 <input type="number" id="threads" value="8" min="1" max="64">
                 <small style="color: var(--text-dim); font-size: 0.7rem;">Matches your physical CPU cores for max speed</small>
             </div>
+            <div class="control-group">
+                <label>Generation Mode</label>
+                <select id="gen-mode" style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255,255,255,0.1); color: var(--text); padding: 8px; border-radius: 6px; outline: none;" onchange="toggleBuffSelect()">
+                    <option value="all">Generate All Combos</option>
+                    <option value="missing" selected>Missing Files Only (Fastest)</option>
+                    <option value="custom">Custom Buff Selection</option>
+                </select>
+            </div>
+            <div id="buff-selection" style="display: none; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="display: grid; grid-template-columns: 1fr 60px 60px; gap: 10px; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
+                    <span style="font-size: 0.7rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase;">Buff Name</span>
+                    <span style="font-size: 0.6rem; color: var(--accent); font-weight: 700; text-align: center; line-height: 1;">PERMUTE<br>(On/Off)</span>
+                    <span style="font-size: 0.6rem; color: #f472b6; font-weight: 700; text-align: center; line-height: 1;">FORCE<br>(Always On)</span>
+                </div>
+                <div id="buff-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    <!-- Row Template -->
+                    <div class="buff-row" style="display: grid; grid-template-columns: 1fr 60px 60px; gap: 10px; align-items: center;">
+                        <span style="font-size: 0.85rem; color: var(--text);">Miku</span>
+                        <input type="checkbox" data-buff="miku" data-type="permute" checked style="justify-self: center;">
+                        <input type="checkbox" data-buff="miku" data-type="force" style="justify-self: center;">
+                    </div>
+                    <div class="buff-row" style="display: grid; grid-template-columns: 1fr 60px 60px; gap: 10px; align-items: center;">
+                        <span style="font-size: 0.85rem; color: var(--text);">Enlightened God</span>
+                        <input type="checkbox" data-buff="enlightenedgod" data-type="permute" checked style="justify-self: center;">
+                        <input type="checkbox" data-buff="enlightenedgod" data-type="force" style="justify-self: center;">
+                    </div>
+                    <div class="buff-row" style="display: grid; grid-template-columns: 1fr 60px 60px; gap: 10px; align-items: center;">
+                        <span style="font-size: 0.85rem; color: var(--text);">Bijuu</span>
+                        <input type="checkbox" data-buff="bijuu" data-type="permute" checked style="justify-self: center;">
+                        <input type="checkbox" data-buff="bijuu" data-type="force" style="justify-self: center;">
+                    </div>
+                    <div class="buff-row" style="display: grid; grid-template-columns: 1fr 60px 60px; gap: 10px; align-items: center;">
+                        <span style="font-size: 0.85rem; color: var(--text);">Ancient Mage</span>
+                        <input type="checkbox" data-buff="amage" data-type="permute" checked style="justify-self: center;">
+                        <input type="checkbox" data-buff="amage" data-type="force" style="justify-self: center;">
+                    </div>
+                    <div class="buff-row" style="display: grid; grid-template-columns: 1fr 60px 60px; gap: 10px; align-items: center;">
+                        <span style="font-size: 0.85rem; color: var(--text);">King Sailor</span>
+                        <input type="checkbox" data-buff="ksailor" data-type="permute" checked style="justify-self: center;">
+                        <input type="checkbox" data-buff="ksailor" data-type="force" style="justify-self: center;">
+                    </div>
+                    <div class="buff-row" style="display: grid; grid-template-columns: 1fr 60px 60px; gap: 10px; align-items: center;">
+                        <span style="font-size: 0.85rem; color: var(--text);">Bulma</span>
+                        <input type="checkbox" data-buff="bulma" data-type="permute" checked style="justify-self: center;">
+                        <input type="checkbox" data-buff="bulma" data-type="force" style="justify-self: center;">
+                    </div>
+                    <div class="buff-row" style="display: grid; grid-template-columns: 1fr 60px 60px; gap: 10px; align-items: center;">
+                        <span style="font-size: 0.85rem; color: var(--text);">Fern (Hill/Ground)</span>
+                        <input type="checkbox" data-buff="fern" data-type="permute" checked style="justify-self: center;">
+                        <span style="font-size: 0.7rem; color: var(--text-dim); text-align: center;">N/A</span>
+                    </div>
+                </div>
+            </div>
             <div style="margin-top: auto; padding: 15px; background: rgba(56, 189, 248, 0.05); border-radius: 8px;">
                 <span style="font-size: 0.8rem; color: var(--accent);">Tip</span>
                 <p style="font-size: 0.75rem; color: var(--text-dim); margin: 5px 0;">If files exist, only selected units will be recalculated. Others will be merged rapidly.</p>
@@ -827,17 +931,29 @@ HTML = """
             `).join('');
         }
         
+        function toggleBuffSelect() {
+            document.getElementById('buff-selection').style.display = document.getElementById('gen-mode').value === 'custom' ? 'block' : 'none';
+        }
+        
         function toggleUnit(id) { selected.has(id) ? selected.delete(id) : selected.add(id); renderUnits(); }
         function selectAll(val) { val ? units.forEach(u => selected.add(u.id)) : selected.clear(); renderUnits(); }
         
         function start() {
+            const mode = document.getElementById('gen-mode').value;
+            const buffs = {};
+            document.querySelectorAll('#buff-selection input[type="checkbox"]').forEach(i => {
+                const b = i.getAttribute('data-buff');
+                const t = i.getAttribute('data-type');
+                if (!buffs[b]) buffs[b] = { permute: false, force: false };
+                buffs[b][t] = i.checked;
+            });
+
             document.getElementById('overlay').style.display = 'flex';
             document.getElementById('progress-title').innerText = 'Generating Databases...';
             document.getElementById('progress-log').innerText = 'Starting Node.js workers...';
             document.getElementById('stop-gen-btn').style.display = 'block';
             
-            // Send exactly the Threads value
-            pywebview.api.start_generation(Array.from(selected), document.getElementById('threads').value);
+            pywebview.api.start_generation(Array.from(selected), document.getElementById('threads').value, mode, buffs);
         }
 
         function stopGeneration() {

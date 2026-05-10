@@ -19,7 +19,7 @@ window.GLOBAL_BUFF_DATA = {
         id: 'enlightenedgod',
         stateKey: 'enlightenedGodActive',
         name: 'Enlightened God',
-        desc: "Apply Enlightened God's +20% Dmg, -20% SPA, +20% Range Buff",
+        desc: "Buffs allied unit's by 5% Attack, Attack Speed, and Range every 60 seconds. (Cap of 20%)",
         color: '#fbbf24',
         math: (uStats) => ({ dmg: 20, spa: 20, range: 20 }),
         renderLabel: "Active: +20% Dmg, -20% SPA, +20% Range",
@@ -57,20 +57,38 @@ window.GLOBAL_BUFF_DATA = {
         id: 'ksailor',
         stateKey: 'kingSailorActive',
         name: 'King Sailor',
-        desc: "Apply King Sailor Buff: +10% Crit Rate, +20% Crit Damage",
+        desc: "Leader Passive: King's Mark. Only activates if in Slot 1. +10% Crit Rate, +20% Crit Damage. Magi: +50% Dmg/+15% SPA. Uncontrollable: +30% Dmg/+10% SPA. Water: +20% Dmg/+10% SPA.",
         color: '#60a5fa',
-        math: (uStats) => {
+        math: (uStats, context) => {
             // King Sailor buff can't apply to King Sailor itself
             if (window.isUnit(uStats.id, 'king_sailor')) return {};
+
+            // Determine if the buff should be active (Check all sources)
+            const hState = window.hotbarState || (typeof hotbarState !== 'undefined' ? hotbarState : null);
+            const leader = hState?.slots ? hState.slots[0] : null;
+            const isKsLeading = leader && window.isUnit(leader.id, 'king_sailor');
+
+            const hotbarBuffActive = hState?.buffState?.kingSailor || hState?.buffState?.ksailor;
+            const globalActive = window.kingSailorActive;
+            const contextActive = context?.kingSailorActive;
+
+            if (!globalActive && !hotbarBuffActive && !contextActive && !isKsLeading) return {};
+
+            // 1. BASE BUFF (+10% Crit, +20% CDmg)
             let b = { crit: 10, cdmg: 20 };
-            // Specific buff logic based on tags
-            const tags = uStats.tags || [];
-            if (tags.includes('Magi')) { b.dmg = 50; b.spa = 15; }
-            else if (tags.includes('Uncontrollable Power')) { b.dmg = 30; b.spa = 10; }
-            else if (uStats.element === 'Water') { b.dmg = 20; b.spa = 10; }
+
+            // 2. LEADER PASSIVE (Specific Mark Bonuses)
+            // Only applies if King Sailor is in Slot 1 OR in Potential Mode
+            if (isKsLeading || window.CALCULATION_MODE === 'potential') {
+                const tags = uStats.tags || [];
+                if (tags.includes('Magi')) { b.dmg = 50; b.spa = 15; }
+                else if (tags.includes('Uncontrollable Power')) { b.dmg = 30; b.spa = 10; }
+                else if (String(uStats.element).toLowerCase() === 'water') { b.dmg = 20; b.spa = 10; }
+            }
+
             return b;
         },
-        renderLabel: "Active: +10% Crit Rate, +20% Crit Dmg (Plus Mark)",
+        renderLabel: "Mark: +10% Crit, +20% CDmg. Extra for Magi/Uncontrollable/Water.",
         genType: 'boolean'
     },
     mageHill: {
@@ -100,6 +118,16 @@ window.GLOBAL_BUFF_DATA = {
         },
         renderLabel: "Active: +45% Crit Rate",
         genType: 'exclusive:fern'
+    },
+    bulma: {
+        id: 'bulma',
+        stateKey: 'bulmaActive',
+        name: 'Bulma Buff',
+        desc: "Apply Bulma's +15% Crit Rate Buff",
+        color: '#f472b6',
+        math: (uStats) => ({ crit: 15 }),
+        renderLabel: "Active: +15% Crit Rate",
+        genType: 'boolean'
     },
 };
 
@@ -578,6 +606,7 @@ const UNIT_FILES = [
     'alpha_devil.js',
     'mimicry_sorcerer.js',
     'jinoo_shadow_monarch.js',
+    'enlightened_god.js',
 ];
 
 // Resolves after every unit script has loaded (or errored).

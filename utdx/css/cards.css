@@ -1565,6 +1565,63 @@
     pointer-events: none;
 }
 
+.sm-side-panel-container {
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%);
+    margin-top: 25px; /* Offset to account for the top tab */
+    margin-left: 20px;
+    display: inline-block;
+}
+
+.sm-side-panel-bg {
+    display: block;
+    pointer-events: none;
+}
+
+.sm-side-character {
+    position: absolute;
+    top: 30px;
+    left: 9px;
+    pointer-events: none;
+}
+
+.sm-pill-dmg,
+.sm-pill-dps {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.9rem;
+    font-weight: 900;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+}
+
+.sm-pill-dmg {
+    bottom: 76px;
+}
+
+.sm-pill-dps {
+    bottom: 28px;
+}
+
+.sm-pill-label {
+    color: #d8b4fe;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+.sm-pill-val {
+    color: #fff;
+    font-size: 1.05rem;
+}
+
 .sm-cards-row {
     position: absolute;
     display: flex;

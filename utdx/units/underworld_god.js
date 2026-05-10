@@ -5,8 +5,8 @@ unitDatabase.push({
     level: 70,
     placement: 2,
     placementType: "Ground",
-    role: "(Specialist)/Ground",
-    tags: ["Divinity"],
+    role: "Specialist",
+    tags: ["Divinity", "King"],
     meta: {
         short: "Ruler",
         long: "Ruler",

@@ -5,7 +5,7 @@ unitDatabase.push({
     level: 100,
     placement: 2,
     placementType: "Ground",
-    role: "Utility / Ground",
+    role: "Utility",
     tags: ["Magi", "King", "Hero", "Uncontrollable Power"],
     meta: {
         short: "Ruler",
@@ -36,7 +36,7 @@ unitDatabase.push({
     ],
     etherealization: [
         "+10 Stat Points",
-        "\"Baal's Lightning\" Chains up to 7 enemies",
+        { desc: "\"Baal's Lightning\" Chains up to 7 enemies", passiveCrit: 20 },
         "+10 Stat Points",
         "\"Baal's Lightning\" Damage increased to 20%",
         "+10 Stat Points",

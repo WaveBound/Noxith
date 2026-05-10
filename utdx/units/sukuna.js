@@ -20,9 +20,12 @@ unitDatabase.push({
 
     // BASE STATS
     stats: {
-        spaCap: 2, crit: 0, cdmg: 150,             // spaCap = min SPA | cdmg 150 = standard
-        dot: 0, dotDuration: 0, dotStacks: 1,       // dot = % per tick | duration = # of ticks
-        element: "Dark", passiveDmg: 0, passiveSpa: 0, // "Fire","Ice","Water","Dark","Light","Rose","Wind"
+        spaCap: 2, crit: 0, cdmg: 150,
+        dot: 0, dotDuration: 0, dotStacks: 1,
+        element: "Dark", passiveDmg: 0, passiveSpa: 0,
+        hasRadiation: true, radiationPct: 15, radiationDuration: 6,
+        slowPct: 20, slowDuration: 10,
+        stunDuration: 3,
         customFollowUp: {
             chance: 70,
             dmgMult: 1.0,

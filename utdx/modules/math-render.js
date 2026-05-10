@@ -35,9 +35,13 @@ function renderOverviewSection(data) {
                 <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">UNIT TYPE</span>
                 <b class="text-custom" style="font-size: 0.7rem;">${data.baseStats.placementType || 'Ground'}</b>
             </div>
-            <div class="math-row">
+            <div class="math-row" style="margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px;">
                 <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">FINAL RANGE</span>
                 <b class="math-val-range" style="font-size: 0.8rem;">${fmt.fix(data.range, 1)}</b>
+            </div>
+            <div class="math-row">
+                <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">TRUE DAMAGE</span>
+                <b class="text-accent-start" style="font-size: 0.8rem;">${(data.trueDmgPct || 0).toFixed(0)}%</b>
             </div>
         </div>`;
 }
@@ -153,6 +157,7 @@ function renderSourceTotalsSection(data) {
                     ${setPerkTotal > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Set Perks</span><span class="text-white">${fmt.pct(setPerkTotal)}</span></div>` : ''}
                     ${accessoryPerkTotal > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Accessory Perks</span><span class="text-white">${fmt.pct(accessoryPerkTotal)}</span></div>` : ''}
                     ${tagDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #f472b6; font-weight: 700;"><span>Tag Bonuses</span><span>${fmt.pct(tagDmg)}</span></div>` : ''}
+                    ${data.totalSetStats.set === 'sorcerer_hunter' ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #60a5fa; font-weight: 700;"><span>Sorcerer Hunter</span><span>+15% True Dmg</span></div>` : ''}
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 0.65rem; color: #777; border-top: 1px solid rgba(244, 114, 182, 0.1); padding-top: 4px;">
                     <div style="display:flex; justify-content:space-between;"><span>SPA</span><b class="text-white">-${gearSpa.toFixed(1)}%</b></div>
@@ -193,6 +198,7 @@ function renderSourceTotalsSection(data) {
                                 let html = '';
                                 data.detailedBuffs.passiveBreakdown.forEach(p => {
                                     if (p.dmg > 0) html += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>${p.name}</span><span class="text-white">${fmt.pct(p.dmg)}</span></div>`;
+                                    if (p.trueDmg > 0) html += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #60a5fa;"><span>${p.name} (True)</span><span>+${p.trueDmg}%</span></div>`;
                                 });
                                 const namedDmg = data.detailedBuffs.passiveBreakdown.reduce((sum, p) => sum + (p.dmg || 0), 0);
                                 const eternalSub = (data.traitObj && data.traitObj.isEternal) ? (Math.min(data.wave || 12, 12) * 5) : 0;
@@ -223,10 +229,10 @@ function renderSourceTotalsSection(data) {
 function renderActiveBuffsSection(data) {
     const buffs = [];
 
-    // 1. Automatically fetch active Global Buffs
-    if (window.GLOBAL_BUFF_DATA) {
+    // 1. Automatically fetch active Global Buffs from the snapshot data
+    if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
         Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
-            if (window[buff.stateKey]) {
+            if (data.activeGlobalBuffs[buff.id]) {
                 buffs.push({
                     name: buff.name,
                     desc: buff.renderLabel,
@@ -258,19 +264,14 @@ function renderActiveBuffsSection(data) {
             
             // Use breakdown stats if available, otherwise fallback to static passive definition
             const d = pb || p;
-            const dmg = pb ? pb.dmg : (p.passiveDmg || 0);
-            const spa = pb ? pb.spa : (p.passiveSpa || 0);
-            const range = pb ? pb.range : (p.passiveRange || 0);
-            const crit = pb ? pb.crit : (p.passiveCrit || 0);
-            const cdmg = pb ? pb.cdmg : (p.passiveCdmg || 0);
-            const dot = pb ? pb.dot : (p.dot || 0);
-
-            if (dmg) stats.push(`+${dmg}% Dmg`);
-            if (spa) stats.push(`${spa > 0 ? '-' : '+'}${Math.abs(spa)}% Spa`);
-            if (range) stats.push(`+${range}% Rng`);
-            if (crit) stats.push(`+${crit}% Crit`);
-            if (cdmg) stats.push(`+${cdmg}% CDmg`);
-            if (dot) stats.push(`+${dot}% DoT`);
+            if (pb) {
+                if (pb.dmg) stats.push(`+${pb.dmg}% Dmg`);
+                if (pb.spa) stats.push(`${pb.spa > 0 ? '-' : '+'}${Math.abs(pb.spa)}% Spa`);
+                if (pb.range) stats.push(`+${pb.range}% Rng`);
+                if (pb.crit) stats.push(`+${pb.crit}% Crit`);
+                if (pb.cdmg) stats.push(`+${pb.cdmg}% CDmg`);
+                if (pb.dot) stats.push(`+${pb.dot}% DoT`);
+            }
             
             let desc = p.desc;
             if (stats.length > 0) desc = `<b class="text-accent-start">[Applied: ${stats.join(', ')}]</b> ` + desc;
@@ -1014,15 +1015,19 @@ function renderAttackRateSection(data) {
 
 function renderFinalSection(data) {
     const hitLabel = data.placement > 1 ? `Hit DPS (x${data.placement} Units)` : `Hit DPS`;
-    const hitFormula = data.placement > 1 ? `<span class="op">×</span>${data.placement}` : ``;
+    const singleHit = data.hit / (data.placement || 1);
+    const hitFormula = data.placement > 1 ? `${fmt.num(singleHit)} <span class="op">×</span> ${data.placement}` : ``;
     const isNutaru = window.isUnit(data.baseStats.id, 'nutaru_beast');
 
     return `
             <div class="dd-section border-l-gold">
                 <div class="dd-title text-gold">Final Synthesis</div>
                 <table class="calc-table">
-                    <tr><td class="mt-cell-label">${hitLabel}</td><td class="mt-cell-formula">${hitFormula}</td><td class="mt-cell-val calc-highlight">${fmt.num(data.trueDmgMult > 1 ? data.baseHitDps : data.hit)}</td></tr>
-                    ${data.trueDmgMult > 1 ? `<tr><td class="mt-cell-label text-accent-start">True Damage Bonus</td><td class="mt-cell-formula"><span class="op">×</span>${data.trueDmgMult.toFixed(2)}</td><td class="mt-cell-val text-accent-start">${fmt.num(data.hit)}</td></tr>` : ''}
+                    <tr><td class="mt-cell-label">${hitLabel}</td><td class="mt-cell-formula">${hitFormula}</td><td class="mt-cell-val calc-highlight">${fmt.num(data.hit)}</td></tr>
+                    ${data.trueDmgPct > 0 ? `
+                        <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Normal Damage (${Math.max(0, 100 - data.trueDmgPct).toFixed(0)}%)</td><td class="mt-cell-formula"></td><td class="mt-cell-val opacity-70">${fmt.num(data.normalDmgVal)}</td></tr>
+                        <tr><td class="mt-cell-label mt-pl-md text-accent-start">↳ True Damage (${data.trueDmgPct.toFixed(0)}%)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-start">${fmt.num(data.trueDmgVal)}</td></tr>
+                    ` : ''}
                     ${data.dot > 0 ? `<tr><td class="mt-cell-label">DoT DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-end">${fmt.num(data.dot)}</td></tr>` : ''}
                     ${data.summon > 0 ? `<tr><td class="mt-cell-label">${isNutaru ? 'Clone' : (data.summonData?.isCustom ? 'Custom Summon' : 'Plane')} DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-start">${fmt.num(data.summon)}</td></tr>` : ''}
                     <tr>

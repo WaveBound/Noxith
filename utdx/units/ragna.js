@@ -5,7 +5,7 @@ unitDatabase.push({
     level: 70,
     placement: 1,
     placementType: "Ground",
-    role: "Burst / Hybrid",
+    role: "Burst",
     tags: [],
     meta: {
         short: "Ruler",

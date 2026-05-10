@@ -113,13 +113,26 @@
                         <div class="mobile-switch-visual"></div>
                     </label>
 
+                    <!-- CALCULATION MODE SELECTOR -->
+                    <div class="mode-selector" style="display: flex; gap: 4px; background: rgba(0,0,0,0.2); padding: 3px; border-radius: 8px; margin-left: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                        <button id="modeBtnPotential" class="filter-tab-btn active" onclick="toggleCalcMode('potential')"
+                            style="height: 28px; font-size: 0.7rem; min-width: 80px; margin: 0; padding: 0 10px;">Potential</button>
+                        <button id="modeBtnLoadout" class="filter-tab-btn" onclick="toggleCalcMode('loadout')"
+                            style="height: 28px; font-size: 0.7rem; min-width: 80px; margin: 0; padding: 0 10px;">Loadout</button>
+                    </div>
+
                     <!-- NEW BUFFS TOGGLE BUTTON -->
                     <button id="globalBuffsToggleBtn" class="filter-tab-btn" onclick="toggleGlobalBuffs(this)"
-                        style="height: 34px; margin-left: 5px;">Buffs ▼</button>
+                        style="height: 34px; margin-left: 8px;">Buffs ▼</button>
                 </div>
 
-                <!-- Center controls -->
+                <!-- Center controls (Pagination) -->
                 <div class="injector-center">
+                    <div id="topPagination" class="top-pagination-container"></div>
+                </div>
+
+                <!-- Right side controls (Search) -->
+                <div class="injector-right">
                     <div class="global-search-container">
                         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
@@ -454,19 +467,23 @@
             </div>
             <div class="modal-body">
                 <div class="config-section">
-                    <div class="config-header cp-section-header">1. Assign To Unit</div>
-                    <div class="config-grid" id="cpUnitGrid"></div>
-                </div>
-                <div class="config-section mt-4">
-                    <div class="config-header cp-section-header">2. Select First Trait</div>
+                    <div class="config-header cp-section-header">1. Select First Trait</div>
                     <div class="config-chips" id="cpTrait1List"></div>
                 </div>
                 <div class="config-section mt-4">
-                    <div class="config-header cp-section-header">3. Select Second Trait</div>
+                    <div class="config-header cp-section-header">2. Select Second Trait</div>
                     <div class="config-chips" id="cpTrait2List"></div>
                 </div>
                 <div class="cp-preview-box"><span class="cp-preview-label">Creating Combination:</span><br><b
                         class="cp-preview-val" id="cpPreviewText">Loading...</b></div>
+
+                <div class="config-section mt-4" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+                    <div class="config-header cp-section-header">3. Assign To Unit</div>
+                    <div class="cp-search-wrapper" style="padding: 0 10px 10px 10px;">
+                        <input type="text" id="cpUnitSearch" placeholder="Search units..." class="search-input" style="width: 100%;" onkeyup="handleCpSearch(this.value)">
+                    </div>
+                    <div class="config-grid" id="cpUnitGrid"></div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="action-btn secondary" onclick="closeModal('customPairModal')">Cancel</button>

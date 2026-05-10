@@ -518,6 +518,7 @@ body.header-collapsed .header-toggle-btn {
     gap: 10px;
     flex-wrap: wrap;
     flex: 1;
+    justify-content: flex-start;
 }
 
 .injector-center {
@@ -527,6 +528,58 @@ body.header-collapsed .header-toggle-btn {
     gap: 8px;
     position: relative;
     z-index: 60;
+    flex: 1;
+    justify-content: center;
+}
+
+.injector-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    flex: 1;
+}
+
+.top-pagination-container .pagination-bar {
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    gap: 6px;
+    height: 34px;
+}
+
+.top-pagination-container .pg-btn {
+    height: 32px;
+    min-width: 32px;
+    font-size: 0.75rem;
+    padding: 0 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.top-pagination-container .pg-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.top-pagination-container .pg-btn.pg-active {
+    background: var(--accent-start);
+    border-color: var(--accent-start);
+    color: white;
+}
+
+.top-pagination-container .pg-nav {
+    font-weight: 700;
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.2);
+    color: var(--accent-start);
+}
+
+.top-pagination-container .pg-info {
+    display: none;
 }
 
 .global-buffs-panel {
@@ -692,7 +745,7 @@ input:checked+.mini-switch::after {
 
 .pages-container {
     width: 100%;
-    padding: 20px 20px 20px 20px;
+    padding: 20px 20px 350px 20px;
     box-sizing: border-box;
 }
 
@@ -913,18 +966,25 @@ input:checked+.mini-switch::after {
         padding: 6px 10px;
         gap: 4px;
     }
+
     .pg-btn {
         padding: 5px 8px;
         font-size: 0.75rem;
         min-width: 30px;
     }
+
     .pg-btn.pg-nav {
         padding: 5px 10px;
     }
+
     .pg-info {
         width: 100%;
         text-align: center;
         margin-left: 0;
         margin-top: 4px;
     }
+}
+
+.bottom-pagination {
+    display: none;
 }

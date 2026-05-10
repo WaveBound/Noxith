@@ -2,69 +2,174 @@
 // UI-HELPERS.JS - UI Interaction, Global State & Toggle Functions
 // ============================================================================
 
-// --- 1. GLOBAL BUFF SYSTEM CONFIGURATION ---
-// Initialize global buff states dynamically from data.js
+// --- 1. DUAL BUFF CONTEXT SYSTEM ---
+// Two fully independent buff states — global panel and hotbar panel never share state.
+window.GLOBAL_BUFF_STATE = {}; // { configKey: bool } — drives non-hotbar unit cards
+window.HOTBAR_BUFF_STATE  = {}; // { configKey: bool } — drives hotbar unit cards only
+window.CALCULATION_MODE   = 'potential'; // 'loadout' or 'potential' (Potential is default)
+
 if (window.GLOBAL_BUFF_DATA) {
-    Object.values(window.GLOBAL_BUFF_DATA).forEach(config => {
-        window[config.stateKey] = false;
+    Object.entries(window.GLOBAL_BUFF_DATA).forEach(([key, config]) => {
+        window.GLOBAL_BUFF_STATE[key] = false;
+        window.HOTBAR_BUFF_STATE[key]  = false;
+        window[config.stateKey] = false; // backward-compat for calculations.js
     });
 }
 
-// Automated DB Filename generator based on active buffs
-window.getActiveDbFilename = () => {
+window.toggleCalcMode = function (mode) {
+    if (mode === 'loadout' && typeof ENABLE_LOADOUT_CLICKABLE !== 'undefined' && !ENABLE_LOADOUT_CLICKABLE) {
+        if (typeof showToast === 'function') showToast("Loadout Mode is currently disabled.");
+        return;
+    }
+    if (window.CALCULATION_MODE === mode) return;
+    window.CALCULATION_MODE = mode;
+    
+    // Update button states
+    const pBtn = document.getElementById('modeBtnPotential');
+    const lBtn = document.getElementById('modeBtnLoadout');
+    
+    if (pBtn && lBtn) {
+        pBtn.classList.toggle('active', mode === 'potential');
+        lBtn.classList.toggle('active', mode === 'loadout');
+    }
+
+    // Clear caches and re-render everything
+    window.resetCachesForBuffChange();
+    if (typeof window.resetAndRender === 'function') window.resetAndRender();
+    if (typeof window.updateHotbarUI === 'function') window.updateHotbarUI();
+};
+
+// Apply a buff state map to the window globals that calculations.js reads.
+// Always call this before rendering unit cards, then restore when done.
+window.applyBuffContext = (buffState) => {
+    if (!window.GLOBAL_BUFF_DATA) return;
+    Object.entries(window.GLOBAL_BUFF_DATA).forEach(([key, config]) => {
+        window[config.stateKey] = buffState[key] === true;
+    });
+};
+
+// Compute DB filename for any given buff state map.
+window.getDbFilenameForState = (buffState) => {
     const parts = [];
     if (window.GLOBAL_BUFF_DATA) {
-        Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
-            if (window[buff.stateKey]) {
-                parts.push(buff.id);
-            }
+        Object.entries(window.GLOBAL_BUFF_DATA).forEach(([key, config]) => {
+            if (buffState[key]) parts.push(config.id);
         });
     }
     return parts.length === 0 ? 'db_base.js' : 'db_' + parts.join('_') + '.js';
 };
 
-window.currentLoadedDb = 'db_base.js';
+// ── GLOBAL DB loader ──────────────────────────────────────────────────────────
+window.GLOBAL_STATIC_BUILD_DB = null;
+window.globalCurrentDb = 'db_base.js';
 
-window.loadDatabaseForCurrentBuffs = (callback) => {
-    const dbName = window.getActiveDbFilename();
-    if (window.currentLoadedDb === dbName) return callback && callback();
-
-    const scriptId = 'dynamic-db-script';
-    const oldScript = document.getElementById(scriptId);
-    if (oldScript) oldScript.remove();
-
+window.loadGlobalDb = (callback) => {
+    const dbName = window.getDbFilenameForState(window.GLOBAL_BUFF_STATE);
+    if (window.globalCurrentDb === dbName && window.GLOBAL_STATIC_BUILD_DB) {
+        return callback && callback();
+    }
+    const old = document.getElementById('dynamic-db-script-global');
+    if (old) old.remove();
     const script = document.createElement('script');
-    script.id = scriptId;
+    script.id = 'dynamic-db-script-global';
     script.src = 'databases/' + dbName;
-    script.onload = () => { window.currentLoadedDb = dbName; if (callback) callback(); };
-    script.onerror = () => { console.error("Failed to load database: " + dbName); if (callback) callback(); };
+    script.onload = () => {
+        window.GLOBAL_STATIC_BUILD_DB = window.STATIC_BUILD_DB;
+        if (dbName === 'db_base.js') window.GLOBAL_STATIC_BUILD_DB_BASE = window.STATIC_BUILD_DB;
+        window.globalCurrentDb = dbName;
+        if (callback) callback();
+    };
+    script.onerror = () => { console.error('Failed to load global DB: ' + dbName); if (callback) callback(); };
     document.head.appendChild(script);
 };
 
-// --- 2. GLOBAL BUFF LOGIC MANAGERS ---
+// ── HOTBAR DB loader ──────────────────────────────────────────────────────────
+window.HOTBAR_STATIC_BUILD_DB = null;
+window.hotbarCurrentDb = 'db_base.js';
+
+window.loadHotbarDb = (callback) => {
+    const dbName = window.getDbFilenameForState(window.HOTBAR_BUFF_STATE);
+    if (window.hotbarCurrentDb === dbName && window.HOTBAR_STATIC_BUILD_DB) {
+        return callback && callback();
+    }
+    const old = document.getElementById('dynamic-db-script-hotbar');
+    if (old) old.remove();
+    const script = document.createElement('script');
+    script.id = 'dynamic-db-script-hotbar';
+    script.src = 'databases/' + dbName;
+    script.onload = () => {
+        window.HOTBAR_STATIC_BUILD_DB = window.STATIC_BUILD_DB;
+        // Restore STATIC_BUILD_DB to global so other code keeps using it
+        if (window.GLOBAL_STATIC_BUILD_DB) window.STATIC_BUILD_DB = window.GLOBAL_STATIC_BUILD_DB;
+        window.hotbarCurrentDb = dbName;
+        if (callback) callback();
+    };
+    script.onerror = () => { console.error('Failed to load hotbar DB: ' + dbName); if (callback) callback(); };
+    document.head.appendChild(script);
+};
+
+
+// --- 2. BUFF LOGIC MANAGERS ---
 window.visibleUnitIds = new Set();
 window.isBuffUpdateRunning = false;
 let buffUpdateTimer = null;
 
-window.resetCachesForBuffChange = () => {
-    window.unitBuildsCache = {};
-    window.cachedResults = {};
+// Reset build caches. excludeIds: array of unit IDs to skip (e.g. hotbar units during global reset).
+window.resetCachesForBuffChange = (unitId, excludeIds = []) => {
+    if (unitId) {
+        if (window.unitBuildsCache?.[unitId]) delete window.unitBuildsCache[unitId];
+        if (window.cachedResults?.[unitId])   delete window.cachedResults[unitId];
+        if (window.hotbarFilteredBuilds?.[unitId]) delete window.hotbarFilteredBuilds[unitId];
+    } else {
+        // Full reset — but never touch excluded (hotbar) unit IDs
+        if (excludeIds.length === 0) {
+            window.unitBuildsCache = {};
+            window.cachedResults   = {};
+            window.hotbarFilteredBuilds = {};
+        } else {
+            const excl = new Set(excludeIds);
+            [window.unitBuildsCache, window.cachedResults, window.hotbarFilteredBuilds].forEach(cache => {
+                if (cache) Object.keys(cache).forEach(k => { if (!excl.has(k)) delete cache[k]; });
+            });
+        }
+    }
 };
 
-window.triggerGlobalBuffUpdate = () => {
+// Global buff update — only touches non-hotbar unit cards.
+window.triggerGlobalBuffUpdate = (unitId) => {
+    if (typeof unitId === 'object') unitId = null;
+
+    // Snapshot hotbar IDs so we can exclude them from cache resets and re-renders
+    const hotbarIds = [];
+    if (typeof window.getHotbarState === 'function') {
+        const hs = window.getHotbarState();
+        if (hs?.slots) hs.slots.forEach(s => { if (s?.id) hotbarIds.push(s.id); });
+    }
+    // Also exclude active fusions (synchros) as they use hotbar buff context
+    if (typeof window.getActiveFusions === 'function') {
+        const fusions = window.getActiveFusions();
+        fusions.forEach(f => { if (f?.id) hotbarIds.push(f.id); });
+    }
+
     if (buffUpdateTimer) clearTimeout(buffUpdateTimer);
     buffUpdateTimer = setTimeout(() => {
-        window.loadDatabaseForCurrentBuffs(() => {
-            window.resetCachesForBuffChange();
-            // Re-render full database to cleanly resort by DPS ranking with buffs
-            if (typeof renderDatabase === 'function') {
-                renderDatabase();
-            } else if (typeof updateAllUnitsBuilds === 'function') {
-                window.updateAllUnitsBuilds();
-            }
+        // Ensure calculations run with global buff context
+        window.applyBuffContext(window.GLOBAL_BUFF_STATE);
+        window.loadGlobalDb(() => {
+            window.resetCachesForBuffChange(unitId, hotbarIds);
 
-            const guidesPage = document.getElementById('guidesPage');
-            if (guidesPage && guidesPage.classList.contains('active') && typeof renderGuides === 'function') renderGuides();
+            if (unitId) {
+                if (!hotbarIds.includes(unitId) && typeof updateBuildListDisplay === 'function') {
+                    updateBuildListDisplay(unitId);
+                }
+            } else {
+                if (typeof window.resortUnitCardsInPlace === 'function') window.resortUnitCardsInPlace();
+                if (typeof updateAllUnitsBuilds === 'function') window.updateAllUnitsBuilds(hotbarIds);
+                if (typeof updateHotbarUI === 'function') updateHotbarUI();
+
+                const guidesPage = document.getElementById('guidesPage');
+                if (guidesPage?.classList.contains('active') && typeof renderGuides === 'function') renderGuides();
+            }
         });
     }, 50);
 };
@@ -74,41 +179,47 @@ function updateBuffVisuals(label, isChecked, color) {
     label.classList.toggle('is-checked', isChecked);
     const span = label.querySelector('span');
     if (span) {
-        span.style.color = isChecked ? color : '';
+        span.style.color      = isChecked ? color : '';
         span.style.textShadow = isChecked ? `0 0 10px ${color}` : '';
         span.style.fontWeight = isChecked ? 'bold' : '';
     }
 }
 
-// Master Toggle Handler for all buffs
-window.handleBuffToggle = function (configKey, checkbox) {
+// Master toggle handler for global buffs ONLY — never touches hotbar state.
+window.handleBuffToggle = function (configKey, checkbox, unitId) {
     const config = window.GLOBAL_BUFF_DATA[configKey];
     if (!config) return;
 
     const isChecked = checkbox.checked;
-    if (window[config.stateKey] === isChecked) return;
+    if (window.GLOBAL_BUFF_STATE[configKey] === isChecked) return;
 
-    window[config.stateKey] = isChecked;
+    window.GLOBAL_BUFF_STATE[configKey] = isChecked;
 
-    // Handle mutually exclusive buffs automatically
+    // Handle mutually exclusive buffs (e.g. mageHill <-> mageGround)
     if (isChecked && config.excludes) {
         const exclConfig = window.GLOBAL_BUFF_DATA[config.excludes];
         if (exclConfig) {
-            window[exclConfig.stateKey] = false;
-            document.querySelectorAll(`input[data-buff="${config.excludes}"]`).forEach(cb => {
-                cb.checked = false;
-                updateBuffVisuals(cb.closest('.nav-toggle-label'), false, exclConfig.color);
-            });
+            window.GLOBAL_BUFF_STATE[config.excludes] = false;
+            const panel = document.getElementById('globalBuffsPanel');
+            if (panel) {
+                panel.querySelectorAll(`input[data-buff="${config.excludes}"]`).forEach(cb => {
+                    cb.checked = false;
+                    updateBuffVisuals(cb.closest('.nav-toggle-label'), false, exclConfig.color);
+                });
+            }
         }
     }
 
-    // Sync all related checkbox UI inputs (e.g., hotbar vs sidebar)
-    document.querySelectorAll(`input[data-buff="${configKey}"]`).forEach(cb => {
-        cb.checked = isChecked;
-        updateBuffVisuals(cb.closest('.nav-toggle-label'), isChecked, config.color);
-    });
+    // Sync within global panel only
+    const panel = document.getElementById('globalBuffsPanel');
+    if (panel) {
+        panel.querySelectorAll(`input[data-buff="${configKey}"]`).forEach(cb => {
+            cb.checked = isChecked;
+            updateBuffVisuals(cb.closest('.nav-toggle-label'), isChecked, config.color);
+        });
+    }
 
-    window.triggerGlobalBuffUpdate();
+    window.triggerGlobalBuffUpdate(unitId);
 };
 
 
@@ -187,7 +298,13 @@ window.selectELevel = function (unitId, level) {
 window.filterList = function (element) {
     const card = element.closest('.unit-card');
     if (card && typeof updateBuildListDisplay === 'function') {
-        updateBuildListDisplay(card.id.replace('card-', ''));
+        const unitId = card.id.replace('card-', '');
+        updateBuildListDisplay(unitId);
+        
+        // Refresh hotbar so it updates if this unit is equipped
+        if (typeof window.updateHotbarUI === 'function') {
+            window.updateHotbarUI();
+        }
     }
 };
 
@@ -244,6 +361,8 @@ window.toggleAbility = function (unitId, checkbox) {
         activeAbilityIds.delete(unitId);
     }
     if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(unitId);
+    // Refresh hotbar stats if this unit is in the hotbar
+    if (typeof window.updateHotbarUI === 'function') window.updateHotbarUI();
 };
 
 window.toggleInventoryMode = (checkbox) => {
@@ -266,10 +385,10 @@ window.toggleInventoryMode = (checkbox) => {
 
 // --- 6. PAGE HELPERS & LISTENERS ---
 let activeBuildUpdateFrame = null;
-window.updateAllUnitsBuilds = function () {
+window.updateAllUnitsBuilds = function (excludeIds = []) {
     if (activeBuildUpdateFrame) cancelAnimationFrame(activeBuildUpdateFrame);
 
-    const queue = Array.from(window.visibleUnitIds);
+    const queue = Array.from(window.visibleUnitIds).filter(id => !excludeIds.includes(id));
     document.querySelectorAll('.unit-card.lazy-build-load').forEach(card => {
         card.querySelectorAll('.top-builds-list').forEach(c => c.innerHTML = '');
     });
@@ -287,6 +406,9 @@ window.updateAllUnitsBuilds = function () {
         }
         activeBuildUpdateFrame = null;
         window.isBuffUpdateRunning = false;
+        
+        // Final hotbar sync once all card re-sorting and hydration is complete
+        if (typeof updateHotbarUI === 'function') updateHotbarUI();
     }
     activeBuildUpdateFrame = requestAnimationFrame(processBatch);
 };

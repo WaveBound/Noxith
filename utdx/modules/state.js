@@ -4,6 +4,7 @@
 
 // --- FEATURE FLAGS ---
 const ENABLE_HOTBAR = false; // Set to true to enable the hotbar, false to hide it
+const ENABLE_LOADOUT_CLICKABLE = false; // Set to false to disable Loadout mode switching
 
 // Data & Cache
 let customTraits = [];

@@ -5,7 +5,7 @@ unitDatabase.push({
     level: 70,
     placement: 2,
     placementType: "Ground",
-    role: "DPS / Ground",
+    role: "DPS",
     tags: ["Leveling", "King"],
     meta: {
         short: "Ruler",
@@ -21,7 +21,9 @@ unitDatabase.push({
         element: "Dark",
         passiveDmg: 0, // Max Gluttony Stacks
         trueDmg: 0,
-        support: "Slow"
+        support: "Slow / Radiation",
+        hasRadiation: true, radiationPct: 20, radiationDuration: 6,
+        slowPct: 20, slowDuration: 6
     },
 
     upgrades: [

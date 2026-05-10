@@ -228,8 +228,7 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
         context.rebelliousCCActive = true;
     }
 
-    const _MAGE_UNITS = { 'ancient_mage': 1, 'megumin': 1, 'maid': 1, 'water_god': 1 };
-    const isMage = !!_MAGE_UNITS[uStats.id] || (uStats.name && uStats.name.includes('Mage'));
+    const isMage = window.isUnit(uStats.id, 'ancient_mage') || window.isUnit(uStats.id, 'megumin') || window.isUnit(uStats.id, 'maid') || window.isUnit(uStats.id, 'water_god') || (uStats.name && uStats.name.includes('Mage'));
 
     // Great Mage: +20% Dmg on Type Advantage Hit (Uptime ~90%)
     if (relicStats.set === 'great_mage' && isMage) {
@@ -262,7 +261,7 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
 
     // Universal Magi Tag Buff
     // (King Sailor is excluded because he gets this natively via his unit passives)
-    if (tags.includes('Magi') && uStats.id !== 'king_sailor') {
+    if (tags.includes('Magi') && !window.isUnit(uStats.id, 'king_sailor')) {
         sBonus.dmg = (sBonus.dmg || 0) + 50;
         sBonus.spa = (sBonus.spa || 0) + 15;
         tagBuffs.dmg = (tagBuffs.dmg || 0) + 50;
@@ -274,7 +273,7 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
         const upLevel = context.upgradeLevel !== undefined ? context.upgradeLevel : 6;
         let summonCount = 0;
 
-        if (uStats.id === 'the_strongest_in_history') {
+        if (window.isUnit(uStats.id, 'the_strongest_in_history')) {
             const state = (window.unitModesState || {})[uStats.id];
             const activeModes = Array.isArray(state) ? state : (state !== undefined ? [state] : [0]);
             // Only Perfect Curse (1) and Adaptive Curse (2) count as summons for Monarch (+10% each)
@@ -289,7 +288,7 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
                 if (!activeModes.includes(sIdx)) return acc;
 
                 // Requirement: System Level gating for Jinoo
-                if (uStats.id === 'jinoo_shadow_monarch') {
+                if (window.isUnit(uStats.id, 'jinoo_shadow_monarch')) {
                     const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels[uStats.id] !== undefined)
                         ? window.unitSystemLevels[uStats.id]
                         : (uStats.systemLevel ? (uStats.systemLevel.default || 100) : 100);
@@ -304,7 +303,7 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
             }, 0);
             summonCount = summonCountTotal + (uStats.summonStats ? (uStats.summonStats.maxCount || 1) : 0);
 
-            if (uStats.id === 'phantom_captain' && summonCount === 0) summonCount = 9;
+            if (window.isUnit(uStats.id, 'phantom_captain') && summonCount === 0) summonCount = 9;
         }
 
 
@@ -334,8 +333,7 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
 function _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicStats = {}, context = {}) {
     let headDmgBase = 0, headDmgPassive = 0, headDmgTag = 0, headDotBuff = 0;
     let headCalc = { type: headPiece, uptime: 1, trigger: 0, duration: 0, attacks: 0 };
-    const _MAGE_IDS = { 'ancient_mage': 1, 'megumin': 1, 'maid': 1, 'water_god': 1 };
-    const isMage = !!_MAGE_IDS[uStats.id] || (uStats.name && uStats.name.includes('Mage'));
+    const isMage = window.isUnit(uStats.id, 'ancient_mage') || window.isUnit(uStats.id, 'megumin') || window.isUnit(uStats.id, 'maid') || window.isUnit(uStats.id, 'water_god') || (uStats.name && uStats.name.includes('Mage'));
 
     if (headPiece === 'sun_god') {
         headCalc.attacks = 6; headCalc.duration = 7;
@@ -380,14 +378,13 @@ function _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicSta
         headCalc.noCrits = true;
     } else if (headPiece === 'strongest_sorcerer_glasses') {
         // Strongest Sorcerer Glasses: +50% Damage vs Timestopped enemies (Assume 100% uptime for Gojo/Sukuna in Domain)
-        const canTimestop = (uStats.id === 'the_strongest_of_today');
+        const canTimestop = window.isUnit(uStats.id, 'the_strongest_of_today');
         if (canTimestop) {
             headDmgPassive = 50;
         }
         headCalc.type = 'strongest_sorcerer';
     } else if (headPiece === 'bloodline_head') {
-        const bloodlineUnits = ['alpha_devil', 'devil_hunter', 'ancient_mage', 'mimicry_sorcerer'];
-        const isBloodline = bloodlineUnits.includes(uStats.id);
+        const isBloodline = window.isAnyUnit(uStats.id, ['alpha_devil', 'devil_hunter', 'ancient_mage', 'mimicry_sorcerer']);
         headDmgPassive = isBloodline ? 30 : 0;
         headCalc.type = isBloodline ? 'bloodline' : 'none';
     }
@@ -506,7 +503,10 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
 
     const canStack = (traitObj.allowDotStack || traitObj.allowPlacementStack);
     if (uStats.dot > 0) {
-        const nativeTickPct = uStats.dot * traitMultiplier * gearMultiplier;
+        let basePct = uStats.dot;
+        if (uStats.isBoss && uStats.bossDot) basePct = uStats.bossDot;
+        
+        const nativeTickPct = basePct * traitMultiplier * gearMultiplier;
         const totalNativeDmg = finalDmg * (nativeTickPct / 100) * dotCritMult;
         const duration = uStats.dotDuration || 0;
         const interval = canStack ? finalSpa : (duration > 0 ? Math.ceil(duration / finalSpa) * finalSpa : finalSpa);
@@ -524,318 +524,4 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
     dotDpsTotal = (dotBreakdown.nativeDps + dotBreakdown.radDps) * (canStack ? placement : 1);
     return { dotDpsTotal, dotBreakdown };
 }
-
-function calculateDPS(uStats, relicStats, context) {
-    const { dmgPoints, spaPoints, rangePoints, wave, isBoss, traitObj, placement, isSSS, headPiece, starMult, isAbility } = context;
-
-    let lvStats = getLevelStats(uStats.dmg, uStats.spa, uStats.range || 0, dmgPoints, spaPoints, rangePoints);
-    let rDmg = 0, rSpa = 0, rRange = 0;
-    if (context.rankData) { rDmg = context.rankData.dmg || 0; rSpa = context.rankData.spa || 0; rRange = context.rankData.range || 0; }
-    else if (isSSS) { rDmg = 20; rSpa = 8; rRange = 20; }
-    if (rDmg !== 0) lvStats.dmg *= (1 + rDmg / 100);
-    if (rSpa !== 0) lvStats.spa *= (1 - rSpa / 100);
-    if (rRange !== 0) lvStats.range *= (1 + rRange / 100);
-
-    let passivePcent = (uStats.buffDmg || 0);
-    let passiveSpaPcent = 0;
-    let passiveRangePcent = 0;
-    let trueDmgFromPassives = 0;
-    let passiveCritFromPassives = 0;
-    let passiveCdmgFromPassives = 0;
-    let passiveDotFromPassives = 0;
-    let passiveBreakdown = [];
-
-    if (uStats.passiveDmg) passivePcent += uStats.passiveDmg;
-    if (uStats.passiveSpa) passiveSpaPcent += uStats.passiveSpa;
-    if (uStats.passiveRange) passiveRangePcent += uStats.passiveRange;
-    if (uStats.passiveCrit) passiveCritFromPassives += uStats.passiveCrit;
-    if (uStats.passiveCdmg) passiveCdmgFromPassives += uStats.passiveCdmg;
-
-    // Attribute root-level passives to breakdown
-    if (uStats.passiveDmg || uStats.passiveSpa || uStats.passiveRange || uStats.passiveCrit || uStats.passiveCdmg) {
-        passiveBreakdown.push({
-            name: "Unit Base (Passive)",
-            dmg: uStats.passiveDmg || 0,
-            spa: uStats.passiveSpa || 0,
-            range: uStats.passiveRange || 0,
-            crit: uStats.passiveCrit || 0,
-            cdmg: uStats.passiveCdmg || 0,
-            trueDmg: 0,
-            dot: 0
-        });
-    }
-
-    if (uStats.passives && Array.isArray(uStats.passives)) {
-        uStats.passives.forEach(p => {
-            let pDmg = p.passiveDmg || 0;
-            let pSpa = p.passiveSpa || 0;
-            let pRange = p.passiveRange || 0;
-            let pTrue = p.trueDmg || 0;
-            let pCrit = p.passiveCrit || 0;
-            let pCdmg = p.passiveCdmg || 0;
-            let pDot = p.dot || 0;
-            
-            if (p.buffedByJunior && headPiece === 'junior') {
-                pDmg *= 1.1;
-                pSpa *= 1.1;
-                pTrue *= 1.1;
-                pCrit *= 1.1;
-                pCdmg *= 1.1;
-                pDot *= 1.1;
-            }
-            
-            if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0) {
-                passivePcent += pDmg;
-                passiveSpaPcent += pSpa;
-                passiveRangePcent += pRange;
-                trueDmgFromPassives += pTrue;
-                passiveCritFromPassives += pCrit;
-                passiveCdmgFromPassives += pCdmg;
-                passiveDotFromPassives += pDot;
-                // Inherit DoT duration from passive if the unit doesn't have a base one
-                if (p.dotDuration && !uStats.dotDuration) uStats.dotDuration = p.dotDuration;
-                passiveBreakdown.push({ name: p.name, dmg: pDmg, spa: pSpa, range: pRange, trueDmg: pTrue, crit: pCrit, cdmg: pCdmg, dot: pDot });
-            }
-        });
-    }
-
-    const totalBossDmg = (uStats.bossDmg || 0) + (traitObj.bossDmg || 0);
-    let traitDmgPct = traitObj.dmg + (totalBossDmg && isBoss ? totalBossDmg : 0), traitSpaPct = traitObj.spa;
-    let traitCritRate = traitObj.critRate || 0, traitRangePct = traitObj.range || 0, traitDotBuff = (traitObj.dotBuff || 0) + (uStats.dotBuff || 0);
-
-    let eternalDmgBuff = 0, eternalRangeBuff = 0;
-    if (traitObj.isEternal) { const waveCap = Math.min(wave, 12); eternalDmgBuff = waveCap * 5; passivePcent += eternalDmgBuff; eternalRangeBuff = waveCap * 2.5; }
-
-    let { sBonus, tagBuffs, setPerkDmg } = _calcSetAndTagBonuses(relicStats, uStats, headPiece, context);
-    if (starMult && starMult !== 1) { for (let key in sBonus) { if (typeof sBonus[key] === 'number') sBonus[key] *= starMult; } }
-
-    const getRelicStat = (stat, apply) => apply ? relicStats[stat] : 0;
-    let baseR_Dmg = getRelicStat('dmg', statConfig.applyRelicDmg), baseR_Spa = getRelicStat('spa', statConfig.applyRelicSpa);
-    let baseR_Cm = getRelicStat('cm', statConfig.applyRelicCrit), baseR_Cf = relicStats.cf;
-    let baseR_Dot = getRelicStat('dot', statConfig.applyRelicDot), baseR_Range = relicStats.range || 0;
-
-    if (traitObj.relicBuff) {
-        const mult = traitObj.relicBuff;
-        baseR_Dmg = ((1 + baseR_Dmg / 100) * mult - 1) * 100;
-        baseR_Range = ((1 + baseR_Range / 100) * mult - 1) * 100;
-        baseR_Spa *= mult;
-        baseR_Cm *= mult;
-        baseR_Dot *= mult;
-        baseR_Cf *= mult;
-    }
-
-    // Assuming context.wave is available if traitObj.isEternal is true, or needs to be passed.
-    // For now, let's assume it's handled upstream or passed in uStats if needed.
-    // if (traitObj.isEternal) { const waveCap = Math.min(wave, 12); eternalDmgBuff = waveCap * 5; passivePcent += eternalDmgBuff; eternalRangeBuff = waveCap * 2.5; }
-
-    let enlightenedGodBuff = (typeof window !== 'undefined' && window.enlightenedGodActive) ? 20 : 0;
-    let enlightenedGodSpa = (typeof window !== 'undefined' && window.enlightenedGodActive) ? 20 : 0;
-    const bijuuBuff = (typeof window !== 'undefined' && window.bijuuActive) ? 25 : 0;
-    const bijuuSpa = (typeof window !== 'undefined' && window.bijuuActive) ? 15 : 0;
-
-    // King Sailor / Magi Tag Buffs
-    const tags = uStats.tags || [];
-    let kmDmg = 0, kmSpa = 0;
-
-    // Apply global tag buffs ONLY if this isn't King Sailor himself
-    // (King Sailor gets his native buffs via his unit passives array)
-    if (uStats.id !== 'king_sailor') {
-        // Magi Tag: Permanent +50% Damage, -15% SPA
-        if (tags.includes('Magi')) {
-            kmDmg += 50;
-            kmSpa += 15;
-        }
-
-        const kingMark = (typeof window !== 'undefined' && window.kingSailorActive);
-        if (kingMark) {
-            if (tags.includes('Uncontrollable Power')) { kmDmg += 30; kmSpa += 10; }
-            else if (uStats.element === 'Water') { kmDmg += 20; kmSpa += 10; }
-        }
-    }
-
-    let mikuBuff = (typeof window !== 'undefined' && window.mikuActive) ? 100 : 0;
-
-    // Apply Junior Ninja 1.1x Multiplier BEFORE values are consumed by totals
-    if (headPiece === 'junior') {
-        
-        if (tagBuffs.dmg) {
-            const extraTagDmg = tagBuffs.dmg * 0.1;
-            tagBuffs.dmg += extraTagDmg;
-            sBonus.dmg = (sBonus.dmg || 0) + extraTagDmg;
-        }
-        if (tagBuffs.spa) {
-            const extraTagSpa = tagBuffs.spa * 0.1;
-            tagBuffs.spa += extraTagSpa;
-            sBonus.spa = (sBonus.spa || 0) + extraTagSpa;
-        }
-
-        kmDmg *= 1.1;
-        kmSpa *= 1.1;
-        mikuBuff *= 1.1;
-        enlightenedGodBuff *= 1.1;
-        enlightenedGodSpa *= 1.1;
-    }
-
-    const isKsBuffActive = (typeof window !== 'undefined' && window.kingSailorActive);
-    let ksCrit = 0, ksCdmg = 0;
-    if (isKsBuffActive && uStats.id !== 'king_sailor') { ksCrit = 10; ksCdmg = 20; }
-
-    const amSupportActive = (typeof window !== 'undefined' && window.ancientMageActive);
-    const amCritRate = amSupportActive ? 20 : 0;
-    const amCritDmg = amSupportActive ? 20 : 0;
-
-    const mageHillBuffActive = (typeof window !== 'undefined' && window.fernHillActive);
-    const uType = (uStats.placementType || 'Ground').toLowerCase();
-    const mageHillSpa = (mageHillBuffActive && (uType === 'hill' || uType === 'hybrid')) ? 30 : 0;
-
-    const mageGroundBuffActive = (typeof window !== 'undefined' && window.fernGroundActive);
-    const mageGroundCrit = (mageGroundBuffActive && (uType === 'ground' || uType === 'hybrid')) ? 45 : 0;
-
-    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + enlightenedGodBuff + (bijuuBuff > 0 ? 25 : 0) + (uStats.id === 'king_sailor' ? 10 : 0);
-    const finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
-
-    const setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + enlightenedGodSpa + bijuuSpa + kmSpa + mageHillSpa;
-
-
-    // Nutaru (Beast) dynamic SPA Cap override
-    const effectiveSpaCap = (isAbility && uStats.id === 'nutaru_beast') ? 3.0 : (uStats.spaCap || 0.1);
-
-    const spaAfterRelic = lvStats.spa * (1 - traitSpaPct / 100) * (1 - baseR_Spa / 100);
-    const rawFinalSpa = spaAfterRelic * (1 - setAndPassiveSpa / 100);
-    const finalSpa = Math.max(rawFinalSpa, effectiveSpaCap);
-
-    const { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc } = _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicStats, context);
-
-    // Rebellious Set CC Perk (Now independent of head piece)
-    let ccPerkDmg = 0;
-    if (context.rebelliousCCActive) {
-        const ccDuration = 10;
-        const buffedAttacks = Math.floor(ccDuration / finalSpa);
-        const totalCycleAttacks = 1 + buffedAttacks;
-        const uptime = totalCycleAttacks > 0 ? buffedAttacks / totalCycleAttacks : 0;
-        ccPerkDmg = 30 * uptime;
-        
-        // Add to set perks
-        setPerkDmg += ccPerkDmg;
-        
-        // Ensure UI can still render it by injecting it into headCalc if it's not being used by a real head
-        if (!headCalc.type || headCalc.type === 'none') {
-            headCalc.type = 'rebellious_cc';
-            headCalc.uptime = uptime;
-            headCalc.ccBonus = ccPerkDmg;
-        } else {
-            // If another head is used, we'll need to make sure the breakdown knows about this
-            // We'll add a specific field for set perks in calculateDPS return if needed
-            headCalc.ccBonus = ccPerkDmg;
-            headCalc.ccUptime = uptime;
-        }
-    }
-    let abilityDmg = 0;
-    if (isAbility && uStats.ability) {
-        const ab = Array.isArray(uStats.ability) ? uStats.ability[0] : uStats.ability;
-        if (ab.buffDmg) abilityDmg = ab.buffDmg;
-    }
-
-    let additiveTotal = (sBonus.dmg || 0) + setPerkDmg + passivePcent + headDmgBase + headDmgPassive + headDmgTag + mikuBuff + enlightenedGodBuff + bijuuBuff + kmDmg + abilityDmg;
-
-    // Detailed breakdown for UI
-    const detailedBuffs = {
-        setBase: (sBonus.dmg || 0) - (tagBuffs.dmg || 0) - setPerkDmg,
-        setPerk: setPerkDmg,
-        accessoryPerk: headDmgPassive,
-        tagBonus: (tagBuffs.dmg || 0) + headDmgTag,
-        unitPassive: passivePcent,
-        abilityBuff: abilityDmg,
-        accessoryBase: headDmgBase,
-        globalBuffs: mikuBuff + enlightenedGodBuff + bijuuBuff + kmDmg,
-        passiveBreakdown: passiveBreakdown
-    };
-
-
-    const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.finalMult || 1) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1);
-
-    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + amCritDmg + ksCdmg + passiveCdmgFromPassives;
-
-    // Kirito and Gojo are hard-capped to their base crit rate (50%) and cannot receive buffs or relic stats
-    let finalCritRate = Math.min(uStats.crit + traitCritRate + amCritRate + ksCrit + mageGroundCrit + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
-
-    if (uStats.id === 'kirito' || uStats.id === 'the_strongest_of_today') {
-        finalCritRate = Math.min(finalCritRate, uStats.crit);
-    }
-
-    if (headPiece === 'sorcerer_hunter_spirit') finalCritRate = 0;
-
-    const avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
-    const avgHit = finalDmg * avgCritMult;
-
-    // --- SPECIAL ATTACK RATE LOGIC ---
-    let attackMultiplier = 1;
-    let extraAttacksData = null;
-    let usedSpa = finalSpa;
-
-    if (uStats.id === 'rohan') {
-        const probs = [0.40, 0.35, 0.30, 0.25, 0.20];
-        let cumulativeProbs = [];
-        let currentProb = 1.0;
-
-        for (let i = 0; i < probs.length; i++) {
-            currentProb *= probs[i];
-            cumulativeProbs.push(currentProb);
-        }
-
-        const sumP = cumulativeProbs.reduce((a, b) => a + b, 0);
-        const expectedAttacks = 1 + sumP;
-
-        // Time sequence: Initial hit (finalSpa) + Chained hits (spaCap)
-        const expectedTime = finalSpa + (sumP * (uStats.spaCap || 3.0));
-
-        // Effective SPA for the sequence
-        usedSpa = expectedTime / expectedAttacks;
-
-        // Damage weights: Robot (1.04x base only) + 5th Chain (+50% dmg)
-        const robotMult = (!isAbility) ? 1.04 : 1.0;
-        const fifthChainProb = cumulativeProbs[4];
-        const dmgSumFactor = (1 + sumP + (fifthChainProb * 0.5));
-        const avgDmgMult = dmgSumFactor / expectedAttacks;
-
-        attackMultiplier = expectedAttacks;
-        extraAttacksData = { type: 'Rohan (Chain)', expectedAttacks, expectedTime, avgDmgMult, robotMult };
-    } else if (uStats.id === 'alpha_devil') {
-        // Phantom Swords: 2 swords, 10% dmg/tick, 10 ticks, 20s Cooldown. Can Crit.
-        const swordCount = 2;
-        const swordDmgPct = 0.10;
-        const swordTicks = 10;
-        const swordCooldown = 20;
-
-        // Average DPS = (Count * Ticks * DmgPct * avgHit) / Cooldown
-        const avgSwordDps = (swordCount * swordTicks * swordDmgPct * avgHit) / swordCooldown;
-
-        // Integrate into attackMultiplier for consistency
-        attackMultiplier = 1 + (avgSwordDps * usedSpa / avgHit);
-        extraAttacksData = { type: 'Phantom Swords (Crit)', hits: swordCount, mult: attackMultiplier };
-    }
-
-    const { summonDpsTotal, summonData } = _calcSummonDPS(uStats, finalDmg, finalSpa, placement);
-    const { dotDpsTotal, dotBreakdown } = _calcDoTDPS({ ...uStats, dot: (uStats.dot || 0) + passiveDotFromPassives }, traitObj, traitDotBuff, baseR_Dot + (sBonus.dot || 0) + headDotBuff, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult);
-
-    const hitDps = (avgHit / usedSpa) * placement * attackMultiplier;
-    const totalDps = hitDps + (summonDpsTotal || 0) + (dotDpsTotal || 0);
-
-    return {
-        total: totalDps,
-        hit: hitDps,
-        summon: summonDpsTotal,
-        dot: dotDpsTotal,
-        dmgVal: finalDmg,
-        spa: finalSpa,
-        range: finalRange,
-        critRate: finalCritRate,
-        cdmg: finalCdmgStat,
-        summonData,
-        dotBreakdown,
-        buffs: detailedBuffs,
-        headPiece,
-        relicStats,
-        extraAttacksData
-    };
-}
+

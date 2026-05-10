@@ -22,7 +22,9 @@ unitDatabase.push({
         passiveDmg: 0,
         passiveSpa: 0,
         element: "Ice",
-        dotDuration: 0
+        dotDuration: 0,
+        slowPct: 25,
+        slowDuration: 5
     },
 
     upgrades: [

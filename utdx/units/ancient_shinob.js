@@ -5,7 +5,7 @@ unitDatabase.push({
     level: 70,
     placement: 3,
     placementType: "Ground",
-    role: "DPS / Ground",
+    role: "DPS",
     tags: ["Sage", "Bloodline", "Villain", "Ninjaverse"],
     meta: {
         short: "Ruler",
