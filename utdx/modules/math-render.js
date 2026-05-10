@@ -302,14 +302,20 @@ function renderActiveBuffsSection(data) {
 }
 
 function renderQuickBreakdownSection(data, avgHitPerUnit, dotColorClass) {
-    const dotLabelClass = data.dot > 0 ? 'text-accent-end' : '';
+    const isInactive = data.dotData && data.dotData.inactive;
+    const dotLabelClass = data.dot > 0 ? 'text-accent-end' : (isInactive ? '' : '');
     const isNutaru = window.isUnit(data.baseStats.id, 'nutaru_beast');
+    
     return `
         <div class="math-section no-border-bottom" style="margin-bottom: 4px;">
             <div class="math-header opacity-70">Quick Breakdown</div>
             <div class="mq-box">
                 <div style="border-color: rgba(251, 191, 36, 0.3);"><div class="mq-label mt-text-gold">Hit DPS</div><div class="mq-val mt-text-gold">${fmt.num(data.hit)}</div><div class="mq-sub">(${fmt.num(avgHitPerUnit)} avg ÷ ${fmt.fix(data.spa, 2)}s) × ${data.placement}</div></div>
-                <div style="border-color: ${data.dot > 0 ? 'rgba(192, 132, 252, 0.3)' : '#333'};"><div class="mq-label ${dotLabelClass}">DoT DPS</div><div class="mq-val ${dotColorClass}">${data.dot > 0 ? fmt.num(data.dot) : '-'}</div><div class="mq-sub">${data.dot > 0 ? (data.hasStackingDoT ? `Stacking: x${data.placement} units` : `Limited: x1 unit only`) : 'No DoT'}</div></div>
+                <div style="border-color: ${data.dot > 0 ? 'rgba(192, 132, 252, 0.3)' : (isInactive ? 'rgba(239, 68, 68, 0.4)' : '#333')};">
+                    <div class="mq-label ${isInactive ? '' : dotLabelClass}" style="${isInactive ? 'color: #fca5a5;' : ''}">DoT DPS</div>
+                    <div class="mq-val ${isInactive ? '' : dotColorClass}" style="${isInactive ? 'color: #ef4444;' : ''}">${data.dot > 0 ? fmt.num(data.dot) : (isInactive ? 'INACTIVE' : '-')}</div>
+                    <div class="mq-sub">${data.dot > 0 ? (data.hasStackingDoT ? `Stacking: x${data.placement} units` : `Limited: x1 unit only`) : (isInactive ? `Needs ${data.dotData.requirement}` : 'No DoT')}</div>
+                </div>
                 <div style="border-color: rgba(216, 180, 254, 0.3);"><div class="mq-label text-custom">Crit Rate / Dmg</div><div class="mq-val text-custom">${fmt.fix(data.critData.rate, 0)}% <span class="color-dim">|</span> x${fmt.fix(data.critData.cdmg / 100, 2)}</div><div class="mq-sub">Avg Mult: x${fmt.fix(data.critData.avgMult, 3)}</div></div>
                 ${data.summon > 0 ? `<div style="border-color: rgba(96, 165, 250, 0.3);"><div class="mq-label text-accent-start">${isNutaru ? 'Clone' : (data.summonData?.isCustom ? 'Custom Summon' : 'Plane')} DPS</div><div class="mq-val text-accent-start">${fmt.num(data.summon)}</div><div class="mq-sub">Independent of Host Stats</div></div>` : `<div style="border-color: rgba(96, 165, 250, 0.3);"><div class="mq-label text-accent-start">Attack Rate</div><div class="mq-val text-accent-start">${fmt.fix(data.spa, 2)}s</div><div class="mq-sub">Base: ${data.baseStats.spa}s (Current Cap: ${data.spaCap}s)</div></div>`}
             </div>
@@ -479,6 +485,16 @@ function renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa) {
 }
 
 function renderDotSection(data, headDotRow) {
+    if (data.dotData && data.dotData.inactive) {
+        return `
+        <div class="dd-section">
+            <div class="dd-title text-accent-end"><span>6. Status Effect (DoT) Breakdown</span> <button class="calc-info-btn" onclick="openInfoPopup('dot_logic')">?</button></div>
+            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px; border-radius: 8px; color: #fca5a5; font-size: 0.75rem; text-align: center; margin-top: 8px; line-height: 1.4;">
+                <b style="color: #ef4444; display: block; margin-bottom: 4px; font-size: 0.85rem;">⚠ DOT INACTIVE</b>
+                This unit requires a teammate with <b style="color: #fff; text-decoration: underline;">${data.dotData.requirement}</b> DoT to enable its own status effects in Loadout Mode.
+            </div>
+        </div>`;
+    }
     if (data.dot <= 0) return '';
     const db = data.dotData;
     const getFormula = (total, time) => {

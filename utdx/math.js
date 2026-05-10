@@ -500,6 +500,46 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         radTotalDmg: 0,
         isMultiHit: false
     };
+    
+    // --- REQUIREMENT CHECK (LOADOUT MODE) ---
+    // If a unit requires a specific DoT type (e.g. Devil Hunter needs Bleed), check the team.
+    if (uStats.requiresDot && window.CALCULATION_MODE === 'loadout') {
+        const hotbar = window.hotbarState;
+        let requirementMet = false;
+
+        if (hotbar && hotbar.slots) {
+            hotbar.slots.forEach(s => {
+                if (!s || requirementMet) return;
+                
+                // Get the base unit ID to avoid self-checking
+                const sBaseId = s.id.split('-')[0];
+                const uBaseId = uStats.id.split('-')[0];
+                if (sBaseId === uBaseId) return;
+
+                const sUnit = window.getUnitById(s.id);
+                if (!sUnit) return;
+
+                // 1. Check base stats dotType
+                if (sUnit.stats && sUnit.stats.dotType === uStats.requiresDot && (sUnit.stats.dot > 0 || (sUnit.stats.customFollowUp && sUnit.stats.customFollowUp.dotType === uStats.requiresDot))) {
+                    requirementMet = true;
+                }
+                
+                // 2. Check active mode dotType
+                const modeIdx = (window.unitModesState && window.unitModesState[sUnit.id]);
+                if (sUnit.modes && modeIdx !== undefined && sUnit.modes[modeIdx]) {
+                    if (sUnit.modes[modeIdx].dotType === uStats.requiresDot && (sUnit.modes[modeIdx].dot > 0)) {
+                        requirementMet = true;
+                    }
+                }
+            });
+        }
+
+        if (!requirementMet) {
+            dotBreakdown.inactive = true;
+            dotBreakdown.requirement = uStats.requiresDot;
+            return { dotDpsTotal: 0, dotBreakdown };
+        }
+    }
 
     const canStack = (traitObj.allowDotStack || traitObj.allowPlacementStack);
     if (uStats.dot > 0) {

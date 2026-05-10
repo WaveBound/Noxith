@@ -82,7 +82,7 @@ unitDatabase.push({
             img: "images/units/AlphaDevil/Phantom_Sword.png",
             desc: "Applies 80% Bleed for 8 ticks to afflicted enemies.",
             dmg: 6000, spa: 9, range: 34, spaCap: 6,
-            passiveDmg: 0, dot: 80, dotDuration: 8
+            passiveDmg: 0, dot: 80, dotDuration: 8, dotType: "Bleed"
         },
         {
             name: "Mirage Barrage",

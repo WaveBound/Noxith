@@ -31,6 +31,7 @@ unitDatabase.push({
             dmgMult: 1.0,
             dotPct: 15,
             dotDuration: 3,
+            dotType: "Bleed",
             fuaAnimation: 2
         }
     },

@@ -163,6 +163,15 @@ const comingSoonData = [
 
 const patchNotesData = [
     {
+        version: "v5.7",
+        date: "May 10, 2026",
+        changes: [
+            { type: "Synergy", text: "<b>Loadout Logic:</b> Implemented dynamic DoT requirements. Certain modes (like Devil Hunter's 'Devil Sword') now require a specific DoT type (e.g., Bleed) in the team to activate." },
+            { type: "Unit", text: "<b>DoT Tagging:</b> Labeled DoT types for <b>Sukuna</b>, <b>Alpha Devil</b>, and <b>Grimjaw</b> (Bleed) to support synergy checks." },
+            { type: "UI", text: "<b>Loadout Feedback:</b> Math breakdown now highlights <b>INACTIVE</b> DoTs with a warning if requirements are not met." }
+        ]
+    },
+    {
         version: "v5.6",
         date: "May 09, 2026",
         changes: [
@@ -576,13 +585,14 @@ const creditsData = [
 // ============================================================================
 const UNIT_FILES = [
     'sukuna.js',
-    'jingliu.js',
-    'maid.js',
+    'Jingliu.js',
+    'Maid.js',
     'ace.js',
     'akainu.js',
     'ancient_mage.js',
     'ancient_shinob.js',
     'ant_king_savage.js',
+    'bambietta.js',
     'cell.js',
     'crow_shinobi.js',
     'esdeath.js',

@@ -60,7 +60,7 @@ unitDatabase.push({
             level: 70,
             desc: "Sword focus: Burn on Bleed mechanics.",
             dmg: 5400, spa: 8.0, range: 37, spaCap: 2.5,
-            crit: 0, cdmg: 150, dot: 80, dotDuration: 10,
+            crit: 0, cdmg: 150, dot: 80, dotDuration: 10, dotType: "Burn", requiresDot: "Bleed",
             passiveDmg: 0, passiveSpa: 0, bossDmg: 0, dotBuff: 0, trueDmg: 0, cooldown: 0
         },
         {

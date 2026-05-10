@@ -22,7 +22,8 @@ unitDatabase.push({
         passiveDmg: 6.67,
         passiveSpa: 4.17,
         element: "Water",
-        dotDuration: 10
+        dotDuration: 10,
+        dotType: "Bleed"
     },
 
     upgrades: [
