@@ -6,7 +6,7 @@ unitDatabase.push({
     placement: 3,
     placementType: "Hill",
     role: "Damage / Burn(DoT)",
-    tags: [],
+    tags: ["Piece"],
     meta: {
         short: "Ruler",
         long: "Ruler/Astral",

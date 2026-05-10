@@ -697,7 +697,7 @@ function initHotbar() {
 
         const farmUnits = [
             { id: 'bulma', name: 'Bulma', img: 'images/units/Bulma.png', tags: ['Assistant'] },
-            { id: 'speedwagon', name: 'Speedwagon', img: 'images/units/Speedwagon.png', tags: ['Assistant'] }
+            { id: 'speedwagon', name: 'Speedcart', img: 'images/units/Speedwagon.png', tags: ['Hero', 'Assistant'] }
         ];
 
         farmUnits.forEach(farm => {
@@ -733,7 +733,7 @@ function initHotbar() {
         buffersMenu.onclick = (e) => e.stopPropagation();
 
         const bufferUnits = [
-            { id: 'miku', name: 'Miku', img: 'images/units/Miku.png' },
+            { id: 'miku', name: 'Miku', img: 'images/units/Miku.png', tags: ['Assistant'] },
             { id: 'enlightenedgod', name: 'Enlightened God', img: 'images/units/EnlightenedGod.png' },
             { id: 'ancient_mage', name: 'Ancient Mage', img: 'images/units/AncientMage.png' },
             { id: 'king_sailor', name: 'King Sailor', img: 'images/units/KingSailor.png' },

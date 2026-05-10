@@ -40,7 +40,7 @@ unitDatabase.push({
     modes: [
         {
             name: "DPS",
-            img: "images/units/AncientMage/dps.png",
+            img: "images/units/AncientMage/Dps.png",
             level: 70,
             desc: "Combat focus: +20% Dmg, +40% Slow (Penalty), +50% Boss Dmg. Applies Wind Shear (60% DoT over 10s).",
             dmg: 6650, spa: 7, range: 45, spaCap: 2,

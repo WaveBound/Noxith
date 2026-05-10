@@ -6,7 +6,7 @@ unitDatabase.push({
     placement: 3,
     placementType: "Hybrid",
     role: "Support / Damage",
-    tags: [],
+    tags: ["Piece", "Piece Marines", "Villain"],
     meta: {
         short: "Eternal/Sacred",
         long: "Eternal/Sacred",

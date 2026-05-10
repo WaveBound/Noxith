@@ -6,7 +6,7 @@ unitDatabase.push({
     placement: 1,
     placementType: "Hybrid",
     role: "Damage / Summon",
-    tags: ["Bio-Android"],
+    tags: ["Villain"],
     meta: {
         short: "Ruler",
         long: "Ruler",

@@ -6,7 +6,7 @@ unitDatabase.push({
     placement: 3,
     placementType: "Ground",
     role: "Damage",
-    tags: [],
+    tags: ["Super Warrior", "Hero"],
     meta: {
         short: "Ruler",
         long: "Eternal",

@@ -6,7 +6,7 @@ unitDatabase.push({
     placement: 3,
     placementType: "Hill",
     role: "Damage",
-    tags: [],
+    tags: ["Hero", "Uncontrollable Power"],
     meta: {
         short: "Ruler",
         long: "Eternal/Sacred",
