@@ -5,7 +5,8 @@ const ENABLE_LOADOUT_CLICKABLE = true;
 // Data & Cache
 let customTraits = [];
 let unitSpecificTraits = {};
-let activeAbilityIds = new Set();
+window.activeAbilityIds = new Set();
+let activeAbilityIds = window.activeAbilityIds;
 let cachedResults = {};
 let unitBuildsCache = {};
 

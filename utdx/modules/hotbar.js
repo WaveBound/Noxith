@@ -254,6 +254,12 @@ function openTeamSummary() {
         } else if (unit.id === 'water_god') {
             effects.push({ label: 'Primordial Power', val: '30% Slow (3s) | +20% DoT Duration', color: '#60a5fa' });
             effects.push({ label: 'God of the Seas', val: '+30% DoT Dmg / Duration to enemies', color: '#38bdf8' });
+            
+            // Check for Underworld God synergy
+            const hotbar = window.hotbarState;
+            if (hotbar && hotbar.slots && hotbar.slots.some(s => s && window.isUnit(s.id, 'underworld_god'))) {
+                effects.push({ label: 'Divine Accord', val: '-1 Placement Limit (Synergy Active)', color: '#c084fc' });
+            }
         } else if (unit.id === 'sasuke_great_war') {
             effects.push({ label: 'Pure Hatred', val: 'Applies Hatred (5s) | +15% Dmg Taken', color: '#a855f7' });
             effects.push({ label: 'Dark Stun', val: 'Stuns Dark enemies for 3s', color: '#fcd34d' });
@@ -1458,7 +1464,7 @@ function updateHotbarUI() {
             }
 
             // Mini Stats Overlay (Hide for buffers)
-            const isBuffer = unit.id === 'miku' || unit.id === 'enlightenedgod';
+            const isBuffer = unit.id === 'miku';
             let statsOverlay = slot.querySelector('.slot-stats-overlay');
             if (!isBuffer) {
                 const stats = getUnitStats(unit.id);

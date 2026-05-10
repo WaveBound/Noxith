@@ -479,14 +479,15 @@ function _calcSummonDPS(uStats, finalDmg, finalSpa, placement) {
 
 function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult) {
     let dotDpsTotal = 0;
+    let bossDotDpsTotal = 0;
     const dotCritMult = isVirtualRealm ? avgCritMult : 1;
 
-    // REFINED LOGIC: Base % * (1 + Trait/100) * (1 + Gear/100)
     const traitMultiplier = 1 + (traitDotBonus / 100);
     const gearMultiplier = 1 + (gearDotBonus / 100);
 
     let dotBreakdown = {
         nativeDps: 0,
+        bossNativeDps: 0,
         radDps: 0,
         base: uStats.dot,
         traitBonus: traitDotBonus,
@@ -501,31 +502,21 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         isMultiHit: false
     };
     
-    // --- REQUIREMENT CHECK (LOADOUT MODE) ---
-    // If a unit requires a specific DoT type (e.g. Devil Hunter needs Bleed), check the team.
     if (uStats.requiresDot && window.CALCULATION_MODE === 'loadout') {
         const hotbar = window.hotbarState;
         let requirementMet = false;
-
         if (hotbar && hotbar.slots) {
             hotbar.slots.forEach(s => {
                 if (!s || requirementMet) return;
-                
-                // Get the base unit ID to avoid self-checking
                 const sBaseId = s.id.split('-')[0];
                 const uBaseId = uStats.id.split('-')[0];
                 if (sBaseId === uBaseId) return;
-
                 const sUnit = window.getUnitById(s.id);
                 if (!sUnit) return;
-
-                // 1. Check base stats (including follow-ups like Sukuna)
                 if (sUnit.stats) {
                     if (sUnit.stats.dotType === uStats.requiresDot && sUnit.stats.dot > 0) requirementMet = true;
                     if (sUnit.stats.customFollowUp && sUnit.stats.customFollowUp.dotType === uStats.requiresDot) requirementMet = true;
                 }
-                
-                // 2. Check active mode (including modes like Alpha Devil: Phantom Sword)
                 const modeIdx = (window.unitModesState && window.unitModesState[sUnit.id]);
                 if (sUnit.modes && modeIdx !== undefined && sUnit.modes[modeIdx]) {
                     const activeMode = sUnit.modes[modeIdx];
@@ -534,35 +525,44 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
                 }
             });
         }
-
         if (!requirementMet) {
             dotBreakdown.inactive = true;
             dotBreakdown.requirement = uStats.requiresDot;
-            return { dotDpsTotal: 0, dotBreakdown };
+            return { dotDpsTotal: 0, bossDotDpsTotal: 0, dotBreakdown };
         }
     }
 
     const canStack = (traitObj.allowDotStack || traitObj.allowPlacementStack);
-    if (uStats.dot > 0) {
-        let basePct = uStats.dot;
-        if (uStats.isBoss && uStats.bossDot) basePct = uStats.bossDot;
+    if (uStats.dot > 0 || uStats.bossDot > 0) {
+        // Normal Dot
+        let normalTickPct = uStats.dot * traitMultiplier * gearMultiplier;
+        let normalTotalDmg = finalDmg * (normalTickPct / 100) * dotCritMult;
         
-        const nativeTickPct = basePct * traitMultiplier * gearMultiplier;
-        const totalNativeDmg = finalDmg * (nativeTickPct / 100) * dotCritMult;
+        // Boss Dot (Defaults to normal dot if bossDot is not specified)
+        let bossBasePct = uStats.bossDot || uStats.dot;
+        let bossTickPct = bossBasePct * traitMultiplier * gearMultiplier;
+        let bossTotalDmg = finalDmg * (bossTickPct / 100) * dotCritMult;
+
         const duration = uStats.dotDuration || 0;
         const interval = canStack ? finalSpa : (duration > 0 ? Math.ceil(duration / finalSpa) * finalSpa : finalSpa);
-        dotBreakdown.nativeTotalDmg = totalNativeDmg; dotBreakdown.nativeInterval = interval; dotBreakdown.nativeDps = totalNativeDmg / interval;
+        
+        dotBreakdown.nativeTotalDmg = normalTotalDmg; 
+        dotBreakdown.nativeInterval = interval; 
+        dotBreakdown.nativeDps = normalTotalDmg / interval;
+        dotBreakdown.bossNativeDps = bossTotalDmg / interval;
     }
 
     if (traitObj.hasRadiation) {
         const radPct = (traitObj.radiationPct || 20) * traitMultiplier * gearMultiplier;
         const totalRadDmg = finalDmg * (radPct / 100);
         dotBreakdown.radTotalDmg = totalRadDmg;
-        dotBreakdown.radInterval = 10; // Standard Radiation interval
+        dotBreakdown.radInterval = 10; 
         dotBreakdown.radDps = totalRadDmg / 10;
     }
 
     dotDpsTotal = (dotBreakdown.nativeDps + dotBreakdown.radDps) * (canStack ? placement : 1);
-    return { dotDpsTotal, dotBreakdown };
+    bossDotDpsTotal = (dotBreakdown.bossNativeDps + dotBreakdown.radDps) * (canStack ? placement : 1);
+
+    return { dotDpsTotal, bossDotDpsTotal, dotBreakdown };
 }
 

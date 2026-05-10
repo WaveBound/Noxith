@@ -170,6 +170,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
                             <span class="dps-label" style="margin:0;">${displayLabel}</span>
                             <button class="info-btn" onclick="showMath('${r.id}')">?</button>
                         </div>
+                        ${r.bossDps && r.bossDps !== r.dps ? `<div class="boss-dps-mini" style="font-size: 0.7rem; color: #f87171; font-weight: 700; margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px;"><span style="opacity: 0.6; font-weight: 500;">BOSS:</span> ${format(r.bossDps)}</div>` : ''}
                     </div>
                 </div>
             </div>
@@ -219,8 +220,12 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     if (!card) return;
     const unitObj = window.getUnitById(unitId);
 
-    // NEW: Always force sync for multi-mode units like Jinoo to ensure 'None' is respected on load
-    if (!forceSync && unitObj && unitObj.allowMultipleModes) {
+    const activeType = (window.activeAbilityIds && window.activeAbilityIds.has(unitId) && unitObj && unitObj.ability) ? 'abil' : 'base';
+    const activeMode = 'fixed';
+    const hasCache = !!(window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0]);
+
+    // OPTIMIZATION: Only force sync for multi-mode units if they don't have a cache yet
+    if (!forceSync && unitObj && unitObj.allowMultipleModes && !hasCache) {
         forceSync = true;
     }
 
@@ -243,10 +248,14 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             unitCost = placementCost;
         }
     }
-    const unitPlace = unitObj ? (unitObj.placement || 1) : 1;
+    let unitPlace = unitObj ? (unitObj.placement || 1) : 1;
+    if (isUnit(unitId, 'water_god')) {
+        const hbStats = (typeof getCachedHotbarStats === 'function') ? getCachedHotbarStats() : null;
+        if (hbStats && hbStats.ugPresent) {
+            unitPlace = Math.max(1, unitPlace - 1);
+        }
+    }
 
-    const activeMode = 'fixed';
-    const activeType = activeAbilityIds.has(unitId) && unitObj && unitObj.ability ? 'abil' : 'base';
 
     let benchmarkDps = 0;
     try {
@@ -304,6 +313,9 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const headSelect = card.querySelector('select[data-filter="head"]')?.value || 'all';
     const sortSelect = card.querySelector('select[data-filter="sort"]')?.value || 'dps';
 
+    const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unitId || s.id.split('-')[0] === unitId.split('-')[0]));
+    const isHotbar = card.parentElement?.id === 'hotbarHiddenRender' || !!card.closest('.team-summary-container') || isInHotbarState;
+
     const hydrateBuildEntry = (r) => {
         if (!r) return null;
         let res;
@@ -331,11 +343,10 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
         if (typeof reconstructMathData === 'function') {
             try {
-                const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unitId || s.id.split('-')[0] === unitId.split('-')[0]));
-                const isHotbar = card.parentElement?.id === 'hotbarHiddenRender' || !!card.closest('.team-summary-container') || isInHotbarState;
                 const fullMath = reconstructMathData(res, undefined, { isHotbar: isHotbar });
                 if (fullMath) {
                     res.dps = fullMath.total || fullMath.dps || 0;
+                    res.bossDps = fullMath.bossTotal || fullMath.bossDps || 0;
                     res.dmgVal = fullMath.dmgVal;
                     res.spa = fullMath.spa;
                     res.range = fullMath.range;
@@ -626,7 +637,7 @@ window.getLiveScore = (unit) => {
 
     const currentTrait = (window.unitTraits && window.unitTraits[unitId]);
     const currentHead = (window.unitHeads && window.unitHeads[unitId]);
-    const activeType = (typeof activeAbilityIds !== 'undefined' && activeAbilityIds.has(unitId)) ? 'abil' : 'base';
+    const activeType = (window.activeAbilityIds && window.activeAbilityIds.has(unitId)) ? 'abil' : 'base';
 
     let dbKey = unitId;
     if (activeType === 'abil' && !unit.allowMultipleModes) dbKey += '_abil';
@@ -736,6 +747,15 @@ function renderUnitCard(unit, absoluteIndex) {
         }
     }
 
+    // Calculate Dynamic Placement
+    let dynamicPlacement = unit.placement || 1;
+    if (isUnit(unit.id, 'water_god')) {
+        const hbStats = (typeof getCachedHotbarStats === 'function') ? getCachedHotbarStats() : null;
+        if (hbStats && hbStats.ugPresent) {
+            dynamicPlacement = Math.max(1, dynamicPlacement - 1);
+        }
+    }
+
     const topControls = `<div class="unit-toolbar"><div class="ut-actions"><button class="calc-btn ut-btn-compact" onclick="openCalc('${unit.id}')">🖩 Custom</button><button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">📊 Traits</button><button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">ⓘ Info</button></div><div class="ut-toggle-area">${initialModeIndicatorHtml}${modesBtn}${abilityToggleHtml}</div></div>`;
 
     let defaultSort = 'dps';
@@ -827,7 +847,7 @@ function renderUnitCard(unit, absoluteIndex) {
         id: 'card-' + unit.id,
         additionalClasses: (activeAbilityIds.has(unit.id) ? ' use-ability' : '') + ' lazy-build-load',
         bannerContent: `<div class="banner-badges">
-            <div class="placement-badge">Max Place: ${unit.placement}</div>
+            <div class="placement-badge">Max Place: ${dynamicPlacement}</div>
             <div class="placement-badge is-${(unit.placementType || 'Ground').toLowerCase()}">${unit.placementType || 'Ground'}</div>
             <div class="placement-badge" style="color: #4ade80; border-color: rgba(74, 222, 128, 0.3);">DPS Rank: #${absoluteIndex}</div>
 
@@ -1045,7 +1065,7 @@ function openTraitBestList(unitId) {
     if (!unit) return;
 
     const mode = 'fixed';
-    const type = activeAbilityIds.has(unitId) && unit.ability ? 'abil' : 'base';
+    const type = (window.activeAbilityIds && window.activeAbilityIds.has(unitId) && unit.ability) ? 'abil' : 'base';
 
     const cfgIndex = 0; // Forced Max Potential
 
@@ -1095,7 +1115,7 @@ function openTraitBestList(unitId) {
     }
 
     // Ability Active is unit-specific, so it stays separate
-    if (activeAbilityIds.has(unitId) && unit.ability) {
+    if (window.activeAbilityIds && window.activeAbilityIds.has(unitId) && unit.ability) {
         tagsHtml += `<span style="background: rgba(168, 85, 247, 0.2); color: #c084fc; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(168, 85, 247, 0.3);">Ability Active</span>`;
     }
 
@@ -1168,6 +1188,7 @@ function openTraitBestList(unitId) {
             </td>
             <td style="vertical-align: middle; text-align: right; padding: 10px 5px;">
                 <div class="comp-highlight" style="font-weight: 800; font-size: 1rem;">${val} <span class="comp-val-label ${labelClass}">${label}</span></div>
+                ${b.bossDps && b.bossDps !== b.dps ? `<div style="font-size: 0.7rem; color: #f87171; font-weight: 700; margin-top: 2px;">${format(b.bossDps)} <span style="opacity: 0.6; font-size: 0.6rem;">BOSS</span></div>` : ''}
             </td>
         </tr>`;
     });

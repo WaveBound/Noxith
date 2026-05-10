@@ -2,6 +2,65 @@
 // CALCULATIONS.JS - Build Calculation Logic
 // ============================================================================
 
+// --- PERFORMANCE CACHING ---
+
+let _globalHotbarStats = null;
+let _lastHotbarUpdate = 0;
+
+/**
+ * Optimized lookup for team-wide synergy data (Hotbar context).
+ * Prevents redundant array traversals during heavy calculation loops.
+ */
+function getCachedHotbarStats() {
+    const now = Date.now();
+    // Short-lived cache (200ms) is sufficient to optimize a single Trait Leaderboard generation
+    if (_globalHotbarStats && (now - _lastHotbarUpdate < 200)) return _globalHotbarStats;
+
+    const hotbar = window.hotbarState;
+    const slots = hotbar?.slots || [];
+    
+    const stats = {
+        divinityCount: 0,
+        ugPresent: false,
+        akPresent: false,
+        jinooPresent: false,
+        idsInHotbar: new Set()
+    };
+
+    slots.forEach(slot => {
+        if (!slot) return;
+        const baseId = slot.id.indexOf('-') === -1 ? slot.id : slot.id.split('-')[0];
+        stats.idsInHotbar.add(baseId);
+        
+        if (baseId === 'underworld_god') stats.ugPresent = true;
+        if (baseId === 'ant_king_savage') stats.akPresent = true;
+        if (baseId === 'jinoo' || baseId === 'jinoo_shadow_monarch' || baseId === 'sjw') stats.jinooPresent = true;
+        
+        // Fast divinity stack calculation
+        const sUnit = window.getUnitById(slot.id);
+        if (sUnit && sUnit.tags && sUnit.tags.includes('Divinity')) {
+            let count = sUnit.placement || 1;
+            if (baseId === 'water_god') count = Math.max(0, count - 1);
+            stats.divinityCount += count;
+        }
+    });
+
+    _globalHotbarStats = stats;
+    _lastHotbarUpdate = now;
+    return stats;
+}
+
+/**
+ * Fast unit ID matching without heavy regex or repeated splitting.
+ */
+function isUnit(id, target) {
+    if (!id || !target) return false;
+    const dashIdx = id.indexOf('-');
+    if (dashIdx === -1) return id === target;
+    return id.substring(0, dashIdx) === target;
+}
+window.isUnit = isUnit;
+
 // --- HELPERS ---
 
 // Speed optimization: Fast lookup maps for static data
@@ -93,6 +152,14 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     let actualPlacement = unit.placement;
     if (traitObj.limitPlace) actualPlacement = Math.min(unit.placement, traitObj.limitPlace);
     if (isAbility && unit.ability && unit.ability.limitPlace) actualPlacement = Math.min(actualPlacement, unit.ability.limitPlace);
+
+    // Synergy: Water God + Underworld God (Placement -1)
+    if (isUnit(unit.id, 'water_god')) {
+        const hbStats = getCachedHotbarStats();
+        if (hbStats.ugPresent) {
+            actualPlacement = Math.max(1, actualPlacement - 1);
+        }
+    }
 
     // --- APPLY UPGRADE STATS (Dmg/Spa/Range) ---
     // Use the forced level if provided, otherwise the selected level from window.unitELevels, else default to MAX
@@ -345,10 +412,12 @@ function createResultEntry({ id, buildName, traitName, res, prio, mainStats, sub
         setName: buildName.split('(')[0].trim(),
         traitName: traitName,
         dps: res.total,
+        bossDps: res.bossTotal,
         dmgVal: res.dmgVal,
         spa: res.spa,
         range: res.range,
         dot: res.dot || 0,
+        bossDot: res.bossTotal - res.hit - res.summon, // Approximation if needed
         dotTotal: res.dotData ? (res.dotData.nativeTotalDmg + (res.dotData.radTotalDmg || 0)) : 0,
         prio: prio,
         mainStats: mainStats,
@@ -790,85 +859,68 @@ function calculateDPS(uStats, relicStats, context) {
             let pCdmg = p.passiveCdmg || 0;
             let pDot = p.dot || 0;
 
-            if (window.isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother") {
-                const hotbar = window.hotbarState;
-                if (hotbar && hotbar.slots) {
-                    let divinityCount = 0;
-                    hotbar.slots.forEach(slot => {
-                        if (!slot) return;
-                        const sUnit = window.getUnitById(slot.id);
-                        if (!sUnit) return;
-                        if (sUnit.tags && sUnit.tags.includes('Divinity')) {
-                            // Use the unit's actual placement count
-                            let count = sUnit.placement || 1;
-                            
-                            // Water God specific penalty: counts as placements - 1
-                            if (window.isUnit(sUnit.id, 'water_god')) {
-                                count = Math.max(0, count - 1);
-                            }
-                            
-                            divinityCount += count;
-                        }
-                    });
-                    
-                    const maxBuff = (context.upgradeLevel >= 2) ? 90 : 60;
-                    pDmg = Math.min(maxBuff, divinityCount * 15);
+            if (isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother") {
+                const hbStats = getCachedHotbarStats();
+                // EXCLUDE SELF: Divinity count already includes self, so we subtract 
+                // the divinity value of this specific unit to get "other divinity"
+                let divinityCount = hbStats.divinityCount;
+                if (uStats.tags && uStats.tags.includes('Divinity')) {
+                    let selfCount = uStats.placement || 1;
+                    if (isUnit(uStats.id, 'water_god')) selfCount = Math.max(0, selfCount - 1);
+                    divinityCount = Math.max(0, divinityCount - selfCount);
                 }
+                
+                const maxBuff = (context.upgradeLevel >= 2) ? 90 : 60;
+                pDmg = Math.min(maxBuff, divinityCount * 15);
             }
 
             // SPECIAL: King Sailor Loadout Mode Overrides
-            if (window.CALCULATION_MODE === 'loadout' && window.isUnit(uStats.id, 'king_sailor')) {
+            if (window.CALCULATION_MODE === 'loadout' && isUnit(uStats.id, 'king_sailor')) {
                 if (p.name === "Manipulator of Fate") {
                     pDmg = 0;
                     pSpa = 0;
 
-                    const hotbar = window.hotbarState;
-                    if (hotbar && hotbar.slots) {
-                        // Check if King Sailor is actually in the hotbar before applying loadout buffs
-                        const isSelfInHotbar = hotbar.slots.some(s => s && (s.id === uStats.id || s.id.split('-')[0] === uStats.id.split('-')[0]));
-                        if (!isSelfInHotbar) {
-                            pDmg = 0;
-                            pSpa = 0;
-                        } else {
-                            const ksTags = uStats.tags || ["Magi", "King", "Hero", "Uncontrollable Power"];
-                            let matchCount = 0;
-                            let mismatchCount = 0;
+                    const hbStats = getCachedHotbarStats();
+                    if (!hbStats.idsInHotbar.has('king_sailor')) {
+                        pDmg = 0;
+                        pSpa = 0;
+                    } else {
+                        const ksTags = uStats.tags || ["Magi", "King", "Hero", "Uncontrollable Power"];
+                        let matchCount = 0;
+                        let mismatchCount = 0;
 
-                            hotbar.slots.forEach((s) => {
-                                if (!s) return;
-                                // Skip King Sailor himself
-                                if (s.id === uStats.id || s.id.split('-')[0] === uStats.id.split('-')[0]) return;
+                        const hotbarSlots = window.hotbarState?.slots || [];
+                        hotbarSlots.forEach((s) => {
+                            if (!s) return;
+                            // Skip King Sailor himself
+                            if (s.id === uStats.id || isUnit(s.id, uStats.id)) return;
 
-                                const sUnit = window.getUnitById(s.id);
-                                if (!sUnit) return;
+                            const sUnit = window.getUnitById(s.id);
+                            if (!sUnit) return;
 
-                                // Determine placement for this slot (Account for Ruler/Trait limits)
-                                let sPlacement = sUnit.placement || 1;
-                                const sTraitId = (window.unitTraits && window.unitTraits[s.id]);
-                                if (sTraitId) {
-                                    const sTrait = (typeof window.getTraitFast === 'function') ? window.getTraitFast(sTraitId) : null;
-                                    // FIX: Ensure limitPlace doesn't result in NaN if undefined
-                                    if (sTrait && sTrait.limitPlace !== undefined) {
-                                        sPlacement = Math.min(sPlacement, sTrait.limitPlace);
-                                    }
+                            // Determine placement for this slot
+                            let sPlacement = sUnit.placement || 1;
+                            const sTraitId = (window.unitTraits && window.unitTraits[s.id]);
+                            if (sTraitId) {
+                                const sTrait = getTraitFast(sTraitId);
+                                if (sTrait && sTrait.limitPlace !== undefined) {
+                                    sPlacement = Math.min(sPlacement, sTrait.limitPlace);
                                 }
+                            }
 
-                                // Check the unit itself
-                                const sTags = sUnit.tags || [];
-                                const hasMatch = ksTags.some(tag => sTags.includes(tag));
+                            const sTags = sUnit.tags || [];
+                            const hasMatch = ksTags.some(tag => sTags.includes(tag));
 
-                                if (hasMatch) matchCount += sPlacement;
-                                else mismatchCount += sPlacement;
+                            if (hasMatch) matchCount += sPlacement;
+                            else mismatchCount += sPlacement;
 
-                                // Count summon placements as tagless mismatches
-                                if (sUnit.summonStats && sUnit.summonStats.maxCount) {
-                                    mismatchCount += (sUnit.summonStats.maxCount * sPlacement);
-                                }
-                            });
+                            if (sUnit.summonStats && sUnit.summonStats.maxCount) {
+                                mismatchCount += (sUnit.summonStats.maxCount * sPlacement);
+                            }
+                        });
 
-                            pDmg = Math.min(50, matchCount * 10);
-                            pSpa = Math.min(25, mismatchCount * 5);
-                        }
+                        pDmg = Math.min(50, matchCount * 10);
+                        pSpa = Math.min(25, mismatchCount * 5);
                     }
                 }
             }
@@ -888,43 +940,6 @@ function calculateDPS(uStats, relicStats, context) {
                 }
             }
 
-            // SPECIAL: Underworld God (Syncro) - As The Eldest Brother
-            if (window.isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother") {
-                if (window.CALCULATION_MODE === 'loadout') {
-                    const hotbar = window.hotbarState;
-                    if (hotbar && hotbar.slots) {
-                        let divinityCount = 0;
-                        hotbar.slots.forEach(s => {
-                            if (!s) return;
-                            const baseId = s.id.split('-')[0];
-                            if (baseId === 'underworld_god') return; // Do not count himself
-
-                            const slotUnit = typeof window.getUnitById === 'function' ? window.getUnitById(baseId) : null;
-                            if (slotUnit && slotUnit.tags && Array.isArray(slotUnit.tags) && slotUnit.tags.includes('Divinity')) {
-                                // Determine placement count for this slot
-                                let placement = slotUnit.placement || 1;
-                                const traitId = (window.unitTraits && window.unitTraits[s.id]);
-                                if (traitId) {
-                                    const traitObj = (typeof window.getTraitFast === 'function') ? window.getTraitFast(traitId) : null;
-                                    if (traitObj && traitObj.limitPlace !== undefined) {
-                                        placement = Math.min(placement, traitObj.limitPlace);
-                                    }
-                                }
-
-                                if (baseId === 'water_god') {
-                                    divityCount += Math.max(1, placement - 1);
-                                } else {
-                                    divinityCount += placement;
-                                }
-                            }
-                        });
-                        const cap = (uStats.ethereal >= 2) ? 90 : 90;
-                        pDmg = Math.min(divinityCount * 15, cap);
-                    }
-                } else if (window.CALCULATION_MODE === 'potential') {
-                    pDmg = (uStats.ethereal >= 2) ? 90 : 90;
-                }
-            }
 
             // Conditional Logic: Unrivaled Mark only applies if in Slot 1 (Leader)
             if (p.name === "Unrivaled Mark") {
@@ -966,21 +981,20 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     // MONARCH'S DEVOTION: Team buff from Ant King (Savage) when Jinoo is in loadout
-    // Gives +10% DMG to all OTHER units on the team (not Ant King itself)
-    if (window.CALCULATION_MODE === 'loadout' && !window.isUnit(uStats.id, 'ant_king_savage')) {
-        const hotbar = window.hotbarState;
-        if (hotbar && hotbar.slots) {
-            const antKingPresent = hotbar.slots.some(s => s && window.isUnit(s.id, 'ant_king_savage'));
-            const jinooPresent = hotbar.slots.some(s => s && (window.isUnit(s.id, 'jinoo_shadow_monarch') || window.isUnit(s.id, 'sjw')));
-            if (antKingPresent && jinooPresent) {
-                passivePcent += 10;
-                passiveBreakdown.push({ name: "Monarch's Devotion", dmg: 10, spa: 0, range: 0, trueDmg: 0, crit: 0, cdmg: 0, dot: 0 });
-            }
+    if (window.CALCULATION_MODE === 'loadout' && !isUnit(uStats.id, 'ant_king_savage')) {
+        const hbStats = getCachedHotbarStats();
+        if (hbStats.akPresent && hbStats.jinooPresent) {
+            passivePcent += 10;
+            passiveBreakdown.push({ name: "Monarch's Devotion", dmg: 10, spa: 0, range: 0, trueDmg: 0, crit: 0, cdmg: 0, dot: 0 });
         }
     }
 
     const totalBossDmg = (uStats.bossDmg || 0) + (traitObj.bossDmg || 0);
-    let traitDmgPct = traitObj.dmg + (totalBossDmg && isBoss ? totalBossDmg : 0), traitSpaPct = traitObj.spa;
+    let traitDmgPctNormal = traitObj.dmg;
+    let traitDmgPctBoss = traitObj.dmg + (totalBossDmg || 0);
+
+    let traitDmgPct = isBoss ? traitDmgPctBoss : traitDmgPctNormal;
+    let traitSpaPct = traitObj.spa;
     let traitCritRate = traitObj.critRate || 0, traitRangePct = traitObj.range || 0, traitDotBuff = (traitObj.dotBuff || 0) + (uStats.dotBuff || 0);
 
     let eternalDmgBuff = 0, eternalRangeBuff = 0;
@@ -1128,6 +1142,8 @@ function calculateDPS(uStats, relicStats, context) {
 
 
     const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1);
+    const finalDmgBoss = lvStats.dmg * (1 + traitDmgPctBoss / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1);
+    const finalDmgNormal = lvStats.dmg * (1 + traitDmgPctNormal / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1);
 
     const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cdmg || 0) + passiveCdmgFromPassives;
     let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
@@ -1139,6 +1155,8 @@ function calculateDPS(uStats, relicStats, context) {
 
     const avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
     const avgHit = finalDmg * avgCritMult;
+    const avgHitBoss = finalDmgBoss * avgCritMult;
+    const avgHitNormal = finalDmgNormal * avgCritMult;
 
     // --- SPECIAL ATTACK RATE LOGIC ---
     let attackMultiplier = 1;
@@ -1265,6 +1283,8 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     let hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
+    let bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
+    let normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
 
     // True Damage Conversion Logic (No longer a multiplier)
     let trueDmgPct = ((uStats.trueDmg || 0) + trueDmgFromPassives);
@@ -1275,12 +1295,14 @@ function calculateDPS(uStats, relicStats, context) {
     const trueDmgVal = hitDpsTotal * (trueDmgPct / 100);
     const normalDmgVal = hitDpsTotal * (1 - trueDmgPct / 100);
     let finalHitDps = hitDpsTotal;
+    let finalBossHitDps = bossHitDpsTotal;
 
     // Add King Sailor's Chain Lightning DPS (NO Crit, No True Damage)
     let chainLightningDps = 0;
     if (uStats.id === 'king_sailor') {
         chainLightningDps = ((finalDmg * 0.20) / usedSpa) * placement;
         finalHitDps += chainLightningDps;
+        finalBossHitDps += ((finalDmgBoss * 0.20) / usedSpa) * placement;
     }
 
     let { summonDpsTotal, summonData } = _calcSummonDPS(uStats, finalDmg, finalSpa, placement);
@@ -1354,9 +1376,10 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     const gearDotBonus = baseR_Dot + headDotBuff + (sBonus.dot || 0);
-    const { dotDpsTotal, dotBreakdown } = _calcDoTDPS({ ...uStats, dot: (uStats.dot || 0) + passiveDotFromPassives, isBoss: context.isBoss }, traitObj, traitDotBuff, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult);
+    const { dotDpsTotal, bossDotDpsTotal, dotBreakdown } = _calcDoTDPS({ ...uStats, dot: (uStats.dot || 0) + passiveDotFromPassives, isBoss: context.isBoss }, traitObj, traitDotBuff, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult);
 
     let finalDotDps = dotDpsTotal;
+    let finalBossDotDps = bossDotDpsTotal;
 
     if (uStats.customFollowUp) {
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
@@ -1365,8 +1388,12 @@ function calculateDPS(uStats, relicStats, context) {
 
         // FUA DoT: dotPct is TOTAL bleed damage (not per-tick), DoT doesn't crit so use finalDmg
         let followUpDotDmg = finalDmg * (uStats.customFollowUp.dotPct / 100);
+        let followUpDotDmgBoss = finalDmgBoss * (uStats.customFollowUp.dotPct / 100);
         let followUpDotDpsPerCycle = (followUpDotDmg * (chance / 100)) / usedSpa;
+        let followUpDotDpsPerCycleBoss = (followUpDotDmgBoss * (chance / 100)) / usedSpa;
+        
         finalDotDps += followUpDotDpsPerCycle * placement;
+        finalBossDotDps += followUpDotDpsPerCycleBoss * placement;
 
         // Add to breakdown for UI rendering
         if (dotBreakdown) {
@@ -1382,6 +1409,7 @@ function calculateDPS(uStats, relicStats, context) {
 
     return {
         total: (finalHitDps + finalDotDps + finalSummonDps),
+        bossTotal: (finalBossHitDps + finalBossDotDps + finalSummonDps), // Summons scaling can be added later if needed
         hit: finalHitDps,
         baseHitDps: hitDpsTotal,
         trueDmgPct,

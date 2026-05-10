@@ -22,6 +22,11 @@ function renderOverviewSection(data) {
                 <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">TOTAL DPS</span>
                 <b class="math-val-gold" style="font-size: 0.85rem;">${fmt.num(data.total)}</b>
             </div>
+            ${data.bossTotal && Math.abs(data.bossTotal - data.total) > 1 ? `
+            <div class="math-row" style="margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px;">
+                <span style="font-size: 0.55rem; font-weight: 700; color: #f87171; letter-spacing: 0.5px;">BOSS DPS</span>
+                <b style="font-size: 0.85rem; color: #f87171;">${fmt.num(data.bossTotal)}</b>
+            </div>` : ''}
             ${(data.summon > 0 && (!data.summonData || !data.summonData.isCustom)) ? `
             <div class="math-row" style="margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px;">
                 <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">${isNutaru ? 'CLONES' : 'PLANES'} ACTIVE</span>
@@ -29,7 +34,10 @@ function renderOverviewSection(data) {
             </div>` : ''}
             <div class="math-row" style="margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px;">
                 <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">PLACEMENT</span>
-                <b style="font-size: 0.7rem;">${data.placement} Unit(s)</b>
+                <div style="text-align: right;">
+                    <b style="font-size: 0.7rem;">${data.placement} Unit(s)</b>
+                    ${data.placement < (data.baseStats.placement || 1) ? `<div style="font-size: 0.5rem; color: #f87171; font-weight: 700;">(Synergy Reduction Active)</div>` : ''}
+                </div>
             </div>
             <div class="math-row" style="margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 4px;">
                 <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">UNIT TYPE</span>
