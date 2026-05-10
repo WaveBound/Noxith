@@ -58,7 +58,10 @@
                         return result;
                     });
                 };
-                target[prop] = { bugged: unpackList(rawData.bugged, "b"), fixed: unpackList(rawData.fixed, "f") };
+                target[prop] = { 
+                    bugged: rawData.bugged ? unpackList(rawData.bugged, "b") : [], 
+                    fixed: rawData.fixed ? unpackList(rawData.fixed, "f") : [] 
+                };
                 D[prop] = null;
                 return target[prop];
             }

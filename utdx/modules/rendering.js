@@ -611,7 +611,7 @@ window.getQuickScore = (unit) => {
 
     let score = 0;
     if (window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {
-        const list = window.STATIC_BUILD_DB[dbKey]['fixed']?.[0];
+        const list = window.STATIC_BUILD_DB[dbKey]['fixed'];
         if (list && list.length > 0) {
             score = window.isUnit(unit.id, 'law') ? (list[0].range || 0) : list[0].dps;
         }
@@ -642,7 +642,7 @@ window.getLiveScore = (unit) => {
     let dbKey = unitId;
     if (activeType === 'abil' && !unit.allowMultipleModes) dbKey += '_abil';
 
-    const buildList = window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey] ? window.STATIC_BUILD_DB[dbKey]['fixed']?.[0] : null;
+    const buildList = window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey] ? window.STATIC_BUILD_DB[dbKey]['fixed'] : null;
 
     if (!buildList || buildList.length === 0) {
         return window.getQuickScore(unit);

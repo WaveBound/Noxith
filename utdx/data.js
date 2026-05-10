@@ -586,7 +586,7 @@ const creditsData = [
 // ============================================================================
 const UNIT_FILES = [
     'sukuna.js',
-    'jingliu.js',
+    'Jingliu.js',
     'Maid.js',
     'ace.js',
     'akainu.js',
