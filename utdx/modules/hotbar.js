@@ -23,6 +23,47 @@ const getActiveFusions = () => {
     return fusions;
 };
 
+/**
+ * Performs a full team-wide recalculation for all hotbar units.
+ * This should be called only when the team composition or global buffs change.
+ */
+function recalculateHotbarTeam() {
+    const hiddenContainer = document.getElementById('hotbarHiddenRender');
+    
+    // Determine which units need recalculating
+    const hotbarUnitIds = hotbarState.slots.filter(u => u !== null).map(u => u.id);
+    
+    // Also include active fusion units in the refresh
+    const activeFusions = getActiveFusions();
+    activeFusions.forEach(f => {
+        if (!hotbarUnitIds.includes(f.id)) {
+            hotbarUnitIds.push(f.id);
+        }
+    });
+
+    hotbarUnitIds.forEach(id => {
+        const u = typeof window.getUnitById === 'function' ? window.getUnitById(id) : null;
+        if (!u) return;
+        
+        const isAssistant = u.tags && u.tags.includes('Assistant');
+        if (isAssistant) return;
+        
+        // Ensure hidden card exists
+        if (!document.getElementById('card-' + id) && hiddenContainer && typeof renderUnitCard === 'function') {
+            const card = renderUnitCard(u, 0);
+            hiddenContainer.appendChild(card);
+        }
+        
+        // Clear caches and force recalculation
+        if (typeof window.resetCachesForBuffChange === 'function') {
+            window.resetCachesForBuffChange(id);
+        }
+        if (typeof updateBuildListDisplay === 'function') {
+            updateBuildListDisplay(id, true);
+        }
+    });
+}
+
 const getDetailedUnitStats = (unitId) => {
     const fullUnit = typeof window.getUnitById === 'function' ? window.getUnitById(unitId) : null;
     if (!fullUnit) return null;
@@ -36,12 +77,9 @@ const getDetailedUnitStats = (unitId) => {
     const hasCard = !!document.getElementById('card-' + unitId);
     
     if (hasCard) {
-        // Card exists — clear cache and recalculate through the full rendering pipeline
-        if (typeof window.resetCachesForBuffChange === 'function') {
-            window.resetCachesForBuffChange(unitId);
-        }
-        if (typeof updateBuildListDisplay === 'function') {
-            updateBuildListDisplay(unitId, true);
+        // Only force recalculate if explicitly requested or if cache is missing
+        if (!bestBuild || typeof window.resetCachesForBuffChange === 'function') {
+            // rely on the pre-pass having already run for performance
             bestBuild = window.hotbarFilteredBuilds && window.hotbarFilteredBuilds[unitId]
                 ? window.hotbarFilteredBuilds[unitId]
                 : bestBuild;
@@ -166,28 +204,8 @@ function openTeamSummary() {
     let unitsToProcess = [...hotbarState.slots.filter(u => u !== null)];
     const teamEffects = []; // Collect all CC/debuff effects across the team
 
-    // PRE-PASS: Ensure all hotbar units have hidden cards and fresh calculations
-    // This is critical for team-composition-dependent passives (e.g. King Sailor's Manipulator of Fate)
-    const hiddenContainer = document.getElementById('hotbarHiddenRender');
-    hotbarState.slots.forEach(u => {
-        if (!u) return;
-        const isAssistant = u.tags && u.tags.includes('Assistant');
-        if (isAssistant) return;
-        
-        // Ensure hidden card exists
-        if (!document.getElementById('card-' + u.id) && hiddenContainer && typeof renderUnitCard === 'function') {
-            const card = renderUnitCard(u, 0);
-            hiddenContainer.appendChild(card);
-        }
-        
-        // Clear cache and force recalculation with current team context
-        if (typeof window.resetCachesForBuffChange === 'function') {
-            window.resetCachesForBuffChange(u.id);
-        }
-        if (typeof updateBuildListDisplay === 'function') {
-            updateBuildListDisplay(u.id, true);
-        }
-    });
+    // Rely on the hotbar's existing cache for speed
+    // Calculations are kept fresh by updateHotbarUI(true) called on changes
 
     // If fusion is active, process fused units instead of components
     if (hotbarState.fusionMode) {
@@ -266,7 +284,7 @@ function openTeamSummary() {
         } else if (unit.id === 'crow_shinobi') {
             effects.push({ label: 'Amaterasu', val: 'Passive', color: '#f87171' });
             effects.push({ label: 'Time Snail', val: '+20% DoT & Status | 30% Slow (3s)', color: '#fb923c' });
-        } else if (unit.id === 'strongest_of_today') {
+        } else if (unit.id === 'the_strongest_of_today') {
             effects.push({ label: 'Limitless', val: '40% Slow (5s) | +25% Dmg Taken in Range', color: '#60a5fa' });
             effects.push({ label: 'On Crit', val: 'Timestops enemies for 4s', color: '#a78bfa' });
             effects.push({ label: 'Domain Expansion', val: 'Timestops map for 30s', color: '#c084fc' });
@@ -284,6 +302,10 @@ function openTeamSummary() {
         } else if (unit.id === 'prodigy_mage') {
             effects.push({ label: 'Prodigy Slow', val: '30% Slow for 5s', color: '#38bdf8' });
             effects.push({ label: 'Prodigy Stun', val: 'Stun for 2.5s', color: '#a78bfa' });
+        } else if (unit.id === 'unparalleled_armor') {
+            effects.push({ label: 'Ancient Shinobi', val: 'Stun or Confuse (3s)', color: '#fbbf24' });
+        } else if (unit.id === 'majestic_armor') {
+            // Combined Might removed as per user request
         }
 
         // Push to team-wide effects tracker
@@ -625,15 +647,11 @@ function handleHotbarBuffToggle(configKey, checkbox) {
             window.applyBuffContext(hotbarState.buffState);
         }
 
-        // Temporarily swap STATIC_BUILD_DB to the hotbar DB so processUnitCache
-        // and updateBuildListDisplay pull builds from the correct pre-computed table
+        // Temporarily swap STATIC_BUILD_DB to the hotbar DB so calculations pull from correct pre-computed table
         const savedDb = window.STATIC_BUILD_DB;
         window.STATIC_BUILD_DB = window.HOTBAR_STATIC_BUILD_DB || savedDb;
 
-        hotbarUnitIds.forEach(id => {
-            window.resetCachesForBuffChange(id);
-            if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(id);
-        });
+        recalculateHotbarTeam();
 
         // Restore global DB + global buff context
         window.STATIC_BUILD_DB = savedDb;
@@ -641,7 +659,6 @@ function handleHotbarBuffToggle(configKey, checkbox) {
             window.applyBuffContext(window.GLOBAL_BUFF_STATE || {});
         }
 
-        // Pull fresh hotbarFilteredBuilds values into totals
         updateHotbarUI();
     });
 }
@@ -736,13 +753,7 @@ function initHotbar() {
                     hotbarState.slots[toIndex] = hotbarState.slots[fromIndex];
                     hotbarState.slots[fromIndex] = temp;
                     
-                    // Force a re-calculation for all units involved to update leader passives
-                    hotbarState.slots.forEach(u => {
-                        if (u && typeof window.resetCachesForBuffChange === 'function') {
-                            window.resetCachesForBuffChange(u.id);
-                        }
-                    });
-
+                    recalculateHotbarTeam();
                     updateHotbarUI();
                 }
             });
@@ -899,64 +910,6 @@ function addUnitToHotbar(unit, forceAdd = false) {
     const slots = hotbarState.slots;
     const unitIds = slots.filter(u => u !== null).map(u => u.id);
 
-    // Special Case: Unparalleled Armor
-    if (window.isUnit(unit.id, 'unparalleled_armor')) {
-        const hasShinobi = unitIds.includes(window.getUnitId('ancient_shinob'));
-        const hasNutaru = unitIds.includes(window.getUnitId('nutaru_beast'));
-        const isComplete = hasShinobi && hasNutaru;
-
-        if (isComplete && !forceAdd) {
-            const hasSasuke = unitIds.includes(window.getUnitId('sasuke_great_war'));
-
-            const idxShinobi = slots.findIndex(s => s && window.isUnit(s.id, 'ancient_shinob'));
-            if (idxShinobi !== -1) clearHotbarSlot(idxShinobi);
-
-            if (!hasSasuke) {
-                const idxNutaru = slots.findIndex(s => s && window.isUnit(s.id, 'nutaru_beast'));
-                if (idxNutaru !== -1) clearHotbarSlot(idxNutaru);
-            }
-        } else {
-            if (!hasShinobi) {
-                const u = unitDatabase.find(x => window.isUnit(x.id, 'ancient_shinob'));
-                if (u) _executeAddUnit(u, true);
-            }
-            if (!hasNutaru) {
-                const u = unitDatabase.find(x => window.isUnit(x.id, 'nutaru_beast'));
-                if (u) _executeAddUnit(u, true);
-            }
-        }
-        return;
-    }
-
-    // Special Case: Majestic Armor
-    if (window.isUnit(unit.id, 'majestic_armor')) {
-        const hasSasuke = unitIds.includes(window.getUnitId('sasuke_great_war'));
-        const hasNutaru = unitIds.includes(window.getUnitId('nutaru_beast'));
-        const isComplete = hasSasuke && hasNutaru;
-
-        if (isComplete && !forceAdd) {
-            const hasShinobi = unitIds.includes(window.getUnitId('ancient_shinob'));
-
-            const idxSasuke = slots.findIndex(s => s && window.isUnit(s.id, 'sasuke_great_war'));
-            if (idxSasuke !== -1) clearHotbarSlot(idxSasuke);
-
-            if (!hasShinobi) {
-                const idxNutaru = slots.findIndex(s => s && window.isUnit(s.id, 'nutaru_beast'));
-                if (idxNutaru !== -1) clearHotbarSlot(idxNutaru);
-            }
-        } else {
-            if (!hasSasuke) {
-                const u = unitDatabase.find(x => window.isUnit(x.id, 'sasuke_great_war'));
-                if (u) _executeAddUnit(u, true);
-            }
-            if (!hasNutaru) {
-                const u = unitDatabase.find(x => window.isUnit(x.id, 'nutaru_beast'));
-                if (u) _executeAddUnit(u, true);
-            }
-        }
-        return;
-    }
-
     _executeAddUnit(unit, forceAdd);
 }
 
@@ -993,19 +946,7 @@ function _executeAddUnit(unit, onlyAdd = false) {
                 }
             }
             checkHotbarSynergies();
-
-            // SYNERGY REFRESH: Re-render all other hotbar units so synergy-dependent
-            // stats update (e.g., Devil Hunter gaining Bleed source, King Sailor placement math)
-            hotbarState.slots.forEach(s => {
-                if (!s || s.id === unit.id) return;
-                if (typeof window.resetCachesForBuffChange === 'function') {
-                    window.resetCachesForBuffChange(s.id);
-                }
-                if (typeof updateBuildListDisplay === 'function') {
-                    updateBuildListDisplay(s.id, true);
-                }
-            });
-
+            recalculateHotbarTeam();
             updateHotbarUI();
         }, 0);
     }
@@ -1082,18 +1023,7 @@ function clearHotbarSlot(index) {
             updateBuildListDisplay(unit.id);
         }
 
-        // SYNERGY REFRESH: Re-render all remaining hotbar units so synergy-dependent 
-        // stats update (e.g., Devil Hunter losing Bleed source, King Sailor placement math)
-        hotbarState.slots.forEach(s => {
-            if (!s) return;
-            if (typeof window.resetCachesForBuffChange === 'function') {
-                window.resetCachesForBuffChange(s.id);
-            }
-            if (typeof updateBuildListDisplay === 'function') {
-                updateBuildListDisplay(s.id, true);
-            }
-        });
-
+        recalculateHotbarTeam();
         checkHotbarSynergies();
         updateHotbarUI();
     }
@@ -1198,6 +1128,7 @@ function updateHotbarUI() {
         'ancient_mage': ['ancientMage'],
         'king_sailor': ['kingSailor'],
         'prodigy_mage': ['mageHill', 'mageGround'],
+        'unparalleled_armor': ['bijuu'],
         'bulma': ['bulma']
     };
 
@@ -1279,30 +1210,6 @@ function updateHotbarUI() {
     if (hotbarState.fusionMode) {
         activeFusions.forEach(f => f.components.forEach(c => fusionSkipIds.add(c)));
     }
-
-    // PRE-PASS: Ensure all hotbar units have hidden cards and fresh calculations
-    // This makes sure stats like King Sailor's Manipulator of Fate update live in the hotbar 
-    // even when you add matching units from a completely different page.
-    const hiddenContainer = document.getElementById('hotbarHiddenRender');
-    hotbarState.slots.forEach(u => {
-        if (!u) return;
-        const isAssistant = u.tags && u.tags.includes('Assistant');
-        if (isAssistant) return;
-        
-        // Ensure hidden card exists for units added from other pages
-        if (!document.getElementById('card-' + u.id) && hiddenContainer && typeof renderUnitCard === 'function') {
-            const card = renderUnitCard(u, 0);
-            hiddenContainer.appendChild(card);
-        }
-        
-        // Force recalculation for the entire hotbar to catch team-composition changes
-        if (typeof window.resetCachesForBuffChange === 'function') {
-            window.resetCachesForBuffChange(u.id);
-        }
-        if (typeof updateBuildListDisplay === 'function') {
-            updateBuildListDisplay(u.id, true);
-        }
-    });
 
     const getUnitStats = (unitId) => {
         const detail = getDetailedUnitStats(unitId);

@@ -958,7 +958,7 @@ body.modal-open .unit-hotbar {
     border-radius: 10px;
     border: 1px solid rgba(255,255,255,0.06);
     background: rgba(255,255,255,0.02);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -995,7 +995,7 @@ body.modal-open .unit-hotbar {
 
 .ts-unit-card {
     background: rgba(15, 15, 20, 0.5);
-    backdrop-filter: blur(25px);
+    backdrop-filter: blur(8px);
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 20px;
     padding: 20px;
