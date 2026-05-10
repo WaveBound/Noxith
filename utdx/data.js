@@ -127,6 +127,7 @@ window.GLOBAL_BUFF_DATA = {
         color: '#f472b6',
         math: (uStats) => ({ crit: 15 }),
         renderLabel: "Active: +15% Crit Rate",
+        tags: ["Assistant"],
         genType: 'boolean'
     },
 };
@@ -585,14 +586,13 @@ const creditsData = [
 // ============================================================================
 const UNIT_FILES = [
     'sukuna.js',
-    'Jingliu.js',
+    'jingliu.js',
     'Maid.js',
     'ace.js',
     'akainu.js',
     'ancient_mage.js',
     'ancient_shinob.js',
     'ant_king_savage.js',
-    'bambietta.js',
     'cell.js',
     'crow_shinobi.js',
     'esdeath.js',

@@ -85,6 +85,7 @@ const getDetailedUnitStats = (unitId) => {
         dps: totalDps, 
         teamDmg: totalDmg, 
         teamDps: totalDps,
+        placementsCounted: placements,
         placements: placements
     };
 };
@@ -134,6 +135,15 @@ function openTeamSummary() {
 
     let html = `
         <div class="team-summary-container">
+            <div class="ts-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <h2 style="margin: 0; color: #e2e8f0; font-size: 1.4rem; display: flex; align-items: center; gap: 10px; font-weight: 900; letter-spacing: 1.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                    <i class="fas fa-swords" style="color: var(--accent-start);"></i> TEAM SUMMARY
+                </h2>
+                <button onclick="closeModal('universalModal')" style="width: 32px; height: 32px; font-size: 1.4rem; background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3); color: #fb7185; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 900; transition: 0.2s; padding-bottom: 2px;" onmouseover="this.style.background='rgba(244, 63, 94, 0.2)'" onmouseout="this.style.background='rgba(244, 63, 94, 0.1)'" title="Close">
+                    &times;
+                </button>
+            </div>
+            
             <div class="ts-section">
                 <h3 class="ts-title">ACTIVE HOTBAR BUFFS</h3>
                 <div class="ts-buffs-list">
@@ -229,6 +239,47 @@ function openTeamSummary() {
         if (stats.stunDuration) effects.push({ label: 'Stun', val: `${stats.stunDuration}s`, color: '#fbbf24' });
         if (stats.timestopDuration) effects.push({ label: 'Timestop', val: `${stats.timestopDuration}s`, color: '#a78bfa' });
         if (stats.hasRadiation) effects.push({ label: 'Radiation', val: `+${stats.radiationPct || 20}% Dmg Taken (${stats.radiationDuration || 6}s)`, color: '#f87171' });
+        
+        // Get active mode name for mode-specific effects
+        let activeModeName = null;
+        if (unit.modes && Array.isArray(unit.modes)) {
+            const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+            const currentModeObj = unit.modes[activeMode];
+            if (currentModeObj) activeModeName = currentModeObj.name.toLowerCase();
+        }
+
+        // Custom Unit Effects requested by user
+        if (unit.id === 'underworld_god') {
+            effects.push({ label: 'Primordial Power', val: '30% Slow (3s) | +20% DoT/Affliction', color: '#60a5fa' });
+        } else if (unit.id === 'water_god') {
+            effects.push({ label: 'Primordial Power', val: '30% Slow (3s) | +20% DoT Duration', color: '#60a5fa' });
+            effects.push({ label: 'God of the Seas', val: '+30% DoT Dmg / Duration to enemies', color: '#38bdf8' });
+        } else if (unit.id === 'sasuke_great_war') {
+            effects.push({ label: 'Pure Hatred', val: 'Applies Hatred (5s) | +15% Dmg Taken', color: '#a855f7' });
+            effects.push({ label: 'Dark Stun', val: 'Stuns Dark enemies for 3s', color: '#fcd34d' });
+        } else if (unit.id === 'crow_shinobi') {
+            effects.push({ label: 'Amaterasu', val: 'Passive', color: '#f87171' });
+            effects.push({ label: 'Time Snail', val: '+20% DoT & Status | 30% Slow (3s)', color: '#fb923c' });
+        } else if (unit.id === 'strongest_of_today') {
+            effects.push({ label: 'Limitless', val: '40% Slow (5s) | +25% Dmg Taken in Range', color: '#60a5fa' });
+            effects.push({ label: 'On Crit', val: 'Timestops enemies for 4s', color: '#a78bfa' });
+            effects.push({ label: 'Domain Expansion', val: 'Timestops map for 30s', color: '#c084fc' });
+        } else if (unit.id === 'alpha_devil' && activeModeName === 'katana') {
+            effects.push({ label: 'Katana Mode', val: 'Stuns enemies for 3s', color: '#fcd34d' });
+        } else if (unit.id === 'devil_hunter' && activeModeName === 'demoncycle') {
+            effects.push({ label: 'Demoncycle Mode', val: 'Stuns +2s per DoT applied to enemy', color: '#f87171' });
+        } else if (unit.id === 'ancient_mage' && activeModeName === 'utility') {
+            effects.push({ label: 'Utility Stun', val: 'Stun (2s) | +20% Dmg Taken', color: '#a78bfa' });
+            effects.push({ label: 'Utility Slow', val: '75% Slow for 5s', color: '#38bdf8' });
+        } else if (unit.id === 'mimicry_sorcerer' && activeModeName === 'infinity sorcerer') {
+            effects.push({ label: 'Infinity Mode', val: '+15% Dmg Taken | 30% Slow (5s) | Stun (3s)', color: '#818cf8' });
+        } else if (unit.id === 'enlightenedgod' && activeModeName === 'shield of fear') {
+            effects.push({ label: 'Shield of Fear', val: 'Converts Debuffs to Buffs', color: '#fbbf24' });
+        } else if (unit.id === 'prodigy_mage') {
+            effects.push({ label: 'Prodigy Slow', val: '30% Slow for 5s', color: '#38bdf8' });
+            effects.push({ label: 'Prodigy Stun', val: 'Stun for 2.5s', color: '#a78bfa' });
+        }
+
         // Push to team-wide effects tracker
         effects.forEach(e => teamEffects.push({ ...e, unitName: unit.name }));
 
@@ -265,14 +316,38 @@ function openTeamSummary() {
                             <img src="${unit.img}" class="ts-unit-img">
                         </div>
                         <div class="ts-unit-info">
-                            <span class="ts-unit-name">${unit.name}</span>
+                            <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                                <span class="ts-unit-name">${unit.name}</span>
+                            </div>
                             <div class="ts-unit-trait">${traitName}</div>
+                            ${(() => {
+                                if (unit.modes && Array.isArray(unit.modes)) {
+                                    const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+                                    const currentMode = unit.modes[activeMode];
+                                    const isSummon = unit.modesLabel && unit.modesLabel.toLowerCase() === 'summons';
+                                    if (currentMode && !isSummon) {
+                                        return `<div class="ts-unit-mode" style="margin-top: 4px; font-size: 0.75rem; color: #c084fc; font-weight: 800; background: rgba(192, 132, 252, 0.1); border: 1px solid rgba(192, 132, 252, 0.3); padding: 2px 6px; border-radius: 4px; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; display: inline-block;" title="${currentMode.name}">⚙ MODE: ${currentMode.name.toUpperCase()}</div>`;
+                                    }
+                                }
+                                return '';
+                            })()}
+                            ${(() => {
+                                if (!isLoadout || !build.baseStats || !build.baseStats.requiresDot) return '';
+                                const req = build.baseStats.requiresDot;
+                                const isMet = build.dotData && !build.dotData.inactive;
+                                return `
+                                    <div class="ts-synergy-badge ${isMet ? 'active' : 'missing'}">
+                                        <i class="fas ${isMet ? 'fa-link' : 'fa-link-slash'}"></i> 
+                                        ${isMet ? 'SYNCED' : 'REQUIRED'}: ${req.toUpperCase()}
+                                    </div>
+                                `;
+                            })()}
                         </div>
                     </div>
                     <div class="ts-header-right">
                         <div class="ts-dps-box">
                             <div class="ts-dps-val">${format(detail.dps)}</div>
-                            <div class="ts-dps-label">UNIT DPS</div>
+                            <div class="ts-dps-label">TOTAL DPS (x${detail.placementsCounted})</div>
                         </div>
                     </div>
                 </div>
@@ -481,7 +556,14 @@ function openTeamSummary() {
 
 
     if (typeof showUniversalModal === 'function') {
-        showUniversalModal({ title: '⚔️ TEAM SUMMARY', content: html, size: 'modal-lg' });
+        showUniversalModal({
+            title: '',
+            content: html,
+            size: 'modal-lg',
+            headerClass: 'hidden-header',
+            footerClass: 'hidden-header',
+            boxClass: 'modal-transparent'
+        });
     } else {
         alert("Modal system not found. Check console for data.");
         console.log("Team Summary HTML:", html);
@@ -697,6 +779,7 @@ function initHotbar() {
 
         const farmUnits = [
             { id: 'bulma', name: 'Bulma', img: 'images/units/Bulma.png', tags: ['Assistant'] },
+            { id: 'miku', name: 'Miku', img: 'images/units/Miku.png', tags: ['Assistant'] },
             { id: 'speedwagon', name: 'Speedcart', img: 'images/units/Speedwagon.png', tags: ['Hero', 'Assistant'] }
         ];
 
@@ -903,8 +986,75 @@ function _executeAddUnit(unit, onlyAdd = false) {
                     }
                 }
             }
+            checkHotbarSynergies();
+
+            // SYNERGY REFRESH: Re-render all other hotbar units so synergy-dependent
+            // stats update (e.g., Devil Hunter gaining Bleed source, King Sailor placement math)
+            hotbarState.slots.forEach(s => {
+                if (!s || s.id === unit.id) return;
+                if (typeof window.resetCachesForBuffChange === 'function') {
+                    window.resetCachesForBuffChange(s.id);
+                }
+                if (typeof updateBuildListDisplay === 'function') {
+                    updateBuildListDisplay(s.id, true);
+                }
+            });
+
             updateHotbarUI();
         }, 0);
+    }
+}
+
+function checkHotbarSynergies() {
+    if (window.CALCULATION_MODE !== 'loadout') return;
+    
+    const slots = hotbarState.slots.filter(u => u !== null);
+    const unitIds = slots.map(u => u.id);
+    
+    // Ant King / Jinoo Auto-Toggle
+    const hasJinoo = unitIds.some(id => window.isUnit(id, 'jinoo_shadow_monarch') || window.isUnit(id, 'sjw'));
+    const antKing = slots.find(s => window.isUnit(s.id, 'ant_king_savage'));
+    
+    if (antKing) {
+        const isCurrentlyActive = activeAbilityIds.has(antKing.id);
+        if (hasJinoo) {
+            if (!isCurrentlyActive) {
+                activeAbilityIds.add(antKing.id);
+                const card = document.getElementById('card-' + antKing.id);
+                if (card) {
+                    card.classList.add('use-ability');
+                    const cb = card.querySelector('.ability-cb');
+                    if (cb) {
+                        cb.checked = true;
+                        cb.parentNode.classList.add('is-checked');
+                    }
+                    const label = card.querySelector('.ut-ability-text');
+                    const override = (typeof TOGGLE_OVERRIDES !== 'undefined') ? TOGGLE_OVERRIDES[window.getFileName(antKing.id)] : null;
+                    if (label && override && override.dynamicLabel) label.innerText = override.dynamicLabel(true);
+                }
+                if (typeof window.resetCachesForBuffChange === 'function') window.resetCachesForBuffChange(antKing.id);
+                if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(antKing.id, true);
+            }
+        } else {
+            // Deactivate if Jinoo is gone
+            if (isCurrentlyActive) {
+                activeAbilityIds.delete(antKing.id);
+                const card = document.getElementById('card-' + antKing.id);
+                if (card) {
+                    card.classList.remove('use-ability');
+                    const cb = card.querySelector('.ability-cb');
+                    if (cb) {
+                        cb.checked = false;
+                        cb.parentNode.classList.remove('is-checked');
+                    }
+                    const label = card.querySelector('.ut-ability-text');
+                    const override = (typeof TOGGLE_OVERRIDES !== 'undefined') ? TOGGLE_OVERRIDES[window.getFileName(antKing.id)] : null;
+                    if (label && override && override.dynamicLabel) label.innerText = override.dynamicLabel(false);
+                }
+                if (typeof window.resetCachesForBuffChange === 'function') window.resetCachesForBuffChange(antKing.id);
+                if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(antKing.id, true);
+            }
+        }
     }
 }
 
@@ -917,6 +1067,28 @@ function clearHotbarSlot(index) {
         const hiddenCard = document.querySelector('#hotbarHiddenRender #card-' + unit.id);
         if (hiddenCard) hiddenCard.remove();
 
+        // FORCED RE-RENDER: Ensure the database card resets to global state (removes hotbar buffs)
+        if (typeof window.resetCachesForBuffChange === 'function') {
+            window.resetCachesForBuffChange(unit.id);
+        }
+        if (typeof updateBuildListDisplay === 'function') {
+            // Re-render removed unit without hotbar context
+            updateBuildListDisplay(unit.id);
+        }
+
+        // SYNERGY REFRESH: Re-render all remaining hotbar units so synergy-dependent 
+        // stats update (e.g., Devil Hunter losing Bleed source, King Sailor placement math)
+        hotbarState.slots.forEach(s => {
+            if (!s) return;
+            if (typeof window.resetCachesForBuffChange === 'function') {
+                window.resetCachesForBuffChange(s.id);
+            }
+            if (typeof updateBuildListDisplay === 'function') {
+                updateBuildListDisplay(s.id, true);
+            }
+        });
+
+        checkHotbarSynergies();
         updateHotbarUI();
     }
 }
@@ -1034,9 +1206,22 @@ function updateHotbarUI() {
     if (window.GLOBAL_BUFF_DATA) {
         Object.keys(window.GLOBAL_BUFF_DATA).forEach(configKey => {
             const config = window.GLOBAL_BUFF_DATA[configKey];
-            if (activeBuffsInHotbar.has(configKey)) {
+            const isProvided = activeBuffsInHotbar.has(configKey);
+            
+            if (isProvided) {
                 availableConfigs.push({ configKey, config });
             } else {
+                // AUTO-DISABLE: If no provider is in hotbar, ensure the buff is OFF
+                if (hotbarState.buffState[configKey]) {
+                    hotbarState.buffState[configKey] = false;
+                    if (window.HOTBAR_BUFF_STATE) window.HOTBAR_BUFF_STATE[configKey] = false;
+                    
+                    // If we auto-disabled a buff, we need to force the database to refresh 
+                    // so any cards reflecting hotbar stats are updated.
+                    if (typeof window.renderDatabase === 'function') {
+                        setTimeout(() => window.renderDatabase(), 0);
+                    }
+                }
             }
         });
     }

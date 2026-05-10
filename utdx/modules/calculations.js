@@ -12,11 +12,11 @@ const _setCacheMap = new Map();
 window.getTraitFast = (idOrName) => {
     if (!idOrName) return null;
     const lowerSearch = idOrName.toLowerCase();
-    
+
     if (_traitCacheMap.size === 0) {
-        traitsList.forEach(t => { 
-            _traitCacheMap.set(t.id.toLowerCase(), t); 
-            _traitCacheMap.set(t.name.toLowerCase(), t); 
+        traitsList.forEach(t => {
+            _traitCacheMap.set(t.id.toLowerCase(), t);
+            _traitCacheMap.set(t.name.toLowerCase(), t);
         });
     }
 
@@ -156,10 +156,10 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
             const isDescription = lowU.includes('instead of') || lowU.includes('increased to');
             const valueMatch = lowU.match(/([+-]\d+)%/); // Requires explicit + or -
             const gainMatch = lowU.match(/(?:gain|increase|plus)\s*(\d+)%/); // Matches "Gain 10%"
-            
+
             if (!isDescription && (valueMatch || gainMatch) && !lowU.includes('per placement')) {
                 const val = valueMatch ? parseInt(valueMatch[1]) : parseInt(gainMatch[1]);
-                
+
                 if (lowU.includes('damage') || lowU.includes('dmg') || lowU.includes('atk')) {
                     effectiveStats.passiveDmg = (effectiveStats.passiveDmg || 0) + val;
                 }
@@ -250,7 +250,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
             if (isMulti) {
                 // Multi-mode units (like Jinoo) handle their logic in customSummons loop,
                 // so we don't pick a single 'default' mode here.
-                modeData = null; 
+                modeData = null;
             } else {
                 const modeIdx = (state !== undefined) ? state : 0;
                 modeData = unit.modes[modeIdx];
@@ -273,6 +273,8 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
                 else if (targetKey === 'bossdmg') targetKey = 'bossDmg';
                 else if (targetKey === 'bossdot') targetKey = 'bossDot';
                 else if (targetKey === 'dotbuff') targetKey = 'dotBuff';
+                else if (targetKey === 'requiresdot') targetKey = 'requiresDot';
+                else if (targetKey === 'dottype') targetKey = 'dotType';
 
                 // Attribute passive stats to the mode's name in the passives array!
                 if (['passivedmg', 'passivespa', 'passivecrit', 'passivecdmg', 'truedmg'].includes(targetKey)) {
@@ -293,7 +295,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
                 if (!effectiveStats.passives) effectiveStats.passives = [];
                 // Shallow copy so we don't permanently mutate the base unit definition
                 else effectiveStats.passives = [...effectiveStats.passives];
-                
+
                 effectiveStats.passives.push(modePassiveObj);
             }
         }
@@ -641,7 +643,7 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
     });
 
     if (ctxOverrides) Object.assign(context, ctxOverrides);
-    
+
     // Auto-sync hotbar buff toggles into context for hotbar units
     if (context.isHotbar && window.hotbarState && window.hotbarState.buffState) {
         Object.entries(window.hotbarState.buffState).forEach(([key, val]) => {
@@ -787,37 +789,54 @@ function calculateDPS(uStats, relicStats, context) {
                 if (p.name === "Manipulator of Fate") {
                     pDmg = 0;
                     pSpa = 0;
-                    
+
                     const hotbar = window.hotbarState;
                     if (hotbar && hotbar.slots) {
-                        const ksTags = uStats.tags || ["Magi", "King", "Hero", "Uncontrollable Power"];
-                        let matchCount = 0;
-                        let mismatchCount = 0;
-                        
-                        hotbar.slots.forEach((s) => {
-                            if (!s) return;
-                            // Skip King Sailor himself
-                            if (s.id === uStats.id || s.id.split('-')[0] === uStats.id.split('-')[0]) return;
-                            
-                            const sUnit = window.getUnitById(s.id);
-                            if (!sUnit) return;
-                            
-                            // Check the unit itself
-                            const sTags = sUnit.tags || [];
-                            const hasMatch = ksTags.some(tag => sTags.includes(tag));
-                            
-                            if (hasMatch) matchCount++;
-                            else mismatchCount++;
-                            
-                            // Count summon placements as tagless mismatches
-                            // Phantom Captain style: summonStats.maxCount planes
-                            if (sUnit.summonStats && sUnit.summonStats.maxCount) {
-                                mismatchCount += sUnit.summonStats.maxCount;
-                            }
-                        });
-                        
-                        pDmg = Math.min(50, matchCount * 10);
-                        pSpa = Math.min(25, mismatchCount * 5);
+                        // Check if King Sailor is actually in the hotbar before applying loadout buffs
+                        const isSelfInHotbar = hotbar.slots.some(s => s && (s.id === uStats.id || s.id.split('-')[0] === uStats.id.split('-')[0]));
+                        if (!isSelfInHotbar) {
+                            pDmg = 0;
+                            pSpa = 0;
+                        } else {
+                            const ksTags = uStats.tags || ["Magi", "King", "Hero", "Uncontrollable Power"];
+                            let matchCount = 0;
+                            let mismatchCount = 0;
+
+                            hotbar.slots.forEach((s) => {
+                                if (!s) return;
+                                // Skip King Sailor himself
+                                if (s.id === uStats.id || s.id.split('-')[0] === uStats.id.split('-')[0]) return;
+
+                                const sUnit = window.getUnitById(s.id);
+                                if (!sUnit) return;
+
+                                // Determine placement for this slot (Account for Ruler/Trait limits)
+                                let sPlacement = sUnit.placement || 1;
+                                const sTraitId = (window.unitTraits && window.unitTraits[s.id]);
+                                if (sTraitId) {
+                                    const sTrait = (typeof window.getTraitFast === 'function') ? window.getTraitFast(sTraitId) : null;
+                                    // FIX: Ensure limitPlace doesn't result in NaN if undefined
+                                    if (sTrait && sTrait.limitPlace !== undefined) {
+                                        sPlacement = Math.min(sPlacement, sTrait.limitPlace);
+                                    }
+                                }
+
+                                // Check the unit itself
+                                const sTags = sUnit.tags || [];
+                                const hasMatch = ksTags.some(tag => sTags.includes(tag));
+
+                                if (hasMatch) matchCount += sPlacement;
+                                else mismatchCount += sPlacement;
+
+                                // Count summon placements as tagless mismatches
+                                if (sUnit.summonStats && sUnit.summonStats.maxCount) {
+                                    mismatchCount += (sUnit.summonStats.maxCount * sPlacement);
+                                }
+                            });
+
+                            pDmg = Math.min(50, matchCount * 10);
+                            pSpa = Math.min(25, mismatchCount * 5);
+                        }
                     }
                 }
             }
@@ -837,6 +856,44 @@ function calculateDPS(uStats, relicStats, context) {
                 }
             }
 
+            // SPECIAL: Underworld God (Syncro) - As The Eldest Brother
+            if (window.isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother") {
+                if (window.CALCULATION_MODE === 'loadout') {
+                    const hotbar = window.hotbarState;
+                    if (hotbar && hotbar.slots) {
+                        let divinityCount = 0;
+                        hotbar.slots.forEach(s => {
+                            if (!s) return;
+                            const baseId = s.id.split('-')[0];
+                            if (baseId === 'underworld_god') return; // Do not count himself
+
+                            const slotUnit = typeof window.getUnitById === 'function' ? window.getUnitById(baseId) : null;
+                            if (slotUnit && slotUnit.tags && Array.isArray(slotUnit.tags) && slotUnit.tags.includes('Divinity')) {
+                                // Determine placement count for this slot
+                                let placement = slotUnit.placement || 1;
+                                const traitId = (window.unitTraits && window.unitTraits[s.id]);
+                                if (traitId) {
+                                    const traitObj = (typeof window.getTraitFast === 'function') ? window.getTraitFast(traitId) : null;
+                                    if (traitObj && traitObj.limitPlace !== undefined) {
+                                        placement = Math.min(placement, traitObj.limitPlace);
+                                    }
+                                }
+
+                                if (baseId === 'water_god') {
+                                    divityCount += Math.max(1, placement - 1);
+                                } else {
+                                    divinityCount += placement;
+                                }
+                            }
+                        });
+                        const cap = (uStats.ethereal >= 2) ? 90 : 90;
+                        pDmg = Math.min(divinityCount * 15, cap);
+                    }
+                } else if (window.CALCULATION_MODE === 'potential') {
+                    pDmg = (uStats.ethereal >= 2) ? 90 : 90;
+                }
+            }
+
             // Conditional Logic: Unrivaled Mark only applies if in Slot 1 (Leader)
             if (p.name === "Unrivaled Mark") {
                 const isPotential = window.CALCULATION_MODE === 'potential';
@@ -848,7 +905,7 @@ function calculateDPS(uStats, relicStats, context) {
                     }
                 }
             }
-            
+
             if (p.buffedByJunior && headPiece === 'junior') {
                 pDmg *= 1.1;
                 pSpa *= 1.1;
@@ -857,11 +914,12 @@ function calculateDPS(uStats, relicStats, context) {
                 pCdmg *= 1.1;
                 pDot *= 1.1;
             }
-            
+
             const isKsDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit(uStats.id, 'king_sailor') && (p.name === "Manipulator of Fate" || p.name === "Unrivaled Mark"));
             const isAkDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit(uStats.id, 'ant_king_savage') && p.name === "Monarch's Devotion");
-            
-            if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || isKsDynamic || isAkDynamic) {
+            const isUgDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother");
+
+            if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || isKsDynamic || isAkDynamic || isUgDynamic) {
                 passivePcent += pDmg;
                 passiveSpaPcent += pSpa;
                 passiveRangePcent += pRange;
@@ -923,7 +981,7 @@ function calculateDPS(uStats, relicStats, context) {
             // Priority: context override -> global window state
             let isActive = false;
             const overrideKey = buff.id + 'Buff'; // e.g. mikuBuff
-            
+
             if (context[overrideKey] !== undefined) {
                 isActive = context[overrideKey];
             } else if (context[buff.stateKey] !== undefined) {
@@ -935,13 +993,13 @@ function calculateDPS(uStats, relicStats, context) {
 
             if (isActive) {
                 const buffStats = buff.math(uStats, context);
-                
+
                 // JUNIOR NINJA 1.1x Multiplier for specific global buffs (Dmg/SPA based)
                 if (headPiece === 'junior' && ['miku', 'enlightenedgod', 'ksailor', 'bijuu', 'magehill'].includes(buff.id)) {
                     if (buffStats.dmg) buffStats.dmg *= 1.1;
                     if (buffStats.spa) buffStats.spa *= 1.1;
                 }
-                
+
                 activeGlobalBuffs[buff.id] = buffStats;
                 if (buffStats.dmg) globalDmg += buffStats.dmg;
                 if (buffStats.spa) globalSpa += buffStats.spa;
@@ -990,6 +1048,35 @@ function calculateDPS(uStats, relicStats, context) {
     if (isAbility && uStats.ability) {
         const ab = Array.isArray(uStats.ability) ? uStats.ability[0] : uStats.ability;
         if (ab.buffDmg) abilityDmg = ab.buffDmg;
+    }
+
+    // --- SYNERGY CHECKS (e.g. requiresDot) ---
+    if (uStats.requiresDot) {
+        const hotbar = window.hotbarState;
+        let met = false;
+        if (hotbar && hotbar.slots) {
+            met = hotbar.slots.some(s => {
+                if (!s || s.id.split('-')[0] === uStats.id.split('-')[0]) return false;
+                const sUnit = window.getUnitById(s.id);
+                if (!sUnit) return false;
+
+                // 1. Check base unit for the required DoT
+                if (sUnit.stats && sUnit.stats.dotType === uStats.requiresDot && (sUnit.stats.dot > 0 || (sUnit.stats.customFollowUp && sUnit.stats.customFollowUp.dotType === uStats.requiresDot))) return true;
+
+                // 2. Check current mode of the unit
+                const sMode = (window.unitModesState && window.unitModesState[sUnit.id]) || 0;
+                if (sUnit.modes && sUnit.modes[sMode]) {
+                    const m = sUnit.modes[sMode];
+                    if (m.dotType === uStats.requiresDot && (m.dot > 0 || (m.customFollowUp && m.customFollowUp.dotType === uStats.requiresDot))) return true;
+                }
+                return false;
+            });
+        }
+
+        // If not met in Loadout mode (or potential mode if we want strict logic), zero the DoT
+        if (!met) {
+            uStats.dot = 0;
+        }
     }
 
     let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassive + headDmgTag + globalDmg + abilityDmg;
@@ -1152,7 +1239,7 @@ function calculateDPS(uStats, relicStats, context) {
     if (relicStats.set === 'sorcerer_hunter') {
         trueDmgPct += 15;
     }
-    
+
     const trueDmgVal = hitDpsTotal * (trueDmgPct / 100);
     const normalDmgVal = hitDpsTotal * (1 - trueDmgPct / 100);
     let finalHitDps = hitDpsTotal;
@@ -1193,7 +1280,7 @@ function calculateDPS(uStats, relicStats, context) {
                     const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels[uStats.id] !== undefined)
                         ? window.unitSystemLevels[uStats.id]
                         : (uStats.systemLevel ? (uStats.systemLevel.default || 100) : 100);
-                    
+
                     if (sIdx === 1 && sysLvl < 40) isEnabled = false;
                     if (sIdx === 2 && sysLvl < 60) isEnabled = false;
                     if (sIdx === 3 && sysLvl < 80) isEnabled = false;

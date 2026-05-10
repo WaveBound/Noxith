@@ -899,8 +899,19 @@ body.modal-open .unit-hotbar {
     color: #fff;
     font-family: 'Outfit', sans-serif;
     position: relative;
-    overflow: hidden;
+    overflow-y: auto;
+    max-height: 90vh;
     box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+.team-summary-container::-webkit-scrollbar {
+    width: 6px;
+}
+.team-summary-container::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
 }
 
 .team-summary-container::before {
@@ -1486,6 +1497,49 @@ body.modal-open .unit-hotbar {
     text-transform: uppercase;
     border: 1px dashed rgba(255,255,255,0.05);
     border-radius: 16px;
+}
+
+/* SYNERGY BADGE */
+.ts-synergy-badge {
+    font-size: 8px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    align-self: flex-start;
+    transition: all 0.3s ease;
+}
+
+.ts-synergy-badge.missing {
+    background: rgba(0, 0, 0, 0.2);
+    color: #71717a;
+    border: 1px solid rgba(113, 113, 122, 0.2);
+    opacity: 0.7;
+}
+
+.ts-synergy-badge.active {
+    background: rgba(244, 63, 94, 0.1);
+    color: #f43f5e;
+    border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
+.ts-synergy-badge i {
+    font-size: 9px;
+}
+
+.sync-active {
+    animation: pulseSync 2s infinite ease-in-out;
+}
+
+@keyframes pulseSync {
+    0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(244, 63, 94, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
 }
 
 

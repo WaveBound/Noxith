@@ -145,6 +145,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
 
     let displayVal = format(r.sortDps || r.dps || 0), displayLabel = "DPS";
     if (sortMode === 'range') { displayVal = fix1(r.range || 0); displayLabel = "RNG"; }
+    else if (sortMode === 'dps' && r.placement > 1) { displayLabel = `TOTAL (x${r.placement})`; }
 
     return `
         <div class="build-row ${rankClass} ${sortMode === 'efficiency' ? 'is-efficiency-sort' : ''}">
@@ -442,6 +443,76 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     } else {
         container.innerHTML = `<div class="msg-loading"><div class="loading-spinner"></div><span>Calculating...</span></div>`;
     }
+
+    // --- DYNAMIC BADGE UPDATES (Mode + Synergy) ---
+    // These badges must be updated every re-render since hotbar composition changes affect them
+    if (unitObj && card) {
+        const badgesDiv = card.querySelector('.banner-badges');
+        if (badgesDiv) {
+            // 1. MODE INDICATOR BADGE — shows which mode the unit is currently in (moved to toggle area)
+            const toggleArea = card.querySelector('.ut-toggle-area');
+            if (toggleArea) {
+                let existingModeBadge = toggleArea.querySelector('.mode-indicator-badge');
+                if (unitObj.modes && Array.isArray(unitObj.modes)) {
+                    const currentModeIdx = (window.unitModesState && window.unitModesState[unitId] !== undefined) ? window.unitModesState[unitId] : 0;
+                    const currentMode = unitObj.modes[currentModeIdx];
+                    const isSummon = (unitObj.modesLabel && unitObj.modesLabel.toLowerCase() === 'summons') || unitObj.id === 'the_strongest_in_history';
+                    if (currentMode && !isSummon) {
+                        const modeHtml = `<div class="mode-indicator-badge" style="display: flex; align-items: center; color: #c084fc; font-size: 0.65rem; font-weight: 800; border: 1px solid rgba(192, 132, 252, 0.4); background: rgba(192, 132, 252, 0.06); padding: 2px 6px; border-radius: 4px; white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis;" title="${currentMode.name}">⚙ ${currentMode.name.toUpperCase()}</div>`;
+                        if (existingModeBadge) {
+                            existingModeBadge.outerHTML = modeHtml;
+                        } else {
+                            toggleArea.insertAdjacentHTML('afterbegin', modeHtml);
+                        }
+                    } else if (existingModeBadge) {
+                        existingModeBadge.remove();
+                    }
+                } else if (existingModeBadge) {
+                    existingModeBadge.remove();
+                }
+            }
+
+            // 2. SYNERGY BADGE — shows SYNCED/REQUIRED for DoT dependencies
+            let existingSynergyBadge = badgesDiv.querySelector('.synergy-dot-badge');
+            if (window.CALCULATION_MODE === 'loadout') {
+                const currentModeIdx = (window.unitModesState && window.unitModesState[unitId] !== undefined) ? window.unitModesState[unitId] : 0;
+                const modeStats = unitObj.modes && unitObj.modes[currentModeIdx] ? unitObj.modes[currentModeIdx] : {};
+                const requiresDot = modeStats.requiresDot || (unitObj.stats && unitObj.stats.requiresDot);
+
+                if (requiresDot) {
+                    const hotbar = window.hotbarState;
+                    const met = hotbar && hotbar.slots && hotbar.slots.some(s => {
+                        if (!s || s.id.split('-')[0] === unitId) return false;
+                        const sUnit = window.getUnitById(s.id);
+                        if (!sUnit) return false;
+                        if (sUnit.stats && (sUnit.stats.dotType === requiresDot && sUnit.stats.dot > 0 || (sUnit.stats.customFollowUp && sUnit.stats.customFollowUp.dotType === requiresDot))) return true;
+                        const sMode = (window.unitModesState && window.unitModesState[sUnit.id]) || 0;
+                        if (sUnit.modes && sUnit.modes[sMode]) {
+                            const m = sUnit.modes[sMode];
+                            if (m.dotType === requiresDot && (m.dot > 0 || (m.customFollowUp && m.customFollowUp.dotType === requiresDot))) return true;
+                        }
+                        return false;
+                    });
+
+                    let synergyHtml;
+                    if (met) {
+                        synergyHtml = `<div class="placement-badge synergy-dot-badge sync-active" style="color: #f43f5e; border-color: rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.08); font-weight: 900;">🔗 SYNCED: ${requiresDot.toUpperCase()}</div>`;
+                    } else {
+                        synergyHtml = `<div class="placement-badge synergy-dot-badge" style="color: #71717a; border-color: rgba(113, 113, 122, 0.3); background: rgba(0,0,0,0.2); font-weight: 700; opacity: 0.6;">⛓ REQUIRED: ${requiresDot.toUpperCase()}</div>`;
+                    }
+                    if (existingSynergyBadge) {
+                        existingSynergyBadge.outerHTML = synergyHtml;
+                    } else {
+                        badgesDiv.insertAdjacentHTML('beforeend', synergyHtml);
+                    }
+                } else if (existingSynergyBadge) {
+                    existingSynergyBadge.remove();
+                }
+            } else if (existingSynergyBadge) {
+                existingSynergyBadge.remove();
+            }
+        }
+    }
 }
 
 function processUnitCache(unit, specificCfg = null, specificType = null) {
@@ -654,7 +725,18 @@ function renderUnitCard(unit, absoluteIndex) {
 
     const abilityToggleHtml = (unit.ability && !abilityObj.noToggle) ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>` : '<div></div>';
     const modesBtn = (unit.modes && Array.isArray(unit.modes)) ? `<button class="calc-btn ut-btn-compact modes-btn" onclick="openUnitModes('${unit.id}')" title="Change Mode">${unit.modesLabel || 'Modes'}</button>` : '';
-    const topControls = `<div class="unit-toolbar"><div class="ut-actions"><button class="calc-btn ut-btn-compact" onclick="openCalc('${unit.id}')">🖩 Custom</button><button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">📊 Traits</button><button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">ⓘ Info</button></div><div class="ut-toggle-area">${modesBtn}${abilityToggleHtml}</div></div>`;
+
+    let initialModeIndicatorHtml = '';
+    if (unit.modes && Array.isArray(unit.modes)) {
+        const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+        const currentMode = unit.modes[activeMode];
+        const isSummon = (unit.modesLabel && unit.modesLabel.toLowerCase() === 'summons') || unit.id === 'the_strongest_in_history';
+        if (currentMode && !isSummon) {
+            initialModeIndicatorHtml = `<div class="mode-indicator-badge" style="display: flex; align-items: center; color: #c084fc; font-size: 0.65rem; font-weight: 800; border: 1px solid rgba(192, 132, 252, 0.4); background: rgba(192, 132, 252, 0.06); padding: 2px 6px; border-radius: 4px; white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis;" title="${currentMode.name}">⚙ ${currentMode.name.toUpperCase()}</div>`;
+        }
+    }
+
+    const topControls = `<div class="unit-toolbar"><div class="ut-actions"><button class="calc-btn ut-btn-compact" onclick="openCalc('${unit.id}')">🖩 Custom</button><button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">📊 Traits</button><button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">ⓘ Info</button></div><div class="ut-toggle-area">${initialModeIndicatorHtml}${modesBtn}${abilityToggleHtml}</div></div>`;
 
     let defaultSort = 'dps';
     if (isAnyUnit(unit.id, ['sjw', 'esdeath'])) defaultSort = 'damage';
@@ -748,6 +830,34 @@ function renderUnitCard(unit, absoluteIndex) {
             <div class="placement-badge">Max Place: ${unit.placement}</div>
             <div class="placement-badge is-${(unit.placementType || 'Ground').toLowerCase()}">${unit.placementType || 'Ground'}</div>
             <div class="placement-badge" style="color: #4ade80; border-color: rgba(74, 222, 128, 0.3);">DPS Rank: #${absoluteIndex}</div>
+
+            ${(() => {
+                if (window.CALCULATION_MODE !== 'loadout') return '';
+                const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+                const modeStats = unit.modes && unit.modes[activeMode] ? unit.modes[activeMode] : {};
+                const requiresDot = modeStats.requiresDot || (unit.stats && unit.stats.requiresDot);
+                if (!requiresDot) return '';
+                
+                const hotbar = window.hotbarState;
+                const met = hotbar && hotbar.slots && hotbar.slots.some(s => {
+                    if (!s || s.id.split('-')[0] === unit.id) return false;
+                    const sUnit = window.getUnitById(s.id);
+                    if (!sUnit) return false;
+                    if (sUnit.stats && (sUnit.stats.dotType === requiresDot && sUnit.stats.dot > 0 || (sUnit.stats.customFollowUp && sUnit.stats.customFollowUp.dotType === requiresDot))) return true;
+                    const sMode = (window.unitModesState && window.unitModesState[sUnit.id]) || 0;
+                    if (sUnit.modes && sUnit.modes[sMode]) {
+                        const m = sUnit.modes[sMode];
+                        if (m.dotType === requiresDot && (m.dot > 0 || (m.customFollowUp && m.customFollowUp.dotType === requiresDot))) return true;
+                    }
+                    return false;
+                });
+                
+                if (met) {
+                    return `<div class="placement-badge synergy-dot-badge sync-active" style="color: #f43f5e; border-color: rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.08); font-weight: 900;">🔗 SYNCED: ${requiresDot.toUpperCase()}</div>`;
+                } else {
+                    return `<div class="placement-badge synergy-dot-badge" style="color: #71717a; border-color: rgba(113, 113, 122, 0.3); background: rgba(0,0,0,0.2); font-weight: 700; opacity: 0.6;">⛓ REQUIRED: ${requiresDot.toUpperCase()}</div>`;
+                }
+            })()}
         </div>${getUnitImgHtml(unit, 'unit-avatar')}<div class="unit-title"><h2>${unit.name}</h2><span>${unit.role}</span></div>${unit.meta ? `<button class="trait-guide-btn" onclick="openTraitGuide('${unit.id}')">📋 Rec. Traits</button>` : ''}`,
         topControls, bottomControls, mainContent
     });

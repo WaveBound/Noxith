@@ -519,17 +519,18 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
                 const sUnit = window.getUnitById(s.id);
                 if (!sUnit) return;
 
-                // 1. Check base stats dotType
-                if (sUnit.stats && sUnit.stats.dotType === uStats.requiresDot && (sUnit.stats.dot > 0 || (sUnit.stats.customFollowUp && sUnit.stats.customFollowUp.dotType === uStats.requiresDot))) {
-                    requirementMet = true;
+                // 1. Check base stats (including follow-ups like Sukuna)
+                if (sUnit.stats) {
+                    if (sUnit.stats.dotType === uStats.requiresDot && sUnit.stats.dot > 0) requirementMet = true;
+                    if (sUnit.stats.customFollowUp && sUnit.stats.customFollowUp.dotType === uStats.requiresDot) requirementMet = true;
                 }
                 
-                // 2. Check active mode dotType
+                // 2. Check active mode (including modes like Alpha Devil: Phantom Sword)
                 const modeIdx = (window.unitModesState && window.unitModesState[sUnit.id]);
                 if (sUnit.modes && modeIdx !== undefined && sUnit.modes[modeIdx]) {
-                    if (sUnit.modes[modeIdx].dotType === uStats.requiresDot && (sUnit.modes[modeIdx].dot > 0)) {
-                        requirementMet = true;
-                    }
+                    const activeMode = sUnit.modes[modeIdx];
+                    if (activeMode.dotType === uStats.requiresDot && (activeMode.dot > 0)) requirementMet = true;
+                    if (activeMode.customFollowUp && activeMode.customFollowUp.dotType === uStats.requiresDot) requirementMet = true;
                 }
             });
         }
