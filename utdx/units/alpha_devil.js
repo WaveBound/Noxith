@@ -11,8 +11,8 @@ unitDatabase.push({
 
     // META (Build Guide tab)
     meta: {
-        short: "Ruler",
-        long: "Duelist/Sacred",
+        short: "Duelist/Ruler",
+        long: "Duelist",
         note: "Mode-based swordsman with varying SPA caps. Mirage Barrage and Katana offer the fastest attack speeds."
     },
 
