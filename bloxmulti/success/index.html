@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Successful — BloxMulti</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg: #06050d;
+            --accent: #9d6fff;
+            --accent-glow: rgba(157, 111, 255, 0.35);
+            --green: #2af598;
+            --text: #edeafa;
+            --muted: #6a607e;
+            --border-hi: #2a2642;
+            --font-body: 'Inter', sans-serif;
+            --font-display: 'Syne', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .global-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 80% 60% at 75% 10%, rgba(100, 40, 220, 0.45) 0%, transparent 65%),
+                radial-gradient(ellipse 50% 40% at 15% 55%, rgba(50, 200, 255, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 85% 85%, rgba(200, 50, 255, 0.10) 0%, transparent 55%),
+                linear-gradient(160deg, #07051a 0%, #0d0820 40%, #120a28 70%, #08050f 100%);
+        }
+
+        .global-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(120deg, transparent 0px, transparent 40px, rgba(157, 111, 255, 0.015) 40px, rgba(157, 111, 255, 0.015) 41px);
+        }
+
+        .card {
+            background: rgba(10, 9, 20, 0.75);
+            border: 1px solid var(--border-hi);
+            border-radius: 16px;
+            padding: 48px 32px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(42, 245, 152, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+            max-width: 440px;
+            animation: fade-up 0.6s ease-out forwards;
+            margin: 20px;
+        }
+
+        .icon-wrapper {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(42, 245, 152, 0.1);
+            border: 1px solid rgba(42, 245, 152, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--green);
+            margin-bottom: 24px;
+            box-shadow: 0 0 30px rgba(42, 245, 152, 0.2);
+        }
+
+        .title {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .desc {
+            font-size: 15px;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-hi);
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            font-family: var(--font-body);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--muted);
+        }
+
+        @keyframes fade-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="global-bg"></div>
+
+    <div class="card">
+        <div class="icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+        </div>
+
+        <h1 class="title">Welcome to Premium!</h1>
+        <p class="desc">
+            Your payment was successful. BloxMulti will automatically detect your upgrade in a few seconds.<br><br>You
+            can safely close this tab.
+        </p>
+
+        <button class="btn" onclick="window.close()">
+            Close Tab
+        </button>
+    </div>
+</body>
+
+</html>
