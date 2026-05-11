@@ -108,6 +108,8 @@ if (isMainThread) {
     // --- NODE.JS POLYFILLS ---
     global.window = global;
     global.unitModesState = {}; // Fix for units with Modes (Sukuna, etc.)
+    global.hotbarState = { slots: [null, null, null, null, null, null], fernTargets: [] };
+    global.unitELevels = {}; 
     global.btoa = function(str) { return Buffer.from(str, 'binary').toString('base64'); };
     global.atob = function(str) { return Buffer.from(str, 'base64').toString('binary'); };
 
@@ -507,6 +509,7 @@ if (isMainThread) {
             window.bijuuActive = combo[2] === '1'; window.ancientMageActive = combo[3] === '1';
             window.kingSailorActive = combo[4] === '1'; window.bulmaActive = combo[6] === '1';
             window.fernHillActive = combo[5] === 'hill'; window.fernGroundActive = combo[5] === 'ground';
+            window.CALCULATION_MODE = 'potential';
  
             // Assume full modes for Sukuna for DB ranking
             window.unitModesState['the_strongest_in_history'] = [1, 2];

@@ -1569,3 +1569,26 @@ body.modal-open .unit-hotbar {
     opacity: 0.8;
 }
 
+.fern-target-btn {
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 7px;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 6px;
+    z-index: 20;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+}
+
+.fern-target-btn:hover {
+    transform: translateX(-50%) scale(1.1);
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}

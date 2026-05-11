@@ -4,14 +4,16 @@
 
 const hotbarState = {
     slots: Array(6).fill(null),
-    fusionMode: false,
-    buffState: {} // { configKey: bool } — completely separate from GLOBAL_BUFF_STATE
+    fusionMode: false, // Legacy master switch (still used for skipping components)
+    activeFusionIds: [], // Specific fusions that the user has explicitly activated
+    buffState: {},
+    fernTargets: [] // Array of slot indices (0-5)
 };
 window.hotbarState = hotbarState;
 
 
 
-const getActiveFusions = () => {
+const getAvailableFusions = () => {
     const unitIdsInHotbar = hotbarState.slots.filter(u => u !== null).map(u => u.id);
     const hasNutaru = unitIdsInHotbar.includes(window.getUnitId('nutaru_beast'));
     const hasShinobi = unitIdsInHotbar.includes(window.getUnitId('ancient_shinob'));
@@ -23,37 +25,58 @@ const getActiveFusions = () => {
     return fusions;
 };
 
+const getActiveFusions = () => {
+    const available = getAvailableFusions();
+    return available.filter(f => hotbarState.activeFusionIds.includes(f.id));
+};
+
+const toggleFusion = (armorId) => {
+    const idx = hotbarState.activeFusionIds.indexOf(armorId);
+    if (idx === -1) {
+        hotbarState.activeFusionIds.push(armorId);
+    } else {
+        hotbarState.activeFusionIds.splice(idx, 1);
+    }
+
+    // Update legacy fusionMode flag based on whether ANY fusion is active
+    hotbarState.fusionMode = hotbarState.activeFusionIds.length > 0;
+
+    recalculateHotbarTeam();
+    updateHotbarUI();
+};
+
 /**
  * Performs a full team-wide recalculation for all hotbar units.
  * This should be called only when the team composition or global buffs change.
  */
 function recalculateHotbarTeam() {
     const hiddenContainer = document.getElementById('hotbarHiddenRender');
-    
+
     // Determine which units need recalculating
     const hotbarUnitIds = hotbarState.slots.filter(u => u !== null).map(u => u.id);
-    
+
     // Also include active fusion units in the refresh
-    const activeFusions = getActiveFusions();
-    activeFusions.forEach(f => {
-        if (!hotbarUnitIds.includes(f.id)) {
-            hotbarUnitIds.push(f.id);
-        }
-    });
+    if (hotbarState.activeFusionIds.length > 0) {
+        hotbarState.activeFusionIds.forEach(id => {
+            if (!hotbarUnitIds.includes(id)) {
+                hotbarUnitIds.push(id);
+            }
+        });
+    }
 
     hotbarUnitIds.forEach(id => {
         const u = typeof window.getUnitById === 'function' ? window.getUnitById(id) : null;
         if (!u) return;
-        
+
         const isAssistant = u.tags && u.tags.includes('Assistant');
         if (isAssistant) return;
-        
+
         // Ensure hidden card exists
         if (!document.getElementById('card-' + id) && hiddenContainer && typeof renderUnitCard === 'function') {
             const card = renderUnitCard(u, 0);
             hiddenContainer.appendChild(card);
         }
-        
+
         // Clear caches and force recalculation
         if (typeof window.resetCachesForBuffChange === 'function') {
             window.resetCachesForBuffChange(id);
@@ -75,7 +98,7 @@ const getDetailedUnitStats = (unitId) => {
 
     // Check if the DOM card exists for this unit
     const hasCard = !!document.getElementById('card-' + unitId);
-    
+
     if (hasCard) {
         // Only force recalculate if explicitly requested or if cache is missing
         if (!bestBuild || typeof window.resetCachesForBuffChange === 'function') {
@@ -119,9 +142,9 @@ const getDetailedUnitStats = (unitId) => {
     return {
         unit: fullUnit,
         build: bestBuild,
-        dmg: totalDmg, 
-        dps: totalDps, 
-        teamDmg: totalDmg, 
+        dmg: totalDmg,
+        dps: totalDps,
+        teamDmg: totalDmg,
         teamDps: totalDps,
         placementsCounted: placements,
         placements: placements
@@ -163,15 +186,20 @@ function openTeamSummary() {
     if (leader && window.isUnit(leader.id, 'king_sailor')) {
         const config = (window.GLOBAL_BUFF_DATA || {}).kingSailor;
         if (config) {
-            activeBuffs.push({ 
-                name: "King's Mark", 
-                color: config.color, 
-                renderLabel: "Leader Passive: +10% Crit, +20% CDmg + Tag Bonuses" 
+            activeBuffs.push({
+                name: "King's Mark",
+                color: config.color,
+                renderLabel: "Mark Synergy: Magi (+15% SPA +50% Dmg), Uncontrollable (+10% SPA +30% Dmg), Water (+10% SPA +20% Dmg)"
             });
         }
     }
 
     let html = `
+        <style>
+            .ts-toggle-wrap { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+            .ts-toggle-wrap .mini-switch { margin: 0; transform: scale(0.8); }
+            .ts-toggle-label { font-size: 0.65rem; font-weight: 800; color: #f472b6; text-transform: uppercase; letter-spacing: 0.5px; }
+        </style>
         <div class="team-summary-container">
             <div class="ts-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.08);">
                 <h2 style="margin: 0; color: #e2e8f0; font-size: 1.4rem; display: flex; align-items: center; gap: 10px; font-weight: 900; letter-spacing: 1.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
@@ -257,12 +285,14 @@ function openTeamSummary() {
         if (stats.stunDuration) effects.push({ label: 'Stun', val: `${stats.stunDuration}s`, color: '#fbbf24' });
         if (stats.timestopDuration) effects.push({ label: 'Timestop', val: `${stats.timestopDuration}s`, color: '#a78bfa' });
         if (stats.hasRadiation) effects.push({ label: 'Radiation', val: `+${stats.radiationPct || 20}% Dmg Taken (${stats.radiationDuration || 6}s)`, color: '#f87171' });
-        
+
         // Get active mode name for mode-specific effects
         let activeModeName = null;
+        let activeModes = [];
         if (unit.modes && Array.isArray(unit.modes)) {
-            const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
-            const currentModeObj = unit.modes[activeMode];
+            const state = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+            activeModes = Array.isArray(state) ? state : [state];
+            const currentModeObj = unit.modes[activeModes[0]];
             if (currentModeObj) activeModeName = currentModeObj.name.toLowerCase();
         }
 
@@ -272,7 +302,7 @@ function openTeamSummary() {
         } else if (unit.id === 'water_god') {
             effects.push({ label: 'Primordial Power', val: '30% Slow (3s) | +20% DoT Duration', color: '#60a5fa' });
             effects.push({ label: 'God of the Seas', val: '+30% DoT Dmg / Duration to enemies', color: '#38bdf8' });
-            
+
             // Check for Underworld God synergy
             const hotbar = window.hotbarState;
             if (hotbar && hotbar.slots && hotbar.slots.some(s => s && window.isUnit(s.id, 'underworld_god'))) {
@@ -284,10 +314,34 @@ function openTeamSummary() {
         } else if (unit.id === 'crow_shinobi') {
             effects.push({ label: 'Amaterasu', val: 'Passive', color: '#f87171' });
             effects.push({ label: 'Time Snail', val: '+20% DoT & Status | 30% Slow (3s)', color: '#fb923c' });
+        } else if (unit.id === 'the_strongest_in_history') {
+            effects.push({ label: 'The Shadows', val: '+15-35% Dmg Taken (Marks)', color: '#f87171' });
+            if (activeModes.includes(1) || activeModes.includes(2)) {
+                effects.push({ label: 'Ten Umbra', val: 'Stun (3s) | 40% Bleed | 20% Radiation', color: '#c084fc' });
+            }
+            effects.push({ label: 'Domain Expansion', val: '20% Slow | +20% Dmg Taken', color: '#f43f5e' });
         } else if (unit.id === 'the_strongest_of_today') {
             effects.push({ label: 'Limitless', val: '40% Slow (5s) | +25% Dmg Taken in Range', color: '#60a5fa' });
             effects.push({ label: 'On Crit', val: 'Timestops enemies for 4s', color: '#a78bfa' });
             effects.push({ label: 'Domain Expansion', val: 'Timestops map for 30s', color: '#c084fc' });
+
+            const isToggled = window.activeAbilityIds.has(unit.id);
+            effects.push({
+                label: 'TS Enemy (3x)',
+                val: `<div class="ts-toggle-wrap"><span class="ts-toggle-label">${isToggled ? 'ON' : 'OFF'}</span><label class="mini-toggle-wrap"><input type="checkbox" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this); setTimeout(openTeamSummary, 100);"><div class="mini-switch"></div></label></div>`,
+                color: '#f472b6'
+            });
+        } else if (unit.id === 'ant_king_savage') {
+            effects.push({ label: 'Paralyzing Venom', val: '20% Slow (6s)', color: '#fbbf24' });
+
+            // Check for E4+ team buff
+            if (unit.etherealization && unit.etherealization.length >= 4) {
+                effects.push({ label: "Monarch's Devotion", val: '+10% Dmg to Team (E4+)', color: '#f472b6' });
+            }
+        } else if (unit.id === 'jinoo_shadow_monarch') {
+            effects.push({ label: 'Strongest Hunter', val: '+20-30% Dmg to Leveling units', color: '#818cf8' });
+            if (activeModes.includes(3)) effects.push({ label: 'Shadow Knight', val: '2s Stun', color: '#a78bfa' });
+            if (activeModes.includes(4)) effects.push({ label: 'Ant King', val: '30% Bleed', color: '#f87171' });
         } else if (unit.id === 'alpha_devil' && activeModeName === 'katana') {
             effects.push({ label: 'Katana Mode', val: 'Stuns enemies for 3s', color: '#fcd34d' });
         } else if (unit.id === 'devil_hunter' && activeModeName === 'demoncycle') {
@@ -324,13 +378,13 @@ function openTeamSummary() {
         const isLoadout = window.CALCULATION_MODE === 'loadout';
         const isKsLeading = isPotential || (leader && window.isUnit(leader.id, 'king_sailor'));
         const isKsActive = isPotential || (isLoadout && isKsLeading) || window.kingSailorActive || (hotbarState.buffState.kingSailor && isKsLeading);
-        
+
         // Mark bonus only triggers if KS is the leader
         if (isKsActive && isKsLeading) {
             const tags = unit.tags || [];
             const rawElement = unit.element || (unit.stats && unit.stats.element) || (unit.meta && unit.meta.element) || "";
             const element = String(rawElement).toLowerCase();
-            
+
             if (tags.includes('Magi')) ksBonus = 'MAGI: +50% DMG / +15% SPA';
             else if (tags.includes('Uncontrollable Power')) ksBonus = 'UNCONTROLLABLE: +30% DMG / +10% SPA';
             else if (element === 'water') ksBonus = 'WATER: +20% DMG / +10% SPA';
@@ -349,27 +403,27 @@ function openTeamSummary() {
                             </div>
                             <div class="ts-unit-trait">${traitName}</div>
                             ${(() => {
-                                if (unit.modes && Array.isArray(unit.modes)) {
-                                    const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
-                                    const currentMode = unit.modes[activeMode];
-                                    const isSummon = unit.modesLabel && unit.modesLabel.toLowerCase() === 'summons';
-                                    if (currentMode && !isSummon) {
-                                        return `<div class="ts-unit-mode" style="margin-top: 4px; font-size: 0.75rem; color: #c084fc; font-weight: 800; background: rgba(192, 132, 252, 0.1); border: 1px solid rgba(192, 132, 252, 0.3); padding: 2px 6px; border-radius: 4px; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; display: inline-block;" title="${currentMode.name}">⚙ MODE: ${currentMode.name.toUpperCase()}</div>`;
-                                    }
-                                }
-                                return '';
-                            })()}
+                if (unit.modes && Array.isArray(unit.modes)) {
+                    const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+                    const currentMode = unit.modes[activeMode];
+                    const isSummon = unit.modesLabel && unit.modesLabel.toLowerCase() === 'summons';
+                    if (currentMode && !isSummon) {
+                        return `<div class="ts-unit-mode" style="margin-top: 4px; font-size: 0.75rem; color: #c084fc; font-weight: 800; background: rgba(192, 132, 252, 0.1); border: 1px solid rgba(192, 132, 252, 0.3); padding: 2px 6px; border-radius: 4px; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; display: inline-block;" title="${currentMode.name}">⚙ MODE: ${currentMode.name.toUpperCase()}</div>`;
+                    }
+                }
+                return '';
+            })()}
                             ${(() => {
-                                if (!isLoadout || !build.baseStats || !build.baseStats.requiresDot) return '';
-                                const req = build.baseStats.requiresDot;
-                                const isMet = build.dotData && !build.dotData.inactive;
-                                return `
+                if (!isLoadout || !build.baseStats || !build.baseStats.requiresDot) return '';
+                const req = build.baseStats.requiresDot;
+                const isMet = build.dotData && !build.dotData.inactive;
+                return `
                                     <div class="ts-synergy-badge ${isMet ? 'active' : 'missing'}">
                                         <i class="fas ${isMet ? 'fa-link' : 'fa-link-slash'}"></i> 
                                         ${isMet ? 'SYNCED' : 'REQUIRED'}: ${req.toUpperCase()}
                                     </div>
                                 `;
-                            })()}
+            })()}
                         </div>
                     </div>
                     <div class="ts-header-right">
@@ -430,60 +484,60 @@ function openTeamSummary() {
                     </div>
 
                     ${(() => {
-                        // Determine if Jinoo is in loadout (for Monarch's Devotion)
-                        const jinooInLoadout = isLoadout ? hotbarState.slots.some(s => s && (window.isUnit(s.id, 'jinoo_shadow_monarch') || window.isUnit(s.id, 'sjw'))) : true;
+                // Determine if Jinoo is in loadout (for Monarch's Devotion)
+                const jinooInLoadout = isLoadout ? hotbarState.slots.some(s => s && (window.isUnit(s.id, 'jinoo_shadow_monarch') || window.isUnit(s.id, 'sjw'))) : true;
 
-                        let passiveHtml = '';
-                        if (unit.passives && unit.passives.length > 0) {
-                            passiveHtml = unit.passives.map(p => {
-                                // Special logic for King Sailor's conditional passive
-                                if (p.name === "Unrivaled Mark") {
-                                    if (!isKsActive || !isKsLeading) return null;
-                                }
+                let passiveHtml = '';
+                if (unit.passives && unit.passives.length > 0) {
+                    passiveHtml = unit.passives.map(p => {
+                        // Special logic for King Sailor's conditional passive
+                        if (p.name === "Unrivaled Mark") {
+                            if (!isKsActive || !isKsLeading) return null;
+                        }
 
-                                // Monarch's Devotion: only show when Jinoo is in loadout (Loadout Mode) or always in Potential
-                                if (p.name === "Monarch's Devotion") {
-                                    if (isLoadout && !jinooInLoadout) return null;
-                                }
+                        // Monarch's Devotion: only show when Jinoo is in loadout (Loadout Mode) or always in Potential
+                        if (p.name === "Monarch's Devotion") {
+                            if (isLoadout && !jinooInLoadout) return null;
+                        }
 
-                                // Find calculated stats in the breakdown if available
-                                const pb = (build.detailedBuffs && build.detailedBuffs.passiveBreakdown) 
-                                    ? build.detailedBuffs.passiveBreakdown.find(item => item.name === p.name) 
-                                    : null;
+                        // Find calculated stats in the breakdown if available
+                        const pb = (build.detailedBuffs && build.detailedBuffs.passiveBreakdown)
+                            ? build.detailedBuffs.passiveBreakdown.find(item => item.name === p.name)
+                            : null;
 
-                                const statParts = [];
-                                const dmgVal = pb ? pb.dmg : (p.passiveDmg || 0);
-                                const spaVal = pb ? pb.spa : (p.passiveSpa || 0);
-                                const critVal = pb ? pb.crit : (p.passiveCrit || 0);
-                                const cdmgVal = pb ? pb.cdmg : (p.passiveCdmg || 0);
-                                const trueVal = pb ? (pb.trueDmg || 0) : (p.trueDmg || 0);
-                                const dotVal = pb ? (pb.dot || 0) : (p.dot || 0);
-                                const rangeVal = pb ? (pb.range || 0) : (p.passiveRange || 0);
+                        const statParts = [];
+                        const dmgVal = pb ? pb.dmg : (p.passiveDmg || 0);
+                        const spaVal = pb ? pb.spa : (p.passiveSpa || 0);
+                        const critVal = pb ? pb.crit : (p.passiveCrit || 0);
+                        const cdmgVal = pb ? pb.cdmg : (p.passiveCdmg || 0);
+                        const trueVal = pb ? (pb.trueDmg || 0) : (p.trueDmg || 0);
+                        const dotVal = pb ? (pb.dot || 0) : (p.dot || 0);
+                        const rangeVal = pb ? (pb.range || 0) : (p.passiveRange || 0);
 
-                                if (dmgVal !== 0) statParts.push(`+${dmgVal}% DMG`);
-                                else if (pb && p.name === "Manipulator of Fate") statParts.push(`+0% DMG`);
-                                
-                                if (spaVal !== 0) statParts.push(`-${spaVal}% SPA`);
-                                else if (pb && p.name === "Manipulator of Fate") statParts.push(`-0% SPA`);
-                                
-                                if (critVal !== 0) statParts.push(`+${critVal}% CRIT`);
-                                if (cdmgVal !== 0) statParts.push(`+${cdmgVal}% CDMG`);
-                                if (trueVal !== 0) statParts.push(`+${trueVal}% TRUE`);
-                                if (dotVal !== 0) statParts.push(`+${dotVal}% DOT`);
-                                if (rangeVal !== 0) statParts.push(`+${rangeVal}% RANGE`);
-                                
-                                const statStr = statParts.join(' / ');
-                                const descText = p.desc ? (p.desc.length > 120 ? p.desc.substring(0, 120).trim() + '…' : p.desc) : '';
+                        if (dmgVal !== 0) statParts.push(`+${dmgVal}% DMG`);
+                        else if (pb && p.name === "Manipulator of Fate") statParts.push(`+0% DMG`);
 
-                                // Determine badge type
-                                let badgeLabel = 'PASSIVE';
-                                let badgeClass = 'ts-passive-badge';
-                                if (p.name === "Monarch's Devotion" && isLoadout && jinooInLoadout) {
-                                    badgeLabel = 'TEAM';
-                                    badgeClass = 'ts-passive-badge ts-team-badge';
-                                }
+                        if (spaVal !== 0) statParts.push(`-${spaVal}% SPA`);
+                        else if (pb && p.name === "Manipulator of Fate") statParts.push(`-0% SPA`);
 
-                                return `
+                        if (critVal !== 0) statParts.push(`+${critVal}% CRIT`);
+                        if (cdmgVal !== 0) statParts.push(`+${cdmgVal}% CDMG`);
+                        if (trueVal !== 0) statParts.push(`+${trueVal}% TRUE`);
+                        if (dotVal !== 0) statParts.push(`+${dotVal}% DOT`);
+                        if (rangeVal !== 0) statParts.push(`+${rangeVal}% RANGE`);
+
+                        const statStr = statParts.join(' / ');
+                        const descText = p.desc ? (p.desc.length > 120 ? p.desc.substring(0, 120).trim() + '…' : p.desc) : '';
+
+                        // Determine badge type
+                        let badgeLabel = 'PASSIVE';
+                        let badgeClass = 'ts-passive-badge';
+                        if (p.name === "Monarch's Devotion" && isLoadout && jinooInLoadout) {
+                            badgeLabel = 'TEAM';
+                            badgeClass = 'ts-passive-badge ts-team-badge';
+                        }
+
+                        return `
                                     <div class="ts-passive-row">
                                         <div class="${badgeClass}">${badgeLabel}</div>
                                         <div class="ts-passive-main">
@@ -493,16 +547,16 @@ function openTeamSummary() {
                                         </div>
                                     </div>
                                 `;
-                            }).filter(x => x !== null).join('');
-                        }
+                    }).filter(x => x !== null).join('');
+                }
 
-                        // Check if Monarch's Devotion team buff applies to THIS unit (from Ant King being in loadout)
-                        let monarchTeamBuff = '';
-                        if (isLoadout) {
-                            const antKingInLoadout = hotbarState.slots.some(s => s && window.isUnit(s.id, 'ant_king_savage'));
-                            const isThisAntKing = window.isUnit(unit.id, 'ant_king_savage');
-                            if (antKingInLoadout && jinooInLoadout && !isThisAntKing) {
-                                monarchTeamBuff = `
+                // Check if Monarch's Devotion team buff applies to THIS unit (from Ant King being in loadout)
+                let monarchTeamBuff = '';
+                if (isLoadout) {
+                    const antKingInLoadout = hotbarState.slots.some(s => s && window.isUnit(s.id, 'ant_king_savage'));
+                    const isThisAntKing = window.isUnit(unit.id, 'ant_king_savage');
+                    if (antKingInLoadout && jinooInLoadout && !isThisAntKing) {
+                        monarchTeamBuff = `
                                     <div class="ts-passive-row">
                                         <div class="ts-passive-badge ts-team-badge">TEAM</div>
                                         <div class="ts-passive-main">
@@ -512,12 +566,12 @@ function openTeamSummary() {
                                         </div>
                                     </div>
                                 `;
-                            }
-                        }
+                    }
+                }
 
-                        if (!passiveHtml && !monarchTeamBuff) return '';
+                if (!passiveHtml && !monarchTeamBuff) return '';
 
-                        return `
+                return `
                         <div class="ts-section-group">
                             <div class="ts-breakdown-title">PASSIVE ABILITIES</div>
                             <div class="ts-passives-container">
@@ -526,7 +580,7 @@ function openTeamSummary() {
                             </div>
                         </div>
                         `;
-                    })()}
+            })()}
                 </div>
 
                 <div class="ts-lower-row" style="margin-top: auto;">
@@ -545,19 +599,88 @@ function openTeamSummary() {
         `;
     });
 
-    // Build team effects summary
-    const teamEffectsHtml = teamEffects.length > 0 ? `
+    // Build team effects summary - deduplicate non-slows, list all slows and highlight the max
+    const uniqueTeamEffects = [];
+    const seenLabels = new Set();
+
+    // Separate Slows for special handling
+    const slows = teamEffects.filter(e => e.label.toLowerCase().includes('slow'));
+    const nonSlows = teamEffects.filter(e => !e.label.toLowerCase().includes('slow'));
+
+    // Handle Non-Slows (Deduplicate)
+    nonSlows.forEach(e => {
+        if (!seenLabels.has(e.label)) {
+            uniqueTeamEffects.push(e);
+            seenLabels.add(e.label);
+        } else {
+            const existing = uniqueTeamEffects.find(x => x.label === e.label);
+            if (existing && !existing.unitName.includes(e.unitName)) {
+                existing.unitName += `, ${e.unitName}`;
+            }
+        }
+    });
+
+    // Handle Slows (List all, highlight max)
+    let maxSlowVal = 0;
+    slows.forEach(s => {
+        const match = s.val.match(/(\d+)%/);
+        if (match) {
+            const val = parseInt(match[1]);
+            if (val > maxSlowVal) maxSlowVal = val;
+        }
+    });
+
+    slows.forEach(s => {
+        const match = s.val.match(/(\d+)%/);
+        const isMax = match && parseInt(match[1]) === maxSlowVal && maxSlowVal > 0;
+        uniqueTeamEffects.push({
+            ...s,
+            isMaxEffect: isMax
+        });
+    });
+
+    // Calculate total damage multiplier
+    let totalDmgMulti = 1.0;
+    uniqueTeamEffects.forEach(e => {
+        const valText = e.val.toLowerCase();
+        const labelText = e.label.toLowerCase();
+
+        // Match damage taken / radiation multipliers
+        if (valText.includes('dmg taken') || labelText.includes('dmg taken') || labelText.includes('radiation')) {
+            // Find percentages
+            const matches = [...e.val.matchAll(/(\d+)%/g)];
+            if (matches.length > 0) {
+                // For ranges or multiple percentages in one string, use the highest one for the multiplier
+                let highestPct = 0;
+                matches.forEach(m => {
+                    const num = parseInt(m[1]);
+                    if (num > highestPct) highestPct = num;
+                });
+                totalDmgMulti *= (1 + highestPct / 100);
+            }
+        }
+    });
+
+    const teamEffectsHtml = uniqueTeamEffects.length > 0 ? `
         <div class="ts-section ts-team-effects-section">
             <h3 class="ts-title">TEAM EFFECTS</h3>
             <div class="ts-team-effects-grid">
-                ${teamEffects.map(e => `
-                    <div class="ts-team-effect-row" style="--effect-color: ${e.color};">
+                ${uniqueTeamEffects.map(e => `
+                    <div class="ts-team-effect-row ${e.isMaxEffect ? 'is-max-effect' : ''}" style="--effect-color: ${e.color}; ${e.isMaxEffect ? 'background: rgba(255,255,255,0.05); border-left: 2px solid ' + e.color + ';' : ''}">
                         <span class="ts-effect-dot" style="background: ${e.color};"></span>
                         <span class="ts-te-label">${e.label}</span>
-                        <span class="ts-te-val">${e.val}</span>
+                        <span class="ts-te-val">${e.val} ${e.isMaxEffect ? '<span style="font-size: 0.6rem; font-weight: 900; color: #4ade80; margin-left: 5px; letter-spacing: 0.5px;">[MAX]</span>' : ''}</span>
                         <span class="ts-te-source">${e.unitName}</span>
                     </div>
                 `).join('')}
+
+                ${totalDmgMulti > 1.0 ? `
+                    <div class="ts-team-effect-row total-multi-row" style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; --effect-color: #fb7185;">
+                        <span class="ts-te-label" style="font-weight: 900; color: #fb7185; letter-spacing: 1px; font-size: 0.75rem;">TOTAL DMG MULTI</span>
+                        <span class="ts-te-val" style="font-size: 1.2rem; font-weight: 900; color: #fff; text-shadow: 0 0 10px rgba(251, 113, 133, 0.4);">x${totalDmgMulti.toFixed(2)}</span>
+                        <span class="ts-te-source" style="font-size: 0.7rem; opacity: 0.6;">Combined Team Debuffs</span>
+                    </div>
+                ` : ''}
             </div>
         </div>
     ` : '';
@@ -604,9 +727,17 @@ function handleHotbarBuffToggle(configKey, checkbox) {
 
     const isChecked = checkbox.checked;
 
-    // Store in HOTBAR_BUFF_STATE only — never touches GLOBAL_BUFF_STATE
+    // Store in hotbarState.buffState for the math function to read at runtime
     hotbarState.buffState[configKey] = isChecked;
-    if (window.HOTBAR_BUFF_STATE) window.HOTBAR_BUFF_STATE[configKey] = isChecked;
+
+    // Fern buffs (mageHill/mageGround) are per-unit TARGETED — they must NOT
+    // be included in HOTBAR_BUFF_STATE because that determines which pre-calculated
+    // database file is loaded. If included, ALL builds get Fern baked in, even
+    // for untargeted units. Fern is applied purely through the math function.
+    const isFernTargetedBuff = (configKey === 'mageHill' || configKey === 'mageGround');
+    if (window.HOTBAR_BUFF_STATE && !isFernTargetedBuff) {
+        window.HOTBAR_BUFF_STATE[configKey] = isChecked;
+    }
 
     // Handle mutually exclusive buffs (e.g. mageHill <-> mageGround)
     if (isChecked && config.excludes) {
@@ -632,7 +763,7 @@ function handleHotbarBuffToggle(configKey, checkbox) {
     // Load the hotbar-specific DB (scoped to HOTBAR_BUFF_STATE), then re-render
     // only hotbar unit cards with hotbar buff context applied.
     const hotbarUnitIds = hotbarState.slots.filter(u => u !== null).map(u => u.id);
-    
+
     // Also apply hotbar buffs to active synchro/fusion units
     const activeFusions = getActiveFusions();
     activeFusions.forEach(f => {
@@ -752,7 +883,7 @@ function initHotbar() {
                     const temp = hotbarState.slots[toIndex];
                     hotbarState.slots[toIndex] = hotbarState.slots[fromIndex];
                     hotbarState.slots[fromIndex] = temp;
-                    
+
                     recalculateHotbarTeam();
                     updateHotbarUI();
                 }
@@ -795,9 +926,8 @@ function initHotbar() {
         farmsMenu.onclick = (e) => e.stopPropagation();
 
         const farmUnits = [
-            { id: 'bulma', name: 'Bulma', img: 'images/units/Bulma.png', tags: ['Assistant'] },
-            { id: 'miku', name: 'Miku', img: 'images/units/Miku.png', tags: ['Assistant'] },
-            { id: 'speedwagon', name: 'Speedcart', img: 'images/units/Speedwagon.png', tags: ['Hero', 'Assistant'] }
+            { id: 'bulma', name: 'Bulma', img: 'images/units/Bulma.png', tags: ['Hero', 'Assistant'] },
+            { id: 'speedwagon', name: 'Speedcart', img: 'images/units/Speedwagon.png', tags: ['Assistant'] }
         ];
 
         farmUnits.forEach(farm => {
@@ -907,8 +1037,34 @@ function addUnitToHotbar(unit, forceAdd = false) {
         return;
     }
 
-    const slots = hotbarState.slots;
-    const unitIds = slots.filter(u => u !== null).map(u => u.id);
+    // Auto-add fusion components for armors
+    const majesticId = window.getUnitId('majestic_armor');
+    const unparalleledId = window.getUnitId('unparalleled_armor');
+
+    if (unit.id === majesticId || unit.id === unparalleledId) {
+        const components = unit.id === majesticId
+            ? ['sasuke_great_war', 'nutaru_beast']
+            : ['ancient_shinob', 'nutaru_beast'];
+
+        let addedCount = 0;
+        components.forEach(fName => {
+            const compId = window.getUnitId(fName);
+            const alreadyInHotbar = hotbarState.slots.some(s => s && s.id === compId);
+            if (!alreadyInHotbar) {
+                const compUnit = typeof unitDatabase !== 'undefined' ? unitDatabase.find(u => u.id === compId) : null;
+                if (compUnit) {
+                    _executeAddUnit(compUnit, true);
+                    addedCount++;
+                }
+            }
+        });
+
+        if (addedCount > 0) {
+            recalculateHotbarTeam();
+            updateHotbarUI();
+        }
+        return;
+    }
 
     _executeAddUnit(unit, forceAdd);
 }
@@ -939,7 +1095,7 @@ function _executeAddUnit(unit, onlyAdd = false) {
                 if (hiddenContainer && typeof renderUnitCard === 'function') {
                     const card = renderUnitCard(unit, 0);
                     hiddenContainer.appendChild(card);
-                    
+
                     if (typeof updateBuildListDisplay === 'function') {
                         updateBuildListDisplay(unit.id);
                     }
@@ -954,14 +1110,14 @@ function _executeAddUnit(unit, onlyAdd = false) {
 
 function checkHotbarSynergies() {
     if (window.CALCULATION_MODE !== 'loadout') return;
-    
+
     const slots = hotbarState.slots.filter(u => u !== null);
     const unitIds = slots.map(u => u.id);
-    
+
     // Ant King / Jinoo Auto-Toggle
     const hasJinoo = unitIds.some(id => window.isUnit(id, 'jinoo_shadow_monarch') || window.isUnit(id, 'sjw'));
     const antKing = slots.find(s => window.isUnit(s.id, 'ant_king_savage'));
-    
+
     if (antKing) {
         const isCurrentlyActive = activeAbilityIds.has(antKing.id);
         if (hasJinoo) {
@@ -1010,6 +1166,11 @@ function clearHotbarSlot(index) {
     if (unit) {
         hotbarState.slots[index] = null;
 
+        // If removed unit is Fern, clear her targets
+        if (window.isUnit(unit.id, 'prodigy_mage') || window.isUnit(unit.id, 'ancient_mage')) {
+            hotbarState.fernTargets = [];
+        }
+
         // Remove from hidden container if it's there
         const hiddenCard = document.querySelector('#hotbarHiddenRender #card-' + unit.id);
         if (hiddenCard) hiddenCard.remove();
@@ -1044,7 +1205,7 @@ function showFusionImages(armorIds) {
         if (unit) {
             const build = bestBuilds[id] || { dmg: '0', spa: '0', range: '0', crit: '0%', cdmg: '0%', dot: '0' };
             const fusionImg = unit.img.replace('.png', 'Syncro.png');
-            const isFused = hotbarState.fusionMode;
+            const isFused = hotbarState.activeFusionIds.includes(id);
             const fuseBtnText = isFused ? 'UNFUSE' : 'FUSE';
             const fuseBtnClass = isFused ? 'fusion-btn-unfuse' : 'fusion-btn-fuse';
 
@@ -1055,7 +1216,7 @@ function showFusionImages(armorIds) {
                     <div class="br-full-stats fusion-stats-box-full-build">
                         <div class="fs-comparison-grid" style="grid-template-columns: 1fr;">
                             <div class="fs-item-lg dmg-row" style="justify-content: center;">
-                                <span class="fs-icon-box dmg-bg"><svg viewBox="0 0 290.226 290.226" fill="currentColor"><path d="M63.951,243.575c-1.945-3.578-4.401-6.907-7.363-9.869c-3.106-3.102-6.626-5.633-10.4-7.63 c-4.51-2.387-0.945-7.5-0.945-7.5c4.616-7.023,8.825-14.079,12.305-20.226l-23.363-23.344H11.504c-4.362,0-7.898-3.539-7.898-7.902 c0-4.361,3.536-7.9,7.898-7.9h25.947c2.1,0,4.107,0.832,5.588,2.312l85.379,85.291c1.483,1.483,2.315,3.495,2.315,5.589v26.073 c0,4.365-3.537,7.897-7.9,7.897c-4.367,0-7.904-3.531-7.904-7.897v-22.798l-23.27-23.24c-6.281,3.707-13.582,8.252-20.816,13.25 C70.842,245.679,66.698,248.629,63.951,243.575z"/><path d="M26.61,237.102c-7.106,0-13.784,2.764-18.812,7.784c-5.019,5.015-7.782,11.686-7.782,18.778 c0,7.097,2.764,13.762,7.782,18.776c5.027,5.016,11.706,7.783,18.812,7.785c7.102,0,13.781-2.77,18.804-7.785 c5.023-5.015,7.79-11.682,7.79-18.776c0-7.093-2.768-13.764-7.79-18.778C40.392,239.866,33.712,237.102,26.61,237.102z"/><path d="M100.985,182.318c-3.502,3.499-9.232,3.499-12.734,0.001l-8.81-8.801c-3.502-3.498-3.502-9.223,0-12.721L229.832,10.564 c3.502-3.498,10.401-6.727,15.33-7.175l36.862-3.352c4.93-0.448,8.596,3.218,8.148,8.148l-3.346,36.791 c-0.448,4.93-3.68,11.825-7.182,15.324l-150.4,150.251c-3.502,3.498-9.232,3.498-12.734,0l-8.822-8.813 c-3.502-3.498-3.502-9.223,0-12.722L233.608,63.213c1.854-1.848,1.856-4.852,0.003-6.702c-1.848-1.853-4.853-1.853-6.709-0.002 L100.985,182.318z"/></svg></span>
+                                <span class="fs-icon-box dmg-bg"><svg viewBox="0 0 290.226 290.226" fill="currentColor"><path d="M63.951,243.575c-1.945-3.578-4.401-6.907-7.363-9.869c-3.106-3.102-6.626-5.633-10.4-7.63 c-4.51-2.387-0.945-7.5-0.945-7.5c4.616-7.023,8.825-14.079,12.305-20.226l-23.363-23.344H11.504c-4.362,0-7.898-3.539-7.898-7.902 c0-4.361,3.536-7.9,7.898-7.9h25.947c2.1,0,4.107,0.832,5.588,2.312l85.379,85.291c1.483,1.483,2.315,3.495,2.315,5.589v26.073 c0,4.365-3.537,7.897-7.9,7.897c-4.367,0-7.904-3.531-7.904-7.897v-22.798l-23.27-23.24c-6.281,3.707-13.582,8.252-20.816,13.25 C70.842,245.679,66.698,248.629,63.951,243.575z"/><path d="M26.61,237.102c-7.106,0-13.784,2.764-18.812,7.784c-5.019,5.015-7.782,11.686-7.782,18.778 c0,7.097,2.764,13.762,7.782,18.776c5.027,5.016,11.706,7.783,18.812,7.785c7.102,0,13.781-2.77,18.804-7.785 c5.023-5.015,7.79-11.682,7.79-18.776c0-7.093-2.768-13.764-7.79-18.778C40.392,239.866,33.712,237.102,26.61,237.102z"/><path d="M100.985,182.318c-3.502,3.499-9.232,3.499-12.734,0.001l-8.81-8.801c-3.502-3.498-3.502-9.223,0-12.721L229.832,10.564 c3.502-3.498,10.401-6.727,15.33-7.175l36.862-3.352c4.93-0.448,8.596,3.218,8.148,8.148l-3.346,36.791 c-0.448,4.93-3.68,11.825-7.182,15.324l-150.4,150.251c-3.502,3.498-9.232,3.498-12.734,0l-8.822-8.813 c-3.502-3.498-3.502-9.223,0-12.722L233.608,63.213c1.854-1.848,1.856-4.852,0.003-6.702c-1.848-1.848,1.856-4.852,0.003-6.702c-1.848-1.853-4.853-1.853-6.709-0.002 L100.985,182.318z"/></svg></span>
                                 <span class="fs-val val-dmg" style="width: 60px; text-align: left;">${build.dmg}</span>
                             </div>
 
@@ -1076,7 +1237,7 @@ function showFusionImages(armorIds) {
                         </div>
                     </div>
 
-                    <button class="fusion-toggle-btn ${fuseBtnClass}" onclick="event.stopPropagation(); hotbarState.fusionMode = !hotbarState.fusionMode; updateHotbarUI(); if(typeof triggerGlobalBuffUpdate === 'function') triggerGlobalBuffUpdate(); closeModal('universalModal');">
+                    <button class="fusion-toggle-btn ${fuseBtnClass}" onclick="event.stopPropagation(); toggleFusion('${id}'); showFusionImages([${armorIds.map(aid => `'${aid}'`).join(',')}]);">
                         ${fuseBtnText}
                     </button>
                 </div>
@@ -1109,10 +1270,15 @@ function updateHotbarUI() {
     if (!hotbar) return;
 
     // 1. Detect Fusions dynamically
-    const activeFusions = getActiveFusions();
+    const availableFusions = getAvailableFusions();
 
-    // Auto-disable fusion mode if no fusions available
-    if (activeFusions.length === 0) hotbarState.fusionMode = false;
+    // Clean up activeFusionIds if components are missing
+    const availableIds = availableFusions.map(f => f.id);
+    hotbarState.activeFusionIds = hotbarState.activeFusionIds.filter(id => availableIds.includes(id));
+
+    // Update legacy fusionMode flag
+    hotbarState.fusionMode = hotbarState.activeFusionIds.length > 0;
+    const activeFusions = availableFusions.filter(f => hotbarState.activeFusionIds.includes(f.id));
 
     // Detect component flags for logic further down
     const unitIdsInHotbar = hotbarState.slots.filter(u => u !== null).map(u => u.id);
@@ -1132,7 +1298,12 @@ function updateHotbarUI() {
         'bulma': ['bulma']
     };
 
-    unitIdsInHotbar.forEach(id => {
+    const idsToCheck = [...unitIdsInHotbar];
+    if (hotbarState.fusionMode) {
+        activeFusions.forEach(f => idsToCheck.push(f.id));
+    }
+
+    idsToCheck.forEach(id => {
         if (BUFF_PROVIDERS[id]) {
             BUFF_PROVIDERS[id].forEach(configKey => activeBuffsInHotbar.add(configKey));
         }
@@ -1144,7 +1315,7 @@ function updateHotbarUI() {
         Object.keys(window.GLOBAL_BUFF_DATA).forEach(configKey => {
             const config = window.GLOBAL_BUFF_DATA[configKey];
             const isProvided = activeBuffsInHotbar.has(configKey);
-            
+
             if (isProvided) {
                 availableConfigs.push({ configKey, config });
             } else {
@@ -1152,7 +1323,7 @@ function updateHotbarUI() {
                 if (hotbarState.buffState[configKey]) {
                     hotbarState.buffState[configKey] = false;
                     if (window.HOTBAR_BUFF_STATE) window.HOTBAR_BUFF_STATE[configKey] = false;
-                    
+
                     // If we auto-disabled a buff, we need to force the database to refresh 
                     // so any cards reflecting hotbar stats are updated.
                     if (typeof window.renderDatabase === 'function') {
@@ -1167,7 +1338,7 @@ function updateHotbarUI() {
     const togglesRow = document.getElementById('hotbarToggles');
     if (togglesRow) {
         const currentConfigsKey = availableConfigs.map(c => c.configKey).join(',');
-        
+
         if (togglesRow.dataset.configsKey !== currentConfigsKey) {
             let togglesHtml = '';
             availableConfigs.forEach(({ configKey, config }) => {
@@ -1207,6 +1378,7 @@ function updateHotbarUI() {
     // 1.5 Calculate Team Totals
     // Build a set of component unit IDs to skip in fusion mode
     const fusionSkipIds = new Set();
+
     if (hotbarState.fusionMode) {
         activeFusions.forEach(f => f.components.forEach(c => fusionSkipIds.add(c)));
     }
@@ -1214,8 +1386,8 @@ function updateHotbarUI() {
     const getUnitStats = (unitId) => {
         const detail = getDetailedUnitStats(unitId);
         if (!detail) return { dmg: 0, dps: 0, teamDmg: 0, teamDps: 0 };
-        return { 
-            dmg: detail.dmg, 
+        return {
+            dmg: detail.dmg,
             dps: detail.dps,
             teamDmg: detail.teamDmg,
             teamDps: detail.teamDps
@@ -1228,7 +1400,14 @@ function updateHotbarUI() {
     // Add stats for non-fused units
     hotbarState.slots.forEach(u => {
         if (!u) return;
-        if (fusionSkipIds.has(u.id)) return; // Skip component units in fusion mode
+
+        // Robust skip check for components when fused
+        const isComponent = hotbarState.fusionMode && activeFusions.some(f =>
+            f.components.includes(u.id) || f.components.some(c => window.isUnit(u.id, c))
+        );
+
+        if (isComponent) return;
+
         const stats = getUnitStats(u.id);
         teamDmg += stats.teamDmg;
         teamDps += stats.teamDps;
@@ -1349,7 +1528,7 @@ function updateHotbarUI() {
             const leader = hotbarState.slots[0];
             const isKsLeading = (window.CALCULATION_MODE === 'potential') || (leader && window.isUnit(leader.id, 'king_sailor'));
             const isKs = window.isUnit(unit.id, 'king_sailor');
-            
+
             if (i === 0 && isKs) {
                 let leaderBadge = slot.querySelector('.leader-badge');
                 if (!leaderBadge) {
@@ -1370,6 +1549,34 @@ function updateHotbarUI() {
                 if (mb) mb.remove();
             }
 
+            // FERN TARGETS BUTTON (Only for Fern herself)
+            const isFern = window.isUnit(unit.id, 'prodigy_mage') || window.isUnit(unit.id, 'ancient_mage');
+            let fernTargetBtn = slot.querySelector('.fern-target-btn');
+            if (isFern) {
+                if (!fernTargetBtn) {
+                    fernTargetBtn = document.createElement('div');
+                    fernTargetBtn.className = 'fern-target-btn';
+                    fernTargetBtn.innerHTML = `<i class="fas fa-bullseye"></i> TARGETS`;
+                    slot.appendChild(fernTargetBtn);
+                }
+                fernTargetBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    openFernTargetMenu();
+                };
+            } else {
+                if (fernTargetBtn) fernTargetBtn.remove();
+            }
+
+            // Highlight targeted units
+            if (hotbarState.fernTargets.includes(i)) {
+                slot.style.borderColor = '#8b5cf6';
+                slot.style.boxShadow = '0 0 10px rgba(139, 92, 246, 0.3)';
+            } else {
+                slot.style.borderColor = '';
+                slot.style.boxShadow = '';
+            }
+            const oldBadge = slot.querySelector('.fern-target-badge');
+            if (oldBadge) oldBadge.remove();
             // Mini Stats Overlay (Hide for buffers)
             const isBuffer = unit.id === 'miku';
             let statsOverlay = slot.querySelector('.slot-stats-overlay');
@@ -1392,7 +1599,7 @@ function updateHotbarUI() {
                     const dmgValEl = statsOverlay.querySelector('.dmg-val') || statsOverlay.querySelector('.dmg span');
                     const dpsValEl = statsOverlay.querySelector('.dps-val') || statsOverlay.querySelector('.dps span');
                     const placeEl = statsOverlay.querySelector('.place-mult');
-                    
+
                     if (dmgValEl) dmgValEl.innerText = dmgStr;
                     if (dpsValEl) dpsValEl.innerText = dpsStr;
                     if (placeEl) placeEl.innerText = placements > 1 ? `x${placements}` : '';
@@ -1403,21 +1610,20 @@ function updateHotbarUI() {
         } else {
             slot.classList.remove('filled');
             slot.classList.remove('fused-slot');
-            
-            const img = slot.querySelector('img');
-            if (img) img.remove();
-            
-            const removeBtn = slot.querySelector('.remove-btn');
-            if (removeBtn) removeBtn.remove();
-            
-            const fusionBadge = slot.querySelector('.fusion-badge:not(.modes-badge)');
-            if (fusionBadge) fusionBadge.remove();
-            
-            const modesBadge = slot.querySelector('.modes-badge');
-            if (modesBadge) modesBadge.remove();
-            
-            const statsOverlay = slot.querySelector('.slot-stats-overlay');
-            if (statsOverlay) statsOverlay.remove();
+
+            // Cleanup all possible extra UI elements for empty slots
+            [
+                '.leader-badge', '.mark-badge', '.fern-target-btn', 
+                '.modes-badge', '.fusion-badge', '.slot-stats-overlay', 
+                '.remove-btn', 'img', '.fern-target-badge'
+            ].forEach(selector => {
+                const el = slot.querySelector(selector);
+                if (el) el.remove();
+            });
+
+            // Reset styling
+            slot.style.borderColor = '';
+            slot.style.boxShadow = '';
         }
     });
 }
@@ -1431,4 +1637,61 @@ window.openTeamSummary = openTeamSummary;
 window.handleHotbarBuffToggle = handleHotbarBuffToggle;
 window.getHotbarState = () => hotbarState;
 window.getActiveFusions = getActiveFusions;
+window.getAvailableFusions = getAvailableFusions;
 
+function toggleFernTarget(index) {
+    const idx = hotbarState.fernTargets.indexOf(index);
+    if (idx === -1) {
+        // Max 3 targets total
+        if (hotbarState.fernTargets.length >= 3) {
+            hotbarState.fernTargets.shift();
+        }
+        hotbarState.fernTargets.push(index);
+    } else {
+        hotbarState.fernTargets.splice(idx, 1);
+    }
+
+    recalculateHotbarTeam();
+    updateHotbarUI();
+}
+
+function openFernTargetMenu() {
+    const slots = hotbarState.slots;
+    const fernIndex = slots.findIndex(s => s && (window.isUnit(s.id, 'prodigy_mage') || window.isUnit(s.id, 'ancient_mage')));
+
+    if (fernIndex === -1) {
+        alert("Prodigy Mage must be in your hotbar to select targets!");
+        return;
+    }
+
+    let html = `
+        <div class="fern-menu-container" style="display: flex; flex-direction: column; gap: 15px; padding: 10px;">
+            <div style="font-size: 0.85rem; color: #94a3b8; line-height: 1.4;">
+                Select up to <b style="color: #8b5cf6;">3</b> team members to receive tactical support from Fern.
+            </div>
+            <div class="fern-slots-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+    `;
+
+    slots.forEach((s, i) => {
+        if (!s || i === fernIndex) return;
+        const isTargeted = hotbarState.fernTargets.includes(i);
+        html += `
+            <div class="fern-menu-item" 
+                 onclick="toggleFernTarget(${i}); openFernTargetMenu();"
+                 style="background: #1e293b; border: 2px solid ${isTargeted ? '#8b5cf6' : 'rgba(255,255,255,0.05)'}; border-radius: 12px; padding: 10px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; ${isTargeted ? 'box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);' : ''}">
+                <img src="${s.img}" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
+                <div style="font-size: 0.65rem; font-weight: 800; color: ${isTargeted ? 'white' : '#64748b'}; text-align: center; text-transform: uppercase;">${s.name}</div>
+            </div>
+        `;
+    });
+
+    html += `</div></div>`;
+
+    if (typeof showUniversalModal === 'function') {
+        showUniversalModal({
+            title: '<i class="fas fa-magic" style="color: #8b5cf6;"></i> PARTY TACTICIAN',
+            content: html,
+            size: 'modal-md'
+        });
+    }
+}

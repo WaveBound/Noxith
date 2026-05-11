@@ -886,8 +886,8 @@ function calculateDPS(uStats, relicStats, context) {
                         pSpa = 0;
                     } else {
                         const ksTags = uStats.tags || ["Magi", "King", "Hero", "Uncontrollable Power"];
-                        let matchCount = 0;
-                        let mismatchCount = 0;
+                        let matchPlacements = 0;
+                        let mismatchPlacements = 0;
 
                         const hotbarSlots = window.hotbarState?.slots || [];
                         hotbarSlots.forEach((s) => {
@@ -896,31 +896,46 @@ function calculateDPS(uStats, relicStats, context) {
                             if (s.id === uStats.id || isUnit(s.id, uStats.id)) return;
 
                             const sUnit = window.getUnitById(s.id);
-                            if (!sUnit) return;
-
+                            
                             // Determine placement for this slot
-                            let sPlacement = sUnit.placement || 1;
-                            const sTraitId = (window.unitTraits && window.unitTraits[s.id]);
-                            if (sTraitId) {
-                                const sTrait = getTraitFast(sTraitId);
-                                if (sTrait && sTrait.limitPlace !== undefined) {
-                                    sPlacement = Math.min(sPlacement, sTrait.limitPlace);
+                            let sPlacement = (sUnit ? sUnit.placement : s.placement) || 1;
+                            
+                            // Check for Assistant tag or specific assistant units
+                            const isAssistant = (sUnit?.tags && sUnit.tags.includes('Assistant')) || 
+                                              (s.tags && s.tags.includes('Assistant')) ||
+                                              isUnit(s.id, 'speedwagon') || isUnit(s.id, 'bulma');
+                            
+                            // RULE: Assistants only count as 1 placement for King Sailor
+                            if (isAssistant) {
+                                sPlacement = 1;
+                            } else {
+                                const sTraitId = (window.unitTraits && window.unitTraits[s.id]);
+                                if (sTraitId) {
+                                    const sTrait = getTraitFast(sTraitId);
+                                    if (sTrait && sTrait.limitPlace !== undefined) {
+                                        sPlacement = Math.min(sPlacement, sTrait.limitPlace);
+                                    }
                                 }
                             }
 
-                            const sTags = sUnit.tags || [];
+                            const sTags = (sUnit ? sUnit.tags : s.tags) || [];
                             const hasMatch = ksTags.some(tag => sTags.includes(tag));
 
-                            if (hasMatch) matchCount += sPlacement;
-                            else mismatchCount += sPlacement;
+                            if (hasMatch) {
+                                matchPlacements += sPlacement;
+                            } else {
+                                mismatchPlacements += sPlacement;
+                            }
 
-                            if (sUnit.summonStats && sUnit.summonStats.maxCount) {
-                                mismatchCount += (sUnit.summonStats.maxCount * sPlacement);
+                            // User request: Phantom Captain planes count as placements for King Sailor (tagless = mismatch)
+                            if (isUnit(s.id, 'phantom_captain') && sUnit?.summonStats?.maxCount) {
+                                mismatchPlacements += sUnit.summonStats.maxCount;
                             }
                         });
 
-                        pDmg = Math.min(50, matchCount * 10);
-                        pSpa = Math.min(25, mismatchCount * 5);
+                        // 10% DMG per matching placement, 5% SPA per mismatching placement
+                        pDmg = Math.min(50, matchPlacements * 10);
+                        pSpa = Math.min(25, mismatchPlacements * 5);
                     }
                 }
             }
@@ -978,6 +993,29 @@ function calculateDPS(uStats, relicStats, context) {
                 passiveBreakdown.push({ name: p.name, dmg: pDmg, spa: pSpa, range: pRange, trueDmg: pTrue, crit: pCrit, cdmg: pCdmg, dot: pDot });
             }
         });
+    }
+
+    // STRONGEST HUNTER: Team buff from Jinoo (Shadow Monarch) to Leveling units
+    if (window.CALCULATION_MODE === 'loadout' && !isUnit(uStats.id, 'jinoo_shadow_monarch') && !isUnit(uStats.id, 'sjw')) {
+        const hbStats = getCachedHotbarStats();
+        if (hbStats.jinooPresent) {
+            if (uStats.tags && uStats.tags.includes('Leveling')) {
+                // Find Jinoo's E-level to determine buff strength
+                const jinooSlot = window.hotbarState?.slots.find(s => s && (isUnit(s.id, 'jinoo_shadow_monarch') || isUnit(s.id, 'sjw')));
+                const jinooELevel = (jinooSlot && window.unitELevels && window.unitELevels[jinooSlot.id] !== undefined) ? window.unitELevels[jinooSlot.id] : 0;
+                
+                let buffDmg = 20;
+                if (jinooELevel >= 4) buffDmg = 30;
+                
+                // Shadow Knight specific buff
+                if (isUnit(uStats.id, 'shadow_knight')) {
+                    buffDmg = (jinooELevel >= 4) ? 50 : 40;
+                }
+                
+                passivePcent += buffDmg;
+                passiveBreakdown.push({ name: "Strongest Hunter", dmg: buffDmg, spa: 0, range: 0, trueDmg: 0, crit: 0, cdmg: 0, dot: 0 });
+            }
+        }
     }
 
     // MONARCH'S DEVOTION: Team buff from Ant King (Savage) when Jinoo is in loadout
@@ -1091,9 +1129,11 @@ function calculateDPS(uStats, relicStats, context) {
     const { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc } = _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicStats, context);
 
     let abilityDmg = 0;
+    let abilityFinalMult = 1;
     if (isAbility && uStats.ability) {
         const ab = Array.isArray(uStats.ability) ? uStats.ability[0] : uStats.ability;
         if (ab.buffDmg) abilityDmg = ab.buffDmg;
+        if (ab.finalMult) abilityFinalMult = ab.finalMult;
     }
 
     // --- SYNERGY CHECKS (e.g. requiresDot) ---
@@ -1141,9 +1181,9 @@ function calculateDPS(uStats, relicStats, context) {
 
 
 
-    const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1);
-    const finalDmgBoss = lvStats.dmg * (1 + traitDmgPctBoss / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1);
-    const finalDmgNormal = lvStats.dmg * (1 + traitDmgPctNormal / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1);
+    const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
+    const finalDmgBoss = lvStats.dmg * (1 + traitDmgPctBoss / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
+    const finalDmgNormal = lvStats.dmg * (1 + traitDmgPctNormal / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
 
     const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cdmg || 0) + passiveCdmgFromPassives;
     let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);

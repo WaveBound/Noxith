@@ -32,8 +32,9 @@ window.GLOBAL_BUFF_DATA = {
         desc: "Apply Bijuu Link: +25% Dmg, +25% Range, -15% SPA",
         color: '#f87171',
         math: (uStats) => {
-            // Bijuu Link comes from Unparalleled Armor — can't buff itself
-            if (window.isUnit(uStats.id, 'unparalleled_armor')) return {};
+            // Bijuu Link comes from Unparalleled Armor — doesn't apply to providers
+            const baseId = (uStats.id || "").split('-')[0];
+            if (baseId === 'unparalleled_armor' || baseId === 'nutaru_beast' || baseId === 'ancient_shinob') return {};
             return { dmg: 25, spa: 15, range: 25 };
         },
         renderLabel: "Active: +25% Dmg, +25% Range, -15% SPA",
@@ -81,14 +82,14 @@ window.GLOBAL_BUFF_DATA = {
             // Only applies if King Sailor is in Slot 1 OR in Potential Mode
             if (isKsLeading || window.CALCULATION_MODE === 'potential') {
                 const tags = uStats.tags || [];
-                if (tags.includes('Magi')) { b.dmg = 50; b.spa = 15; }
+                if (tags.includes('Magi') || tags.includes('Hero')) { b.dmg = 50; b.spa = 15; }
                 else if (tags.includes('Uncontrollable Power')) { b.dmg = 30; b.spa = 10; }
                 else if (String(uStats.element).toLowerCase() === 'water') { b.dmg = 20; b.spa = 10; }
             }
 
             return b;
         },
-        renderLabel: "Mark: +10% Crit, +20% CDmg. Extra for Magi/Uncontrollable/Water.",
+        renderLabel: "+10% Crit Rate, +20% Crit Damage",
         genType: 'boolean'
     },
     mageHill: {
@@ -98,9 +99,27 @@ window.GLOBAL_BUFF_DATA = {
         desc: "Apply Fern (Hill) Buff: -30% SPA (Hill Only)",
         color: '#fb923c',
         excludes: 'mageGround', // Automatically disables mageGround if checked
-        math: (uStats) => {
+        math: (uStats, context) => {
             const uType = (uStats.placementType || 'Ground').toLowerCase();
-            return (uType === 'hill' || uType === 'hybrid') ? { spa: 30 } : {};
+            const isMatching = (uType === 'hill' || uType === 'hybrid');
+            if (!isMatching) return {};
+
+            if (window.CALCULATION_MODE === 'potential') return { spa: 30 };
+
+            // Hotbar unit: context.isHotbar is set by the rendering pipeline
+            if (context.isHotbar) {
+                const hotbar = window.hotbarState;
+                if (!hotbar || !hotbar.slots) return {};
+                const targets = hotbar.fernTargets || [];
+                if (targets.length === 0) return {};
+                const isFernPresent = hotbar.slots.some(s => s && (window.isUnit(s.id, 'prodigy_mage') || window.isUnit(s.id, 'ancient_mage')));
+                if (!isFernPresent) return {};
+                const slotIdx = hotbar.slots.findIndex(s => s && (s.id === uStats.id || window.isUnit(s.id, uStats.id)));
+                return (slotIdx !== -1 && targets.includes(slotIdx)) ? { spa: 30 } : {};
+            }
+
+            // Main list unit: apply globally
+            return { spa: 30 };
         },
         renderLabel: "Active: -30% SPA",
         genType: 'exclusive:fern' // Tells Python these are mutually exclusive
@@ -112,9 +131,27 @@ window.GLOBAL_BUFF_DATA = {
         desc: "Apply Fern (Ground) Buff: +45% Crit Rate (Ground Only)",
         color: '#f472b6',
         excludes: 'mageHill', // Automatically disables mageHill if checked
-        math: (uStats) => {
+        math: (uStats, context) => {
             const uType = (uStats.placementType || 'Ground').toLowerCase();
-            return (uType === 'ground' || uType === 'hybrid') ? { crit: 45 } : {};
+            const isMatching = (uType === 'ground' || uType === 'hybrid');
+            if (!isMatching) return {};
+
+            if (window.CALCULATION_MODE === 'potential') return { crit: 45 };
+
+            // Hotbar unit: context.isHotbar is set by the rendering pipeline
+            if (context.isHotbar) {
+                const hotbar = window.hotbarState;
+                if (!hotbar || !hotbar.slots) return {};
+                const targets = hotbar.fernTargets || [];
+                if (targets.length === 0) return {};
+                const isFernPresent = hotbar.slots.some(s => s && (window.isUnit(s.id, 'prodigy_mage') || window.isUnit(s.id, 'ancient_mage')));
+                if (!isFernPresent) return {};
+                const slotIdx = hotbar.slots.findIndex(s => s && (s.id === uStats.id || window.isUnit(s.id, uStats.id)));
+                return (slotIdx !== -1 && targets.includes(slotIdx)) ? { crit: 45 } : {};
+            }
+
+            // Main list unit: apply globally
+            return { crit: 45 };
         },
         renderLabel: "Active: +45% Crit Rate",
         genType: 'exclusive:fern'
@@ -158,8 +195,6 @@ const SUB_NAMES = {
 
 const comingSoonData = [
     { type: "Feature", title: "Relic Database", desc: "A dedicated page showing all relic stats, set bonuses, and specific drop locations/obtainable methods." },
-    { type: "Feature", title: "Mode Differentiation", desc: "Potential Mode will assume maximum possible stats and self-leading buffs. Loadout Mode will require meeting specific positional/team requirements." },
-    { type: "Feature", title: "Team Synergy Dashboard", desc: "Real-time summary of team-wide buffs, total team DPS, debuff contributions, and equipped synergy sets." }
 ];
 
 const patchNotesData = [
