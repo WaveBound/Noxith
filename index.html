@@ -11,16 +11,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <!-- Load the stylesheet asynchronously -->
+  <!-- Load the stylesheet normally (The &display=swap handles the magic for us) -->
   <link
     href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
-    rel="stylesheet" media="print" onload="this.media='all'" />
-
-  <!-- Fallback for users who have JavaScript disabled -->
-  <noscript>
-    <link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" />
-  </noscript>
+    rel="stylesheet" />
   <style>
     :root {
       --bg: #080808;
