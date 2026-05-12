@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+   
+   <!-- Main Homepage -->
+   <url>
+      <loc>https://noxith.com/</loc>
+      <lastmod>2026-05-08</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>1.00</priority>
+   </url>
+
+   <!-- BloxMulti Project -->
+   <url>
+      <loc>https://noxith.com/bloxmulti/</loc>
+      <lastmod>2026-05-11</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.80</priority>
+   </url>
+
+   <!-- UTDX Project -->
+   <url>
+      <loc>https://noxith.com/utdx/</loc>
+      <lastmod>2026-05-12</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.80</priority>
+   </url>
+
+   <!-- Wavebound Project -->
+   <url>
+      <loc>https://noxith.com/wavebound/</loc>
+      <lastmod>2026-05-01</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.80</priority>
+   </url>
+
+</urlset>
