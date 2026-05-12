@@ -1137,7 +1137,8 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     // --- SYNERGY CHECKS (e.g. requiresDot) ---
-    if (uStats.requiresDot) {
+    // Only enforce in Loadout mode; Potential mode assumes synergy is always met
+    if (uStats.requiresDot && window.CALCULATION_MODE === 'loadout') {
         const hotbar = window.hotbarState;
         let met = false;
         if (hotbar && hotbar.slots) {

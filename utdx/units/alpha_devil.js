@@ -7,7 +7,7 @@ unitDatabase.push({
     placement: 3,
     placementType: "Ground",
     role: "Damage / Modes",
-    tags: [],
+    tags: ["Demon", "Sword", "Villain"],
 
     // META (Build Guide tab)
     meta: {
