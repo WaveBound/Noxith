@@ -21,7 +21,8 @@
       --accent-lt: #ffffff;
       --text: #f0f0f0;
       --muted: #666666;
-      --sub: #333333;
+      --sub: #888888;
+      /* Updated from #333333 to pass WCAG 4.5:1 color contrast */
     }
 
     *,
@@ -129,14 +130,22 @@
       list-style: none;
     }
 
-    .nav-links a {
+    /* Updated to include semantic button styles for SEO improvements */
+    .nav-links a,
+    .nav-btn {
+      background: transparent;
+      border: none;
       color: var(--muted);
       text-decoration: none;
+      font-family: inherit;
       font-size: 0.86rem;
+      cursor: pointer;
+      padding: 0;
       transition: color 0.2s;
     }
 
-    .nav-links a:hover {
+    .nav-links a:hover,
+    .nav-btn:hover {
       color: var(--text);
     }
 
@@ -667,82 +676,86 @@
       </a>
       <ul class="nav-links">
         <li><a href="#projects">Projects</a></li>
-        <li><a href="javascript:void(0)" onclick="openModal()">Contact</a></li>
-        <li><a href="javascript:void(0)" onclick="NoxithDonations.open()" style="color: var(--accent);">Donate</a></li>
+        <!-- Changed to <button> for SEO: fixes 'Links are not crawlable' warning -->
+        <li><button class="nav-btn" onclick="openModal()">Contact</button></li>
+        <li><button class="nav-btn" onclick="NoxithDonations.open()" style="color: var(--accent);">Donate</button></li>
       </ul>
     </div>
   </nav>
 
   <script src="./donations/donations.js"></script>
 
-  <section class="hero">
-    <h1 class="hero-title">noxith<br /><em>hub.</em></h1>
-    <p class="hero-sub">A home for tools and projects. Everything lives here.</p>
-    <div id="creditsContainer" class="credits-badges"></div>
-  </section>
+  <!-- Wrapped in a <main> tag to fix the missing landmark accessibility warning -->
+  <main>
+    <section class="hero">
+      <h1 class="hero-title">noxith<br /><em>hub.</em></h1>
+      <p class="hero-sub">A home for tools and projects. Everything lives here.</p>
+      <div id="creditsContainer" class="credits-badges"></div>
+    </section>
 
-  <section class="projects" id="projects">
-    <p class="projects-heading">Recent Projects</p>
-    <div class="grid">
+    <section class="projects" id="projects">
+      <p class="projects-heading">Recent Projects</p>
+      <div class="grid">
 
-      <a href="/bloxmulti/" class="card">
-        <div class="card-status">
-          <div class="card-status-dot"></div>
-          Active
-        </div>
-        <h2 class="card-title">BloxMulti</h2>
-        <p class="card-desc">Free multi-account manager for Roblox. Run multiple accounts at once with isolated
-          sessions, launch games by Place ID, and save private server codes.</p>
-        <div class="card-tags">
-          <span class="tag">roblox</span>
-          <span class="tag">multi-account</span>
-          <span class="tag">windows</span>
-        </div>
-        <div class="card-footer">
-          <span class="card-updated">Updated recently</span>
-          <div class="btn-visit">Check it out <span class="btn-arrow">→</span></div>
-        </div>
-      </a>
+        <a href="/bloxmulti/" class="card">
+          <div class="card-status">
+            <div class="card-status-dot"></div>
+            Active
+          </div>
+          <h2 class="card-title">BloxMulti</h2>
+          <p class="card-desc">Free multi-account manager for Roblox. Run multiple accounts at once with isolated
+            sessions, launch games by Place ID, and save private server codes.</p>
+          <div class="card-tags">
+            <span class="tag">roblox</span>
+            <span class="tag">multi-account</span>
+            <span class="tag">windows</span>
+          </div>
+          <div class="card-footer">
+            <span class="card-updated">Updated recently</span>
+            <div class="btn-visit">Check it out <span class="btn-arrow">→</span></div>
+          </div>
+        </a>
 
-      <a href="/wavebound/" class="card">
-        <div class="card-status">
-          <div class="card-status-dot"></div>
-          Active
-        </div>
-        <h2 class="card-title">Wavebound</h2>
-        <p class="card-desc">Game automation with sub-10ms timing, OCR screen reading, HSV color detection, and full
-          remote control.</p>
-        <div class="card-tags">
-          <span class="tag">automation</span>
-          <span class="tag">windows</span>
-          <span class="tag">ocr</span>
-        </div>
-        <div class="card-footer">
-          <span class="card-updated">Updated recently</span>
-          <div class="btn-visit">Check it out <span class="btn-arrow">→</span></div>
-        </div>
-      </a>
+        <a href="/wavebound/" class="card">
+          <div class="card-status">
+            <div class="card-status-dot"></div>
+            Active
+          </div>
+          <h2 class="card-title">Wavebound</h2>
+          <p class="card-desc">Game automation with sub-10ms timing, OCR screen reading, HSV color detection, and full
+            remote control.</p>
+          <div class="card-tags">
+            <span class="tag">automation</span>
+            <span class="tag">windows</span>
+            <span class="tag">ocr</span>
+          </div>
+          <div class="card-footer">
+            <span class="card-updated">Updated recently</span>
+            <div class="btn-visit">Check it out <span class="btn-arrow">→</span></div>
+          </div>
+        </a>
 
-      <a href="/utdx/" class="card">
-        <div class="card-status">
-          <div class="card-status-dot"></div>
-          Active
-        </div>
-        <h2 class="card-title">UTDX</h2>
-        <p class="card-desc">Advanced Unit Optimizer for UTDX. Optimize your units with the best traits, relics, and
-          more.</p>
-        <div class="card-tags">
-          <span class="tag">tool</span>
-          <span class="tag">optimizer</span>
-        </div>
-        <div class="card-footer">
-          <span class="card-updated">Updated recently</span>
-          <div class="btn-visit">Check it out <span class="btn-arrow">→</span></div>
-        </div>
-      </a>
+        <a href="/utdx/" class="card">
+          <div class="card-status">
+            <div class="card-status-dot"></div>
+            Active
+          </div>
+          <h2 class="card-title">UTDX</h2>
+          <p class="card-desc">Advanced Unit Optimizer for UTDX. Optimize your units with the best traits, relics, and
+            more.</p>
+          <div class="card-tags">
+            <span class="tag">tool</span>
+            <span class="tag">optimizer</span>
+          </div>
+          <div class="card-footer">
+            <span class="card-updated">Updated recently</span>
+            <div class="btn-visit">Check it out <span class="btn-arrow">→</span></div>
+          </div>
+        </a>
 
-    </div>
-  </section>
+      </div>
+    </section>
+  </main>
 
   <footer>
     <div class="footer-inner">
