@@ -1550,7 +1550,7 @@ function updateHotbarUI() {
             }
 
             // FERN TARGETS BUTTON (Only for Fern herself)
-            const isFern = window.isUnit(unit.id, 'prodigy_mage') || window.isUnit(unit.id, 'ancient_mage');
+            const isFern = window.isUnit(unit.id, 'prodigy_mage');
             let fernTargetBtn = slot.querySelector('.fern-target-btn');
             if (isFern) {
                 if (!fernTargetBtn) {
@@ -1613,8 +1613,8 @@ function updateHotbarUI() {
 
             // Cleanup all possible extra UI elements for empty slots
             [
-                '.leader-badge', '.mark-badge', '.fern-target-btn', 
-                '.modes-badge', '.fusion-badge', '.slot-stats-overlay', 
+                '.leader-badge', '.mark-badge', '.fern-target-btn',
+                '.modes-badge', '.fusion-badge', '.slot-stats-overlay',
                 '.remove-btn', 'img', '.fern-target-badge'
             ].forEach(selector => {
                 const el = slot.querySelector(selector);

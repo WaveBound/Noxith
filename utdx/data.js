@@ -82,7 +82,7 @@ window.GLOBAL_BUFF_DATA = {
             // Only applies if King Sailor is in Slot 1 OR in Potential Mode
             if (isKsLeading || window.CALCULATION_MODE === 'potential') {
                 const tags = uStats.tags || [];
-                if (tags.includes('Magi') || tags.includes('Hero')) { b.dmg = 50; b.spa = 15; }
+                if (tags.includes('Magi')) { b.dmg = 50; b.spa = 15; }
                 else if (tags.includes('Uncontrollable Power')) { b.dmg = 30; b.spa = 10; }
                 else if (String(uStats.element).toLowerCase() === 'water') { b.dmg = 20; b.spa = 10; }
             }
@@ -112,7 +112,7 @@ window.GLOBAL_BUFF_DATA = {
                 if (!hotbar || !hotbar.slots) return {};
                 const targets = hotbar.fernTargets || [];
                 if (targets.length === 0) return {};
-                const isFernPresent = hotbar.slots.some(s => s && (window.isUnit(s.id, 'prodigy_mage') || window.isUnit(s.id, 'ancient_mage')));
+                const isFernPresent = hotbar.slots.some(s => s && window.isUnit(s.id, 'prodigy_mage'));
                 if (!isFernPresent) return {};
                 const slotIdx = hotbar.slots.findIndex(s => s && (s.id === uStats.id || window.isUnit(s.id, uStats.id)));
                 return (slotIdx !== -1 && targets.includes(slotIdx)) ? { spa: 30 } : {};
@@ -144,7 +144,7 @@ window.GLOBAL_BUFF_DATA = {
                 if (!hotbar || !hotbar.slots) return {};
                 const targets = hotbar.fernTargets || [];
                 if (targets.length === 0) return {};
-                const isFernPresent = hotbar.slots.some(s => s && (window.isUnit(s.id, 'prodigy_mage') || window.isUnit(s.id, 'ancient_mage')));
+                const isFernPresent = hotbar.slots.some(s => s && window.isUnit(s.id, 'prodigy_mage'));
                 if (!isFernPresent) return {};
                 const slotIdx = hotbar.slots.findIndex(s => s && (s.id === uStats.id || window.isUnit(s.id, uStats.id)));
                 return (slotIdx !== -1 && targets.includes(slotIdx)) ? { crit: 45 } : {};
