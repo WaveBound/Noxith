@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /donations/
+Disallow: /pfp/
+Disallow: /bloxmulti/success/
+Disallow: /bloxmulti/cancel/
+
+Sitemap: https://noxith.com/sitemap.xml
