@@ -33,6 +33,12 @@ window.toggleCalcMode = function (mode) {
         lBtn.classList.toggle('active', mode === 'loadout');
     }
 
+    // Show/hide hotbar based on mode — only visible in Loadout
+    const hotbarEl = document.getElementById('unitHotbar');
+    if (hotbarEl) {
+        hotbarEl.style.display = (mode === 'loadout') ? '' : 'none';
+    }
+
     // Clear caches and re-render everything
     window.resetCachesForBuffChange();
     if (typeof window.resetAndRender === 'function') window.resetAndRender();
@@ -163,7 +169,17 @@ window.triggerGlobalBuffUpdate = (unitId) => {
                     updateBuildListDisplay(unitId);
                 }
             } else {
-                if (typeof window.resortUnitCardsInPlace === 'function') window.resortUnitCardsInPlace();
+                // Full re-sort: recalculate scores for ALL units and re-render the current page.
+                // This ensures units move between pages correctly when buffs change their ranking.
+                if (typeof paginatedSortedUnits !== 'undefined' && paginatedSortedUnits && paginatedSortedUnits.length > 0) {
+                    paginatedSortedUnits.forEach(entry => {
+                        entry.maxScore = typeof getLiveScore === 'function' ? getLiveScore(entry.unit) : (typeof getQuickScore === 'function' ? getQuickScore(entry.unit) : 0);
+                    });
+                    paginatedSortedUnits.sort((a, b) => b.maxScore - a.maxScore);
+                    if (typeof renderCurrentPage === 'function') renderCurrentPage();
+                } else {
+                    if (typeof window.resortUnitCardsInPlace === 'function') window.resortUnitCardsInPlace();
+                }
                 if (typeof updateAllUnitsBuilds === 'function') window.updateAllUnitsBuilds(hotbarIds);
                 if (typeof updateHotbarUI === 'function') updateHotbarUI();
 

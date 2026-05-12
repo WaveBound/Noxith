@@ -196,9 +196,35 @@ function openTeamSummary() {
 
     let html = `
         <style>
-            .ts-toggle-wrap { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
-            .ts-toggle-wrap .mini-switch { margin: 0; transform: scale(0.8); }
-            .ts-toggle-label { font-size: 0.65rem; font-weight: 800; color: #f472b6; text-transform: uppercase; letter-spacing: 0.5px; }
+            .ts-ability-toggle {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                cursor: pointer;
+                user-select: none;
+                vertical-align: middle;
+            }
+            .ts-ability-toggle .mini-switch {
+                margin: 0;
+                transform: scale(0.7);
+                flex-shrink: 0;
+            }
+            .ts-ability-toggle.is-on .mini-switch {
+                background: var(--toggle-color, #f472b6);
+            }
+            .ts-ability-toggle.is-on .mini-switch::after {
+                transform: translateX(14px);
+            }
+            .ts-ability-status {
+                font-size: 0.6rem;
+                font-weight: 900;
+                letter-spacing: 0.5px;
+                color: rgba(255,255,255,0.5);
+            }
+            .ts-ability-toggle.is-on .ts-ability-status {
+                color: var(--toggle-color, #f472b6);
+                text-shadow: 0 0 6px color-mix(in srgb, var(--toggle-color, #f472b6) 40%, transparent);
+            }
         </style>
         <div class="team-summary-container">
             <div class="ts-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.08);">
@@ -328,7 +354,11 @@ function openTeamSummary() {
             const isToggled = window.activeAbilityIds.has(unit.id);
             effects.push({
                 label: 'TS Enemy (3x)',
-                val: `<div class="ts-toggle-wrap"><span class="ts-toggle-label">${isToggled ? 'ON' : 'OFF'}</span><label class="mini-toggle-wrap"><input type="checkbox" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this); setTimeout(openTeamSummary, 100);"><div class="mini-switch"></div></label></div>`,
+                val: `<label class="ts-ability-toggle ${isToggled ? 'is-on' : ''}" style="--toggle-color: #f472b6;">
+                    <input type="checkbox" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this); var lbl=this.closest('.ts-ability-toggle'); lbl.classList.toggle('is-on',this.checked); lbl.querySelector('.ts-ability-status').textContent=this.checked?'ON':'OFF';" style="display:none;">
+                    <span class="ts-ability-status">${isToggled ? 'ON' : 'OFF'}</span>
+                    <div class="mini-switch"></div>
+                </label>`,
                 color: '#f472b6'
             });
         } else if (unit.id === 'ant_king_savage') {
@@ -992,6 +1022,11 @@ function initHotbar() {
         extraButtonsWrapper.appendChild(farmsContainer);
         extraButtonsWrapper.appendChild(buffersContainer);
         hotbar.appendChild(extraButtonsWrapper);
+
+        // Hide hotbar initially unless we're already in loadout mode
+        if (window.CALCULATION_MODE !== 'loadout') {
+            hotbar.style.display = 'none';
+        }
 
         document.body.appendChild(hotbar);
 
