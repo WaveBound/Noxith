@@ -837,6 +837,463 @@
       transform: none;
       transition-delay: 0.5s;
     }
+
+    /* ── Widgets Section ── */
+    .widgets-section {
+      padding: 100px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .widgets-section .section-label,
+    .widgets-section .section-title {
+      text-align: center;
+    }
+
+    .widgets-intro {
+      font-size: 16px;
+      color: var(--muted);
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 60px;
+      line-height: 1.7;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.65s ease 0.1s, transform 0.65s ease 0.1s;
+    }
+
+    .widgets-intro.in {
+      opacity: 1;
+      transform: none;
+    }
+
+    .widgets-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .widgets-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── Updates for Widget Cards ── */
+    .widget-card {
+      background: rgba(10, 9, 20, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      /* Reduced from 28px 24px */
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(20px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .widget-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      /* Tighter gap */
+      margin-bottom: 12px;
+      /* Tighter margin */
+    }
+
+    .widget-card-icon {
+      width: 38px;
+      /* Slightly smaller icon box */
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(157, 111, 255, 0.1);
+      border: 1px solid rgba(157, 111, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .widget-card-title {
+      font-size: 16px;
+      /* Slightly smaller text */
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .widget-card-desc {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.55;
+      /* Tighter line height */
+    }
+
+    /* ── Updates for "How to change a widget" box ── */
+    .widget-how-to {
+      margin-top: 24px;
+      /* Reduced from 48px to bring it closer */
+      background: rgba(157, 111, 255, 0.05);
+      border: 1px solid rgba(157, 111, 255, 0.15);
+      border-radius: 16px;
+      padding: 24px;
+      /* Reduced from 32px 36px */
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.65s ease 0.2s, transform 0.65s ease 0.2s;
+    }
+
+    .widget-how-to-icon {
+      width: 40px;
+      /* Smaller icon box */
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(157, 111, 255, 0.12);
+      border: 1px solid rgba(157, 111, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-light);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .widget-how-to-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent-light);
+      margin-bottom: 6px;
+    }
+
+    .widget-how-to-text {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .widget-how-to-steps {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      /* Tighter spacing between list items */
+    }
+
+    .widget-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13.5px;
+      color: var(--muted);
+    }
+
+    .widget-step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(157, 111, 255, 0.15);
+      border: 1px solid rgba(157, 111, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    @media (max-width: 600px) {
+      .widget-how-to {
+        flex-direction: column;
+        padding: 24px 20px;
+      }
+    }
+
+    /* ── Premium Section ── */
+    .premium-section {
+      padding: 100px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .premium-section .section-label,
+    .premium-section .section-title {
+      text-align: center;
+    }
+
+    .premium-intro {
+      font-size: 16px;
+      color: var(--muted);
+      text-align: center;
+      max-width: 580px;
+      margin: 0 auto 60px;
+      line-height: 1.7;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.65s ease 0.1s, transform 0.65s ease 0.1s;
+    }
+
+    .premium-intro.in {
+      opacity: 1;
+      transform: none;
+    }
+
+    .premium-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .premium-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .premium-features-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .premium-feat {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      background: rgba(10, 9, 20, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 20px;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(20px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .premium-feat::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(157, 111, 255, 0.4), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .premium-feat:hover {
+      border-color: rgba(157, 111, 255, 0.3);
+      background: rgba(15, 14, 28, 0.9);
+      transform: translateY(-2px);
+    }
+
+    .premium-feat:hover::before {
+      opacity: 1;
+    }
+
+    .premium-feat.in {
+      opacity: 1;
+      transform: none;
+    }
+
+    .premium-feat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 11px;
+      background: rgba(157, 111, 255, 0.1);
+      border: 1px solid rgba(157, 111, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .premium-feat-body {
+      flex: 1;
+    }
+
+    .premium-feat-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+
+    .premium-feat-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* Pricing card */
+    .premium-card {
+      background: rgba(157, 111, 255, 0.06);
+      border: 1px solid rgba(157, 111, 255, 0.22);
+      border-radius: 20px;
+      padding: 32px 28px;
+      /* Removed position: sticky and top: 100px here */
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.65s ease 0.25s, transform 0.65s ease 0.25s;
+      overflow: hidden;
+    }
+
+    .premium-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(157, 111, 255, 0.6), transparent);
+    }
+
+    .premium-card.in {
+      opacity: 1;
+      transform: none;
+    }
+
+    .premium-card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .premium-card-price {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .price-amount {
+      font-family: var(--font-display);
+      font-size: 52px;
+      font-weight: 800;
+      color: var(--accent-light);
+      line-height: 1;
+    }
+
+    .price-currency {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
+      align-self: flex-start;
+      margin-top: 10px;
+    }
+
+    .price-period {
+      font-size: 14px;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+
+    .premium-card-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .premium-card-divider {
+      height: 1px;
+      background: rgba(157, 111, 255, 0.15);
+      margin-bottom: 20px;
+    }
+
+    .premium-card-perks {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .premium-perk {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .premium-perk-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      background: rgba(42, 245, 152, 0.12);
+      border: 1px solid rgba(42, 245, 152, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--green);
+      flex-shrink: 0;
+    }
+
+    .btn-premium {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 15px 24px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 28px var(--accent-glow);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .btn-premium:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .premium-card-note {
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* premium badge on widget card */
+    .widget-premium-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(157, 111, 255, 0.12);
+      border: 1px solid rgba(157, 111, 255, 0.25);
+      border-radius: 99px;
+      padding: 3px 8px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
   </style>
 </head>
 
@@ -852,6 +1309,8 @@
     <div class="nav-right">
       <ul class="nav-links">
         <li><a href="#features">Features</a></li>
+        <li><a href="#widgets">Widgets</a></li>
+        <li><a href="#premium">Premium</a></li>
         <li><a href="#download">Download</a></li>
       </ul>
 
@@ -893,7 +1352,7 @@
   <section class="hero">
     <div class="hero-badge">
       <div class="hero-badge-dot"></div>
-      Version 1.0.0 Live
+      v1.0.1 — Widgets &amp; Premium now live
     </div>
 
     <h1 class="hero-title">
@@ -901,8 +1360,8 @@
     </h1>
 
     <p class="hero-sub">
-      Run multiple Roblox accounts at the same time — each with its own isolated session. Switch accounts instantly,
-      launch games by Place ID, and save private server codes.
+      Run multiple Roblox accounts at the same time — each with its own isolated session. Customize your dashboard with
+      widgets, organize accounts into groups, and monitor every instance live.
     </p>
 
     <div class="hero-actions">
@@ -932,7 +1391,7 @@
           stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12" />
         </svg>
-        Fast & Light
+        Fast &amp; Light
       </div>
       <div class="hero-meta-item">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -947,6 +1406,13 @@
           <polyline points="20 6 9 17 4 12" />
         </svg>
         Windows 10 &amp; 11
+      </div>
+      <div class="hero-meta-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        Open Source
       </div>
     </div>
 
@@ -1018,7 +1484,7 @@
   </div>
 
   <!-- Features -->
-  <section class="features">
+  <section class="features" id="features">
     <div class="section-label animate">What's inside</div>
     <h2 class="section-title animate">Everything you need<br />to play smarter</h2>
 
@@ -1033,7 +1499,7 @@
         </div>
         <div class="feat-title">Multi-Account Management</div>
         <div class="feat-desc">Add and switch between multiple Roblox accounts instantly. Each account shows your avatar
-          with a clean sidebar for quick selection.</div>
+          with a clean sidebar for quick selection. Drag to reorder, pin your favourites to the top.</div>
       </div>
 
       <div class="feat-card">
@@ -1045,7 +1511,7 @@
         </div>
         <div class="feat-title">One-Click Game Launch</div>
         <div class="feat-desc">Enter a Place ID and launch directly into any Roblox game with a single click — no
-          browser, no redirects, no friction.</div>
+          browser, no redirects, no friction. Works for public games and private servers alike.</div>
       </div>
 
       <div class="feat-card">
@@ -1057,8 +1523,8 @@
           </svg>
         </div>
         <div class="feat-title">Saved Games Library</div>
-        <div class="feat-desc">Bookmark your favorite games with thumbnails. Pin the ones you play most to the top, and
-          launch them instantly with one tap.</div>
+        <div class="feat-desc">Bookmark your favourite games with thumbnails. Pin the ones you play most to the top, and
+          launch them instantly with one tap from your customizable widget panel.</div>
       </div>
 
       <div class="feat-card">
@@ -1070,8 +1536,8 @@
           </svg>
         </div>
         <div class="feat-title">Private Server Codes</div>
-        <div class="feat-desc">Save private server link codes alongside your favorite games. Jump straight into your
-          crew's server without hunting for the link.</div>
+        <div class="feat-desc">Save private server link codes alongside your favourite games. Jump straight into your
+          crew's server without hunting for the link. Pin the ones you use most.</div>
       </div>
 
       <div class="feat-card">
@@ -1092,14 +1558,281 @@
         <div class="feat-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <path
-              d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
           </svg>
         </div>
-        <div class="feat-title">Polished Dark UI</div>
-        <div class="feat-desc">A purpose-built interface with glass panels, smooth transitions, and a deep purple
-          aesthetic designed for long sessions.</div>
+        <div class="feat-title">Customizable Dashboard</div>
+        <div class="feat-desc">The four dashboard panels are fully customizable widgets. Right-click any panel title to
+          swap it out for a different view — no restarts, no settings menus.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Widget Dashboard Section -->
+  <section class="widgets-section" id="widgets">
+    <div class="section-label animate">Dashboard</div>
+    <h2 class="section-title animate">Your layout,<br />your way</h2>
+    <p class="widgets-intro animate">
+      BloxMulti's four-panel dashboard is made up of fully swappable widgets. Every panel can show a different view —
+      mix and match to build the exact setup you want.
+    </p>
+
+    <div class="widgets-grid">
+      <div class="widget-card animate" style="transition-delay:0s">
+        <div class="widget-card-header">
+          <div class="widget-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </div>
+          <div class="widget-card-title">Saved Games</div>
+        </div>
+        <div class="widget-card-desc">Your bookmarked games with thumbnails and pin support. Click any entry to launch
+          it
+          instantly with your selected account. Sorted by pinned first, then most recently added.</div>
+      </div>
+
+      <div class="widget-card animate" style="transition-delay:0.1s">
+        <div class="widget-card-header">
+          <div class="widget-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="4" />
+              <path d="M7 12h10M12 7v10" />
+            </svg>
+          </div>
+          <div class="widget-card-title">Saved Servers</div>
+        </div>
+        <div class="widget-card-desc">Private server link codes stored alongside their game. No more digging through
+          messages for links — your crew's servers are always one click away, pinnable and launchable instantly.</div>
+      </div>
+
+      <div class="widget-card animate" style="transition-delay:0.2s">
+        <div class="widget-card-header">
+          <div class="widget-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+          </div>
+          <div class="widget-card-title">Recent Launches</div>
+        </div>
+        <div class="widget-card-desc">A live feed of the last 10 game launches you made, with timestamps and thumbnails.
+          Great for quickly jumping back into something you were just playing without saving it first.</div>
+      </div>
+
+      <div class="widget-card animate" style="transition-delay:0.3s">
+        <div class="widget-card-header">
+          <div class="widget-card-icon"
+            style="color: var(--green); background: rgba(42,245,152,0.08); border-color: rgba(42,245,152,0.2);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <path d="M8 21h8M12 17v4" />
+              <polyline points="7 10 10 7 13 10 17 6" />
+            </svg>
+          </div>
+          <div class="widget-card-title">
+            Running Instances
+            <span class="widget-premium-badge">
+              <svg width="8" height="8" viewBox="0 0 1024 1024" fill="currentColor">
+                <path
+                  d="M967.68 368.64l-153.6-204.8c-3.9424-5.2736-9.7792-8.8064-16.2816-9.8816l-307.2-51.2c-2.7648-0.4608-5.632-0.4608-8.3968 0l-307.2 51.2c-6.5024 1.0752-12.3392 4.608-16.2816 9.8816l-153.6 204.8c-7.3216 9.7792-6.7072 23.3984 1.4336 32.4608l460.8 512c4.864 5.376 11.776 8.4992 19.0464 8.4992s14.1824-3.072 19.0464-8.4992l460.8-512c8.192-9.1136 8.8064-22.6816 1.4336-32.4608z" />
+              </svg>
+              Premium
+            </span>
+          </div>
+        </div>
+        <div class="widget-card-desc">A real-time monitor for every active Roblox instance on your machine. See live
+          CPU, RAM, and GPU usage per account, and kill any instance with a single click. Available to Premium users.
+        </div>
+      </div>
+    </div>
+
+    <div class="widget-how-to animate">
+      <div class="widget-how-to-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+      </div>
+      <div class="widget-how-to-body">
+        <div class="widget-how-to-title">How to change a widget</div>
+        <div class="widget-how-to-text">Swapping out a panel is instant — no settings menus or restarts needed.</div>
+        <div class="widget-how-to-steps">
+          <div class="widget-step">
+            <div class="widget-step-num">1</div>
+            <span><strong style="color:var(--text);">Right-click</strong> the small label at the top of any dashboard
+              panel (e.g. "SAVED GAMES").</span>
+          </div>
+          <div class="widget-step">
+            <div class="widget-step-num">2</div>
+            <span>A picker appears showing all available widgets. Ones already in use are greyed out.</span>
+          </div>
+          <div class="widget-step">
+            <div class="widget-step-num">3</div>
+            <span>Click the widget you want — the panel swaps instantly and your choice is saved.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Premium Section -->
+  <section class="premium-section" id="premium">
+    <div class="section-label animate">Upgrade</div>
+    <h2 class="section-title animate">Take it further<br />with Premium</h2>
+    <p class="premium-intro animate">
+      The core app is free forever. Premium unlocks power-user features built for people running
+      serious numbers of accounts.
+    </p>
+
+    <div class="premium-layout">
+      <div class="premium-features-list">
+
+        <div class="premium-feat animate" style="transition-delay:0s">
+          <div class="premium-feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+          </div>
+          <div class="premium-feat-body">
+            <div class="premium-feat-title">Groups</div>
+            <div class="premium-feat-desc">Organise your accounts into named groups and launch every account in a group
+              into a game with a single click. Perfect for managing a large roster — add the group to your sidebar just
+              like a regular account, then click to select all and launch.</div>
+          </div>
+        </div>
+
+        <div class="premium-feat animate" style="transition-delay:0.1s">
+          <div class="premium-feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+          </div>
+          <div class="premium-feat-body">
+            <div class="premium-feat-title">Per-Account FPS Cap</div>
+            <div class="premium-feat-desc">Set a custom FPS limit for each account independently, overriding the global
+              cap. Throttle background instances down to 30 FPS to save CPU and GPU while keeping your active account
+              silky smooth. Configure it per-account right from the account settings menu.</div>
+          </div>
+        </div>
+
+        <div class="premium-feat animate" style="transition-delay:0.2s">
+          <div class="premium-feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg>
+          </div>
+          <div class="premium-feat-body">
+            <div class="premium-feat-title">Window Renaming</div>
+            <div class="premium-feat-desc">When enabled, each Roblox window is automatically renamed to the account's
+              display name as soon as it launches. Instead of five windows all called "Roblox", you see exactly which
+              account is in which window in the taskbar and Task Manager — making it trivial to switch between them.
+            </div>
+          </div>
+        </div>
+
+        <div class="premium-feat animate" style="transition-delay:0.3s">
+          <div class="premium-feat-icon"
+            style="color:var(--green); background:rgba(42,245,152,0.08); border-color:rgba(42,245,152,0.2);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <path d="M8 21h8M12 17v4" />
+              <polyline points="7 10 10 7 13 10 17 6" />
+            </svg>
+          </div>
+          <div class="premium-feat-body">
+            <div class="premium-feat-title">Running Instances Widget</div>
+            <div class="premium-feat-desc">A live dashboard widget that shows every active Roblox process — matched to
+              the account that launched it — with real-time CPU, RAM, and GPU usage bars updating every few seconds.
+              Kill
+              any instance instantly with one click without hunting through Task Manager.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="premium-card animate">
+        <div class="premium-card-label">BloxMulti Premium</div>
+        <div class="premium-card-price">
+          <span class="price-currency">$</span>
+          <span class="price-amount">5</span>
+          <span class="price-period">/ month</span>
+        </div>
+        <div class="premium-card-sub">Cancel anytime. Access lasts until the end of your billing period.</div>
+        <div class="premium-card-divider"></div>
+        <div class="premium-card-perks">
+          <div class="premium-perk">
+            <div class="premium-perk-check">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            Groups
+          </div>
+          <div class="premium-perk">
+            <div class="premium-perk-check">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            Per-Account FPS Cap
+          </div>
+          <div class="premium-perk">
+            <div class="premium-perk-check">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            Window Renaming
+          </div>
+          <div class="premium-perk">
+            <div class="premium-perk-check">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            Running Instances Widget
+          </div>
+          <div class="premium-perk">
+            <div class="premium-perk-check">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            All future Premium features
+          </div>
+        </div>
+        <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-premium">
+          <svg width="14" height="14" viewBox="0 0 1024 1024" fill="currentColor">
+            <path
+              d="M967.68 368.64l-153.6-204.8c-3.9424-5.2736-9.7792-8.8064-16.2816-9.8816l-307.2-51.2c-2.7648-0.4608-5.632-0.4608-8.3968 0l-307.2 51.2c-6.5024 1.0752-12.3392 4.608-16.2816 9.8816l-153.6 204.8c-7.3216 9.7792-6.7072 23.3984 1.4336 32.4608l460.8 512c4.864 5.376 11.776 8.4992 19.0464 8.4992s14.1824-3.072 19.0464-8.4992l460.8-512c8.192-9.1136 8.8064-22.6816 1.4336-32.4608z" />
+          </svg>
+          Get Premium — $5 / mo
+        </a>
+        <div class="premium-card-note">Upgrade from inside the app after signing in. No refunds — all purchases are
+          final.</div>
       </div>
     </div>
   </section>
@@ -1122,11 +1855,10 @@
           </svg>
         </div>
         Windows 10 / 11
-        <div class="dl-version">v1.0.0</div>
+        <div class="dl-version">v1.0.1</div>
       </div>
 
-      <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-primary"
-        style="width: 100%;">
+      <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-primary" style="width: 100%;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -1147,6 +1879,7 @@
     <div class="footer-logo">BloxMulti</div>
     <div class="footer-links">
       <a href="https://github.com/WaveBound/BloxMulti">GitHub</a>
+      <a href="https://discord.gg/ju6ANNecQg">Discord</a>
     </div>
   </footer>
 
@@ -1167,13 +1900,13 @@
       });
     }, observerOptions);
 
-    document.querySelectorAll('.animate, .stagger').forEach(el => observer.observe(el));
+    document.querySelectorAll('.animate, .stagger, .premium-feat, .widget-card, .premium-card').forEach(el => observer.observe(el));
 
     // Safety fallback: Ensure everything is visible after a short delay
     // in case the IntersectionObserver doesn't trigger
     window.addEventListener('load', () => {
       setTimeout(() => {
-        document.querySelectorAll('.animate, .stagger').forEach(el => {
+        document.querySelectorAll('.animate, .stagger, .premium-feat, .widget-card, .premium-card').forEach(el => {
           el.classList.add('in');
         });
       }, 1000);
