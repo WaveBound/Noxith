@@ -102,7 +102,8 @@ window.GLOBAL_BUFF_DATA = {
         math: (uStats, context) => {
             const uType = (uStats.placementType || 'Ground').toLowerCase();
             const isMatching = (uType === 'hill' || uType === 'hybrid');
-            if (!isMatching) return {};
+            const isFernSelf = window.isUnit(uStats.id, 'prodigy_mage');
+            if (!isMatching && !isFernSelf) return {};
 
             if (window.CALCULATION_MODE === 'potential') return { spa: 30 };
 
@@ -114,6 +115,10 @@ window.GLOBAL_BUFF_DATA = {
                 if (targets.length === 0) return {};
                 const isFernPresent = hotbar.slots.some(s => s && window.isUnit(s.id, 'prodigy_mage'));
                 if (!isFernPresent) return {};
+
+                // "Both units" — Fern always receives her own buff when she has targets
+                if (isFernSelf) return { spa: 30 };
+
                 const slotIdx = hotbar.slots.findIndex(s => s && (s.id === uStats.id || window.isUnit(s.id, uStats.id)));
                 return (slotIdx !== -1 && targets.includes(slotIdx)) ? { spa: 30 } : {};
             }
@@ -134,7 +139,8 @@ window.GLOBAL_BUFF_DATA = {
         math: (uStats, context) => {
             const uType = (uStats.placementType || 'Ground').toLowerCase();
             const isMatching = (uType === 'ground' || uType === 'hybrid');
-            if (!isMatching) return {};
+            const isFernSelf = window.isUnit(uStats.id, 'prodigy_mage');
+            if (!isMatching && !isFernSelf) return {};
 
             if (window.CALCULATION_MODE === 'potential') return { crit: 45 };
 
@@ -146,6 +152,10 @@ window.GLOBAL_BUFF_DATA = {
                 if (targets.length === 0) return {};
                 const isFernPresent = hotbar.slots.some(s => s && window.isUnit(s.id, 'prodigy_mage'));
                 if (!isFernPresent) return {};
+
+                // "Both units" — Fern always receives her own buff when she has targets
+                if (isFernSelf) return { crit: 45 };
+
                 const slotIdx = hotbar.slots.findIndex(s => s && (s.id === uStats.id || window.isUnit(s.id, uStats.id)));
                 return (slotIdx !== -1 && targets.includes(slotIdx)) ? { crit: 45 } : {};
             }
