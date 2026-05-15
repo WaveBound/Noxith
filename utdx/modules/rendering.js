@@ -941,7 +941,8 @@ function renderCurrentPage() {
             existing.remove();
         }
 
-        const card = renderUnitCard(entry.unit, startIdx + i + 1);
+        const absoluteRank = (window.unitAbsoluteRanks && window.unitAbsoluteRanks[entry.unit.id]) || (startIdx + i + 1);
+        const card = renderUnitCard(entry.unit, absoluteRank);
         card.style.setProperty('--stagger-delay', `${i * 50}ms`);
         fragment.appendChild(card);
     });
@@ -1017,7 +1018,15 @@ window.globalFilterUnits = (term) => {
     const clearBtn = document.getElementById('globalSearchClear');
     if (clearBtn) clearBtn.style.display = searchTerm ? 'flex' : 'none';
 
-    // 1. Filter entire database
+    // 1. Compute absolute ranks from the FULL database (before any search filtering)
+    const allSorted = unitDatabase.map(unit => {
+        return { unit, maxScore: getLiveScore(unit) };
+    }).sort((a, b) => b.maxScore - a.maxScore);
+
+    window.unitAbsoluteRanks = {};
+    allSorted.forEach((entry, i) => { window.unitAbsoluteRanks[entry.unit.id] = i + 1; });
+
+    // 2. Filter by search term
     let filtered = unitDatabase;
     if (searchTerm) {
         filtered = unitDatabase.filter(unit => {
@@ -1034,12 +1043,12 @@ window.globalFilterUnits = (term) => {
         });
     }
 
-    // 2. Prepare paginated list using LIVE score (real-time math)
+    // 3. Prepare paginated list using LIVE score (real-time math)
     paginatedSortedUnits = filtered.map(unit => {
         return { unit, maxScore: getLiveScore(unit) };
     }).sort((a, b) => b.maxScore - a.maxScore);
 
-    // 3. Initialize upgrade levels if needed
+    // 4. Initialize upgrade levels if needed
     paginatedSortedUnits.forEach(entry => {
         const unit = entry.unit;
         if (window.unitELevels[unit.id] === undefined && unit.upgrades && unit.upgrades.length > 0) {
@@ -1047,7 +1056,7 @@ window.globalFilterUnits = (term) => {
         }
     });
 
-    // 4. Reset to page 1 and render
+    // 5. Reset to page 1 and render
     currentPage = 1;
     renderCurrentPage();
 };
