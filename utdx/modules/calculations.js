@@ -1028,10 +1028,8 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     const totalBossDmg = (uStats.bossDmg || 0) + (traitObj.bossDmg || 0);
-    let traitDmgPctNormal = traitObj.dmg;
-    let traitDmgPctBoss = traitObj.dmg + (totalBossDmg || 0);
-
-    let traitDmgPct = isBoss ? traitDmgPctBoss : traitDmgPctNormal;
+    const bossMult = 1 + (totalBossDmg / 100);
+    let traitDmgPct = traitObj.dmg;
     let traitSpaPct = traitObj.spa;
     let traitCritRate = traitObj.critRate || 0, traitRangePct = traitObj.range || 0, traitDotBuff = (traitObj.dotBuff || 0) + (uStats.dotBuff || 0);
 
@@ -1183,8 +1181,8 @@ function calculateDPS(uStats, relicStats, context) {
 
 
     const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
-    const finalDmgBoss = lvStats.dmg * (1 + traitDmgPctBoss / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
-    const finalDmgNormal = lvStats.dmg * (1 + traitDmgPctNormal / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
+    const finalDmgBoss = finalDmg;
+    const finalDmgNormal = finalDmg;
 
     const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cdmg || 0) + passiveCdmgFromPassives;
     let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
@@ -1450,7 +1448,7 @@ function calculateDPS(uStats, relicStats, context) {
 
     return {
         total: (finalHitDps + finalDotDps + finalSummonDps),
-        bossTotal: (finalBossHitDps + finalBossDotDps + finalSummonDps), // Summons scaling can be added later if needed
+        bossTotal: (finalHitDps + finalDotDps + finalSummonDps) * bossMult,
         hit: finalHitDps,
         baseHitDps: hitDpsTotal,
         trueDmgPct,
