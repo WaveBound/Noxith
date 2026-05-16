@@ -1051,7 +1051,7 @@
       display: grid;
       grid-template-columns: 1fr 340px;
       gap: 24px;
-      align-items: start;
+      align-items: center;
     }
 
     @media (max-width: 900px) {
@@ -1351,8 +1351,7 @@
   <!-- Hero -->
   <section class="hero">
     <div class="hero-badge">
-      <div class="hero-badge-dot"></div>
-      v1.0.1 — Widgets &amp; Premium now live
+      v1.0.2 - Cloud sync added
     </div>
 
     <h1 class="hero-title">
@@ -1360,7 +1359,7 @@
     </h1>
 
     <p class="hero-sub">
-      Run multiple Roblox accounts at the same time — each with its own isolated session. Customize your dashboard with
+      Run multiple Roblox accounts at the same time, each with its own isolated session. Customize your dashboard with
       widgets, organize accounts into groups, and monitor every instance live.
     </p>
 
@@ -1449,15 +1448,13 @@
       <div class="stat-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7" rx="1" />
-          <rect x="14" y="3" width="7" height="7" rx="1" />
-          <rect x="14" y="14" width="7" height="7" rx="1" />
-          <rect x="3" y="14" width="7" height="7" rx="1" />
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
         </svg>
       </div>
       <div class="stat-text">
-        <div class="stat-num"><span>Multi-account</span> launch</div>
-        <div class="stat-label">Fire multiple accounts into the same game at once</div>
+        <div class="stat-num"><span>Global</span> FPS cap</div>
+        <div class="stat-label">Limit your FPS to save system resources</div>
       </div>
     </div>
     <div class="stat-item animate" style="transition-delay:0.3s">
@@ -1499,51 +1496,13 @@
         <div class="feat-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="5 3 19 12 5 21 5 3" />
-          </svg>
-        </div>
-        <div class="feat-title">One-Click Game Launch</div>
-        <div class="feat-desc">Enter a Place ID and launch directly into any Roblox game with a single click — no
-          browser, no redirects, no friction. Works for public games and private servers alike.</div>
-      </div>
-
-      <div class="feat-card">
-        <div class="feat-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path
-              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
-        </div>
-        <div class="feat-title">Saved Games Library</div>
-        <div class="feat-desc">Bookmark your favourite games with thumbnails. Pin the ones you play most to the top, and
-          launch them instantly with one tap from your customizable widget panel.</div>
-      </div>
-
-      <div class="feat-card">
-        <div class="feat-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="2" width="20" height="20" rx="4" />
-            <path d="M7 12h10M12 7v10" />
-          </svg>
-        </div>
-        <div class="feat-title">Private Server Codes</div>
-        <div class="feat-desc">Save private server link codes alongside your favourite games. Jump straight into your
-          crew's server without hunting for the link. Pin the ones you use most.</div>
-      </div>
-
-      <div class="feat-card">
-        <div class="feat-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="7" width="20" height="14" rx="2" />
             <path d="M16 7V5a2 2 0 0 0-4 0v2" />
             <path d="M8 7V5a2 2 0 0 1 4 0" />
           </svg>
         </div>
         <div class="feat-title">Multi-Account Launch</div>
-        <div class="feat-desc">Select multiple accounts at once and launch them all into the same game simultaneously,
+        <div class="feat-desc">Shift-click to select multiple accounts and launch them all into the same game simultaneously,
           each staggered safely to avoid rate limits.</div>
       </div>
 
@@ -1551,15 +1510,11 @@
         <div class="feat-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="7" height="7" rx="1" />
-            <rect x="14" y="3" width="7" height="7" rx="1" />
-            <rect x="14" y="14" width="7" height="7" rx="1" />
-            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
           </svg>
         </div>
-        <div class="feat-title">Customizable Dashboard</div>
-        <div class="feat-desc">The four dashboard panels are fully customizable widgets. Right-click any panel title to
-          swap it out for a different view — no restarts, no settings menus.</div>
+        <div class="feat-title">Cloud Synchronization</div>
+        <div class="feat-desc">Securely back up your accounts, widgets, and settings to Google Drive for free. Your data is locally encrypted, ensuring complete privacy before it leaves your machine.</div>
       </div>
     </div>
   </section>
@@ -1569,7 +1524,7 @@
     <div class="section-label animate">Dashboard</div>
     <h2 class="section-title animate">Your layout,<br />your way</h2>
     <p class="widgets-intro animate">
-      BloxMulti's four-panel dashboard is made up of fully swappable widgets. Every panel can show a different view —
+      BloxMulti's four-panel dashboard is made up of fully swappable widgets. Every panel can show a different view;
       mix and match to build the exact setup you want.
     </p>
 
@@ -1602,7 +1557,7 @@
           <div class="widget-card-title">Saved Servers</div>
         </div>
         <div class="widget-card-desc">Private server link codes stored alongside their game. No more digging through
-          messages for links — your crew's servers are always one click away, pinnable and launchable instantly.</div>
+          messages for links: your crew's servers are always one click away, pinnable and launchable instantly.</div>
       </div>
 
       <div class="widget-card animate" style="transition-delay:0.2s">
@@ -1701,7 +1656,7 @@
           <div class="premium-feat-body">
             <div class="premium-feat-title">Groups</div>
             <div class="premium-feat-desc">Organise your accounts into named groups and launch every account in a group
-              into a game with a single click. Perfect for managing a large roster — add the group to your sidebar just
+              into a game with a single click. Perfect for managing a large roster: add the group to your sidebar just
               like a regular account, then click to select all and launch.</div>
           </div>
         </div>
@@ -1735,7 +1690,7 @@
             <div class="premium-feat-title">Window Renaming</div>
             <div class="premium-feat-desc">When enabled, each Roblox window is automatically renamed to the account's
               display name as soon as it launches. Instead of five windows all called "Roblox", you see exactly which
-              account is in which window in the taskbar and Task Manager — making it trivial to switch between them.
+              account is in which window in the taskbar and Task Manager, making it trivial to switch between them.
             </div>
           </div>
         </div>
@@ -1752,8 +1707,8 @@
           </div>
           <div class="premium-feat-body">
             <div class="premium-feat-title">Running Instances Widget</div>
-            <div class="premium-feat-desc">A live dashboard widget that shows every active Roblox process — matched to
-              the account that launched it — with real-time CPU, RAM, and GPU usage bars updating every few seconds.
+            <div class="premium-feat-desc">A live dashboard widget that shows every active Roblox process matched to
+              the account that launched it, with real-time CPU, RAM, and GPU usage bars updating every few seconds.
               Kill
               any instance instantly with one click without hunting through Task Manager.</div>
           </div>
@@ -1822,9 +1777,9 @@
             <path
               d="M967.68 368.64l-153.6-204.8c-3.9424-5.2736-9.7792-8.8064-16.2816-9.8816l-307.2-51.2c-2.7648-0.4608-5.632-0.4608-8.3968 0l-307.2 51.2c-6.5024 1.0752-12.3392 4.608-16.2816 9.8816l-153.6 204.8c-7.3216 9.7792-6.7072 23.3984 1.4336 32.4608l460.8 512c4.864 5.376 11.776 8.4992 19.0464 8.4992s14.1824-3.072 19.0464-8.4992l460.8-512c8.192-9.1136 8.8064-22.6816 1.4336-32.4608z" />
           </svg>
-          Get Premium — $5 / mo
+          Get Premium - $5 / mo
         </a>
-        <div class="premium-card-note">Upgrade from inside the app after signing in. No refunds — all purchases are
+        <div class="premium-card-note">Upgrade from inside the app after signing in. No refunds: all purchases are
           final.</div>
       </div>
     </div>
@@ -1848,7 +1803,7 @@
           </svg>
         </div>
         Windows 10 / 11
-        <div class="dl-version">v1.0.1</div>
+        <div class="dl-version">v1.0.2</div>
       </div>
 
       <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-primary" style="width: 100%;">
