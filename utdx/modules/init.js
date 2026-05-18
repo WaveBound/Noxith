@@ -125,6 +125,7 @@ function injectBuffButtons() {
 
     if (window.GLOBAL_BUFF_DATA) {
         Object.entries(window.GLOBAL_BUFF_DATA).forEach(([key, config]) => {
+            if (config.hideButton) return;
             frag.appendChild(createBtn(key, config));
         });
     }

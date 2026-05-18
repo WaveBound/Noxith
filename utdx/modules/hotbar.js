@@ -1352,7 +1352,7 @@ function updateHotbarUI() {
             const config = window.GLOBAL_BUFF_DATA[configKey];
             const isProvided = activeBuffsInHotbar.has(configKey);
 
-            if (isProvided) {
+            if (isProvided && !config.hideButton) {
                 availableConfigs.push({ configKey, config });
             } else {
                 // AUTO-DISABLE: If no provider is in hotbar, ensure the buff is OFF

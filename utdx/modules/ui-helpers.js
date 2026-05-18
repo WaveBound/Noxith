@@ -122,6 +122,9 @@ let buffUpdateTimer = null;
 
 // Reset build caches. excludeIds: array of unit IDs to skip (e.g. hotbar units during global reset).
 window.resetCachesForBuffChange = (unitId, excludeIds = []) => {
+    // Clear live score cache on any buff/unit state updates
+    window.LIVE_SCORE_CACHE = {};
+
     if (unitId) {
         if (window.unitBuildsCache?.[unitId]) delete window.unitBuildsCache[unitId];
         if (window.cachedResults?.[unitId])   delete window.cachedResults[unitId];
@@ -376,7 +379,7 @@ window.toggleAbility = function (unitId, checkbox) {
         card.classList.remove('use-ability');
         activeAbilityIds.delete(unitId);
     }
-    if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(unitId);
+    if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(unitId, true);
     // Refresh hotbar stats if this unit is in the hotbar
     if (typeof window.updateHotbarUI === 'function') window.updateHotbarUI();
 };

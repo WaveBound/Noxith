@@ -252,7 +252,8 @@ if (isMainThread) {
 
         traitsForCalc.forEach(trait => {
             if (trait.id === 'none') return;
-            const { effectiveStats, context } = buildCalculationContext(unit, trait, { isAbility, mode: 'fixed' });
+            const isBossForTT = (unit.id === 'triple_threat' && !isAbility);
+            const { effectiveStats, context } = buildCalculationContext(unit, trait, { isAbility, mode: 'fixed', isBoss: isBossForTT });
             const traitAddsDot = trait.dotBuff > 0 || trait.hasRadiation || trait.allowDotStack;
             const isDotPossible = hasNativeDoT || traitAddsDot;
             

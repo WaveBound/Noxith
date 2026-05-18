@@ -154,7 +154,11 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
 
     let displayVal = format(r.sortDps || r.dps || 0), displayLabel = "DPS";
     if (sortMode === 'range') { displayVal = fix1(r.range || 0); displayLabel = "RNG"; }
-    else if (sortMode === 'dps' && r.placement > 1) { displayLabel = `TOTAL (x${r.placement})`; }
+    else if (sortMode === 'dps' && r.placement > 1) {
+        displayLabel = (unitId === 'triple_threat' && window.ttBossActive) ? `BOSS TOTAL (x${r.placement})` : `TOTAL (x${r.placement})`;
+    } else if (unitId === 'triple_threat' && window.ttBossActive) {
+        displayLabel = "BOSS DPS";
+    }
 
     return `
         <div class="build-row ${rankClass} ${sortMode === 'efficiency' ? 'is-efficiency-sort' : ''}">
@@ -287,7 +291,10 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             // NEW: If unit has modes and we are forcing a sync (from a mode change),
             // re-calculate the best possible build dynamically. 
             // The static DB only contains results for the "Base" form.
-            if (forceSync && unitObj && unitObj.modes) {
+            // ALSO do this for Triple Threat if both toggles are ON or both are OFF.
+            const isTTDynamicState = (unitId === 'triple_threat' && ((window.ttBossActive && activeType === 'abil') || (!window.ttBossActive && activeType === 'base')));
+            
+            if (forceSync && unitObj && (unitObj.modes || isTTDynamicState)) {
                 const dynamicResults = calculateUnitBuilds(
                     unitObj,
                     null,
@@ -303,12 +310,20 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     benchmarkDps = dynamicResults[0].dps || 0;
                     // Cache this new benchmark for this unit/mode combo
                     if (!window.modeBenchmarks) window.modeBenchmarks = {};
-                    const modeKey = `${unitId}-${JSON.stringify(window.unitModesState[unitId])}-${activeType}`;
+                    const stateStr = isTTDynamicState ? `boss_${window.ttBossActive}` : JSON.stringify(window.unitModesState[unitId]);
+                    const modeKey = `${unitId}-${stateStr}-${activeType}`;
                     window.modeBenchmarks[modeKey] = benchmarkDps;
+                    
+                    // Directly cache the dynamic results so it doesn't fall back to the static DB
+                    if (!window.unitBuildsCache[unitId]) window.unitBuildsCache[unitId] = {};
+                    if (!window.unitBuildsCache[unitId][activeType]) window.unitBuildsCache[unitId][activeType] = {};
+                    window.unitBuildsCache[unitId][activeType][activeMode] = [dynamicResults];
+                    // DO NOT return here, we must continue to render the list!
                 }
-            } else if (unitObj && unitObj.modes) {
+            } else if (unitObj && (unitObj.modes || isTTDynamicState)) {
                 // Check cache if not forcing sync
-                const modeKey = `${unitId}-${JSON.stringify(window.unitModesState[unitId])}-${activeType}`;
+                const stateStr = isTTDynamicState ? `boss_${window.ttBossActive}` : JSON.stringify(window.unitModesState[unitId]);
+                const modeKey = `${unitId}-${stateStr}-${activeType}`;
                 if (window.modeBenchmarks && window.modeBenchmarks[modeKey]) {
                     benchmarkDps = window.modeBenchmarks[modeKey];
                 }
@@ -356,7 +371,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 if (fullMath) {
                     res.dps = fullMath.total || fullMath.dps || 0;
                     res.bossDps = fullMath.bossTotal || fullMath.bossDps || 0;
-                    res.dmgVal = fullMath.dmgVal;
+                    res.dmgVal = (unitId === 'triple_threat' && window.ttBossActive) ? (fullMath.bossDmgVal || fullMath.dmgVal) : fullMath.dmgVal;
                     res.spa = fullMath.spa;
                     res.range = fullMath.range;
                     res.dot = fullMath.dot;
@@ -368,7 +383,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     res.subStats.finalCm = fullMath.critData ? fullMath.critData.cdmg : 0;
                 }
                 res.dps = res.dps || 0;
-                res.sortDps = res.dps;
+                res.sortDps = (unitId === 'triple_threat' && window.ttBossActive) ? res.bossDps : res.dps;
                 res.baseStats = null;
             } catch (e) {
                 console.warn("Hydration Math Error for", res.id, e);
@@ -558,14 +573,49 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
             let calculatedResults = [];
 
             if (!useInventory) {
-                const canUseStatic = true;
-
-                if (canUseStatic && window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {
+                if (window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {
                     const dbTable = window.STATIC_BUILD_DB[dbKey];
                     const dbList = dbTable[mode] || dbTable[mode === 'fixed' ? 'f' : 'b'];
                     if (dbList && dbList[i]) {
                         calculatedResults = dbList[i].map(r => ({ ...r }));
                     }
+                }
+
+                // If global buffers are active or special dynamic states exist, re-optimize
+                // the static builds dynamically in the browser (incredibly fast single-relic single-trait calculations)!
+                const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(buff => !buff.hideButton && !!window[buff.stateKey]);
+                const ttBossOff = (unit.id === 'triple_threat' && !window.ttBossActive);
+                if ((anyGlobal || ttBossOff) && calculatedResults.length > 0) {
+                    calculatedResults = calculatedResults.map(r => {
+                        const setName = r.setName || (typeof r.s === 'number' ? SETS[r.s]?.id : r.s) || (window.getSetFast && window.getSetFast(r.setName)?.id);
+                        const traitId = r.traitName || r.trait || (typeof r.t === 'number' ? traitsList[r.t]?.id : r.t);
+                        if (!setName || !traitId) return r;
+
+                        const singleBuilds = window.getFilteredBuilds().filter(b => b.setName === setName);
+                        const singleTrait = traitsList.find(t => t.id === traitId || t.name === traitId);
+                        const traitArr = singleTrait ? [singleTrait] : null;
+
+                        const optResList = window.calculateUnitBuilds(
+                            unit,
+                            null,
+                            singleBuilds,
+                            window.getValidSubCandidates(),
+                            cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat'] : ['none'],
+                            cfg.subs,
+                            traitArr,
+                            useAbility,
+                            mode
+                        );
+
+                        if (optResList && optResList.length > 0) {
+                            let best = optResList[0];
+                            optResList.forEach(opt => {
+                                if (opt.dps > best.dps) best = opt;
+                            });
+                            return best;
+                        }
+                        return r;
+                    });
                 }
             }
 
@@ -644,9 +694,17 @@ window.getQuickScore = (unit) => {
 window.getLiveScore = (unit) => {
     let unitId = unit.id;
 
+    window.LIVE_SCORE_CACHE = window.LIVE_SCORE_CACHE || {};
     const currentTrait = (window.unitTraits && window.unitTraits[unitId]);
     const currentHead = (window.unitHeads && window.unitHeads[unitId]);
-    const activeType = (window.activeAbilityIds && window.activeAbilityIds.has(unitId)) ? 'abil' : 'base';
+    let activeType = (window.activeAbilityIds && window.activeAbilityIds.has(unitId)) ? 'abil' : 'base';
+    if (unitId === 'triple_threat') activeType = 'base';
+
+    const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(buff => !buff.hideButton && !!window[buff.stateKey]);
+    const cacheKey = `${unitId}-${currentTrait || ''}-${currentHead || ''}-${activeType}-${anyGlobal ? 'buffed' : 'base'}-${window.ttBossActive ? 'boss' : 'noboss'}`;
+    if (window.LIVE_SCORE_CACHE[cacheKey] !== undefined) {
+        return window.LIVE_SCORE_CACHE[cacheKey];
+    }
 
     let dbKey = unitId;
     if (activeType === 'abil' && !unit.allowMultipleModes) dbKey += '_abil';
@@ -654,7 +712,25 @@ window.getLiveScore = (unit) => {
     const buildList = window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey] ? window.STATIC_BUILD_DB[dbKey]['fixed']?.[0] : null;
 
     if (!buildList || buildList.length === 0) {
-        return window.getQuickScore(unit);
+        const val = window.getQuickScore(unit);
+        window.LIVE_SCORE_CACHE[cacheKey] = val;
+        return val;
+    }
+
+    // FAST PATH: If no custom trait/head is set, and no global buffer is active,
+    // we can just read the pre-saved dps directly from the #1 build in the database!
+    // This is instant and avoids thousands of reconstructMathData calls on load.
+    // We bypass this for Triple Threat when Boss is OFF since the pre-saved database baseline has Boss ON.
+    const isTTWithoutBoss = (unitId === 'triple_threat' && !window.ttBossActive);
+    if (!currentTrait && !currentHead && !anyGlobal && !isTTWithoutBoss) {
+        const topBuild = buildList[0];
+        if (topBuild) {
+            let score = topBuild.d || topBuild.dps || 0;
+            if (score > 0) {
+                window.LIVE_SCORE_CACHE[cacheKey] = score;
+                return score;
+            }
+        }
     }
 
     let maxScore = 0;
@@ -680,8 +756,40 @@ window.getLiveScore = (unit) => {
         if (currentTrait) scoringEntry.traitName = currentTrait;
         if (currentHead) scoringEntry.headUsed = currentHead;
 
+        const ttBossOff = (unitId === 'triple_threat' && !window.ttBossActive);
+        let finalScoringEntry = scoringEntry;
+        if (anyGlobal || ttBossOff) {
+            const setName = scoringEntry.setName || (typeof scoringEntry.s === 'number' ? SETS[scoringEntry.s]?.id : scoringEntry.s) || (window.getSetFast && window.getSetFast(scoringEntry.setName)?.id);
+            const traitId = scoringEntry.traitName || scoringEntry.trait || (typeof scoringEntry.t === 'number' ? traitsList[scoringEntry.t]?.id : scoringEntry.t);
+            if (setName && traitId) {
+                const singleBuilds = window.getFilteredBuilds().filter(b => b.setName === setName);
+                const singleTrait = traitsList.find(t => t.id === traitId || t.name === traitId);
+                const traitArr = singleTrait ? [singleTrait] : null;
+
+                const optResList = window.calculateUnitBuilds(
+                    unit,
+                    null,
+                    singleBuilds,
+                    window.getValidSubCandidates(),
+                    currentHead ? [currentHead] : ['none'],
+                    true, // includeSubs
+                    traitArr,
+                    activeType === 'abil',
+                    'fixed'
+                );
+
+                if (optResList && optResList.length > 0) {
+                    let best = optResList[0];
+                    optResList.forEach(opt => {
+                        if (opt.dps > best.dps) best = opt;
+                    });
+                    finalScoringEntry = best;
+                }
+            }
+        }
+
         try {
-            const res = window.reconstructMathData(scoringEntry);
+            const res = window.reconstructMathData(finalScoringEntry);
             if (res) {
                 let score = window.isUnit(unitId, 'law') ? (res.range || 0) : res.total;
                 if (score > maxScore) maxScore = score;
@@ -692,9 +800,12 @@ window.getLiveScore = (unit) => {
     }
 
     if (maxScore === 0) {
-        return window.getQuickScore(unit);
+        const val = window.getQuickScore(unit);
+        window.LIVE_SCORE_CACHE[cacheKey] = val;
+        return val;
     }
 
+    window.LIVE_SCORE_CACHE[cacheKey] = maxScore;
     return maxScore;
 };
 

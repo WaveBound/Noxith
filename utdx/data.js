@@ -98,22 +98,19 @@ window.GLOBAL_BUFF_DATA = {
         name: 'Triple Threat',
         desc: "Leader Passive: Unrivaled Mark. Only activates if in Slot 1 (Works on self). Tag Sword (+50% Dmg, -7.5% Cost), Tag Piece (+25% Dmg, +10% Range), Element Wind (+20% Dmg, +5% Crit Rate).",
         color: '#a7f3d0',
+        hideButton: true,
         math: (uStats, context) => {
-            const hState = window.hotbarState || (typeof hotbarState !== 'undefined' ? hotbarState : null);
-            const leader = hState?.slots ? hState.slots[0] : null;
-            const isTtLeading = leader && window.isUnit(leader.id, 'triple_threat');
-
-            const hotbarBuffActive = hState?.buffState?.tripleThreat || hState?.buffState?.triplethreat;
-            const globalActive = window.tripleThreatActive;
-            const contextActive = context?.tripleThreatActive;
-
-            const isPotential = window.CALCULATION_MODE === 'potential';
+            const isPotential = (typeof window !== 'undefined' && window.CALCULATION_MODE !== undefined) ? (window.CALCULATION_MODE === 'potential') : true;
             
             let isActive = false;
             if (isPotential) {
-                isActive = globalActive !== false && contextActive !== false;
+                // In potential mode, leader buff is ONLY active on Triple Threat himself!
+                isActive = (uStats.id === 'triple_threat');
             } else {
-                isActive = isTtLeading;
+                // In loadout mode, active if Triple Threat is in Slot 1 of the hotbar
+                const hState = (typeof window !== 'undefined') ? window.hotbarState : null;
+                const leader = hState?.slots ? hState.slots[0] : null;
+                isActive = leader && (leader.id === 'triple_threat' || (typeof window !== 'undefined' && window.isUnit && window.isUnit(leader.id, 'triple_threat')));
             }
 
             if (!isActive) return {};

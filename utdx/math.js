@@ -259,7 +259,7 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
     applyTagBuff('rebellious_set', 'Sage', {}); // Element and Hyperarmor ignored per request
     applyTagBuff('rebellious_set', 'Bloodline', { dmg: 15, range: 20 });
     
-    applyTagBuff('warlord', 'Piece', { dmg: 20, spa: -5, cf: 10, dot: 20 });
+    applyTagBuff('warlord', 'Piece', { dmg: 20, spa: 5, cf: 10, dot: 20 });
     applyTagBuff('warlord', 'Villain', { dmg: 10, cm: 20, range: 15 });
 
     // Universal Magi Tag Buff

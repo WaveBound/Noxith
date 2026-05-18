@@ -1245,15 +1245,9 @@ function calculateDPS(uStats, relicStats, context) {
 
 
 
-    const finalDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
+    let finalDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
     let finalDmg = finalDmgNormal;
     let finalDmgBoss = finalDmgNormal;
-
-    if (uStats.id === 'triple_threat') {
-        const bossDmgBuff = (upgradeLevel >= 4) ? 65 : 50;
-        const additiveTotalBoss = (sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassive + headDmgTag + globalDmg + bossDmgBuff; // +Boss Dmg, disables King of Heck abilityDmg
-        finalDmgBoss = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotalBoss / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * 1;
-    }
 
     const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cdmg || 0) + passiveCdmgFromPassives;
     let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
@@ -1264,14 +1258,7 @@ function calculateDPS(uStats, relicStats, context) {
     if (headPiece === 'sorcerer_hunter_spirit') finalCritRate = 0;
 
     let finalCritRateBoss = finalCritRate;
-    if (uStats.id === 'triple_threat') {
-        finalCritRateBoss = Math.min(finalCritRate + 50, 100); // +50% Boss Crit Rate
-    }
-
     let finalCdmgStatBoss = finalCdmgStat;
-    if (uStats.id === 'triple_threat' && isAbility) {
-        finalCdmgStatBoss = finalCdmgStat - 100; // Disables King of Heck +100% CDmg against Bosses
-    }
 
     const avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
     const avgCritMultBoss = (1 + ((finalCdmgStatBoss / 100) * (finalCritRateBoss / 100)));
@@ -1577,6 +1564,7 @@ function calculateDPS(uStats, relicStats, context) {
         range: finalRange,
         passiveRange: (uStats.passiveRange || 0) + eternalRangeBuff,
         dmgVal: finalDmg,
+        bossDmgVal: (uStats.id === 'triple_threat' ? finalDmgBoss : finalDmg),
         lvStats,
         traitBuffs: { dmg: traitDmgPct, spa: traitSpaPct, range: traitRangePct },
         traitObj,
