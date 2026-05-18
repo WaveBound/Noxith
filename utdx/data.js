@@ -101,7 +101,7 @@ window.GLOBAL_BUFF_DATA = {
         hideButton: true,
         math: (uStats, context) => {
             const isPotential = (typeof window !== 'undefined' && window.CALCULATION_MODE !== undefined) ? (window.CALCULATION_MODE === 'potential') : true;
-            
+
             let isActive = false;
             if (isPotential) {
                 // In potential mode, leader buff is ONLY active on Triple Threat himself!
@@ -562,7 +562,8 @@ const guideData = [
     { unit: "devil_hunter", img: "images/units/DevilHunter.png", isCalculated: true },
     { unit: "alpha_devil", img: "images/units/AlphaDevil.png", isCalculated: true },
     { unit: "mimicry_sorcerer", img: "images/units/MimicrySorcerer.png", isCalculated: true },
-    { unit: "triple_threat", img: "images/units/TripleThreat.png", isCalculated: true }
+    { unit: "triple_threat", img: "images/units/TripleThreat.png", isCalculated: true },
+    { unit: "mochi_pirate", img: "images/units/MochiPirate.png", isCalculated: true }
 ];
 
 
@@ -726,6 +727,7 @@ const UNIT_FILES = [
     'jinoo_shadow_monarch.js',
     'enlightened_god.js',
     'triple_threat.js',
+    'mochi_pirate.js'
 ];
 
 // Resolves after every unit script has loaded (or errored).

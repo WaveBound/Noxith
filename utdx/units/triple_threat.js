@@ -11,8 +11,8 @@ unitDatabase.push({
 
     // META (Build Guide tab)
     meta: {
-        short: "Eternal/Sacred",
-        long: "Eternal/Sacred",
+        short: "Ruler",
+        long: "Ruler/Astral",
         note: "Powerful wind utility unit with high boss-slaying capacity."
     },
 
@@ -54,7 +54,7 @@ unitDatabase.push({
         },
         {
             name: "Pirate Hunter",
-            desc: "When a Boss is in Range:<br>• This unit can only target the boss and has its AOE size halved<br>• Gain 50% Damage [+65% on E4], 75% Hyper Armor Damage, and 50% Crit Rate until the Boss is no longer in Range.<br>• <b>Disables 'King of Heck' while active.</b>"
+            desc: "When a Boss is in Range:<br>• This unit can only target the boss and has its AOE size halved<br>• Gain 50% Damage [+65% on E4], 75% Hyper Armor Damage, and 50% Crit Rate until the Boss is no longer in Range."
         },
         {
             name: "Color of Armaments",

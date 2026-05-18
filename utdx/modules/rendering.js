@@ -38,7 +38,7 @@ const TOGGLE_OVERRIDES = {
     'nutaru_beast': { label: 'Beast Mode' },
     'ancient_shinob': { label: 'Reanimation' },
     'super_roku': { label: 'Same Enemy' },
-    'triple_threat': { label: 'KoH' },
+    'triple_threat': { label: 'Boss' },
     'cell': {
         dynamicLabel: (isChecked) => isChecked ? 'Perfect Form' : 'True Form',
         script: `this.parentElement.previousElementSibling.innerText = this.checked ? 'Perfect Form' : 'True Form'; this.closest('.unit-toolbar').firstElementChild.style.gap = '2px';`
@@ -585,6 +585,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                 // the static builds dynamically in the browser (incredibly fast single-relic single-trait calculations)!
                 const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(buff => !buff.hideButton && !!window[buff.stateKey]);
                 const ttBossOff = (unit.id === 'triple_threat' && !window.ttBossActive);
+                
                 if ((anyGlobal || ttBossOff) && calculatedResults.length > 0) {
                     calculatedResults = calculatedResults.map(r => {
                         const setName = r.setName || (typeof r.s === 'number' ? SETS[r.s]?.id : r.s) || (window.getSetFast && window.getSetFast(r.setName)?.id);
