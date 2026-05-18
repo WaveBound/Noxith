@@ -104,7 +104,7 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
     if (mode === false) mode = 'none';
 
     let headOptions = (mode === 'auto')
-        ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch']
+        ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat']
         : (mode && mode !== 'none' ? [mode] : ['none']);
 
     // Filter bloodline_head for non-CC units - REMOVED restriction
@@ -258,6 +258,9 @@ function _calcSetAndTagBonuses(relicStats, uStats, headPiece, context = {}) {
     applyTagBuff('rebellious_set', 'Ninjaverse', { cf: 15, cm: 20 });
     applyTagBuff('rebellious_set', 'Sage', {}); // Element and Hyperarmor ignored per request
     applyTagBuff('rebellious_set', 'Bloodline', { dmg: 15, range: 20 });
+    
+    applyTagBuff('warlord', 'Piece', { dmg: 20, spa: -5, cf: 10, dot: 20 });
+    applyTagBuff('warlord', 'Villain', { dmg: 10, cm: 20, range: 15 });
 
     // Universal Magi Tag Buff
     // (King Sailor is excluded because he gets this natively via his unit passives)
@@ -387,6 +390,8 @@ function _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicSta
         const isBloodline = window.isAnyUnit(uStats.id, ['alpha_devil', 'devil_hunter', 'ancient_mage', 'mimicry_sorcerer']);
         headDmgPassive = isBloodline ? 30 : 0;
         headCalc.type = isBloodline ? 'bloodline' : 'none';
+    } else if (headPiece === 'warlord_hat') {
+        headCalc.type = 'warlord';
     }
 
     // Monarch Cape Accessory Bonus (Requires Monarch Set)
@@ -477,10 +482,27 @@ function _calcSummonDPS(uStats, finalDmg, finalSpa, placement) {
     return { summonDpsTotal: (avgOnePlaneDps * actualCount) * placement, summonData: { count: actualCount, max: s.maxCount, avgPlaneDps: avgOnePlaneDps, hostSpa: finalSpa, avgDuration: avgDuration, dpsA: dpsA, dpsB: dpsB } };
 }
 
-function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult) {
+function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult, finalDmgBoss = undefined, avgCritMultBoss = undefined) {
     let dotDpsTotal = 0;
     let bossDotDpsTotal = 0;
-    const dotCritMult = isVirtualRealm ? avgCritMult : 1;
+    let dotCritMult = isVirtualRealm ? avgCritMult : 1;
+    let dotCritMultBoss = isVirtualRealm ? (avgCritMultBoss || avgCritMult) : 1;
+
+    // DoT can Crit logic
+    let dotCanCrit = false;
+    if (uStats.passives && uStats.passives.some(p => p.canCrit === true)) dotCanCrit = true;
+    if (uStats.modes && typeof window !== 'undefined' && window.unitModesState) {
+        const state = window.unitModesState[uStats.id] !== undefined ? window.unitModesState[uStats.id] : 0;
+        const activeModes = Array.isArray(state) ? state : [state];
+        activeModes.forEach(idx => {
+            if (uStats.modes[idx] && uStats.modes[idx].canCrit === true) dotCanCrit = true;
+        });
+    }
+
+    if (dotCanCrit) {
+        dotCritMult = avgCritMult;
+        dotCritMultBoss = avgCritMultBoss || avgCritMult;
+    }
 
     const traitMultiplier = 1 + (traitDotBonus / 100);
     const gearMultiplier = 1 + (gearDotBonus / 100);
@@ -541,7 +563,8 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         // Boss Dot (Defaults to normal dot if bossDot is not specified)
         let bossBasePct = uStats.bossDot || uStats.dot;
         let bossTickPct = bossBasePct * traitMultiplier * gearMultiplier;
-        let bossTotalDmg = finalDmg * (bossTickPct / 100) * dotCritMult;
+        const actualFinalDmgBoss = finalDmgBoss !== undefined ? finalDmgBoss : finalDmg;
+        let bossTotalDmg = actualFinalDmgBoss * (bossTickPct / 100) * dotCritMultBoss;
 
         const duration = uStats.dotDuration || 0;
         const interval = canStack ? finalSpa : (duration > 0 ? Math.ceil(duration / finalSpa) * finalSpa : finalSpa);

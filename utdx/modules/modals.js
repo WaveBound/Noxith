@@ -303,7 +303,11 @@ function openUnitInfo(unitId) {
     if (s.hyper) innateStatsHtml += `<li><span>Hyper Dmg:</span> <span class="text-white">+${s.hyper}%</span></li>`;
 
     if (unit.passives && Array.isArray(unit.passives)) {
-        passivesHtml = unit.passives.map(p => `<li class="info-passive-item"><strong class="text-white">${p.name}:</strong> <span class="info-passive-desc">${p.desc}</span></li>`).join('');
+        passivesHtml = unit.passives.map(p => {
+            let desc = p.desc;
+
+            return `<li class="info-passive-item"><strong class="text-white">${p.name}:</strong> <span class="info-passive-desc">${desc}</span></li>`;
+        }).join('');
         if (innateStatsHtml) passivesHtml = innateStatsHtml + passivesHtml;
     } else {
         passivesHtml = innateStatsHtml;

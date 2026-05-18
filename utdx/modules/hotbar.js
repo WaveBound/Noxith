@@ -164,7 +164,7 @@ function openTeamSummary() {
         'shadow_reaper_necklace': 'S. Reaper', 'junior': 'Junior Ninja', 'biju_head': 'Biju',
         'reanimated_head': 'Reanimated', 'bloodline_head': 'Bloodline',
         'sorcerer_hunter_spirit': 'S.H. Spirit', 'strongest_sorcerer_glasses': 'Strongest',
-        'monarch': 'Monarch Cape', 'none': 'None'
+        'monarch': 'Monarch Cape', 'warlord_hat': 'Warlord Hat', 'none': 'None'
     };
     const MAIN_STAT_NAMES = {
         body: { 'dmg': 'Damage', 'dot': 'DoT', 'cm': 'Crit Damage' },
@@ -557,7 +557,8 @@ function openTeamSummary() {
                         if (rangeVal !== 0) statParts.push(`+${rangeVal}% RANGE`);
 
                         const statStr = statParts.join(' / ');
-                        const descText = p.desc ? (p.desc.length > 120 ? p.desc.substring(0, 120).trim() + '…' : p.desc) : '';
+                        let descText = p.desc ? (p.desc.length > 120 ? p.desc.substring(0, 120).trim() + '…' : p.desc) : '';
+
 
                         // Determine badge type
                         let badgeLabel = 'PASSIVE';

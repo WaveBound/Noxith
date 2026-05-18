@@ -233,13 +233,16 @@ if (isMainThread) {
         return templates;
     }
 
-    function fastCalculateUnitBuilds(unit, cfg, traitsForCalc, isAbility) {
+    function fastCalculateUnitBuilds(unit, cfg, traitsForCalc, isAbility, existingHeads) {
         const upgradeLevel = (unit.upgrades && unit.upgrades.length > 0) ? unit.upgrades.length - 1 : 0;
         const { effectiveStats, isKiritoVR, suffix } = buildCalculationContext(unit, 'ruler', { isAbility, upgradeLevel });
         const hasPassiveDoT = effectiveStats.passives && effectiveStats.passives.some(p => p.dot && p.dot > 0);
         const hasNativeDoT = (effectiveStats.dot > 0) || (effectiveStats.burnMultiplier > 0) || isKiritoVR || hasPassiveDoT;
 
-        let allowedHeads = cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'] : ['none'];
+        let allowedHeads = cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat'] : ['none'];
+        if (existingHeads && existingHeads.length > 0) {
+            allowedHeads = allowedHeads.filter(h => h === 'none' || !existingHeads.includes(h));
+        }
         // Rebellious set perk (CC) logic is now handled in math.js, so we don't need to filter the head itself by CC anymore.
         // All units can equip any head now.
         const traitGroups = {};
@@ -349,7 +352,7 @@ if (isMainThread) {
         const MAP_PRIO = { 'dmg': 0, 'spa': 1, 'range': 2, 'raw_dmg': 3 };
         const MAP_BODY = { 'dmg': 0, 'dot': 1, 'cm': 2 };
         const MAP_LEGS = { 'dmg': 0, 'spa': 1, 'cf': 2, 'range': 3 };
-        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'bloodline_head': 7, 'reanimated_head': 8, 'sorcerer_hunter_spirit': 9, 'strongest_sorcerer_glasses': 10, 'monarch': 11 };
+        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'bloodline_head': 7, 'reanimated_head': 8, 'sorcerer_hunter_spirit': 9, 'strongest_sorcerer_glasses': 10, 'monarch': 11, 'warlord_hat': 12 };
 
         const stringPool = new Map(); const stringArr = [""]; 
         const subPool = new Map(); const subArr = [null]; 
@@ -425,12 +428,13 @@ if (isMainThread) {
         }
 
         const payloadStr = JSON.stringify({ s: stringArr, p: subArr, d: FINAL_DB });
-        const fileContent = `(function() {
+        const fileContent = `// BUILDSIG: sun_god,ninja,reaper_necklace,shadow_reaper_necklace,junior,biju_head,bloodline_head,reanimated_head,sorcerer_hunter_spirit,strongest_sorcerer_glasses,monarch,warlord_hat
+(function() {
     const RAW = ${payloadStr};
     const S = RAW.s; const P = RAW.p; const D = RAW.d;
     const PRIO = ['dmg', 'spa', 'range', 'raw_dmg'];
     const BODY = ['dmg', 'dot', 'cm']; const LEGS = ['dmg', 'spa', 'cf', 'range'];
-    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'];
+    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat'];
     const DESC_BODY = ['Dmg', 'DoT', 'Crit Dmg']; const DESC_LEGS = ['Dmg', 'Spa', 'Crit Rate', 'Range'];
     const ROW_SIZE = 18;
 
@@ -519,8 +523,9 @@ if (isMainThread) {
             parentPort.postMessage({ type: 'log', outName, data: 'Loading existing chunks...' });
 
             let existingRaw = null;
+            let existingHeads = [];
             const isFullGen = targetUnits.length === 0 || targetUnits.length >= unitDatabase.length;
-            if (!isFullGen && fs.existsSync(outPath)) {
+            if (fs.existsSync(outPath)) {
                 try {
                     const content = fs.readFileSync(outPath, 'utf-8');
                     const startMarker = 'const RAW = ';
@@ -531,6 +536,10 @@ if (isMainThread) {
                             const endIdx = content.lastIndexOf(';', sIdx - 1);
                             if (endIdx > startIdx) existingRaw = JSON.parse(content.substring(startIdx + startMarker.length, endIdx).trim());
                         }
+                    }
+                    if (isFullGen && content.startsWith('// BUILDSIG:')) {
+                        const sigLine = content.substring(0, content.indexOf('\\n'));
+                        existingHeads = sigLine.replace('// BUILDSIG:', '').split(',').map(s => s.trim());
                     }
                 } catch(e) {}
             }
@@ -552,6 +561,77 @@ if (isMainThread) {
                 }
             });
 
+            const ROW_SIZE = 18;
+            const PRIO = ['dmg', 'spa', 'range', 'raw_dmg'];
+            const BODY = ['dmg', 'dot', 'cm'];
+            const LEGS = ['dmg', 'spa', 'cf', 'range'];
+            const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat'];
+
+            const decode = (b64) => {
+                const bin = Buffer.from(b64, 'base64').toString('binary');
+                const len = bin.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) bytes[i] = bin.charCodeAt(i);
+                return new DataView(bytes.buffer);
+            };
+
+            const unpackBuffer = (b64) => {
+                if (!existingRaw) return [];
+                const view = decode(b64);
+                const len = view.byteLength / ROW_SIZE;
+                const result = [];
+                for (let i = 0; i < len; i++) {
+                    const off = i * ROW_SIZE;
+                    const traitName = existingRaw.s[view.getUint8(off)];
+                    const setName = existingRaw.s[view.getUint8(off + 1)];
+                    const dps = view.getFloat32(off + 2, true);
+                    const spa = view.getUint16(off + 6, true) / 1000;
+                    const range = view.getUint16(off + 8, true) / 10;
+                    const meta = view.getUint16(off + 10, true);
+                    
+                    const prio = PRIO[meta & 3];
+                    const body = BODY[(meta >> 2) & 3];
+                    const legs = LEGS[(meta >> 4) & 3];
+                    const headUsed = HEAD[(meta >> 6) & 15];
+                    const isCustom = !!((meta >> 10) & 1);
+                    
+                    const subIdx = view.getUint16(off + 12, true);
+                    const subRaw = existingRaw.p[subIdx];
+                    let subStats = {};
+                    if (subRaw) {
+                        const unpackSubsPiece = (list) => {
+                            return (list || []).map(item => ({
+                                type: existingRaw.s[item[0]],
+                                val: item[1]
+                            }));
+                        };
+                        subStats = {
+                            head: unpackSubsPiece(subRaw[0]),
+                            body: unpackSubsPiece(subRaw[1]),
+                            legs: unpackSubsPiece(subRaw[2]),
+                            selectedHead: subRaw[3] ? existingRaw.s[subRaw[3]] : undefined
+                        };
+                    }
+                    
+                    const dmgVal = view.getFloat32(off + 14, true);
+                    
+                    result.push({
+                        traitName,
+                        setName,
+                        dps,
+                        spa,
+                        range,
+                        prio,
+                        mainStats: { body, legs },
+                        headUsed,
+                        isCustom,
+                        subStats,
+                        dmgVal
+                    });
+                }
+                return result;
+            };
+
             let workerDb = {};
             tasks.forEach(task => {
                 const { u } = task;
@@ -569,18 +649,24 @@ if (isMainThread) {
                     const finalKey = type === 'abil' ? `${baseKey}_abil` : baseKey;
                     workerDb[finalKey] = { fixed: [], bugged: [] }; 
 
-
+                    let existingFixed = [];
+                    let existingBugged = [];
+                    if (existingRaw && existingRaw.d[finalKey]) {
+                        const d = existingRaw.d[finalKey];
+                        if (d.fixed) existingFixed = d.fixed.flatMap(b64 => unpackBuffer(b64));
+                        if (d.bugged) existingBugged = d.bugged.flatMap(b64 => unpackBuffer(b64));
+                    }
 
                     const isAbility = type === 'abil';
 
                     CONFIGS.forEach(cfg => {
-                        const traitGroups = fastCalculateUnitBuilds(u, cfg, traitsForCalc, isAbility);
+                        const traitGroups = fastCalculateUnitBuilds(u, cfg, traitsForCalc, isAbility, existingHeads);
  
                         if (u.id === 'the_strongest_in_history' && cfg.subs) {
                             window.unitModesState['the_strongest_in_history'] = [1, 2];
                             const monarchTrait = traitsForCalc.find(t => t.name === 'Ruler' || t.name === 'Godly');
                             if (monarchTrait) {
-                                const mBuilds = fastCalculateUnitBuilds(u, { head: true, subs: true }, [monarchTrait], isAbility);
+                                const mBuilds = fastCalculateUnitBuilds(u, { head: true, subs: true }, [monarchTrait], isAbility, existingHeads);
                                 if (mBuilds[monarchTrait.name]) {
                                     if (!traitGroups[monarchTrait.name]) traitGroups[monarchTrait.name] = [];
                                     traitGroups[monarchTrait.name].push(...mBuilds[monarchTrait.name]);
@@ -597,9 +683,12 @@ if (isMainThread) {
                             remainingPool.push(...list.slice(8, 100)); 
                         }
 
-                        let finalBuilds = guaranteedBuilds.concat(remainingPool).sort(sortFn).slice(0, 300);
-                        workerDb[finalKey].fixed.push(finalBuilds);
-                        workerDb[finalKey].bugged.push(finalBuilds); 
+                        let newBuilds = guaranteedBuilds.concat(remainingPool).sort(sortFn);
+                        let finalFixed = existingFixed.concat(newBuilds).sort(sortFn).slice(0, 300);
+                        let finalBugged = existingBugged.concat(newBuilds).sort(sortFn).slice(0, 300);
+
+                        workerDb[finalKey].fixed.push(finalFixed);
+                        workerDb[finalKey].bugged.push(finalBugged); 
                     });
                 });
                 
@@ -729,7 +818,19 @@ class GeneratorApp:
                 return "db_base.js" if not p else "db_" + "_".join(p) + ".js"
 
             if mode == 'missing':
-                combinations = [c for c in all_combos if not os.path.exists(os.path.join(db_dir, get_name(c)))]
+                combinations = []
+                for c in all_combos:
+                    fpath = os.path.join(db_dir, get_name(c))
+                    if not os.path.exists(fpath):
+                        combinations.append(c)
+                    else:
+                        try:
+                            with open(fpath, "r", encoding="utf-8") as f:
+                                first_lines = "".join([f.readline() for _ in range(5)])
+                                if "// BUILDSIG:" not in first_lines or "warlord_hat" not in first_lines:
+                                    combinations.append(c)
+                        except Exception:
+                            combinations.append(c)
             else:
                 combinations = all_combos
 

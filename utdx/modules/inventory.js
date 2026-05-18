@@ -109,7 +109,7 @@ function updateSetOptions(slot) {
     const setSelect = document.getElementById('newRelicSet');
     if (!setSelect) return;
     const currentSelection = setSelect.value;
-    const invalidHeadSets = ['laughing', 'ex'];
+    const invalidHeadSets = ['laughing', 'ex', 'warlord'];
     const filteredSets = SETS.filter(s => slot === 'Head' ? !invalidHeadSets.includes(s.id) : true);
 
     setSelect.innerHTML = filteredSets.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
@@ -299,7 +299,8 @@ function getRelicVisuals(setKey, slot) {
         'biju_set': { 'Head': 'BijuMask.png', 'Body': 'BijuTop.png', 'Legs': 'BijuBottom.png' },
         'rebellious_set': { 'Head': 'ReblliousMask.png', 'Body': 'ReblliousTop.png', 'Legs': 'ReblliousBottom.png' },
         'reanimated_ninja': { 'Head': 'ReanimatedMask.png', 'Body': 'ReanimatedTop.png', 'Legs': 'ReanimatedBottom.png' },
-        'great_mage': { 'Head': 'MageMask.png', 'Body': 'MageTop.png', 'Legs': 'MageBottom.png' }
+        'great_mage': { 'Head': 'MageMask.png', 'Body': 'MageTop.png', 'Legs': 'MageBottom.png' },
+        'warlord': { 'Head': 'WarlordMask.png', 'Body': 'WarlordTop.png', 'Legs': 'WarlordBottom.png' }
     };
 
     if (customImages[visualKey] && customImages[visualKey][slot]) {

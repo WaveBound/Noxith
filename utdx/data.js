@@ -92,6 +92,54 @@ window.GLOBAL_BUFF_DATA = {
         renderLabel: "+10% Crit Rate, +20% Crit Damage",
         genType: 'boolean'
     },
+    tripleThreat: {
+        id: 'triplethreat',
+        stateKey: 'tripleThreatActive',
+        name: 'Triple Threat',
+        desc: "Leader Passive: Unrivaled Mark. Only activates if in Slot 1 (Works on self). Tag Sword (+50% Dmg, -7.5% Cost), Tag Piece (+25% Dmg, +10% Range), Element Wind (+20% Dmg, +5% Crit Rate).",
+        color: '#a7f3d0',
+        math: (uStats, context) => {
+            const hState = window.hotbarState || (typeof hotbarState !== 'undefined' ? hotbarState : null);
+            const leader = hState?.slots ? hState.slots[0] : null;
+            const isTtLeading = leader && window.isUnit(leader.id, 'triple_threat');
+
+            const hotbarBuffActive = hState?.buffState?.tripleThreat || hState?.buffState?.triplethreat;
+            const globalActive = window.tripleThreatActive;
+            const contextActive = context?.tripleThreatActive;
+
+            const isPotential = window.CALCULATION_MODE === 'potential';
+            
+            let isActive = false;
+            if (isPotential) {
+                isActive = globalActive !== false && contextActive !== false;
+            } else {
+                isActive = isTtLeading;
+            }
+
+            if (!isActive) return {};
+
+            const tags = uStats.tags || [];
+            const element = String(uStats.element || "").toLowerCase();
+
+            let b = { dmg: 0, range: 0, crit: 0 };
+
+            if (tags.includes('Sword')) {
+                b.dmg += 50;
+            }
+            if (tags.includes('Piece')) {
+                b.dmg += 25;
+                b.range += 10;
+            }
+            if (element === 'wind') {
+                b.dmg += 20;
+                b.crit += 5;
+            }
+
+            return b;
+        },
+        renderLabel: "Leader: Unrivaled Mark",
+        genType: 'boolean'
+    },
     mageHill: {
         id: 'magehill',
         stateKey: 'fernHillActive',
@@ -516,7 +564,8 @@ const guideData = [
     { unit: "the_strongest_of_today", img: "images/units/Gojo.png", isCalculated: true },
     { unit: "devil_hunter", img: "images/units/DevilHunter.png", isCalculated: true },
     { unit: "alpha_devil", img: "images/units/AlphaDevil.png", isCalculated: true },
-    { unit: "mimicry_sorcerer", img: "images/units/MimicrySorcerer.png", isCalculated: true }
+    { unit: "mimicry_sorcerer", img: "images/units/MimicrySorcerer.png", isCalculated: true },
+    { unit: "triple_threat", img: "images/units/TripleThreat.png", isCalculated: true }
 ];
 
 
@@ -537,6 +586,7 @@ const setBonuses = {
     sorcerer_hunter: { dmg: 10, spa: 7.5, cf: 0, cm: 0, range: 0 },
     strongest_sorcerer: { dmg: 10, spa: 0, cf: 0, cm: 0, range: 5 },
     monarch: { dmg: 0, spa: 0, cf: 0, cm: 0, range: 0 }, // Dynamic bonus handled in math.js
+    warlord: { dmg: 0, spa: 0, cf: 0, cm: 0, range: 0 }, // Dynamic bonus handled in calculations.js
     none: { dmg: 0, spa: 0, cf: 0, cm: 0, range: 0 }
 };
 
@@ -564,7 +614,8 @@ const SETS = [
     { id: "great_mage", name: "Great Mage", bonus: { range: 10 } },
     { id: "sorcerer_hunter", name: "Sorcerer Hunter", bonus: { dmg: 10, spa: 7.5 } },
     { id: "strongest_sorcerer", name: "Strongest Sorcerer", bonus: { dmg: 10, range: 5 } },
-    { id: "monarch", name: "Monarch", bonus: { dmg: "Up to +40% (Summon Based)" } }
+    { id: "monarch", name: "Monarch", bonus: { dmg: "Up to +40% (Summon Based)" } },
+    { id: "warlord", name: "Warlord", bonus: { dmg: "Avg +30% Dmg (Crit Proc)" } }
 ];
 
 const globalBuilds = SETS.flatMap(set =>
@@ -677,6 +728,7 @@ const UNIT_FILES = [
     'mimicry_sorcerer.js',
     'jinoo_shadow_monarch.js',
     'enlightened_god.js',
+    'triple_threat.js',
 ];
 
 // Resolves after every unit script has loaded (or errored).

@@ -124,6 +124,11 @@ const infoDefinitions = {
         formula: `<span class="ip-var">Cycle</span> = <span class="ip-num">7s</span> + (6 * <span class="ip-var">SPA</span>)`,
         desc: "The Sun God Head grants a temporary Damage % Buff equal to your total Range.<br><br><b>Trigger:</b> Every 6 Attacks.<br><b>Duration:</b> 7 Seconds.<br><br>Because the buff must expire before the counter restarts, 100% uptime is impossible."
     },
+    'warlord_passive': {
+        title: "Warlord Set Passive",
+        formula: `<span class="ip-var">Cycle</span> = <span class="ip-var">Time to Crit</span> + <span class="ip-num">20s</span> (Active) + <span class="ip-num">10s</span> (Cooldown)`,
+        desc: "Landing a critical hit grants a +45% Damage buff for 20 seconds, followed by a 10 second cooldown after it ends.<br><br><b>Uptime:</b> Calculated dynamically based on your final Speed (SPA) and Crit Rate. High crit rate and speed minimize the 'Time to Crit' delay, pushing uptime close to the maximum theoretical limit of 66.7%."
+    },
     'ninja_passive': {
         title: "Junior Ninja Head Passive",
         formula: `<span class="ip-var">Cycle</span> = <span class="ip-num">10s</span> + (5 * <span class="ip-var">SPA</span>)`,

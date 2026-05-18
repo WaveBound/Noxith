@@ -18,7 +18,7 @@ function getCachedHotbarStats() {
 
     const hotbar = window.hotbarState;
     const slots = hotbar?.slots || [];
-    
+
     const stats = {
         divinityCount: 0,
         ugPresent: false,
@@ -31,11 +31,11 @@ function getCachedHotbarStats() {
         if (!slot) return;
         const baseId = slot.id.indexOf('-') === -1 ? slot.id : slot.id.split('-')[0];
         stats.idsInHotbar.add(baseId);
-        
+
         if (baseId === 'underworld_god') stats.ugPresent = true;
         if (baseId === 'ant_king_savage') stats.akPresent = true;
         if (baseId === 'jinoo' || baseId === 'jinoo_shadow_monarch' || baseId === 'sjw') stats.jinooPresent = true;
-        
+
         // Fast divinity stack calculation
         const sUnit = window.getUnitById(slot.id);
         if (sUnit && sUnit.tags && sUnit.tags.includes('Divinity')) {
@@ -210,7 +210,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
             // Special Case: Underworld God + Water God Divinity Stack Fix
             // "Water god placement - 1"
             if (isUnit(unit.id, 'underworld_god')) {
-                 // We apply the logic in the calculateDPS loop instead of here to ensure it's dynamic
+                // We apply the logic in the calculateDPS loop instead of here to ensure it's dynamic
             }
 
             // Special Case: Damage per placement
@@ -376,15 +376,13 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
 
     if (isAbility && unit.ability) {
         const ab = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
-        Object.assign(effectiveStats, ab);
 
-        // If the ability has a name that matches an existing passive, attribute the stats to that passive for breakdown visibility
+        let mappedToPassive = false;
         if (ab.abilityName && effectiveStats.passives) {
-            // Create a deep copy of passives to avoid mutating unitDatabase
             effectiveStats.passives = effectiveStats.passives.map(p => {
                 if (p.name === ab.abilityName) {
+                    mappedToPassive = true;
                     const newP = { ...p };
-                    // Map ability keys to passive breakdown keys
                     if (ab.buffDmg) newP.passiveDmg = (newP.passiveDmg || 0) + ab.buffDmg;
                     if (ab.buffSpa) newP.passiveSpa = (newP.passiveSpa || 0) + ab.buffSpa;
                     if (ab.passiveRange) newP.passiveRange = (newP.passiveRange || 0) + ab.passiveRange;
@@ -397,6 +395,19 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
                 return p;
             });
         }
+
+        // Apply remaining unmapped stats to root
+        const rootAb = { ...ab };
+        if (mappedToPassive) {
+            delete rootAb.buffDmg;
+            delete rootAb.buffSpa;
+            delete rootAb.passiveRange;
+            delete rootAb.dotBuff;
+            delete rootAb.trueDmg;
+            delete rootAb.passiveCrit;
+            delete rootAb.passiveCdmg;
+        }
+        Object.assign(effectiveStats, rootAb);
     }
 
     let suffix = isAbility ? '-ABILITY' : '-BASE';
@@ -810,7 +821,7 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
 // ==========================================================
 
 function calculateDPS(uStats, relicStats, context) {
-    const { dmgPoints, spaPoints, rangePoints, wave, isBoss, traitObj, placement, isSSS, headPiece, isVirtualRealm, starMult, isAbility } = context;
+    const { dmgPoints, spaPoints, rangePoints, wave, isBoss, traitObj, placement, isSSS, headPiece, isVirtualRealm, starMult, isAbility, upgradeLevel } = context;
 
     let lvStats = getLevelStats(uStats.dmg, uStats.spa, uStats.range || 0, dmgPoints, spaPoints, rangePoints);
     let rDmg = 0, rSpa = 0, rRange = 0;
@@ -858,6 +869,9 @@ function calculateDPS(uStats, relicStats, context) {
             let pCrit = p.passiveCrit || 0;
             let pCdmg = p.passiveCdmg || 0;
             let pDot = p.dot || 0;
+            if (p.name === "Brutal Slashes") {
+                pDot = (upgradeLevel >= 6) ? 120 : 100;
+            }
 
             if (isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother") {
                 const hbStats = getCachedHotbarStats();
@@ -869,7 +883,7 @@ function calculateDPS(uStats, relicStats, context) {
                     if (isUnit(uStats.id, 'water_god')) selfCount = Math.max(0, selfCount - 1);
                     divinityCount = Math.max(0, divinityCount - selfCount);
                 }
-                
+
                 const maxBuff = (context.upgradeLevel >= 2) ? 90 : 60;
                 pDmg = Math.min(maxBuff, divinityCount * 15);
             }
@@ -896,15 +910,15 @@ function calculateDPS(uStats, relicStats, context) {
                             if (s.id === uStats.id || isUnit(s.id, uStats.id)) return;
 
                             const sUnit = window.getUnitById(s.id);
-                            
+
                             // Determine placement for this slot
                             let sPlacement = (sUnit ? sUnit.placement : s.placement) || 1;
-                            
+
                             // Check for Assistant tag or specific assistant units
-                            const isAssistant = (sUnit?.tags && sUnit.tags.includes('Assistant')) || 
-                                              (s.tags && s.tags.includes('Assistant')) ||
-                                              isUnit(s.id, 'speedwagon') || isUnit(s.id, 'bulma');
-                            
+                            const isAssistant = (sUnit?.tags && sUnit.tags.includes('Assistant')) ||
+                                (s.tags && s.tags.includes('Assistant')) ||
+                                isUnit(s.id, 'speedwagon') || isUnit(s.id, 'bulma');
+
                             // RULE: Assistants only count as 1 placement for King Sailor
                             if (isAssistant) {
                                 sPlacement = 1;
@@ -981,6 +995,12 @@ function calculateDPS(uStats, relicStats, context) {
             const isAkDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit(uStats.id, 'ant_king_savage') && p.name === "Monarch's Devotion");
             const isUgDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother");
 
+            if (p.name === "Pirate Hunter" && (context.isBoss || (typeof window !== 'undefined' && window.ttBossActive))) {
+                const bossDmgBuff = (upgradeLevel >= 4) ? 65 : 50;
+                pDmg += bossDmgBuff;
+                pCrit += 50;
+            }
+
             if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || isKsDynamic || isAkDynamic || isUgDynamic) {
                 passivePcent += pDmg;
                 passiveSpaPcent += pSpa;
@@ -1003,15 +1023,15 @@ function calculateDPS(uStats, relicStats, context) {
                 // Find Jinoo's E-level to determine buff strength
                 const jinooSlot = window.hotbarState?.slots.find(s => s && (isUnit(s.id, 'jinoo_shadow_monarch') || isUnit(s.id, 'sjw')));
                 const jinooELevel = (jinooSlot && window.unitELevels && window.unitELevels[jinooSlot.id] !== undefined) ? window.unitELevels[jinooSlot.id] : 0;
-                
+
                 let buffDmg = 20;
                 if (jinooELevel >= 4) buffDmg = 30;
-                
+
                 // Shadow Knight specific buff
                 if (isUnit(uStats.id, 'shadow_knight')) {
                     buffDmg = (jinooELevel >= 4) ? 50 : 40;
                 }
-                
+
                 passivePcent += buffDmg;
                 passiveBreakdown.push({ name: "Strongest Hunter", dmg: buffDmg, spa: 0, range: 0, trueDmg: 0, crit: 0, cdmg: 0, dot: 0 });
             }
@@ -1114,7 +1134,27 @@ function calculateDPS(uStats, relicStats, context) {
     const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (uStats.id === 'king_sailor' ? 10 : 0);
     const finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
 
-    const setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa;
+    let setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa;
+    let warlordSpa = 0;
+
+    if (headPiece === 'warlord_hat') {
+        const isPotential = (typeof window !== 'undefined') ? (window.CALCULATION_MODE === 'potential') : true;
+        let spaReduction = 10;
+        if (!isPotential && typeof window !== 'undefined') {
+            let otherPlacements = 0;
+            const hotbarSlots = window.hotbarState?.slots || [];
+            hotbarSlots.forEach(s => {
+                if (!s) return;
+                if (s.id === uStats.id || isUnit(s.id, uStats.id)) return;
+                const sUnit = window.getUnitById(s.id);
+                let sPlacement = (sUnit ? sUnit.placement : s.placement) || 1;
+                otherPlacements += sPlacement;
+            });
+            spaReduction = Math.min(10, otherPlacements * 2);
+        }
+        warlordSpa = spaReduction;
+        setAndPassiveSpa += spaReduction;
+    }
 
 
     // Nutaru (Beast) dynamic SPA Cap override
@@ -1130,7 +1170,8 @@ function calculateDPS(uStats, relicStats, context) {
     let abilityFinalMult = 1;
     if (isAbility && uStats.ability) {
         const ab = Array.isArray(uStats.ability) ? uStats.ability[0] : uStats.ability;
-        if (ab.buffDmg) abilityDmg = ab.buffDmg;
+        const mappedToPassive = ab.abilityName && uStats.passives && uStats.passives.some(p => p.name === ab.abilityName);
+        if (ab.buffDmg && !mappedToPassive) abilityDmg = ab.buffDmg;
         if (ab.finalMult) abilityFinalMult = ab.finalMult;
     }
 
@@ -1166,9 +1207,33 @@ function calculateDPS(uStats, relicStats, context) {
 
     let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassive + headDmgTag + globalDmg + abilityDmg;
 
+    // --- WARLORD DYNAMIC SET BONUS ---
+    let warlordData = null;
+    if (relicStats.set === 'warlord') {
+        // Estimate final crit rate to determine trigger time
+        const estCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
+        if (estCritRate > 0) {
+            const attacksToCrit = Math.max(1, 1 / (estCritRate / 100));
+            const timeToTrigger = attacksToCrit * finalSpa;
+            const cycleTime = timeToTrigger + 20 + 10;
+            const uptime = 20 / cycleTime;
+            const warlordDmg = 45 * uptime;
+            additiveTotal += warlordDmg;
+            setPerkDmg += warlordDmg; // Add to UI display
+            warlordData = {
+                critRate: estCritRate,
+                attacksToCrit,
+                timeToTrigger,
+                cycleTime,
+                uptime,
+                dmg: warlordDmg
+            };
+        }
+    }
+
     // Detailed breakdown for UI
     const detailedBuffs = {
-        setBase: (sBonus.dmg || 0) - (tagBuffs.dmg || 0) - setPerkDmg,
+        setBase: (sBonus.dmg || 0) - (tagBuffs.dmg || 0) - (relicStats.set === 'great_mage' ? 18 : 0) - (relicStats.set === 'monarch' ? setPerkDmg : 0),
         setPerk: setPerkDmg + headDmgPassive,
         tagBonus: (tagBuffs.dmg || 0) + headDmgTag,
         unitPassive: passivePcent,
@@ -1180,9 +1245,15 @@ function calculateDPS(uStats, relicStats, context) {
 
 
 
-    const finalDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
-    const finalDmgBoss = finalDmg;
-    const finalDmgNormal = finalDmg;
+    const finalDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
+    let finalDmg = finalDmgNormal;
+    let finalDmgBoss = finalDmgNormal;
+
+    if (uStats.id === 'triple_threat') {
+        const bossDmgBuff = (upgradeLevel >= 4) ? 65 : 50;
+        const additiveTotalBoss = (sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassive + headDmgTag + globalDmg + bossDmgBuff; // +Boss Dmg, disables King of Heck abilityDmg
+        finalDmgBoss = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotalBoss / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * 1;
+    }
 
     const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cdmg || 0) + passiveCdmgFromPassives;
     let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
@@ -1192,9 +1263,20 @@ function calculateDPS(uStats, relicStats, context) {
 
     if (headPiece === 'sorcerer_hunter_spirit') finalCritRate = 0;
 
+    let finalCritRateBoss = finalCritRate;
+    if (uStats.id === 'triple_threat') {
+        finalCritRateBoss = Math.min(finalCritRate + 50, 100); // +50% Boss Crit Rate
+    }
+
+    let finalCdmgStatBoss = finalCdmgStat;
+    if (uStats.id === 'triple_threat' && isAbility) {
+        finalCdmgStatBoss = finalCdmgStat - 100; // Disables King of Heck +100% CDmg against Bosses
+    }
+
     const avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
+    const avgCritMultBoss = (1 + ((finalCdmgStatBoss / 100) * (finalCritRateBoss / 100)));
     const avgHit = finalDmg * avgCritMult;
-    const avgHitBoss = finalDmgBoss * avgCritMult;
+    const avgHitBoss = finalDmgBoss * avgCritMultBoss;
     const avgHitNormal = finalDmgNormal * avgCritMult;
 
     // --- SPECIAL ATTACK RATE LOGIC ---
@@ -1325,6 +1407,13 @@ function calculateDPS(uStats, relicStats, context) {
     let bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
     let normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
 
+    if (uStats.id === 'triple_threat') {
+        const followUpDps = ((0.75 * avgHit) / 15) * placement;
+        const followUpDpsBoss = ((0.75 * avgHitBoss) / 15) * placement;
+        hitDpsTotal += followUpDps;
+        bossHitDpsTotal += followUpDpsBoss;
+    }
+
     // True Damage Conversion Logic (No longer a multiplier)
     let trueDmgPct = ((uStats.trueDmg || 0) + trueDmgFromPassives);
     if (relicStats.set === 'sorcerer_hunter') {
@@ -1415,10 +1504,35 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     const gearDotBonus = baseR_Dot + headDotBuff + (sBonus.dot || 0);
-    const { dotDpsTotal, bossDotDpsTotal, dotBreakdown } = _calcDoTDPS({ ...uStats, dot: (uStats.dot || 0) + passiveDotFromPassives, isBoss: context.isBoss }, traitObj, traitDotBuff, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult);
+    const { dotDpsTotal, bossDotDpsTotal, dotBreakdown } = _calcDoTDPS({ ...uStats, dot: (uStats.dot || 0) + passiveDotFromPassives, isBoss: context.isBoss }, traitObj, traitDotBuff, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult, finalDmgBoss, avgCritMultBoss);
 
     let finalDotDps = dotDpsTotal;
     let finalBossDotDps = bossDotDpsTotal;
+
+    if (uStats.id === 'triple_threat') {
+        const traitMultiplier = 1 + (traitDotBuff / 100);
+        const gearMultiplier = 1 + (gearDotBonus / 100);
+        const bleedPct = ((upgradeLevel >= 6) ? 120 : 100) * traitMultiplier * gearMultiplier;
+
+        // Follow-up is a Critical Bleed: always multiplies by avgCritMult
+        const fuaDotDmg = finalDmg * (bleedPct / 100) * avgCritMult;
+        const fuaDotDmgBoss = finalDmgBoss * (bleedPct / 100) * avgCritMultBoss;
+
+        // Only added to DPS if trait allows DoT stacking (e.g. Astral)
+        const canStack = !!traitObj.allowDotStack;
+        const fuaDotDps = canStack ? ((fuaDotDmg / 15) * placement) : 0;
+        const fuaDotDpsBoss = canStack ? ((fuaDotDmgBoss / 15) * placement) : 0;
+
+        finalDotDps += fuaDotDps;
+        finalBossDotDps += fuaDotDpsBoss;
+
+        if (dotBreakdown) {
+            dotBreakdown.fuaDotDps = fuaDotDps / placement;
+            dotBreakdown.fuaDotTotalDmg = fuaDotDmg;
+            dotBreakdown.fuaChance = 100;
+            dotBreakdown.fuaLabel = "Brutal Slashes Follow-Up (15s Cooldown)";
+        }
+    }
 
     if (uStats.customFollowUp) {
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
@@ -1430,7 +1544,7 @@ function calculateDPS(uStats, relicStats, context) {
         let followUpDotDmgBoss = finalDmgBoss * (uStats.customFollowUp.dotPct / 100);
         let followUpDotDpsPerCycle = (followUpDotDmg * (chance / 100)) / usedSpa;
         let followUpDotDpsPerCycleBoss = (followUpDotDmgBoss * (chance / 100)) / usedSpa;
-        
+
         finalDotDps += followUpDotDpsPerCycle * placement;
         finalBossDotDps += followUpDotDpsPerCycleBoss * placement;
 
@@ -1477,7 +1591,7 @@ function calculateDPS(uStats, relicStats, context) {
         eternalRangeBuff: eternalRangeBuff,
         totalAdditivePct: additiveTotal,
         conditionalData: uStats.burnMultiplier ? { name: "Target: Burn", val: uStats.burnMultiplier, mult: (1 + uStats.burnMultiplier / 100) } : null,
-        headBuffs: { dmg: headDmgBase + headDmgPassive + headDmgTag, headBase: headDmgBase, passiveDmg: headDmgPassive, tagDmg: headDmgTag, dot: headDotBuff, type: headPiece, ...headCalc },
+        headBuffs: { dmg: headDmgBase + headDmgPassive + headDmgTag, headBase: headDmgBase, passiveDmg: headDmgPassive, tagDmg: headDmgTag, dot: headDotBuff, type: headPiece, warlordSpa, ...headCalc },
         dotData: dotBreakdown,
         critData: { rate: finalCritRate, cdmg: finalCdmgStat, baseCdmg: uStats.cdmg, relicCmPct: baseR_Cm, setCm: sBonus.cm, totalCmBuff: (sBonus.cm || 0) + baseR_Cm, preRelicCdmg: uStats.cdmg, avgMult: avgCritMult },
         placement,
@@ -1492,6 +1606,7 @@ function calculateDPS(uStats, relicStats, context) {
         singleUnitDoT: dotDpsTotal / (traitObj.allowDotStack || traitObj.allowPlacementStack ? placement : 1),
         hasStackingDoT: traitObj.allowDotStack || traitObj.allowPlacementStack,
         extraAttacks: extraAttacksData,
-        abilityBuff: (uStats.buffDmg || 0) + abilityDmg
+        abilityBuff: (uStats.buffDmg || 0) + abilityDmg,
+        warlordData
     };
 }

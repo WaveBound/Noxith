@@ -6,6 +6,13 @@ window.unitSystemLevels = window.unitSystemLevels || {};
 window.unitTraits = window.unitTraits || {};
 window.unitHeads = window.unitHeads || {};
 window.unitModesState = window.unitModesState || {};
+window.ttBossActive = false;
+
+window.toggleTTBoss = function() {
+    window.ttBossActive = !window.ttBossActive;
+    if (window.unitBuildsCache['triple_threat']) delete window.unitBuildsCache['triple_threat'];
+    updateBuildListDisplay('triple_threat', true);
+};
 
 // Single Source of Truth for Head Item UI mapping in rendering
 const HEAD_CONFIG = {
@@ -19,7 +26,8 @@ const HEAD_CONFIG = {
     'bloodline_head': { name: 'Bloodline', search: 'Bloodline', cls: 'ninja' },
     'sorcerer_hunter_spirit': { name: 'S.H. Spirit', search: 'S. Hunter', cls: 'custom' },
     'strongest_sorcerer_glasses': { name: 'Strongest', search: 'Strongest', cls: 'custom' },
-    'monarch': { name: 'Monarch Cape', search: 'Monarch', cls: 'custom' }
+    'monarch': { name: 'Monarch Cape', search: 'Monarch', cls: 'custom' },
+    'warlord_hat': { name: 'Warlord Hat', search: 'Warlord', cls: 'custom' }
 };
 
 // Config for Custom Ability Buttons
@@ -30,6 +38,7 @@ const TOGGLE_OVERRIDES = {
     'nutaru_beast': { label: 'Beast Mode' },
     'ancient_shinob': { label: 'Reanimation' },
     'super_roku': { label: 'Same Enemy' },
+    'triple_threat': { label: 'KoH' },
     'cell': {
         dynamicLabel: (isChecked) => isChecked ? 'Perfect Form' : 'True Form',
         script: `this.parentElement.previousElementSibling.innerText = this.checked ? 'Perfect Form' : 'True Form'; this.closest('.unit-toolbar').firstElementChild.style.gap = '2px';`
@@ -284,7 +293,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     null,
                     null, // No filter
                     ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'],
-                    ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'],
+                    ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat'],
                     true,
                     null,
                     activeType === 'abil',
@@ -331,7 +340,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 spa: r.sp || r.spa || 0,
                 range: r.ra || r.range || 0,
                 prio: r.p || r.prio || 'dmg',
-                headUsed: (typeof r.h === 'number' ? (['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'][r.h]) : (r.headUsed || r.h)) || 'none',
+                headUsed: (typeof r.h === 'number' ? (['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat'][r.h]) : (r.headUsed || r.h)) || 'none',
                 isCustom: !!(r.c || r.isCustom),
                 subStats: r.ss || r.subStats || {},
                 mainStats: r.ms || r.mainStats || {
@@ -566,7 +575,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                 ? [...(typeof customTraits !== 'undefined' ? customTraits : []), ...(unitSpecificTraits[unit.id] || [])]
                 : null;
 
-            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
+            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
 
             if (dynamicResults.length > 0) {
                 const seen = new Set(calculatedResults.map(r => r.id));
@@ -734,7 +743,13 @@ function renderUnitCard(unit, absoluteIndex) {
         }
     }
 
-    const abilityToggleHtml = (unit.ability && !abilityObj.noToggle) ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>` : '<div></div>';
+    let abilityToggleHtml = (unit.ability && !abilityObj.noToggle) ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>` : '<div></div>';
+    
+    if (unit.id === 'triple_threat') {
+        const isBossToggled = window.ttBossActive || false;
+        abilityToggleHtml += `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="Boss">Boss</span><label><input type="checkbox" class="ability-cb" ${isBossToggled ? 'checked' : ''} onchange="toggleTTBoss()"><div class="mini-switch"></div></label></div>`;
+    }
+
     const modesBtn = (unit.modes && Array.isArray(unit.modes)) ? `<button class="calc-btn ut-btn-compact modes-btn" onclick="openUnitModes('${unit.id}')" title="Change Mode">${unit.modesLabel || 'Modes'}</button>` : '';
 
     let initialModeIndicatorHtml = '';
@@ -793,6 +808,7 @@ function renderUnitCard(unit, absoluteIndex) {
                         <option value="Sorcerer Hunter">Sets: S. Hunter</option>
                         <option value="Strongest Sorcerer">Sets: Strongest</option>
                         <option value="Monarch">Sets: Monarch</option>
+                        <option value="Warlord">Sets: Warlord</option>
                     </select>
                     <select onchange="filterList(this)" data-filter="head" class="search-select">
                         <option value="all">Heads: All</option>
@@ -807,6 +823,7 @@ function renderUnitCard(unit, absoluteIndex) {
                         <option value="sorcerer_hunter_spirit">Heads: S. Hunter Spirit</option>
                         <option value="strongest_sorcerer_glasses">Heads: Strongest Glasses</option>
                         <option value="monarch">Heads: Monarch Cape</option>
+                        <option value="warlord_hat">Heads: Warlord Hat</option>
                         <option value="none">Heads: None</option>
                     </select>
                 </div>

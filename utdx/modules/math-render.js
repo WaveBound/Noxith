@@ -341,6 +341,42 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, h
         });
     }
 
+    let warlordHtml = '';
+    if (data.warlordData) {
+        const w = data.warlordData;
+        warlordHtml += `
+        <tr class="mt-row-warlord"><td colspan="3" class="p-2">
+            <div class="mt-flex-between mb-2">
+                <span class="mt-text-bold text-xs tracking-sm" style="color: #a78bfa;">WARLORD SET PASSIVE</span>
+                <button class="calc-info-btn" onclick="openInfoPopup('warlord_passive')">?</button>
+            </div>
+            <div class="mt-flex-between text-xs text-white mb-1">
+                <span class="opacity-70">Estimated Crit Rate:</span>
+                <span class="mt-font-mono mt-text-right text-white">${fmt.fix(w.critRate, 1)}%</span>
+            </div>
+            <div class="mt-flex-between text-xs text-white mb-1">
+                <span class="opacity-70">Avg Attacks to Crit:</span>
+                <span class="mt-font-mono mt-text-right text-white">${fmt.fix(w.attacksToCrit, 2)}</span>
+            </div>
+            <div class="mt-flex-between text-xs text-white mb-1">
+                <span class="opacity-70">Time to Crit:</span>
+                <span class="mt-font-mono mt-text-right text-white">${fmt.fix(w.timeToTrigger, 2)}s</span>
+            </div>
+            <div class="mt-flex-between text-xs text-white mb-1">
+                <span class="opacity-70">Cycle Time (Time to Crit + 20s + 10s):</span>
+                <span class="mt-font-mono mt-text-right text-white">${fmt.fix(w.cycleTime, 2)}s</span>
+            </div>
+            <div class="mt-flex-between text-xs text-white mb-3">
+                <span class="opacity-70">Buff Uptime:</span>
+                <span class="mt-font-mono mt-text-right mt-text-green">${fmt.fix(w.uptime * 100, 1)}%</span>
+            </div>
+            <div class="mt-flex-between mt-border-top mt-pt-sm">
+                <span class="text-white text-xs text-bold">Avg Damage Buff (+45% Base * Uptime)</span>
+                <span class="text-sm mt-text-bold" style="color: #a78bfa;"> +${fmt.fix(w.dmg, 1)}%</span>
+            </div>
+        </td></tr>`;
+    }
+
     return `
             <div class="dd-section">
                 <div class="dd-title mt-text-red"><span>1. Base Damage Calculation</span></div>
@@ -354,6 +390,7 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, h
                     <tr><td class="mt-cell-label text-accent-end">Relic Multiplier <button class="calc-info-btn" onclick="openInfoPopup('relic_multi')">?</button></td><td class="mt-cell-formula text-accent-end">${fmt.pct(data.relicBuffs.dmg)}</td><td class="mt-cell-val">${fmt.num(dmgAfterRelic)}</td></tr>
                     
                     ${headDmgHtml}
+                    ${warlordHtml}
 
                     <tr>
                         <td class="mt-cell-label mt-pt-md">Buff Data <button class="calc-info-btn" onclick="openInfoPopup('tag_logic')">?</button></td>
@@ -470,6 +507,7 @@ function renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa) {
                     <tr><td class="mt-cell-label mt-pt-md">Relic Multiplier</td><td class="mt-cell-formula mt-pt-md">-${fmt.fix(data.relicBuffs.spa, 1)}%</td><td class="mt-cell-val mt-pt-md">${fmt.fix(data.spaAfterRelic, 3)}s</td></tr>
                     <tr><td class="mt-cell-label mt-pt-md">Set Bonus + Passive + Abilities <button class="calc-info-btn" onclick="openInfoPopup('tag_logic')">?</button></td><td class="mt-cell-formula mt-pt-md">${data.setAndPassiveSpa >= 0 ? '-' : '+'}${Math.abs(fmt.fix(data.setAndPassiveSpa, 1))}%</td><td class="mt-cell-val mt-pt-md">${fmt.fix(data.rawFinalSpa, 3)}s</td></tr>
                     <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base</td><td class="mt-cell-formula">-${fmt.fix(baseSetSpa, 1)}%</td><td class="mt-cell-val"></td></tr>
+                    ${(data.headBuffs && data.headBuffs.warlordSpa > 0) ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Warlord Hat Accessory</td><td class="mt-cell-formula">-${fmt.fix(data.headBuffs.warlordSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${tagSpa !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonuses</td><td class="mt-cell-formula">-${fmt.fix(tagSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(() => {
                         let html = '';
@@ -625,11 +663,25 @@ function renderDotSection(data, headDotRow) {
             </tr>
             ` : ''}
 
-            ${db.fuaDotDps > 0 ? `
+            ${data.baseStats.id === 'triple_threat' ? `
+            <tr>
+                <td class="mt-cell-label mt-pt-md mt-text-bold" style="color: #60a5fa">Brutal Slashes Follow-Up Bleed</td>
+                <td class="mt-cell-formula mt-pt-md"></td>
+                <td class="mt-cell-val mt-pt-md mt-text-bold" style="color: #60a5fa">${fmt.num(db.fuaDotDps || 0)} DPS</td>
+            </tr>
+            <tr><td class="mt-cell-label mt-pl-sm text-dim text-xs">• Trigger Cooldown</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">Every 15.0s</td></tr>
+            <tr><td class="mt-cell-label mt-pl-sm text-dim text-xs">• Critical Bleed Proc</td><td class="mt-cell-formula">Avg Hit × ${((data.upgradeLevel >= 6) ? 120 : 100)}%</td><td class="mt-cell-val text-xs text-gold">${fmt.num(db.fuaDotTotalDmg)}</td></tr>
+            ${(db.fuaDotDps || 0) === 0 ? `
+            <tr>
+                <td colspan="3" class="pt-1 pb-1" style="font-size: 0.72rem; color: #f87171; line-height: 1.35; padding-left: 12px;">
+                    ↳ <i>Disabled: Requires <b>Astral</b> trait to stack Bleed.</i>
+                </td>
+            </tr>` : ''}
+            ` : (db.fuaDotDps > 0 ? `
             <tr><td class="mt-cell-label mt-pt-md mt-text-bold" style="color: #60a5fa">${db.fuaLabel || 'Follow-Up DoT'}</td><td class="mt-cell-formula mt-pt-md"></td><td class="mt-cell-val mt-pt-md mt-text-bold" style="color: #60a5fa">${fmt.num(db.fuaDotDps)}</td></tr>
             <tr><td class="mt-cell-label mt-pl-sm text-dim text-xs">• Trigger Chance</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">${db.fuaChance}%</td></tr>
             <tr><td class="mt-cell-label mt-pl-sm text-dim text-xs">• Damage Per Proc</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">${fmt.num(db.fuaDotTotalDmg)}</td></tr>
-            ` : ''}
+            ` : '')}
 
             <tr class="mt-border-top">
                 <td class="mt-cell-label text-white mt-pt-md">Total DoT (1 Unit)</td>
@@ -996,6 +1048,34 @@ function renderSummonSection(data) {
 }
 
 function renderAttackRateSection(data) {
+    if (data.baseStats.id === 'triple_threat') {
+        const avgHitVal = data.dmgVal * data.critData.avgMult;
+        const fuaDmg = avgHitVal * 0.75;
+        const singleFuaDps = fuaDmg / 15;
+        const totalFuaDps = singleFuaDps * data.placement;
+
+        return `
+            <div class="dd-section" style="border-left: 3px solid #60a5fa;">
+                <div class="dd-title text-custom" style="color: #60a5fa !important;"><span>5. Follow-Up Attack (Brutal Slashes)</span> <button class="calc-info-btn" onclick="openInfoPopup('tag_logic')">?</button></div>
+                <table class="calc-table">
+                    <tr><td class="mt-cell-label">Trigger Condition</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-white">Hit Enemy with Critical Bleed</td></tr>
+                    <tr><td class="mt-cell-label">Trigger Cooldown</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-white">Every 15.0 seconds</td></tr>
+                    <tr><td class="mt-cell-label">Follow-Up Damage</td><td class="mt-cell-formula">75% × Avg Hit</td><td class="mt-cell-val text-gold">${fmt.num(fuaDmg)}</td></tr>
+                    
+                    <tr class="mt-border-top">
+                        <td class="mt-cell-label mt-pt-sm text-white">Single FUA Hit DPS</td>
+                        <td class="mt-cell-formula">${fmt.num(fuaDmg)} / 15s</td>
+                        <td class="mt-cell-val mt-pt-sm text-white">${fmt.num(singleFuaDps)}</td>
+                    </tr>
+                    <tr>
+                        <td class="mt-cell-label text-accent-start">Total FUA DPS (x${data.placement})</td>
+                        <td class="mt-cell-formula">${fmt.num(singleFuaDps)} × ${data.placement}</td>
+                        <td class="mt-cell-val text-accent-start font-bold" style="font-size: 1.05rem;">${fmt.num(totalFuaDps)}</td>
+                    </tr>
+                </table>
+            </div>`;
+    }
+
     if (!data.extraAttacks) return '';
     const isKS = window.isUnit(data.baseStats.id, 'king_sailor');
     const isAD = window.isUnit(data.baseStats.id, 'alpha_devil');
@@ -1042,12 +1122,28 @@ function renderFinalSection(data) {
     const singleHit = data.hit / (data.placement || 1);
     const hitFormula = data.placement > 1 ? `${fmt.num(singleHit)} <span class="op">×</span> ${data.placement}` : ``;
     const isNutaru = window.isUnit(data.baseStats.id, 'nutaru_beast');
+    const isTripleThreat = data.baseStats.id === 'triple_threat';
+
+    let tripleThreatFollowUpHtml = '';
+    if (isTripleThreat) {
+        const avgHitVal = data.dmgVal * data.critData.avgMult;
+        const singleBaseHitDps = avgHitVal / data.spa;
+        const totalBaseHitDps = singleBaseHitDps * data.placement;
+        const singleFuaDps = (0.75 * avgHitVal) / 15;
+        const totalFuaDps = singleFuaDps * data.placement;
+
+        tripleThreatFollowUpHtml = `
+            <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Base Hit DPS</td><td class="mt-cell-formula">${fmt.num(singleBaseHitDps)} <span class="op">×</span> ${data.placement}</td><td class="mt-cell-val opacity-70">${fmt.num(totalBaseHitDps)}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-md text-accent-start" style="font-weight: 700;">↳ Brutal Slashes Follow-Up (75% Dmg / 15s)</td><td class="mt-cell-formula text-accent-start">${fmt.num(singleFuaDps)} <span class="op">×</span> ${data.placement}</td><td class="mt-cell-val text-accent-start" style="font-weight: 700;">${fmt.num(totalFuaDps)}</td></tr>
+        `;
+    }
 
     return `
             <div class="dd-section border-l-gold">
                 <div class="dd-title text-gold">Final Synthesis</div>
                 <table class="calc-table">
                     <tr><td class="mt-cell-label">${hitLabel}</td><td class="mt-cell-formula">${hitFormula}</td><td class="mt-cell-val calc-highlight">${fmt.num(data.hit)}</td></tr>
+                    ${tripleThreatFollowUpHtml}
                     ${data.trueDmgPct > 0 ? `
                         <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Normal Damage (${Math.max(0, 100 - data.trueDmgPct).toFixed(0)}%)</td><td class="mt-cell-formula"></td><td class="mt-cell-val opacity-70">${fmt.num(data.normalDmgVal)}</td></tr>
                         <tr><td class="mt-cell-label mt-pl-md text-accent-start">↳ True Damage (${data.trueDmgPct.toFixed(0)}%)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-start">${fmt.num(data.trueDmgVal)}</td></tr>
