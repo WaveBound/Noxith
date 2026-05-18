@@ -107,7 +107,7 @@ if (isMainThread) {
     
     // --- NODE.JS POLYFILLS ---
     global.window = global;
-    global.unitModesState = {}; // Fix for units with Modes (Sukuna, etc.)
+    global.unitModesState = { 'joyful_captain': 2 }; // Fix for units with Modes. Evaluate Joyful in Joy Boy mode so SPA builds generate.
     global.hotbarState = { slots: [null, null, null, null, null, null], fernTargets: [] };
     global.unitELevels = {}; 
     global.btoa = function(str) { return Buffer.from(str, 'binary').toString('base64'); };
@@ -676,20 +676,54 @@ if (isMainThread) {
                             window.unitModesState['the_strongest_in_history'] = [0];
                         }
 
-                        const guaranteedBuilds = [];
-                        const remainingPool = [];
+                        // Pre-process new builds to reduce size drastically before merging
+                        const topNewPerTrait = [];
                         for (const trait in traitGroups) {
                             const list = traitGroups[trait].sort(sortFn);
-                            guaranteedBuilds.push(...list.slice(0, 8)); 
-                            remainingPool.push(...list.slice(8, 100)); 
+                            const uniqueList = [];
+                            const seenKeys = new Set();
+                            for (const b of list) {
+                                const key = b.setName + "_" + (b.headUsed || 'none') + "_" + b.mainStats.body + "_" + b.mainStats.legs;
+                                if (!seenKeys.has(key)) {
+                                    uniqueList.push(b);
+                                    seenKeys.add(key);
+                                    if (uniqueList.length >= 15) break;
+                                }
+                            }
+                            topNewPerTrait.push(...uniqueList);
                         }
 
-                        let newBuilds = guaranteedBuilds.concat(remainingPool).sort(sortFn);
-                        let finalFixed = existingFixed.concat(newBuilds).sort(sortFn).slice(0, 300);
-                        let finalBugged = existingBugged.concat(newBuilds).sort(sortFn).slice(0, 300);
+                        const mergeAndReduce = (existingArr, newReduced) => {
+                            const combined = existingArr.concat(newReduced);
+                            const traitMap = {};
+                            combined.forEach(b => {
+                                if (!traitMap[b.traitName]) traitMap[b.traitName] = [];
+                                traitMap[b.traitName].push(b);
+                            });
+                            
+                            const result = [];
+                            for (const trait in traitMap) {
+                                const list = traitMap[trait].sort(sortFn);
+                                const uniqueList = [];
+                                const seenKeys = new Set();
+                                for (const b of list) {
+                                    const key = b.setName + "_" + (b.headUsed || 'none') + "_" + b.mainStats.body + "_" + b.mainStats.legs;
+                                    if (!seenKeys.has(key)) {
+                                        uniqueList.push(b);
+                                        seenKeys.add(key);
+                                        if (uniqueList.length >= 20) break;
+                                    }
+                                }
+                                result.push(...uniqueList);
+                            }
+                            return result;
+                        };
+
+                        let finalFixed = mergeAndReduce(existingFixed, topNewPerTrait).sort(sortFn);
+                        let finalBugged = mergeAndReduce(existingBugged, topNewPerTrait).sort(sortFn);
 
                         workerDb[finalKey].fixed.push(finalFixed);
-                        workerDb[finalKey].bugged.push(finalBugged); 
+                        workerDb[finalKey].bugged.push(finalBugged);
                     });
                 });
                 

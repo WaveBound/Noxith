@@ -7,7 +7,7 @@ unitDatabase.push({
     placement: 1,
     placementType: "Ground",
     role: "Specialist",
-    tags: ["Main Character", "Hero", "Leveling"],
+    tags: ["Main Character", "Hero", "Leveling", "Sword", "Miner"],
 
     // META (Build Guide tab)
     meta: {

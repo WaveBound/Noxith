@@ -254,6 +254,15 @@ const comingSoonData = [
 
 const patchNotesData = [
     {
+        version: "v5.8",
+        date: "May 18, 2026",
+        changes: [
+            { type: "Unit", text: "<b>New Units:</b> Added <b>Triple Threat</b>, <b>Joyful Captain</b>, and <b>Mochi Pirate</b>." },
+            { type: "Item", text: "<b>New Gear:</b> Added the <b>Warlord</b> Set and <b>Warlord Hat</b>." },
+            { type: "UI", text: "<b>UI Rework:</b> Fixed build card display and sorting to dynamically prioritize <b>Boss DPS</b> for boss-centric traits like Duelist." }
+        ]
+    },
+    {
         version: "v5.7",
         date: "May 10, 2026",
         changes: [
@@ -563,7 +572,8 @@ const guideData = [
     { unit: "alpha_devil", img: "images/units/AlphaDevil.png", isCalculated: true },
     { unit: "mimicry_sorcerer", img: "images/units/MimicrySorcerer.png", isCalculated: true },
     { unit: "triple_threat", img: "images/units/TripleThreat.png", isCalculated: true },
-    { unit: "mochi_pirate", img: "images/units/MochiPirate.png", isCalculated: true }
+    { unit: "mochi_pirate", img: "images/units/MochiPirate.png", isCalculated: true },
+    { unit: "joyful_captain", img: "images/units/JoyfulCaptain.png", isCalculated: true }
 ];
 
 
@@ -727,7 +737,8 @@ const UNIT_FILES = [
     'jinoo_shadow_monarch.js',
     'enlightened_god.js',
     'triple_threat.js',
-    'mochi_pirate.js'
+    'mochi_pirate.js',
+    'joyful_captain.js'
 ];
 
 // Resolves after every unit script has loaded (or errored).

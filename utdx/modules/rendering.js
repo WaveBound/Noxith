@@ -38,7 +38,7 @@ const TOGGLE_OVERRIDES = {
     'nutaru_beast': { label: 'Beast Mode' },
     'ancient_shinob': { label: 'Reanimation' },
     'super_roku': { label: 'Same Enemy' },
-    'triple_threat': { label: 'Boss' },
+    'triple_threat': { label: 'KoH' },
     'cell': {
         dynamicLabel: (isChecked) => isChecked ? 'Perfect Form' : 'True Form',
         script: `this.parentElement.previousElementSibling.innerText = this.checked ? 'Perfect Form' : 'True Form'; this.closest('.unit-toolbar').firstElementChild.style.gap = '2px';`
@@ -135,11 +135,11 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
         const currentPrio = r.prio || 'default';
         const secCfg = prioConfig[currentPrio] || prioConfig['default'];
         const invBadge = `<button class="prio-badge prio-inv clickable" onclick="viewInventoryItems('${hId}', '${bId}', '${lId}')" title="Locate in Inventory"><img src="https://img.icons8.com/fluency-systems-filled/48/ffffff/backpack.png" alt="Inv"></button>`;
-        const statBadge = `<span class="prio-badge ${secCfg.cls}">${secCfg.label}</span>`;
+        const statBadge = (unitId === 'joyful_captain') ? '' : `<span class="prio-badge ${secCfg.cls}">${secCfg.label}</span>`;
         prioHtml = `<div class="br-badges">${invBadge}${statBadge}</div>`;
     } else {
         const pCfg = prioConfig[r.prio] || prioConfig['default'];
-        prioHtml = `<span class="prio-badge ${pCfg.cls}">${pCfg.label}</span>`;
+        prioHtml = (unitId === 'joyful_captain') ? '' : `<span class="prio-badge ${pCfg.cls}">${pCfg.label}</span>`;
     }
 
     const mainBodyBadge = getBadgeHtml(r.mainStats.body, MAIN_STAT_VALS.body[r.mainStats.body]);
@@ -152,12 +152,11 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
 
     const mobileToggle = `<button class="mobile-stat-toggle" onclick="toggleRelicStatDisplay(this)"><span class="m-toggle-txt">Main</span><span class="m-toggle-txt">Sub</span></button>`;
 
+    const isBossHigher = (sortMode === 'dps') && (r.bossDps > (r.dps || 0));
     let displayVal = format(r.sortDps || r.dps || 0), displayLabel = "DPS";
     if (sortMode === 'range') { displayVal = fix1(r.range || 0); displayLabel = "RNG"; }
-    else if (sortMode === 'dps' && r.placement > 1) {
-        displayLabel = (unitId === 'triple_threat' && window.ttBossActive) ? `BOSS TOTAL (x${r.placement})` : `TOTAL (x${r.placement})`;
-    } else if (unitId === 'triple_threat' && window.ttBossActive) {
-        displayLabel = "BOSS DPS";
+    else if (isBossHigher) {
+        displayLabel = `BOSS DPS`;
     }
 
     return `
@@ -180,10 +179,13 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
                     <div class="dps-container">
                         <span class="build-dps">${displayVal}</span>
                         <div style="display:flex; align-items:center; gap:4px; justify-content: flex-end; margin-top: 2px;">
-                            <span class="dps-label" style="margin:0;">${displayLabel}</span>
+                            <span class="dps-label" style="margin:0; ${isBossHigher ? 'color: #fca5a5;' : ''}">${displayLabel}</span>
                             <button class="info-btn" onclick="showMath('${r.id}')">?</button>
                         </div>
-                        ${r.bossDps && r.bossDps !== r.dps ? `<div class="boss-dps-mini" style="font-size: 0.7rem; color: #f87171; font-weight: 700; margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px;"><span style="opacity: 0.6; font-weight: 500;">BOSS:</span> ${format(r.bossDps)}</div>` : ''}
+                        <div class="boss-dps-mini" style="font-size: 0.75rem; color: #94a3b8; font-weight: 700; margin-top: 4px; display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+                            ${isBossHigher ? `<div style="display: flex; gap: 4px; color: #cbd5e1;"><span style="opacity: 0.6; font-weight: 500;">BASE:</span> ${format(r.dps)}</div>` : ''}
+                            ${(!isBossHigher && r.bossDps && r.bossDps !== r.dps) ? `<div style="display: flex; gap: 4px; color: #fca5a5;"><span style="opacity: 0.6; font-weight: 500;">BOSS:</span> ${format(r.bossDps)}</div>` : ''}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -233,6 +235,17 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     if (!card) return;
     const unitObj = window.getUnitById(unitId);
 
+    const activeModeIdx = (window.unitModesState && window.unitModesState[unitId] !== undefined) ? window.unitModesState[unitId] : 0;
+    const systemLevelBar = card.querySelector('.system-level-bar');
+    if (systemLevelBar && unitObj && unitObj.systemLevel) {
+        const cfg = unitObj.systemLevel;
+        let visible = true;
+        if (cfg.restrictModes) {
+            visible = cfg.restrictModes.includes(activeModeIdx);
+        }
+        systemLevelBar.style.setProperty('display', visible ? 'flex' : 'none', 'important');
+    }
+
     const activeType = (window.activeAbilityIds && window.activeAbilityIds.has(unitId) && unitObj && unitObj.ability) ? 'abil' : 'base';
     const activeMode = 'fixed';
     const hasCache = !!(window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0]);
@@ -244,16 +257,19 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     const currentUpgrade = (window.unitELevels && window.unitELevels[unitId]) || 0;
 
-    let unitCost = unitObj ? (unitObj.totalCost || 50000) : 50000;
+    const modeObj = (unitObj && unitObj.modes && unitObj.modes[activeModeIdx]) ? unitObj.modes[activeModeIdx] : null;
+    const upgradesArr = (modeObj && modeObj.upgrades && modeObj.upgrades.length > 0) ? modeObj.upgrades : (unitObj && unitObj.upgrades && unitObj.upgrades.length > 0 ? unitObj.upgrades : null);
 
-    if (unitObj && unitObj.upgrades && unitObj.upgrades.length > 0) {
-        let placementCost = unitObj.upgrades[0].cost || 0;
+    let unitCost = modeObj ? (modeObj.totalCost || (unitObj ? unitObj.totalCost : 50000)) : (unitObj ? (unitObj.totalCost || 50000) : 50000);
+
+    if (upgradesArr) {
+        let placementCost = upgradesArr[0].cost || 0;
 
         if (currentUpgrade > 0) {
             let cumulative = placementCost;
             for (let i = 1; i <= currentUpgrade; i++) {
-                if (unitObj.upgrades[i] && unitObj.upgrades[i].cost) {
-                    cumulative += unitObj.upgrades[i].cost;
+                if (upgradesArr[i] && upgradesArr[i].cost) {
+                    cumulative += upgradesArr[i].cost;
                 }
             }
             unitCost = cumulative;
@@ -383,7 +399,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     res.subStats.finalCm = fullMath.critData ? fullMath.critData.cdmg : 0;
                 }
                 res.dps = res.dps || 0;
-                res.sortDps = (unitId === 'triple_threat' && window.ttBossActive) ? res.bossDps : res.dps;
+                res.sortDps = Math.max(res.dps || 0, res.bossDps || 0);
                 res.baseStats = null;
             } catch (e) {
                 console.warn("Hydration Math Error for", res.id, e);
@@ -678,14 +694,18 @@ window.getQuickScore = (unit) => {
     }
 
     if (score > 0) return score;
+    const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+    const modeObj = (unit.modes && unit.modes[activeMode]) ? unit.modes[activeMode] : null;
+    const upgradesArr = (modeObj && modeObj.upgrades && modeObj.upgrades.length > 0) ? modeObj.upgrades : (unit.upgrades && unit.upgrades.length > 0 ? unit.upgrades : null);
+
     if (window.isUnit(unit.id, 'law')) {
         if (unit.stats.range) return unit.stats.range;
-        if (unit.upgrades && unit.upgrades.length > 0) return unit.upgrades[unit.upgrades.length - 1].range || 0;
+        if (upgradesArr) return upgradesArr[upgradesArr.length - 1].range || 0;
         return 0;
     }
     let d = unit.stats.dmg, s = unit.stats.spa;
-    if ((!d || !s) && unit.upgrades && unit.upgrades.length > 0) {
-        const last = unit.upgrades[unit.upgrades.length - 1];
+    if ((!d || !s) && upgradesArr) {
+        const last = upgradesArr[upgradesArr.length - 1];
         d = d || last.dmg;
         s = s || last.spa;
     }
@@ -792,7 +812,7 @@ window.getLiveScore = (unit) => {
         try {
             const res = window.reconstructMathData(finalScoringEntry);
             if (res) {
-                let score = window.isUnit(unitId, 'law') ? (res.range || 0) : res.total;
+                let score = window.isUnit(unitId, 'law') ? (res.range || 0) : Math.max(res.total || 0, res.bossTotal || 0);
                 if (score > maxScore) maxScore = score;
             }
         } catch (e) {
@@ -829,8 +849,12 @@ window.resortUnitCardsInPlace = function () {
 };
 
 function renderUnitCard(unit, absoluteIndex) {
-    if (window.unitELevels[unit.id] === undefined && unit.upgrades && unit.upgrades.length > 0) {
-        window.unitELevels[unit.id] = unit.upgrades.length - 1;
+    const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+    const modeObj = (unit.modes && unit.modes[activeMode]) ? unit.modes[activeMode] : null;
+    const upgradesArr = (modeObj && modeObj.upgrades && modeObj.upgrades.length > 0) ? modeObj.upgrades : (unit.upgrades && unit.upgrades.length > 0 ? unit.upgrades : null);
+
+    if (window.unitELevels[unit.id] === undefined && upgradesArr) {
+        window.unitELevels[unit.id] = upgradesArr.length - 1;
     }
 
     const abilityObj = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
@@ -845,12 +869,12 @@ function renderUnitCard(unit, absoluteIndex) {
 
     const currentLevel = (window.unitELevels && window.unitELevels[unit.id]) || 0;
     let abilityUnlocked = true;
-    if (unit.upgrades && unit.upgrades.length > 0) {
-        const hasUnlockCondition = unit.upgrades.some(u => u.unlocksAbility);
+    if (upgradesArr) {
+        const hasUnlockCondition = upgradesArr.some(u => u.unlocksAbility);
         if (hasUnlockCondition) {
             abilityUnlocked = false;
             for (let i = 0; i <= currentLevel; i++) {
-                if (unit.upgrades[i] && unit.upgrades[i].unlocksAbility) { abilityUnlocked = true; break; }
+                if (upgradesArr[i] && upgradesArr[i].unlocksAbility) { abilityUnlocked = true; break; }
             }
         }
     }
@@ -956,16 +980,31 @@ function renderUnitCard(unit, absoluteIndex) {
         </div>` : ''}
         ${unit.systemLevel ? (() => {
             const cfg = unit.systemLevel;
+            if (cfg.restrictModes) {
+                const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+                if (!cfg.restrictModes.includes(activeMode)) return '';
+            }
             const currentSysLvl = (window.unitSystemLevels && window.unitSystemLevels[unit.id] !== undefined) ? window.unitSystemLevels[unit.id] : (cfg.default || cfg.max || 100);
             if (window.unitSystemLevels[unit.id] === undefined) window.unitSystemLevels[unit.id] = currentSysLvl;
-            return `<div class="system-level-bar" style="display:flex; align-items:center; gap:8px; padding:4px 15px; background:rgba(99,102,241,0.06); border-bottom:1px solid var(--card-border);">
-                <span style="font-size:0.65rem; font-weight:700; color:#a5b4fc; text-transform:uppercase; letter-spacing:0.5px;">${cfg.label || 'System Level'}</span>
-                <input id="system-level-${unit.id}" type="number" min="${cfg.min || 1}" max="${cfg.max || 100}" value="${currentSysLvl}"
-                    style="width:45px; padding:1px 4px; background:rgba(0,0,0,0.4); border:1px solid rgba(99,102,241,0.3); border-radius:4px; color:#e0e7ff; font-size:0.8rem; font-weight:700; text-align:center;"
-                    onchange="setSystemLevel('${unit.id}', this.value)"
-                    onkeyup="if(event.key==='Enter') setSystemLevel('${unit.id}', this.value)">
-                <span style="font-size:0.65rem; color:rgba(165,180,252,0.4); margin-left: auto;">MAX LV. ${cfg.max || 100}</span>
-            </div>`;
+            if (cfg.controlType === 'slider') {
+                return `<div class="system-level-bar" style="display:flex; align-items:center; gap:12px; padding:6px 15px; background:rgba(99,102,241,0.06); border-bottom:1px solid var(--card-border);">
+                    <span style="font-size:0.65rem; font-weight:700; color:#a5b4fc; text-transform:uppercase; letter-spacing:0.5px; min-width: 55px;">${cfg.label || 'System Level'}</span>
+                    <input id="system-level-${unit.id}" type="range" min="${cfg.min || 1}" max="${cfg.max || 100}" value="${currentSysLvl}"
+                        style="flex:1; height:4px; background:rgba(99,102,241,0.2); border-radius:2px; cursor:pointer; accent-color:#818cf8; outline:none;"
+                        oninput="document.getElementById('sys-lvl-val-${unit.id}').innerText = this.value; setSystemLevel('${unit.id}', this.value)">
+                    <span id="sys-lvl-val-${unit.id}" style="font-size:0.8rem; font-weight:700; color:#e0e7ff; background:rgba(99,102,241,0.3); padding:1px 6px; border-radius:4px; min-width:18px; text-align:center;">${currentSysLvl}</span>
+                    <span style="font-size:0.65rem; color:rgba(165,180,252,0.4);">MAX LV. ${cfg.max || 100}</span>
+                </div>`;
+            } else {
+                return `<div class="system-level-bar" style="display:flex; align-items:center; gap:8px; padding:4px 15px; background:rgba(99,102,241,0.06); border-bottom:1px solid var(--card-border);">
+                    <span style="font-size:0.65rem; font-weight:700; color:#a5b4fc; text-transform:uppercase; letter-spacing:0.5px;">${cfg.label || 'System Level'}</span>
+                    <input id="system-level-${unit.id}" type="number" min="${cfg.min || 1}" max="${cfg.max || 100}" value="${currentSysLvl}"
+                        style="width:45px; padding:1px 4px; background:rgba(0,0,0,0.4); border:1px solid rgba(99,102,241,0.3); border-radius:4px; color:#e0e7ff; font-size:0.8rem; font-weight:700; text-align:center;"
+                        onchange="setSystemLevel('${unit.id}', this.value)"
+                        onkeyup="if(event.key==='Enter') setSystemLevel('${unit.id}', this.value)">
+                    <span style="font-size:0.65rem; color:rgba(165,180,252,0.4); margin-left: auto;">MAX LV. ${cfg.max || 100}</span>
+                </div>`;
+            }
         })() : ''}
         `;
 
@@ -1180,8 +1219,12 @@ window.globalFilterUnits = (term) => {
     // 4. Initialize upgrade levels if needed
     paginatedSortedUnits.forEach(entry => {
         const unit = entry.unit;
-        if (window.unitELevels[unit.id] === undefined && unit.upgrades && unit.upgrades.length > 0) {
-            window.unitELevels[unit.id] = unit.upgrades.length - 1;
+        const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+        const modeObj = (unit.modes && unit.modes[activeMode]) ? unit.modes[activeMode] : null;
+        const upgradesArr = (modeObj && modeObj.upgrades && modeObj.upgrades.length > 0) ? modeObj.upgrades : (unit.upgrades && unit.upgrades.length > 0 ? unit.upgrades : null);
+
+        if (window.unitELevels[unit.id] === undefined && upgradesArr) {
+            window.unitELevels[unit.id] = upgradesArr.length - 1;
         }
     });
 
@@ -1225,8 +1268,8 @@ function openTraitBestList(unitId) {
         } else {
             const current = bestByTrait.get(build.traitName);
             const isRange = (unitId === 'law');
-            const valBuild = isRange ? (build.range || 0) : build.dps;
-            const valCurrent = isRange ? (current.range || 0) : current.dps;
+            const valBuild = isRange ? (build.range || 0) : (build.dps || build.d || 0);
+            const valCurrent = isRange ? (current.range || 0) : (current.dps || current.d || 0);
 
             if (valBuild > valCurrent) {
                 bestByTrait.set(build.traitName, build);
@@ -1234,10 +1277,33 @@ function openTraitBestList(unitId) {
         }
     });
 
-    const sortedTraits = Array.from(bestByTrait.values()).sort((a, b) => {
+    const hydratedBest = Array.from(bestByTrait.values()).map(b => {
+        if (typeof window.reconstructMathData === 'function') {
+            try {
+                const bClone = { ...b };
+                if (!bClone.subStats && bClone.ss) bClone.subStats = bClone.ss;
+                if (!bClone.mainStats && bClone.ms) bClone.mainStats = bClone.ms;
+                if (!bClone.mainStats && (bClone.b !== undefined || bClone.l !== undefined)) {
+                    bClone.mainStats = {
+                        body: (typeof bClone.b === 'string' ? bClone.b : (bClone.b === 1 ? 'dot' : (bClone.b === 2 ? 'cm' : 'dmg'))),
+                        legs: (typeof bClone.l === 'string' ? bClone.l : (bClone.l === 1 ? 'spa' : (bClone.l === 2 ? 'cf' : (bClone.l === 3 ? 'range' : 'dmg'))))
+                    };
+                }
+                const math = window.reconstructMathData(bClone);
+                if (math) {
+                    bClone.bossDps = math.bossTotal || math.bossDps || 0;
+                    bClone.dps = math.total || math.dps || 0;
+                }
+                return bClone;
+            } catch(e) {}
+        }
+        return b;
+    });
+
+    const sortedTraits = hydratedBest.sort((a, b) => {
         const isRange = (unitId === 'law');
-        const valA = isRange ? (a.range || 0) : a.dps;
-        const valB = isRange ? (b.range || 0) : b.dps;
+        const valA = isRange ? (a.range || 0) : Math.max(a.dps || 0, a.bossDps || 0);
+        const valB = isRange ? (b.range || 0) : Math.max(b.dps || 0, b.bossDps || 0);
         return valB - valA;
     });
 
@@ -1292,9 +1358,10 @@ function openTraitBestList(unitId) {
 
     sortedTraits.forEach((b, idx) => {
         const isRange = (unitId === 'law');
-        const val = isRange ? (b.range || 0).toFixed(1) : format(b.dps || 0);
-        const label = isRange ? 'RNG' : 'DPS';
-        const labelClass = isRange ? 'comp-val-rng' : 'comp-val-dps';
+        const isBossHigher = !isRange && (b.bossDps > (b.dps || 0));
+        const val = isRange ? (b.range || 0).toFixed(1) : format(Math.max(b.dps || 0, b.bossDps || 0));
+        const label = isRange ? 'RNG' : (isBossHigher ? 'BOSS DPS' : 'DPS');
+        const labelClass = isRange ? 'comp-val-rng' : (isBossHigher ? 'comp-val-boss' : 'comp-val-dps');
 
         const tObj = getTraitByName(b.traitName, unitId);
         const traitImg = tObj ? `<div class="trait-img-rainbow" style="width: 22px; height: 22px; margin-right: 10px; flex-shrink: 0;"><img src="images/traits/${tObj.name}.png" onerror="this.parentElement.style.display='none'"></div>` : '';
@@ -1325,8 +1392,8 @@ function openTraitBestList(unitId) {
                 <div class="text-xs" style="margin-top: 2px; color: rgba(255,255,255,0.4);">Prio: <span class="text-custom" style="font-weight: 600;">${b.prio.toUpperCase()}</span></div>
             </td>
             <td style="vertical-align: middle; text-align: right; padding: 10px 5px;">
-                <div class="comp-highlight" style="font-weight: 800; font-size: 1rem;">${val} <span class="comp-val-label ${labelClass}">${label}</span></div>
-                ${b.bossDps && b.bossDps !== b.dps ? `<div style="font-size: 0.7rem; color: #f87171; font-weight: 700; margin-top: 2px;">${format(b.bossDps)} <span style="opacity: 0.6; font-size: 0.6rem;">BOSS</span></div>` : ''}
+                <div class="comp-highlight" style="font-weight: 800; font-size: 1rem; ${isBossHigher ? 'color: #fca5a5;' : ''}">${val} <span class="comp-val-label ${labelClass}" style="${isBossHigher ? 'color: #f87171;' : ''}">${label}</span></div>
+                ${isBossHigher ? `<div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; margin-top: 2px;">${format(b.dps)} <span style="opacity: 0.6; font-size: 0.6rem;">BASE</span></div>` : ''}
             </td>
         </tr>`;
     });

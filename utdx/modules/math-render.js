@@ -68,10 +68,11 @@ function renderBuffSummarySection(data) {
                 <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">TRAIT BONUS</span>
                 <b class="text-custom" style="font-size: 0.7rem;">${fmt.pct(data.traitBuffs.dmg)}</b>
             </div>
+            ${(!(window.getUnitById(data.baseStats.id)?.noPoints)) ? `
             <div class="math-row" style="margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 3px;">
                 <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">STAT POINTS</span>
                 <b class="text-white" style="font-size: 0.7rem;">${fmt.pct(statPointsPct)}</b>
-            </div>
+            </div>` : ''}
             <div class="math-row" style="margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 3px;">
                 <span style="font-size: 0.55rem; font-weight: 700; opacity: 0.6; letter-spacing: 0.5px;">ADDITIVE BUCKET</span>
                 <b class="mt-text-gold" style="font-size: 0.7rem;">${fmt.pct(data.totalAdditivePct)}</b>
@@ -831,7 +832,7 @@ function renderMathContent(data, isSplit = false) {
 
     let headDotRow = '';
 
-    const statPointsHtml = (data.dmgPoints !== undefined) ? `
+    const statPointsHtml = (data.dmgPoints !== undefined && !(window.getUnitById(data.baseStats.id)?.noPoints)) ? `
     <tr>
         <td class="mt-cell-label">Stat Points (Dmg) <button class="calc-info-btn" onclick="openInfoPopup('level_scale')">?</button></td>
         <td class="mt-cell-formula">x${fmt.fix(data.lvStats.dmgMult, 2)}</td>
@@ -1155,6 +1156,12 @@ function renderFinalSection(data) {
                         <td class="mt-cell-formula"></td>
                         <td class="mt-cell-val mt-text-gold mt-pt-md" style="font-size: 1.2rem;">${fmt.num(data.total)}</td>
                     </tr>
+                    ${(data.bossTotal && data.bossTotal > data.total) ? `
+                    <tr>
+                        <td class="mt-cell-label text-accent-start mt-pt-sm" style="font-size: 0.95rem; font-weight: 700;">↳ Boss Target DPS</td>
+                        <td class="mt-cell-formula mt-pt-sm"><span class="op">×</span>${fmt.fix(data.bossTotal / data.total, 2)}</td>
+                        <td class="mt-cell-val text-accent-start mt-pt-sm" style="font-size: 1.1rem; font-weight: 800;">${fmt.num(data.bossTotal)}</td>
+                    </tr>` : ''}
                 </table>
             </div>`;
 }

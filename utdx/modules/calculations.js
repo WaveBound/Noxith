@@ -161,14 +161,27 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
         }
     }
 
+    const state = (window.unitModesState && window.unitModesState[unit.id]);
+    const activeMode = unit.allowMultipleModes ? 0 : ((state !== undefined) ? state : 0);
+    const modeObj = (unit.modes && unit.modes[activeMode]) ? unit.modes[activeMode] : null;
+    
+    // Apply mode-specific stat overrides (like spaCap)
+    if (modeObj && modeObj.stats) {
+        for (let key in modeObj.stats) {
+            effectiveStats[key] = modeObj.stats[key];
+        }
+    }
+    
+    const upgradesArr = (modeObj && modeObj.upgrades && modeObj.upgrades.length > 0) ? modeObj.upgrades : (unit.upgrades && unit.upgrades.length > 0 ? unit.upgrades : null);
+
     // --- APPLY UPGRADE STATS (Dmg/Spa/Range) ---
     // Use the forced level if provided, otherwise the selected level from window.unitELevels, else default to MAX
     const upgradeLevel = (forcedLevel !== undefined) ? forcedLevel : ((window.unitELevels && window.unitELevels[unit.id] !== undefined)
         ? window.unitELevels[unit.id]
-        : ((unit.upgrades && unit.upgrades.length > 0) ? unit.upgrades.length - 1 : 0));
+        : (upgradesArr ? upgradesArr.length - 1 : 0));
 
-    if (unit.upgrades && unit.upgrades[upgradeLevel]) {
-        const upStats = unit.upgrades[upgradeLevel];
+    if (upgradesArr && upgradesArr[upgradeLevel]) {
+        const upStats = upgradesArr[upgradeLevel];
         if (upStats.dmg) effectiveStats.dmg = upStats.dmg;
         if (upStats.spa) effectiveStats.spa = upStats.spa;
         if (upStats.range) effectiveStats.range = upStats.range;
@@ -261,54 +274,85 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     // --- SYSTEM LEVEL SUPPORT (e.g. Jinoo's "The System") ---
     if (unit.systemLevel) {
         const cfg = unit.systemLevel;
-        const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels[unit.id] !== undefined)
-            ? window.unitSystemLevels[unit.id]
-            : (cfg.default || cfg.max || 100);
-
-        // Apply per-level bonuses
-        if (cfg.perLevel) {
-            if (cfg.perLevel.passiveDmg) {
-                const passiveName = cfg.passiveName || 'System Level';
-                // Find or create the passive to attribute stats
-                if (!effectiveStats.passives) effectiveStats.passives = [];
-                else effectiveStats.passives = [...effectiveStats.passives];
-                const existing = effectiveStats.passives.find(p => p.name === passiveName);
-                if (existing) {
-                    const idx = effectiveStats.passives.indexOf(existing);
-                    effectiveStats.passives[idx] = { ...existing, passiveDmg: (existing.passiveDmg || 0) + cfg.perLevel.passiveDmg * sysLvl };
-                } else {
-                    effectiveStats.passives.push({ name: passiveName, passiveDmg: cfg.perLevel.passiveDmg * sysLvl });
-                }
-            }
+        let activeModeIdx = 0;
+        if (unit.modes && Array.isArray(unit.modes)) {
+            const state = (typeof window !== 'undefined' && window.unitModesState && window.unitModesState[unit.id]);
+            activeModeIdx = (state !== undefined) ? state : 0;
         }
+        if (!cfg.restrictModes || cfg.restrictModes.includes(activeModeIdx)) {
+            const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels[unit.id] !== undefined)
+                ? window.unitSystemLevels[unit.id]
+                : (cfg.default || cfg.max || 100);
 
-        // Apply threshold bonuses
-        if (cfg.thresholds) {
-            cfg.thresholds.forEach(t => {
-                if (sysLvl >= t.level) {
+            if (unit.id === 'joyful_captain' && cfg.passiveName === 'Charge') {
+                const passiveName = 'Charge';
+                if (!effectiveStats.passives) effectiveStats.passives = [];
+                else if (!Array.isArray(effectiveStats.passives)) effectiveStats.passives = [...effectiveStats.passives];
+                effectiveStats.passives = effectiveStats.passives.filter(p => p.name !== passiveName);
+                
+                // Uncapped SPA is exactly equal to the charge slider level (sysLvl)
+                // Capped SPA is Math.max(sysLvl, 3)
+                const computedSpa = Math.max(Number(sysLvl), 3);
+                const passiveSpa = 0; // Handled absolutely below
+                const passiveDmg = 15 * computedSpa;
+                
+                effectiveStats.passives.push({
+                    name: passiveName,
+                    passiveSpa: passiveSpa,
+                    passiveDmg: passiveDmg
+                });
+            } else {
+                // Apply per-level bonuses
+                if (cfg.perLevel) {
                     const passiveName = cfg.passiveName || 'System Level';
                     if (!effectiveStats.passives) effectiveStats.passives = [];
-                    else if (!Array.isArray(effectiveStats.passives)) effectiveStats.passives = [...effectiveStats.passives];
+                    else effectiveStats.passives = [...effectiveStats.passives];
+
                     const existing = effectiveStats.passives.find(p => p.name === passiveName);
+                    let updated = existing ? { ...existing } : { name: passiveName };
+
+                    for (let statKey in cfg.perLevel) {
+                        const val = cfg.perLevel[statKey] * sysLvl;
+                        updated[statKey] = (updated[statKey] || 0) + val;
+                    }
+
                     if (existing) {
                         const idx = effectiveStats.passives.indexOf(existing);
-                        const updated = { ...effectiveStats.passives[idx] };
-                        if (t.passiveSpa) updated.passiveSpa = (updated.passiveSpa || 0) + t.passiveSpa;
-                        if (t.passiveDmg) updated.passiveDmg = (updated.passiveDmg || 0) + t.passiveDmg;
                         effectiveStats.passives[idx] = updated;
                     } else {
-                        const newP = { name: passiveName };
-                        if (t.passiveSpa) newP.passiveSpa = t.passiveSpa;
-                        if (t.passiveDmg) newP.passiveDmg = t.passiveDmg;
-                        effectiveStats.passives.push(newP);
+                        effectiveStats.passives.push(updated);
                     }
                 }
-            });
+
+                // Apply threshold bonuses
+                if (cfg.thresholds) {
+                    cfg.thresholds.forEach(t => {
+                        if (sysLvl >= t.level) {
+                            const passiveName = cfg.passiveName || 'System Level';
+                            if (!effectiveStats.passives) effectiveStats.passives = [];
+                            else if (!Array.isArray(effectiveStats.passives)) effectiveStats.passives = [...effectiveStats.passives];
+                            const existing = effectiveStats.passives.find(p => p.name === passiveName);
+                            if (existing) {
+                                const idx = effectiveStats.passives.indexOf(existing);
+                                const updated = { ...effectiveStats.passives[idx] };
+                                if (t.passiveSpa) updated.passiveSpa = (updated.passiveSpa || 0) + t.passiveSpa;
+                                if (t.passiveDmg) updated.passiveDmg = (updated.passiveDmg || 0) + t.passiveDmg;
+                                effectiveStats.passives[idx] = updated;
+                            } else {
+                                const newP = { name: passiveName };
+                                if (t.passiveSpa) newP.passiveSpa = t.passiveSpa;
+                                if (t.passiveDmg) newP.passiveDmg = t.passiveDmg;
+                                effectiveStats.passives.push(newP);
+                            }
+                        }
+                    });
+                }
+            }
         }
     }
 
     // Requirement: Points = (Level - 1) + 30
-    const maxPts = ((unit.level || 1) - 1) + 30;
+    const maxPts = unit.noPoints ? 0 : (((unit.level || 1) - 1) + 30);
     options.dmgPoints = Math.min(options.dmgPoints || 0, maxPts);
     options.spaPoints = Math.min(options.spaPoints || 0, maxPts);
     options.rangePoints = Math.min(options.rangePoints || 0, maxPts);
@@ -357,6 +401,22 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
                     if (targetKey === 'passivecrit') modePassiveObj.passiveCrit = modeData[key];
                     if (targetKey === 'passivecdmg') modePassiveObj.passiveCdmg = modeData[key];
                     if (targetKey === 'truedmg') modePassiveObj.trueDmg = modeData[key];
+                    continue;
+                }
+
+                if (targetKey === 'passives') {
+                    if (!effectiveStats.passives) effectiveStats.passives = [];
+                    else effectiveStats.passives = [...effectiveStats.passives];
+
+                    modeData[key].forEach(p => {
+                        const existing = effectiveStats.passives.find(ep => ep.name === p.name);
+                        if (existing) {
+                            const idx = effectiveStats.passives.indexOf(existing);
+                            effectiveStats.passives[idx] = { ...existing, ...p };
+                        } else {
+                            effectiveStats.passives.push(p);
+                        }
+                    });
                     continue;
                 }
 
@@ -1162,7 +1222,17 @@ function calculateDPS(uStats, relicStats, context) {
 
     const spaAfterRelic = lvStats.spa * (1 - traitSpaPct / 100) * (1 - baseR_Spa / 100);
     const rawFinalSpa = spaAfterRelic * (1 - setAndPassiveSpa / 100);
-    const finalSpa = Math.max(rawFinalSpa, effectiveSpaCap);
+    let finalSpa = Math.max(rawFinalSpa, effectiveSpaCap);
+
+    if (uStats.id === 'joyful_captain') {
+        const activeModeIdx = (typeof window !== 'undefined' && window.unitModesState && window.unitModesState['joyful_captain'] !== undefined) ? window.unitModesState['joyful_captain'] : 0;
+        if (activeModeIdx === 0 || activeModeIdx === 1) {
+            const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels['joyful_captain'] !== undefined) ? window.unitSystemLevels['joyful_captain'] : 10;
+            // The uncapped SPA is exactly equal to sysLvl (1 to 10).
+            // Capped SPA is Math.max(sysLvl, effectiveSpaCap) where effectiveSpaCap is 3!
+            finalSpa = Math.max(Number(sysLvl), effectiveSpaCap);
+        }
+    }
 
     const { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc } = _calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicStats, context);
 

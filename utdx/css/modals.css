@@ -2190,3 +2190,32 @@
 .unit-ancient_mage .mode-card-large {
     margin: 0 !important;
 }
+
+/* --- JOYFUL CAPTAIN SPECIFIC OVERRIDES (6 MODES) --- */
+.unit-joyful_captain {
+    gap: 15px !important;
+}
+
+.unit-joyful_captain .mode-card-large {
+    margin: 0 !important;
+}
+
+.unit-joyful_captain .mode-img-container-large {
+    width: 220px;
+    height: 320px;
+}
+
+.unit-joyful_captain .mode-card-info {
+    width: 200px;
+    padding: 15px;
+    bottom: 20px;
+}
+
+.unit-joyful_captain .mode-card-name {
+    font-size: 0.95rem;
+    margin-bottom: 5px;
+}
+
+.unit-joyful_captain .mode-card-desc {
+    font-size: 0.8rem;
+}

@@ -176,7 +176,7 @@ function openCalc(unitId) {
     const sP = document.getElementById('calcSpaPoints');
     const rP = document.getElementById('calcRangePoints');
     
-    const calcPts = ((unit.level || 1) - 1) + 30;
+    const calcPts = unit.noPoints ? 0 : (((unit.level || 1) - 1) + 30);
     dP.max = calcPts;
     sP.max = calcPts;
     rP.max = calcPts;
@@ -184,6 +184,10 @@ function openCalc(unitId) {
     dP.value = 0;
     sP.value = 0;
     rP.value = 0; 
+
+    dP.disabled = !!unit.noPoints;
+    sP.disabled = !!unit.noPoints;
+    rP.disabled = !!unit.noPoints;
     document.getElementById('calcRankDmg').value = 20;
     document.getElementById('calcRankSpa').value = 8;
     document.getElementById('calcRankRange').value = 20;

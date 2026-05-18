@@ -302,8 +302,12 @@ function openUnitInfo(unitId) {
     if (s.trueDmg) innateStatsHtml += `<li><span>True Dmg:</span> <span class="text-white">+${s.trueDmg}%</span></li>`;
     if (s.hyper) innateStatsHtml += `<li><span>Hyper Dmg:</span> <span class="text-white">+${s.hyper}%</span></li>`;
 
-    if (unit.passives && Array.isArray(unit.passives)) {
-        passivesHtml = unit.passives.map(p => {
+    const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+    const modeObj = (unit.modes && unit.modes[activeMode]) ? unit.modes[activeMode] : null;
+    const passivesSource = (modeObj && modeObj.passives) ? modeObj.passives : unit.passives;
+
+    if (passivesSource && Array.isArray(passivesSource)) {
+        passivesHtml = passivesSource.map(p => {
             let desc = p.desc;
 
             return `<li class="info-passive-item"><strong class="text-white">${p.name}:</strong> <span class="info-passive-desc">${desc}</span></li>`;
@@ -369,7 +373,7 @@ function openUnitInfo(unitId) {
                 <div class="info-sec-title">Unit Discovery</div>
                 <ul class="info-list">
                     <li><span>Level:</span> <span class="text-white">${unit.level || 1}</span></li>
-                    <li><span>Total Stat Points:</span> <span class="text-gold">${((unit.level || 1) - 1) + 30}</span></li>
+                    ${unit.noPoints ? '' : `<li><span>Total Stat Points:</span> <span class="text-gold">${((unit.level || 1) - 1) + 30}</span></li>`}
                     <li><span>Role:</span> <span>${unit.role}</span></li>
                     <li><span>Placement Type:</span> <span class="${unit.placementType === 'Hill' ? 'text-gold' : (unit.placementType === 'Hybrid' ? 'text-white' : 'text-custom')}">${unit.placementType || 'Ground'}</span></li>
                     <li><span>Element:</span> <span class="text-custom">${unit.stats.element}</span></li>
@@ -388,9 +392,19 @@ function openUnitInfo(unitId) {
             <div class="info-section section-stats">
                 <div class="info-sec-title">Maximum Statistics (Lv 1)</div>
                 <ul class="info-list">
-                    <li><span>Damage:</span> <span class="text-white">${(unit.stats.dmg || (unit.upgrades && unit.upgrades.length > 0 ? unit.upgrades[unit.upgrades.length - 1].dmg : 0)).toLocaleString()}</span></li>
-                    <li><span>SPA:</span> <span class="text-white">${unit.stats.spa || (unit.upgrades && unit.upgrades.length > 0 ? unit.upgrades[unit.upgrades.length - 1].spa : 0)}s</span></li>
-                    <li><span>Range:</span> <span class="text-white">${unit.stats.range || (unit.upgrades && unit.upgrades.length > 0 ? unit.upgrades[unit.upgrades.length - 1].range : 0)}</span></li>
+                    ${(() => {
+                        const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+                        const modeObj = (unit.modes && unit.modes[activeMode]) ? unit.modes[activeMode] : null;
+                        const upgradesArr = (modeObj && modeObj.upgrades && modeObj.upgrades.length > 0) ? modeObj.upgrades : (unit.upgrades && unit.upgrades.length > 0 ? unit.upgrades : null);
+                        const finalDmg = unit.stats.dmg || (upgradesArr ? (upgradesArr[upgradesArr.length - 1].dmg || 0) : 0);
+                        const finalSpa = unit.stats.spa || (upgradesArr ? (upgradesArr[upgradesArr.length - 1].spa || 0) : 0);
+                        const finalRange = unit.stats.range || (upgradesArr ? (upgradesArr[upgradesArr.length - 1].range || 0) : 0);
+                        return `
+                            <li><span>Damage:</span> <span class="text-white">${finalDmg.toLocaleString()}</span></li>
+                            <li><span>SPA:</span> <span class="text-white">${finalSpa}s</span></li>
+                            <li><span>Range:</span> <span class="text-white">${finalRange}</span></li>
+                        `;
+                    })()}
                     <li><span>Animation Cap:</span> <span class="text-white">${unit.stats.spaCap}s</span></li>
                 </ul>
             </div>
