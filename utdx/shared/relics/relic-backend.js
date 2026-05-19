@@ -194,13 +194,19 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
     } else if (headPiece === 'junior') {
         headDmgBase = 0; headCalc.type = 'junior'; headCalc.multiplier = 1.1;
     } else if (headPiece === 'biju_head') {
-        if (uStats.id && (uStats.id.includes('sasuke') || (uStats._fileName && uStats._fileName.includes('sasuke')))) {
+        const isSasuke = uStats.id && (uStats.id.includes('sasuke') || (uStats._fileName && uStats._fileName.includes('sasuke')));
+        const isTripleThreat = uStats.id && (uStats.id.includes('triple_threat') || (uStats._fileName && uStats._fileName.includes('triple_threat')));
+        if (isSasuke) {
             headCalc.attacks = 3;
             headCalc.duration = 10;
             const timeToTrigger = headCalc.attacks * finalSpa;
             headCalc.uptime = Math.min(1, headCalc.duration / timeToTrigger);
             headCalc.trigger = timeToTrigger;
             headDmgPassive = 70 * headCalc.uptime;
+            headCalc.type = 'biju';
+        } else if (isTripleThreat) {
+            headCalc.uptime = 1;
+            headDmgPassive = 70;
             headCalc.type = 'biju';
         }
     } else if (headPiece === 'reanimated_head') {

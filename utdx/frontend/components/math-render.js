@@ -914,6 +914,37 @@ function renderMathContent(data, isSplit = false) {
         </td></tr>`;
     }
 
+    // Biju Passive
+    if (data.headBuffs && data.headBuffs.type === 'biju') {
+        const uptimePct = (data.headBuffs.uptime || 0);
+        headDmgHtml += `
+        <tr class="mt-row-sungod"><td colspan="3" class="p-2">
+            <div class="mt-flex-between mb-2">
+                <span class="text-gold mt-text-bold text-xs tracking-sm">BIJU PASSIVE</span>
+                <button class="calc-info-btn" onclick="openInfoPopup('biju_passive')">?</button>
+            </div>
+            ${data.baseStats.id !== 'triple_threat' ? `
+            <div class="mt-flex-between text-xs text-white mb-1">
+                <span class="opacity-70">Trigger:</span>
+                <span class="mt-font-mono mt-text-right text-white">Every 3rd Attack (${fmt.fix(data.headBuffs.trigger, 1)}s)</span>
+            </div>
+            <div class="mt-flex-between text-xs text-white mb-3">
+                <span class="opacity-70">Uptime:</span>
+                <span class="mt-font-mono mt-text-right ${uptimePct >= 1 ? 'mt-text-green' : 'mt-text-orange'}">${fmt.fix(uptimePct * 100, 1)}%</span>
+            </div>
+            ` : `
+            <div class="mt-flex-between text-xs text-white mb-3">
+                <span class="opacity-70">Status:</span>
+                <span class="mt-font-mono mt-text-right mt-text-green">Always Active (Triple Threat)</span>
+            </div>
+            `}
+            <div class="mt-flex-between mt-border-top mt-pt-sm">
+                <span class="text-white text-xs text-bold">Avg Damage Buff</span>
+                <span class="text-gold text-sm mt-text-bold"> +${fmt.fix(data.headBuffs.dmg, 1)}%</span>
+            </div>
+        </td></tr>`;
+    }
+
     let headDotRow = '';
 
     const statPointsHtml = (data.dmgPoints !== undefined && !(window.getUnitById(data.baseStats.id)?.noPoints)) ? `
