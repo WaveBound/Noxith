@@ -142,8 +142,25 @@ function calculateDPS(uStats, relicStats, context) {
         if (estCritRate > 0) {
             const attacksToCrit = Math.max(1, 1 / (estCritRate / 100));
             const timeToTrigger = attacksToCrit * finalSpa;
-            const cycleTime = timeToTrigger + 20 + 10;
-            const uptime = 20 / cycleTime;
+            const p = estCritRate / 100;
+            const N = 10 / finalSpa;
+            const pFail = Math.pow(1 - p, N);
+            const refreshChance = 1 - pFail;
+
+            let uptime, cycleTime, expectedActive, expectedUnbuffed;
+            if (pFail === 0) {
+                uptime = 1;
+                cycleTime = 10 + finalSpa;
+                expectedActive = cycleTime;
+                expectedUnbuffed = 0;
+            } else {
+                const subCycleActive = 10 + timeToTrigger * (1 - pFail);
+                expectedActive = subCycleActive / pFail;
+                expectedUnbuffed = timeToTrigger;
+                cycleTime = expectedActive + expectedUnbuffed;
+                uptime = expectedActive / cycleTime;
+            }
+
             const warlordDmg = 45 * uptime;
             additiveTotal += warlordDmg;
             setPerkDmg += warlordDmg; // Add to UI display
@@ -151,6 +168,7 @@ function calculateDPS(uStats, relicStats, context) {
                 critRate: estCritRate,
                 attacksToCrit,
                 timeToTrigger,
+                refreshChance,
                 cycleTime,
                 uptime,
                 dmg: warlordDmg

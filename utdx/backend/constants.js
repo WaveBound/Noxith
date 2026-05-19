@@ -126,8 +126,8 @@ const infoDefinitions = {
     },
     'warlord_passive': {
         title: "Warlord Set Passive",
-        formula: `<span class="ip-var">Cycle</span> = <span class="ip-var">Time to Crit</span> + <span class="ip-num">20s</span> (Active) + <span class="ip-num">10s</span> (Cooldown)`,
-        desc: "Landing a critical hit grants a +45% Damage buff for 20 seconds, followed by a 10 second cooldown after it ends.<br><br><b>Uptime:</b> Calculated dynamically based on your final Speed (SPA) and Crit Rate. High crit rate and speed minimize the 'Time to Crit' delay, pushing uptime close to the maximum theoretical limit of 66.7%."
+        formula: `<span class="ip-var">Cycle</span> = <span class="ip-var">Active</span> + <span class="ip-var">Unbuffed</span>`,
+        desc: "Landing a critical hit grants a +45% Damage buff for 20 seconds. The 10s cooldown begins immediately upon proccing.<br><br><b>Refresh Mechanic:</b> During the final 10 seconds of the buff (after cooldown ends), landing another critical hit resets the buff duration back to 20 seconds. High crit rate and speed allow continuous refreshes, pushing uptime towards 100%."
     },
     'ninja_passive': {
         title: "Junior Ninja Head Passive",
