@@ -9,7 +9,7 @@ unitDatabase.push({
     tags: ["Main Character", "Pirate Crew", "Warlord", "Piece", "Hero"],
     meta: {
         short: "Ruler",
-        long: "Duelust",
+        long: "Duelist",
         note: "Unit has 6 distinct modes with separate stats."
     },
     totalCost: 100000,
