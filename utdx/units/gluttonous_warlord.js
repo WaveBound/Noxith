@@ -9,9 +9,9 @@ unitDatabase.push({
     tags: ["Villain", "Piece", "Warlord"],
 
     meta: {
-        short: "",
-        long: "",
-        note: ""
+        short: "Ruler",
+        long: "Ruler",
+        note: "Standared Dps Selection"
     },
 
     totalCost: 79000,
