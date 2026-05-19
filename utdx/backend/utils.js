@@ -208,10 +208,10 @@ function getTraitByName(traitName, unitId = null) {
     // 4. Dynamic Reconstruction (Fix for Static DB / Missing Custom Traits)
     if (traitName.includes(' + ')) {
         const parts = traitName.split(' + ');
-        if (parts.length === 2 && typeof combineTraits === 'function') {
+        if (parts.length === 2 && typeof window.combineTraits === 'function') {
             const t1 = getTraitByName(parts[0], unitId);
             const t2 = getTraitByName(parts[1], unitId);
-            if (t1 && t2) return combineTraits(t1, t2);
+            if (t1 && t2) return window.combineTraits(t1, t2);
         }
     }
 

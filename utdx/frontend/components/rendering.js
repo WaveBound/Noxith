@@ -27,7 +27,9 @@ const HEAD_CONFIG = {
     'sorcerer_hunter_spirit': { name: 'S.H. Spirit', search: 'S. Hunter', cls: 'custom' },
     'strongest_sorcerer_glasses': { name: 'Strongest', search: 'Strongest', cls: 'custom' },
     'monarch': { name: 'Monarch Cape', search: 'Monarch', cls: 'custom' },
-    'warlord_hat': { name: 'Warlord Hat', search: 'Warlord', cls: 'custom' }
+    'warlord_hat': { name: 'Warlord Hat', search: 'Warlord', cls: 'custom' },
+    'mochi_scarf': { name: 'Mochi Scarf', search: 'Mochi', cls: 'custom' },
+    'flaming_donut': { name: 'Flaming Donut', search: 'Flaming Donut', cls: 'custom' }
 };
 
 // Config for Custom Ability Buttons
@@ -316,7 +318,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     null,
                     null, // No filter
                     ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'],
-                    ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat'],
+                    ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'],
                     true,
                     null,
                     activeType === 'abil',
@@ -371,7 +373,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 spa: r.sp || r.spa || 0,
                 range: r.ra || r.range || 0,
                 prio: r.p || r.prio || 'dmg',
-                headUsed: (typeof r.h === 'number' ? (['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat'][r.h]) : (r.headUsed || r.h)) || 'none',
+                headUsed: (typeof r.h === 'number' ? (['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'][r.h]) : (r.headUsed || r.h)) || 'none',
                 isCustom: !!(r.c || r.isCustom),
                 subStats: r.ss || r.subStats || {},
                 mainStats: r.ms || r.mainStats || {
@@ -391,7 +393,12 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     res.spa = fullMath.spa;
                     res.range = fullMath.range;
                     res.dot = fullMath.dot;
-                    res.dotTotal = fullMath.dotData ? (fullMath.dotData.nativeTotalDmg + (fullMath.dotData.radTotalDmg || 0)) : 0;
+                    res.dotTotal = fullMath.dotData ? (
+                        (fullMath.dotData.nativeTotalDmg || 0) + 
+                        (fullMath.dotData.radTotalDmg || 0) + 
+                        (fullMath.dotData.fuaDotTotalDmg || 0) + 
+                        (fullMath.dotData.scarfBurnTotalDmg || 0)
+                    ) : 0;
                     res.placement = fullMath.placement;
                     res.detailedBuffs = fullMath.detailedBuffs;
                     if (!res.subStats) res.subStats = {};
@@ -617,7 +624,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                             null,
                             singleBuilds,
                             window.getValidSubCandidates(),
-                            cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat'] : ['none'],
+                            cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'] : ['none'],
                             cfg.subs,
                             traitArr,
                             useAbility,
@@ -642,7 +649,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                 ? [...(typeof customTraits !== 'undefined' ? customTraits : []), ...(unitSpecificTraits[unit.id] || [])]
                 : null;
 
-            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
+            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'] : ['none'], cfg.subs, traitsForCalc, useAbility, mode);
 
             if (dynamicResults.length > 0) {
                 const seen = new Set(calculatedResults.map(r => r.id));
@@ -686,8 +693,9 @@ window.getQuickScore = (unit) => {
     }
 
     let score = 0;
-    if (window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[dbKey]) {
-        const list = window.STATIC_BUILD_DB[dbKey]['fixed'][0];
+    const activeDb = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : window.STATIC_BUILD_DB;
+    if (activeDb && activeDb[dbKey]) {
+        const list = activeDb[dbKey]['fixed'][0];
         if (list && list.length > 0) {
             score = window.isUnit(unit.id, 'law') ? (list[0].range || 0) : list[0].dps;
         }
@@ -714,6 +722,14 @@ window.getQuickScore = (unit) => {
 
 window.getLiveScore = (unit) => {
     let unitId = unit.id;
+
+    if (window.CALCULATION_MODE === 'loadout') {
+        const currentBuild = window.hotbarFilteredBuilds && window.hotbarFilteredBuilds[unitId];
+        if (currentBuild) {
+            return window.isUnit(unitId, 'law') ? (currentBuild.range || 0) : (currentBuild.dps || 0);
+        }
+        return window.getQuickScore ? window.getQuickScore(unit) : 0;
+    }
 
     window.LIVE_SCORE_CACHE = window.LIVE_SCORE_CACHE || {};
     const currentTrait = (window.unitTraits && window.unitTraits[unitId]);
@@ -945,6 +961,7 @@ function renderUnitCard(unit, absoluteIndex) {
                         <option value="Strongest Sorcerer">Sets: Strongest</option>
                         <option value="Monarch">Sets: Monarch</option>
                         <option value="Warlord">Sets: Warlord</option>
+                        <option value="Mochi">Sets: Mochi</option>
                     </select>
                     <select onchange="filterList(this)" data-filter="head" class="search-select">
                         <option value="all">Heads: All</option>
@@ -960,6 +977,8 @@ function renderUnitCard(unit, absoluteIndex) {
                         <option value="strongest_sorcerer_glasses">Heads: Strongest Glasses</option>
                         <option value="monarch">Heads: Monarch Cape</option>
                         <option value="warlord_hat">Heads: Warlord Hat</option>
+                        <option value="mochi_scarf">Heads: Mochi Scarf</option>
+                        <option value="flaming_donut">Heads: Flaming Donut</option>
                         <option value="none">Heads: None</option>
                     </select>
                 </div>
@@ -1340,9 +1359,10 @@ function openTraitBestList(unitId) {
         <thead>
             <tr>
                 <th style="width: 8%; text-align: center;">#</th>
-                <th style="width: 30%">Trait</th>
-                <th style="width: 42%">Best Setup</th>
+                <th style="width: 25%">Trait</th>
+                <th style="width: 32%">Best Setup</th>
                 <th style="width: 20%; text-align: right;">Potential</th>
+                <th style="width: 15%; text-align: center;">Action</th>
             </tr>
         </thead>
         <tbody>`;
@@ -1379,6 +1399,11 @@ function openTraitBestList(unitId) {
         else if (idx === 1) rankStyle = 'color: #e2e8f0; font-weight: 800; font-size: 1.1em;';
         else if (idx === 2) rankStyle = 'color: #b45309; font-weight: 800; font-size: 1.1em;';
 
+        const isCurrentlyEquipped = (window.unitTraits && window.unitTraits[unitId] === b.traitName) || (!window.unitTraits?.[unitId] && idx === 0);
+        const actionBtn = isCurrentlyEquipped
+            ? `<span style="color: #10b981; font-weight: bold; font-size: 0.75rem;">ACTIVE</span>`
+            : `<button class="calc-btn ut-btn-compact" onclick="window.applyUnitTrait('${unitId}', '${b.traitName}')" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #10b981; color: white; padding: 4px 10px; font-size: 0.75rem; font-weight: bold; border-radius: 4px; cursor: pointer; transition: all 0.2s;">SELECT</button>`;
+
         html += `<tr style="${rowStyle}">
             <td style="text-align: center; vertical-align: middle; padding: 10px 5px;"><span style="${rankStyle}">#${idx + 1}</span></td>
             <td style="vertical-align: middle; padding: 10px 5px;">
@@ -1395,6 +1420,9 @@ function openTraitBestList(unitId) {
                 <div class="comp-highlight" style="font-weight: 800; font-size: 1rem; ${isBossHigher ? 'color: #fca5a5;' : ''}">${val} <span class="comp-val-label ${labelClass}" style="${isBossHigher ? 'color: #f87171;' : ''}">${label}</span></div>
                 ${isBossHigher ? `<div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; margin-top: 2px;">${format(b.dps)} <span style="opacity: 0.6; font-size: 0.6rem;">BASE</span></div>` : ''}
             </td>
+            <td style="vertical-align: middle; text-align: center; padding: 10px 5px;">
+                ${actionBtn}
+            </td>
         </tr>`;
     });
 
@@ -1402,8 +1430,124 @@ function openTraitBestList(unitId) {
     showUniversalModal({ title: `<span class="text-gold">TRAIT LEADERBOARD</span>`, content: html, size: 'modal-lg' });
 }
 
+window.applyUnitTrait = function(unitId, traitName) {
+    window.unitTraits = window.unitTraits || {};
+    window.unitTraits[unitId] = traitName;
+    
+    // Clear ONLY the hotbarFilteredBuilds entry so precalculateAllLoadoutBuilds
+    // writes a fresh hydrated build for the newly selected trait.
+    // We preserve unitBuildsCache — it contains the full set of pre-calculated builds
+    // across all traits that we need to search through.
+    if (window.hotbarFilteredBuilds) {
+        delete window.hotbarFilteredBuilds[unitId];
+    }
+    // Also clear the live score cache for this unit so the card re-sorts correctly
+    if (window.LIVE_SCORE_CACHE) {
+        Object.keys(window.LIVE_SCORE_CACHE).forEach(k => {
+            if (k.startsWith(unitId)) delete window.LIVE_SCORE_CACHE[k];
+        });
+    }
+    
+    // Re-hydrate hotbarFilteredBuilds[unitId] with the selected trait's best build
+    if (typeof window.precalculateAllLoadoutBuilds === 'function') {
+        window.precalculateAllLoadoutBuilds();
+    }
+    
+    // Refresh the hotbar slot stats overlay (reads from hotbarFilteredBuilds)
+    if (typeof window.updateHotbarUI === 'function') {
+        window.updateHotbarUI();
+    }
+    
+    // Re-render the modal in-place so the selected trait gets the "ACTIVE" tag
+    if (typeof openTraitBestList === 'function') openTraitBestList(unitId);
+    if (typeof showToast === 'function') {
+        const u = window.getUnitById(unitId);
+        showToast(`Successfully selected ${traitName} trait for ${u ? u.name : unitId}!`);
+    }
+};
+
 // Global Exports
 window.processUnitCache = processUnitCache;
 window.renderUnitCard = renderUnitCard;
 window.renderListInternal = renderListInternal;
 window.updateBuildListDisplay = updateBuildListDisplay;
+
+window.precalculateAllLoadoutBuilds = function() {
+    const activeDb = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : window.STATIC_BUILD_DB;
+    if (!activeDb) return;
+    if (!window.hotbarFilteredBuilds) window.hotbarFilteredBuilds = {};
+
+    unitDatabase.forEach(unit => {
+        const unitId = unit.id;
+        const activeType = (window.activeAbilityIds && window.activeAbilityIds.has(unitId) && unit.ability) ? 'abil' : 'base';
+        const activeMode = 'fixed';
+        
+        let dbKey = unitId;
+        if (activeType === 'abil') dbKey += '_abil';
+        
+        const dbEntry = activeDb[dbKey] || {};
+        const modeData = dbEntry[activeMode] || dbEntry[activeMode === 'fixed' ? 'f' : 'b'];
+        let perfectBuilds = modeData ? modeData[0] : null;
+
+        // Try to pull comprehensive builds from the browser's dynamic cache if available,
+        // because the static DB is truncated and might not contain the selected trait!
+        if (window.unitBuildsCache && window.unitBuildsCache[unitId] && window.unitBuildsCache[unitId][activeType] && window.unitBuildsCache[unitId][activeType][activeMode]) {
+            const cacheBuilds = window.unitBuildsCache[unitId][activeType][activeMode][0];
+            if (cacheBuilds && cacheBuilds.length > 0) {
+                perfectBuilds = cacheBuilds;
+            }
+        }
+
+        if (perfectBuilds && perfectBuilds.length > 0) {
+            let topBuild = perfectBuilds[0];
+            const selectedTrait = window.unitTraits && window.unitTraits[unitId];
+            if (selectedTrait) {
+                const matchingBuilds = perfectBuilds.filter(b => {
+                    const tName = (typeof b.t === 'number' ? (traitsList[b.t]?.name) : (b.traitName || b.t)) || 'Unknown Trait';
+                    return tName.toLowerCase() === selectedTrait.toLowerCase();
+                });
+                if (matchingBuilds.length > 0) {
+                    // Pick the highest-DPS matching build, not just the first one
+                    topBuild = matchingBuilds.reduce((best, cur) => {
+                        const bestDps = best.d || best.dps || 0;
+                        const curDps = cur.d || cur.dps || 0;
+                        return curDps > bestDps ? cur : best;
+                    }, matchingBuilds[0]);
+                }
+            }
+            const hydrated = {
+                id: topBuild.id || `${unitId}-static`,
+                traitName: (typeof topBuild.t === 'number' ? (traitsList[topBuild.t]?.name) : (topBuild.traitName || topBuild.t)) || 'Unknown Trait',
+                setName: (typeof topBuild.s === 'number' ? (SETS[topBuild.s]?.name) : (topBuild.setName || topBuild.s)) || 'Unknown Set',
+                dps: topBuild.d || topBuild.dps || 0,
+                dmgVal: topBuild.dv || topBuild.dmgVal || 0,
+                spa: topBuild.sp || topBuild.spa || 0,
+                range: topBuild.ra || topBuild.range || 0,
+                prio: topBuild.p || topBuild.prio || 'dmg',
+                headUsed: (typeof topBuild.h === 'number' ? (['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'][topBuild.h]) : (topBuild.headUsed || topBuild.h)) || 'none',
+                subStats: topBuild.ss || topBuild.subStats || {},
+                mainStats: topBuild.ms || topBuild.mainStats || {
+                    body: (typeof topBuild.b === 'string' ? topBuild.b : (topBuild.b === 1 ? 'dot' : (topBuild.b === 2 ? 'cm' : 'dmg'))),
+                    legs: (typeof topBuild.l === 'string' ? topBuild.l : (topBuild.l === 1 ? 'spa' : (topBuild.l === 2 ? 'cf' : (topBuild.l === 3 ? 'range' : 'dmg'))))
+                }
+            };
+
+            const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unitId || s.id.split('-')[0] === unitId.split('-')[0]));
+            if (typeof reconstructMathData === 'function') {
+                try {
+                    const fullMath = reconstructMathData(hydrated, undefined, { isHotbar: isInHotbarState });
+                    if (fullMath) {
+                        hydrated.dps = fullMath.total || fullMath.dps || 0;
+                        hydrated.bossDps = fullMath.bossTotal || fullMath.bossDps || 0;
+                        hydrated.dmgVal = (unitId === 'triple_threat' && window.ttBossActive) ? (fullMath.bossDmgVal || fullMath.dmgVal) : fullMath.dmgVal;
+                        hydrated.spa = fullMath.spa;
+                        hydrated.range = fullMath.range;
+                    }
+                } catch (e) {
+                    console.warn("Precalc Math Error", unitId, e);
+                }
+            }
+            window.hotbarFilteredBuilds[unitId] = hydrated;
+        }
+    });
+};

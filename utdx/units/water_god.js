@@ -8,8 +8,8 @@ unitDatabase.push({
     role: "Utility",
     tags: ["Divinity", "Historic Being"],
     meta: {
-        short: "Ruler/Sacred",
-        long: "Sacred/Fission",
+        short: "Ruler",
+        long: "Duelist/Sacred",
         note: "God Of The Seas: +20% DoT/Affliction. Crit increases 5% per attack (Cap 30/50%). Double attack at cap."
 
     },

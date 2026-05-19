@@ -39,7 +39,7 @@ unitDatabase.push({
         controlType: 'slider',
         min: 1,
         max: 10,
-        default: 2,
+        default: 3,
         restrictModes: [0, 1],
         thresholds: [
             { level: 1, spa: 1, passiveDmg: 45 },

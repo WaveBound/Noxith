@@ -49,7 +49,14 @@ const toggleFusion = (armorId) => {
  * Performs a full team-wide recalculation for all hotbar units.
  * This should be called only when the team composition or global buffs change.
  */
-function recalculateHotbarTeam() {
+window.recalculateHotbarTeam = function recalculateHotbarTeam() {
+    // 1. Temporarily swap buff context and database to the hotbar ones
+    const savedDb = window.STATIC_BUILD_DB;
+    window.STATIC_BUILD_DB = window.HOTBAR_STATIC_BUILD_DB || savedDb;
+    if (typeof window.applyBuffContext === 'function') {
+        window.applyBuffContext(hotbarState.buffState);
+    }
+
     const hiddenContainer = document.getElementById('hotbarHiddenRender');
 
     // Determine which units need recalculating
@@ -85,6 +92,16 @@ function recalculateHotbarTeam() {
             updateBuildListDisplay(id, true);
         }
     });
+
+    // 2. Restore global DB + global buff context
+    window.STATIC_BUILD_DB = savedDb;
+    if (typeof window.applyBuffContext === 'function') {
+        window.applyBuffContext(window.GLOBAL_BUFF_STATE || {});
+    }
+
+    if (window.CALCULATION_MODE !== 'loadout' && typeof window.resortUnitCardsInPlace === 'function') {
+        window.resortUnitCardsInPlace();
+    }
 }
 
 const getDetailedUnitStats = (unitId) => {
@@ -95,42 +112,6 @@ const getDetailedUnitStats = (unitId) => {
     let bestBuild = window.hotbarFilteredBuilds && window.hotbarFilteredBuilds[unitId]
         ? window.hotbarFilteredBuilds[unitId]
         : null;
-
-    // Check if the DOM card exists for this unit
-    const hasCard = !!document.getElementById('card-' + unitId);
-
-    if (hasCard) {
-        // Only force recalculate if explicitly requested or if cache is missing
-        if (!bestBuild || typeof window.resetCachesForBuffChange === 'function') {
-            // rely on the pre-pass having already run for performance
-            bestBuild = window.hotbarFilteredBuilds && window.hotbarFilteredBuilds[unitId]
-                ? window.hotbarFilteredBuilds[unitId]
-                : bestBuild;
-        }
-    } else if (bestBuild && typeof reconstructMathData === 'function') {
-        // Card doesn't exist (unit from another page) — recalculate directly
-        // using the cached build data but with FRESH team context
-        try {
-            const refreshed = reconstructMathData(bestBuild);
-            if (refreshed) {
-                // Merge refreshed calculation values into the cached build
-                bestBuild = Object.assign({}, bestBuild, {
-                    dmgVal: refreshed.dmgVal,
-                    dps: refreshed.total || refreshed.dps || 0,
-                    sortDps: refreshed.total || refreshed.sortDps || 0,
-                    spa: refreshed.spa,
-                    range: refreshed.range,
-                    placement: refreshed.placement,
-                    detailedBuffs: refreshed.detailedBuffs
-                });
-                // Update the cache so subsequent reads get fresh values
-                if (!window.hotbarFilteredBuilds) window.hotbarFilteredBuilds = {};
-                window.hotbarFilteredBuilds[unitId] = bestBuild;
-            }
-        } catch (e) {
-            console.warn('[TeamSummary] Direct recalc failed for', unitId, e);
-        }
-    }
 
     if (!bestBuild) return null;
 
@@ -164,7 +145,7 @@ function openTeamSummary() {
         'shadow_reaper_necklace': 'S. Reaper', 'junior': 'Junior Ninja', 'biju_head': 'Biju',
         'reanimated_head': 'Reanimated', 'bloodline_head': 'Bloodline',
         'sorcerer_hunter_spirit': 'S.H. Spirit', 'strongest_sorcerer_glasses': 'Strongest',
-        'monarch': 'Monarch Cape', 'warlord_hat': 'Warlord Hat', 'none': 'None'
+        'monarch': 'Monarch Cape', 'warlord_hat': 'Warlord Hat', 'mochi_scarf': 'Mochi Scarf', 'flaming_donut': 'Flaming Donut', 'none': 'None'
     };
     const MAIN_STAT_NAMES = {
         body: { 'dmg': 'Damage', 'dot': 'DoT', 'cm': 'Crit Damage' },
@@ -368,6 +349,11 @@ function openTeamSummary() {
             if (unit.etherealization && unit.etherealization.length >= 4) {
                 effects.push({ label: "Monarch's Devotion", val: '+10% Dmg to Team (E4+)', color: '#f472b6' });
             }
+        } else if (unit.id === 'quake_warlord') {
+            effects.push({ label: 'Quake Stun', val: 'Stun for 3s on attack', color: '#fbbf24' });
+            effects.push({ label: 'Quake Slow', val: '40% Slow for 5s on Crit', color: '#60a5fa' });
+        } else if (unit.id === 'mochi_pirate') {
+            effects.push({ label: 'Time Snail', val: '+20% DoT & Status | 30% Slow (3s)', color: '#fb923c' });
         } else if (unit.id === 'jinoo_shadow_monarch') {
             effects.push({ label: 'Strongest Hunter', val: '+20-30% Dmg to Leveling units', color: '#818cf8' });
             if (activeModes.includes(3)) effects.push({ label: 'Shadow Knight', val: '2s Stun', color: '#a78bfa' });
@@ -418,6 +404,21 @@ function openTeamSummary() {
             if (tags.includes('Magi')) ksBonus = 'MAGI: +50% DMG / +15% SPA';
             else if (tags.includes('Uncontrollable Power')) ksBonus = 'UNCONTROLLABLE: +30% DMG / +10% SPA';
             else if (element === 'water') ksBonus = 'WATER: +20% DMG / +10% SPA';
+        }
+
+        // Check for Triple Threat leader bonus - ONLY applies if TT is in Slot 1 (Leader)
+        let ttBonus = null;
+        const isTtLeading = isPotential || (leader && window.isUnit(leader.id, 'triple_threat'));
+        const isTtActive = isPotential || (isLoadout && isTtLeading) || window.tripleThreatActive || (hotbarState.buffState.triple_threat && isTtLeading) || (hotbarState.buffState.triplethreat && isTtLeading);
+
+        if (isTtActive && isTtLeading) {
+            const tags = unit.tags || [];
+            const rawElement = unit.element || (unit.stats && unit.stats.element) || (unit.meta && unit.meta.element) || "";
+            const element = String(rawElement).toLowerCase();
+
+            if (tags.includes('Sword')) ttBonus = 'UNRIVALED: +50% DMG (Sword)';
+            else if (tags.includes('Piece')) ttBonus = 'UNRIVALED: +25% DMG / +10% RNG (Piece)';
+            else if (element === 'wind') ttBonus = 'UNRIVALED: +20% DMG / +5% CRIT (Wind)';
         }
 
         html += `
@@ -520,9 +521,14 @@ function openTeamSummary() {
                 let passiveHtml = '';
                 if (unit.passives && unit.passives.length > 0) {
                     passiveHtml = unit.passives.map(p => {
-                        // Special logic for King Sailor's conditional passive
+                        // Special logic for King Sailor and Triple Threat conditional passives
                         if (p.name === "Unrivaled Mark") {
-                            if (!isKsActive || !isKsLeading) return null;
+                            if (window.isUnit(unit.id, 'king_sailor')) {
+                                if (!isKsActive || !isKsLeading) return null;
+                            } else if (window.isUnit(unit.id, 'triple_threat')) {
+                                const isTtLeading = isPotential || (leader && window.isUnit(leader.id, 'triple_threat'));
+                                if (!isTtLeading) return null;
+                            }
                         }
 
                         // Monarch's Devotion: only show when Jinoo is in loadout (Loadout Mode) or always in Potential
@@ -618,6 +624,11 @@ function openTeamSummary() {
                     ${ksBonus ? `
                         <div class="ts-bonus-pill">
                             <span class="ks-text">${ksBonus}</span>
+                        </div>
+                    ` : ''}
+                    ${ttBonus ? `
+                        <div class="ts-bonus-pill" style="border-color: rgba(167, 243, 208, 0.4); background: rgba(167, 243, 208, 0.08); color: #a7f3d0;">
+                            <span class="ks-text" style="color: #a7f3d0;">${ttBonus}</span>
                         </div>
                     ` : ''}
                     ${effects.length > 0 ? `
@@ -804,23 +815,9 @@ function handleHotbarBuffToggle(configKey, checkbox) {
     });
 
     window.loadHotbarDb(() => {
-        // Apply hotbar buff context so reconstructMathData reads the right flags
-        if (typeof window.applyBuffContext === 'function') {
-            window.applyBuffContext(hotbarState.buffState);
+        if (typeof window.recalculateHotbarTeam === 'function') {
+            window.recalculateHotbarTeam();
         }
-
-        // Temporarily swap STATIC_BUILD_DB to the hotbar DB so calculations pull from correct pre-computed table
-        const savedDb = window.STATIC_BUILD_DB;
-        window.STATIC_BUILD_DB = window.HOTBAR_STATIC_BUILD_DB || savedDb;
-
-        recalculateHotbarTeam();
-
-        // Restore global DB + global buff context
-        window.STATIC_BUILD_DB = savedDb;
-        if (typeof window.applyBuffContext === 'function') {
-            window.applyBuffContext(window.GLOBAL_BUFF_STATE || {});
-        }
-
         updateHotbarUI();
     });
 }
@@ -1421,12 +1418,13 @@ function updateHotbarUI() {
 
     const getUnitStats = (unitId) => {
         const detail = getDetailedUnitStats(unitId);
-        if (!detail) return { dmg: 0, dps: 0, teamDmg: 0, teamDps: 0 };
+        if (!detail) return { dmg: 0, dps: 0, teamDmg: 0, teamDps: 0, placements: 1 };
         return {
             dmg: detail.dmg,
             dps: detail.dps,
             teamDmg: detail.teamDmg,
-            teamDps: detail.teamDps
+            teamDps: detail.teamDps,
+            placements: detail.placementsCounted || detail.placements || 1
         };
     };
 
@@ -1560,12 +1558,15 @@ function updateHotbarUI() {
                 if (modesBadge) modesBadge.remove();
             }
 
+            // Old TRAIT badge replaced by overlay button
+
             // LEADER & MARK BADGES
             const leader = hotbarState.slots[0];
             const isKsLeading = (window.CALCULATION_MODE === 'potential') || (leader && window.isUnit(leader.id, 'king_sailor'));
             const isKs = window.isUnit(unit.id, 'king_sailor');
+            const isTt = window.isUnit(unit.id, 'triple_threat');
 
-            if (i === 0 && isKs) {
+            if (i === 0 && (isKs || isTt)) {
                 let leaderBadge = slot.querySelector('.leader-badge');
                 if (!leaderBadge) {
                     leaderBadge = document.createElement('div');
@@ -1613,35 +1614,31 @@ function updateHotbarUI() {
             }
             const oldBadge = slot.querySelector('.fern-target-badge');
             if (oldBadge) oldBadge.remove();
-            // Mini Stats Overlay (Hide for buffers)
-            const isBuffer = unit.id === 'miku';
+            // Mini Stats Overlay & Trait Button
             let statsOverlay = slot.querySelector('.slot-stats-overlay');
-            if (!isBuffer) {
+            if (!statsOverlay) {
+                statsOverlay = document.createElement('div');
+                statsOverlay.className = 'slot-stats-overlay';
+                slot.appendChild(statsOverlay);
+            }
+
+            const activeTraitName = (window.unitTraits && window.unitTraits[unit.id]) || 'DEFAULT';
+            const isBuffer = unit.id === 'miku';
+            const traitBtnHtml = `<div class="stats-trait-btn interactive" title="Active Trait: ${activeTraitName}. Click to change!" onclick="event.stopPropagation(); if (typeof openTraitBestList === 'function') openTraitBestList('${unit.id}');">TRAIT</div>`;
+            
+            if (isBuffer) {
+                statsOverlay.innerHTML = traitBtnHtml;
+            } else {
                 const stats = getUnitStats(unit.id);
                 const placements = stats.placements || 1;
                 const dmgStr = (typeof format === 'function') ? format(stats.dmg) : stats.dmg;
                 const dpsStr = (typeof format === 'function') ? format(stats.dps) : stats.dps;
-                const placeLabel = placements > 1 ? `<span class="place-mult">x${placements}</span>` : '';
-
-                if (!statsOverlay) {
-                    statsOverlay = document.createElement('div');
-                    statsOverlay.className = 'slot-stats-overlay';
-                    statsOverlay.innerHTML = `
-                        <div class="stat-mini dmg"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"></path><path d="M13 19l6-6"></path><path d="M16 16l4 4"></path><path d="M19 13l2 2"></path></svg><span class="dmg-val">${dmgStr}</span>${placeLabel}</div>
-                        <div class="stat-mini dps"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg><span class="dps-val">${dpsStr}</span></div>
-                    `;
-                    slot.appendChild(statsOverlay);
-                } else {
-                    const dmgValEl = statsOverlay.querySelector('.dmg-val') || statsOverlay.querySelector('.dmg span');
-                    const dpsValEl = statsOverlay.querySelector('.dps-val') || statsOverlay.querySelector('.dps span');
-                    const placeEl = statsOverlay.querySelector('.place-mult');
-
-                    if (dmgValEl) dmgValEl.innerText = dmgStr;
-                    if (dpsValEl) dpsValEl.innerText = dpsStr;
-                    if (placeEl) placeEl.innerText = placements > 1 ? `x${placements}` : '';
-                }
-            } else {
-                if (statsOverlay) statsOverlay.remove();
+                
+                statsOverlay.innerHTML = `
+                    <div class="stat-mini dmg"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"></path><path d="M13 19l6-6"></path><path d="M16 16l4 4"></path><path d="M19 13l2 2"></path></svg><span class="dmg-val">${dmgStr}</span></div>
+                    <div class="stat-mini dps"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg><span class="dps-val">${dpsStr}</span></div>
+                    ${traitBtnHtml}
+                `;
             }
         } else {
             slot.classList.remove('filled');

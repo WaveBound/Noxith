@@ -40,9 +40,23 @@ window.toggleCalcMode = function (mode) {
     }
 
     // Clear caches and re-render everything
-    window.resetCachesForBuffChange();
-    if (typeof window.resetAndRender === 'function') window.resetAndRender();
-    if (typeof window.updateHotbarUI === 'function') window.updateHotbarUI();
+    if (mode === 'loadout' && typeof window.loadHotbarDb === 'function') {
+        window.loadHotbarDb(() => {
+            window.resetCachesForBuffChange();
+            if (typeof window.precalculateAllLoadoutBuilds === 'function') {
+                window.precalculateAllLoadoutBuilds();
+            }
+            if (typeof window.recalculateHotbarTeam === 'function') {
+                window.recalculateHotbarTeam();
+            }
+            if (typeof window.resetAndRender === 'function') window.resetAndRender();
+            if (typeof window.updateHotbarUI === 'function') window.updateHotbarUI();
+        });
+    } else {
+        window.resetCachesForBuffChange();
+        if (typeof window.resetAndRender === 'function') window.resetAndRender();
+        if (typeof window.updateHotbarUI === 'function') window.updateHotbarUI();
+    }
 };
 
 // Apply a buff state map to the window globals that calculations.js reads.
@@ -175,13 +189,17 @@ window.triggerGlobalBuffUpdate = (unitId) => {
                 // Full re-sort: recalculate scores for ALL units and re-render the current page.
                 // This ensures units move between pages correctly when buffs change their ranking.
                 if (typeof paginatedSortedUnits !== 'undefined' && paginatedSortedUnits && paginatedSortedUnits.length > 0) {
-                    paginatedSortedUnits.forEach(entry => {
-                        entry.maxScore = typeof getLiveScore === 'function' ? getLiveScore(entry.unit) : (typeof getQuickScore === 'function' ? getQuickScore(entry.unit) : 0);
-                    });
-                    paginatedSortedUnits.sort((a, b) => b.maxScore - a.maxScore);
+                    if (window.CALCULATION_MODE !== 'loadout') {
+                        paginatedSortedUnits.forEach(entry => {
+                            entry.maxScore = typeof getLiveScore === 'function' ? getLiveScore(entry.unit) : (typeof getQuickScore === 'function' ? getQuickScore(entry.unit) : 0);
+                        });
+                        paginatedSortedUnits.sort((a, b) => b.maxScore - a.maxScore);
+                    }
                     if (typeof renderCurrentPage === 'function') renderCurrentPage();
                 } else {
-                    if (typeof window.resortUnitCardsInPlace === 'function') window.resortUnitCardsInPlace();
+                    if (window.CALCULATION_MODE !== 'loadout' && typeof window.resortUnitCardsInPlace === 'function') {
+                        window.resortUnitCardsInPlace();
+                    }
                 }
                 if (typeof updateAllUnitsBuilds === 'function') window.updateAllUnitsBuilds(hotbarIds);
                 if (typeof updateHotbarUI === 'function') updateHotbarUI();
@@ -264,7 +282,10 @@ window.setSystemLevel = function (unitId, value) {
         window.unitBuildsCache[unitId] = { base: { fixed: [null] }, abil: { fixed: [null] } };
     }
     if (typeof processUnitCache === 'function' && unit) processUnitCache(unit);
-    setTimeout(() => { if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(unitId); }, 10);
+    setTimeout(() => { 
+        if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(unitId); 
+        if (typeof window.updateHotbarUI === 'function') window.updateHotbarUI();
+    }, 10);
 };
 
 window.resetAndRender = () => {
@@ -346,43 +367,9 @@ window.getValidSubCandidates = () => SUB_CANDIDATES.filter(c =>
 );
 
 
-// --- 5. UNIT MODE MANAGERS ---
-function handleUnitModeChange(unitId, updateStateCallback) {
-    updateStateCallback();
+// Unit mode toggles migrated to shared/modes/mode-frontend.js
 
-    const unit = typeof getUnitById === 'function' ? getUnitById(unitId) : (typeof unitDatabase !== 'undefined' ? unitDatabase.find(u => u.id === unitId) : null);
-    if (!unit) return;
-
-    if (window.unitBuildsCache && window.unitBuildsCache[unitId]) {
-        window.unitBuildsCache[unitId] = { base: { fixed: [null, null, null, null] }, abil: { fixed: [null, null, null, null] } };
-    }
-
-    if (typeof processUnitCache === 'function') processUnitCache(unit);
-    else return window.resetAndRender();
-
-    // Small timeout to ensure DOM resolves before updating UI list
-    setTimeout(() => {
-        if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(unitId);
-        const guidesPage = document.getElementById('guidesPage');
-        if (guidesPage && guidesPage.classList.contains('active') && typeof renderGuides === 'function') renderGuides();
-    }, 10);
-}
-
-window.toggleAbility = function (unitId, checkbox) {
-    const card = document.getElementById('card-' + unitId);
-    if (!card) return;
-    checkbox.parentNode.classList.toggle('is-checked', checkbox.checked);
-    if (checkbox.checked) {
-        card.classList.add('use-ability');
-        activeAbilityIds.add(unitId);
-    } else {
-        card.classList.remove('use-ability');
-        activeAbilityIds.delete(unitId);
-    }
-    if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(unitId, true);
-    // Refresh hotbar stats if this unit is in the hotbar
-    if (typeof window.updateHotbarUI === 'function') window.updateHotbarUI();
-};
+// Toggle ability logic migrated to shared/abilities/ability-frontend.js
 
 window.toggleInventoryMode = (checkbox) => {
     const isChecked = checkbox.checked;
@@ -578,21 +565,7 @@ window.toggleTopPanel = (btn) => {
     }
 };
 
-window.toggleSummonDesc = (btn) => {
-    const headerRow = btn.closest('tr');
-    const descRow = headerRow.nextElementSibling;
-    if (!descRow) return;
-
-    if (descRow.classList.contains('hidden')) {
-        descRow.classList.remove('hidden');
-        btn.textContent = 'HIDE INFO';
-        btn.style.background = 'rgba(96, 165, 250, 0.2)';
-    } else {
-        descRow.classList.add('hidden');
-        btn.textContent = 'VIEW INFO';
-        btn.style.background = '';
-    }
-};
+// Summons UI logic migrated to shared/summons/summon-frontend.js
 
 window.toggleHeader = () => document.body.classList.toggle('header-collapsed');
 

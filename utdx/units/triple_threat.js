@@ -50,20 +50,23 @@ unitDatabase.push({
         },
         {
             name: "King of Heck",
-            desc: "While active:<br>• -10 Haki [-8 on E2] per Attack (~3%)<br>• +50% Damage<br>• +100% Crit Damage<br><br>When Haki reaches below 10:<br>• Automatically disable this Ability<br>• Stun this unit for 10s<br>• Disable 'Pirate Hunter' for 30s<br><br><i>Lasts for 37 attacks when maxed.</i>"
+            passiveDmg: 50,
+            passiveCdmg: 100,
+            buffedByJunior: true,
+            juniorIgnoreCdmg: true,
+            desc: "• +50% Damage<br>• +100% Crit Damage"
         },
         {
             name: "Pirate Hunter",
-            desc: "When a Boss is in Range:<br>• This unit can only target the boss and has its AOE size halved<br>• Gain 50% Damage [+65% on E4], 75% Hyper Armor Damage, and 50% Crit Rate until the Boss is no longer in Range."
+            desc: "When a Boss is in Range:<br>• This unit can only target the boss and has its AOE size halved<br>• Gain 50% Damage [+65% on E4], 75% Hyper Armor Damage, and 65% Crit Rate until the Boss is no longer in Range."
         },
         {
             name: "Color of Armaments",
-            desc: "This unit has a 'Haki' Charge<br>• Gain +1 Haki per Bleed tick<br>• This unit cannot gain Haki while 'King of Heck' is active"
+            desc: "This unit has a 'Haki' Charge<br>• Gain +1 Haki per Bleed tick"
         },
         {
             name: "Unrivaled Mark",
-            passiveDmg: 50,
-            desc: "If this unit is placed in the First Slot:<br>• Gain +50% Damage"
+            desc: "If this unit is placed in the First Slot:<br>• 'Sword' Tag: +50% Damage, -7.5% Cost<br>• 'Piece' Tag: +25% Damage, +10% Range<br>• 'Wind' Element: +20% Damage, +5% Crit Rate (Works on self)"
         },
         {
             name: "Brutal Slashes",
@@ -73,15 +76,6 @@ unitDatabase.push({
             desc: "On Attack:<br>• Deal Critical Bleed for 100% Damage [120% on E6] over 7 seconds<br>• Hitting enemies with Critical Bleed triggers a Follow-up for 75% Damage (Applies Bleed too)<br>• Cooldown: 15s"
         }
     ],
-
-    // ABILITY
-    ability: {
-        abilityName: "King of Heck",
-        buffDmg: 50,
-        passiveCdmg: 100,
-        cooldown: 0,
-        desc: "While active:<br>• -10 Haki per Attack (~3%)<br>• +50% Damage<br>• +100% Crit Damage<br><br>When Haki reaches below 10:<br>• Automatically disable this Ability<br>• Stun this unit for 10s<br>• Disable 'Pirate Hunter' for 30s"
-    },
 
     // ETHEREALIZATION (E1-E6 upgrade descriptions)
     etherealization: [

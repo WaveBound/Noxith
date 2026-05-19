@@ -16,12 +16,24 @@ if sys.stdout.encoding.lower() != 'utf-8':
         sys.stdout.reconfigure(encoding='utf-8')
 
 REQUIRED_FILES = [
-    "modules/state.js",
-    "data.js",
-    "modules/constants.js",
-    "modules/utils.js",
-    "math.js",
-    "modules/calculations.js"
+    "backend/data/buffs.js",
+    "backend/data/config.js",
+    "shared/relics/relics.js",
+    "shared/traits/traits.js",
+    "backend/state.js",
+    "backend/constants.js",
+    "backend/utils.js",
+    "backend/math/lookups.js",
+    "backend/math/core-math.js",
+    "shared/abilities/ability-backend.js",
+    "shared/modes/mode-backend.js",
+    "shared/summons/summon-backend.js",
+    "shared/passives/passive-backend.js",
+    "shared/relics/relic-backend.js",
+    "shared/traits/trait-backend.js",
+    "backend/math/context-builder.js",
+    "backend/math/calculations.js",
+    "backend/math/build-runner.js",
 ]
 
 GENERATOR_SCRIPT = """
@@ -239,7 +251,7 @@ if (isMainThread) {
         const hasPassiveDoT = effectiveStats.passives && effectiveStats.passives.some(p => p.dot && p.dot > 0);
         const hasNativeDoT = (effectiveStats.dot > 0) || (effectiveStats.burnMultiplier > 0) || isKiritoVR || hasPassiveDoT;
 
-        let allowedHeads = cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat'] : ['none'];
+        let allowedHeads = cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'] : ['none'];
         if (existingHeads && existingHeads.length > 0) {
             allowedHeads = allowedHeads.filter(h => h === 'none' || !existingHeads.includes(h));
         }
@@ -353,7 +365,7 @@ if (isMainThread) {
         const MAP_PRIO = { 'dmg': 0, 'spa': 1, 'range': 2, 'raw_dmg': 3 };
         const MAP_BODY = { 'dmg': 0, 'dot': 1, 'cm': 2 };
         const MAP_LEGS = { 'dmg': 0, 'spa': 1, 'cf': 2, 'range': 3 };
-        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'bloodline_head': 7, 'reanimated_head': 8, 'sorcerer_hunter_spirit': 9, 'strongest_sorcerer_glasses': 10, 'monarch': 11, 'warlord_hat': 12 };
+        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'bloodline_head': 7, 'reanimated_head': 8, 'sorcerer_hunter_spirit': 9, 'strongest_sorcerer_glasses': 10, 'monarch': 11, 'warlord_hat': 12, 'mochi_scarf': 13, 'flaming_donut': 14 };
 
         const stringPool = new Map(); const stringArr = [""]; 
         const subPool = new Map(); const subArr = [null]; 
@@ -429,13 +441,13 @@ if (isMainThread) {
         }
 
         const payloadStr = JSON.stringify({ s: stringArr, p: subArr, d: FINAL_DB });
-        const fileContent = `// BUILDSIG: sun_god,ninja,reaper_necklace,shadow_reaper_necklace,junior,biju_head,bloodline_head,reanimated_head,sorcerer_hunter_spirit,strongest_sorcerer_glasses,monarch,warlord_hat
+        const fileContent = `// BUILDSIG: sun_god,ninja,reaper_necklace,shadow_reaper_necklace,junior,biju_head,bloodline_head,reanimated_head,sorcerer_hunter_spirit,strongest_sorcerer_glasses,monarch,warlord_hat,mochi_scarf,flaming_donut
 (function() {
     const RAW = ${payloadStr};
     const S = RAW.s; const P = RAW.p; const D = RAW.d;
     const PRIO = ['dmg', 'spa', 'range', 'raw_dmg'];
     const BODY = ['dmg', 'dot', 'cm']; const LEGS = ['dmg', 'spa', 'cf', 'range'];
-    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat'];
+    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'];
     const DESC_BODY = ['Dmg', 'DoT', 'Crit Dmg']; const DESC_LEGS = ['Dmg', 'Spa', 'Crit Rate', 'Range'];
     const ROW_SIZE = 18;
 
@@ -566,7 +578,7 @@ if (isMainThread) {
             const PRIO = ['dmg', 'spa', 'range', 'raw_dmg'];
             const BODY = ['dmg', 'dot', 'cm'];
             const LEGS = ['dmg', 'spa', 'cf', 'range'];
-            const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat'];
+            const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'];
 
             const decode = (b64) => {
                 const bin = Buffer.from(b64, 'base64').toString('binary');
@@ -836,7 +848,7 @@ class GeneratorApp:
             b_bulma = get_states('bulma')
 
             all_combos = list(itertools.product(b_miku, b_enlightened, b_bijuu, b_amage, b_ksailor, b_fern, b_bulma))
-            db_dir = "databases" if os.path.exists("modules") else os.path.join("utdx", "databases")
+            db_dir = "databases" if os.path.exists("databases") else os.path.join("utdx", "databases")
             os.makedirs(db_dir, exist_ok=True)
 
             # Helper for name calculation (same logic as Node)
@@ -862,7 +874,7 @@ class GeneratorApp:
                         try:
                             with open(fpath, "r", encoding="utf-8") as f:
                                 first_lines = "".join([f.readline() for _ in range(5)])
-                                if "// BUILDSIG:" not in first_lines or "warlord_hat" not in first_lines:
+                                if "// BUILDSIG:" not in first_lines or "flaming_donut" not in first_lines:
                                     combinations.append(c)
                         except Exception:
                             combinations.append(c)

@@ -286,6 +286,8 @@
                                     <option value="strongest_sorcerer_glasses">Strongest Glasses</option>
                                     <option value="monarch">Monarch Cape</option>
                                     <option value="warlord_hat">Warlord Hat</option>
+                                    <option value="mochi_scarf">Mochi Scarf</option>
+                                    <option value="flaming_donut">Flaming Donut</option>
                                 </select>
                                 <select id="calcHeadStars" class="gear-main-select opt-gold w-65px hidden">
                                     <option value="1">1★</option>
@@ -531,23 +533,40 @@
     </div>
 
     <!-- SCRIPTS -->
-    <script src="data.js"></script>
-    <script src="math.js"></script>
+    <script src="backend/data/buffs.js"></script>
+    <script src="backend/data/config.js"></script>
+    <script src="frontend/data/ui-data.js"></script>
+    <script src="shared/relics/relics.js"></script>
+    <script src="shared/traits/traits.js"></script>
+    <script src="backend/data/units.js"></script>
+    <script src="backend/math/lookups.js"></script>
+    <script src="backend/math/core-math.js"></script>
     <script id="dynamic-db-script" src="databases/db_base.js"></script>
-    <script src="modules/state.js"></script>
-    <script src="modules/constants.js"></script>
-    <script src="modules/utils.js"></script>
-    <script src="modules/ui-helpers.js"></script>
-    <script src="modules/calculations.js"></script>
-    <script src="modules/rendering.js"></script>
-    <script src="modules/modals.js"></script>
-    <script src="modules/custom-pair.js"></script>
-    <script src="modules/calculator.js"></script>
-    <script src="modules/math-render.js"></script>
-    <script src="modules/inventory.js"></script>
-    <script src="modules/feedback.js"></script>
-    <script src="modules/hotbar.js"></script>
-    <script src="modules/tutorials.js"></script>
-    <script src="modules/init.js"></script>
+    <script src="backend/state.js"></script>
+    <script src="backend/constants.js"></script>
+    <script src="backend/utils.js"></script>
+    <script src="shared/abilities/ability-backend.js"></script>
+    <script src="shared/modes/mode-backend.js"></script>
+    <script src="shared/summons/summon-backend.js"></script>
+    <script src="shared/passives/passive-backend.js"></script>
+    <script src="shared/relics/relic-backend.js"></script>
+    <script src="shared/traits/trait-backend.js"></script>
+    <script src="backend/math/context-builder.js"></script>
+    <script src="backend/math/calculations.js"></script>
+    <script src="backend/math/build-runner.js"></script>
+    <script src="shared/abilities/ability-frontend.js"></script>
+    <script src="shared/modes/mode-frontend.js"></script>
+    <script src="shared/summons/summon-frontend.js"></script>
+    <script src="frontend/controllers/ui-helpers.js"></script>
+    <script src="frontend/components/rendering.js"></script>
+    <script src="frontend/components/modals.js"></script>
+    <script src="frontend/components/custom-pair.js"></script>
+    <script src="frontend/controllers/calculator.js"></script>
+    <script src="frontend/components/math-render.js"></script>
+    <script src="frontend/views/inventory.js"></script>
+    <script src="frontend/views/feedback.js"></script>
+    <script src="frontend/components/hotbar.js"></script>
+    <script src="frontend/views/tutorials.js"></script>
+    <script src="frontend/controllers/init.js"></script>
 
 </body>

@@ -470,6 +470,63 @@ function openUnitInfo(unitId) {
 window.openUnitInfo = openUnitInfo;
 window.unitModesState = window.unitModesState || {};
 
+window.updateOverlaySlider = function (unitId, activeModeIdx) {
+    const unit = getUnitById(unitId);
+    if (!unit) return;
+    const overlay = document.getElementById('modesOverlay');
+    if (!overlay) return;
+
+    let sliderContainer = overlay.querySelector('.modes-overlay-slider-container');
+    if (sliderContainer) sliderContainer.remove();
+
+    if (unit.systemLevel) {
+        const cfg = unit.systemLevel;
+        let showSlider = true;
+        if (cfg.restrictModes) {
+            showSlider = cfg.restrictModes.includes(activeModeIdx);
+        }
+        if (showSlider) {
+            const currentSysLvl = (window.unitSystemLevels && window.unitSystemLevels[unitId] !== undefined) ? window.unitSystemLevels[unitId] : (cfg.default || cfg.max || 100);
+            
+            sliderContainer = document.createElement('div');
+            sliderContainer.className = 'modes-overlay-slider-container';
+            sliderContainer.onclick = (e) => e.stopPropagation();
+            sliderContainer.style.cssText = `
+                position: absolute;
+                bottom: 40px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 90%;
+                max-width: 450px;
+                background: rgba(10, 10, 12, 0.95);
+                border: 1px solid rgba(165, 180, 252, 0.2);
+                border-radius: 12px;
+                padding: 16px 20px;
+                box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(99, 102, 241, 0.05);
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                z-index: 5000;
+                backdrop-filter: blur(12px);
+                animation: modeEntrance 0.5s ease forwards;
+            `;
+            sliderContainer.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <span style="font-size: 0.75rem; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 1px;">Adjust ${cfg.label || 'System Level'}</span>
+                    <span style="font-size: 0.75rem; color: rgba(165, 180, 252, 0.5);">MAX LV. ${cfg.max || 100}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
+                    <input id="overlay-system-level-${unitId}" type="range" min="${cfg.min || 1}" max="${cfg.max || 100}" value="${currentSysLvl}"
+                        style="flex: 1; height: 6px; background: rgba(99, 102, 241, 0.2); border-radius: 3px; cursor: pointer; accent-color: #818cf8; outline: none; margin: 0;"
+                        oninput="document.getElementById('overlay-sys-lvl-val-${unitId}').innerText = this.value; if(document.getElementById('system-level-${unitId}')) { document.getElementById('system-level-${unitId}').value = this.value; } if(document.getElementById('sys-lvl-val-${unitId}')) { document.getElementById('sys-lvl-val-${unitId}').innerText = this.value; } window.setSystemLevel('${unitId}', this.value)">
+                    <span id="overlay-sys-lvl-val-${unitId}" style="font-size: 0.9rem; font-weight: 900; color: #e0e7ff; background: rgba(99, 102, 241, 0.25); padding: 3px 10px; border-radius: 6px; min-width: 32px; text-align: center; border: 1px solid rgba(99, 102, 241, 0.15);">${currentSysLvl}</span>
+                </div>
+            `;
+            overlay.appendChild(sliderContainer);
+        }
+    }
+};
+
 function openUnitModes(unitId) {
     const unit = getUnitById(unitId);
     if (!unit || !unit.modes) return;
@@ -517,6 +574,8 @@ function openUnitModes(unitId) {
     if (unit.allowMultipleModes) grid.classList.add('multi-select-modes');
     if (unitId === 'the_strongest_in_history') grid.classList.add('circular-layout');
     
+    window.updateOverlaySlider(unitId, activeModes[0] || 0);
+
     overlay.classList.remove('hidden');
     document.body.classList.add('modal-open');
 }
@@ -593,8 +652,13 @@ function selectUnitMode(unitId, modeIdx) {
         window.updateHotbarUI();
     }
 
+    // Dynamically update overlay slider based on newly selected mode
+    if (typeof window.updateOverlaySlider === 'function') {
+        window.updateOverlaySlider(unitId, modeIdx);
+    }
+
     // Auto close after selection ONLY for single-select units
-    if (!isMulti) {
+    if (!isMulti && unitId !== 'joyful_captain') {
         setTimeout(() => {
             closeModesOverlay();
         }, 100);
