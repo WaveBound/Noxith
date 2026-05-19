@@ -288,6 +288,11 @@ function getRelicVisuals(setKey, slot) {
     if (visualKey === 'shadow_reaper_necklace') visualKey = 'shadow_reaper';
     if (visualKey === 'reaper_necklace') visualKey = 'reaper_set';
     if (visualKey === 'warlord_hat') visualKey = 'warlord';
+    if (visualKey === 'reanimated_head') visualKey = 'reanimated_ninja';
+    if (visualKey === 'biju_head') visualKey = 'biju_set';
+    if (visualKey === 'strongest_sorcerer_glasses') visualKey = 'strongest_sorcerer';
+    if (visualKey === 'sorcerer_hunter_spirit') visualKey = 'sorcerer_hunter';
+    if (visualKey === 'junior') visualKey = 'ninja';
 
     const customImages = {
         'ninja': { 'Head': 'JuniorMask.png', 'Body': 'JuniorTop.png', 'Legs': 'JuniorBottom.png' },
@@ -302,7 +307,10 @@ function getRelicVisuals(setKey, slot) {
         'rebellious_set': { 'Head': 'ReblliousMask.png', 'Body': 'ReblliousTop.png', 'Legs': 'ReblliousBottom.png' },
         'reanimated_ninja': { 'Head': 'ReanimatedMask.png', 'Body': 'ReanimatedTop.png', 'Legs': 'ReanimatedBottom.png' },
         'great_mage': { 'Head': 'MageMask.png', 'Body': 'MageTop.png', 'Legs': 'MageBottom.png' },
-        'warlord': { 'Head': 'WarlordMask.png', 'Body': 'WarlordTop.png', 'Legs': 'WarlordBottom.png' }
+        'warlord': { 'Head': 'WarlordMask.png', 'Body': 'WarlordTop.png', 'Legs': 'WarlordBottom.png' },
+        'monarch': { 'Head': 'MonarchHead.png', 'Body': 'MonarchTop.png', 'Legs': 'MonarchBottom.png' },
+        'strongest_sorcerer': { 'Head': 'StrongestHead.png', 'Body': 'StrongestTop.png', 'Legs': 'StrongestBottom.png' },
+        'sorcerer_hunter': { 'Head': 'HunterHead.png', 'Body': 'HunterTop.png', 'Legs': 'HunterBottom.png' }
     };
 
     if (customImages[visualKey] && customImages[visualKey][slot]) {
