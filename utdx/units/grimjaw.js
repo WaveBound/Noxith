@@ -9,7 +9,7 @@ unitDatabase.push({
     tags: ["Peroxide", "Hollow"],
     meta: {
         short: "Ruler",
-        long: "Eternal",
+        long: "Ruler",
         note: "Standard DPS selection."
     },
     totalCost: 41175,
