@@ -780,19 +780,19 @@ body.modal-open .unit-hotbar {
     background: linear-gradient(135deg, #a78bfa, #7c3aed);
 }
 
-/* MODES & TRAIT BADGES - positioned symmetrically at bottom corners */
+/* MODES BADGE - centered at bottom like fusion badge */
 .modes-badge {
     font-size: 7px !important;
     padding: 1px 5px !important;
     bottom: -8px !important;
-    right: 5px !important;
-    left: auto !important;
-    transform: none !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
 }
 
 .modes-badge:hover {
     background: linear-gradient(135deg, rgba(167, 139, 250, 0.95), rgba(124, 58, 237, 0.95)) !important;
-    transform: scale(1.08) !important;
+    transform: translateX(-50%) scale(1.08) !important;
 }
 
 .hotbar-trait-badge {

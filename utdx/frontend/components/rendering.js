@@ -1007,6 +1007,8 @@ function renderUnitCard(unit, absoluteIndex) {
     }).join('')}
         </div>` : ''}
         ${unit.systemLevel ? (() => {
+            // In loadout mode, hide the inline slider — it's accessible through the modes overlay
+            if (window.CALCULATION_MODE === 'loadout') return '';
             const cfg = unit.systemLevel;
             if (cfg.restrictModes) {
                 const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;

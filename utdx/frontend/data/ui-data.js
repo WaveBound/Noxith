@@ -4,6 +4,15 @@ const comingSoonData = [
 
 const patchNotesData = [
     {
+        version: "v5.9",
+        date: "May 19, 2026",
+        changes: [
+            { type: "Unit", text: "<b>New Units:</b> Added <b>Quake Warlord</b> and <b>Gluttonous Warlord</b>." },
+            { type: "Feature", text: "<b>Loadout Mode:</b> Added dynamic <b>Trait Selection</b> to customize unit builds and accurately calculate trait-specific DPS." },
+            { type: "UI", text: "<b>Modes Overlay:</b> Polished modal layout and fixed charge/system level slider positioning across various unit forms." }
+        ]
+    },
+    {
         version: "v5.8",
         date: "May 18, 2026",
         changes: [

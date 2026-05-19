@@ -47,7 +47,7 @@ function showUniversalModal({ title, content, leftPanel = '', rightPanel = '', f
     const bodyEl = modal.querySelector('.modal-body');
     const footerEl = modal.querySelector('.modal-footer');
     const headerEl = modal.querySelector('.modal-header');
-    
+
     const leftEl = modal.querySelector('.left-panel');
     const rightEl = modal.querySelector('.right-panel');
     const leftToggle = document.getElementById('toggleLeftPanelBtn');
@@ -148,7 +148,7 @@ const showMath = (id) => {
     const hasSummons = !!data.summonData;
     const isSplit = window.innerWidth > 992 && hasSummons;
     const mathResult = renderMathContent(data, isSplit);
-    
+
     const title = `<span class="text-white">DPS BREAKDOWN</span>`;
     const size = 'modal-md'; // Standardized width for all units
 
@@ -355,7 +355,8 @@ function openUnitInfo(unitId) {
                     <span class="info-ethereal-text">${text}</span>
                     <span class="e-badge">E${idx + 1}</span>
                 </li>
-            `;}).join('');
+            `;
+            }).join('');
         } else {
             const e = unit.etherealization;
             if (e.dmg) etherealHtml += `<li><span>Damage:</span> <span>+${e.dmg}%</span></li>`;
@@ -393,18 +394,18 @@ function openUnitInfo(unitId) {
                 <div class="info-sec-title">Maximum Statistics (Lv 1)</div>
                 <ul class="info-list">
                     ${(() => {
-                        const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
-                        const modeObj = (unit.modes && unit.modes[activeMode]) ? unit.modes[activeMode] : null;
-                        const upgradesArr = (modeObj && modeObj.upgrades && modeObj.upgrades.length > 0) ? modeObj.upgrades : (unit.upgrades && unit.upgrades.length > 0 ? unit.upgrades : null);
-                        const finalDmg = unit.stats.dmg || (upgradesArr ? (upgradesArr[upgradesArr.length - 1].dmg || 0) : 0);
-                        const finalSpa = unit.stats.spa || (upgradesArr ? (upgradesArr[upgradesArr.length - 1].spa || 0) : 0);
-                        const finalRange = unit.stats.range || (upgradesArr ? (upgradesArr[upgradesArr.length - 1].range || 0) : 0);
-                        return `
+            const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+            const modeObj = (unit.modes && unit.modes[activeMode]) ? unit.modes[activeMode] : null;
+            const upgradesArr = (modeObj && modeObj.upgrades && modeObj.upgrades.length > 0) ? modeObj.upgrades : (unit.upgrades && unit.upgrades.length > 0 ? unit.upgrades : null);
+            const finalDmg = unit.stats.dmg || (upgradesArr ? (upgradesArr[upgradesArr.length - 1].dmg || 0) : 0);
+            const finalSpa = unit.stats.spa || (upgradesArr ? (upgradesArr[upgradesArr.length - 1].spa || 0) : 0);
+            const finalRange = unit.stats.range || (upgradesArr ? (upgradesArr[upgradesArr.length - 1].range || 0) : 0);
+            return `
                             <li><span>Damage:</span> <span class="text-white">${finalDmg.toLocaleString()}</span></li>
                             <li><span>SPA:</span> <span class="text-white">${finalSpa}s</span></li>
                             <li><span>Range:</span> <span class="text-white">${finalRange}</span></li>
                         `;
-                    })()}
+        })()}
                     <li><span>Animation Cap:</span> <span class="text-white">${unit.stats.spaCap}s</span></li>
                 </ul>
             </div>
@@ -481,21 +482,20 @@ window.updateOverlaySlider = function (unitId, activeModeIdx) {
 
     if (unit.systemLevel) {
         const cfg = unit.systemLevel;
-        let showSlider = true;
-        if (cfg.restrictModes) {
-            showSlider = cfg.restrictModes.includes(activeModeIdx);
-        }
+        // Only show the slider in the modes overlay if it has restrictModes.
+        // Units without restrictModes (like Jinoo) already have the slider on their card.
+        if (!cfg.restrictModes) return;
+
+        let showSlider = cfg.restrictModes.includes(activeModeIdx);
         if (showSlider) {
             const currentSysLvl = (window.unitSystemLevels && window.unitSystemLevels[unitId] !== undefined) ? window.unitSystemLevels[unitId] : (cfg.default || cfg.max || 100);
-            
+
             sliderContainer = document.createElement('div');
             sliderContainer.className = 'modes-overlay-slider-container';
             sliderContainer.onclick = (e) => e.stopPropagation();
             sliderContainer.style.cssText = `
-                position: absolute;
-                bottom: 40px;
-                left: 50%;
-                transform: translateX(-50%);
+                position: relative;
+                margin: 15px auto 0;
                 width: 90%;
                 max-width: 450px;
                 background: rgba(10, 10, 12, 0.95);
@@ -522,7 +522,13 @@ window.updateOverlaySlider = function (unitId, activeModeIdx) {
                     <span id="overlay-sys-lvl-val-${unitId}" style="font-size: 0.9rem; font-weight: 900; color: #e0e7ff; background: rgba(99, 102, 241, 0.25); padding: 3px 10px; border-radius: 6px; min-width: 32px; text-align: center; border: 1px solid rgba(99, 102, 241, 0.15);">${currentSysLvl}</span>
                 </div>
             `;
-            overlay.appendChild(sliderContainer);
+            // Append after the grid so it appears right below the mode cards
+            const grid = overlay.querySelector('#modesOverlayGrid');
+            if (grid && grid.nextSibling) {
+                overlay.insertBefore(sliderContainer, grid.nextSibling);
+            } else {
+                overlay.appendChild(sliderContainer);
+            }
         }
     }
 };
@@ -533,8 +539,12 @@ function openUnitModes(unitId) {
 
     const overlay = document.getElementById('modesOverlay');
     const grid = document.getElementById('modesOverlayGrid');
-    
+
     if (!overlay || !grid) return;
+
+    // Always clean up any existing overlay slider when opening modes for ANY unit
+    let existingSlider = overlay.querySelector('.modes-overlay-slider-container');
+    if (existingSlider) existingSlider.remove();
 
     if (unitId === 'jinoo_shadow_monarch') {
         if (!Array.isArray(window.unitModesState[unitId])) {
@@ -573,7 +583,7 @@ function openUnitModes(unitId) {
     grid.className = 'modes-overlay-grid unit-' + unitId;
     if (unit.allowMultipleModes) grid.classList.add('multi-select-modes');
     if (unitId === 'the_strongest_in_history') grid.classList.add('circular-layout');
-    
+
     window.updateOverlaySlider(unitId, activeModes[0] || 0);
 
     overlay.classList.remove('hidden');
@@ -591,7 +601,7 @@ function selectUnitMode(unitId, modeIdx) {
         if (!Array.isArray(state)) {
             state = (state !== undefined) ? [state] : [];
         }
-        
+
         if (state.includes(modeIdx)) {
             state = state.filter(i => i !== modeIdx);
             // For Sukuna we might want to default back, but Jinoo should stay empty
@@ -602,13 +612,13 @@ function selectUnitMode(unitId, modeIdx) {
                 const sysLvl = (window.unitSystemLevels && window.unitSystemLevels[unitId] !== undefined)
                     ? window.unitSystemLevels[unitId]
                     : (unit.systemLevel ? (unit.systemLevel.default || 100) : 100);
-                
+
                 let reqLvl = 0;
                 if (modeIdx === 1) reqLvl = 40;
                 if (modeIdx === 2) reqLvl = 60;
                 if (modeIdx === 3) reqLvl = 80;
                 if (modeIdx === 4) reqLvl = 100;
-                
+
                 if (sysLvl < reqLvl) return; // Prevent selection if locked
             }
             state.push(modeIdx);
@@ -622,12 +632,12 @@ function selectUnitMode(unitId, modeIdx) {
     } else {
         window.unitModesState[unitId] = modeIdx;
     }
-    
+
     // Clear caches for this unit as stats changed
     if (window.unitBuildsCache) {
         delete window.unitBuildsCache[unitId];
     }
-    
+
     // Update the unit card display in the main database
     if (typeof updateBuildListDisplay === 'function') {
         updateBuildListDisplay(unitId, true);
@@ -682,7 +692,7 @@ function closeModesOverlay() {
         if (otherModals.length === 0) {
             document.body.classList.remove('modal-open');
         }
-    }, 200); 
+    }, 200);
 }
 
 window.closeModesOverlay = closeModesOverlay;
@@ -697,11 +707,11 @@ function renderShadowMonarchSpecialUI(unit, grid, overlay) {
 
     // 1. Prioritize currently rendered/calculated build for Jinoo (respects active modes)
     const currentBuild = window.hotbarFilteredBuilds ? window.hotbarFilteredBuilds[unit.id] : null;
-    
+
     if (currentBuild) {
         dmgText = Math.floor(currentBuild.dmgVal || currentBuild.dmg || 0).toLocaleString();
         dpsText = Math.floor(currentBuild.dps || 0).toLocaleString();
-    } 
+    }
     // 2. Fallback to STATIC_BUILD_DB
     else if (window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[unit.id] && window.STATIC_BUILD_DB[unit.id]['fixed']) {
         const buildList = window.STATIC_BUILD_DB[unit.id]['fixed'][0];
@@ -738,18 +748,18 @@ function renderShadowMonarchSpecialUI(unit, grid, overlay) {
         
         <div class="sm-cards-row">
             ${unit.customSummons.map((s, idx) => {
-                const isActive = activeModes.includes(idx);
-                let isUnlocked = true;
-                let reqLvl = 0;
-                if (idx === 1) reqLvl = 40;
-                if (idx === 2) reqLvl = 60;
-                if (idx === 3) reqLvl = 80;
-                if (idx === 4) reqLvl = 100;
-                if (sysLvl < reqLvl) isUnlocked = false;
+        const isActive = activeModes.includes(idx);
+        let isUnlocked = true;
+        let reqLvl = 0;
+        if (idx === 1) reqLvl = 40;
+        if (idx === 2) reqLvl = 60;
+        if (idx === 3) reqLvl = 80;
+        if (idx === 4) reqLvl = 100;
+        if (sysLvl < reqLvl) isUnlocked = false;
 
-                const btnImg = isActive ? 'btn_disable.png' : 'btn_enable.png';
+        const btnImg = isActive ? 'btn_disable.png' : 'btn_enable.png';
 
-                return `
+        return `
                 <div class="sm-card-slot ${!isUnlocked ? 'locked' : ''}">
                     <div class="sm-card-inner">
                         <img src="${unit.modes[idx].img}" alt="${s.name}" class="sm-card-image">
@@ -760,7 +770,7 @@ function renderShadowMonarchSpecialUI(unit, grid, overlay) {
                     </div>
                 </div>
                 `;
-            }).join('')}
+    }).join('')}
         </div>
     </div>
     `;
