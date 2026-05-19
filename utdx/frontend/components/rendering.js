@@ -470,7 +470,16 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         // respecting their set/priority filters instead of always picking the absolute best.
         if (slice.length > 0) {
             if (!window.hotbarFilteredBuilds) window.hotbarFilteredBuilds = {};
-            window.hotbarFilteredBuilds[unitId] = slice[0];
+            
+            // In loadout mode with a selected trait, export the best build for THAT trait
+            // so the hotbar DPS reflects the user's trait choice, not just the overall #1.
+            const selectedTrait = (window.CALCULATION_MODE === 'loadout' && window.unitTraits && window.unitTraits[unitId]);
+            if (selectedTrait) {
+                const traitMatch = slice.find(b => b.traitName && b.traitName.toLowerCase() === selectedTrait.toLowerCase());
+                window.hotbarFilteredBuilds[unitId] = traitMatch || slice[0];
+            } else {
+                window.hotbarFilteredBuilds[unitId] = slice[0];
+            }
         }
 
         return slice.map((r, i) => generateBuildRowHTML(r, i, { totalCost: unitCost, placement: unitPlace, sortMode: sortSelect, unitId, benchmarkDps: benchmarkDps })).join('');
@@ -1434,23 +1443,29 @@ window.applyUnitTrait = function(unitId, traitName) {
     window.unitTraits = window.unitTraits || {};
     window.unitTraits[unitId] = traitName;
     
-    // Clear ONLY the hotbarFilteredBuilds entry so precalculateAllLoadoutBuilds
+    // Clear the stale hotbarFilteredBuilds entry for this unit so the recalculation
     // writes a fresh hydrated build for the newly selected trait.
-    // We preserve unitBuildsCache — it contains the full set of pre-calculated builds
-    // across all traits that we need to search through.
     if (window.hotbarFilteredBuilds) {
         delete window.hotbarFilteredBuilds[unitId];
     }
-    // Also clear the live score cache for this unit so the card re-sorts correctly
+    // Clear live score cache for this unit
     if (window.LIVE_SCORE_CACHE) {
         Object.keys(window.LIVE_SCORE_CACHE).forEach(k => {
             if (k.startsWith(unitId)) delete window.LIVE_SCORE_CACHE[k];
         });
     }
     
-    // Re-hydrate hotbarFilteredBuilds[unitId] with the selected trait's best build
+    // Re-hydrate hotbarFilteredBuilds with the selected trait's best build
     if (typeof window.precalculateAllLoadoutBuilds === 'function') {
         window.precalculateAllLoadoutBuilds();
+    }
+    
+    // Force a full recalculation with proper hotbar buff context.
+    // recalculateHotbarTeam swaps to HOTBAR_STATIC_BUILD_DB + hotbar buff state,
+    // then calls updateBuildListDisplay which writes the final hydrated build
+    // to hotbarFilteredBuilds[unitId] (via renderListInternal line ~473).
+    if (typeof window.recalculateHotbarTeam === 'function') {
+        window.recalculateHotbarTeam();
     }
     
     // Refresh the hotbar slot stats overlay (reads from hotbarFilteredBuilds)
