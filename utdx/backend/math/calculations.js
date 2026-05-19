@@ -161,7 +161,7 @@ function calculateDPS(uStats, relicStats, context) {
                 uptime = expectedActive / cycleTime;
             }
 
-            const warlordDmg = 45 * uptime;
+            const warlordDmg = 45 * uptime * (starMult || 1);
             additiveTotal += warlordDmg;
             setPerkDmg += warlordDmg; // Add to UI display
             warlordData = {
@@ -171,7 +171,8 @@ function calculateDPS(uStats, relicStats, context) {
                 refreshChance,
                 cycleTime,
                 uptime,
-                dmg: warlordDmg
+                dmg: warlordDmg,
+                starMult: starMult || 1
             };
         }
     }

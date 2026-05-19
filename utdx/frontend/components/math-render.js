@@ -372,7 +372,7 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, h
                 <span class="mt-font-mono mt-text-right mt-text-green">${fmt.fix(w.uptime * 100, 1)}%</span>
             </div>
             <div class="mt-flex-between mt-border-top mt-pt-sm">
-                <span class="text-white text-xs text-bold">Avg Damage Buff (+45% Base * Uptime)</span>
+                <span class="text-white text-xs text-bold">Avg Damage Buff (+${fmt.fix(45 * (w.starMult || 1), 2)}% Base * Uptime)</span>
                 <span class="text-sm mt-text-bold" style="color: #a78bfa;"> +${fmt.fix(w.dmg, 1)}%</span>
             </div>
         </td></tr>`;

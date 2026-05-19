@@ -143,7 +143,7 @@ function openCalc(unitId) {
 
     const updateHeadStarVisibility = () => {
         const headVal = headSelect.value;
-        const showStars = (headVal === 'reaper_necklace' || headVal === 'shadow_reaper_necklace');
+        const showStars = (headVal === 'reaper_necklace' || headVal === 'shadow_reaper_necklace' || headVal === 'warlord_hat');
         headStarsSelect.classList.toggle('hidden', !showStars);
         if (!showStars) headStarsSelect.value = '1';
         updateCalcUI();
@@ -151,7 +151,7 @@ function openCalc(unitId) {
 
     const updateBodyStarVisibility = () => {
         const setVal = setSelect.value;
-        const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set');
+        const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set' || setVal === 'warlord');
         bodyStarsSelect.classList.toggle('hidden', !showStars);
         if (!showStars) bodyStarsSelect.value = '1';
         updateCalcUI();
@@ -159,7 +159,7 @@ function openCalc(unitId) {
 
     const updateLegsStarVisibility = () => {
         const setVal = setSelect.value;
-        const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set');
+        const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set' || setVal === 'warlord');
         legsStarsSelect.classList.toggle('hidden', !showStars);
         if (!showStars) legsStarsSelect.value = '1';
         updateCalcUI();

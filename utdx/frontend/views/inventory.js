@@ -109,7 +109,7 @@ function updateSetOptions(slot) {
     const setSelect = document.getElementById('newRelicSet');
     if (!setSelect) return;
     const currentSelection = setSelect.value;
-    const invalidHeadSets = ['laughing', 'ex', 'warlord'];
+    const invalidHeadSets = ['laughing', 'ex'];
     const filteredSets = SETS.filter(s => slot === 'Head' ? !invalidHeadSets.includes(s.id) : true);
 
     setSelect.innerHTML = filteredSets.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
@@ -125,7 +125,7 @@ function updateStarVisibility() {
     const starSelect = document.getElementById('newRelicStars');
     if (!starSelect) return;
 
-    const showStars = (setId === 'shadow_reaper' || setId === 'reaper_set');
+    const showStars = (setId === 'shadow_reaper' || setId === 'reaper_set' || setId === 'warlord');
     if (showStars) starSelect.parentElement.classList.remove('hidden');
     else { starSelect.parentElement.classList.add('hidden'); starSelect.value = "1"; }
 }
@@ -250,6 +250,7 @@ function addRelic() {
     if (slot === 'Head') {
         if (setKey === 'shadow_reaper') setKey = 'shadow_reaper_necklace';
         if (setKey === 'reaper_set') setKey = 'reaper_necklace';
+        if (setKey === 'warlord') setKey = 'warlord_hat';
     }
 
     const newRelic = {
@@ -286,6 +287,7 @@ function getRelicVisuals(setKey, slot) {
     let visualKey = setKey;
     if (visualKey === 'shadow_reaper_necklace') visualKey = 'shadow_reaper';
     if (visualKey === 'reaper_necklace') visualKey = 'reaper_set';
+    if (visualKey === 'warlord_hat') visualKey = 'warlord';
 
     const customImages = {
         'ninja': { 'Head': 'JuniorMask.png', 'Body': 'JuniorTop.png', 'Legs': 'JuniorBottom.png' },

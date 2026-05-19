@@ -11,9 +11,9 @@ unitDatabase.push({
 
     // META (Build Guide tab)
     meta: {
-        short: "TBD",
-        long: "TBD",
-        note: "TBD"
+        short: "Ruler",
+        long: "Ruler",
+        note: "Ruler due to placement count, Sacred/Eternal for support use"
     },
 
     totalCost: 67500,
