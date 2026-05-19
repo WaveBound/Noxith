@@ -4,7 +4,7 @@ let cpT2 = 'none';
 let cpSearchQuery = '';
 
 function handleCpSearch(val) {
-    cpSearchQuery = val.toLowerCase();
+    cpSearchQuery = (val || '').trim().toLowerCase();
     renderCustomPairUI();
 }
 
@@ -63,7 +63,10 @@ function renderCustomPairUI() {
     let unitsHtml = `<div class="config-item ${isAll ? 'selected' : ''}" onclick="selectCpUnit('all')"><div class="cp-avatar-placeholder">ALL</div><span>All Units</span></div>`;
 
     unitDatabase.forEach(u => {
-        if (cpSearchQuery && !u.name.toLowerCase().includes(cpSearchQuery)) return;
+        const element = (u.stats && u.stats.element) ? u.stats.element.toLowerCase() : '';
+        const nameMatches = u.name.toLowerCase().includes(cpSearchQuery);
+        const elementMatches = element.includes(cpSearchQuery);
+        if (cpSearchQuery && !nameMatches && !elementMatches) return;
         const isSelected = cpUnitSelection.has(u.id);
         unitsHtml += `<div class="config-item ${isSelected ? 'selected' : ''}" onclick="selectCpUnit('${u.id}')">${getUnitImgHtml(u, '', 'small')}<span>${u.name}</span></div>`;
     });

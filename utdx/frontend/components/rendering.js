@@ -1212,7 +1212,7 @@ function renderDatabase() {
 }
 
 window.globalFilterUnits = (term) => {
-    const searchTerm = (term || '').toLowerCase();
+    const searchTerm = (term || '').trim().toLowerCase();
     const clearBtn = document.getElementById('globalSearchClear');
     if (clearBtn) clearBtn.style.display = searchTerm ? 'flex' : 'none';
 
@@ -1232,8 +1232,13 @@ window.globalFilterUnits = (term) => {
             const role = unit.role.toLowerCase();
             const id = unit.id.toLowerCase();
             const placement = (unit.placementType || 'Ground').toLowerCase();
+            const element = (unit.stats && unit.stats.element) ? unit.stats.element.toLowerCase() : '';
 
-            let matches = title.includes(searchTerm) || role.includes(searchTerm) || id.includes(searchTerm) || placement.includes(searchTerm);
+            let matches = title.includes(searchTerm) || 
+                          role.includes(searchTerm) || 
+                          id.includes(searchTerm) || 
+                          placement.includes(searchTerm) ||
+                          element.includes(searchTerm);
             if (!matches && (searchTerm === 'ground' || searchTerm === 'hill')) {
                 if (placement === 'hybrid') matches = true;
             }
