@@ -1366,14 +1366,16 @@ function openTraitBestList(unitId) {
         </div>
     </div>`;
 
+    const isPotential = (window.CALCULATION_MODE === 'potential');
+
     html += `<table class="compare-table" style="border-collapse: separate; border-spacing: 0 4px;">
         <thead>
             <tr>
                 <th style="width: 8%; text-align: center;">#</th>
-                <th style="width: 25%">Trait</th>
-                <th style="width: 32%">Best Setup</th>
+                <th style="width: ${isPotential ? '30%' : '25%'}">Trait</th>
+                <th style="width: ${isPotential ? '42%' : '32%'}">Best Setup</th>
                 <th style="width: 20%; text-align: right;">Potential</th>
-                <th style="width: 15%; text-align: center;">Action</th>
+                ${isPotential ? '' : '<th style="width: 15%; text-align: center;">Action</th>'}
             </tr>
         </thead>
         <tbody>`;
@@ -1431,9 +1433,10 @@ function openTraitBestList(unitId) {
                 <div class="comp-highlight" style="font-weight: 800; font-size: 1rem; ${isBossHigher ? 'color: #fca5a5;' : ''}">${val} <span class="comp-val-label ${labelClass}" style="${isBossHigher ? 'color: #f87171;' : ''}">${label}</span></div>
                 ${isBossHigher ? `<div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; margin-top: 2px;">${format(b.dps)} <span style="opacity: 0.6; font-size: 0.6rem;">BASE</span></div>` : ''}
             </td>
+            ${isPotential ? '' : `
             <td style="vertical-align: middle; text-align: center; padding: 10px 5px;">
                 ${actionBtn}
-            </td>
+            </td>`}
         </tr>`;
     });
 
