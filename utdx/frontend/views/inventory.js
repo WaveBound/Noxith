@@ -362,9 +362,10 @@ function renderInventory() {
         let lookupKey = relic.setKey;
         if (lookupKey === 'shadow_reaper_necklace') lookupKey = 'shadow_reaper';
         if (lookupKey === 'reaper_necklace') lookupKey = 'reaper_set';
+        if (lookupKey === 'warlord_hat') lookupKey = 'warlord';
 
         let starCount = 0;
-        if (lookupKey === 'shadow_reaper' || lookupKey === 'reaper_set') {
+        if (lookupKey === 'shadow_reaper' || lookupKey === 'reaper_set' || lookupKey === 'warlord') {
             if (relic.stars >= 1.05) starCount = 3;
             else if (relic.stars >= 1.025) starCount = 2;
             else if (relic.stars >= 1) starCount = 1;
