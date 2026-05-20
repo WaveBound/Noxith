@@ -78,6 +78,7 @@ unitDatabase.push({
             name: "Brutal Slashes",
             dot: 120,
             dotDuration: 7,
+            canCrit: false,
             desc: "On Attack:<br>• Deal Critical Bleed for 100% Damage [120% on E6] over 7 seconds<br>• Hitting enemies with Critical Bleed triggers a Follow-up that receives -25% Damage from Passives (Applies Bleed too)<br>• Cooldown: 15s"
         }
     ],

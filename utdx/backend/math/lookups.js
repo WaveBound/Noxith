@@ -92,13 +92,7 @@ window.getTraitFast = (idOrName) => {
 
     let found = _traitCacheMap.get(lowerSearch);
 
-    // Fallback 1: Try splitting by space/parentheses (e.g. "Ruler (Dmg/Spa)" -> "Ruler")
-    if (!found) {
-        const baseName = idOrName.split(' ')[0].toLowerCase();
-        found = _traitCacheMap.get(baseName);
-    }
-
-    // Fallback: Scan dynamically generated Custom Pairs
+    // Fallback 1: Scan dynamically generated Custom Pairs
     if (!found) {
         if (typeof customTraits !== 'undefined') {
             found = customTraits.find(t => t.id === idOrName || t.name === idOrName);
@@ -112,12 +106,20 @@ window.getTraitFast = (idOrName) => {
                 }
             }
         }
-        // Cache the newly found Custom Trait for future fast lookups
-        if (found) {
-            _traitCacheMap.set(found.id, found);
-            _traitCacheMap.set(found.name, found);
-        }
     }
+
+    // Fallback 2: Try splitting by space/parentheses (e.g. "Ruler (Dmg/Spa)" -> "Ruler")
+    if (!found) {
+        const baseName = idOrName.split(' ')[0].toLowerCase();
+        found = _traitCacheMap.get(baseName);
+    }
+
+    // Cache the newly found Custom Trait for future fast lookups
+    if (found) {
+        _traitCacheMap.set(found.id, found);
+        _traitCacheMap.set(found.name, found);
+    }
+
     return found;
 };
 
