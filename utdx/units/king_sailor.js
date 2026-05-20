@@ -10,7 +10,7 @@ unitDatabase.push({
     meta: {
         short: "Ruler",
         long: "Ruler",
-        note: "Manipulator of Fate: +50% Dmg / -25% SPA. Baal's Lightning provides +20% non-critical Chain Lightning damage."
+        note: "Manipulator of Fate: +50% Dmg / -25% SPA. Baal's Lightning provides +20% non-critical Chain Lightning damage.<br><span style='color: #fbbf24;'>⚠️ In-game: Does 2.5x dmg currently (so 150.4k dps is actually 2.5x that).</span>"
     },
     totalCost: 91800,
     stats: {
@@ -31,7 +31,7 @@ unitDatabase.push({
     passives: [
         { name: "Manipulator of Fate", passiveDmg: 50, passiveSpa: 25, buffedByJunior: true, desc: "Gain +50% Damage and -25% Attack Speed based on shared tags with allies." },
         { name: "Baal's Lightning", desc: "Every attack chains to 5 enemies for 20% non-critical damage. Range extended by 10%." },
-        { name: "Unrivaled Mark", passiveDmg: 50, passiveSpa: 15, buffedByJunior: true, desc: "Global Buff: Magi (+50% Dmg, -15% SPA), Uncontrollable (+30% Dmg, -10% SPA), Water (+20% Dmg, -10% SPA)." },
+        { name: "Unrivaled Mark", desc: "Global Buff: Magi (+50% Dmg, -15% SPA), Uncontrollable (+30% Dmg, -10% SPA), Water (+20% Dmg, -10% SPA)." },
         { name: "Rukh's Judgement", passiveCrit: 20, passiveCdmg: 25, desc: "When attacking an enemy inflicted by chain lightning in the last 10s: +10% Crit Damage and +5% Crit Chance for 15s. [On E6]: both buffs increased by 15%." }
     ],
     etherealization: [

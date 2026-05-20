@@ -285,10 +285,10 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         if (inventoryMode && window.STATIC_BUILD_DB) {
             let dbKey = unitId;
             if (activeType === 'abil') dbKey += '_abil';
-            
+
             // Try current buffed DB first
             let dbEntry = window.STATIC_BUILD_DB[dbKey] || {};
-            
+
             // FALLBACK: If unit not in current buffed DB (skipped by generator), try baseline DB
             if (!dbEntry.fixed && window.GLOBAL_STATIC_BUILD_DB_BASE && window.GLOBAL_STATIC_BUILD_DB_BASE[dbKey]) {
                 dbEntry = window.GLOBAL_STATIC_BUILD_DB_BASE[dbKey];
@@ -320,7 +320,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     const stateStr = JSON.stringify(window.unitModesState[unitId]);
                     const modeKey = `${unitId}-${stateStr}-${activeType}`;
                     window.modeBenchmarks[modeKey] = benchmarkDps;
-                    
+
                     // Directly cache the dynamic results so it doesn't fall back to the static DB
                     if (!window.unitBuildsCache[unitId]) window.unitBuildsCache[unitId] = {};
                     if (!window.unitBuildsCache[unitId][activeType]) window.unitBuildsCache[unitId][activeType] = {};
@@ -383,9 +383,9 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     res.range = fullMath.range;
                     res.dot = fullMath.dot;
                     res.dotTotal = fullMath.dotData ? (
-                        (fullMath.dotData.nativeTotalDmg || 0) + 
-                        (fullMath.dotData.radTotalDmg || 0) + 
-                        (fullMath.dotData.fuaDotTotalDmg || 0) + 
+                        (fullMath.dotData.nativeTotalDmg || 0) +
+                        (fullMath.dotData.radTotalDmg || 0) +
+                        (fullMath.dotData.fuaDotTotalDmg || 0) +
                         (fullMath.dotData.scarfBurnTotalDmg || 0)
                     ) : 0;
                     res.placement = fullMath.placement;
@@ -459,7 +459,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         // respecting their set/priority filters instead of always picking the absolute best.
         if (slice.length > 0) {
             if (!window.hotbarFilteredBuilds) window.hotbarFilteredBuilds = {};
-            
+
             // In loadout mode with a selected trait, export the best build for THAT trait
             // so the hotbar DPS reflects the user's trait choice, not just the overall #1.
             const selectedTrait = (window.CALCULATION_MODE === 'loadout' && window.unitTraits && window.unitTraits[unitId]);
@@ -605,7 +605,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                 // If global buffers are active or special dynamic states exist, re-optimize
                 // the static builds dynamically in the browser (incredibly fast single-relic single-trait calculations)!
                 const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(buff => !buff.hideButton && !!window[buff.stateKey]);
-                
+
                 if (anyGlobal && calculatedResults.length > 0) {
                     calculatedResults = calculatedResults.map(r => {
                         const setName = r.setName || (typeof r.s === 'number' ? SETS[r.s]?.id : r.s) || (window.getSetFast && window.getSetFast(r.setName)?.id);
@@ -890,7 +890,7 @@ function renderUnitCard(unit, absoluteIndex) {
     }
 
     let abilityToggleHtml = (unit.ability && !abilityObj.noToggle) ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>` : '<div></div>';
-    
+
 
 
     const modesBtn = (unit.modes && Array.isArray(unit.modes)) ? `<button class="calc-btn ut-btn-compact modes-btn" onclick="openUnitModes('${unit.id}')" title="Change Mode">${unit.modesLabel || 'Modes'}</button>` : '';
@@ -919,6 +919,21 @@ function renderUnitCard(unit, absoluteIndex) {
     let defaultSort = 'dps';
     if (isAnyUnit(unit.id, ['sjw', 'esdeath'])) defaultSort = 'damage';
     else if (isUnit(unit.id, 'law')) defaultSort = 'range';
+
+    let customNoticeHtml = '';
+    if (unit.id === 'triple_threat') {
+        customNoticeHtml = `
+        <div class="unit-card-warning" style="padding: 6px 12px; background: rgba(239, 68, 68, 0.08); border-bottom: 1px solid rgba(239, 68, 68, 0.15); display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 700; color: #f87171;">
+            <span style="font-size: 0.85rem; line-height: 1;">⚠️</span>
+            <span><strong>Notice:</strong> Triple Threat is bugged; his DoT doesn't crit currently.</span>
+        </div>`;
+    } else if (unit.id === 'king_sailor') {
+        customNoticeHtml = `
+        <div class="unit-card-warning" style="padding: 6px 12px; background: rgba(245, 158, 11, 0.08); border-bottom: 1px solid rgba(245, 158, 11, 0.15); display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 700; color: #fbbf24;">
+            <span style="font-size: 0.85rem; line-height: 1;">⚠️</span>
+            <span><strong>Notice:</strong> In-game he does 2.5x dmg currently (e.g. 150.4k dps x2.5).</span>
+        </div>`;
+    }
 
     const bottomControls = `
         <div class="search-container">
@@ -1018,6 +1033,7 @@ function renderUnitCard(unit, absoluteIndex) {
                 </div>`;
             }
         })() : ''}
+        ${customNoticeHtml}
         `;
 
     let mainContent = '';
@@ -1037,7 +1053,7 @@ function renderUnitCard(unit, absoluteIndex) {
                 const modeStats = unit.modes && unit.modes[activeMode] ? unit.modes[activeMode] : {};
                 const requiresDot = modeStats.requiresDot || (unit.stats && unit.stats.requiresDot);
                 if (!requiresDot) return '';
-                
+
                 const hotbar = window.hotbarState;
                 const met = hotbar && hotbar.slots && hotbar.slots.some(s => {
                     if (!s || s.id.split('-')[0] === unit.id) return false;
@@ -1051,7 +1067,7 @@ function renderUnitCard(unit, absoluteIndex) {
                     }
                     return false;
                 });
-                
+
                 if (met) {
                     return `<div class="placement-badge synergy-dot-badge sync-active" style="color: #f43f5e; border-color: rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.08); font-weight: 900;">🔗 SYNCED: ${requiresDot.toUpperCase()}</div>`;
                 } else {
@@ -1216,11 +1232,11 @@ window.globalFilterUnits = (term) => {
             const placement = (unit.placementType || 'Ground').toLowerCase();
             const element = (unit.stats && unit.stats.element) ? unit.stats.element.toLowerCase() : '';
 
-            let matches = title.includes(searchTerm) || 
-                          role.includes(searchTerm) || 
-                          id.includes(searchTerm) || 
-                          placement.includes(searchTerm) ||
-                          element.includes(searchTerm);
+            let matches = title.includes(searchTerm) ||
+                role.includes(searchTerm) ||
+                id.includes(searchTerm) ||
+                placement.includes(searchTerm) ||
+                element.includes(searchTerm);
             if (!matches && (searchTerm === 'ground' || searchTerm === 'hill')) {
                 if (placement === 'hybrid') matches = true;
             }
@@ -1312,7 +1328,7 @@ function openTraitBestList(unitId) {
                     bClone.dps = math.total || math.dps || 0;
                 }
                 return bClone;
-            } catch(e) {}
+            } catch (e) { }
         }
         return b;
     });
@@ -1431,10 +1447,10 @@ function openTraitBestList(unitId) {
     showUniversalModal({ title: `<span class="text-gold">TRAIT LEADERBOARD</span>`, content: html, size: 'modal-lg' });
 }
 
-window.applyUnitTrait = function(unitId, traitName) {
+window.applyUnitTrait = function (unitId, traitName) {
     window.unitTraits = window.unitTraits || {};
     window.unitTraits[unitId] = traitName;
-    
+
     // Clear the stale hotbarFilteredBuilds entry for this unit so the recalculation
     // writes a fresh hydrated build for the newly selected trait.
     if (window.hotbarFilteredBuilds) {
@@ -1446,12 +1462,12 @@ window.applyUnitTrait = function(unitId, traitName) {
             if (k.startsWith(unitId)) delete window.LIVE_SCORE_CACHE[k];
         });
     }
-    
+
     // Re-hydrate hotbarFilteredBuilds with the selected trait's best build
     if (typeof window.precalculateAllLoadoutBuilds === 'function') {
         window.precalculateAllLoadoutBuilds();
     }
-    
+
     // Force a full recalculation with proper hotbar buff context.
     // recalculateHotbarTeam swaps to HOTBAR_STATIC_BUILD_DB + hotbar buff state,
     // then calls updateBuildListDisplay which writes the final hydrated build
@@ -1459,12 +1475,12 @@ window.applyUnitTrait = function(unitId, traitName) {
     if (typeof window.recalculateHotbarTeam === 'function') {
         window.recalculateHotbarTeam();
     }
-    
+
     // Refresh the hotbar slot stats overlay (reads from hotbarFilteredBuilds)
     if (typeof window.updateHotbarUI === 'function') {
         window.updateHotbarUI();
     }
-    
+
     // Re-render the modal in-place so the selected trait gets the "ACTIVE" tag
     if (typeof openTraitBestList === 'function') openTraitBestList(unitId);
     if (typeof showToast === 'function') {
@@ -1479,7 +1495,7 @@ window.renderUnitCard = renderUnitCard;
 window.renderListInternal = renderListInternal;
 window.updateBuildListDisplay = updateBuildListDisplay;
 
-window.precalculateAllLoadoutBuilds = function() {
+window.precalculateAllLoadoutBuilds = function () {
     const activeDb = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : window.STATIC_BUILD_DB;
     if (!activeDb) return;
     if (!window.hotbarFilteredBuilds) window.hotbarFilteredBuilds = {};
@@ -1488,10 +1504,10 @@ window.precalculateAllLoadoutBuilds = function() {
         const unitId = unit.id;
         const activeType = (window.activeAbilityIds && window.activeAbilityIds.has(unitId) && unit.ability) ? 'abil' : 'base';
         const activeMode = 'fixed';
-        
+
         let dbKey = unitId;
         if (activeType === 'abil') dbKey += '_abil';
-        
+
         const dbEntry = activeDb[dbKey] || {};
         const modeData = dbEntry[activeMode] || dbEntry[activeMode === 'fixed' ? 'f' : 'b'];
         let perfectBuilds = modeData ? modeData[0] : null;

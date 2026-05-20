@@ -224,8 +224,8 @@ window.calcGlobalBuffs = function(uStats, context, headPiece) {
             let isActive = false;
             const overrideKey = buff.id + 'Buff'; 
 
-            if (buff.hideButton) {
-                isActive = true; // Always evaluate hideButton buffs since they manage their own active states!
+            if (buff.hideButton || (buff.id === 'ksailor' && window.isUnit && window.isUnit(uStats.id, 'king_sailor'))) {
+                isActive = true; // Always evaluate hideButton buffs and King Sailor's own buff
             } else if (context[overrideKey] !== undefined) {
                 isActive = context[overrideKey];
             } else if (context[buff.stateKey] !== undefined) {
