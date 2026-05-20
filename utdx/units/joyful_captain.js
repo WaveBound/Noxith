@@ -62,7 +62,7 @@ unitDatabase.push({
             desc: "KongGun + Conqueror Haki.",
             img: "images/units/JoyfulCaptain/KongConq.png",
             stats: { spaCap: 3 },
-            upgrades: [{ dmg: 10000, spa: 20, range: 45, cost: 101500, passiveSpa: 0 }],
+            upgrades: [{ dmg: 10000, spa: 20, range: 50, cost: 101500, passiveSpa: 0 }],
             totalCost: 101500,
             passives: [
                 {
@@ -84,7 +84,7 @@ unitDatabase.push({
             desc: "KongGun + Observation Haki.",
             img: "images/units/JoyfulCaptain/KongObs.png",
             stats: { spaCap: 3 },
-            upgrades: [{ dmg: 10000, spa: 20, range: 45, cost: 100000, passiveSpa: 0 }],
+            upgrades: [{ dmg: 10000, spa: 20, range: 50, cost: 100000, passiveSpa: 0 }],
             totalCost: 100000,
             passives: [
                 {
