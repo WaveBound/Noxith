@@ -32,6 +32,7 @@ unitDatabase.push({
         { name: "Manipulator of Fate", passiveDmg: 50, passiveSpa: 25, buffedByJunior: true, desc: "Gain +50% Damage and -25% Attack Speed based on shared tags with allies." },
         { name: "Baal's Lightning", desc: "Every attack chains to 5 enemies for 20% non-critical damage. Range extended by 10%." },
         { name: "Unrivaled Mark", desc: "Global Buff: Magi (+50% Dmg, -15% SPA), Uncontrollable (+30% Dmg, -10% SPA), Water (+20% Dmg, -10% SPA)." },
+        { name: "King of his People", desc: " When another unit is in range: +25% Crit damage, +10% Crit chance" },
         { name: "Rukh's Judgement", passiveCrit: 20, passiveCdmg: 25, desc: "When attacking an enemy inflicted by chain lightning in the last 10s: +10% Crit Damage and +5% Crit Chance for 15s. [On E6]: both buffs increased by 15%." }
     ],
     etherealization: [

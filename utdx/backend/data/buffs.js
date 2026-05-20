@@ -52,7 +52,7 @@ window.GLOBAL_BUFF_DATA = {
         id: 'ksailor',
         stateKey: 'kingSailorActive',
         name: 'King Sailor',
-        desc: "Passive: King of his People. . +10% Crit Rate, +20% Crit Damage.",
+        desc: "Passive: King of his People. +10% Crit Rate, +25% Crit Damage.",
         color: '#a7f3d0',
         math: (uStats, context) => {
             const isPotential = (typeof window !== 'undefined' && window.CALCULATION_MODE !== undefined) ? (window.CALCULATION_MODE === 'potential') : true;
@@ -79,35 +79,20 @@ window.GLOBAL_BUFF_DATA = {
 
             if (!isActive) return {};
 
-            // 1. BASE BUFF (+10% Crit, +20% CDmg)
+            // 1. BASE BUFF (+10% Crit, +25% CDmg)
             // King Sailor himself does not get the base crit buffs (only other units get them)
-            let b = window.isUnit(uStats.id, 'king_sailor') ? {} : { crit: 10, cdmg: 20 };
-
-            // 2. TAG & ELEMENT BUFFS
-            const tags = uStats.tags || [];
-            const element = String(uStats.element || uStats.stats?.element || "").toLowerCase();
-
-            if (tags.includes('Magi')) {
-                b.dmg = (b.dmg || 0) + 50;
-                b.spa = (b.spa || 0) + 15;
-            } else if (tags.includes('Uncontrollable Power')) {
-                b.dmg = (b.dmg || 0) + 30;
-                b.spa = (b.spa || 0) + 10;
-            } else if (element === 'water') {
-                b.dmg = (b.dmg || 0) + 20;
-                b.spa = (b.spa || 0) + 10;
-            }
+            let b = window.isUnit(uStats.id, 'king_sailor') ? {} : { crit: 10, cdmg: 25 };
 
             return b;
         },
-        renderLabel: "Leader: Unrivaled Mark",
+        renderLabel: "Leader: King of his People",
         genType: 'boolean'
     },
-    tripleThreat: {
-        id: 'triplethreat',
-        stateKey: 'tripleThreatActive',
+    unrivaledMark: {
+        id: 'unrivaledmark',
+        stateKey: 'unrivaledMarkActive',
         name: 'Unrivaled Mark',
-        desc: "Leader Passive: Unrivaled Mark. Only activates if in Slot 1 (Works on self). Tag Piece (+50% Dmg), Tag Sword (+25% Dmg), Element Wind (+20% Dmg, +5% Crit Rate).",
+        desc: "Leader Passive: Unrivaled Mark. Only activates if in Slot 1 (Works on self). Applies tag buffs based on the leader.",
         color: '#a7f3d0',
         hideButton: true,
         math: (uStats, context) => {
@@ -117,33 +102,60 @@ window.GLOBAL_BUFF_DATA = {
             if (!isPotential && (!context || !context.isHotbar)) return {};
 
             let isActive = false;
+            let leaderId = null;
+
             if (isPotential) {
-                // In potential mode, leader buff is active ONLY on Triple Threat himself!
-                isActive = (uStats.id === 'triple_threat');
+                // In potential mode, leader buff is active ONLY on the unit providing it
+                isActive = (window.isUnit(uStats.id, 'triple_threat') || window.isUnit(uStats.id, 'king_sailor'));
+                leaderId = uStats.id;
             } else {
-                // In loadout mode, active if Triple Threat is in Slot 1 of the hotbar
+                // In loadout mode, active if a unit with Unrivaled Mark is in Slot 1
                 const hState = (typeof window !== 'undefined') ? window.hotbarState : null;
                 const leader = hState?.slots ? hState.slots[0] : null;
-                isActive = leader && (leader.id === 'triple_threat' || (typeof window !== 'undefined' && window.isUnit && window.isUnit(leader.id, 'triple_threat')));
+                if (leader) {
+                    const lId = leader.id;
+                    if (window.isUnit(lId, 'triple_threat') || window.isUnit(lId, 'king_sailor')) {
+                        isActive = true;
+                        leaderId = lId;
+                    }
+                }
             }
 
-            if (!isActive) return {};
+            if (!isActive || !leaderId) return {};
 
             const tags = uStats.tags || [];
             const element = String(uStats.element || uStats.stats?.element || "").toLowerCase();
+            let b = { dmg: 0, range: 0, crit: 0, spa: 0 };
 
-            let b = { dmg: 0, range: 0, crit: 0 };
-
-            if (tags.includes('Piece')) {
-                b.dmg = 50;
-            } else if (tags.includes('Sword')) {
-                b.dmg = 25;
-            } else if (element === 'wind') {
-                b.dmg = 20;
-                b.crit = 5;
+            if (window.isUnit(leaderId, 'triple_threat')) {
+                if (tags.includes('Piece')) {
+                    b.dmg = 50;
+                } else if (tags.includes('Sword')) {
+                    b.dmg = 25;
+                } else if (element === 'wind') {
+                    b.dmg = 20;
+                    b.crit = 5;
+                }
+            } else if (window.isUnit(leaderId, 'king_sailor')) {
+                if (tags.includes('Magi')) {
+                    b.dmg = 50;
+                    b.spa = 15;
+                } else if (tags.includes('Uncontrollable Power')) {
+                    b.dmg = 30;
+                    b.spa = 10;
+                } else if (element === 'water') {
+                    b.dmg = 20;
+                    b.spa = 10;
+                }
             }
 
-            return b;
+            // Remove empty keys
+            if (b.spa === 0) delete b.spa;
+            if (b.dmg === 0) delete b.dmg;
+            if (b.crit === 0) delete b.crit;
+            if (b.range === 0) delete b.range;
+
+            return Object.keys(b).length > 0 ? b : {};
         },
         renderLabel: "Leader: Unrivaled Mark",
         genType: 'boolean'
