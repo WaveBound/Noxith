@@ -10,6 +10,75 @@ unitDatabase.push = function (unit) {
     else if (typeof global !== 'undefined' && global.__currentUnitFile) {
         unit._fileName = global.__currentUnitFile;
     }
+
+    // Dynamic Balance: Reduce all dotDurations by 1 tick/second
+    (function() {
+        const changes = new Map();
+
+        const findAndReduce = (obj) => {
+            if (!obj || typeof obj !== 'object') return;
+            if (Array.isArray(obj)) {
+                obj.forEach(item => findAndReduce(item));
+                return;
+            }
+            for (const key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                    const lowerKey = key.toLowerCase();
+                    if (lowerKey === 'dotduration' && typeof obj[key] === 'number') {
+                        const oldDur = obj[key];
+                        if (oldDur > 0) {
+                            const newDur = oldDur - 1;
+                            obj[key] = newDur;
+                            changes.set(oldDur, newDur);
+                        }
+                    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                        findAndReduce(obj[key]);
+                    }
+                }
+            }
+        };
+
+        const updateStrings = (obj) => {
+            if (!obj || typeof obj !== 'object') return;
+            if (Array.isArray(obj)) {
+                obj.forEach((item, idx) => {
+                    if (typeof item === 'string') {
+                        obj[idx] = replaceText(item);
+                    } else {
+                        updateStrings(item);
+                    }
+                });
+                return;
+            }
+            for (const key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                    if (typeof obj[key] === 'string') {
+                        obj[key] = replaceText(obj[key]);
+                    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                        updateStrings(obj[key]);
+                    }
+                }
+            }
+        };
+
+        const replaceText = (text) => {
+            let newText = text;
+            changes.forEach((newDur, oldDur) => {
+                newText = newText
+                    .replace(new RegExp(`\\b${oldDur}\\s*ticks\\b`, 'gi'), `${newDur} ticks`)
+                    .replace(new RegExp(`\\b${oldDur}\\s*seconds\\b`, 'gi'), `${newDur} seconds`)
+                    .replace(new RegExp(`over ${oldDur} ticks`, 'gi'), `over ${newDur} ticks`)
+                    .replace(new RegExp(`over ${oldDur} seconds`, 'gi'), `over ${newDur} seconds`);
+            });
+            return newText;
+        };
+
+        findAndReduce(unit);
+        if (changes.size > 0) {
+            updateStrings(unit);
+        }
+    })();
+
     return _originalPush.call(this, unit);
 };
 // ============================================================================

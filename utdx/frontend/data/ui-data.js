@@ -7,6 +7,7 @@ const patchNotesData = [
         version: "v6.0",
         date: "May 19, 2026",
         changes: [
+            { type: "Balance", text: "<b>DoT Duration Reduction:</b> Reduced all character DoT durations by 1 tick/second across all modes and passives as a global balance adjustment, since the first tick applies instantly." },
             { type: "Relics", text: "<b>Gluttonous Warlord:</b> Enabled <b>Monarch Cape</b> head piece compatibility, allowing her to combine the Warlord set with Monarch Cape for a dynamic +60% damage buff." },
             { type: "Relics", text: "<b>Triple Threat:</b> Enabled <b>Bijuu Head Piece</b> compatibility, granting a permanent +70% passive damage bonus." },
             { type: "Fix", text: "<b>King Sailor:</b> Fixed Potential Mode scaling. He no longer incorrectly receives his own leader buff's Crit Rate (+10%) or Crit Damage (+20%) bonuses, receiving only his tag buff (+50% Dmg, -15% SPA)." },
