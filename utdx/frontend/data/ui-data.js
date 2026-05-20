@@ -10,7 +10,8 @@ const patchNotesData = [
             { type: "Balance", text: "<b>DoT Duration Reduction:</b> Reduced all character DoT durations by 1 tick/second across all modes and passives as a global balance adjustment, since the first tick applies instantly." },
             { type: "Relics", text: "<b>Gluttonous Warlord:</b> Enabled <b>Monarch Cape</b> head piece compatibility, allowing her to combine the Warlord set with Monarch Cape for a dynamic +60% damage buff." },
             { type: "Relics", text: "<b>Triple Threat:</b> Enabled <b>Bijuu Head Piece</b> compatibility, granting a permanent +70% passive damage bonus." },
-            { type: "Fix", text: "<b>Mochi Pirate:</b> Fixed bugs by disabling his default 100% base crit rate (set to 0%) and excluding him from the Time Snail relic check. Added a warning notice banner to his unit profile." }
+            { type: "Fix", text: "<b>Mochi Pirate:</b> Fixed bugs by disabling his default 100% base crit rate (set to 0%) and excluding him from the Time Snail relic check. Added a warning notice banner to his unit profile." },
+            { type: "Fix", text: "<b>Bio Android (Relic):</b> SPA stat set from -5 to 0 to match in-game behavior as it is currently bugged." }
         ]
     },
     {

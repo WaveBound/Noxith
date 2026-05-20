@@ -310,9 +310,16 @@ function calculateDPS(uStats, relicStats, context) {
     let bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
     let normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
 
+    let tripleThreatFuaDmgNormal = finalDmgNormal;
     if (uStats.id === 'triple_threat') {
-        const followUpDps = ((0.75 * avgHit) / 15) * placement;
-        const followUpDpsBoss = ((0.75 * avgHitBoss) / 15) * placement;
+        const fuaAdditiveTotal = additiveTotal - 25;
+        tripleThreatFuaDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * Math.max(0, 1 + fuaAdditiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
+        
+        const fuaAvgHit = tripleThreatFuaDmgNormal * avgCritMult;
+        const fuaAvgHitBoss = tripleThreatFuaDmgNormal * avgCritMultBoss;
+
+        const followUpDps = (fuaAvgHit / 15) * placement;
+        const followUpDpsBoss = (fuaAvgHitBoss / 15) * placement;
         hitDpsTotal += followUpDps;
         bossHitDpsTotal += followUpDpsBoss;
     }
@@ -367,8 +374,8 @@ function calculateDPS(uStats, relicStats, context) {
         const bleedPct = ((upgradeLevel >= 6) ? 120 : 100) * traitMultiplier * gearMultiplier;
 
         // Follow-up is a Critical Bleed: always multiplies by avgCritMult
-        const fuaDotDmg = finalDmg * (bleedPct / 100) * avgCritMult;
-        const fuaDotDmgBoss = finalDmgBoss * (bleedPct / 100) * avgCritMultBoss;
+        const fuaDotDmg = tripleThreatFuaDmgNormal * (bleedPct / 100) * avgCritMult;
+        const fuaDotDmgBoss = tripleThreatFuaDmgNormal * (bleedPct / 100) * avgCritMultBoss;
 
         // Only added to DPS if trait allows DoT stacking (e.g. Astral)
         const canStack = !!traitObj.allowDotStack;

@@ -6,7 +6,7 @@ const setBonuses = {
     shadow_reaper: { dmg: 2.5, spa: 0, cf: 5, cm: 5, range: 10 },
     reaper_set: { dmg: 0, spa: 7.5, cf: 0, cm: 0, range: 15 },
     super_roku: { dmg: 10, spa: 0, cf: 15, cm: 0, range: 0 },
-    bio_android: { dmg: 10, spa: 5, cf: 5, cm: 15, range: 5 },
+    bio_android: { dmg: 10, spa: 0, cf: 5, cm: 15, range: 5 },
     biju_set: { dmg: 10, spa: 0, cf: 0, cm: 0, range: 0 },
     rebellious_set: { dmg: 0, spa: 0, cf: 0, cm: 0, range: 0 },
     reanimated_ninja: { dmg: 10, spa: 0, cf: 0, cm: 0, range: 0, dot: 30 },

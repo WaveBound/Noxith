@@ -20,7 +20,7 @@ unitDatabase.push({
 
     // BASE STATS
     stats: {
-        crit: 0,
+        crit: 100,
         cdmg: 200,
         dot: 0,
         dotStacks: 1,

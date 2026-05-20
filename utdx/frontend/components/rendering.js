@@ -937,7 +937,7 @@ function renderUnitCard(unit, absoluteIndex) {
         customNoticeHtml = `
         <div class="unit-card-warning" style="padding: 6px 12px; background: rgba(239, 68, 68, 0.08); border-bottom: 1px solid rgba(239, 68, 68, 0.15); display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 700; color: #f87171;">
             <span style="font-size: 0.85rem; line-height: 1;">⚠️</span>
-            <span><strong>Notice:</strong> Mochi Pirate is bugged; he does not apply Time Snail currently.</span>
+            <span><strong>Notice:</strong> Mochi Pirate is bugged; he does not apply Time Snail currently / Crit Time snail enemies.</span>
         </div>`;
     }
 
