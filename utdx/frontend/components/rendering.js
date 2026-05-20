@@ -156,7 +156,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     return `
         <div class="build-row ${rankClass} ${sortMode === 'efficiency' ? 'is-efficiency-sort' : ''}">
             <div class="br-header" style="align-items: flex-start; padding-top: 6px;">
-                <div class="br-header-info" style="margin-top: 2px;"><span class="br-rank">#${i + 1}</span><span class="br-set">${r.setName}</span><span class="br-sep">/</span><span class="br-trait">${r.traitName}</span></div>
+                <div class="br-header-info" style="margin-top: 2px;"><span class="br-rank">#${i + 1}</span><span class="br-set">${r.setName.toLowerCase().includes('set') ? r.setName : r.setName + ' Set'}</span><span class="br-sep">/</span><span class="br-trait">${r.traitName}</span></div>
                 <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
                     <div style="display:flex; gap:6px; align-items:center;">${mobileToggle}${prioHtml}</div>
                     ${optimalityHtml}
@@ -914,7 +914,11 @@ function renderUnitCard(unit, absoluteIndex) {
         }
     }
 
-    const topControls = `<div class="unit-toolbar"><div class="ut-actions"><button class="calc-btn ut-btn-compact" onclick="openCalc('${unit.id}')">🖩 Custom</button><button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">📊 Traits</button><button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">ⓘ Info</button></div><div class="ut-toggle-area">${initialModeIndicatorHtml}${modesBtn}${abilityToggleHtml}</div></div>`;
+    const iconCustom = `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; color: #06b6d4;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>`;
+    const iconTraits = `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; color: #a78bfa;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`;
+    const iconInfo = `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; color: #0ea5e9;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+
+    const topControls = `<div class="unit-toolbar"><div class="ut-actions"><button class="calc-btn ut-btn-compact" onclick="openCalc('${unit.id}')">${iconCustom} CUSTOM</button><button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">${iconTraits} TRAITS</button><button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">${iconInfo} INFO</button></div><div class="ut-toggle-area">${initialModeIndicatorHtml}${modesBtn}${abilityToggleHtml}</div></div>`;
 
     let defaultSort = 'dps';
     if (isAnyUnit(unit.id, ['sjw', 'esdeath'])) defaultSort = 'damage';
@@ -1080,7 +1084,7 @@ function renderUnitCard(unit, absoluteIndex) {
                     return `<div class="placement-badge synergy-dot-badge" style="color: #71717a; border-color: rgba(113, 113, 122, 0.3); background: rgba(0,0,0,0.2); font-weight: 700; opacity: 0.6;">⛓ REQUIRED: ${requiresDot.toUpperCase()}</div>`;
                 }
             })()}
-        </div>${getUnitImgHtml(unit, 'unit-avatar')}<div class="unit-title"><h2>${unit.name}</h2><span>${unit.role}</span></div>${unit.meta ? `<button class="trait-guide-btn" onclick="openTraitGuide('${unit.id}')">📋 Rec. Traits</button>` : ''}`,
+        </div>${getUnitImgHtml(unit, 'unit-avatar')}<div class="unit-title"><h2>${unit.name}</h2><span>${unit.role}</span></div>${unit.meta ? `<button class="trait-guide-btn" onclick="openTraitGuide('${unit.id}')" style="font-size: 0.65rem; padding: 2px 6px;">📋 Rec. Traits</button>` : ''}`,
         topControls, bottomControls, mainContent
     });
 }
