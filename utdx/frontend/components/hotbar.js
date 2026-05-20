@@ -304,7 +304,12 @@ function openTeamSummary() {
         }
 
         // Custom Unit Effects requested by user
-        if (unit.id === 'underworld_god') {
+        if (unit.id === 'joyful_captain' && activeModeName && activeModeName.includes('joy boy')) {
+            effects.push({ label: 'Rubber Control', val: '1.5x DoT', color: '#f43f5e', skipTeam: true });
+            effects.push({ label: 'Rubber Control', val: 'Knockback 10 studs', color: '#f43f5e', skipTeam: true });
+            effects.push({ label: 'Rubber Control', val: '+30% Dmg Taken', color: '#f43f5e', skipTeam: true });
+            teamEffects.push({ label: 'Rubber Control', val: '1.5x DoT | Knockback 10 studs | +30% Dmg Taken', color: '#f43f5e', unitName: unit.name });
+        } else if (unit.id === 'underworld_god') {
             effects.push({ label: 'Primordial Power', val: '30% Slow (3s) | +20% DoT/Affliction', color: '#60a5fa' });
         } else if (unit.id === 'water_god') {
             effects.push({ label: 'Primordial Power', val: '30% Slow (3s) | +20% DoT Duration', color: '#60a5fa' });
@@ -379,7 +384,9 @@ function openTeamSummary() {
         }
 
         // Push to team-wide effects tracker
-        effects.forEach(e => teamEffects.push({ ...e, unitName: unit.name }));
+        effects.forEach(e => {
+            if (!e.skipTeam) teamEffects.push({ ...e, unitName: unit.name });
+        });
 
         // DPS breakdown stats
         const spaStr = build.spa ? (typeof fix2 === 'function' ? fix2(build.spa) + 's' : build.spa.toFixed(2) + 's') : '—';
@@ -519,8 +526,15 @@ function openTeamSummary() {
                 const jinooInLoadout = isLoadout ? hotbarState.slots.some(s => s && (window.isUnit(s.id, 'jinoo_shadow_monarch') || window.isUnit(s.id, 'sjw'))) : true;
 
                 let passiveHtml = '';
-                if (unit.passives && unit.passives.length > 0) {
-                    passiveHtml = unit.passives.map(p => {
+                let activePassives = unit.passives;
+                if (unit.modes && Array.isArray(unit.modes)) {
+                    const activeModeIdx = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+                    if (unit.modes[activeModeIdx] && unit.modes[activeModeIdx].passives) {
+                        activePassives = unit.modes[activeModeIdx].passives;
+                    }
+                }
+                if (activePassives && activePassives.length > 0) {
+                    passiveHtml = activePassives.map(p => {
                         // Special logic for King Sailor and Triple Threat conditional passives
                         if (p.name === "Unrivaled Mark") {
                             if (window.isUnit(unit.id, 'king_sailor')) {
@@ -563,7 +577,7 @@ function openTeamSummary() {
                         if (rangeVal !== 0) statParts.push(`+${rangeVal}% RANGE`);
 
                         const statStr = statParts.join(' / ');
-                        let descText = p.desc ? (p.desc.length > 120 ? p.desc.substring(0, 120).trim() + '…' : p.desc) : '';
+                        let descText = p.desc ? (p.desc.length > 250 ? p.desc.substring(0, 250).trim() + '…' : p.desc) : '';
 
 
                         // Determine badge type

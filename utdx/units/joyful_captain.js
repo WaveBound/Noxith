@@ -116,7 +116,7 @@ unitDatabase.push({
                 },
                 {
                     name: "Rubber Control",
-                    desc: "<b>On Attack:</b><br>• Leave behind a bouncy area where this unit attacked for 15 seconds<br>• Enemies in bouncy areas will take 1.5x DoT for 10 seconds<br>• After the DoT buff ends, knock enemies back 10 studs<br><b>Every second enemies spend in bouncy areas:</b><br>• Take +5% Damage from all sources up to +30% for 15 seconds<br>• Maximum amount of bouncy areas: 2<br>• This passive does not trigger for Variant 3 of 'Goofing Around'"
+                    desc: "<b>On Attack:</b><br>• Leaves bouncy area<br>• 1.5x DoT Dmg for 10s<br>• Knocks enemies back 10 studs<br>• Enemies take +30% dmg<br>• Maximum amount of bouncy areas: 2<br>• This passive does not trigger for Variant 3 of 'Goofing Around'"
                 },
                 {
                     name: "Armament",
@@ -139,7 +139,7 @@ unitDatabase.push({
                 },
                 {
                     name: "Rubber Control",
-                    desc: "<b>On Attack:</b><br>• Leave behind a bouncy area where this unit attacked for 15 seconds<br>• Enemies in bouncy areas will take 1.5x DoT for 10 seconds<br>• After the DoT buff ends, knock enemies back 10 studs<br><b>Every second enemies spend in bouncy areas:</b><br>• Take +5% Damage from all sources up to +30% for 15 seconds<br>• Maximum amount of bouncy areas: 2<br>• This passive does not trigger for Variant 3 of 'Goofing Around'"
+                    desc: "<b>On Attack:</b><br>• Leaves bouncy area<br>• 1.5x DoT Dmg for 10s<br>• Knocks enemies back 10 studs<br>• Enemies take +30% dmg<br>• Maximum amount of bouncy areas: 2<br>• This passive does not trigger for Variant 3 of 'Goofing Around'"
                 },
                 {
                     name: "Observation",
