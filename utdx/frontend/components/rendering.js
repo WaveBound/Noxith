@@ -297,7 +297,22 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
             const modeData = dbEntry[activeMode] || dbEntry[activeMode === 'fixed' ? 'f' : 'b'];
             const perfectBuilds = modeData ? modeData[0] : null;
-            if (perfectBuilds && perfectBuilds.length > 0) benchmarkDps = perfectBuilds[0].dps || 0;
+            if (perfectBuilds && perfectBuilds.length > 0) {
+                // Hydrate the benchmark build through reconstructMathData so the DPS
+                // is computed with the same pipeline (current conditions, buffs, star level)
+                // as every other displayed build. Using the static pre-stored dps would
+                // give a mismatched comparison since displayed builds are recomputed live.
+                if (typeof reconstructMathData === 'function') {
+                    try {
+                        const benchMath = reconstructMathData(perfectBuilds[0], undefined, { isHotbar: isHotbar });
+                        benchmarkDps = (benchMath && benchMath.total) ? benchMath.total : (perfectBuilds[0].dps || 0);
+                    } catch (e) {
+                        benchmarkDps = perfectBuilds[0].dps || 0;
+                    }
+                } else {
+                    benchmarkDps = perfectBuilds[0].dps || 0;
+                }
+            }
 
             // NEW: If unit has modes and we are forcing a sync (from a mode change),
             // re-calculate the best possible build dynamically. 
