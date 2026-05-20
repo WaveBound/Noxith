@@ -151,13 +151,16 @@ window.calcPassives = function(uStats, context, headPiece, upgradeLevel) {
             const isAkDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'ant_king_savage') && p.name === "Monarch's Devotion");
             const isUgDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother");
 
-            if (p.name === "Pirate Hunter" && (context.isBoss || (typeof window !== 'undefined' && window.ttBossActive))) {
-                let bossDmgBuff = (upgradeLevel >= 4) ? 65 : 50;
-                if (headPiece === 'junior') {
-                    bossDmgBuff *= 1.1;
+            if (p.name === "Pirate Hunter") {
+                const activeModeIdx = (typeof window !== 'undefined' && window.unitModesState && window.unitModesState['triple_threat'] !== undefined) ? window.unitModesState['triple_threat'] : 0;
+                if (context.isBoss || activeModeIdx === 0) {
+                    let bossDmgBuff = (upgradeLevel >= 4) ? 65 : 50;
+                    if (headPiece === 'junior') {
+                        bossDmgBuff *= 1.1;
+                    }
+                    pDmg += bossDmgBuff;
+                    pCrit += 65;
                 }
-                pDmg += bossDmgBuff;
-                pCrit += 65;
             }
 
             if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || isKsDynamic || isAkDynamic || isUgDynamic) {

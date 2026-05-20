@@ -6,13 +6,6 @@ window.unitSystemLevels = window.unitSystemLevels || {};
 window.unitTraits = window.unitTraits || {};
 window.unitHeads = window.unitHeads || {};
 window.unitModesState = window.unitModesState || {};
-window.ttBossActive = false;
-
-window.toggleTTBoss = function() {
-    window.ttBossActive = !window.ttBossActive;
-    if (window.unitBuildsCache['triple_threat']) delete window.unitBuildsCache['triple_threat'];
-    updateBuildListDisplay('triple_threat', true);
-};
 
 // Single Source of Truth for Head Item UI mapping in rendering
 const HEAD_CONFIG = {
@@ -40,7 +33,6 @@ const TOGGLE_OVERRIDES = {
     'nutaru_beast': { label: 'Beast Mode' },
     'ancient_shinob': { label: 'Reanimation' },
     'super_roku': { label: 'Same Enemy' },
-    'triple_threat': { label: 'KoH' },
     'cell': {
         dynamicLabel: (isChecked) => isChecked ? 'Perfect Form' : 'True Form',
         script: `this.parentElement.previousElementSibling.innerText = this.checked ? 'Perfect Form' : 'True Form'; this.closest('.unit-toolbar').firstElementChild.style.gap = '2px';`
@@ -309,10 +301,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             // NEW: If unit has modes and we are forcing a sync (from a mode change),
             // re-calculate the best possible build dynamically. 
             // The static DB only contains results for the "Base" form.
-            // ALSO do this for Triple Threat if both toggles are ON or both are OFF.
-            const isTTDynamicState = (unitId === 'triple_threat' && ((window.ttBossActive && activeType === 'abil') || (!window.ttBossActive && activeType === 'base')));
-            
-            if (forceSync && unitObj && (unitObj.modes || isTTDynamicState)) {
+            if (forceSync && unitObj && unitObj.modes) {
                 const dynamicResults = calculateUnitBuilds(
                     unitObj,
                     null,
@@ -328,7 +317,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     benchmarkDps = dynamicResults[0].dps || 0;
                     // Cache this new benchmark for this unit/mode combo
                     if (!window.modeBenchmarks) window.modeBenchmarks = {};
-                    const stateStr = isTTDynamicState ? `boss_${window.ttBossActive}` : JSON.stringify(window.unitModesState[unitId]);
+                    const stateStr = JSON.stringify(window.unitModesState[unitId]);
                     const modeKey = `${unitId}-${stateStr}-${activeType}`;
                     window.modeBenchmarks[modeKey] = benchmarkDps;
                     
@@ -338,9 +327,9 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     window.unitBuildsCache[unitId][activeType][activeMode] = [dynamicResults];
                     // DO NOT return here, we must continue to render the list!
                 }
-            } else if (unitObj && (unitObj.modes || isTTDynamicState)) {
+            } else if (unitObj && unitObj.modes) {
                 // Check cache if not forcing sync
-                const stateStr = isTTDynamicState ? `boss_${window.ttBossActive}` : JSON.stringify(window.unitModesState[unitId]);
+                const stateStr = JSON.stringify(window.unitModesState[unitId]);
                 const modeKey = `${unitId}-${stateStr}-${activeType}`;
                 if (window.modeBenchmarks && window.modeBenchmarks[modeKey]) {
                     benchmarkDps = window.modeBenchmarks[modeKey];
@@ -389,7 +378,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 if (fullMath) {
                     res.dps = fullMath.total || fullMath.dps || 0;
                     res.bossDps = fullMath.bossTotal || fullMath.bossDps || 0;
-                    res.dmgVal = (unitId === 'triple_threat' && window.ttBossActive) ? (fullMath.bossDmgVal || fullMath.dmgVal) : fullMath.dmgVal;
+                    res.dmgVal = fullMath.dmgVal;
                     res.spa = fullMath.spa;
                     res.range = fullMath.range;
                     res.dot = fullMath.dot;
@@ -616,7 +605,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                 // If global buffers are active or special dynamic states exist, re-optimize
                 // the static builds dynamically in the browser (incredibly fast single-relic single-trait calculations)!
                 const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(buff => !buff.hideButton && !!window[buff.stateKey]);
-                const ttBossOff = (unit.id === 'triple_threat' && !window.ttBossActive);
+                const ttBossOff = (unit.id === 'triple_threat' && (window.unitModesState['triple_threat'] === 1));
                 
                 if ((anyGlobal || ttBossOff) && calculatedResults.length > 0) {
                     calculatedResults = calculatedResults.map(r => {
@@ -747,7 +736,8 @@ window.getLiveScore = (unit) => {
     if (unitId === 'triple_threat') activeType = 'base';
 
     const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(buff => !buff.hideButton && !!window[buff.stateKey]);
-    const cacheKey = `${unitId}-${currentTrait || ''}-${currentHead || ''}-${activeType}-${anyGlobal ? 'buffed' : 'base'}-${window.ttBossActive ? 'boss' : 'noboss'}`;
+    const activeModeIdx = (window.unitModesState && window.unitModesState[unitId] !== undefined) ? window.unitModesState[unitId] : 0;
+    const cacheKey = `${unitId}-${currentTrait || ''}-${currentHead || ''}-${activeType}-${anyGlobal ? 'buffed' : 'base'}-${activeModeIdx}`;
     if (window.LIVE_SCORE_CACHE[cacheKey] !== undefined) {
         return window.LIVE_SCORE_CACHE[cacheKey];
     }
@@ -767,7 +757,7 @@ window.getLiveScore = (unit) => {
     // we can just read the pre-saved dps directly from the #1 build in the database!
     // This is instant and avoids thousands of reconstructMathData calls on load.
     // We bypass this for Triple Threat when Boss is OFF since the pre-saved database baseline has Boss ON.
-    const isTTWithoutBoss = (unitId === 'triple_threat' && !window.ttBossActive);
+    const isTTWithoutBoss = (unitId === 'triple_threat' && (window.unitModesState['triple_threat'] === 1));
     if (!currentTrait && !currentHead && !anyGlobal && !isTTWithoutBoss) {
         const topBuild = buildList[0];
         if (topBuild) {
@@ -802,7 +792,7 @@ window.getLiveScore = (unit) => {
         if (currentTrait) scoringEntry.traitName = currentTrait;
         if (currentHead) scoringEntry.headUsed = currentHead;
 
-        const ttBossOff = (unitId === 'triple_threat' && !window.ttBossActive);
+        const ttBossOff = (unitId === 'triple_threat' && (window.unitModesState['triple_threat'] === 1));
         let finalScoringEntry = scoringEntry;
         if (anyGlobal || ttBossOff) {
             const setName = scoringEntry.setName || (typeof scoringEntry.s === 'number' ? SETS[scoringEntry.s]?.id : scoringEntry.s) || (window.getSetFast && window.getSetFast(scoringEntry.setName)?.id);
@@ -906,10 +896,7 @@ function renderUnitCard(unit, absoluteIndex) {
 
     let abilityToggleHtml = (unit.ability && !abilityObj.noToggle) ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>` : '<div></div>';
     
-    if (unit.id === 'triple_threat') {
-        const isBossToggled = window.ttBossActive || false;
-        abilityToggleHtml += `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="Boss">Boss</span><label><input type="checkbox" class="ability-cb" ${isBossToggled ? 'checked' : ''} onchange="toggleTTBoss()"><div class="mini-switch"></div></label></div>`;
-    }
+
 
     const modesBtn = (unit.modes && Array.isArray(unit.modes)) ? `<button class="calc-btn ut-btn-compact modes-btn" onclick="openUnitModes('${unit.id}')" title="Change Mode">${unit.modesLabel || 'Modes'}</button>` : '';
 
@@ -1564,7 +1551,7 @@ window.precalculateAllLoadoutBuilds = function() {
                     if (fullMath) {
                         hydrated.dps = fullMath.total || fullMath.dps || 0;
                         hydrated.bossDps = fullMath.bossTotal || fullMath.bossDps || 0;
-                        hydrated.dmgVal = (unitId === 'triple_threat' && window.ttBossActive) ? (fullMath.bossDmgVal || fullMath.dmgVal) : fullMath.dmgVal;
+                        hydrated.dmgVal = fullMath.dmgVal;
                         hydrated.spa = fullMath.spa;
                         hydrated.range = fullMath.range;
                     }
