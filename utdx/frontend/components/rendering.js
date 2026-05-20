@@ -139,10 +139,10 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     const mainBodyBadge = getBadgeHtml(r.mainStats.body, MAIN_STAT_VALS.body[r.mainStats.body]);
     const mainLegsBadge = getBadgeHtml(r.mainStats.legs, MAIN_STAT_VALS.legs[r.mainStats.legs]);
     const headHtml = getHeadBadgeHtml(r.headUsed);
-    const s = r.subStats || {};
-    const headRow = (r.headUsed && r.headUsed !== 'none') ? `<div class="stat-line"><span class="sl-label">HEAD</span>${getRichBadgeHtml(s.head || [])}</div>` : '';
-    const bodyRow = `<div class="stat-line"><span class="sl-label">BODY</span>${getRichBadgeHtml(s.body || [])}</div>`;
-    const legsRow = `<div class="stat-line"><span class="sl-label">LEGS</span>${getRichBadgeHtml(s.legs || [])}</div>`;
+    const s = window.disableSubStats ? {} : (r.subStats || {});
+    const headRow = (!window.disableSubStats && r.headUsed && r.headUsed !== 'none') ? `<div class="stat-line"><span class="sl-label">HEAD</span>${getRichBadgeHtml(s.head || [])}</div>` : '';
+    const bodyRow = window.disableSubStats ? '' : `<div class="stat-line"><span class="sl-label">BODY</span>${getRichBadgeHtml(s.body || [])}</div>`;
+    const legsRow = window.disableSubStats ? '' : `<div class="stat-line"><span class="sl-label">LEGS</span>${getRichBadgeHtml(s.legs || [])}</div>`;
 
     const mobileToggle = `<button class="mobile-stat-toggle" onclick="toggleRelicStatDisplay(this)"><span class="m-toggle-txt">Main</span><span class="m-toggle-txt">Sub</span></button>`;
 
@@ -152,24 +152,25 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     else if (isBossHigher) {
         displayLabel = `BOSS DPS`;
     }
+    const hasBossDps = isBossHigher || (r.bossDps && r.bossDps !== r.dps);
 
     return `
         <div class="build-row ${rankClass} ${sortMode === 'efficiency' ? 'is-efficiency-sort' : ''}">
             <div class="br-header" style="align-items: flex-start; padding-top: 6px;">
                 <div class="br-header-info" style="margin-top: 2px;"><span class="br-rank">#${i + 1}</span><span class="br-set">${r.setName.toLowerCase().includes('set') ? r.setName : r.setName + ' Set'}</span><span class="br-sep">/</span><span class="br-trait">${r.traitName}</span></div>
                 <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
-                    <div style="display:flex; gap:6px; align-items:center;">${mobileToggle}${prioHtml}</div>
+                    <div style="display:flex; gap:6px; align-items:center;">${mobileToggle}${hasBossDps ? `<div class="eff-score-line" onclick="event.stopPropagation(); openInfoPopup('efficiency')">${effScore} <span class="eff-label">Eff</span></div>` : ''}${prioHtml}</div>
                     ${optimalityHtml}
                 </div>
             </div>
-            <div class="br-grid">
+            <div class="br-grid ${window.disableSubStats ? 'no-subs' : ''}">
                 <div class="br-col main"><div class="br-col-title">MAIN STAT</div>${headHtml}<div class="stat-line"><span class="sl-label">BODY</span> ${mainBodyBadge}</div><div class="stat-line"><span class="sl-label">LEGS</span> ${mainLegsBadge}</div></div>
-                <div class="br-col sub">
+                ${window.disableSubStats ? '' : `<div class="br-col sub">
                     <div class="br-col-header"><div class="br-col-title">SUB STAT</div></div>
                     ${headRow}${bodyRow}${legsRow}
-                </div>
+                </div>`}
                 <div class="br-res-col">
-                    <div class="eff-score-line" onclick="event.stopPropagation(); openInfoPopup('efficiency')">${effScore} <span class="eff-label">Eff</span></div>
+                    ${!hasBossDps ? `<div class="eff-score-line" onclick="event.stopPropagation(); openInfoPopup('efficiency')">${effScore} <span class="eff-label">Eff</span></div>` : ''}
                     <div class="dps-container">
                         <span class="build-dps">${displayVal}</span>
                         <div style="display:flex; align-items:center; gap:4px; justify-content: flex-end; margin-top: 2px;">
@@ -308,7 +309,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     null, // No filter
                     ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'],
                     ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'],
-                    true,
+                    !window.disableSubStats,
                     null,
                     activeType === 'abil',
                     activeMode
@@ -579,7 +580,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
         };
     }
 
-    const CONFIGS = [{ head: true, subs: true }];
+    const CONFIGS = [{ head: true, subs: !window.disableSubStats }];
 
     const performCalcSet = (mode, useAbility, targetCache) => {
         let dbKey = unit.id;
@@ -604,7 +605,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
 
                 // If global buffers are active or special dynamic states exist, re-optimize
                 // the static builds dynamically in the browser (incredibly fast single-relic single-trait calculations)!
-                const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(buff => !buff.hideButton && !!window[buff.stateKey]);
+                const anyGlobal = (window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(buff => !buff.hideButton && !!window[buff.stateKey])) || window.disableSubStats;
 
                 if (anyGlobal && calculatedResults.length > 0) {
                     calculatedResults = calculatedResults.map(r => {
@@ -733,7 +734,7 @@ window.getLiveScore = (unit) => {
     const currentHead = (window.unitHeads && window.unitHeads[unitId]);
     let activeType = (window.activeAbilityIds && window.activeAbilityIds.has(unitId)) ? 'abil' : 'base';
 
-    const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(buff => !buff.hideButton && !!window[buff.stateKey]);
+    const anyGlobal = (window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(buff => !buff.hideButton && !!window[buff.stateKey])) || window.disableSubStats;
     const activeModeIdx = (window.unitModesState && window.unitModesState[unitId] !== undefined) ? window.unitModesState[unitId] : 0;
     const cacheKey = `${unitId}-${currentTrait || ''}-${currentHead || ''}-${activeType}-${anyGlobal ? 'buffed' : 'base'}-${activeModeIdx}`;
     if (window.LIVE_SCORE_CACHE[cacheKey] !== undefined) {
@@ -803,7 +804,7 @@ window.getLiveScore = (unit) => {
                     singleBuilds,
                     window.getValidSubCandidates(),
                     currentHead ? [currentHead] : ['none'],
-                    true, // includeSubs
+                    !window.disableSubStats, // includeSubs
                     traitArr,
                     activeType === 'abil',
                     'fixed'

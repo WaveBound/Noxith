@@ -606,6 +606,10 @@
     z-index: 1;
 }
 
+.br-grid.no-subs {
+    grid-template-columns: 1fr var(--col-res);
+}
+
 .br-col {
     display: flex;
     flex-direction: column;

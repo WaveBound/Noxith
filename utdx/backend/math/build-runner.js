@@ -292,7 +292,7 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
     const isAbility = liteData.id.includes('ABILITY') || (typeof activeAbilityIds !== 'undefined' && activeAbilityIds.has(unitId));
     const isBuggedMode = liteData.id.includes('-b-');
     const isFixedMode = liteData.id.includes('-f-');
-    const isNoSubsMode = liteData.id.includes('-NOSUBS');
+    const isNoSubsMode = liteData.id.includes('-NOSUBS') || (typeof disableSubStats !== 'undefined' && disableSubStats) || (typeof window !== 'undefined' && window.disableSubStats);
 
     // Determine Logic State based on ID (Override global state for reconstruction)
     const previousDotState = statConfig.applyRelicDot;
@@ -349,8 +349,8 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
         if (liteData.mainStats.legs) { const k = mapStatKey(liteData.mainStats.legs); if (MAIN_STAT_VALS.legs[k]) totalStats[k] += MAIN_STAT_VALS.legs[k]; }
     }
 
-    // 1. Add explicitly stored sub-stats
-    if (liteData.subStats) {
+    // 1. Add explicitly stored sub-stats (only if not in No Substats mode)
+    if (!isNoSubsMode && liteData.subStats) {
         ['head', 'body', 'legs'].forEach(slot => {
             if (liteData.subStats[slot] && Array.isArray(liteData.subStats[slot])) {
                 liteData.subStats[slot].forEach(sub => {

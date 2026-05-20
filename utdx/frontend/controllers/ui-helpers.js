@@ -388,6 +388,32 @@ window.toggleInventoryMode = (checkbox) => {
     if (guidesPage && guidesPage.classList.contains('active') && typeof renderGuides === 'function') renderGuides();
 };
 
+window.toggleNoSubStats = (checkbox) => {
+    const isChecked = checkbox.checked;
+    disableSubStats = isChecked;
+    window.disableSubStats = isChecked;
+
+    const ids = ['globalNoSubStats', 'sidebarNoSubStats', 'guideNoSubStats'];
+    ids.forEach(id => {
+        const cb = document.getElementById(id);
+        if (cb) {
+            cb.checked = isChecked;
+            if (cb.parentNode) {
+                cb.parentNode.classList.toggle('is-checked', isChecked);
+            }
+        }
+    });
+
+    if (typeof window.resetCachesForBuffChange === 'function') {
+        window.resetCachesForBuffChange();
+    }
+
+    window.resetAndRender();
+    const guidesPage = document.getElementById('guidesPage');
+    if (guidesPage && guidesPage.classList.contains('active') && typeof renderGuides === 'function') renderGuides();
+};
+
+
 
 // --- 6. PAGE HELPERS & LISTENERS ---
 let activeBuildUpdateFrame = null;

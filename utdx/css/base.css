@@ -536,7 +536,7 @@ body.header-collapsed .header-toggle-btn {
     gap: 15px;
     transition: opacity 0.15s;
     box-sizing: border-box;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     position: relative;
     z-index: 50;
 }
@@ -546,8 +546,8 @@ body.header-collapsed .header-toggle-btn {
     flex-direction: row;
     align-items: center;
     gap: 10px;
-    flex-wrap: wrap;
-    flex: 1;
+    flex-wrap: nowrap;
+    flex: 0 0 auto;
     justify-content: flex-start;
 }
 
@@ -558,7 +558,7 @@ body.header-collapsed .header-toggle-btn {
     gap: 8px;
     position: relative;
     z-index: 60;
-    flex: 1;
+    flex: 1 1 auto;
     justify-content: center;
 }
 
@@ -568,7 +568,7 @@ body.header-collapsed .header-toggle-btn {
     align-items: center;
     justify-content: flex-end;
     gap: 12px;
-    flex: 1;
+    flex: 0 0 auto;
 }
 
 .top-pagination-container .pagination-bar {

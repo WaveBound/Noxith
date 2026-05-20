@@ -67,7 +67,7 @@ unitDatabase.push({
             passives: [
                 {
                     name: "Charge",
-                    desc: "• Gains charge when not attacking. Damage and SPA are buffed per charge level.<br>• Charge Level ranges from 1 to 10.<br>• at Level 1: +15% Damage, -95% SPA<br>• at Level 2: +30% Damage, -90% SPA<br>• each level adds +15% Damage and -5% SPA<br>• at Level 10: +150% Damage, -50% SPA"
+                    desc: "• Gains charge when not attacking.<br>• Charge Level ranges from 1 to 10.<br>• Each level sets SPA Value to that level.<br>• Every second of charge +15% Dmg."
                 },
                 {
                     name: "Armament",

@@ -90,6 +90,12 @@
                 <div class="mini-switch"></div>
             </label>
 
+            <label class="nav-toggle-label sidebar-toggle">
+                <input type="checkbox" id="sidebarNoSubStats" onchange="toggleNoSubStats(this)">
+                <span>No Substats</span>
+                <div class="mini-switch"></div>
+            </label>
+
             <div class="sidebar-divider">Utility</div>
         </div>
 
@@ -126,6 +132,12 @@
                     <label id="invModeToggle" class="nav-toggle-label" title="Calculate using Inventory">
                         <input type="checkbox" id="globalInventoryMode" onchange="toggleInventoryMode(this)">
                         <span id="invLabel" class="text-accent-start">Inventory Mode</span>
+                        <div class="mobile-switch-visual"></div>
+                    </label>
+
+                    <label id="noSubStatsToggle" class="nav-toggle-label" title="Show best builds without sub stats">
+                        <input type="checkbox" id="globalNoSubStats" onchange="toggleNoSubStats(this)">
+                        <span id="noSubsLabel" class="text-accent-start">No Substats</span>
                         <div class="mobile-switch-visual"></div>
                     </label>
 
@@ -181,6 +193,12 @@
                     <label class="nav-toggle-label">
                         <input type="checkbox" id="guideInventoryMode" onchange="toggleInventoryMode(this)">
                         <span class="text-accent-start">Inventory Mode</span>
+                        <div class="mobile-switch-visual"></div>
+                    </label>
+
+                    <label class="nav-toggle-label" title="Show best builds without sub stats">
+                        <input type="checkbox" id="guideNoSubStats" onchange="toggleNoSubStats(this)">
+                        <span class="text-accent-start">No Substats</span>
                         <div class="mobile-switch-visual"></div>
                     </label>
                 </div>

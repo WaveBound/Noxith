@@ -11,6 +11,8 @@ let cachedResults = {};
 let unitBuildsCache = {};
 
 let inventoryMode = false;
+let disableSubStats = false;
+
 
 let currentCalcUnitId = null;
 
