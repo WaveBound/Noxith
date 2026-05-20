@@ -52,7 +52,7 @@ window.GLOBAL_BUFF_DATA = {
         id: 'ksailor',
         stateKey: 'kingSailorActive',
         name: 'King Sailor',
-        desc: "Leader Passive: King's Mark. Only activates if in Slot 1. +10% Crit Rate, +20% Crit Damage. Magi: +50% Dmg/+15% SPA. Uncontrollable: +30% Dmg/+10% SPA. Water: +20% Dmg/+10% SPA.",
+        desc: "Passive: King of his People. . +10% Crit Rate, +20% Crit Damage.",
         color: '#a7f3d0',
         math: (uStats, context) => {
             const isPotential = (typeof window !== 'undefined' && window.CALCULATION_MODE !== undefined) ? (window.CALCULATION_MODE === 'potential') : true;
@@ -82,6 +82,21 @@ window.GLOBAL_BUFF_DATA = {
             // 1. BASE BUFF (+10% Crit, +20% CDmg)
             // King Sailor himself does not get the base crit buffs (only other units get them)
             let b = window.isUnit(uStats.id, 'king_sailor') ? {} : { crit: 10, cdmg: 20 };
+
+            // 2. TAG & ELEMENT BUFFS
+            const tags = uStats.tags || [];
+            const element = String(uStats.element || uStats.stats?.element || "").toLowerCase();
+
+            if (tags.includes('Magi')) {
+                b.dmg = (b.dmg || 0) + 50;
+                b.spa = (b.spa || 0) + 15;
+            } else if (tags.includes('Uncontrollable Power')) {
+                b.dmg = (b.dmg || 0) + 30;
+                b.spa = (b.spa || 0) + 10;
+            } else if (element === 'water') {
+                b.dmg = (b.dmg || 0) + 20;
+                b.spa = (b.spa || 0) + 10;
+            }
 
             return b;
         },
