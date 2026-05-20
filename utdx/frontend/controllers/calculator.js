@@ -145,7 +145,10 @@ function openCalc(unitId) {
         const headVal = headSelect.value;
         const showStars = (headVal === 'reaper_necklace' || headVal === 'shadow_reaper_necklace' || headVal === 'warlord_hat');
         headStarsSelect.classList.toggle('hidden', !showStars);
-        if (!showStars) headStarsSelect.value = '1';
+        if (!showStars && headStarsSelect.value !== '1') {
+            headStarsSelect.value = '1';
+            scaleCardSubs(0, 1);
+        }
         updateCalcUI();
     };
 
@@ -153,7 +156,11 @@ function openCalc(unitId) {
         const setVal = setSelect.value;
         const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set' || setVal === 'warlord');
         bodyStarsSelect.classList.toggle('hidden', !showStars);
-        if (!showStars) bodyStarsSelect.value = '1';
+        if (!showStars && bodyStarsSelect.value !== '1') {
+            bodyStarsSelect.value = '1';
+            scaleCardSubs(1, 1);
+            updateCardSubs(document.querySelectorAll('#calcModal .gear-card')[1], document.getElementById('calcBodyMain').value, true);
+        }
         updateCalcUI();
     };
 
@@ -161,7 +168,11 @@ function openCalc(unitId) {
         const setVal = setSelect.value;
         const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set' || setVal === 'warlord');
         legsStarsSelect.classList.toggle('hidden', !showStars);
-        if (!showStars) legsStarsSelect.value = '1';
+        if (!showStars && legsStarsSelect.value !== '1') {
+            legsStarsSelect.value = '1';
+            scaleCardSubs(2, 1);
+            updateCardSubs(document.querySelectorAll('#calcModal .gear-card')[2], document.getElementById('calcLegsMain').value, true);
+        }
         updateCalcUI();
     };
 

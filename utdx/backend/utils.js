@@ -134,6 +134,8 @@ function applyStarScalingToInput(input, newStarMult) {
         input.step = PERFECT_SUBS[statKey] * newStarMult;
     }
 
+    if (input.value === '') return;
+
     const base = parseFloat(input.dataset.baseVal);
     if (isNaN(base)) return;
     input.value = parseFloat((base * newStarMult).toFixed(3));

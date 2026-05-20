@@ -176,16 +176,15 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
 
     if (headPiece === 'sun_god') {
         headCalc.attacks = 6; headCalc.duration = 7;
-        const buffedAttacks = Math.floor(headCalc.duration / finalSpa);
-        const totalCycleAttacks = headCalc.attacks + buffedAttacks;
-        headCalc.uptime = totalCycleAttacks > 0 ? buffedAttacks / totalCycleAttacks : 0;
-        headCalc.trigger = headCalc.attacks * finalSpa;
+        const timeToTrigger = headCalc.attacks * finalSpa;
+        headCalc.trigger = timeToTrigger;
+        headCalc.uptime = Math.min(1, headCalc.duration / timeToTrigger);
         headDmgBase = finalRange * headCalc.uptime;
     } else if (headPiece === 'ninja') {
         headCalc.attacks = 5; headCalc.duration = 10;
         const timeToTrigger = headCalc.attacks * finalSpa;
         headCalc.trigger = timeToTrigger;
-        headCalc.uptime = headCalc.duration / (headCalc.duration + timeToTrigger);
+        headCalc.uptime = Math.min(1, headCalc.duration / timeToTrigger);
         headDotBuff += 20 * headCalc.uptime;
     } else if (headPiece === 'reaper_necklace') {
         headDmgBase = 0; headCalc.type = 'reaper';
@@ -211,10 +210,9 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
         }
     } else if (headPiece === 'reanimated_head') {
         headCalc.attacks = 5; headCalc.duration = 10;
-        const buffedAttacks = Math.floor(headCalc.duration / finalSpa);
-        const totalCycleAttacks = headCalc.attacks + buffedAttacks;
-        headCalc.uptime = totalCycleAttacks > 0 ? buffedAttacks / totalCycleAttacks : 0;
-        headCalc.trigger = headCalc.attacks * finalSpa;
+        const timeToTrigger = headCalc.attacks * finalSpa;
+        headCalc.trigger = timeToTrigger;
+        headCalc.uptime = Math.min(1, headCalc.duration / timeToTrigger);
         headDotBuff += finalRange * headCalc.uptime;
         headCalc.type = 'reanimated';
     } else if (headPiece === 'sorcerer_hunter_spirit') {

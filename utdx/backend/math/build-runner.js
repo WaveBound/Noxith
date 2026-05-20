@@ -4,7 +4,7 @@
 //             backend/math/core-math.js (getBestSubConfig, calculateDPS)
 // ============================================================================
 
-function createResultEntry({ id, buildName, traitName, res, prio, mainStats, subStats, headUsed, isCustom, relicIds = null, baseRes = null }) {
+function createResultEntry({ id, buildName, traitName, res, prio, mainStats, subStats, headUsed, isCustom, relicIds = null, baseRes = null, stars = 1 }) {
     const entry = {
         id: id,
         setName: buildName.split('(')[0].trim(),
@@ -31,7 +31,8 @@ function createResultEntry({ id, buildName, traitName, res, prio, mainStats, sub
         },
         headUsed: headUsed,
         isCustom: isCustom,
-        placement: res.placement
+        placement: res.placement,
+        stars: stars
     };
     if (baseRes) {
         entry.baseStats = {
@@ -249,7 +250,8 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
                                 subStatsUI,
                                 headSet: head.setKey,
                                 isCustom: trait.isCustom,
-                                relicIds: { head: head.id, body: body.id, legs: leg.id }
+                                relicIds: { head: head.id, body: body.id, legs: leg.id },
+                                stars: starMult
                             });
                         }
                     }); // end variation loop
@@ -271,7 +273,8 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
             subStats: v.subStatsUI,
             headUsed: v.headSet,
             isCustom: v.isCustom,
-            relicIds: v.relicIds
+            relicIds: v.relicIds,
+            stars: v.stars
         });
         window.cachedResults[v.entryId] = entry;
         unitResults.push(entry);
@@ -317,7 +320,8 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
         spaPoints: spaPts,
         rangePoints: rangePts,
         headPiece: liteData.headUsed || (liteData.subStats && liteData.subStats.selectedHead) || 'none',
-        upgradeLevel: forcedUpgradeLevel
+        upgradeLevel: forcedUpgradeLevel,
+        starMult: liteData.stars || 1
     });
 
     if (ctxOverrides) Object.assign(context, ctxOverrides);
@@ -344,9 +348,10 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
         return k;
     };
 
+    const starMult = liteData.stars || 1;
     if (liteData.mainStats) {
-        if (liteData.mainStats.body) { const k = mapStatKey(liteData.mainStats.body); if (MAIN_STAT_VALS.body[k]) totalStats[k] += MAIN_STAT_VALS.body[k]; }
-        if (liteData.mainStats.legs) { const k = mapStatKey(liteData.mainStats.legs); if (MAIN_STAT_VALS.legs[k]) totalStats[k] += MAIN_STAT_VALS.legs[k]; }
+        if (liteData.mainStats.body) { const k = mapStatKey(liteData.mainStats.body); if (MAIN_STAT_VALS.body[k]) totalStats[k] += MAIN_STAT_VALS.body[k] * starMult; }
+        if (liteData.mainStats.legs) { const k = mapStatKey(liteData.mainStats.legs); if (MAIN_STAT_VALS.legs[k]) totalStats[k] += MAIN_STAT_VALS.legs[k] * starMult; }
     }
 
     // 1. Add explicitly stored sub-stats (only if not in No Substats mode)
@@ -381,7 +386,7 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
         validCandidates.forEach(cand => {
             if (cand === mappedMain) return;
             if (existingTypes.has(cand)) return;
-            totalStats[cand] = (totalStats[cand] || 0) + PERFECT_SUBS[cand];
+            totalStats[cand] = (totalStats[cand] || 0) + (PERFECT_SUBS[cand] * starMult);
         });
     };
 
@@ -412,3 +417,64 @@ window.calculateUnitBuilds = calculateUnitBuilds;
 window.calculateInventoryBuilds = calculateInventoryBuilds;
 window.reconstructMathData = reconstructMathData;
 window.createResultEntry = createResultEntry;
+
+window.getBenchmarkDps = function(unitId, traitName, starMult, isAbility) {
+    const cacheKey = `${unitId}_${traitName}_${starMult}_${isAbility}`;
+    if (window.benchmarkDpsCache && window.benchmarkDpsCache[cacheKey]) return window.benchmarkDpsCache[cacheKey];
+    
+    const unit = typeof getUnitById === 'function' ? getUnitById(unitId) : unitDatabase.find(u => u.id === unitId);
+    if (!unit) return 0;
+
+    const trait = getTraitByName(traitName, unitId) || getTraitFast(traitName);
+    
+    const { effectiveStats, context } = buildCalculationContext(unit, trait || traitName, {
+        isAbility: isAbility
+    });
+    
+    let maxScore = 0;
+    const candidates = ['dmg', 'spa', 'range', 'cm', 'cf', 'dot'].filter(c => {
+        if (c === 'dot' && !statConfig.applyRelicDot) return false;
+        if ((c === 'cm' || c === 'cf') && !statConfig.applyRelicCrit) return false;
+        return true;
+    });
+
+    SETS.forEach(set => {
+        candidates.forEach(masterStat => {
+            let benchStats = { set: set.id, dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0 };
+            
+            const getBestMain = (slotMains) => {
+                let bestMain = 'dmg';
+                let bestDps = 0;
+                Object.keys(slotMains).forEach(mKey => {
+                    let temp = { ...benchStats, [mKey]: slotMains[mKey] * starMult };
+                    let res = calculateDPS(effectiveStats, temp, context);
+                    if (res.total > bestDps) { bestDps = res.total; bestMain = mKey; }
+                });
+                return bestMain;
+            };
+            
+            const bestBodyMain = getBestMain(MAIN_STAT_VALS.body);
+            const bestLegMain = getBestMain(MAIN_STAT_VALS.legs);
+            
+            benchStats[bestBodyMain] = (benchStats[bestBodyMain]||0) + MAIN_STAT_VALS.body[bestBodyMain] * starMult;
+            benchStats[bestLegMain] = (benchStats[bestLegMain]||0) + MAIN_STAT_VALS.legs[bestLegMain] * starMult;
+            
+            benchStats[masterStat] = (benchStats[masterStat]||0) + MAX_SUB_STAT_VALUES[masterStat] * starMult;
+            
+            let fillers = candidates.filter(c => c !== masterStat && c !== bestBodyMain && c !== bestLegMain);
+            let fillerDpsMap = fillers.map(fKey => {
+                let temp = { ...benchStats, [fKey]: PERFECT_SUBS[fKey] * starMult };
+                return { key: fKey, dps: calculateDPS(effectiveStats, temp, context).total };
+            }).sort((a, b) => b.dps - a.dps);
+
+            fillerDpsMap.slice(0, 3).forEach(f => benchStats[f.key] = (benchStats[f.key]||0) + PERFECT_SUBS[f.key] * starMult);
+
+            let finalBenchRes = calculateDPS(effectiveStats, benchStats, context);
+            if (finalBenchRes.total > maxScore) maxScore = finalBenchRes.total;
+        });
+    });
+
+    if (!window.benchmarkDpsCache) window.benchmarkDpsCache = {};
+    window.benchmarkDpsCache[cacheKey] = maxScore;
+    return maxScore;
+};

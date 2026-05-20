@@ -73,7 +73,20 @@ function loadInventory() {
     try {
         const stored = localStorage.getItem(RELIC_STORAGE_KEY);
         relicInventory = stored ? JSON.parse(stored) : [];
-    } catch (e) { relicInventory = []; }
+        
+        // Migration for old head pieces
+        relicInventory.forEach(r => {
+            if (r.slot === 'Head') {
+                if (r.setKey === 'biju_set') r.setKey = 'biju_head';
+                if (r.setKey === 'reanimated_ninja') r.setKey = 'reanimated_head';
+                if (r.setKey === 'sorcerer_hunter') r.setKey = 'sorcerer_hunter_spirit';
+                if (r.setKey === 'strongest_sorcerer') r.setKey = 'strongest_sorcerer_glasses';
+                if (r.setKey === 'mochi') r.setKey = 'mochi_scarf';
+            }
+        });
+    } catch (e) {
+        relicInventory = [];
+    }
 }
 
 function updateInventoryToggleState() {
@@ -126,8 +139,16 @@ function updateStarVisibility() {
     if (!starSelect) return;
 
     const showStars = (setId === 'shadow_reaper' || setId === 'reaper_set' || setId === 'warlord');
-    if (showStars) starSelect.parentElement.classList.remove('hidden');
-    else { starSelect.parentElement.classList.add('hidden'); starSelect.value = "1"; }
+    if (showStars) {
+        starSelect.parentElement.classList.remove('hidden');
+    } else { 
+        starSelect.parentElement.classList.add('hidden'); 
+        if (starSelect.value !== "1") {
+            starSelect.value = "1";
+            updateMainStatOptions(document.getElementById('newRelicSlot').value);
+            updateSubStatValues(1);
+        }
+    }
 }
 
 function lockConflictingSubStat(mainStatValue) {
@@ -252,6 +273,11 @@ function addRelic() {
         if (setKey === 'shadow_reaper') setKey = 'shadow_reaper_necklace';
         if (setKey === 'reaper_set') setKey = 'reaper_necklace';
         if (setKey === 'warlord') setKey = 'warlord_hat';
+        if (setKey === 'biju_set') setKey = 'biju_head';
+        if (setKey === 'reanimated_ninja') setKey = 'reanimated_head';
+        if (setKey === 'sorcerer_hunter') setKey = 'sorcerer_hunter_spirit';
+        if (setKey === 'strongest_sorcerer') setKey = 'strongest_sorcerer_glasses';
+        if (setKey === 'mochi') setKey = 'mochi_scarf';
     }
 
     const newRelic = {
