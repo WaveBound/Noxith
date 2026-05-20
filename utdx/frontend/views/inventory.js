@@ -150,7 +150,7 @@ function lockConflictingSubStat(mainStatValue) {
 function updateSubStatValues(newMult) {
     Object.keys(STAT_MAPPING).forEach(id => {
         const input = document.getElementById(id);
-        if (input && !input.disabled && input.value !== '') {
+        if (input && !input.disabled) {
             applyStarScalingToInput(input, newMult);
         }
     });
@@ -234,6 +234,7 @@ function openAddRelicModal() {
     if (starSelect) starSelect.value = "1";
 
     updateStarVisibility();
+    updateSubStatValues(1);
     toggleModal('addRelicModal', true);
 }
 

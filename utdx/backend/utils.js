@@ -127,6 +127,13 @@ function applyStarScalingToInput(input, newStarMult) {
     if (!input.dataset.baseVal && input.value !== '') {
         trackBaseStatValue(input, 1);
     }
+
+    let rawKey = input.dataset.stat || input.id;
+    const statKey = normalizeStatKey(rawKey);
+    if (typeof PERFECT_SUBS !== 'undefined' && PERFECT_SUBS[statKey]) {
+        input.step = PERFECT_SUBS[statKey] * newStarMult;
+    }
+
     const base = parseFloat(input.dataset.baseVal);
     if (isNaN(base)) return;
     input.value = parseFloat((base * newStarMult).toFixed(3));
@@ -136,6 +143,52 @@ function applyStarScalingToInput(input, newStarMult) {
  * Attaches scaling, clamping, and base-tracking logic to a stat input.
  */
 function attachStatScaler(inputElement, getStarMultFn) {
+    const updateStepAndMax = () => {
+        let rawKey = inputElement.dataset.stat || inputElement.id;
+        const statKey = normalizeStatKey(rawKey);
+        const starMult = getStarMultFn();
+        
+        if (typeof PERFECT_SUBS !== 'undefined' && PERFECT_SUBS[statKey]) {
+            inputElement.step = PERFECT_SUBS[statKey] * starMult;
+            inputElement.min = "0";
+        }
+        
+        const baseMaxValue = typeof MAX_SUB_STAT_VALUES !== 'undefined' ? MAX_SUB_STAT_VALUES[statKey] : undefined;
+        if (baseMaxValue !== undefined) {
+            inputElement.max = baseMaxValue * starMult;
+        }
+    };
+    
+    updateStepAndMax();
+
+    // Inject custom arrows if they don't exist yet
+    if (inputElement.parentElement && !inputElement.parentElement.querySelector('.custom-spinners')) {
+        const spinnerContainer = document.createElement('div');
+        spinnerContainer.className = 'custom-spinners';
+        
+        const upBtn = document.createElement('div');
+        upBtn.className = 'custom-spin-btn';
+        upBtn.innerHTML = '▲';
+        upBtn.onclick = (e) => {
+            e.stopPropagation();
+            inputElement.stepUp();
+            inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+
+        const downBtn = document.createElement('div');
+        downBtn.className = 'custom-spin-btn';
+        downBtn.innerHTML = '▼';
+        downBtn.onclick = (e) => {
+            e.stopPropagation();
+            inputElement.stepDown();
+            inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+
+        spinnerContainer.appendChild(upBtn);
+        spinnerContainer.appendChild(downBtn);
+        inputElement.parentElement.appendChild(spinnerContainer);
+    }
+
     inputElement.oninput = () => {
         let value = parseFloat(inputElement.value);
         if (value < 0 || isNaN(value)) {
@@ -146,12 +199,12 @@ function attachStatScaler(inputElement, getStarMultFn) {
         let rawKey = inputElement.dataset.stat || inputElement.id;
         const statKey = normalizeStatKey(rawKey);
 
-        const baseMaxValue = MAX_SUB_STAT_VALUES[statKey];
+        const baseMaxValue = typeof MAX_SUB_STAT_VALUES !== 'undefined' ? MAX_SUB_STAT_VALUES[statKey] : undefined;
         const starMult = getStarMultFn();
-        const dynamicMaxValue = baseMaxValue * starMult;
+        const dynamicMaxValue = baseMaxValue !== undefined ? baseMaxValue * starMult : undefined;
 
-        if (baseMaxValue !== undefined && value > dynamicMaxValue) {
-            inputElement.value = dynamicMaxValue.toFixed(3);
+        if (dynamicMaxValue !== undefined && value > dynamicMaxValue) {
+            inputElement.value = parseFloat(dynamicMaxValue.toFixed(3));
         }
 
         trackBaseStatValue(inputElement, starMult);
