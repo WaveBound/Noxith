@@ -234,7 +234,11 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
         headCalc.type = 'warlord';
     } else if (headPiece === 'mochi_scarf') {
         const hasStatus = window.unitHasStatusEffect ? window.unitHasStatusEffect(uStats) : false;
-        if (hasStatus) {
+        // Skip scarf burn if unit already applies native Burn DoT (would not stack)
+        const hasNativeDot = (uStats.dot > 0) ||
+            (uStats.stats && uStats.stats.dot > 0) ||
+            (uStats.passives && uStats.passives.some(p => p.dot > 0));
+        if (hasStatus && !hasNativeDot) {
             headCalc.hasScarfBurn = true;
             headCalc.scarfBurnPct = 30;
             headCalc.scarfBurnDuration = 5;
