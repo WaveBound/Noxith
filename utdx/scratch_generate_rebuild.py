@@ -18,10 +18,10 @@ def main():
     app.window = MockWindow()
     app.is_running = True
     
-    # Run logic headlessly for king_sailor
-    print("Starting database generation for King Sailor...")
+    # Run logic headlessly for king_sailor, mochi_pirate, and gluttonous_warlord
+    print("Starting database generation for King Sailor, Mochi Pirate, and Gluttonous Warlord...")
     app._run_logic(
-        selected_units=["king_sailor"],
+        selected_units=["king_sailor", "mochi_pirate", "gluttonous_warlord"],
         threads=4,
         mode="all"
     )

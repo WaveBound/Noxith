@@ -13,14 +13,14 @@ unitDatabase.push({
     meta: {
         short: "Ruler",
         long: "Ruler",
-        note: "Ruler due to placement count, Sacred/Eternal for support use"
+        note: "Ruler due to placement count, Sacred/Eternal for support use.<br><span style='color: #f87171;'>⚠️ Bugged: Does not apply Time Snail in-game, and has 0% base crit rate currently.</span>"
     },
 
     totalCost: 67500,
 
     // BASE STATS
     stats: {
-        crit: 100,
+        crit: 0,
         cdmg: 200,
         dot: 0,
         dotStacks: 1,

@@ -50,7 +50,6 @@ window.unitHasTimeSnail = function(uStats) {
     return window.isUnit && (
         window.isUnit(uStats.id, 'water_god') ||
         window.isUnit(uStats.id, 'underworld_god') ||
-        window.isUnit(uStats.id, 'mochi_pirate') ||
         window.isUnit(uStats.id, 'crow_shinobi')
     );
 };

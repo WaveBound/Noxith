@@ -248,7 +248,7 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
         headCalc.type = 'flaming_donut';
     }
 
-    if ((headPiece === 'monarch_cape' || headPiece === 'monarch_head' || headPiece === 'monarch') && relicStats.set === 'monarch') {
+    if ((headPiece === 'monarch_cape' || headPiece === 'monarch_head' || headPiece === 'monarch') && (relicStats.set === 'monarch' || (window.isUnit && window.isUnit(uStats.id, 'gluttonous_warlord')))) {
         headDmgBase = 0; 
         const upLevel = context.upgradeLevel !== undefined ? context.upgradeLevel : 6;
         let summonCount = 0;
