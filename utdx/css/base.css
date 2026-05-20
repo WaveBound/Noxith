@@ -627,6 +627,7 @@ body.header-collapsed .header-toggle-btn {
     height: 34px;
     padding-top: 0;
     padding-bottom: 0;
+    justify-content: center;
 }
 
 /* PAGES & LAYOUTS */

@@ -12,7 +12,8 @@ const patchNotesData = [
             { type: "Relics", text: "<b>Triple Threat:</b> Enabled <b>Bijuu Head Piece</b> compatibility, granting a permanent +70% passive damage bonus." },
             { type: "Fix", text: "<b>Mochi Pirate:</b> Fixed bugs by disabling his default 100% base crit rate (set to 0%) and excluding him from the Time Snail relic check. Added a warning notice banner to his unit profile." },
             { type: "Fix", text: "<b>Bio Android (Relic):</b> SPA stat set from -5 to 0 to match in-game behavior as it is currently bugged." },
-            { type: "UI", text: "<b>Relic Sets:</b> Added 'Set' suffix to UI rendering for clarity (e.g., Warlord Set, Sorcerer Hunter Set)." }
+            { type: "UI", text: "<b>Relic Sets:</b> Added 'Set' suffix to UI rendering for clarity (e.g., Warlord Set, Sorcerer Hunter Set)." },
+            { type: "Feature", text: "<b>No Substats Toggle:</b> Added a 'No Substats' mode that recalculates all builds without sub-stat bonuses, showing the best relic setups based on main stats alone." }
         ]
     },
     {
