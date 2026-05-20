@@ -348,7 +348,8 @@ const guideData = [
     { unit: "joyful_captain", img: "images/units/JoyfulCaptain.png", isCalculated: true },
     { unit: "gluttonous_warlord", img: "images/units/GluttonousWarlord.png", isCalculated: true },
     { unit: "quake_warlord", img: "images/units/QuakeWarlord.png", isCalculated: true },
-    { unit: "dragon_warlord", img: "images/units/DragonWarlord.png", isCalculated: true }
+    { unit: "dragon_warlord", img: "images/units/DragonWarlord.png", isCalculated: true },
+    { unit: "string_warlord", img: "images/units/StringWarlord.png", isCalculated: true }
 ];
 const elementIcons = {
     "Water": "images/elements/Water.png",
