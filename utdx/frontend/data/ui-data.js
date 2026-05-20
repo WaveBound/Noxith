@@ -347,7 +347,8 @@ const guideData = [
     { unit: "mochi_pirate", img: "images/units/MochiPirate.png", isCalculated: true },
     { unit: "joyful_captain", img: "images/units/JoyfulCaptain.png", isCalculated: true },
     { unit: "gluttonous_warlord", img: "images/units/GluttonousWarlord.png", isCalculated: true },
-    { unit: "quake_warlord", img: "images/units/QuakeWarlord.png", isCalculated: true }
+    { unit: "quake_warlord", img: "images/units/QuakeWarlord.png", isCalculated: true },
+    { unit: "dragon_warlord", img: "images/units/DragonWarlord.png", isCalculated: true }
 ];
 const elementIcons = {
     "Water": "images/elements/Water.png",

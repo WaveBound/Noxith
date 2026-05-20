@@ -101,7 +101,7 @@ window.GLOBAL_BUFF_DATA = {
         id: 'triplethreat',
         stateKey: 'tripleThreatActive',
         name: 'Unrivaled Mark',
-        desc: "Leader Passive: Unrivaled Mark. Only activates if in Slot 1 (Works on self). Tag Sword (+50% Dmg, -7.5% Cost), Tag Piece (+25% Dmg, +10% Range), Element Wind (+20% Dmg, +5% Crit Rate).",
+        desc: "Leader Passive: Unrivaled Mark. Only activates if in Slot 1 (Works on self). Tag Piece (+50% Dmg), Tag Sword (+25% Dmg), Element Wind (+20% Dmg, +5% Crit Rate).",
         color: '#a7f3d0',
         hideButton: true,
         math: (uStats, context) => {
@@ -128,11 +128,10 @@ window.GLOBAL_BUFF_DATA = {
 
             let b = { dmg: 0, range: 0, crit: 0 };
 
-            if (tags.includes('Sword')) {
+            if (tags.includes('Piece')) {
                 b.dmg = 50;
-            } else if (tags.includes('Piece')) {
+            } else if (tags.includes('Sword')) {
                 b.dmg = 25;
-                b.range = 10;
             } else if (element === 'wind') {
                 b.dmg = 20;
                 b.crit = 5;

@@ -137,7 +137,8 @@ const UNIT_FILES = [
     'mochi_pirate.js',
     'joyful_captain.js',
     'gluttonous_warlord.js',
-    'quake_warlord.js'
+    'quake_warlord.js',
+    'dragon_warlord.js'
 ];
 
 // Resolves after every unit script has loaded (or errored).
