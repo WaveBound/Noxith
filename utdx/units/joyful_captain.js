@@ -58,7 +58,7 @@ unitDatabase.push({
     // The 6 modes
     modes: [
         {
-            name: "KongGun + Conq",
+            name: "5-2-0",
             desc: "KongGun + Conqueror Haki.",
             img: "images/units/JoyfulCaptain/KongConq.png",
             stats: { spaCap: 3 },
@@ -80,7 +80,7 @@ unitDatabase.push({
             ]
         },
         {
-            name: "KongGun + Obs",
+            name: "5-0-2",
             desc: "KongGun + Observation Haki.",
             img: "images/units/JoyfulCaptain/KongObs.png",
             stats: { spaCap: 3 },
@@ -102,7 +102,7 @@ unitDatabase.push({
             ]
         },
         {
-            name: "Joy Boy + Arm",
+            name: "2-5-0",
             desc: "Joy Boy + Armament Haki.",
             img: "images/units/JoyfulCaptain/JoyArm.png",
             stats: { spaCap: 3.75 },
@@ -125,7 +125,7 @@ unitDatabase.push({
             ]
         },
         {
-            name: "Joy Boy + Obs",
+            name: "0-5-2",
             desc: "Joy Boy + Observation Haki.",
             img: "images/units/JoyfulCaptain/JoyObs.png",
             stats: { spaCap: 3.75 },
@@ -148,7 +148,7 @@ unitDatabase.push({
             ]
         },
         {
-            name: "Snakeman + Arm",
+            name: "2-0-5",
             desc: "Snakeman + Armament Haki.",
             img: "images/units/JoyfulCaptain/SnakeArm.png",
             stats: { spaCap: 2.5 },
@@ -174,7 +174,7 @@ unitDatabase.push({
             ]
         },
         {
-            name: "Snakeman + Conq",
+            name: "0-2-5",
             desc: "Snakeman + Conqueror Haki.",
             img: "images/units/JoyfulCaptain/SnakeConq.png",
             stats: { spaCap: 2.5 },
