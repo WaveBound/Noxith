@@ -951,7 +951,7 @@ function renderUnitCard(unit, absoluteIndex) {
         customNoticeHtml = `
         <div class="unit-card-warning" style="padding: 6px 12px; background: rgba(245, 158, 11, 0.08); border-bottom: 1px solid rgba(245, 158, 11, 0.15); display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 700; color: #fbbf24;">
             <span style="font-size: 0.85rem; line-height: 1;">⚠️</span>
-            <span><strong>Notice:</strong> In-game he does 2.5x dmg currently (e.g. 150.4k dps x2.5).</span>
+            <span><strong>Notice:</strong> In-game he does 2.5x dmg currently (e.g. 147.4k dps x2.5).</span>
         </div>`;
     } else if (unit.id === 'mochi_pirate') {
         customNoticeHtml = `
