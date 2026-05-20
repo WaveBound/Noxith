@@ -225,6 +225,7 @@ body.menu-open::after {
     }
 
     .mobile-switch-visual {
+        display: block;
         position: relative;
         width: 40px;
         height: 20px;

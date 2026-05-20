@@ -230,6 +230,66 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     if (!card) return;
     const unitObj = window.getUnitById(unitId);
 
+    const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unitId || s.id.split('-')[0] === unitId.split('-')[0]));
+    const isHotbar = card.parentElement?.id === 'hotbarHiddenRender' || !!card.closest('.team-summary-container') || isInHotbarState;
+
+    const hydrateBuildEntry = (r) => {
+        if (!r) return null;
+        let res;
+        if (r.id && r.mainStats && r.setName) {
+            res = r;
+        } else {
+            res = {
+                id: r.id || `${unitId}-static-${Math.random().toString(36).substr(2, 9)}`,
+                traitName: (typeof r.t === 'number' ? (traitsList[r.t]?.name) : (r.traitName || r.t)) || 'Unknown Trait',
+                setName: (typeof r.s === 'number' ? (SETS[r.s]?.name) : (r.setName || r.s)) || 'Unknown Set',
+                dps: r.d || r.dps || 0,
+                dmgVal: r.dv || r.dmgVal || 0,
+                spa: r.sp || r.spa || 0,
+                range: r.ra || r.range || 0,
+                prio: r.p || r.prio || 'dmg',
+                headUsed: (typeof r.h === 'number' ? (['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'][r.h]) : (r.headUsed || r.h)) || 'none',
+                isCustom: !!(r.c || r.isCustom),
+                subStats: r.ss || r.subStats || {},
+                mainStats: r.ms || r.mainStats || {
+                    body: (typeof r.b === 'string' ? r.b : (r.b === 1 ? 'dot' : (r.b === 2 ? 'cm' : 'dmg'))),
+                    legs: (typeof r.l === 'string' ? r.l : (r.l === 1 ? 'spa' : (r.l === 2 ? 'cf' : (r.l === 3 ? 'range' : 'dmg'))))
+                }
+            };
+        }
+
+        if (typeof reconstructMathData === 'function') {
+            try {
+                const fullMath = reconstructMathData(res, undefined, { isHotbar: isHotbar });
+                if (fullMath) {
+                    res.dps = fullMath.total || fullMath.dps || 0;
+                    res.bossDps = fullMath.bossTotal || fullMath.bossDps || 0;
+                    res.dmgVal = fullMath.dmgVal;
+                    res.spa = fullMath.spa;
+                    res.range = fullMath.range;
+                    res.dot = fullMath.dot;
+                    res.dotTotal = fullMath.dotData ? (
+                        (fullMath.dotData.nativeTotalDmg || 0) +
+                        (fullMath.dotData.radTotalDmg || 0) +
+                        (fullMath.dotData.fuaDotTotalDmg || 0) +
+                        (fullMath.dotData.scarfBurnTotalDmg || 0)
+                    ) : 0;
+                    res.placement = fullMath.placement;
+                    res.detailedBuffs = fullMath.detailedBuffs;
+                    if (!res.subStats) res.subStats = {};
+                    res.subStats.finalCf = fullMath.critData ? fullMath.critData.rate : 0;
+                    res.subStats.finalCm = fullMath.critData ? fullMath.critData.cdmg : 0;
+                }
+                res.dps = res.dps || 0;
+                res.sortDps = Math.max(res.dps || 0, res.bossDps || 0);
+                res.baseStats = null;
+            } catch (e) {
+                console.warn("Hydration Math Error for", res.id, e);
+            }
+        }
+        return res;
+    };
+
     const activeModeIdx = (window.unitModesState && window.unitModesState[unitId] !== undefined) ? window.unitModesState[unitId] : 0;
     const systemLevelBar = card.querySelector('.system-level-bar');
     if (systemLevelBar && unitObj && unitObj.systemLevel) {
@@ -298,18 +358,11 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             const modeData = dbEntry[activeMode] || dbEntry[activeMode === 'fixed' ? 'f' : 'b'];
             const perfectBuilds = modeData ? modeData[0] : null;
             if (perfectBuilds && perfectBuilds.length > 0) {
-                // Hydrate the benchmark build through reconstructMathData so the DPS
-                // is computed with the same pipeline (current conditions, buffs, star level)
-                // as every other displayed build. Using the static pre-stored dps would
-                // give a mismatched comparison since displayed builds are recomputed live.
-                if (typeof reconstructMathData === 'function') {
-                    try {
-                        const benchMath = reconstructMathData(perfectBuilds[0], undefined, { isHotbar: isHotbar });
-                        benchmarkDps = (benchMath && benchMath.total) ? benchMath.total : (perfectBuilds[0].dps || 0);
-                    } catch (e) {
-                        benchmarkDps = perfectBuilds[0].dps || 0;
-                    }
-                } else {
+                // Hydrate the benchmark build through hydrateBuildEntry so it goes through reconstructMathData properly
+                try {
+                    const hydratedBench = hydrateBuildEntry(perfectBuilds[0]);
+                    benchmarkDps = hydratedBench ? (hydratedBench.dps || 0) : 0;
+                } catch (e) {
                     benchmarkDps = perfectBuilds[0].dps || 0;
                 }
             }
@@ -359,66 +412,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const setSelect = card.querySelector('select[data-filter="set"]')?.value || 'all';
     const headSelect = card.querySelector('select[data-filter="head"]')?.value || 'all';
     const sortSelect = card.querySelector('select[data-filter="sort"]')?.value || 'dps';
-
-    const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unitId || s.id.split('-')[0] === unitId.split('-')[0]));
-    const isHotbar = card.parentElement?.id === 'hotbarHiddenRender' || !!card.closest('.team-summary-container') || isInHotbarState;
-
-    const hydrateBuildEntry = (r) => {
-        if (!r) return null;
-        let res;
-        if (r.id && r.mainStats && r.setName) {
-            res = r;
-        } else {
-            res = {
-                id: r.id || `${unitId}-static-${Math.random().toString(36).substr(2, 9)}`,
-                traitName: (typeof r.t === 'number' ? (traitsList[r.t]?.name) : (r.traitName || r.t)) || 'Unknown Trait',
-                setName: (typeof r.s === 'number' ? (SETS[r.s]?.name) : (r.setName || r.s)) || 'Unknown Set',
-                dps: r.d || r.dps || 0,
-                dmgVal: r.dv || r.dmgVal || 0,
-                spa: r.sp || r.spa || 0,
-                range: r.ra || r.range || 0,
-                prio: r.p || r.prio || 'dmg',
-                headUsed: (typeof r.h === 'number' ? (['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'][r.h]) : (r.headUsed || r.h)) || 'none',
-                isCustom: !!(r.c || r.isCustom),
-                subStats: r.ss || r.subStats || {},
-                mainStats: r.ms || r.mainStats || {
-                    body: (typeof r.b === 'string' ? r.b : (r.b === 1 ? 'dot' : (r.b === 2 ? 'cm' : 'dmg'))),
-                    legs: (typeof r.l === 'string' ? r.l : (r.l === 1 ? 'spa' : (r.l === 2 ? 'cf' : (r.l === 3 ? 'range' : 'dmg'))))
-                }
-            };
-        }
-
-        if (typeof reconstructMathData === 'function') {
-            try {
-                const fullMath = reconstructMathData(res, undefined, { isHotbar: isHotbar });
-                if (fullMath) {
-                    res.dps = fullMath.total || fullMath.dps || 0;
-                    res.bossDps = fullMath.bossTotal || fullMath.bossDps || 0;
-                    res.dmgVal = fullMath.dmgVal;
-                    res.spa = fullMath.spa;
-                    res.range = fullMath.range;
-                    res.dot = fullMath.dot;
-                    res.dotTotal = fullMath.dotData ? (
-                        (fullMath.dotData.nativeTotalDmg || 0) +
-                        (fullMath.dotData.radTotalDmg || 0) +
-                        (fullMath.dotData.fuaDotTotalDmg || 0) +
-                        (fullMath.dotData.scarfBurnTotalDmg || 0)
-                    ) : 0;
-                    res.placement = fullMath.placement;
-                    res.detailedBuffs = fullMath.detailedBuffs;
-                    if (!res.subStats) res.subStats = {};
-                    res.subStats.finalCf = fullMath.critData ? fullMath.critData.rate : 0;
-                    res.subStats.finalCm = fullMath.critData ? fullMath.critData.cdmg : 0;
-                }
-                res.dps = res.dps || 0;
-                res.sortDps = Math.max(res.dps || 0, res.bossDps || 0);
-                res.baseStats = null;
-            } catch (e) {
-                console.warn("Hydration Math Error for", res.id, e);
-            }
-        }
-        return res;
-    };
 
     const renderListInternal = (builds, limit) => {
         if (!builds || builds.length === 0) return '<div class="msg-empty">No valid builds found.</div>';

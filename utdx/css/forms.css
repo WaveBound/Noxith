@@ -51,6 +51,8 @@ input[type=number] { -moz-appearance: textfield; }
 .nav-toggle-label:hover { border-color: #666; color: #fff; }
 .nav-toggle-label.is-checked { background: rgba(16, 185, 129, 0.1); border-color: var(--success); color: var(--success); box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
 
+.mobile-switch-visual { display: none; }
+
 /* NEW: DISABLED STATE FOR EMPTY INVENTORY */
 .nav-toggle-label.disabled {
     opacity: 0.5;
