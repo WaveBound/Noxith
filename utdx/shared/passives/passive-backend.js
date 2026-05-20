@@ -152,8 +152,7 @@ window.calcPassives = function(uStats, context, headPiece, upgradeLevel) {
             const isUgDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother");
 
             if (p.name === "Pirate Hunter") {
-                const activeModeIdx = (typeof window !== 'undefined' && window.unitModesState && window.unitModesState['triple_threat'] !== undefined) ? window.unitModesState['triple_threat'] : 0;
-                if (context.isBoss || activeModeIdx === 0) {
+                if (context.isBoss || context.isAbility) {
                     let bossDmgBuff = (upgradeLevel >= 4) ? 65 : 50;
                     if (headPiece === 'junior') {
                         bossDmgBuff *= 1.1;

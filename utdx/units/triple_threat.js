@@ -41,19 +41,12 @@ unitDatabase.push({
         { dmg: 3500, spa: 9.0, range: 32, cost: 20000 },  // Up 5
         { dmg: 5200, spa: 12.0, range: 36, cost: 25000 }   // Up 6
     ],
-
-    modes: [
-        {
-            name: "Boss Mode",
-            img: "images/units/TripleThreat.png",
-            desc: "Pirate Hunter active: can only target the boss, AOE size halved. Gain 50% Damage [+65% on E4], 75% Hyper Armor Damage, and 65% Crit Rate."
-        },
-        {
-            name: "Base Mode",
-            img: "images/units/TripleThreat.png",
-            desc: "Standard mode: no Boss in Range."
-        }
-    ],
+    ability: {
+        abilityName: "Boss",
+        noToggle: false,
+        cooldown: 0,
+        desc: "Pirate Hunter active: can only target the boss, AOE size halved. Gain 50% Damage [+65% on E4], 75% Hyper Armor Damage, and 65% Crit Rate."
+    },
 
     // PASSIVES (displayed in unit info panel)
     passives: [

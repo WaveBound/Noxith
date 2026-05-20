@@ -605,9 +605,8 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                 // If global buffers are active or special dynamic states exist, re-optimize
                 // the static builds dynamically in the browser (incredibly fast single-relic single-trait calculations)!
                 const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(buff => !buff.hideButton && !!window[buff.stateKey]);
-                const ttBossOff = (unit.id === 'triple_threat' && (window.unitModesState['triple_threat'] === 1));
                 
-                if ((anyGlobal || ttBossOff) && calculatedResults.length > 0) {
+                if (anyGlobal && calculatedResults.length > 0) {
                     calculatedResults = calculatedResults.map(r => {
                         const setName = r.setName || (typeof r.s === 'number' ? SETS[r.s]?.id : r.s) || (window.getSetFast && window.getSetFast(r.setName)?.id);
                         const traitId = r.traitName || r.trait || (typeof r.t === 'number' ? traitsList[r.t]?.id : r.t);
@@ -733,7 +732,6 @@ window.getLiveScore = (unit) => {
     const currentTrait = (window.unitTraits && window.unitTraits[unitId]);
     const currentHead = (window.unitHeads && window.unitHeads[unitId]);
     let activeType = (window.activeAbilityIds && window.activeAbilityIds.has(unitId)) ? 'abil' : 'base';
-    if (unitId === 'triple_threat') activeType = 'base';
 
     const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(buff => !buff.hideButton && !!window[buff.stateKey]);
     const activeModeIdx = (window.unitModesState && window.unitModesState[unitId] !== undefined) ? window.unitModesState[unitId] : 0;
@@ -756,9 +754,7 @@ window.getLiveScore = (unit) => {
     // FAST PATH: If no custom trait/head is set, and no global buffer is active,
     // we can just read the pre-saved dps directly from the #1 build in the database!
     // This is instant and avoids thousands of reconstructMathData calls on load.
-    // We bypass this for Triple Threat when Boss is OFF since the pre-saved database baseline has Boss ON.
-    const isTTWithoutBoss = (unitId === 'triple_threat' && (window.unitModesState['triple_threat'] === 1));
-    if (!currentTrait && !currentHead && !anyGlobal && !isTTWithoutBoss) {
+    if (!currentTrait && !currentHead && !anyGlobal) {
         const topBuild = buildList[0];
         if (topBuild) {
             let score = topBuild.d || topBuild.dps || 0;
@@ -792,9 +788,8 @@ window.getLiveScore = (unit) => {
         if (currentTrait) scoringEntry.traitName = currentTrait;
         if (currentHead) scoringEntry.headUsed = currentHead;
 
-        const ttBossOff = (unitId === 'triple_threat' && (window.unitModesState['triple_threat'] === 1));
         let finalScoringEntry = scoringEntry;
-        if (anyGlobal || ttBossOff) {
+        if (anyGlobal) {
             const setName = scoringEntry.setName || (typeof scoringEntry.s === 'number' ? SETS[scoringEntry.s]?.id : scoringEntry.s) || (window.getSetFast && window.getSetFast(scoringEntry.setName)?.id);
             const traitId = scoringEntry.traitName || scoringEntry.trait || (typeof scoringEntry.t === 'number' ? traitsList[scoringEntry.t]?.id : scoringEntry.t);
             if (setName && traitId) {
