@@ -407,7 +407,9 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         }
     } catch (e) { console.warn("Benchmark error", e); }
 
-    const searchInput = card.querySelector('.search-container input')?.value?.toLowerCase() || '';
+    const globalSearchInput = (document.getElementById('globalSearch')?.value || document.getElementById('sidebarSearch')?.value || '').trim().toLowerCase();
+    const localSearchInput = card.querySelector('.search-container input')?.value?.toLowerCase() || '';
+    const searchInput = localSearchInput || globalSearchInput;
     const prioSelect = card.querySelector('select[data-filter="prio"]')?.value || 'all';
     const setSelect = card.querySelector('select[data-filter="set"]')?.value || 'all';
     const headSelect = card.querySelector('select[data-filter="head"]')?.value || 'all';
@@ -1259,6 +1261,16 @@ window.globalFilterUnits = (term) => {
             if (!matches && (searchTerm === 'ground' || searchTerm === 'hill')) {
                 if (placement === 'hybrid') matches = true;
             }
+            if (!matches) {
+                const uTraits = [
+                    ...(typeof traitsList !== 'undefined' ? traitsList : []),
+                    ...(typeof customTraits !== 'undefined' ? customTraits : []),
+                    ...(typeof unitSpecificTraits !== 'undefined' && unitSpecificTraits[unit.id] ? unitSpecificTraits[unit.id] : [])
+                ];
+                if (uTraits.some(t => t && t.name && t.name.toLowerCase().includes(searchTerm))) {
+                    matches = true;
+                }
+            }
             return matches;
         });
     }
@@ -1289,8 +1301,12 @@ window.clearGlobalSearch = () => {
     const input = document.getElementById('globalSearch');
     if (input) {
         input.value = '';
-        globalFilterUnits('');
     }
+    const sidebarInput = document.getElementById('sidebarSearch');
+    if (sidebarInput) {
+        sidebarInput.value = '';
+    }
+    globalFilterUnits('');
 };
 
 function openTraitBestList(unitId) {
