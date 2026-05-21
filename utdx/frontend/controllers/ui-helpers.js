@@ -59,7 +59,7 @@ window.toggleCalcMode = function (mode) {
     }
 };
 
-window.GLOBAL_MODE_SORT = 'short';
+window.GLOBAL_MODE_SORT = 'none';
 window.handleGlobalModeSort = function(value) {
     window.GLOBAL_MODE_SORT = value;
     window.resetCachesForBuffChange();
