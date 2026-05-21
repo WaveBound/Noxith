@@ -60,6 +60,9 @@
 .rc-set-info {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    margin-right: 10px;
 }
 
 .rc-set-name {
@@ -68,6 +71,9 @@
     color: #e0e0e0;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .rc-stars {
@@ -223,6 +229,8 @@
     align-items: center;
     gap: 20px;
 }
+
+
 
 /* ADD THE NEW STYLES HERE */
 #optBestStat .badge-base {

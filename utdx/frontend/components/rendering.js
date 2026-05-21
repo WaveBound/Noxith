@@ -409,7 +409,14 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     const globalSearchInput = (document.getElementById('globalSearch')?.value || document.getElementById('sidebarSearch')?.value || '').trim().toLowerCase();
     const localSearchInput = card.querySelector('.search-container input')?.value?.toLowerCase() || '';
-    const searchInput = localSearchInput || globalSearchInput;
+    
+    let searchInput = localSearchInput;
+    let isGlobalFallback = false;
+    if (!searchInput && globalSearchInput) {
+        searchInput = globalSearchInput;
+        isGlobalFallback = true;
+    }
+
     const prioSelect = card.querySelector('select[data-filter="prio"]')?.value || 'all';
     const setSelect = card.querySelector('select[data-filter="set"]')?.value || 'all';
     const headSelect = card.querySelector('select[data-filter="head"]')?.value || 'all';
@@ -418,17 +425,29 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const renderListInternal = (builds, limit) => {
         if (!builds || builds.length === 0) return '<div class="msg-empty">No valid builds found.</div>';
 
-        let filtered = builds.map(hydrateBuildEntry).filter(r => {
-            if (!r) return false;
-            const prioMatch = (prioSelect === 'all' || r.prio === prioSelect);
-            if (!prioMatch) return false;
-            if (setSelect !== 'all' && r.setName !== setSelect) return false;
-            if (headSelect !== 'all' && (r.headUsed || 'none') !== headSelect) return false;
+        const filterBuilds = (searchStr) => {
+            return builds.map(hydrateBuildEntry).filter(r => {
+                if (!r) return false;
+                const prioMatch = (prioSelect === 'all' || r.prio === prioSelect);
+                if (!prioMatch) return false;
+                if (setSelect !== 'all' && r.setName !== setSelect) return false;
+                if (headSelect !== 'all' && (r.headUsed || 'none') !== headSelect) return false;
 
-            let hSearch = HEAD_CONFIG[r.headUsed]?.search || '';
-            const searchText = `${r.traitName} ${r.setName} ${r.prio} ${hSearch}`.toLowerCase();
-            return searchText.includes(searchInput);
-        });
+                let hSearch = HEAD_CONFIG[r.headUsed]?.search || '';
+                const searchText = `${r.traitName} ${r.setName} ${r.prio} ${hSearch}`.toLowerCase();
+                return searchText.includes(searchStr);
+            });
+        };
+
+        let filtered = filterBuilds(searchInput);
+
+        // If we used the global search as a fallback, but it resulted in NO builds showing,
+        // that means the global search was likely a unit name (like "spade") and not a trait/set.
+        // In that case, ignore the global search fallback and show all builds.
+        if (filtered.length === 0 && isGlobalFallback) {
+            searchInput = ''; // reset
+            filtered = filterBuilds(searchInput);
+        }
 
         if (prioSelect === 'all') {
             const uniqueMap = new Map();
@@ -1247,9 +1266,9 @@ window.globalFilterUnits = (term) => {
     let filtered = unitDatabase;
     if (searchTerm) {
         filtered = unitDatabase.filter(unit => {
-            const title = unit.name.toLowerCase();
-            const role = unit.role.toLowerCase();
-            const id = unit.id.toLowerCase();
+            const title = (unit.name || '').toLowerCase();
+            const role = (unit.role || '').toLowerCase();
+            const id = (unit.id || '').toLowerCase();
             const placement = (unit.placementType || 'Ground').toLowerCase();
             const element = (unit.stats && unit.stats.element) ? unit.stats.element.toLowerCase() : '';
 
@@ -1262,13 +1281,43 @@ window.globalFilterUnits = (term) => {
                 if (placement === 'hybrid') matches = true;
             }
             if (!matches) {
-                const uTraits = [
-                    ...(typeof traitsList !== 'undefined' ? traitsList : []),
-                    ...(typeof customTraits !== 'undefined' ? customTraits : []),
-                    ...(typeof unitSpecificTraits !== 'undefined' && unitSpecificTraits[unit.id] ? unitSpecificTraits[unit.id] : [])
-                ];
-                if (uTraits.some(t => t && t.name && t.name.toLowerCase().includes(searchTerm))) {
+                // Check unit's recommended meta traits (short, long, and note tags)
+                const metaShort = (unit.meta && unit.meta.short) ? unit.meta.short.toLowerCase() : '';
+                const metaLong = (unit.meta && unit.meta.long) ? unit.meta.long.toLowerCase() : '';
+                if (metaShort.includes(searchTerm) || metaLong.includes(searchTerm)) {
                     matches = true;
+                }
+
+                // Check custom unit-specific traits assigned by the user
+                if (!matches && typeof unitSpecificTraits !== 'undefined' && unitSpecificTraits[unit.id]) {
+                    const specific = Array.isArray(unitSpecificTraits[unit.id]) ? unitSpecificTraits[unit.id] : [];
+                    if (specific.some(t => t && t.name && t.name.toLowerCase().includes(searchTerm))) {
+                        matches = true;
+                    }
+                }
+
+                // Check if the unit has any valid builds matching the search term
+                if (!matches && window.STATIC_BUILD_DB) {
+                    let dbKey = unit.id;
+                    if (unit.ability) {
+                        const ab = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
+                        if (ab.noToggle && !unit.allowMultipleModes && window.STATIC_BUILD_DB[unit.id + "_abil"]) {
+                            dbKey = unit.id + "_abil";
+                        }
+                    }
+                    const unitDB = window.STATIC_BUILD_DB[dbKey] || window.STATIC_BUILD_DB[unit.id];
+                    if (unitDB) {
+                        const list = unitDB['fixed'] ? unitDB['fixed'][0] : (unitDB['f'] ? unitDB['f'][0] : null);
+                        if (list) {
+                            // Quick scan of builds
+                            matches = list.some(b => {
+                                const traitName = b.traitName || b.trait || (typeof b.t === 'number' && typeof traitsList !== 'undefined' ? traitsList[b.t]?.name : b.t) || '';
+                                const setName = b.setName || (typeof b.s === 'number' && typeof SETS !== 'undefined' ? SETS[b.s]?.name : b.s) || '';
+                                const prio = b.prio || '';
+                                return `${traitName} ${setName} ${prio}`.toLowerCase().includes(searchTerm);
+                            });
+                        }
+                    }
                 }
             }
             return matches;

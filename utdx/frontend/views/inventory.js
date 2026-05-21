@@ -63,6 +63,8 @@ function initInventory() {
     // Update static labels for Crit Dmg and Crit Rate
     document.querySelectorAll('.sub-label.sub-cm').forEach(el => el.textContent = 'Crit Dmg');
     document.querySelectorAll('.sub-label.sub-cf').forEach(el => el.textContent = 'Crit Rate');
+
+
 }
 
 function saveInventory() {
@@ -73,7 +75,7 @@ function loadInventory() {
     try {
         const stored = localStorage.getItem(RELIC_STORAGE_KEY);
         relicInventory = stored ? JSON.parse(stored) : [];
-        
+
         // Migration for old head pieces
         relicInventory.forEach(r => {
             if (r.slot === 'Head') {
@@ -141,8 +143,8 @@ function updateStarVisibility() {
     const showStars = (setId === 'shadow_reaper' || setId === 'reaper_set' || setId === 'warlord' || setId === 'monarch');
     if (showStars) {
         starSelect.parentElement.classList.remove('hidden');
-    } else { 
-        starSelect.parentElement.classList.add('hidden'); 
+    } else {
+        starSelect.parentElement.classList.add('hidden');
         if (starSelect.value !== "1") {
             starSelect.value = "1";
             updateMainStatOptions(document.getElementById('newRelicSlot').value);
@@ -420,7 +422,7 @@ function renderInventory() {
                     <span class="rc-set-name">${setObj.name}</span>
                     <span class="rc-stars">${starCount > 0 ? "★".repeat(starCount) : ""}</span>
                 </div>
-                <div style="display: flex; gap: 8px; align-items: center;">
+                <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0; margin-left: auto;">
                     <button class="rc-opt-btn" onclick="event.stopPropagation(); checkOptimality('${relic.id}')" title="Check Optimality">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
                         OPTIMALITY
@@ -625,3 +627,4 @@ window.runOptimalityCalc = function (relicId) {
     circle.style.borderColor = color;
     document.getElementById('optPercent').style.color = color;
 };
+
