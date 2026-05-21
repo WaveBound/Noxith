@@ -153,6 +153,11 @@
                             style="height: 28px; font-size: 0.7rem; min-width: 80px; margin: 0; padding: 0 10px;">Loadout</button>
                     </div>
 
+                    <select id="globalModeSort" onchange="if(window.handleGlobalModeSort) window.handleGlobalModeSort(this.value)" class="filter-tab-btn" style="height: 34px; margin-left: 8px; border-radius: 8px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white;">
+                        <option value="short">Progression</option>
+                        <option value="long">Infinite Mode</option>
+                    </select>
+
                     <button id="globalBuffsToggleBtn" class="filter-tab-btn" onclick="toggleGlobalBuffs(this)"
                         style="height: 34px; margin-left: 8px;">Buffs ▼</button>
                 </div>

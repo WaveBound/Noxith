@@ -435,6 +435,15 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
                 let hSearch = HEAD_CONFIG[r.headUsed]?.search || '';
                 const searchText = `${r.traitName} ${r.setName} ${r.prio} ${hSearch}`.toLowerCase();
+                
+                if (window.GLOBAL_MODE_SORT === 'short' && unitObj && unitObj.meta && unitObj.meta.short) {
+                    const recTrait = unitObj.meta.short.split('/')[0].trim().toLowerCase();
+                    if (!searchText.includes(recTrait)) return false;
+                } else if (window.GLOBAL_MODE_SORT === 'long' && unitObj && unitObj.meta && unitObj.meta.long) {
+                    const recTrait = unitObj.meta.long.split('/')[0].trim().toLowerCase();
+                    if (!searchText.includes(recTrait)) return false;
+                }
+
                 return searchText.includes(searchStr);
             });
         };
@@ -759,7 +768,12 @@ window.getLiveScore = (unit) => {
     }
 
     window.LIVE_SCORE_CACHE = window.LIVE_SCORE_CACHE || {};
-    const currentTrait = (window.unitTraits && window.unitTraits[unitId]);
+    let currentTrait = (window.unitTraits && window.unitTraits[unitId]);
+    if (!currentTrait && window.GLOBAL_MODE_SORT === 'short' && unit.meta && unit.meta.short) {
+        currentTrait = unit.meta.short.split('/')[0].trim();
+    } else if (!currentTrait && window.GLOBAL_MODE_SORT === 'long' && unit.meta && unit.meta.long) {
+        currentTrait = unit.meta.long.split('/')[0].trim();
+    }
     const currentHead = (window.unitHeads && window.unitHeads[unitId]);
     let activeType = (window.activeAbilityIds && window.activeAbilityIds.has(unitId)) ? 'abil' : 'base';
 
@@ -1079,6 +1093,17 @@ function renderUnitCard(unit, absoluteIndex) {
     let mainContent = '';
     ['base', 'abil'].forEach(type => { const mode = 'fixed'; mainContent += `<div class="top-builds-list build-list-container mode-${type} mode-${mode} cfg-0" id="results-${type}-${mode}-0-${unit.id}"></div>`; });
 
+    let traitBadgeHtml = '';
+    if (unit.meta) {
+        if (window.GLOBAL_MODE_SORT === 'short' && unit.meta.short) {
+            traitBadgeHtml = `<div class="trait-guide-btn" style="font-size: 0.65rem; padding: 2px 6px; cursor: default; background: linear-gradient(135deg, #a855f7, #6366f1); border-color: #818cf8; font-weight: bold; color: white;">🌟 ${unit.meta.short.split('/')[0].trim()}</div>`;
+        } else if (window.GLOBAL_MODE_SORT === 'long' && unit.meta.long) {
+            traitBadgeHtml = `<div class="trait-guide-btn" style="font-size: 0.65rem; padding: 2px 6px; cursor: default; background: linear-gradient(135deg, #a855f7, #6366f1); border-color: #818cf8; font-weight: bold; color: white;">🌟 ${unit.meta.long.split('/')[0].trim()}</div>`;
+        } else {
+            traitBadgeHtml = `<button class="trait-guide-btn" onclick="openTraitGuide('${unit.id}')" style="font-size: 0.65rem; padding: 2px 6px;">📋 Rec. Traits</button>`;
+        }
+    }
+
     return createBaseUnitCard(unit, {
         id: 'card-' + unit.id,
         additionalClasses: (activeAbilityIds.has(unit.id) ? ' use-ability' : '') + ' lazy-build-load',
@@ -1114,7 +1139,7 @@ function renderUnitCard(unit, absoluteIndex) {
                     return `<div class="placement-badge synergy-dot-badge" style="color: #71717a; border-color: rgba(113, 113, 122, 0.3); background: rgba(0,0,0,0.2); font-weight: 700; opacity: 0.6;">⛓ REQUIRED: ${requiresDot.toUpperCase()}</div>`;
                 }
             })()}
-        </div>${getUnitImgHtml(unit, 'unit-avatar')}<div class="unit-title"><h2>${unit.name}</h2><span>${unit.role}</span></div>${unit.meta ? `<button class="trait-guide-btn" onclick="openTraitGuide('${unit.id}')" style="font-size: 0.65rem; padding: 2px 6px;">📋 Rec. Traits</button>` : ''}`,
+        </div>${getUnitImgHtml(unit, 'unit-avatar')}<div class="unit-title"><h2>${unit.name}</h2><span>${unit.role}</span></div>${traitBadgeHtml}`,
         topControls, bottomControls, mainContent
     });
 }

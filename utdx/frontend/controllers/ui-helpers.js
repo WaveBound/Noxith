@@ -59,6 +59,14 @@ window.toggleCalcMode = function (mode) {
     }
 };
 
+window.GLOBAL_MODE_SORT = 'short';
+window.handleGlobalModeSort = function(value) {
+    window.GLOBAL_MODE_SORT = value;
+    window.resetCachesForBuffChange();
+    if (typeof window.resetAndRender === 'function') window.resetAndRender();
+};
+
+
 // Apply a buff state map to the window globals that calculations.js reads.
 // Always call this before rendering unit cards, then restore when done.
 window.applyBuffContext = (buffState) => {

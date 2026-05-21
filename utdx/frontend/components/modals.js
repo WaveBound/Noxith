@@ -259,7 +259,7 @@ function openTraitGuide(unitId) {
 
     const html = `
         <div class="tg-grid">
-            ${generateSection('Wave 1-30', unit.meta.short, '⚡')}
+            ${generateSection('Progression', unit.meta.short, '⚡')}
             ${generateSection('Infinite Mode', unit.meta.long, '♾️')}
         </div>
         <div class="tg-note">
