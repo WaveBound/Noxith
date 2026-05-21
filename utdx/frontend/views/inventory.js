@@ -138,7 +138,7 @@ function updateStarVisibility() {
     const starSelect = document.getElementById('newRelicStars');
     if (!starSelect) return;
 
-    const showStars = (setId === 'shadow_reaper' || setId === 'reaper_set' || setId === 'warlord');
+    const showStars = (setId === 'shadow_reaper' || setId === 'reaper_set' || setId === 'warlord' || setId === 'monarch');
     if (showStars) {
         starSelect.parentElement.classList.remove('hidden');
     } else { 
@@ -400,7 +400,7 @@ function renderInventory() {
         if (lookupKey === 'warlord_hat') lookupKey = 'warlord';
 
         let starCount = 0;
-        if (lookupKey === 'shadow_reaper' || lookupKey === 'reaper_set' || lookupKey === 'warlord') {
+        if (lookupKey === 'shadow_reaper' || lookupKey === 'reaper_set' || lookupKey === 'warlord' || lookupKey === 'monarch') {
             if (relic.stars >= 1.05) starCount = 3;
             else if (relic.stars >= 1.025) starCount = 2;
             else if (relic.stars >= 1) starCount = 1;
@@ -516,7 +516,8 @@ window.runOptimalityCalc = function (relicId) {
     // 1. Setup Context
     const { effectiveStats, context } = buildCalculationContext(unit, traitId, {
         isAbility: activeAbilityIds.has(unitId),
-        headPiece: (relic.slot === 'Head') ? relic.setKey : 'none'
+        headPiece: (relic.slot === 'Head') ? relic.setKey : 'none',
+        starMult: relic.stars || 1
     });
 
     const starMult = relic.stars || 1;

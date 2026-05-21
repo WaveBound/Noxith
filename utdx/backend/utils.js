@@ -134,6 +134,12 @@ function applyStarScalingToInput(input, newStarMult) {
         input.step = PERFECT_SUBS[statKey] * newStarMult;
     }
 
+    // Dynamic max update for native stepper/validation support
+    const baseMaxValue = typeof MAX_SUB_STAT_VALUES !== 'undefined' ? MAX_SUB_STAT_VALUES[statKey] : undefined;
+    if (baseMaxValue !== undefined) {
+        input.max = baseMaxValue * newStarMult;
+    }
+
     if (input.value === '') return;
 
     const base = parseFloat(input.dataset.baseVal);

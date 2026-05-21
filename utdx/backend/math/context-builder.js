@@ -13,7 +13,7 @@
  * @param {Object} options - Config options { isAbility, mode, points... }
  */
 function buildCalculationContext(unit, traitIdent, options = {}) {
-    const { isAbility = false, mode = 'fixed', dmgPoints = 99, spaPoints = 0, rangePoints = 0, wave = 25, isBoss = false, headPiece = 'none', starMult = 1, rankData = null, upgradeLevel: forcedLevel } = options;
+    const { isAbility = false, mode = 'fixed', dmgPoints = 99, spaPoints = 0, rangePoints = 0, wave = 25, isBoss = false, headPiece = 'none', starMult = 1, headStarMult = 1, rankData = null, upgradeLevel: forcedLevel } = options;
     let traitObj = null;
 
     if (typeof traitIdent === 'object') traitObj = traitIdent;
@@ -248,7 +248,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     let suffix = isAbility ? '-ABILITY' : '-BASE';
     const modeTag = (mode === 'bugged') ? '-b-' : '-f-';
 
-    const context = { dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: false, headPiece, starMult, rankData, isAbility, maxPts, upgradeLevel };
+    const context = { dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: false, headPiece, starMult, headStarMult: options.headStarMult || starMult, rankData, isAbility, maxPts, upgradeLevel };
     return { effectiveStats, traitObj, context, isKiritoVR: false, suffix, modeTag };
 }
 

@@ -295,8 +295,9 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
             if (uStats.id === 'gluttonous_warlord') summonCount = (upLevel >= 6) ? 12 : 10;
         }
 
+        const hStarMult = context.headStarMult || context.starMult || 1;
         if (summonCount > 0) {
-            headDmgPassive += Math.min(60, summonCount * 10);
+            headDmgPassive += Math.min(60, summonCount * 10) * hStarMult;
         }
 
         const tags = uStats.tags || [];

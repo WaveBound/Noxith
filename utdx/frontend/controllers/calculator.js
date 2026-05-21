@@ -143,7 +143,7 @@ function openCalc(unitId) {
 
     const updateHeadStarVisibility = () => {
         const headVal = headSelect.value;
-        const showStars = (headVal === 'reaper_necklace' || headVal === 'shadow_reaper_necklace' || headVal === 'warlord_hat');
+        const showStars = (headVal === 'reaper_necklace' || headVal === 'shadow_reaper_necklace' || headVal === 'warlord_hat' || headVal === 'monarch');
         headStarsSelect.classList.toggle('hidden', !showStars);
         if (!showStars && headStarsSelect.value !== '1') {
             headStarsSelect.value = '1';
@@ -154,7 +154,7 @@ function openCalc(unitId) {
 
     const updateBodyStarVisibility = () => {
         const setVal = setSelect.value;
-        const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set' || setVal === 'warlord');
+        const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set' || setVal === 'warlord' || setVal === 'monarch');
         bodyStarsSelect.classList.toggle('hidden', !showStars);
         if (!showStars && bodyStarsSelect.value !== '1') {
             bodyStarsSelect.value = '1';
@@ -166,7 +166,7 @@ function openCalc(unitId) {
 
     const updateLegsStarVisibility = () => {
         const setVal = setSelect.value;
-        const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set' || setVal === 'warlord');
+        const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set' || setVal === 'warlord' || setVal === 'monarch');
         legsStarsSelect.classList.toggle('hidden', !showStars);
         if (!showStars && legsStarsSelect.value !== '1') {
             legsStarsSelect.value = '1';
@@ -301,12 +301,16 @@ function runCustomCalc() {
             if (stat && value > 0) totalStats[stat] += value;
         });
 
+        const headStarsSelect = document.getElementById('calcHeadStars');
+        const headStarMult = (!headStarsSelect.classList.contains('hidden')) ? parseFloat(headStarsSelect.value) : 1;
+
         // USE UNIFIED CONTEXT BUILDER
         const { effectiveStats, context } = buildCalculationContext(unit, traitId, {
             isAbility: activeAbilityIds.has(unit.id),
             dmgPoints, spaPoints, rangePoints,
             headPiece: headId,
             starMult: bodyStarMult,
+            headStarMult: headStarMult,
             rankData: { dmg: rankDmg, spa: rankSpa, range: rankRange }
         });
 
