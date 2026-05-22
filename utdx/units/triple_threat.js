@@ -72,14 +72,14 @@ unitDatabase.push({
         },
         {
             name: "Unrivaled Mark",
-            desc: "If this unit is placed in the First Slot:<br>• 'Sword' Tag: +50% Damage, -7.5% Cost<br>• 'Piece' Tag: +25% Damage, +10% Range<br>• 'Wind' Element: +20% Damage, +5% Crit Rate (Works on self)"
+            desc: "If this unit is placed in the First Slot:<br>• 'Piece' Tag: +50% Damage, -7.5% Cost<br>• 'Sword' Tag: +25% Damage, +10% Range<br>• 'Wind' Element: +20% Damage, +5% Crit Rate (Works on self)"
         },
         {
             name: "Brutal Slashes",
             dot: 120,
             dotDuration: 7,
             canCrit: false,
-            desc: "On Attack:<br>• Deal Critical Bleed for 100% Damage [120% on E6] over 7 seconds<br>• Hitting enemies with Critical Bleed triggers a Follow-up that receives -25% Damage from Passives (Applies Bleed too)<br>• Cooldown: 15s"
+            desc: "On Attack:<br>• Deal Bleed for 85% Damage [120% on E6] over 7 seconds<br>• Hitting enemies with Bleed triggers a Follow-up that receives -25% Damage from Passives (Applies Bleed too)<br>• Cooldown: 15s"
         }
     ],
 

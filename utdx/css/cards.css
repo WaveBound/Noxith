@@ -1706,3 +1706,31 @@
 .sm-close-btn:hover {
     transform: scale(1.1);
 }
+
+/* COMPACT MODE BOX STYLING */
+.mode-display-button, #activeModeLabel, .global-mode-select, #globalModeSelect {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 85px !important; /* Reduced max-width */
+    padding: 2px 4px !important; /* Reduced padding */
+    height: 26px !important; /* Slightly reduced height */
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem !important; /* Slightly smaller font */
+    font-weight: 900 !important;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+}
+
+select.global-mode-select, select#globalModeSelect {
+    padding-right: 18px !important;
+    background-position: right 4px center !important;
+    background-size: 12px !important;
+}
+
+.trait-icon-small {
+    width: 16px !important;
+    height: 16px !important;
+    padding: 1px !important;
+}

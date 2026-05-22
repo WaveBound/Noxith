@@ -63,16 +63,22 @@ window.GLOBAL_MODE_SORT = 'none';
 window.handleGlobalModeSort = function(value) {
     window.GLOBAL_MODE_SORT = value;
 
-    // 1. Update the visual text label in the header/sidebar
-    const label = document.getElementById('activeModeLabel');
-    if (label) {
-        const textMap = { 'none': 'DEFAULT', 'short': 'PROGRESSION', 'long': 'INFINITE' };
-        label.innerText = textMap[value] || 'DEFAULT';
-    }
+    const textMap = { 'none': 'DEFAULT', 'short': 'PROGRESSION', 'long': 'INFINITE' };
+    const labelText = textMap[value] || 'DEFAULT';
 
-    // 2. Sync the actual select dropdown element if it exists in the toolbar
-    const select = document.getElementById('globalModeSelect');
-    if (select) select.value = value;
+    // 1. Update all possible text labels (header, sidebar, mobile)
+    document.querySelectorAll('#activeModeLabel, .active-mode-label, .current-mode-text').forEach(el => {
+        el.innerText = labelText;
+    });
+
+    // 2. Sync all possible select dropdowns
+    document.querySelectorAll('#globalModeSelect, .global-mode-select, select[onchange*="handleGlobalModeSort"]').forEach(select => {
+        if (select.tagName === 'SELECT') {
+            select.value = value;
+        } else {
+            select.innerText = labelText;
+        }
+    });
 
     window.resetCachesForBuffChange();
     if (typeof window.resetAndRender === 'function') window.resetAndRender();
@@ -81,21 +87,22 @@ window.handleGlobalModeSort = function(value) {
 window.showModeSelectionModal = function() {
     if (typeof showUniversalModal !== 'function') return;
 
+    const current = window.GLOBAL_MODE_SORT || 'none';
     const content = `
         <div style="text-align: center; padding: 10px 10px 5px;">
             <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 24px; line-height: 1.6;">
                 Select your calculation mode. This will <strong style="color:#fff">prioritize</strong> specific traits at the top while still showing others below.
             </p>
             <div style="display: flex; flex-direction: column; gap: 12px;">
-                <button class="mode-select-btn" onclick="window.handleGlobalModeSort('none'); closeModal('universalModal');">
+                <button class="mode-select-btn ${current === 'none' ? 'active' : ''}" onclick="window.handleGlobalModeSort('none'); closeModal('universalModal');">
                     <b style="color: #fff;">DEFAULT MODE</b>
                     <span>Standard ranking based on raw DPS.</span>
                 </button>
-                <button class="mode-select-btn" onclick="window.handleGlobalModeSort('short'); closeModal('universalModal');" style="border-color: #4ade8022; background: linear-gradient(135deg, rgba(74, 222, 128, 0.05) 0%, rgba(0,0,0,0.1) 100%);">
+                <button class="mode-select-btn ${current === 'short' ? 'active' : ''}" onclick="window.handleGlobalModeSort('short'); closeModal('universalModal');" style="border-color: #4ade8022; background: linear-gradient(135deg, rgba(74, 222, 128, 0.05) 0%, rgba(0,0,0,0.1) 100%);">
                     <b style="color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.2);">PROGRESSION MODE</b>
                     <span>Focus on early game potential. This is the unit's recommended trait for Progression.</span>
                 </button>
-                <button class="mode-select-btn" onclick="window.handleGlobalModeSort('long'); closeModal('universalModal');" style="border-color: #a78bfa22; background: linear-gradient(135deg, rgba(167, 139, 250, 0.05) 0%, rgba(0,0,0,0.1) 100%);">
+                <button class="mode-select-btn ${current === 'long' ? 'active' : ''}" onclick="window.handleGlobalModeSort('long'); closeModal('universalModal');" style="border-color: #a78bfa22; background: linear-gradient(135deg, rgba(167, 139, 250, 0.05) 0%, rgba(0,0,0,0.1) 100%);">
                     <b style="color: #a78bfa; text-shadow: 0 0 10px rgba(167, 139, 250, 0.2);">INFINITE MODE</b>
                     <span>Focus on scaling & utility. This is the unit's recommended trait for Infinite Mode.</span>
                 </button>
@@ -115,6 +122,7 @@ window.showModeSelectionModal = function() {
                 text-align: center;
             }
             .mode-select-btn:hover { background: rgba(255,255,255,0.08); transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
+            .mode-select-btn.active { border-color: #60a5fa !important; background: rgba(96, 165, 250, 0.1) !important; box-shadow: 0 0 15px rgba(96, 165, 250, 0.1); }
             .mode-select-btn b { font-size: 1rem; margin-bottom: 4px; letter-spacing: 1.5px; font-weight: 900; }
             .mode-select-btn span { font-size: 0.78rem; color: #94a3b8; font-weight: 500; }
         </style>

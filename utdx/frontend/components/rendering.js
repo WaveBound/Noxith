@@ -1095,10 +1095,21 @@ function renderUnitCard(unit, absoluteIndex) {
 
     let traitBadgeHtml = '';
     if (unit.meta) {
+        const getTraitIcon = (traitStr) => {
+            const cleanName = traitStr.split('/')[0].trim().split('(')[0].trim();
+            const trait = (typeof traitsList !== 'undefined') ? traitsList.find(t => t.name === cleanName || t.id === cleanName.toLowerCase()) : null;
+            if (trait) {
+                return `<div class="trait-img-rainbow trait-icon-small"><img src="images/traits/${trait.name}.png" onerror="this.parentElement.style.display='none'"></div>`;
+            }
+            return '🌟';
+        };
+
         if (window.GLOBAL_MODE_SORT === 'short' && unit.meta.short) {
-            traitBadgeHtml = `<div class="trait-guide-btn" style="font-size: 0.65rem; padding: 2px 6px; cursor: default; background: linear-gradient(135deg, #a855f7, #6366f1); border-color: #818cf8; font-weight: bold; color: white;">🌟 ${unit.meta.short.split('/')[0].trim()}</div>`;
+            const name = unit.meta.short.split('/')[0].trim();
+            traitBadgeHtml = `<div class="trait-guide-btn" style="font-size: 0.65rem; padding: 2px 6px; cursor: default; background: linear-gradient(135deg, #a855f7, #6366f1); border-color: #818cf8; font-weight: bold; color: white; display: flex; align-items: center; gap: 4px;">${getTraitIcon(name)} ${name}</div>`;
         } else if (window.GLOBAL_MODE_SORT === 'long' && unit.meta.long) {
-            traitBadgeHtml = `<div class="trait-guide-btn" style="font-size: 0.65rem; padding: 2px 6px; cursor: default; background: linear-gradient(135deg, #a855f7, #6366f1); border-color: #818cf8; font-weight: bold; color: white;">🌟 ${unit.meta.long.split('/')[0].trim()}</div>`;
+            const name = unit.meta.long.split('/')[0].trim();
+            traitBadgeHtml = `<div class="trait-guide-btn" style="font-size: 0.65rem; padding: 2px 6px; cursor: default; background: linear-gradient(135deg, #a855f7, #6366f1); border-color: #818cf8; font-weight: bold; color: white; display: flex; align-items: center; gap: 4px;">${getTraitIcon(name)} ${name}</div>`;
         } else {
             traitBadgeHtml = `<button class="trait-guide-btn" onclick="openTraitGuide('${unit.id}')" style="font-size: 0.65rem; padding: 2px 6px;">📋 Rec. Traits</button>`;
         }
