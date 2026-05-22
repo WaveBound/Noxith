@@ -91,6 +91,6 @@ unitDatabase.push({
         "+10 Stat Points",
         "Boss passive buffs increased to 65%",
         "+10 Stat Points",
-        "Critical Bleed damage increased to 120%"
+        "Bleed damage increased to 120%"
     ]
 });
