@@ -4,6 +4,13 @@ const comingSoonData = [
 
 const patchNotesData = [
     {
+        version: "v6.1",
+        date: "May 22, 2026",
+        changes: [
+            { type: "Fix", text: "<b>Triple Threat:</b> Implemented 1.45x Boss Damage hidden passive into calculation engine and added UI notice banner." }
+        ]
+    },
+    {
         version: "v6.0",
         date: "May 19, 2026",
         changes: [
