@@ -30,7 +30,12 @@ function initApp() {
         initInventory();
     }
 
-    // 6. Development Resumed Notice
+    // 6. Show Mode Selection on Mobile immediately (Desktop handles after Tutorial)
+    if (window.innerWidth <= 769 && typeof showModeSelectionModal === 'function') {
+        showModeSelectionModal();
+    }
+
+    // 7. Development Resumed Notice
     if (!localStorage.getItem('resume_notice_hidden_v8')) {
         setTimeout(() => {
             if (typeof showUniversalModal === 'function') {

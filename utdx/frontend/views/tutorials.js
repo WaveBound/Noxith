@@ -427,6 +427,11 @@ const TutorialSystem = (function () {
         });
         ensurePanelClosed();
         ensureMikuOff();
+
+        // Show Mode Selection Modal after tutorial ends or is skipped
+        if (typeof window.showModeSelectionModal === 'function') {
+            window.showModeSelectionModal();
+        }
     };
 
     return {

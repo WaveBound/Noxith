@@ -436,14 +436,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 let hSearch = HEAD_CONFIG[r.headUsed]?.search || '';
                 const searchText = `${r.traitName} ${r.setName} ${r.prio} ${hSearch}`.toLowerCase();
                 
-                if (window.GLOBAL_MODE_SORT === 'short' && unitObj && unitObj.meta && unitObj.meta.short) {
-                    const recTrait = unitObj.meta.short.split('/')[0].trim().toLowerCase();
-                    if (!searchText.includes(recTrait)) return false;
-                } else if (window.GLOBAL_MODE_SORT === 'long' && unitObj && unitObj.meta && unitObj.meta.long) {
-                    const recTrait = unitObj.meta.long.split('/')[0].trim().toLowerCase();
-                    if (!searchText.includes(recTrait)) return false;
-                }
-
                 return searchText.includes(searchStr);
             });
         };
@@ -483,6 +475,20 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         if (filtered.length === 0) return '<div class="msg-empty">No matches found.</div>';
 
         filtered.sort((a, b) => {
+            // 1. Prioritize Recommended Traits if a Mode is active (e.g. Ruler for Progression)
+            if (window.GLOBAL_MODE_SORT !== 'none' && unitObj && unitObj.meta) {
+                const modeKey = window.GLOBAL_MODE_SORT === 'short' ? 'short' : 'long';
+                const recStr = (unitObj.meta[modeKey] || '').toLowerCase();
+                const recTraits = recStr.split('/').map(s => s.trim());
+
+                // Check if the specific build trait matches any of the recommendations
+                const aIsRec = recTraits.some(rt => rt && a.traitName.toLowerCase().includes(rt));
+                const bIsRec = recTraits.some(rt => rt && b.traitName.toLowerCase().includes(rt));
+
+                if (aIsRec && !bIsRec) return -1;
+                if (!aIsRec && bIsRec) return 1;
+            }
+
             if (sortSelect === 'range') return (b.range || 0) - (a.range || 0);
             if (sortSelect === 'damage') {
                 if (b.dmgVal !== a.dmgVal) return (b.dmgVal || 0) - (a.dmgVal || 0);
@@ -969,13 +975,7 @@ function renderUnitCard(unit, absoluteIndex) {
     else if (isUnit(unit.id, 'law')) defaultSort = 'range';
 
     let customNoticeHtml = '';
-    if (unit.id === 'triple_threat') {
-        customNoticeHtml = `
-        <div class="unit-card-warning" style="padding: 6px 12px; background: rgba(239, 68, 68, 0.08); border-bottom: 1px solid rgba(239, 68, 68, 0.15); display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 700; color: #f87171;">
-            <span style="font-size: 0.85rem; line-height: 1;">⚠️</span>
-            <span><strong>Notice:</strong> Triple Threat is bugged; his DoT doesn't crit currently.</span>
-        </div>`;
-    } else if (unit.id === 'king_sailor') {
+    if (unit.id === 'king_sailor') {
         customNoticeHtml = `
         <div class="unit-card-warning" style="padding: 6px 12px; background: rgba(245, 158, 11, 0.08); border-bottom: 1px solid rgba(245, 158, 11, 0.15); display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 700; color: #fbbf24;">
             <span style="font-size: 0.85rem; line-height: 1;">⚠️</span>
