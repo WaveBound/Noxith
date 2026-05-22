@@ -319,8 +319,16 @@ function renderQuickBreakdownSection(data, avgHitPerUnit, dotColorClass) {
         <div class="math-section no-border-bottom" style="margin-bottom: 4px;">
             <div class="math-header opacity-70">Quick Breakdown</div>
             <div class="mq-box">
-                <div style="border-color: rgba(251, 191, 36, 0.3);"><div class="mq-label mt-text-gold">Hit DPS</div><div class="mq-val mt-text-gold">${fmt.num(data.hit)}</div><div class="mq-sub">(${fmt.num(avgHitPerUnit)} avg ÷ ${fmt.fix(data.spa, 2)}s) × ${data.placement}</div></div>
-                <div style="border-color: rgba(251, 191, 36, 0.3);"><div class="mq-label mt-text-gold">Hit DPS</div><div class="mq-val mt-text-gold">${fmt.num(data.hit)}</div><div class="mq-sub">${data.baseStats.id === 'triple_threat' ? 'Base Hit + Brutal Slashes FUA' : `(${fmt.num(avgHitPerUnit)} avg ÷ ${fmt.fix(data.spa, 2)}s)`} × ${data.placement}</div></div>
+                <div style="border-color: rgba(251, 191, 36, 0.3);">
+                    <div class="mq-label mt-text-gold">Hit DPS</div>
+                    <div class="mq-val mt-text-gold">${fmt.num(data.hit)}</div>
+                    <div class="mq-sub">
+                        ${data.baseStats.id === 'triple_threat' 
+                            ? `(${fmt.num(avgHitPerUnit / data.spa)} Base + ${fmt.num((data.hit / data.placement) - (avgHitPerUnit / data.spa))} FUA) × ${data.placement}`
+                            : `(${fmt.num(avgHitPerUnit)} avg ÷ ${fmt.fix(data.spa, 2)}s) × ${data.placement}`
+                        }
+                    </div>
+                </div>
                 <div style="border-color: ${data.dot > 0 ? 'rgba(192, 132, 252, 0.3)' : (isInactive ? 'rgba(239, 68, 68, 0.4)' : '#333')};">
                     <div class="mq-label ${isInactive ? '' : dotLabelClass}" style="${isInactive ? 'color: #fca5a5;' : ''}">DoT DPS</div>
                     <div class="mq-val ${isInactive ? '' : dotColorClass}" style="${isInactive ? 'color: #ef4444;' : ''}">${data.dot > 0 ? fmt.num(data.dot) : (isInactive ? 'INACTIVE' : '-')}</div>
