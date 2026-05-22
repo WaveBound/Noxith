@@ -12,7 +12,7 @@ unitDatabase.push = function (unit) {
     }
 
     // Dynamic Balance: Reduce all dotDurations by 1 tick/second
-    (function() {
+    (function () {
         const changes = new Map();
 
         const findAndReduce = (obj) => {
@@ -139,7 +139,8 @@ const UNIT_FILES = [
     'gluttonous_warlord.js',
     'quake_warlord.js',
     'dragon_warlord.js',
-    'string_warlord.js'
+    'string_warlord.js',
+    'shadow_knight.js'
 ];
 
 // Resolves after every unit script has loaded (or errored).

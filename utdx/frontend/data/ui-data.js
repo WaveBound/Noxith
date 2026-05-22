@@ -356,7 +356,8 @@ const guideData = [
     { unit: "gluttonous_warlord", img: "images/units/GluttonousWarlord.png", isCalculated: true },
     { unit: "quake_warlord", img: "images/units/QuakeWarlord.png", isCalculated: true },
     { unit: "dragon_warlord", img: "images/units/DragonWarlord.png", isCalculated: true },
-    { unit: "string_warlord", img: "images/units/StringWarlord.png", isCalculated: true }
+    { unit: "string_warlord", img: "images/units/StringWarlord.png", isCalculated: true },
+    { unit: "shadow_knight", img: "images/units/ShadowKnight.png", isCalculated: true }
 ];
 const elementIcons = {
     "Water": "images/elements/Water.png",
