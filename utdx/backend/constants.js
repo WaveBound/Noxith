@@ -129,6 +129,11 @@ const infoDefinitions = {
         formula: `<span class="ip-var">Cycle</span> = <span class="ip-var">Active</span> + <span class="ip-var">Unbuffed</span>`,
         desc: "Landing a critical hit grants a +45% Damage buff for 20 seconds. The 10s cooldown begins immediately upon proccing.<br><br><b>Refresh Mechanic:</b> During the final 10 seconds of the buff (after cooldown ends), landing another critical hit resets the buff duration back to 20 seconds. High crit rate and speed allow continuous refreshes, pushing uptime towards 100%."
     },
+    'biju_passive': {
+        title: "Biju Head Passive",
+        formula: `<span class="ip-var">Uptime</span> = floor(10s / <span class="ip-var">SPA</span>) / (floor(10s / <span class="ip-var">SPA</span>) + 1)`,
+        desc: "The Biju Head grants a temporary Damage % Buff. <br><br><b>Trigger:</b> On Attack.<br><b>Duration:</b> 10 Seconds.<br><b>Cycle:</b> The trigger attack is unbuffed, followed by all attacks within the 10s window being buffed.<br><br>For example, at 7.0s SPA, the unit performs 1 unbuffed attack and 1 buffed attack (50% uptime)."
+    },
     'ninja_passive': {
         title: "Junior Ninja Head Passive",
         formula: `<span class="ip-var">Cycle</span> = <span class="ip-num">10s</span> + (5 * <span class="ip-var">SPA</span>)`,

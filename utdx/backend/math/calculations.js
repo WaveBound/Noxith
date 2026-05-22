@@ -100,6 +100,20 @@ function calculateDPS(uStats, relicStats, context) {
 
     const { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc } = window._calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicStats, context);
 
+    let headDmgPassiveMod = headDmgPassive;
+    if (headPiece === 'biju_head' && uStats.id === 'triple_threat') {
+        const buffedAtks = Math.floor(10 / finalSpa);
+        const totalAtks = buffedAtks + 1;
+        const uptime = totalAtks > 0 ? (buffedAtks / totalAtks) : 0;
+        headDmgPassiveMod = headDmgPassive * uptime;
+        
+        if (headCalc) {
+            headCalc.uptime = uptime;
+            headCalc.dmg = headDmgPassiveMod;
+            headCalc.trigger = finalSpa;
+        }
+    }
+
     const { abilityDmg, abilityFinalMult } = window.getAbilityMultipliers ? window.getAbilityMultipliers(uStats, isAbility) : { abilityDmg: 0, abilityFinalMult: 1 };
 
     // --- SYNERGY CHECKS (e.g. requiresDot) ---
@@ -132,7 +146,7 @@ function calculateDPS(uStats, relicStats, context) {
         }
     }
 
-    let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassive + headDmgTag + globalDmg + abilityDmg;
+    let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassiveMod + headDmgTag + globalDmg + abilityDmg;
 
     // --- WARLORD DYNAMIC SET BONUS ---
     let warlordData = null;
@@ -181,7 +195,7 @@ function calculateDPS(uStats, relicStats, context) {
     const detailedBuffs = {
         setBase: (sBonus.dmg || 0) - (tagBuffs.dmg || 0) - (relicStats.set === 'great_mage' ? 18 : 0) - (relicStats.set === 'monarch' ? setPerkDmg : 0),
         setPerk: setPerkDmg,
-        accessoryPerk: headDmgPassive,
+        accessoryPerk: headDmgPassiveMod,
         tagBonus: (tagBuffs.dmg || 0) + headDmgTag,
         unitPassive: passivePcent,
         abilityBuff: abilityDmg,
@@ -373,9 +387,9 @@ function calculateDPS(uStats, relicStats, context) {
         const gearMultiplier = 1 + (gearDotBonus / 100);
         const bleedPct = ((upgradeLevel >= 6) ? 120 : 100) * traitMultiplier * gearMultiplier;
 
-        // Follow-up is a Critical Bleed: always multiplies by avgCritMult
-        const fuaDotDmg = tripleThreatFuaDmgNormal * (bleedPct / 100) * avgCritMult;
-        const fuaDotDmgBoss = tripleThreatFuaDmgNormal * (bleedPct / 100) * avgCritMultBoss;
+        // Follow-up is a Bleed: hit damage calculated via passive-reduction logic, no crit applied to DoT
+        const fuaDotDmg = tripleThreatFuaDmgNormal * (bleedPct / 100);
+        const fuaDotDmgBoss = tripleThreatFuaDmgNormal * (bleedPct / 100);
 
         // Only added to DPS if trait allows DoT stacking (e.g. Astral)
         const canStack = !!traitObj.allowDotStack;
@@ -477,7 +491,7 @@ function calculateDPS(uStats, relicStats, context) {
         eternalRangeBuff: eternalRangeBuff,
         totalAdditivePct: additiveTotal,
         conditionalData: uStats.burnMultiplier ? { name: "Target: Burn", val: uStats.burnMultiplier, mult: (1 + uStats.burnMultiplier / 100) } : (uStats.finalMult > 1 ? { name: uStats.id === 'mochi_pirate' ? "Evercrush Dough" : "Raw Multiplier", val: 0, mult: uStats.finalMult } : null),
-        headBuffs: { dmg: headDmgBase + headDmgPassive + headDmgTag, headBase: headDmgBase, passiveDmg: headDmgPassive, tagDmg: headDmgTag, dot: headDotBuff, type: headPiece, warlordSpa, ...headCalc },
+        headBuffs: { dmg: headDmgBase + headDmgPassiveMod + headDmgTag, headBase: headDmgBase, passiveDmg: headDmgPassiveMod, tagDmg: headDmgTag, dot: headDotBuff, type: headPiece, warlordSpa, ...headCalc },
         dotData: dotBreakdown,
         critData: { rate: finalCritRate, cdmg: finalCdmgStat, baseCdmg: uStats.cdmg, relicCmPct: baseR_Cm, setCm: sBonus.cm, totalCmBuff: (sBonus.cm || 0) + baseR_Cm, preRelicCdmg: uStats.cdmg, avgMult: avgCritMult },
         placement,

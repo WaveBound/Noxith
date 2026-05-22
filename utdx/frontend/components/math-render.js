@@ -320,6 +320,7 @@ function renderQuickBreakdownSection(data, avgHitPerUnit, dotColorClass) {
             <div class="math-header opacity-70">Quick Breakdown</div>
             <div class="mq-box">
                 <div style="border-color: rgba(251, 191, 36, 0.3);"><div class="mq-label mt-text-gold">Hit DPS</div><div class="mq-val mt-text-gold">${fmt.num(data.hit)}</div><div class="mq-sub">(${fmt.num(avgHitPerUnit)} avg ÷ ${fmt.fix(data.spa, 2)}s) × ${data.placement}</div></div>
+                <div style="border-color: rgba(251, 191, 36, 0.3);"><div class="mq-label mt-text-gold">Hit DPS</div><div class="mq-val mt-text-gold">${fmt.num(data.hit)}</div><div class="mq-sub">${data.baseStats.id === 'triple_threat' ? 'Base Hit + Brutal Slashes FUA' : `(${fmt.num(avgHitPerUnit)} avg ÷ ${fmt.fix(data.spa, 2)}s)`} × ${data.placement}</div></div>
                 <div style="border-color: ${data.dot > 0 ? 'rgba(192, 132, 252, 0.3)' : (isInactive ? 'rgba(239, 68, 68, 0.4)' : '#333')};">
                     <div class="mq-label ${isInactive ? '' : dotLabelClass}" style="${isInactive ? 'color: #fca5a5;' : ''}">DoT DPS</div>
                     <div class="mq-val ${isInactive ? '' : dotColorClass}" style="${isInactive ? 'color: #ef4444;' : ''}">${data.dot > 0 ? fmt.num(data.dot) : (isInactive ? 'INACTIVE' : '-')}</div>
@@ -745,7 +746,7 @@ function renderDotSection(data, headDotRow) {
                 <td class="mt-cell-val mt-pt-md mt-text-bold" style="color: #60a5fa">${fmt.num(db.fuaDotDps || 0)} DPS</td>
             </tr>
             <tr><td class="mt-cell-label mt-pl-sm text-dim text-xs">• Trigger Cooldown</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">Every 15.0s</td></tr>
-            <tr><td class="mt-cell-label mt-pl-sm text-dim text-xs">• Critical Bleed Proc</td><td class="mt-cell-formula">Avg Hit × ${((data.upgradeLevel >= 6) ? 120 : 100)}%</td><td class="mt-cell-val text-xs text-gold">${fmt.num(db.fuaDotTotalDmg)}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-sm text-dim text-xs">• Bleed Proc</td><td class="mt-cell-formula">Hit Dmg × ${((data.upgradeLevel >= 6) ? 120 : 100)}%</td><td class="mt-cell-val text-xs text-gold">${fmt.num(db.fuaDotTotalDmg)}</td></tr>
             ${(db.fuaDotDps || 0) === 0 ? `
             <tr>
                 <td colspan="3" class="pt-1 pb-1" style="font-size: 0.72rem; color: #f87171; line-height: 1.35; padding-left: 12px;">
@@ -923,21 +924,14 @@ function renderMathContent(data, isSplit = false) {
                 <span class="text-gold mt-text-bold text-xs tracking-sm">BIJU PASSIVE</span>
                 <button class="calc-info-btn" onclick="openInfoPopup('biju_passive')">?</button>
             </div>
-            ${data.baseStats.id !== 'triple_threat' ? `
             <div class="mt-flex-between text-xs text-white mb-1">
-                <span class="opacity-70">Trigger:</span>
-                <span class="mt-font-mono mt-text-right text-white">Every 3rd Attack (${fmt.fix(data.headBuffs.trigger, 1)}s)</span>
+                <span class="opacity-70">Trigger Cycle:</span>
+                <span class="mt-font-mono mt-text-right text-white">1 Unbuffed + 10s Window</span>
             </div>
             <div class="mt-flex-between text-xs text-white mb-3">
                 <span class="opacity-70">Uptime:</span>
                 <span class="mt-font-mono mt-text-right ${uptimePct >= 1 ? 'mt-text-green' : 'mt-text-orange'}">${fmt.fix(uptimePct * 100, 1)}%</span>
             </div>
-            ` : `
-            <div class="mt-flex-between text-xs text-white mb-3">
-                <span class="opacity-70">Status:</span>
-                <span class="mt-font-mono mt-text-right mt-text-green">Always Active (Triple Threat)</span>
-            </div>
-            `}
             <div class="mt-flex-between mt-border-top mt-pt-sm">
                 <span class="text-white text-xs text-bold">Avg Damage Buff</span>
                 <span class="text-gold text-sm mt-text-bold"> +${fmt.fix(data.headBuffs.dmg, 1)}%</span>
@@ -1165,8 +1159,10 @@ function renderSummonSection(data) {
 
 function renderAttackRateSection(data) {
     if (data.baseStats.id === 'triple_threat') {
-        const avgHitVal = data.dmgVal * data.critData.avgMult;
-        const fuaDmg = avgHitVal * 0.75;
+        const baseDmgNoAdditive = data.dmgVal / (1 + data.totalAdditivePct / 100);
+        const fuaHitNormal = baseDmgNoAdditive * Math.max(0, 1 + (data.totalAdditivePct - 25) / 100);
+        const fuaDmg = fuaHitNormal * data.critData.avgMult;
+
         const singleFuaDps = fuaDmg / 15;
         const totalFuaDps = singleFuaDps * data.placement;
 
@@ -1176,7 +1172,7 @@ function renderAttackRateSection(data) {
                 <table class="calc-table">
                     <tr><td class="mt-cell-label">Trigger Condition</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-white">Hit Enemy with Critical Bleed</td></tr>
                     <tr><td class="mt-cell-label">Trigger Cooldown</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-white">Every 15.0 seconds</td></tr>
-                    <tr><td class="mt-cell-label">Follow-Up Damage</td><td class="mt-cell-formula">75% × Avg Hit</td><td class="mt-cell-val text-gold">${fmt.num(fuaDmg)}</td></tr>
+                    <tr><td class="mt-cell-label">Follow-Up Damage</td><td class="mt-cell-formula">Hit Dmg (Passives -25%)</td><td class="mt-cell-val text-gold">${fmt.num(fuaDmg)}</td></tr>
                     
                     <tr class="mt-border-top">
                         <td class="mt-cell-label mt-pt-sm text-white">Single FUA Hit DPS</td>
@@ -1242,15 +1238,18 @@ function renderFinalSection(data) {
 
     let tripleThreatFollowUpHtml = '';
     if (isTripleThreat) {
-        const avgHitVal = data.dmgVal * data.critData.avgMult;
-        const singleBaseHitDps = avgHitVal / data.spa;
+        const baseDmgNoAdditive = data.dmgVal / (1 + data.totalAdditivePct / 100);
+        const fuaHitNormal = baseDmgNoAdditive * Math.max(0, 1 + (data.totalAdditivePct - 25) / 100);
+        const fuaDmg = fuaHitNormal * data.critData.avgMult;
+
+        const singleBaseHitDps = (data.dmgVal * data.critData.avgMult) / data.spa;
         const totalBaseHitDps = singleBaseHitDps * data.placement;
-        const singleFuaDps = (0.75 * avgHitVal) / 15;
+        const singleFuaDps = fuaDmg / 15;
         const totalFuaDps = singleFuaDps * data.placement;
 
         tripleThreatFollowUpHtml = `
             <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Base Hit DPS</td><td class="mt-cell-formula">${fmt.num(singleBaseHitDps)} <span class="op">×</span> ${data.placement}</td><td class="mt-cell-val opacity-70">${fmt.num(totalBaseHitDps)}</td></tr>
-            <tr><td class="mt-cell-label mt-pl-md text-accent-start" style="font-weight: 700;">↳ Brutal Slashes Follow-Up (75% Dmg / 15s)</td><td class="mt-cell-formula text-accent-start">${fmt.num(singleFuaDps)} <span class="op">×</span> ${data.placement}</td><td class="mt-cell-val text-accent-start" style="font-weight: 700;">${fmt.num(totalFuaDps)}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-md text-accent-start" style="font-weight: 700;">↳ Brutal Slashes Follow-Up (-25% Passive / 15s)</td><td class="mt-cell-formula text-accent-start">${fmt.num(singleFuaDps)} <span class="op">×</span> ${data.placement}</td><td class="mt-cell-val text-accent-start" style="font-weight: 700;">${fmt.num(totalFuaDps)}</td></tr>
         `;
     }
 
