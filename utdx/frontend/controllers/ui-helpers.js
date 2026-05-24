@@ -353,6 +353,7 @@ const syncCheckboxes = (ids, isChecked) => {
 window.toggleInventoryMode = (checkbox) => {
     window.inventoryMode = checkbox.checked;
     syncCheckboxes(['globalInventoryMode', 'guideInventoryMode'], checkbox.checked);
+    window.resetCachesForBuffChange();
     window.resetAndRender();
     if (getEl('guidesPage')?.classList.contains('active')) callIfFn('renderGuides');
 };

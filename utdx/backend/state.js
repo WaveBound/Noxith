@@ -3,25 +3,25 @@ const ENABLE_HOTBAR = true;
 const ENABLE_LOADOUT_CLICKABLE = true;
 
 // Data & Cache
-let customTraits = [];
-let unitSpecificTraits = {};
+var customTraits = [];
+var unitSpecificTraits = {};
 window.activeAbilityIds = new Set();
-let activeAbilityIds = window.activeAbilityIds;
-let cachedResults = {};
-let unitBuildsCache = {};
+var activeAbilityIds = window.activeAbilityIds;
+var cachedResults = {};
+var unitBuildsCache = {};
 
-let inventoryMode = false;
-let disableSubStats = false;
+var inventoryMode = false;
+var disableSubStats = false;
 
 
-let currentCalcUnitId = null;
+var currentCalcUnitId = null;
 
 // Async Rendering State
-let renderQueueIndex = 0;
-let renderQueueId = null;
+var renderQueueIndex = 0;
+var renderQueueId = null;
 
 // Pagination State
-let currentPage = 1;
+var currentPage = 1;
 
 /**
  * Requirement: Mobile pages should contain 8 characters a page.
@@ -46,7 +46,7 @@ function getUnitsPerPage() {
     return cols * 2;
 }
 
-let paginatedSortedUnits = [];
+var paginatedSortedUnits = [];
 
 // Inventory
-let relicInventory = [];
+var relicInventory = [];
