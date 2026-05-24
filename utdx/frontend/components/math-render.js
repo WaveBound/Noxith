@@ -203,21 +203,21 @@ function renderSourceTotalsSection(data) {
                         ` : ''}
                     ` : `
                         ${(() => {
-                            if (data.detailedBuffs && data.detailedBuffs.passiveBreakdown && data.detailedBuffs.passiveBreakdown.length > 0) {
-                                let html = '';
-                                data.detailedBuffs.passiveBreakdown.forEach(p => {
-                                    if (p.dmg > 0) html += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>${p.name}</span><span class="text-white">${fmt.pct(p.dmg)}</span></div>`;
-                                    if (p.trueDmg > 0) html += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #60a5fa;"><span>${p.name} (True)</span><span>+${p.trueDmg}%</span></div>`;
-                                });
-                                const namedDmg = data.detailedBuffs.passiveBreakdown.reduce((sum, p) => sum + (p.dmg || 0), 0);
-                                const eternalSub = (data.traitObj && data.traitObj.isEternal) ? (Math.min(data.wave || 12, 12) * 5) : 0;
-                                const rem = (data.detailedBuffs.unitPassive || 0) - namedDmg - eternalSub;
-                                if (Math.abs(rem) > 0.01) html += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Unit Passive</span><span class="text-white">${fmt.pct(rem)}</span></div>`;
-                                return html;
-                            } else {
-                                return unitInnateDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Unit Passive</span><span class="text-white">${fmt.pct(unitInnateDmg)}</span></div>` : '';
-                            }
-                        })()}
+            if (data.detailedBuffs && data.detailedBuffs.passiveBreakdown && data.detailedBuffs.passiveBreakdown.length > 0) {
+                let html = '';
+                data.detailedBuffs.passiveBreakdown.forEach(p => {
+                    if (p.dmg > 0) html += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>${p.name}</span><span class="text-white">${fmt.pct(p.dmg)}</span></div>`;
+                    if (p.trueDmg > 0) html += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #60a5fa;"><span>${p.name} (True)</span><span>+${p.trueDmg}%</span></div>`;
+                });
+                const namedDmg = data.detailedBuffs.passiveBreakdown.reduce((sum, p) => sum + (p.dmg || 0), 0);
+                const eternalSub = (data.traitObj && data.traitObj.isEternal) ? (Math.min(data.wave || 12, 12) * 5) : 0;
+                const rem = (data.detailedBuffs.unitPassive || 0) - namedDmg - eternalSub;
+                if (Math.abs(rem) > 0.01) html += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Unit Passive</span><span class="text-white">${fmt.pct(rem)}</span></div>`;
+                return html;
+            } else {
+                return unitInnateDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Unit Passive</span><span class="text-white">${fmt.pct(unitInnateDmg)}</span></div>` : '';
+            }
+        })()}
                     `) + `
                     ${abilityDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Active Ability</span><span class="text-white">${fmt.pct(abilityDmg)}</span></div>` : ''}
                     ${accessoryBaseDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Accessory Base</span><span class="text-white">${fmt.pct(accessoryBaseDmg)}</span></div>` : ''}
@@ -267,10 +267,10 @@ function renderActiveBuffsSection(data) {
         unit.passives.forEach(p => {
             let stats = [];
             // Find the calculated stats for this specific passive in the breakdown
-            const pb = (data.detailedBuffs && data.detailedBuffs.passiveBreakdown) 
-                ? data.detailedBuffs.passiveBreakdown.find(item => item.name === p.name) 
+            const pb = (data.detailedBuffs && data.detailedBuffs.passiveBreakdown)
+                ? data.detailedBuffs.passiveBreakdown.find(item => item.name === p.name)
                 : null;
-            
+
             // Use breakdown stats if available, otherwise fallback to static passive definition
             const d = pb || p;
             if (pb) {
@@ -281,10 +281,10 @@ function renderActiveBuffsSection(data) {
                 if (pb.cdmg) stats.push(`+${pb.cdmg}% CDmg`);
                 if (pb.dot) stats.push(`+${pb.dot}% DoT`);
             }
-            
+
             let desc = p.desc;
             if (stats.length > 0) desc = `<b class="text-accent-start">[Applied: ${stats.join(', ')}]</b> ` + desc;
-            
+
             buffs.push({ name: p.name, desc: desc, color: "#fff" });
         });
     }
@@ -314,7 +314,7 @@ function renderQuickBreakdownSection(data, avgHitPerUnit, dotColorClass) {
     const isInactive = data.dotData && data.dotData.inactive;
     const dotLabelClass = data.dot > 0 ? 'text-accent-end' : (isInactive ? '' : '');
     const isNutaru = window.isUnit(data.baseStats.id, 'nutaru_beast');
-    
+
     return `
         <div class="math-section no-border-bottom" style="margin-bottom: 4px;">
             <div class="math-header opacity-70">Quick Breakdown</div>
@@ -323,10 +323,10 @@ function renderQuickBreakdownSection(data, avgHitPerUnit, dotColorClass) {
                     <div class="mq-label mt-text-gold">Hit DPS</div>
                     <div class="mq-val mt-text-gold">${fmt.num(data.hit)}</div>
                     <div class="mq-sub">
-                        ${data.baseStats.id === 'triple_threat' 
-                            ? `(${fmt.num(avgHitPerUnit / data.spa)} Base + ${fmt.num((data.hit / data.placement) - (avgHitPerUnit / data.spa))} FUA) × ${data.placement}`
-                            : `(${fmt.num(avgHitPerUnit)} avg ÷ ${fmt.fix(data.spa, 2)}s) × ${data.placement}`
-                        }
+                        ${data.baseStats.id === 'triple_threat'
+            ? `(${fmt.num(avgHitPerUnit / data.spa)} Base + ${fmt.num((data.hit / data.placement) - (avgHitPerUnit / data.spa))} FUA) × ${data.placement}`
+            : `(${fmt.num(avgHitPerUnit)} avg ÷ ${fmt.fix(data.spa, 2)}s) × ${data.placement}`
+        }
                     </div>
                 </div>
                 <div style="border-color: ${data.dot > 0 ? 'rgba(192, 132, 252, 0.3)' : (isInactive ? 'rgba(239, 68, 68, 0.4)' : '#333')};">
@@ -410,72 +410,72 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, h
                     ${(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg) !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Bonus</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.detailedBuffs ? data.detailedBuffs.tagBonus : tagDmg) !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonus</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs ? data.detailedBuffs.tagBonus : tagDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(() => {
-                        if (!data.detailedBuffs) return '';
-                        let html = '';
-                        if (data.detailedBuffs.setPerk && data.detailedBuffs.setPerk !== 0) {
-                            let label = '↳ Set Perks';
-                            if (data.relicStats && data.relicStats.set === 'monarch') {
-                                const summons = data.baseStats.id === 'gluttonous_warlord' ? 4 : (data.summonStats ? Math.min(4, data.summonStats.maxCount) : 4);
-                                label = `↳ Set Perks (Monarch Set: +10% × ${summons} Summons)`;
-                            } else if (data.relicStats && data.relicStats.set === 'warlord') {
-                                label = `↳ Set Perks (Warlord)`;
-                            }
-                            html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label}</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.setPerk)}</td><td class="mt-cell-val"></td></tr>`;
-                        }
-                        if (data.detailedBuffs.accessoryPerk && data.detailedBuffs.accessoryPerk !== 0) {
-                            let label = '↳ Accessory Perks';
-                            const head = data.relicStats ? data.relicStats.head : '';
-                            if (head === 'monarch' || head === 'monarch_cape' || head === 'monarch_head') {
-                                const summons = data.baseStats.id === 'gluttonous_warlord' ? 6 : (data.summonStats ? Math.min(6, data.summonStats.maxCount) : 6);
-                                label = `↳ Accessory Perks (Monarch Cape: +10% × ${summons} Summons)`;
-                            }
-                            html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label}</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.accessoryPerk)}</td><td class="mt-cell-val"></td></tr>`;
-                        }
-                        return html;
-                    })()}
+            if (!data.detailedBuffs) return '';
+            let html = '';
+            if (data.detailedBuffs.setPerk && data.detailedBuffs.setPerk !== 0) {
+                let label = '↳ Set Perks';
+                if (data.relicStats && data.relicStats.set === 'monarch') {
+                    const summons = data.baseStats.id === 'gluttonous_warlord' ? 4 : (data.summonStats ? Math.min(4, data.summonStats.maxCount) : 4);
+                    label = `↳ Set Perks (Monarch Set: +10% × ${summons} Summons)`;
+                } else if (data.relicStats && data.relicStats.set === 'warlord') {
+                    label = `↳ Set Perks (Warlord)`;
+                }
+                html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label}</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.setPerk)}</td><td class="mt-cell-val"></td></tr>`;
+            }
+            if (data.detailedBuffs.accessoryPerk && data.detailedBuffs.accessoryPerk !== 0) {
+                let label = '↳ Accessory Perks';
+                const head = data.relicStats ? data.relicStats.head : '';
+                if (head === 'monarch' || head === 'monarch_cape' || head === 'monarch_head') {
+                    const summons = data.baseStats.id === 'gluttonous_warlord' ? 6 : (data.summonStats ? Math.min(6, data.summonStats.maxCount) : 6);
+                    label = `↳ Accessory Perks (Monarch Cape: +10% × ${summons} Summons)`;
+                }
+                html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label}</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.accessoryPerk)}</td><td class="mt-cell-val"></td></tr>`;
+            }
+            return html;
+        })()}
                     ${(() => {
-                        let html = '';
-                        if (data.detailedBuffs && data.detailedBuffs.passiveBreakdown && data.detailedBuffs.passiveBreakdown.length > 0) {
-                            data.detailedBuffs.passiveBreakdown.forEach(p => {
-                                if (p.dmg !== 0) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ ${p.name}</td><td class="mt-cell-formula">${p.dmg > 0 ? '+' : ''}${fmt.fix(p.dmg, 1)}%</td><td class="mt-cell-val"></td></tr>`;
-                            });
-                            const namedDmg = data.detailedBuffs.passiveBreakdown.reduce((sum, p) => sum + (p.dmg || 0), 0);
-                            const rem = (data.detailedBuffs.unitPassive || 0) - namedDmg - eternalDmg;
-                            if (Math.abs(rem) > 0.01) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive (Base)</td><td class="mt-cell-formula">${rem > 0 ? '+' : ''}${fmt.fix(rem, 1)}%</td><td class="mt-cell-val"></td></tr>`;
-                        } else {
-                            if (Math.abs(data.detailedBuffs ? data.detailedBuffs.unitPassive : passiveDmg) > 0.01) {
-                                const val = data.detailedBuffs ? data.detailedBuffs.unitPassive : passiveDmg;
-                                html = `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${val > 0 ? '+' : ''}${fmt.fix(val, 1)}%</td><td class="mt-cell-val"></td></tr>`;
-                            }
-                        }
-                        return html;
-                    })()}
+            let html = '';
+            if (data.detailedBuffs && data.detailedBuffs.passiveBreakdown && data.detailedBuffs.passiveBreakdown.length > 0) {
+                data.detailedBuffs.passiveBreakdown.forEach(p => {
+                    if (p.dmg !== 0) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ ${p.name}</td><td class="mt-cell-formula">${p.dmg > 0 ? '+' : ''}${fmt.fix(p.dmg, 1)}%</td><td class="mt-cell-val"></td></tr>`;
+                });
+                const namedDmg = data.detailedBuffs.passiveBreakdown.reduce((sum, p) => sum + (p.dmg || 0), 0);
+                const rem = (data.detailedBuffs.unitPassive || 0) - namedDmg - eternalDmg;
+                if (Math.abs(rem) > 0.01) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive (Base)</td><td class="mt-cell-formula">${rem > 0 ? '+' : ''}${fmt.fix(rem, 1)}%</td><td class="mt-cell-val"></td></tr>`;
+            } else {
+                if (Math.abs(data.detailedBuffs ? data.detailedBuffs.unitPassive : passiveDmg) > 0.01) {
+                    const val = data.detailedBuffs ? data.detailedBuffs.unitPassive : passiveDmg;
+                    html = `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${val > 0 ? '+' : ''}${fmt.fix(val, 1)}%</td><td class="mt-cell-val"></td></tr>`;
+                }
+            }
+            return html;
+        })()}
                     ${(() => {
-                        if (data.detailedBuffs && data.detailedBuffs.accessoryBase > 0) {
-                            const MAP_HEAD_NAMES = {
-                                'sun_god': 'Sun God',
-                                'ninja': 'Ninja Headband',
-                                'reaper_necklace': 'Reaper Necklace',
-                                'shadow_reaper_necklace': 'Shadow Reaper',
-                                'junior': 'Junior Ninja',
-                                'biju_head': 'Biju Headband',
-                                'bloodline_head': 'Bloodline',
-                                'reanimated_head': 'Reanimated',
-                                'sorcerer_hunter_spirit': 'S.H. Spirit',
-                                'strongest_sorcerer_glasses': 'Strongest Glasses',
-                                'monarch_cape': 'Monarch Cape',
-                                'monarch_head': 'Monarch Head',
-                                'monarch': 'Monarch Cape',
-                                'warlord_hat': 'Warlord Hat',
-                                'mochi_scarf': 'Mochi Scarf',
-                                'flaming_donut': 'Flaming Donut'
-                            };
-                            const head = (data.headBuffs && data.headBuffs.type) || (data.relicStats && data.relicStats.head) || 'Accessory';
-                            const name = MAP_HEAD_NAMES[head] || head;
-                            return `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Accessory Base (${name})</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.accessoryBase)}</td><td class="mt-cell-val"></td></tr>`;
-                        }
-                        return '';
-                    })()}
+            if (data.detailedBuffs && data.detailedBuffs.accessoryBase > 0) {
+                const MAP_HEAD_NAMES = {
+                    'sun_god': 'Sun God',
+                    'ninja': 'Ninja Headband',
+                    'reaper_necklace': 'Reaper Necklace',
+                    'shadow_reaper_necklace': 'Shadow Reaper',
+                    'junior': 'Junior Ninja',
+                    'biju_head': 'Biju Headband',
+                    'bloodline_head': 'Bloodline',
+                    'reanimated_head': 'Reanimated',
+                    'sorcerer_hunter_spirit': 'S.H. Spirit',
+                    'strongest_sorcerer_glasses': 'Strongest Glasses',
+                    'monarch_cape': 'Monarch Cape',
+                    'monarch_head': 'Monarch Head',
+                    'monarch': 'Monarch Cape',
+                    'warlord_hat': 'Warlord Hat',
+                    'mochi_scarf': 'Mochi Scarf',
+                    'flaming_donut': 'Flaming Donut'
+                };
+                const head = (data.headBuffs && data.headBuffs.type) || (data.relicStats && data.relicStats.head) || 'Accessory';
+                const name = MAP_HEAD_NAMES[head] || head;
+                return `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Accessory Base (${name})</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.accessoryBase)}</td><td class="mt-cell-val"></td></tr>`;
+            }
+            return '';
+        })()}
                     ${eternalDmg > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-accent-start opacity-70">↳ Eternal Stacks (Wave 12+)</td><td class="mt-cell-formula text-accent-start">${fmt.pct(eternalDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.abilityBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-custom opacity-70">↳ Ability Buffs</td><td class="mt-cell-formula text-custom">${fmt.pct(data.abilityBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
 
@@ -568,19 +568,19 @@ function renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa) {
                     ${(data.headBuffs && data.headBuffs.warlordSpa > 0) ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Warlord Hat Accessory</td><td class="mt-cell-formula">-${fmt.fix(data.headBuffs.warlordSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${tagSpa !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonuses</td><td class="mt-cell-formula">${tagSpa > 0 ? '-' : '+'}${Math.abs(fmt.fix(tagSpa, 1))}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(() => {
-                        let html = '';
-                        if (data.detailedBuffs && data.detailedBuffs.passiveBreakdown && data.detailedBuffs.passiveBreakdown.length > 0) {
-                            data.detailedBuffs.passiveBreakdown.forEach(p => {
-                                if (p.spa !== 0) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ ${p.name}</td><td class="mt-cell-formula">${p.spa > 0 ? '-' : '+'}${Math.abs(fmt.fix(p.spa, 1))}%</td><td class="mt-cell-val"></td></tr>`;
-                            });
-                            const namedSpa = data.detailedBuffs.passiveBreakdown.reduce((sum, p) => sum + (p.spa || 0), 0);
-                            const rem = passiveSpa - namedSpa;
-                            if (Math.abs(rem) > 0.01) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive (Base)</td><td class="mt-cell-formula">${rem > 0 ? '-' : '+'}${Math.abs(fmt.fix(rem, 1))}%</td><td class="mt-cell-val"></td></tr>`;
-                        } else {
-                            if (passiveSpa !== 0) html = `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${passiveSpa > 0 ? '-' : '+'}${Math.abs(fmt.fix(passiveSpa, 1))}%</td><td class="mt-cell-val"></td></tr>`;
-                        }
-                        return html;
-                    })()}
+            let html = '';
+            if (data.detailedBuffs && data.detailedBuffs.passiveBreakdown && data.detailedBuffs.passiveBreakdown.length > 0) {
+                data.detailedBuffs.passiveBreakdown.forEach(p => {
+                    if (p.spa !== 0) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ ${p.name}</td><td class="mt-cell-formula">${p.spa > 0 ? '-' : '+'}${Math.abs(fmt.fix(p.spa, 1))}%</td><td class="mt-cell-val"></td></tr>`;
+                });
+                const namedSpa = data.detailedBuffs.passiveBreakdown.reduce((sum, p) => sum + (p.spa || 0), 0);
+                const rem = passiveSpa - namedSpa;
+                if (Math.abs(rem) > 0.01) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive (Base)</td><td class="mt-cell-formula">${rem > 0 ? '-' : '+'}${Math.abs(fmt.fix(rem, 1))}%</td><td class="mt-cell-val"></td></tr>`;
+            } else {
+                if (passiveSpa !== 0) html = `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${passiveSpa > 0 ? '-' : '+'}${Math.abs(fmt.fix(passiveSpa, 1))}%</td><td class="mt-cell-val"></td></tr>`;
+            }
+            return html;
+        })()}
                     ${globalSpaBreakdownHtml}
 
                     <tr><td class="mt-cell-label">Cap Check (${data.spaCap}s)</td><td class="mt-cell-formula">MAX</td><td class="mt-cell-val calc-result">${fmt.fix(data.spa, 3)}s</td></tr>
@@ -970,8 +970,8 @@ function renderMathContent(data, isSplit = false) {
                 ${data.summonData.isCustom ? 'UNIT SUMMONS' : (window.isUnit(data.baseStats.id, 'nutaru_beast') ? 'CLONE LOGIC' : 'PLANE LOGIC')}
             </div>
             
-            ${data.summonData.isCustom ? 
-                data.summonData.summons.map(s => `
+            ${data.summonData.isCustom ?
+            data.summonData.summons.map(s => `
                 <div class="math-section" style="border: 1px solid ${s.color}44; border-left: 4px solid ${s.color}; padding: 10px 14px; background: linear-gradient(135deg, ${s.color}15 0%, rgba(0,0,0,0) 100%); margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
                     <div class="math-header" style="font-size: 0.5rem; margin-bottom: 12px; letter-spacing: 1px; opacity: 0.8; font-weight: 900; color: ${s.color};">${s.name.toUpperCase()}</div>
                     <div class="math-row" style="margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
@@ -1071,14 +1071,14 @@ function renderMathContent(data, isSplit = false) {
 
 function renderSummonSection(data) {
     if (!data.summonData) return '';
-    
+
     // Check if it's a custom summon unit (like Jinoo or Sukuna)
     if (data.summonData.isCustom) {
         // If it's custom but has NO active summons, return empty instead of falling through to Planes
         if (!data.summonData.summons || data.summonData.summons.length === 0) {
             return '';
         }
-        
+
         let summonsHtml = data.summonData.summons.map(s => `
                 <tr class="summon-header-row">
                     <td class="mt-cell-label mt-text-bold" style="color: ${s.color}; font-size: 0.85rem;">
