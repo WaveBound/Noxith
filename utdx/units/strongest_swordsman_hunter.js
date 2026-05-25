@@ -20,15 +20,13 @@ unitDatabase.push({
 
     // BASE STATS
     stats: {
-        spaCap: 3.5,
+        spaCap: 3,
         crit: 0,
         cdmg: 150,
         dot: 0,
         dotStacks: 1,
         element: "Wind",
-        passiveDmg: 0,
-        passiveCrit: 20,
-        passiveCdmg: 100
+        passiveDmg: 0
     },
 
     // UPGRADES (dmg, spa, range, cost per level)
@@ -51,7 +49,9 @@ unitDatabase.push({
         },
         {
             name: "Sword Stances",
-            desc: "• (Permanent) +20% Critical Rate and +100% Critical Damage.<br><br>• Unit cycles through 3 Sword Stances. Every 2nd Normal Attack triggers a transition.<br><br><b>Stance 1:</b> Base stats.<br><b>→ Transition:</b> Instant Follow-up attack, swap to Stance 2.<br><b>Stance 2:</b> +60% Damage and +40% Total Critical Rate.<br><b>→ Transition:</b> Instant Follow-up attack, swap to Stance 3.<br><b>Stance 3:</b> Base stats.<br><b>→ Transition:</b> Instant Follow-up attack, swap to Stance 1."
+            passiveCrit: 20,
+            passiveCdmg: 100,
+            desc: "• +20% Critical Rate<br>• +100% Critical Damage<br><br>• This unit has three Sword Stances and starts with Stance One on placement.<br><br>Every other Attack:<br>• Switch to the next Stance.<br>• Instantly release a Follow-up Attack.<br><br>When reaching Stance Two:<br>• +40% Damage.<br>• +15% Critical Rate.<br><br>When reaching Stance Three:<br>• +5% Critical Rate.<br>• +25% Critical Damage.<br>• These Buffs stack up to 2 times."
         }
     ],
 
