@@ -603,7 +603,9 @@ function renderDotSection(data, headDotRow) {
     const db = data.dotData;
     const getFormula = (total, time) => {
         if (time === 0) return '';
-        const label = Math.abs(time - data.spa) < 0.001 ? 'SPA' : 'Interval';
+        const isChief = data.baseStats.id === 'revolutionary_chief_syncro';
+        const label = isChief ? 'Continuous' : (Math.abs(time - data.spa) < 0.001 ? 'SPA' : 'Interval');
+        if (isChief) return `<span class="text-dim">(${fmt.num(total)} / 1.0s ${label})</span>`;
         return `<span class="text-dim">(${fmt.num(total)} / ${fmt.fix(time, 1)}s ${label})</span>`;
     };
 

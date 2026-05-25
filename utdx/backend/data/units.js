@@ -140,7 +140,8 @@ const UNIT_FILES = [
     'quake_warlord.js',
     'dragon_warlord.js',
     'string_warlord.js',
-    'shadow_knight.js'
+    'shadow_knight.js',
+    'revolutionary_chief_syncro.js'
 ];
 
 // Resolves after every unit script has loaded (or errored).

@@ -669,7 +669,12 @@
 
         window.showUniversalModal({
             title: 'TRAIT SUGGESTIONS TIER LIST',
-            content: `<div class="tier-list-container">${renderSection('Wave 1-30', shortMap)}${renderSection('Infinite Mode', longMap)}</div>`,
+            content: `<div class="tier-list-container">${renderSection('Wave 1-30', shortMap)}${renderSection('Infinite Mode', longMap)}
+                <div style="margin-top: 20px; padding: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; color: #fca5a5; font-size: 0.8rem; text-align: center;">
+                    <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                    <strong>Note:</strong> The <b>Astral</b> trait is currently bugged and no longer currently stacks DoT.
+                </div>
+            </div>`,
             size: 'modal-lg',
             footerButtons: `<button class="action-btn secondary" onclick="closeModal('universalModal')">Close</button>`
         });

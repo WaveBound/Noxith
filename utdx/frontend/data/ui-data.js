@@ -4,6 +4,14 @@ const comingSoonData = [
 
 const patchNotesData = [
     {
+        version: "v6.2",
+        date: "May 25, 2026",
+        changes: [
+            { type: "Unit", text: "<b>Revolutionary Chief (Syncro):</b> Adjusted DoT logic to account for duration refresh on attack; DPS now reflects 1 continuous tick per second." },
+            { type: "Fix", text: "<b>Trait Tier List:</b> Added bug notification for <b>Astral</b> trait (DoT stacking currently non-functional)." }
+        ]
+    },
+    {
         version: "v6.1",
         date: "May 22, 2026",
         changes: [
@@ -357,7 +365,8 @@ const guideData = [
     { unit: "quake_warlord", img: "images/units/QuakeWarlord.png", isCalculated: true },
     { unit: "dragon_warlord", img: "images/units/DragonWarlord.png", isCalculated: true },
     { unit: "string_warlord", img: "images/units/StringWarlord.png", isCalculated: true },
-    { unit: "shadow_knight", img: "images/units/ShadowKnight.png", isCalculated: true }
+    { unit: "shadow_knight", img: "images/units/ShadowKnight.png", isCalculated: true },
+    { unit: "revolutionary_chief_syncro", img: "images/units/RevolutionaryChiefSyncro.png", isCalculated: true }
 ];
 const elementIcons = {
     "Water": "images/elements/Water.png",
