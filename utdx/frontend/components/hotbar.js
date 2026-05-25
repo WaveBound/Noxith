@@ -78,7 +78,7 @@
 
     // --- DECLARATIVE CUSTOM UNIT EFFECTS MAP ---
     const CUSTOM_EFFECTS_MAP = {
-        'joyful_captain': (u, m) => m?.includes('joy boy') ? [
+        'joyful_captain': (u, m, modes) => (modes.includes(2) || modes.includes(3)) ? [
             { label: 'Rubber Control', val: '1.5x DoT', color: '#f43f5e', skipTeam: true },
             { label: 'Rubber Control', val: 'Knockback 10 studs', color: '#f43f5e', skipTeam: true },
             { label: 'Rubber Control', val: '+30% Dmg Taken', color: '#f43f5e', skipTeam: true },
@@ -297,8 +297,8 @@
             });
 
             const ttBonus = getLeaderBonus(leader, 'triple_threat', 'triple_threat', tags, element, (t, e) => {
-                if (t.includes('Sword')) return 'UNRIVALED: +50% DMG (Sword)';
-                if (t.includes('Piece')) return 'UNRIVALED: +25% DMG / +10% RNG (Piece)';
+                if (t.includes('Piece')) return 'UNRIVALED: +50% DMG (Piece)';
+                if (t.includes('Sword')) return 'UNRIVALED: +25% DMG (Sword)';
                 if (e === 'wind') return 'UNRIVALED: +20% DMG / +5% CRIT (Wind)';
             });
 
@@ -435,8 +435,8 @@
                 })()}
                     </div>
                     <div class="ts-lower-row" style="margin-top: auto;">
-                        ${ksBonus ? `<div class="ts-bonus-pill"><span class="ks-text">${ksBonus}</span></div>` : ''}
-                        ${ttBonus ? `<div class="ts-bonus-pill" style="border-color: rgba(167, 243, 208, 0.4); background: rgba(167, 243, 208, 0.08); color: #a7f3d0;"><span class="ks-text" style="color: #a7f3d0;">${ttBonus}</span></div>` : ''}
+                        ${ksBonus ? `<div class="ts-bonus-pill" style="margin-bottom: 8px; display: inline-block;"><span class="ks-text">${ksBonus}</span></div>` : ''}
+                        ${ttBonus ? `<div class="ts-bonus-pill" style="border-color: rgba(167, 243, 208, 0.4); background: rgba(167, 243, 208, 0.08); color: #a7f3d0; padding: 4px 10px; font-size: 0.7rem; height: auto; margin-bottom: 8px; display: inline-block; width: fit-content; line-height: 1.2;"><span class="ks-text" style="color: #a7f3d0;">${ttBonus}</span></div>` : ''}
                         ${effects.length ? `<div class="ts-effect-badges">${effects.map(e => `<div class="ts-effect-badge" style="--effect-color: ${e.color};"><span class="ts-effect-dot" style="background: ${e.color};"></span>${e.label}<span class="ts-effect-val">${e.val}</span></div>`).join('')}</div>` : ''}
                     </div>
                 </div>

@@ -304,7 +304,7 @@ function openTeamSummary() {
         }
 
         // Custom Unit Effects requested by user
-        if (unit.id === 'joyful_captain' && activeModeName && activeModeName.includes('joy boy')) {
+        if (unit.id === 'joyful_captain' && (activeModes.includes(2) || activeModes.includes(3))) {
             effects.push({ label: 'Rubber Control', val: '1.5x DoT', color: '#f43f5e', skipTeam: true });
             effects.push({ label: 'Rubber Control', val: 'Knockback 10 studs', color: '#f43f5e', skipTeam: true });
             effects.push({ label: 'Rubber Control', val: '+30% Dmg Taken', color: '#f43f5e', skipTeam: true });
@@ -423,8 +423,8 @@ function openTeamSummary() {
             const rawElement = unit.element || (unit.stats && unit.stats.element) || (unit.meta && unit.meta.element) || "";
             const element = String(rawElement).toLowerCase();
 
-            if (tags.includes('Sword')) ttBonus = 'UNRIVALED: +50% DMG (Sword)';
-            else if (tags.includes('Piece')) ttBonus = 'UNRIVALED: +25% DMG / +10% RNG (Piece)';
+            if (tags.includes('Piece')) ttBonus = 'UNRIVALED: +50% DMG (Piece)';
+            else if (tags.includes('Sword')) ttBonus = 'UNRIVALED: +25% DMG (Sword)';
             else if (element === 'wind') ttBonus = 'UNRIVALED: +20% DMG / +5% CRIT (Wind)';
         }
 
@@ -636,12 +636,12 @@ function openTeamSummary() {
 
                 <div class="ts-lower-row" style="margin-top: auto;">
                     ${ksBonus ? `
-                        <div class="ts-bonus-pill">
+                        <div class="ts-bonus-pill" style="margin-bottom: 8px; display: inline-block;">
                             <span class="ks-text">${ksBonus}</span>
                         </div>
                     ` : ''}
                     ${ttBonus ? `
-                        <div class="ts-bonus-pill" style="border-color: rgba(167, 243, 208, 0.4); background: rgba(167, 243, 208, 0.08); color: #a7f3d0;">
+                        <div class="ts-bonus-pill" style="border-color: rgba(167, 243, 208, 0.4); background: rgba(167, 243, 208, 0.08); color: #a7f3d0; padding: 4px 10px; font-size: 0.7rem; height: auto; margin-bottom: 8px; display: inline-block; width: fit-content; line-height: 1.2;">
                             <span class="ks-text" style="color: #a7f3d0;">${ttBonus}</span>
                         </div>
                     ` : ''}
