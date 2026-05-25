@@ -291,7 +291,11 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         let bossTotalDmg = actualFinalDmgBoss * (bossTickPct / 100) * dotCritMultBoss;
 
         const duration = uStats.dotDuration || 0;
-        const interval = canStack ? finalSpa : (duration > 0 ? Math.ceil(duration / finalSpa) * finalSpa : finalSpa);
+        let interval = canStack ? finalSpa : (duration > 0 ? Math.ceil(duration / finalSpa) * finalSpa : finalSpa);
+        const isChief = uStats.id === 'revolutionary_chief_syncro' || (window.isUnit && window.isUnit(uStats.id, 'revolutionary_chief_syncro'));
+        if (isChief) {
+            interval = 9.0;
+        }
         
         dotBreakdown.nativeTotalDmg = normalTotalDmg; 
         dotBreakdown.nativeInterval = interval; 

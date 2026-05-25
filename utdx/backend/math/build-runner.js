@@ -48,8 +48,8 @@ function createResultEntry({ id, buildName, traitName, res, prio, mainStats, sub
     return entry;
 }
 
-function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsToProcess, includeSubs, specificTraitsOnly = null, isAbilityContext = false, mode = 'fixed') {
-    if (inventoryMode && relicInventory && relicInventory.length > 0) return calculateInventoryBuilds(unit, null, specificTraitsOnly, isAbilityContext, mode, headsToProcess, includeSubs);
+function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsToProcess, includeSubs, specificTraitsOnly = null, isAbilityContext = false, mode = 'fixed', isHotbar = false) {
+    if (inventoryMode && relicInventory && relicInventory.length > 0) return calculateInventoryBuilds(unit, null, specificTraitsOnly, isAbilityContext, mode, headsToProcess, includeSubs, null, isHotbar);
     window.cachedResults = window.cachedResults || {};
     let activeTraits = [];
     if (specificTraitsOnly && Array.isArray(specificTraitsOnly)) activeTraits = specificTraitsOnly;
@@ -118,7 +118,7 @@ function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsT
 }
 
 // Inventory Mode Calculation
-function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityContext, mode, headsToProcess, includeSubs, forcedRelic = null) {
+function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityContext, mode, headsToProcess, includeSubs, forcedRelic = null, isHotbar = false) {
     window.cachedResults = window.cachedResults || {};
 
     // 1. Determine Traits List
@@ -162,7 +162,8 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
         // Use Unified Context Builder
         const { effectiveStats, context, suffix, modeTag } = buildCalculationContext(unit, trait, {
             isAbility: isAbilityContext,
-            mode: mode
+            mode: mode,
+            isHotbar: isHotbar
         });
 
         heads.forEach(head => {

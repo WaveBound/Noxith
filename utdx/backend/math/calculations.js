@@ -401,6 +401,9 @@ function calculateDPS(uStats, relicStats, context) {
     if (headPiece === 'mochi_scarf' && (uStats.id === 'ace' || (window.isUnit && window.isUnit(uStats.id, 'ace')))) {
         baseDotVal *= 1.5;
     }
+    if (headPiece === 'flaming_donut' && (uStats.id === 'ace' || (window.isUnit && window.isUnit(uStats.id, 'ace')))) {
+        baseDotVal *= 1.5;
+    }
     const { dotDpsTotal, bossDotDpsTotal, dotBreakdown } = _calcDoTDPS({ ...uStats, dot: baseDotVal, isBoss: context.isBoss }, traitObj, traitDotBuff, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult, finalDmgBoss, avgCritMultBoss);
 
     let finalDotDps = dotDpsTotal;

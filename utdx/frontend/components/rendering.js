@@ -317,7 +317,11 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     const activeType = (window.activeAbilityIds?.has(unitId) && unitObj?.ability) ? 'abil' : 'base';
     const activeMode = 'fixed';
-    if (!forceSync && unitObj?.allowMultipleModes && !window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0]) {
+
+    // Units that must ALWAYS calculate dynamically because static DB is stale or complex (Syncro/Follow-ups)
+    const forceDynamicUnits = ['revolutionary_chief_syncro', 'joyful_captain', 'the_strongest_in_history', 'jinoo_shadow_monarch', 'the_strongest_of_today'];
+    
+    if (!forceSync && (unitObj?.allowMultipleModes || unitId.toLowerCase().includes('syncro') || forceDynamicUnits.includes(unitId)) && !window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0]) {
         forceSync = true;
     }
 
@@ -343,22 +347,44 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 }
             }
 
-            if (forceSync && unitObj?.modes) {
-                const dynamicResults = calculateUnitBuilds(
+            // Benchmarking for Optimality must compare against the absolute peak potential across all forms.
+            const PEAK_MODE_STATE = {
+                'the_strongest_in_history': [1, 2],
+                'joyful_captain': 2,
+                'jinoo_shadow_monarch': [0, 1, 2, 3, 4]
+            };
+
+            // Force dynamic recalculation of benchmark if missing or if unit logic is known to have changed (Syncro/Modes)
+            const needsDynamicBench = benchmarkDps === 0 || forceSync || unitObj?.modes || unitId.toLowerCase().includes('syncro') || forceDynamicUnits.includes(unitId);
+
+            if (needsDynamicBench && unitObj) {
+                // Temporarily swap to peak mode state for benchmarking to get true 100% target
+                const savedState = window.unitModesState[unitId];
+                if (PEAK_MODE_STATE[unitId] !== undefined) {
+                    window.unitModesState[unitId] = PEAK_MODE_STATE[unitId];
+                } else if (unitObj.modes && Array.isArray(unitObj.modes)) {
+                    window.unitModesState[unitId] = unitObj.modes.length - 1; // Fallback to final mode
+                }
+
+                const dynamicResults = window.calculateUnitBuilds(
                     unitObj, null, null, ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'], HEADS_LIST,
-                    !window.disableSubStats, null, activeType === 'abil', activeMode
+                    !window.disableSubStats, null, activeType === 'abil', activeMode, isHotbar
                 );
+
+                window.unitModesState[unitId] = savedState; // Restore user's current form
+
                 if (dynamicResults?.length > 0) {
                     benchmarkDps = dynamicResults[0].dps || 0;
                     if (!window.modeBenchmarks) window.modeBenchmarks = {};
-                    window.modeBenchmarks[`${unitId}-${JSON.stringify(window.unitModesState[unitId])}-${activeType}`] = benchmarkDps;
+                    // FIX: Cache peak benchmark by unit ID and type only, ignoring current mode state
+                    window.modeBenchmarks[`${unitId}-${activeType}`] = benchmarkDps;
 
                     if (!window.unitBuildsCache[unitId]) window.unitBuildsCache[unitId] = {};
                     if (!window.unitBuildsCache[unitId][activeType]) window.unitBuildsCache[unitId][activeType] = {};
                     window.unitBuildsCache[unitId][activeType][activeMode] = [dynamicResults];
                 }
-            } else if (unitObj?.modes) {
-                benchmarkDps = window.modeBenchmarks?.[`${unitId}-${JSON.stringify(window.unitModesState[unitId])}-${activeType}`] || 0;
+            } else if (unitObj?.modes || unitId.toLowerCase().includes('syncro') || forceDynamicUnits.includes(unitId)) {
+                benchmarkDps = window.modeBenchmarks?.[`${unitId}-${activeType}`] || 0;
             }
         }
     } catch (e) { console.warn("Benchmark error", e); }

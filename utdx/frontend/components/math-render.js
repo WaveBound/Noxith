@@ -591,9 +591,12 @@ function renderDotSection(data, headDotRow) {
         if (time === 0) return '';
         const isChief = data.baseStats.id === 'revolutionary_chief_syncro';
         const label = isChief ? 'Continuous' : (Math.abs(time - data.spa) < 0.001 ? 'SPA' : 'Interval');
-        if (isChief) return `<span class="text-dim">(${fmt.num(total)} / 1.0s ${label})</span>`;
+        if (isChief) return `<span class="text-dim">(${fmt.num(total / 9.0)} / 1.0s ${label})</span>`;
         return `<span class="text-dim">(${fmt.num(total)} / ${fmt.fix(time, 1)}s ${label})</span>`;
     };
+
+    // Flaming Donut check is only for Spade (Ace)
+    const isSpadeAce = data.baseStats.id === 'ace' || window.isUnit?.(data.baseStats.id, 'ace');
 
     const baseDot = data.baseStats.dot || 0;
     const traitDot = data.traitObj.dotBuff || 0;
@@ -604,6 +607,8 @@ function renderDotSection(data, headDotRow) {
     const gearBonus = relicDot + setDot + headDot;
     const traitMultiplier = 1 + (traitDot / 100);
     const gearMultiplier = 1 + (gearBonus / 100);
+
+    // The 1.5x Flaming Donut multiplier is already included in db.base by the core engine
     const finalTickPct = db.base * traitMultiplier * gearMultiplier;
 
     if (data.headBuffs && data.headBuffs.type === 'ninja') {
@@ -661,7 +666,6 @@ function renderDotSection(data, headDotRow) {
     }
 
     if (data.headBuffs && data.headBuffs.type === 'flaming_donut') {
-        const isAce = data.baseStats.id === 'ace' || window.isUnit(data.baseStats.id, 'ace');
         headDotRow = `
         <tr class="mt-row-ninja" style="background: rgba(239, 68, 68, 0.05); border-left: 3px solid #ef4444;"><td colspan="3" class="p-2">
             <div class="mt-flex-between mb-2">
@@ -674,11 +678,11 @@ function renderDotSection(data, headDotRow) {
             </div>
             <div class="mt-flex-between text-xs text-white mb-3">
                 <span class="opacity-70">Burn Multiplier:</span>
-                <span class="mt-font-mono mt-text-right mt-text-green">${isAce ? '1.5x Multiplier (Active)' : '1.0x (Spade/Ace only)'}</span>
+                <span class="mt-font-mono mt-text-right mt-text-green">${isSpadeAce ? '1.5x Multiplier (Active)' : '1.0x (Spade/Ace only)'}</span>
             </div>
             <div class="mt-flex-between mt-border-top mt-pt-sm">
                 <span class="text-white text-xs text-bold">Applied DoT Multiplier</span>
-                <span class="text-sm mt-text-bold" style="color: #fca5a5;"> ${isAce ? '×1.50' : '×1.00'}</span>
+                <span class="text-sm mt-text-bold" style="color: #fca5a5;"> ${isSpadeAce ? '×1.50' : '×1.00'}</span>
             </div>
         </td></tr>`;
     }
@@ -709,7 +713,7 @@ function renderDotSection(data, headDotRow) {
             ${relicDot > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">• Relic Stats (Main+Sub)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-dim">${fmt.pct(relicDot)}</td></tr>` : ''}
             ${setDot > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">• Set Bonus</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-dim">${fmt.pct(setDot)}</td></tr>` : ''}
             ${headDot > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">• Head Passive</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-dim">${fmt.pct(headDot)}</td></tr>` : ''}
-            ${(data.headBuffs && data.headBuffs.type === 'flaming_donut' && (data.baseStats.id === 'ace' || window.isUnit(data.baseStats.id, 'ace'))) ? `
+            ${(data.headBuffs && data.headBuffs.type === 'flaming_donut' && isSpadeAce) ? `
             <tr><td class="mt-cell-label mt-pl-sm mt-text-bold" style="color: #fca5a5;">3. Flaming Donut Multiplier (Ace)</td><td class="mt-cell-formula mt-text-bold" style="color: #fca5a5;"><span class="op">×</span>1.50</td><td class="mt-cell-val text-bold" style="color: #fca5a5;">1.5x Burn</td></tr>
             ` : ''}
             
@@ -782,6 +786,8 @@ function renderDotSection(data, headDotRow) {
 
 function renderMathContent(data, isSplit = false) {
     if (!data || !data.lvStats || !data.critData) return '<div class="msg-empty">Data incomplete.</div>';
+
+    // The 1.5x Flaming Donut multiplier is already applied in the core engine calculations.js
 
     const identityHtml = `
         <div class="build-identity-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 6px 15px; margin-bottom: 6px; border-left: 4px solid #60a5fa;">
