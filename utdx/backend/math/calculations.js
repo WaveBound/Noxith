@@ -148,6 +148,21 @@ function calculateDPS(uStats, relicStats, context) {
 
     let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassiveMod + headDmgTag + globalDmg + abilityDmg;
 
+    if (uStats.id === 'strongest_swordsman_hunter') {
+        // Stance Cycle Logic:
+        // 6 Normal Attacks (2 per stance) + 3 Transition Follow-ups = 9 total hits per cycle.
+        // Stance 2 buffs (+60% Dmg, +20% extra Crit Rate) apply to 3 out of 9 hits.
+        
+        // We calculate the weighted average of the temporary Stance 2 buff
+        const s2Weight = 3 / 9;
+        const avgS2Dmg = 60 * s2Weight;   // 20% average additive damage
+        const avgS2Crit = 20 * s2Weight;  // 6.66% average extra crit rate
+
+        additiveTotal += avgS2Dmg;
+        // We don't have finalCritRate yet, so we'll store this to add later
+        uStats._stanceCritBonus = avgS2Crit; 
+    }
+
     // --- WARLORD DYNAMIC SET BONUS ---
     let warlordData = null;
     if (relicStats.set === 'warlord') {
