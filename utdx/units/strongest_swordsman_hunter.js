@@ -3,16 +3,16 @@ unitDatabase.push({
     id: "strongest_swordsman_hunter",
     name: "Strongest Swordsman (Hunter)",
     img: "images/units/StrongestSwordsman.png",
-    level: 100,
+    level: 70,
     placement: 2,
     placementType: "Hill",
-    role: "Utility / Damage",
+    role: "DPS",
     tags: ["Piece", "Sword", "Warlord"],
 
     // META (Build Guide tab)
     meta: {
         short: "Ruler",
-        long: "Ruler/Duelist",
+        long: "Ruler",
         note: "Top-tier Hill DPS. Excels at long-range precision and provides powerful synergies to Warlord and Piece teams."
     },
 
@@ -20,7 +20,7 @@ unitDatabase.push({
 
     // BASE STATS
     stats: {
-        spaCap: 3,
+        spaCap: 3.5,
         crit: 0,
         cdmg: 150,
         dot: 0,
@@ -45,13 +45,13 @@ unitDatabase.push({
             name: "Thousand Cuts",
             passiveDmg: 35,
             passiveCdmg: 50,
-            desc: "On Attack:<br>• Deal 5% more Damage per enemy hit.<br>• This Buff caps at 10 enemies hit.<br><br>When attacking more than 1 Armored Enemy:<br>• Deal 1.5x Damage to Armored and Hyper Armored enemies.<br><br>Every 100 Takedowns:<br>• Unlock either 'Armament Haki' or 'Observation Haki'.<br><br>Armament Haki:<br>• +35% Damage.<br>• +50% Critical Damage.<br><br>Observation Haki:<br>When no enemies are in Range:<br>• Switch to Stance One.<br>• +500% Range.<br>• -50% SPA.<br><br>Every 1 stud further the enemy is from this unit:<br>• Deal +1% Damage per stud.<br>• Attacks during 'Observation Haki' do not count toward 'Sword Stances'."
+            desc: "<br>On Attack:<br>• Deal 5% more Damage per enemy hit.<br>• This Buff caps at 10 enemies hit.<br><br>When attacking more than 1 Armored Enemy:<br>• Deal 1.5x Damage to Armored and Hyper Armored enemies.<br><br>Every 100 Takedowns:<br>• Unlock either 'Armament Haki' or 'Observation Haki'.<br><br>Armament Haki:<br>• +35% Damage.<br>• +50% Critical Damage.<br><br>Observation Haki:<br>When no enemies are in Range:<br>• Switch to Stance One.<br>• +500% Range.<br>• -50% SPA.<br><br>Every 1 stud further the enemy is from this unit:<br>• Deal +1% Damage per stud.<br>• Attacks during 'Observation Haki' do not count toward 'Sword Stances'."
         },
         {
             name: "Sword Stances",
             passiveCrit: 20,
             passiveCdmg: 100,
-            desc: "• +20% Critical Rate<br>• +100% Critical Damage<br><br>• This unit has three Sword Stances and starts with Stance One on placement.<br><br>Every other Attack:<br>• Switch to the next Stance.<br>• Instantly release a Follow-up Attack.<br><br>When reaching Stance Two:<br>• +40% Damage.<br>• +15% Critical Rate.<br><br>When reaching Stance Three:<br>• +5% Critical Rate.<br>• +25% Critical Damage.<br>• These Buffs stack up to 2 times."
+            desc: "<br>• +20% Critical Rate<br>• +100% Critical Damage<br><br>• This unit has three Sword Stances and starts with Stance One on placement.<br><br>Every other Attack:<br>• Switch to the next Stance.<br>• Instantly release a Follow-up Attack.<br><br>When reaching Stance Two:<br>• +40% Damage.<br>• +15% Critical Rate.<br><br>When reaching Stance Three:<br>• +5% Critical Rate.<br>• +25% Critical Damage.<br>• These Buffs stack up to 2 times."
         }
     ],
 

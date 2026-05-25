@@ -2,7 +2,7 @@
 // PASSIVE-BACKEND.JS - Centralized Math for Passives and Global Buffs
 // ============================================================================
 
-window.calcPassives = function(uStats, context, headPiece, upgradeLevel) {
+window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
     let passivePcent = (uStats.buffDmg || 0);
     let passiveSpaPcent = 0;
     let passiveRangePcent = 0;
@@ -131,7 +131,7 @@ window.calcPassives = function(uStats, context, headPiece, upgradeLevel) {
                     const hotbar = window.hotbarState;
                     if (hotbar && hotbar.slots) {
                         const slotIdx = hotbar.slots.findIndex(s => s && (s.id === uStats.id || s.id.split('-')[0] === uStats.id));
-                        if (slotIdx !== 0) return; 
+                        if (slotIdx !== 0) return;
                     }
                 }
             }
@@ -215,14 +215,14 @@ window.calcPassives = function(uStats, context, headPiece, upgradeLevel) {
     return { passivePcent, passiveSpaPcent, passiveRangePcent, trueDmgFromPassives, passiveCritFromPassives, passiveCdmgFromPassives, passiveDotFromPassives, passiveBreakdown };
 };
 
-window.calcGlobalBuffs = function(uStats, context, headPiece) {
+window.calcGlobalBuffs = function (uStats, context, headPiece) {
     let globalDmg = 0, globalSpa = 0, globalRange = 0, globalCrit = 0, globalCdmg = 0;
     let activeGlobalBuffs = {};
 
     if (typeof window !== 'undefined' && window.GLOBAL_BUFF_DATA) {
         Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
             let isActive = false;
-            const overrideKey = buff.id + 'Buff'; 
+            const overrideKey = buff.id + 'Buff';
 
             if (buff.hideButton || (buff.id === 'ksailor' && window.isUnit && window.isUnit(uStats.id, 'king_sailor'))) {
                 isActive = true; // Always evaluate hideButton buffs and King Sailor's own buff

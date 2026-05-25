@@ -106,7 +106,7 @@ function calculateDPS(uStats, relicStats, context) {
         const totalAtks = buffedAtks + 1;
         const uptime = totalAtks > 0 ? (buffedAtks / totalAtks) : 0;
         headDmgPassiveMod = headDmgPassive * uptime;
-        
+
         if (headCalc) {
             headCalc.uptime = uptime;
             headCalc.dmg = headDmgPassiveMod;
@@ -328,7 +328,7 @@ function calculateDPS(uStats, relicStats, context) {
     if (uStats.id === 'triple_threat') {
         const fuaAdditiveTotal = additiveTotal - 25;
         tripleThreatFuaDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * Math.max(0, 1 + fuaAdditiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
-        
+
         const fuaAvgHit = tripleThreatFuaDmgNormal * avgCritMult;
         const fuaAvgHitBoss = tripleThreatFuaDmgNormal * avgCritMultBoss;
 
@@ -363,7 +363,7 @@ function calculateDPS(uStats, relicStats, context) {
         const upLevel = context.upgradeLevel !== undefined ? context.upgradeLevel : 6;
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
         const summonsResult = window.calcCustomSummons(uStats, upLevel, eLevel, finalDmg, finalSpa);
-        
+
         if (summonsResult.summonData) {
             if (!summonData) summonData = {};
             summonData.isCustom = true;
