@@ -365,8 +365,9 @@ const guideData = [
     { unit: "quake_warlord", img: "images/units/QuakeWarlord.png", isCalculated: true },
     { unit: "dragon_warlord", img: "images/units/DragonWarlord.png", isCalculated: true },
     { unit: "string_warlord", img: "images/units/StringWarlord.png", isCalculated: true },
-    { unit: "shadow_knight", img: "images/units/ShadowKnight.png", isCalculated: true },
-    { unit: "revolutionary_chief_syncro", img: "images/units/RevolutionaryChiefSyncro.png", isCalculated: true }
+    { unit: "shadow_knight", img: "images/units/ShadowKnight.png", isCalculated: true },    
+    { unit: "revolutionary_chief_syncro", img: "images/units/RevolutionaryChiefSyncro.png", isCalculated: true },
+    { unit: "strongest_swordsman_hunter", img: "images/units/StrongestSwordsman.png", isCalculated: true }
 ];
 const elementIcons = {
     "Water": "images/elements/Water.png",
@@ -374,7 +375,8 @@ const elementIcons = {
     "Light": "images/elements/Light.png",
     "Dark": "images/elements/Dark.png",
     "Ice": "images/elements/Ice.png",
-    "Rose": "images/elements/Rose.png"
+    "Rose": "images/elements/Rose.png",
+    "Wind": "images/elements/Wind.png"
 };
 const creditsData = [
     { role: "Owner", name: "xKing.", id: "xking.", userId: "347578773857632258", pfp: "images/pfp/xking.png", type: "owner" },

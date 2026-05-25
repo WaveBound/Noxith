@@ -141,7 +141,8 @@ const UNIT_FILES = [
     'dragon_warlord.js',
     'string_warlord.js',
     'shadow_knight.js',
-    'revolutionary_chief_syncro.js'
+    'revolutionary_chief_syncro.js',
+    'strongest_swordsman_hunter.js'
 ];
 
 // Resolves after every unit script has loaded (or errored).
