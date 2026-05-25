@@ -23,7 +23,7 @@ const TutorialSystem = (function () {
                 transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             }
             #tut-tooltip {
-                position: fixed; width: 420px;
+                position: fixed; width: 440px;
                 background: #0b0c10; 
                 border: 1px solid #2d2f36; border-top: 4px solid #3b82f6;
                 border-radius: 14px; padding: 24px; color: #fff;
@@ -59,6 +59,65 @@ const TutorialSystem = (function () {
             .tut-btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5); }
             .tut-counter { font-size: 0.75rem; color: #64748b; font-weight: 900; margin-left: 15px; }
             
+            /* Sleek Custom Checkbox Styling */
+            .tut-checkbox-label {
+                font-size: 0.75rem;
+                color: #64748b;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                cursor: pointer;
+                user-select: none;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                transition: color 0.2s ease;
+            }
+            .tut-checkbox-label:hover {
+                color: #94a3b8;
+            }
+            .tut-checkbox-label input {
+                position: absolute;
+                opacity: 0;
+                cursor: pointer;
+                height: 0;
+                width: 0;
+            }
+            .tut-checkbox-custom {
+                height: 16px;
+                width: 16px;
+                background-color: #111217;
+                border: 1.5px solid #2d2f36;
+                border-radius: 4px;
+                display: inline-block;
+                position: relative;
+                transition: all 0.2s ease;
+                flex-shrink: 0;
+            }
+            .tut-checkbox-label:hover input ~ .tut-checkbox-custom {
+                border-color: #3b82f6;
+            }
+            .tut-checkbox-label input:checked ~ .tut-checkbox-custom {
+                background-color: #3b82f6;
+                border-color: #3b82f6;
+                box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+            }
+            .tut-checkbox-custom::after {
+                content: "";
+                position: absolute;
+                display: none;
+                left: 5px;
+                top: 2px;
+                width: 4px;
+                height: 8px;
+                border: solid white;
+                border-width: 0 2px 2px 0;
+                transform: rotate(45deg);
+            }
+            .tut-checkbox-label input:checked ~ .tut-checkbox-custom::after {
+                display: block;
+            }
+
             #tut-cursor {
                 position: fixed; width: 40px; height: 40px; z-index: 100000; pointer-events: none; opacity: 0;
                 transform: translate(var(--tx, 100vw), var(--ty, 100vh)) scale(var(--ts, 1)) rotate(var(--tr, 0deg));
@@ -169,7 +228,7 @@ const TutorialSystem = (function () {
         }
     };
 
-    // --- REORDERED STEPS ---
+    // --- STEPS ---
     const steps = [
         {
             title: "Welcome!",
@@ -310,6 +369,11 @@ const TutorialSystem = (function () {
             <div class="tut-desc" id="tut-desc"></div>
             <div class="tut-controls">
                 <button class="tut-btn" id="tut-skip">Skip</button>
+                <label class="tut-checkbox-label">
+                    <input type="checkbox" id="tut-dont-show">
+                    <span class="tut-checkbox-custom"></span>
+                    <span>Don't show again</span>
+                </label>
                 <div class="tut-counter" id="tut-counter"></div>
                 <div class="tut-controls-right">
                     <button class="tut-btn" id="tut-prev">Back</button>
@@ -330,7 +394,6 @@ const TutorialSystem = (function () {
         isAnimating = true;
         currentAutoClickStep = null;
 
-        // Clear the delay timeout if user skips or goes back early
         if (nextButtonTimeout) clearTimeout(nextButtonTimeout);
 
         document.querySelectorAll('.tut-ripple').forEach(el => el.remove());
@@ -386,7 +449,6 @@ const TutorialSystem = (function () {
         const nextBtn = document.getElementById('tut-next');
         nextBtn.innerText = currentStep === steps.length - 1 ? 'Finish' : 'Next';
 
-        // Apply 1.5 second delay before next button is clickable
         nextBtn.disabled = true;
         if (nextButtonTimeout) clearTimeout(nextButtonTimeout);
         nextButtonTimeout = setTimeout(() => {
@@ -422,13 +484,17 @@ const TutorialSystem = (function () {
         tutorialActive = false;
         if (nextButtonTimeout) clearTimeout(nextButtonTimeout);
 
+        const dontShowCb = document.getElementById('tut-dont-show');
+        if (dontShowCb && dontShowCb.checked) {
+            localStorage.setItem('uto_hide_tutorial_v1', 'true');
+        }
+
         ['tut-mask', 'tut-tooltip', 'tut-cursor', 'tutorial-styles'].forEach(id => {
             const el = document.getElementById(id); if (el) el.remove();
         });
         ensurePanelClosed();
         ensureMikuOff();
 
-        // Show Mode Selection Modal after tutorial ends or is skipped
         if (typeof window.showModeSelectionModal === 'function') {
             window.showModeSelectionModal();
         }
@@ -436,7 +502,7 @@ const TutorialSystem = (function () {
 
     return {
         start: async () => {
-            if (window.innerWidth <= 769 || tutorialActive) return;
+            if (window.innerWidth <= 769 || tutorialActive || localStorage.getItem('uto_hide_tutorial_v1') === 'true') return;
             tutorialActive = true;
             buildUI();
             showStep(0);
@@ -444,7 +510,7 @@ const TutorialSystem = (function () {
     };
 })();
 
-// Automatically start on every reload
+// Automatically start on every reload if not blocked by user preference
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => TutorialSystem.start(), 1000);
 });

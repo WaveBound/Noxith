@@ -34,7 +34,6 @@ function calculateDPS(uStats, relicStats, context) {
     if (eternalDmgBuff > 0) passivePcent += eternalDmgBuff;
 
     let { sBonus, tagBuffs, setPerkDmg, baseR_Dmg, baseR_Spa, baseR_Cm, baseR_Cf, baseR_Dot, baseR_Range } = window.calcRelicStats(relicStats, uStats, headPiece, context, traitObj, starMult, statConfig);
-    // --- DYNAMIC GLOBAL BUFF AGGREGATOR ---
     let { globalDmg, globalSpa, globalRange, globalCrit, globalCdmg, activeGlobalBuffs } = window.calcGlobalBuffs(uStats, context, headPiece);
 
     // Apply Junior Ninja 1.1x Multiplier to Passives & Tags BEFORE values are consumed by totals
@@ -52,8 +51,6 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     const tags = uStats.tags || [];
-
-
 
     const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (uStats.id === 'king_sailor' ? 10 : 0);
     const finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
@@ -80,7 +77,6 @@ function calculateDPS(uStats, relicStats, context) {
         setAndPassiveSpa += spaReduction;
     }
 
-
     // Dynamic SPA Cap override
     const effectiveSpaCap = window.getAbilitySpaCap ? window.getAbilitySpaCap(uStats.id, isAbility, uStats.spaCap) : (uStats.spaCap || 0.1);
 
@@ -92,8 +88,6 @@ function calculateDPS(uStats, relicStats, context) {
         const activeModeIdx = (typeof window !== 'undefined' && window.unitModesState && window.unitModesState['joyful_captain'] !== undefined) ? window.unitModesState['joyful_captain'] : 0;
         if (activeModeIdx === 0 || activeModeIdx === 1) {
             const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels['joyful_captain'] !== undefined) ? window.unitSystemLevels['joyful_captain'] : 10;
-            // The uncapped SPA is exactly equal to sysLvl (1 to 10).
-            // Capped SPA is Math.max(sysLvl, effectiveSpaCap) where effectiveSpaCap is 3!
             finalSpa = Math.max(Number(sysLvl), effectiveSpaCap);
         }
     }
@@ -117,7 +111,6 @@ function calculateDPS(uStats, relicStats, context) {
     const { abilityDmg, abilityFinalMult } = window.getAbilityMultipliers ? window.getAbilityMultipliers(uStats, isAbility) : { abilityDmg: 0, abilityFinalMult: 1 };
 
     // --- SYNERGY CHECKS (e.g. requiresDot) ---
-    // Only enforce in Loadout mode; Potential mode assumes synergy is always met
     if (uStats.requiresDot && window.CALCULATION_MODE === 'loadout') {
         const hotbar = window.hotbarState;
         let met = false;
@@ -127,20 +120,17 @@ function calculateDPS(uStats, relicStats, context) {
                 const sUnit = window.getUnitById(s.id);
                 if (!sUnit) return false;
 
-                // 1. Check base unit for the required DoT
                 if (sUnit.stats && sUnit.stats.dotType === uStats.requiresDot && (sUnit.stats.dot > 0 || (sUnit.stats.customFollowUp && sUnit.stats.customFollowUp.dotType === uStats.requiresDot))) return true;
 
-                // 2. Check current mode of the unit
                 const sMode = (window.unitModesState && window.unitModesState[sUnit.id]) || 0;
                 if (sUnit.modes && sUnit.modes[sMode]) {
                     const m = sUnit.modes[sMode];
-                    if (m.dotType === uStats.requiresDot && (m.dot > 0 || (m.customFollowUp && m.customFollowUp.dotType === uStats.requiresDot))) return true;
+                    if (m.dotType === requiresDot && (m.dot > 0 || (m.customFollowUp && m.customFollowUp.dotType === requiresDot))) return true;
                 }
                 return false;
             });
         }
 
-        // If not met in Loadout mode (or potential mode if we want strict logic), zero the DoT
         if (!met) {
             uStats.dot = 0;
         }
@@ -151,7 +141,6 @@ function calculateDPS(uStats, relicStats, context) {
     // --- WARLORD DYNAMIC SET BONUS ---
     let warlordData = null;
     if (relicStats.set === 'warlord') {
-        // Estimate final crit rate to determine trigger time
         const estCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
         if (estCritRate > 0) {
             const attacksToCrit = Math.max(1, 1 / (estCritRate / 100));
@@ -159,7 +148,6 @@ function calculateDPS(uStats, relicStats, context) {
             const p = estCritRate / 100;
             const N = 10 / finalSpa;
             const pFail = Math.pow(1 - p, N);
-            const refreshChance = 1 - pFail;
 
             let uptime, cycleTime, expectedActive, expectedUnbuffed;
             if (pFail === 0) {
@@ -177,12 +165,12 @@ function calculateDPS(uStats, relicStats, context) {
 
             const warlordDmg = 45 * uptime * (starMult || 1);
             additiveTotal += warlordDmg;
-            setPerkDmg += warlordDmg; // Add to UI display
+            setPerkDmg += warlordDmg;
             warlordData = {
                 critRate: estCritRate,
                 attacksToCrit,
                 timeToTrigger,
-                refreshChance,
+                refreshChance: 1 - pFail,
                 cycleTime,
                 uptime,
                 dmg: warlordDmg,
@@ -204,8 +192,6 @@ function calculateDPS(uStats, relicStats, context) {
         passiveBreakdown: passiveBreakdown
     };
 
-
-
     let finalDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
     let finalDmg = finalDmgNormal;
     let finalDmgBoss = finalDmgNormal;
@@ -221,11 +207,11 @@ function calculateDPS(uStats, relicStats, context) {
     let finalCritRateBoss = finalCritRate;
     let finalCdmgStatBoss = finalCdmgStat;
 
-    const avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
-    const avgCritMultBoss = (1 + ((finalCdmgStatBoss / 100) * (finalCritRateBoss / 100)));
-    const avgHit = finalDmg * avgCritMult;
-    const avgHitBoss = finalDmgBoss * avgCritMultBoss;
-    const avgHitNormal = finalDmgNormal * avgCritMult;
+    let avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
+    let avgCritMultBoss = (1 + ((finalCdmgStatBoss / 100) * (finalCritRateBoss / 100)));
+    let avgHit = finalDmg * avgCritMult;
+    let avgHitBoss = finalDmgBoss * avgCritMultBoss;
+    let avgHitNormal = finalDmgNormal * avgCritMult;
 
     // --- SPECIAL ATTACK RATE LOGIC ---
     let attackMultiplier = 1;
@@ -237,6 +223,50 @@ function calculateDPS(uStats, relicStats, context) {
         usedSpa = ar.usedSpa;
         attackMultiplier = ar.attackMultiplier;
         extraAttacksData = ar.extraAttacksData;
+    } else if (uStats.id === 'strongest_swordsman_hunter') {
+        // --- DUAL-STATE EVALUATION FOR STRONGEST SWORDSMAN ---
+        // Stance 1 & 3 (6 attacks): Base damage, Base crit rate
+        // Stance 2 (3 attacks): +60% Damage (+40% if E0-E5), +20% Crit Rate (+15% if E0-E5)
+        const stance2DmgBonus = (upgradeLevel >= 6) ? 60 : 40;
+        const stance2CritBonus = (upgradeLevel >= 6) ? 20 : 15;
+
+        // Unbuffed state hits
+        const unbuffedDmg = finalDmgNormal;
+        const unbuffedCrit = finalCritRate;
+        const unbuffedCritMult = 1 + (finalCdmgStat / 100) * (unbuffedCrit / 100);
+        const unbuffedAvgHit = unbuffedDmg * unbuffedCritMult;
+
+        // Buffed state hits (Stance 2)
+        const buffedDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + (additiveTotal + stance2DmgBonus) / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
+        const buffedCrit = Math.min(finalCritRate + stance2CritBonus, 100);
+        const buffedCritMult = 1 + (finalCdmgStat / 100) * (buffedCrit / 100);
+        const buffedAvgHit = buffedDmg * buffedCritMult;
+
+        // Overall cycle math: 6 unbuffed attacks + 3 buffed attacks
+        const totalCycleDmg = (6 * unbuffedAvgHit) + (3 * buffedAvgHit);
+
+        // Effective multipliers to align with core game engine's single-value output
+        avgHit = totalCycleDmg / 9; // Weighted hit average
+        avgHitBoss = avgHit * bossMult;
+        avgHitNormal = avgHit;
+
+        // Output effective attack multiplier (1.5x attacks * weighted stance damage ratio)
+        attackMultiplier = (totalCycleDmg / (6 * unbuffedAvgHit));
+
+        extraAttacksData = {
+            req: "Sword Stances",
+            hits: `9 Attacks / Cycle (1.5x rate)`,
+            extra: attackMultiplier - 1,
+            attacksNeeded: 2,
+            mult: attackMultiplier,
+            label: "Sword Stances Follow-up",
+            unbuffedHitVal: unbuffedAvgHit,
+            buffedHitVal: buffedAvgHit,
+            unbuffedHitRaw: unbuffedDmg,
+            buffedHitRaw: buffedDmg,
+            unbuffedCrit: unbuffedCrit,
+            buffedCrit: buffedCrit
+        };
     } else if (uStats.id === 'water_god' && uStats.followUp) {
         usedSpa = Math.max(finalSpa, effectiveSpaCap * 2);
         attackMultiplier = 2;
@@ -251,17 +281,17 @@ function calculateDPS(uStats, relicStats, context) {
     } else if (uStats.id === 'king_sailor') {
         const tickCount = 1;
         const tickDmg = 0.20;
-        attackMultiplier = 1; // Base attacks don't get multiplied here since lightning bypasses true dmg
+        attackMultiplier = 1;
         extraAttacksData = {
             req: "Baal's Lightning",
             hits: `1 + ${tickCount} Tick`,
             extra: tickCount * tickDmg,
             attacksNeeded: 1,
-            mult: 1.20, // For UI display only
+            mult: 1.20,
             label: "Chain Lightning",
             tickDmgVal: finalDmg * tickDmg,
-            avgTick: (finalDmg * tickDmg), // NO crit
-            totalChain: (finalDmg * tickDmg * tickCount) // NO crit
+            avgTick: (finalDmg * tickDmg),
+            totalChain: (finalDmg * tickDmg * tickCount)
         };
     } else if (uStats.customFollowUp) {
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
@@ -271,8 +301,6 @@ function calculateDPS(uStats, relicStats, context) {
         const atkAnim = uStats.spaCap || 0.1;
         const fuaAnim = uStats.customFollowUp.fuaAnimation || 0;
 
-        // Cycle time accounting for animation delay (Poseidon-style)
-        // If FUA triggers, the cycle is capped by (atkAnim + fuaAnim)
         const timeIfFua = Math.max(finalSpa, atkAnim + fuaAnim);
         const timeIfNoFua = Math.max(finalSpa, atkAnim);
         usedSpa = (chance / 100) * timeIfFua + (1 - (chance / 100)) * timeIfNoFua;
@@ -286,16 +314,14 @@ function calculateDPS(uStats, relicStats, context) {
             attacksNeeded: 1,
             mult: attackMultiplier,
             label: "Shadow Emerge",
-            usedSpa: usedSpa // Store for math rendering
+            usedSpa: usedSpa
         };
     } else if (uStats.id === 'alpha_devil') {
-        // Phantom Swords: 2 swords, 10% dmg/tick, 10 ticks, 20s Cooldown. Can Crit.
         const swordCount = 2;
         const swordDmgPct = 0.10;
         const swordTicks = 10;
         const swordCooldown = 20;
 
-        // Average DPS = (Count * Ticks * DmgPct * avgHit) / Cooldown
         const avgSwordDps = (swordCount * swordTicks * swordDmgPct * avgHit) / swordCooldown;
 
         attackMultiplier = 1 + (avgSwordDps * usedSpa / avgHit);
@@ -338,7 +364,6 @@ function calculateDPS(uStats, relicStats, context) {
         bossHitDpsTotal += followUpDpsBoss;
     }
 
-    // True Damage Conversion Logic (No longer a multiplier)
     let trueDmgPct = ((uStats.trueDmg || 0) + trueDmgFromPassives);
     if (relicStats.set === 'sorcerer_hunter') {
         trueDmgPct += 15;
@@ -349,7 +374,6 @@ function calculateDPS(uStats, relicStats, context) {
     let finalHitDps = hitDpsTotal;
     let finalBossHitDps = bossHitDpsTotal;
 
-    // Add King Sailor's Chain Lightning DPS (NO Crit, No True Damage)
     let chainLightningDps = 0;
     if (uStats.id === 'king_sailor') {
         chainLightningDps = ((finalDmg * 0.20) / usedSpa) * placement;
@@ -374,7 +398,7 @@ function calculateDPS(uStats, relicStats, context) {
 
     const gearDotBonus = baseR_Dot + headDotBuff + (sBonus.dot || 0);
     let baseDotVal = (uStats.dot || 0) + passiveDotFromPassives;
-    if (headPiece === 'flaming_donut' && (uStats.id === 'ace' || (window.isUnit && window.isUnit(uStats.id, 'ace')))) {
+    if (headPiece === 'mochi_scarf' && (uStats.id === 'ace' || (window.isUnit && window.isUnit(uStats.id, 'ace')))) {
         baseDotVal *= 1.5;
     }
     const { dotDpsTotal, bossDotDpsTotal, dotBreakdown } = _calcDoTDPS({ ...uStats, dot: baseDotVal, isBoss: context.isBoss }, traitObj, traitDotBuff, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult, finalDmgBoss, avgCritMultBoss);
@@ -387,11 +411,9 @@ function calculateDPS(uStats, relicStats, context) {
         const gearMultiplier = 1 + (gearDotBonus / 100);
         const bleedPct = ((upgradeLevel >= 6) ? 120 : 100) * traitMultiplier * gearMultiplier;
 
-        // Follow-up is a Bleed: hit damage calculated via passive-reduction logic, no crit applied to DoT
         const fuaDotDmg = tripleThreatFuaDmgNormal * (bleedPct / 100);
         const fuaDotDmgBoss = tripleThreatFuaDmgNormal * (bleedPct / 100);
 
-        // Only added to DPS if trait allows DoT stacking (e.g. Astral)
         const canStack = !!traitObj.allowDotStack;
         const fuaDotDps = canStack ? ((fuaDotDmg / 15) * placement) : 0;
         const fuaDotDpsBoss = canStack ? ((fuaDotDmgBoss / 15) * placement) : 0;
@@ -412,7 +434,6 @@ function calculateDPS(uStats, relicStats, context) {
         let chance = uStats.customFollowUp.chance;
         if (eLevel >= uStats.customFollowUp.eLevelReq) chance = uStats.customFollowUp.eLevelChance;
 
-        // FUA DoT: dotPct is TOTAL bleed damage (not per-tick), DoT doesn't crit so use finalDmg
         let dotPct = uStats.customFollowUp.dotPct || 0;
         let followUpDotDmg = finalDmg * (dotPct / 100);
         let followUpDotDmgBoss = finalDmgBoss * (dotPct / 100);
@@ -422,7 +443,6 @@ function calculateDPS(uStats, relicStats, context) {
         finalDotDps += followUpDotDpsPerCycle * placement;
         finalBossDotDps += followUpDotDpsPerCycleBoss * placement;
 
-        // Add to breakdown for UI rendering
         if (dotBreakdown) {
             dotBreakdown.fuaDotDps = followUpDotDpsPerCycle;
             dotBreakdown.fuaDotTotalDmg = followUpDotDmg;
@@ -434,7 +454,6 @@ function calculateDPS(uStats, relicStats, context) {
 
     const finalSummonDps = summonDpsTotal;
 
-    // Mochi Scarf: Burn DoT on status effect application (30% Dmg over 5s)
     if (headPiece === 'mochi_scarf' && headCalc.hasScarfBurn) {
         const scarfBurnPct = headCalc.scarfBurnPct || 30;
         const scarfBurnDuration = headCalc.scarfBurnDuration || 5;

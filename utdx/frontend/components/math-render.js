@@ -1,8 +1,3 @@
-// ============================================================================
-// MATH-RENDER.JS - UI Rendering for DPS Calculations
-// ============================================================================
-
-//Helpers for formatting
 const fmt = {
     pct: (n) => `${(n || 0) >= 0 ? '+' : ''}${parseFloat((n || 0).toFixed(1))}%`,
     num: (n) => (n || 0).toLocaleString(undefined, { maximumFractionDigits: 1 }),
@@ -85,7 +80,6 @@ function renderBuffSummarySection(data) {
 }
 
 function renderSourceTotalsSection(data) {
-    // 1. Relic & Tag Breakdown
     const relicMainSub = data.relicBuffs.dmg || 0;
     const setBaseDmg = data.detailedBuffs ? data.detailedBuffs.setBase : ((data.totalSetStats.dmg || 0) - (data.tagBuffs.dmg || 0));
     const tagDmg = data.detailedBuffs ? data.detailedBuffs.tagBonus : (data.tagBuffs.dmg || 0);
@@ -97,13 +91,11 @@ function renderSourceTotalsSection(data) {
     const gearRange = (data.relicBuffs.range || 0) + (data.totalSetStats.range || 0);
     const gearCrit = (data.relicBuffs.cf || 0) + (data.totalSetStats.cf || 0);
 
-    // 2. Trait Logic (Isolate Base Multipliers)
     const traitDmg = data.traitBuffs.dmg || 0;
     const traitSpa = data.traitBuffs.spa || 0;
     const traitRange = data.traitBuffs.range || 0;
     const traitCrit = data.traitObj.critRate || 0;
 
-    // 3. Passive & Global Breakdown (Isolate specific sources)
     const eternalDmg = data.eternalBuff || 0;
     const unitInnateDmg = data.detailedBuffs ? data.detailedBuffs.unitPassive : ((data.passiveBuff || 0) - (data.headBuffs.dmg || 0) - (data.abilityBuff || 0) - eternalDmg);
     const abilityDmg = data.abilityBuff || 0;
@@ -119,16 +111,15 @@ function renderSourceTotalsSection(data) {
     let globalBuffsSpaHtml = '';
     let globalBuffsCritHtml = '';
 
-    // Dynamically aggregate ALL active buffs for the breakdown
     if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
         Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
             const bData = data.activeGlobalBuffs[buff.id];
             if (bData) {
-                if (bData.dmg) {
+                if (bData.dmg > 0) {
                     globalPassiveDmg += bData.dmg;
                     globalBuffsDmgHtml += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: ${buff.color};"><span>↳ ${buff.name}</span><span>${fmt.pct(bData.dmg)}</span></div>`;
                 }
-                if (bData.spa) {
+                if (bData.spa > 0) {
                     globalPassiveSpa += bData.spa;
                     globalBuffsSpaHtml += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: ${buff.color};"><span>↳ ${buff.name}</span><span>Active</span></div>`;
                 }
@@ -180,7 +171,7 @@ function renderSourceTotalsSection(data) {
                     <span style="font-size: 0.68rem; font-weight: 800; color: #4ade80; letter-spacing: 0.5px;">TRAIT: ${data.traitObj.name.toUpperCase()}</span>
                     <b style="color: #4ade80; font-size: 0.8rem;">${fmt.pct(traitDmg)}</b>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; font-size: 0.6rem; color: #999;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; font-size: 0.60rem; color: #999;">
                     <div style="display:flex; justify-content:space-between;"><span>SPA</span><b class="text-white">-${traitSpa.toFixed(1)}%</b></div>
                     <div style="display:flex; justify-content:space-between;"><span>Range</span><b class="text-white">${fmt.pct(traitRange)}</b></div>
                     ${traitCrit > 0 ? `<div style="display:flex; justify-content:space-between;"><span>Crit</span><b class="text-white">+${traitCrit}%</b></div>` : ''}
@@ -238,7 +229,6 @@ function renderSourceTotalsSection(data) {
 function renderActiveBuffsSection(data) {
     const buffs = [];
 
-    // 1. Automatically fetch active Global Buffs from the snapshot data
     if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
         Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
             if (data.activeGlobalBuffs[buff.id]) {
@@ -251,28 +241,21 @@ function renderActiveBuffsSection(data) {
         });
     }
 
-    // 2. Trait "Passives"
     if (data.traitObj.isEternal) buffs.push({ name: "Eternal Stacks", desc: "Applied: +5% Dmg & +2.5% Rng / Wave (Max 12)", color: "#c084fc" });
     if (data.traitObj.hasRadiation) buffs.push({ name: "Radiation", desc: "Fission Trait: Enemies take +20% Damage", color: "#f87171" });
 
-    // 3. Conditionals
     if (data.conditionalData) buffs.push({ name: data.conditionalData.name, desc: `Target condition met: x${data.conditionalData.mult.toFixed(2)} Dmg`, color: "#fb923c" });
 
-    // 4. Special Attack Mechanics (FuA, Multi-hit, etc.)
     if (data.extraAttacks) buffs.push({ name: data.extraAttacks.label || "Attack Rate", desc: `${data.extraAttacks.hits}: Final x${data.extraAttacks.mult.toFixed(3)} DPS Mult`, color: "#60a5fa" });
 
-    // 5. Unit Innate Passives (Fetched from Database via refreshUnitMap helper)
     const unit = typeof getUnitById === 'function' ? getUnitById(data.baseStats.id) : null;
     if (unit && unit.passives) {
         unit.passives.forEach(p => {
             let stats = [];
-            // Find the calculated stats for this specific passive in the breakdown
             const pb = (data.detailedBuffs && data.detailedBuffs.passiveBreakdown)
                 ? data.detailedBuffs.passiveBreakdown.find(item => item.name === p.name)
                 : null;
 
-            // Use breakdown stats if available, otherwise fallback to static passive definition
-            const d = pb || p;
             if (pb) {
                 if (pb.dmg) stats.push(`+${pb.dmg}% Dmg`);
                 if (pb.spa) stats.push(`${pb.spa > 0 ? '-' : '+'}${Math.abs(pb.spa)}% Spa`);
@@ -323,9 +306,11 @@ function renderQuickBreakdownSection(data, avgHitPerUnit, dotColorClass) {
                     <div class="mq-label mt-text-gold">Hit DPS</div>
                     <div class="mq-val mt-text-gold">${fmt.num(data.hit)}</div>
                     <div class="mq-sub">
-                        ${data.baseStats.id === 'triple_threat'
-            ? `(${fmt.num(avgHitPerUnit / data.spa)} Base + ${fmt.num((data.hit / data.placement) - (avgHitPerUnit / data.spa))} FUA) × ${data.placement}`
-            : `(${fmt.num(avgHitPerUnit)} avg ÷ ${fmt.fix(data.spa, 2)}s) × ${data.placement}`
+                        ${data.baseStats.id === 'strongest_swordsman_hunter'
+            ? `Stances Weighted Average × ${data.placement}`
+            : (data.baseStats.id === 'triple_threat'
+                ? `(${fmt.num(avgHitPerUnit / data.spa)} Base + ${fmt.num((data.hit / data.placement) - (avgHitPerUnit / data.spa))} FUA) × ${data.placement}`
+                : `(${fmt.num(avgHitPerUnit)} avg ÷ ${fmt.fix(data.spa, 2)}s) × ${data.placement}`)
         }
                     </div>
                 </div>
@@ -440,7 +425,8 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, h
                     if (p.dmg !== 0) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ ${p.name}</td><td class="mt-cell-formula">${p.dmg > 0 ? '+' : ''}${fmt.fix(p.dmg, 1)}%</td><td class="mt-cell-val"></td></tr>`;
                 });
                 const namedDmg = data.detailedBuffs.passiveBreakdown.reduce((sum, p) => sum + (p.dmg || 0), 0);
-                const rem = (data.detailedBuffs.unitPassive || 0) - namedDmg - eternalDmg;
+                const eternalSub = (data.traitObj && data.traitObj.isEternal) ? (Math.min(data.wave || 12, 12) * 5) : 0;
+                const rem = (data.detailedBuffs.unitPassive || 0) - namedDmg - eternalSub;
                 if (Math.abs(rem) > 0.01) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive (Base)</td><td class="mt-cell-formula">${rem > 0 ? '+' : ''}${fmt.fix(rem, 1)}%</td><td class="mt-cell-val"></td></tr>`;
             } else {
                 if (Math.abs(data.detailedBuffs ? data.detailedBuffs.unitPassive : passiveDmg) > 0.01) {
@@ -505,7 +491,7 @@ function renderCritSection(data, setTagCfTotal, setTagCmTotal) {
     let passiveCdmgBreakdownHtml = '';
     if (data.detailedBuffs && data.detailedBuffs.passiveBreakdown) {
         data.detailedBuffs.passiveBreakdown.forEach(p => {
-            if (p.crit > 0) passiveCritBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs">• ${p.name}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">+${fmt.fix(p.crit, 1)}%</td></tr>`;
+            if (p.crit > 0 && p.name !== "Sword Stances (Avg)") passiveCritBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs">• ${p.name}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">+${fmt.fix(p.crit, 1)}%</td></tr>`;
             if (p.cdmg > 0) passiveCdmgBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs">• ${p.name}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">+${fmt.fix(p.cdmg, 1)}%</td></tr>`;
         });
     }
@@ -797,7 +783,6 @@ function renderDotSection(data, headDotRow) {
 function renderMathContent(data, isSplit = false) {
     if (!data || !data.lvStats || !data.critData) return '<div class="msg-empty">Data incomplete.</div>';
 
-    // BUILD IDENTITY SECTION
     const identityHtml = `
         <div class="build-identity-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 6px 15px; margin-bottom: 6px; border-left: 4px solid #60a5fa;">
             <div style="font-size: 0.55rem; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; margin-bottom: 2px;">Relic Set & Trait</div>
@@ -809,7 +794,6 @@ function renderMathContent(data, isSplit = false) {
     const levelMult = data.lvStats.dmgMult;
     const avgHitPerUnit = data.dmgVal * data.critData.avgMult;
 
-    // --- Trait Row Logic ---
     let traitRowsDmg = '';
     let traitRowsSpa = '';
     let runningDmg = data.isSSS ? data.lvStats.dmg : (data.baseStats.dmg * levelMult);
@@ -856,10 +840,8 @@ function renderMathContent(data, isSplit = false) {
     const setTagCmTotal = baseSetCm + tagCm;
     const preConditionalDmg = data.dmgVal / (data.conditionalData ? data.conditionalData.mult : 1);
 
-    // --- HEAD PASSIVE RENDERING ---
     let headDmgHtml = '';
 
-    // Sun God
     if (data.headBuffs && data.headBuffs.type === 'sun_god') {
         const uptimePct = (data.headBuffs.uptime || 0);
         headDmgHtml += `
@@ -877,7 +859,6 @@ function renderMathContent(data, isSplit = false) {
         </td></tr>`;
     }
 
-    // Bloodline Passive
     if (data.headBuffs && data.headBuffs.type === 'bloodline') {
         headDmgHtml += `
         <tr class="mt-row-rebellious"><td colspan="3" class="p-2">
@@ -896,7 +877,6 @@ function renderMathContent(data, isSplit = false) {
         </td></tr>`;
     }
 
-    // Rebellious CC (Now can be separate from head)
     if (data.headBuffs && (data.headBuffs.type === 'rebellious_cc' || data.headBuffs.ccBonus > 0)) {
         const uptimePct = (data.headBuffs.ccUptime || data.headBuffs.uptime || 0);
         const ccBonus = (data.headBuffs.ccBonus || 0);
@@ -925,7 +905,6 @@ function renderMathContent(data, isSplit = false) {
         </td></tr>`;
     }
 
-    // Biju Passive
     if (data.headBuffs && data.headBuffs.type === 'biju') {
         const uptimePct = (data.headBuffs.uptime || 0);
         headDmgHtml += `
@@ -1007,7 +986,6 @@ function renderMathContent(data, isSplit = false) {
         </div>
     ` : '';
 
-    // No more right panel - merged into main panel toggle
     const rightPanelHtml = '';
 
     const summarySection = `
@@ -1043,7 +1021,6 @@ function renderMathContent(data, isSplit = false) {
                 .top-view-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
                 @media (max-width: 992px) {
                     .top-toggle-container { display: flex !important; margin-top: 8px; }
-                    /* Ensure panels respect the .hidden class on mobile instead of being forced hidden/visible */
                     .breakdown-panel--right:not(.hidden) { display: block !important; }
                     .breakdown-panel--left:not(.hidden) { display: block !important; }
                 }
@@ -1074,9 +1051,7 @@ function renderMathContent(data, isSplit = false) {
 function renderSummonSection(data) {
     if (!data.summonData) return '';
 
-    // Check if it's a custom summon unit (like Jinoo or Sukuna)
     if (data.summonData.isCustom) {
-        // If it's custom but has NO active summons, return empty instead of falling through to Planes
         if (!data.summonData.summons || data.summonData.summons.length === 0) {
             return '';
         }
@@ -1193,6 +1168,41 @@ function renderAttackRateSection(data) {
                         <td class="mt-cell-label text-accent-start">Total FUA DPS (x${data.placement})</td>
                         <td class="mt-cell-formula">${fmt.num(singleFuaDps)} × ${data.placement}</td>
                         <td class="mt-cell-val text-accent-start font-bold" style="font-size: 1.05rem;">${fmt.num(totalFuaDps)}</td>
+                    </tr>
+                </table>
+            </div>`;
+    }
+
+    if (data.baseStats.id === 'strongest_swordsman_hunter' && data.extraAttacks) {
+        const ea = data.extraAttacks;
+        return `
+            <div class="dd-section" style="border-left: 3px solid #4ade80;">
+                <div class="dd-title mt-text-green"><span>5. Sword Stances Rotation Analysis</span> <button class="calc-info-btn" onclick="openInfoPopup('attack_rate')">?</button></div>
+                <table class="calc-table">
+                    <tr>
+                        <td class="mt-cell-label">Stance 1 & 3 (6 Normal Attacks)</td>
+                        <td class="mt-cell-formula">Crit: ${fmt.fix(ea.unbuffedCrit, 1)}%</td>
+                        <td class="mt-cell-val" style="color: #94a3b8;">${fmt.num(ea.unbuffedHitVal)} Avg Hit</td>
+                    </tr>
+                    <tr>
+                        <td class="mt-cell-label text-custom" style="font-weight: 700;">Stance 2 (3 Buffed Attacks)</td>
+                        <td class="mt-cell-formula text-custom" style="font-weight: 700;">+60% Dmg / +20% Crit</td>
+                        <td class="mt-cell-val text-custom" style="font-weight: 700;">${fmt.num(ea.buffedHitVal)} Avg Hit</td>
+                    </tr>
+                    <tr class="mt-border-top">
+                        <td class="mt-cell-label">Equivalent Cycle Damage</td>
+                        <td class="mt-cell-formula">6 × Unbuffed + 3 × Buffed</td>
+                        <td class="mt-cell-val text-white font-bold">${fmt.num((6 * ea.unbuffedHitVal) + (3 * ea.buffedHitVal))}</td>
+                    </tr>
+                    <tr>
+                        <td class="mt-cell-label">Primary Attack Cost (Equivalent)</td>
+                        <td class="mt-cell-formula">6 Base Normal Attacks</td>
+                        <td class="mt-cell-val text-gray">6.0</td>
+                    </tr>
+                    <tr class="mt-border-top">
+                        <td class="mt-cell-label text-white mt-pt-sm">Final Stance DPS Multiplier</td>
+                        <td class="mt-cell-formula mt-pt-sm">Total Dmg / 6 Hits</td>
+                        <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size: 1.1rem; color: #4ade80;">x${fmt.fix(ea.mult, 3)}</td>
                     </tr>
                 </table>
             </div>`;
