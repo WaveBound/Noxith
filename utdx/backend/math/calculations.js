@@ -340,6 +340,27 @@ function calculateDPS(uStats, relicStats, context) {
         };
     }
 
+    if (uStats.id === 'strongest_swordsman_hunter') {
+        // Stance Cycle Logic:
+        // 6 Normal Attacks (2 per stance) + 3 Transition Follow-ups = 9 total hits per cycle.
+        // Stance 2 buffs (+60% Dmg, +20% extra Crit Rate) apply to 3 out of 9 hits.
+        
+        const s2Weight = 3 / 9;
+        const avgS2Dmg = 60 * s2Weight;   // 20% average additive damage
+        const avgS2Crit = 20 * s2Weight;  // 6.66% average extra crit rate
+
+        additiveTotal += avgS2Dmg;
+        finalCritRate += avgS2Crit;
+        attackMultiplier = 1.5; // 9 hits / 6 SPA intervals
+
+        extraAttacksData = {
+            req: "Sword Stances",
+            hits: "1.5 hits / cycle",
+            label: "Stance Transition Follow-up",
+            mult: 1.5
+        };
+    }
+
     let hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
     let bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
     let normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);

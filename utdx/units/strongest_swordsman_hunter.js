@@ -51,7 +51,7 @@ unitDatabase.push({
         },
         {
             name: "Sword Stances",
-            desc: "• (Permanent) +20% Critical Rate and +100% Critical Damage.<br><br>• This unit has three Sword Stances and starts with Stance One on placement.<br><br>Every 2nd Normal Attack:<br>• Switch to the next Stance (1 → 2 → 3).<br>• Trigger an instant Follow-up Attack (Does not count toward stance progress).<br><br>While in Stance Two:<br>• +60% Damage and +20% Critical Rate."
+            desc: "• (Permanent) +20% Critical Rate and +100% Critical Damage.<br><br>• Unit cycles through 3 Sword Stances. Every 2nd Normal Attack triggers a transition.<br><br><b>Stance 1:</b> Base stats.<br><b>→ Transition:</b> Instant Follow-up attack, swap to Stance 2.<br><b>Stance 2:</b> +60% Damage and +40% Total Critical Rate.<br><b>→ Transition:</b> Instant Follow-up attack, swap to Stance 3.<br><b>Stance 3:</b> Base stats.<br><b>→ Transition:</b> Instant Follow-up attack, swap to Stance 1."
         }
     ],
 
