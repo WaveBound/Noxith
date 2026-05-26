@@ -34,13 +34,13 @@ unitDatabase.push({
         {
             name: "Conqueror's Coating",
             passiveCdmg: 200,
-            desc: "This unit has a fixed Crit Rate of 40% that cannot be increased.<br><br>After this unit is sold and placed again:<br>• Gain +20% Crit Damage [+40% at E6] (Cap: +200%).<br>• This Passive does not work if the unit is sold by the owner."
+            desc: "<br>This unit has a fixed Crit Rate of 40% that cannot be increased.<br><br>After this unit is sold and placed again:<br>• Gain +20% Crit Damage [+40% at E6] (Cap: +200%).<br>• This Passive does not work if the unit is sold by the owner."
         },
         {
             name: "The Spark of the Great Era",
             dot: 50,
             dotDuration: 15,
-            desc: "Placement cost is 0 and retains all upgrades after being sold.<br><br>On placement:<br>• Gain Stun Immunity for 5s<br>• Follow-up with Attack 3<br>• Apply Radiation for 50% Damage over 15 ticks<br>• Gain +100% Damage (15s cooldown)<br><br>On Attack:<br>• -25% Damage<br><br>On max Upgrade:<br>• -10% Damage<br><br>When Buff reaches 0% Damage:<br>• Use active ability to sell or upgrades reset<br><br>When sold:<br>• Auto-place first 'Piece' unit with +15% Damage [+25% at E4] (15s cooldown)<br>• If none, gain a free upgrade next placement."
+            desc: "<br>Placement cost is 0 and retains all upgrades after being sold.<br><br>On placement:<br>• Gain Stun Immunity for 5s<br>• Follow-up with Attack 3<br>• Apply Radiation for 50% Damage over 15 ticks<br>• Gain +100% Damage (15s cooldown)<br><br>On Attack:<br>• -25% Damage<br><br>On max Upgrade:<br>• -10% Damage<br><br>When Buff reaches 0% Damage:<br>• Use active ability to sell or upgrades reset<br><br>When sold:<br>• Auto-place first 'Piece' unit with +15% Damage [+25% at E4] (15s cooldown)<br>• If none, gain a free upgrade next placement."
         },
         {
             name: "King of the Pirates",
