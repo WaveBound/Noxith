@@ -365,18 +365,21 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             if (needsDynamicBench && unitObj) {
                 // Temporarily swap to peak mode state for benchmarking to get true 100% target
                 const savedState = window.unitModesState[unitId];
-                if (PEAK_MODE_STATE[unitId] !== undefined) {
-                    window.unitModesState[unitId] = PEAK_MODE_STATE[unitId];
-                } else if (unitObj.modes && Array.isArray(unitObj.modes)) {
-                    window.unitModesState[unitId] = unitObj.modes.length - 1; // Fallback to final mode
+                let dynamicResults;
+                try {
+                    if (PEAK_MODE_STATE[unitId] !== undefined) {
+                        window.unitModesState[unitId] = PEAK_MODE_STATE[unitId];
+                    } else if (unitObj.modes && Array.isArray(unitObj.modes)) {
+                        window.unitModesState[unitId] = unitObj.modes.length - 1; // Fallback to final mode
+                    }
+
+                    dynamicResults = window.calculateUnitBuilds(
+                        unitObj, null, null, ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'], HEADS_LIST,
+                        !window.disableSubStats, null, activeType === 'abil', activeMode, isHotbar, true
+                    );
+                } finally {
+                    window.unitModesState[unitId] = savedState; // ALWAYS restore user's current form
                 }
-
-                const dynamicResults = window.calculateUnitBuilds(
-                    unitObj, null, null, ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'], HEADS_LIST,
-                    !window.disableSubStats, null, activeType === 'abil', activeMode, isHotbar, true
-                );
-
-                window.unitModesState[unitId] = savedState; // Restore user's current form
 
                 if (dynamicResults?.length > 0) {
                     traitBenchmarks = {}; // Reset with dynamic values
@@ -390,10 +393,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     if (!window.modeBenchmarks) window.modeBenchmarks = {};
                     // FIX: Cache peak benchmark by unit ID and type only, ignoring current mode state
                     window.modeBenchmarks[`${unitId}-${activeType}`] = traitBenchmarks;
-
-                    if (!window.unitBuildsCache[unitId]) window.unitBuildsCache[unitId] = {};
-                    if (!window.unitBuildsCache[unitId][activeType]) window.unitBuildsCache[unitId][activeType] = {};
-                    window.unitBuildsCache[unitId][activeType][activeMode] = [dynamicResults];
                 }
             } else if (unitObj?.modes || unitId.toLowerCase().includes('syncro') || forceDynamicUnits.includes(unitId)) {
                 traitBenchmarks = window.modeBenchmarks?.[`${unitId}-${activeType}`] || {};

@@ -15,7 +15,7 @@ window.calcCustomSummons = function(uStats, upLevel, eLevel, finalDmg, hostFinal
 
     const state = (typeof window !== 'undefined' && window.unitModesState) ? window.unitModesState[uStats.id] : undefined;
     const isMulti = !!uStats.allowMultipleModes;
-    const activeModes = Array.isArray(state) ? state : (state !== undefined ? [state] : (isMulti ? (uStats.id === 'jinoo_shadow_monarch' ? [0] : []) : [0]));
+    const activeModes = Array.isArray(state) ? state : (state !== undefined ? [state] : (isMulti ? [] : [0]));
 
     uStats.customSummons.forEach((s, sIdx) => {
         if (upLevel >= s.reqUp) {

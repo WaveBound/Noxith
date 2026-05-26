@@ -161,6 +161,7 @@ let buffUpdateTimer = null;
 
 window.resetCachesForBuffChange = (unitId, excludeIds = []) => {
     window.LIVE_SCORE_CACHE = {};
+    window.modeBenchmarks = {};
 
     if (!unitId && excludeIds.length === 0) {
         // Fast O(1) reset
