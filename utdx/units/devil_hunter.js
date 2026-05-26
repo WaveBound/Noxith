@@ -26,16 +26,6 @@ unitDatabase.push({
         support: "Stun"
     },
 
-    // UPGRADES (dmg, spa, range, cost per level)
-    upgrades: [
-        { dmg: 360, spa: 8.0, range: 28, cost: 1900 },   // Up 0 (Base)
-        { dmg: 660, spa: 8.0, range: 30, cost: 4500 },   // Up 2
-        { dmg: 1200, spa: 8.0, range: 32, cost: 9100 },   // Up 3
-        { dmg: 2160, spa: 8.0, range: 33, cost: 12000 },   // Up 4
-        { dmg: 3360, spa: 8.0, range: 35, cost: 19000 },   // Up 5
-        { dmg: 5400, spa: 8.0, range: 37, cost: 20000 }    // Up 6
-    ],
-
     // PASSIVES (displayed in unit info panel)
     passives: [
         { name: "Demonic Arsenal", desc: "This unit has an arsenal of weapons to pick from, each with its own unique effect. The placement weapon is Devil Sword.<br><br>Devil Sword:<br>Attacking an enemy with Bleed already applied on them will apply 80% Burn over 10 ticks.<br><br>Twin Guns:<br>Attacks faster at -20% SPA.<br><br>Demoncycle:<br>Any enemy that has a DoT applied on them while they are hit by this variant will be stunned by 2 seconds per DoT.<br><br>Fancy Hat:<br>Each attack in this variant costs 3,000 YEN. Gain +100% Damage and stop attacking when the player doesn’t have at least 3,000 YEN" },

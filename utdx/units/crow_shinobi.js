@@ -6,15 +6,15 @@ unitDatabase.push({
     placement: 3,
     placementType: "Hill",
     role: "DPS",
-    tags: ["Ninjaverse", "Bloodline", "Hero"],
+    tags: ["Ninjaverse", "Bloodline", "Hero", "Blazing"],
     meta: {
-        short: "Ruler",
-        long: "Eternal",
-        note: "Powerful DoT and crowd control. Below 60% HP, Amaterasu becomes significantly more lethal."
+        short: "Sacred/Eternal",
+        long: "Sacred/Eternal",
+        note: "Sacred for cheap cost/Multi placement for confuse."
     },
     totalCost: 68450,
     stats: {
-        spaCap: 2.5,
+        spaCap: 2,
         crit: 0, cdmg: 150, dot: 0, dotDuration: 0, dotStacks: 1,
         element: "Fire",
         support: "Stun, Slow, Confuse"
@@ -26,12 +26,12 @@ unitDatabase.push({
         { dmg: 835, spa: 6, range: 35, cost: 7500 },   // Up 2
         { dmg: 1165, spa: 8, range: 40, cost: 14500 }, // Up 3
         { dmg: 2530, spa: 8, range: 43, cost: 18500 }, // Up 4
-        { dmg: 3050, spa: 8, range: 46, cost: 22500 }, // Up 5
+        { dmg: 3600, spa: 8, range: 46, cost: 22500 }, // Up 5
     ],
     passives: [
         { name: "Elusive Crow Distraction", desc: "Every 5 attacks (4 at E2) confuses enemies for 2 seconds (3s at E2)." },
         { name: "Flame Sealing Technique", desc: "On Kill (Enemy with Black Burn): 30% chance to stun nearby enemies for 4s." },
-        { name: "Amaterasu", dot: 60, dotDuration: 10, desc: "Attacks apply Black Burn (60% Dmg over 10 ticks). Re-applying to a burning target inflicts 'Time Snail': +20% DoT/Affliction and 30% Slow. Enemies below 60% HP take 3% (6% at E6) unit damage per second until death." }
+        { name: "Amaterasu", dot: 3, dotDuration: 0, desc: "Attacks apply Black Burn (3% Dmg every second). Only applies from 1 placement (does not stack with Astral trait). Re-applying to a burning target inflicts 'Time Snail': +20% Affliction and 30% Slow. Enemies below 60% HP take 3% (6% at E6) unit damage per second until death." }
     ],
     ability: {
         abilityName: "Moon God: Counter Crash",
