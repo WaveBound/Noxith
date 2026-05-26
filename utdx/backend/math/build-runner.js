@@ -48,8 +48,8 @@ function createResultEntry({ id, buildName, traitName, res, prio, mainStats, sub
     return entry;
 }
 
-function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsToProcess, includeSubs, specificTraitsOnly = null, isAbilityContext = false, mode = 'fixed', isHotbar = false) {
-    if (inventoryMode && relicInventory && relicInventory.length > 0) return calculateInventoryBuilds(unit, null, specificTraitsOnly, isAbilityContext, mode, headsToProcess, includeSubs, null, isHotbar);
+function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsToProcess, includeSubs, specificTraitsOnly = null, isAbilityContext = false, mode = 'fixed', isHotbar = false, ignoreInventory = false) {
+    if (!ignoreInventory && inventoryMode && relicInventory && relicInventory.length > 0) return calculateInventoryBuilds(unit, null, specificTraitsOnly, isAbilityContext, mode, headsToProcess, includeSubs, null, isHotbar);
     window.cachedResults = window.cachedResults || {};
     let activeTraits = [];
     if (specificTraitsOnly && Array.isArray(specificTraitsOnly)) activeTraits = specificTraitsOnly;

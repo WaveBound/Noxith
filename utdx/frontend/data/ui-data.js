@@ -7,6 +7,7 @@ const patchNotesData = [
         version: "v6.2",
         date: "May 25, 2026",
         changes: [
+            { type: "Fix", text: "<b>Inventory Mode:</b> Fixed optimality calculation logic and fully integrated <b>Strongest Swordsman</b>, <b>Marine Hero</b>, and <b>Revolutionary Chief (Syncro)</b>." },
             { type: "Unit", text: "<b>Revolutionary Chief (Syncro):</b> Adjusted DoT logic to account for duration refresh on attack; DPS now reflects 1 continuous tick per second." },
             { type: "Fix", text: "<b>Trait Tier List:</b> Added bug notification for <b>Astral</b> trait (DoT stacking currently non-functional)." }
         ]
@@ -368,7 +369,8 @@ const guideData = [
     { unit: "shadow_knight", img: "images/units/ShadowKnight.png", isCalculated: true },
     { unit: "revolutionary_chief_syncro", img: "images/units/RevolutionaryChiefSyncro.png", isCalculated: true },
     { unit: "strongest_swordsman_hunter", img: "images/units/StrongestSwordsman.png", isCalculated: true },
-    { unit: "pirate_king", img: "images/units/PirateKing.png", isCalculated: true }
+    { unit: "pirate_king", img: "images/units/PirateKing.png", isCalculated: true },
+    { unit: "marine_hero", img: "images/units/MarineHero.png", isCalculated: true }
 ];
 const elementIcons = {
     "Water": "images/elements/Water.png",

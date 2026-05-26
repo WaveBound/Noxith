@@ -277,7 +277,7 @@ if (isMainThread) {
             }
             
             // Filter out 'cf' candidates for units that shouldn't get them (Kirito, Gojo)
-            const excludeRelicCrit = (isUnit(unit.id, 'kirito') || isUnit(unit.id, 'the_strongest_of_today') || isUnit(unit.id, 'pirate_king'));
+            const excludeRelicCrit = (isUnit(unit.id, 'kirito') || isUnit(unit.id, 'the_strongest_of_today') || isUnit(unit.id, 'pirate_king') || (isUnit(unit.id, 'marine_hero') && isAbility));
             let unitTemplates = templates;
             if (excludeRelicCrit) {
                 unitTemplates = templates.filter(t => {

@@ -34,6 +34,7 @@ const TOGGLE_OVERRIDES = {
     nutaru_beast: { label: 'Beast Mode' },
     ancient_shinob: { label: 'Reanimation' },
     super_roku: { label: 'Same Enemy' },
+    marine_hero: { label: 'Boss' },
     cell: {
         dynamicLabel: (isChecked) => isChecked ? 'Perfect Form' : 'True Form',
         script: `this.parentElement.previousElementSibling.innerText = this.checked ? 'Perfect Form' : 'True Form'; this.closest('.unit-toolbar').firstElementChild.style.gap = '2px';`
@@ -192,12 +193,14 @@ function hydrateBuildEntry(r, unitId, isHotbar) {
 
 // Rendering HTML Rows & Cards
 function generateBuildRowHTML(r, i, unitConfig = {}) {
-    const { totalCost = 50000, placement = 1, sortMode = 'dps', unitId = '', benchmarkDps = 0 } = unitConfig;
+    const { totalCost = 50000, placement = 1, sortMode = 'dps', unitId = '', traitBenchmarks = {} } = unitConfig;
     const currentLevel = window.unitELevels[unitId] || 0;
     const nextLevel = currentLevel + 1;
     const unitObj = window.getUnitById(unitId);
     const maxLevel = unitObj?.upgrades ? unitObj.upgrades.length - 1 : 0;
     let nextStats = { dmgVal: 0, spa: 0, range: 0 };
+
+    const benchmarkDps = traitBenchmarks[r.traitName] || traitBenchmarks['peak'] || 0;
 
     if (nextLevel <= maxLevel) {
         try {
@@ -267,7 +270,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
                 </div>
             </div>
             <div class="br-grid ${window.disableSubStats ? 'no-subs' : ''}">
-                <div class="br-col main"><div class="br-col-title">MAIN STAT</div>${getHeadBadgeHtml(r.headUsed)}<div class="stat-line"><span class="sl-label">BODY</span> ${getBadgeHtml(r.mainStats.body, MAIN_STAT_VALS.body[r.mainStats.body])}</div><div class="stat-line"><span class="sl-label">LEGS</span> ${getBadgeHtml(r.mainStats.legs, MAIN_STAT_VALS.legs[r.mainStats.legs])}</div></div>
+                <div class="br-col main"><div class="br-col-title">MAIN STAT</div>${getHeadBadgeHtml(r.headUsed)}<div class="stat-line"><span class="sl-label">BODY</span> ${window.getBadgeHtml(r.mainStats.body, MAIN_STAT_VALS.body[r.mainStats.body])}</div><div class="stat-line"><span class="sl-label">LEGS</span> ${window.getBadgeHtml(r.mainStats.legs, MAIN_STAT_VALS.legs[r.mainStats.legs])}</div></div>
                 ${window.disableSubStats ? '' : `<div class="br-col sub"><div class="br-col-header"><div class="br-col-title">SUB STAT</div></div>${headRow}${bodyRow}${legsRow}</div>`}
                 <div class="br-res-col">
                     ${!hasBossDps ? `<div class="eff-score-line" onclick="event.stopPropagation(); openInfoPopup('efficiency')">${effScore} <span class="eff-label">Eff</span></div>` : ''}
@@ -319,7 +322,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const activeMode = 'fixed';
 
     // Units that must ALWAYS calculate dynamically because static DB is stale or complex (Syncro/Follow-ups)
-    const forceDynamicUnits = ['revolutionary_chief_syncro', 'joyful_captain', 'the_strongest_in_history', 'jinoo_shadow_monarch', 'the_strongest_of_today'];
+    const forceDynamicUnits = ['revolutionary_chief_syncro', 'joyful_captain', 'the_strongest_in_history', 'jinoo_shadow_monarch', 'the_strongest_of_today', 'marine_hero'];
     
     if (!forceSync && (unitObj?.allowMultipleModes || unitId.toLowerCase().includes('syncro') || forceDynamicUnits.includes(unitId)) && !window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0]) {
         forceSync = true;
@@ -327,7 +330,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     const { unitCost, unitPlace } = getUnitCostAndPlacement(unitObj, activeModeIdx);
 
-    let benchmarkDps = 0;
+    let traitBenchmarks = {};
     try {
         if (inventoryMode && window.STATIC_BUILD_DB) {
             const dbKey = unitId + (activeType === 'abil' ? '_abil' : '');
@@ -338,13 +341,15 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
             const modeData = dbEntry[activeMode] || dbEntry[activeMode === 'fixed' ? 'f' : 'b'];
             const perfectBuilds = modeData?.[0];
-            if (perfectBuilds?.length > 0) {
-                try {
-                    const hydratedBench = hydrateBuildEntry(perfectBuilds[0], unitId, isHotbar);
-                    benchmarkDps = hydratedBench ? (hydratedBench.dps || 0) : 0;
-                } catch (e) {
-                    benchmarkDps = perfectBuilds[0].dps || 0;
-                }
+            if (perfectBuilds) {
+                perfectBuilds.forEach(b => {
+                    const hydrated = hydrateBuildEntry(b, unitId, isHotbar);
+                    if (hydrated) {
+                        const val = hydrated.dps || 0;
+                        if (!traitBenchmarks[hydrated.traitName] || val > traitBenchmarks[hydrated.traitName]) traitBenchmarks[hydrated.traitName] = val;
+                        if (!traitBenchmarks['peak'] || val > traitBenchmarks['peak']) traitBenchmarks['peak'] = val;
+                    }
+                });
             }
 
             // Benchmarking for Optimality must compare against the absolute peak potential across all forms.
@@ -355,7 +360,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             };
 
             // Force dynamic recalculation of benchmark if missing or if unit logic is known to have changed (Syncro/Modes)
-            const needsDynamicBench = benchmarkDps === 0 || forceSync || unitObj?.modes || unitId.toLowerCase().includes('syncro') || forceDynamicUnits.includes(unitId);
+            const needsDynamicBench = !traitBenchmarks['peak'] || forceSync || unitObj?.modes || unitId.toLowerCase().includes('syncro') || forceDynamicUnits.includes(unitId);
 
             if (needsDynamicBench && unitObj) {
                 // Temporarily swap to peak mode state for benchmarking to get true 100% target
@@ -368,23 +373,30 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
                 const dynamicResults = window.calculateUnitBuilds(
                     unitObj, null, null, ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'], HEADS_LIST,
-                    !window.disableSubStats, null, activeType === 'abil', activeMode, isHotbar
+                    !window.disableSubStats, null, activeType === 'abil', activeMode, isHotbar, true
                 );
 
                 window.unitModesState[unitId] = savedState; // Restore user's current form
 
                 if (dynamicResults?.length > 0) {
-                    benchmarkDps = dynamicResults[0].dps || 0;
+                    traitBenchmarks = {}; // Reset with dynamic values
+                    dynamicResults.forEach(res => {
+                        if (!traitBenchmarks[res.traitName] || res.dps > traitBenchmarks[res.traitName]) {
+                            traitBenchmarks[res.traitName] = res.dps;
+                        }
+                    });
+                    traitBenchmarks['peak'] = dynamicResults[0].dps || 0;
+
                     if (!window.modeBenchmarks) window.modeBenchmarks = {};
                     // FIX: Cache peak benchmark by unit ID and type only, ignoring current mode state
-                    window.modeBenchmarks[`${unitId}-${activeType}`] = benchmarkDps;
+                    window.modeBenchmarks[`${unitId}-${activeType}`] = traitBenchmarks;
 
                     if (!window.unitBuildsCache[unitId]) window.unitBuildsCache[unitId] = {};
                     if (!window.unitBuildsCache[unitId][activeType]) window.unitBuildsCache[unitId][activeType] = {};
                     window.unitBuildsCache[unitId][activeType][activeMode] = [dynamicResults];
                 }
             } else if (unitObj?.modes || unitId.toLowerCase().includes('syncro') || forceDynamicUnits.includes(unitId)) {
-                benchmarkDps = window.modeBenchmarks?.[`${unitId}-${activeType}`] || 0;
+                traitBenchmarks = window.modeBenchmarks?.[`${unitId}-${activeType}`] || {};
             }
         }
     } catch (e) { console.warn("Benchmark error", e); }
@@ -461,7 +473,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 : slice[0];
         }
 
-        return slice.map((r, i) => generateBuildRowHTML(r, i, { totalCost: unitCost, placement: unitPlace, sortMode: sortSelect, unitId, benchmarkDps })).join('');
+        return slice.map((r, i) => generateBuildRowHTML(r, i, { totalCost: unitCost, placement: unitPlace, sortMode: sortSelect, unitId, traitBenchmarks })).join('');
     };
 
     const container = document.getElementById(`results-${activeType}-${activeMode}-0-${unitId}`);

@@ -4,7 +4,7 @@
 
 function initApp() {
     // 0. Populate default abilities safely regardless of current IDs
-    ['phantom_captain', 'megumin', 'ancient_shinob', 'triple_threat'].forEach(file => {
+    ['phantom_captain', 'megumin', 'ancient_shinob', 'triple_threat', 'marine_hero'].forEach(file => {
         const dynamicId = window.getUnitId(file);
         if (dynamicId) activeAbilityIds.add(dynamicId);
     });

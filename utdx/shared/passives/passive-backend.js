@@ -125,6 +125,36 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                 }
             }
 
+            if (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'marine_hero')) {
+                if (p.name === "Hero of the Marines") {
+                    let warlordPlacements = 0;
+                    const hotbarSlots = window.hotbarState?.slots || [];
+                    hotbarSlots.forEach((s) => {
+                        if (!s) return;
+                        if (s.id === uStats.id || (window.isUnit && window.isUnit(s.id, uStats.id))) return;
+
+                        const sUnit = window.getUnitById ? window.getUnitById(s.id) : null;
+                        const sTags = (sUnit ? sUnit.tags : s.tags) || [];
+                        
+                        if (sTags.includes('Warlord')) {
+                            let sPlacement = (sUnit ? sUnit.placement : s.placement) || 1;
+                            const sTraitId = (window.unitTraits && window.unitTraits[s.id]);
+                            if (sTraitId) {
+                                const sTrait = typeof window.getTraitFast === 'function' ? window.getTraitFast(sTraitId) : null;
+                                if (sTrait && sTrait.limitPlace !== undefined) {
+                                    sPlacement = Math.min(sPlacement, sTrait.limitPlace);
+                                }
+                            }
+                            warlordPlacements += sPlacement;
+                        }
+                    });
+
+                    const dmgPerWarlord = 25;
+                    const maxCap = (upgradeLevel >= 2) ? 150 : 100;
+                    pDmg = Math.min(maxCap, warlordPlacements * dmgPerWarlord);
+                }
+            }
+
             if (p.name === "Unrivaled Mark") {
                 const isPotential = window.CALCULATION_MODE === 'potential';
                 if (!isPotential) {
@@ -150,6 +180,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
             const isKsDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'king_sailor') && (p.name === "Manipulator of Fate" || p.name === "Unrivaled Mark"));
             const isAkDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'ant_king_savage') && p.name === "Monarch's Devotion");
             const isUgDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother");
+            const isMhDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'marine_hero') && p.name === "Hero of the Marines");
 
             if (p.name === "Pirate Hunter") {
                 if (context.isBoss || context.isAbility) {
@@ -166,7 +197,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                 pDmg += (upgradeLevel >= 2) ? 65 : 50;
             }
 
-            if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || isKsDynamic || isAkDynamic || isUgDynamic) {
+            if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || isKsDynamic || isAkDynamic || isUgDynamic || isMhDynamic) {
                 passivePcent += pDmg;
                 passiveSpaPcent += pSpa;
                 passiveRangePcent += pRange;

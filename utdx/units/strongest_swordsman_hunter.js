@@ -58,10 +58,10 @@ unitDatabase.push({
     // ETHEREALIZATION (E1-E6 upgrade descriptions)
     etherealization: [
         "+10 Stat Points",
-        "Sword Stances Cap INcreased to 4 Cycles.",
+        "\"Sword Stances\" Cap INcreased to 4 Cycles.",
         "+10 Stat Points",
-        "Thousand Cuts Cap increaed to 15%, Damage increased to 7.5% and Armor Damage increased to 1.65x.",
+        "\"Thousand Cuts\" Cap increaed to 15%, Damage increased to 7.5% and Armor Damage increased to 1.65x.",
         "+10 Stat Points",
-        "Sword Stances Damage increased to 60% and Critical Rate increased to 20%."
+        "\"Sword Stances\" Damage increased to 60% and Critical Rate increased to 20%."
     ]
 });

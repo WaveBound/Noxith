@@ -215,6 +215,9 @@ function calculateDPS(uStats, relicStats, context) {
     if (headPiece === 'sorcerer_hunter_spirit') finalCritRate = 0;
 
     let finalCritRateBoss = finalCritRate;
+    if (uStats.id === 'marine_hero') {
+        finalCritRateBoss = Math.min(finalCritRateBoss + 100, 100);
+    }
     let finalCdmgStatBoss = finalCdmgStat;
 
     let avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));

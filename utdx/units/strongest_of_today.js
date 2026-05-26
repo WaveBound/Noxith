@@ -57,10 +57,9 @@ unitDatabase.push({
             abilityName: "Domain Expansion",
             noToggle: false,
             cooldown: 360,
-            desc: `Active Ability unlocked on the final Upgrade: Inflict Timestop for 30s to all Enemies in Range. 
-
-Enemies with Timestop take 150% Damage instead. 
-Gain +1% Damage per Kill until the Ability ends.`
+            desc: `Active Ability unlocked on the final Upgrade: Inflict Timestop for 30s to all Enemies in Range.
+            <br>Enemies with Timestop take 150% Damage instead.
+            <br>Gain +1% Damage per Kill until the Ability ends.`
         }
     ],
 

@@ -145,7 +145,8 @@ const UNIT_FILES = [
     'shadow_knight.js',
     'revolutionary_chief_syncro.js',
     'strongest_swordsman_hunter.js',
-    'pirate_king.js'
+    'pirate_king.js',
+    'marine_hero.js'
 ];
 
 // Resolves after every unit script has loaded (or errored).
