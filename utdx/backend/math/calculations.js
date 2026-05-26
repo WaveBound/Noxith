@@ -141,7 +141,13 @@ function calculateDPS(uStats, relicStats, context) {
     // --- WARLORD DYNAMIC SET BONUS ---
     let warlordData = null;
     if (relicStats.set === 'warlord') {
-        const estCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
+        let estCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
+        if (uStats.id === 'pirate_king') {
+            estCritRate = 40;
+        }
+        if (headPiece === 'sorcerer_hunter_spirit') {
+            estCritRate = 0;
+        }
         if (estCritRate > 0) {
             const attacksToCrit = Math.max(1, 1 / (estCritRate / 100));
             const timeToTrigger = attacksToCrit * finalSpa;
@@ -200,6 +206,10 @@ function calculateDPS(uStats, relicStats, context) {
     let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
     if (uStats.id === 'kirito' || uStats.id === 'the_strongest_of_today') {
         finalCritRate = Math.min(finalCritRate, uStats.crit);
+    }
+
+    if (uStats.id === 'pirate_king') {
+        finalCritRate = 40;
     }
 
     if (headPiece === 'sorcerer_hunter_spirit') finalCritRate = 0;

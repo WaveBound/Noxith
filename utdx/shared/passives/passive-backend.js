@@ -162,6 +162,10 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                 }
             }
 
+            if (p.name === "King of the Pirates") {
+                pDmg += (upgradeLevel >= 2) ? 65 : 50;
+            }
+
             if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || isKsDynamic || isAkDynamic || isUgDynamic) {
                 passivePcent += pDmg;
                 passiveSpaPcent += pSpa;
