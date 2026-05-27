@@ -130,7 +130,6 @@ if (isMainThread) {
 
     // Add unit IDs here to re-enable range combos + range stat points for specific units
     // e.g. when support units are added: new Set(['support_unit_id', 'another_support'])
-    const RANGE_ENABLED_UNITS = new Set([]);
 
     function getDbName(combo) {
         let parts = [];
@@ -260,7 +259,7 @@ if (isMainThread) {
         const traitGroups = {};
 
         const maxPts = ((unit.level || 1) - 1) + 30;
-        const allowRange = RANGE_ENABLED_UNITS.has(unit.id);
+        const allowRange = false;
 
         traitsForCalc.forEach(trait => {
             if (trait.id === 'none') return;
@@ -432,11 +431,11 @@ if (isMainThread) {
         for (const key of allPossibleKeys) {
             if (rawDb[key]) {
                 FINAL_DB[key] = {
-                    fixed: rawDb[key].fixed.map(configRows => rowsToBuffer(configRows)),
-                    bugged: rawDb[key].bugged.map(configRows => rowsToBuffer(configRows))
+                    fixed: rawDb[key].fixed.map(configRows => rowsToBuffer(configRows))
                 };
             } else if (existingRaw && existingRaw.d[key]) {
                 FINAL_DB[key] = existingRaw.d[key]; // pools seeded above — indices still valid, no re-encode needed
+                if (FINAL_DB[key].bugged) delete FINAL_DB[key].bugged;
             }
         }
 
@@ -502,7 +501,7 @@ if (isMainThread) {
                         return result;
                     });
                 };
-                target[prop] = { bugged: unpackList(rawData.bugged, "b"), fixed: unpackList(rawData.fixed, "f") };
+                target[prop] = { fixed: unpackList(rawData.fixed, "f") };
                 D[prop] = null;
                 return target[prop];
             }
@@ -650,24 +649,16 @@ if (isMainThread) {
                 const { u } = task;
                 let baseKey = u.id;
                 const types = u.ability ? ['base', 'abil'] : ['base'];
-                const isLaw = isUnit(u.id, 'law');
-                
-                const sortFn = isLaw 
-                    ? (a, b) => b.range !== a.range ? (b.range || 0) - (a.range || 0) : (b.dps || 0) - (a.dps || 0)
-                    : (a, b) => b.dps !== a.dps ? (b.dps || 0) - (a.dps || 0) : (b.dmgVal || 0) - (a.dmgVal || 0);
-
                 const traitsForCalc = [...traitsList, ...(unitSpecificTraits[u.id] || [])];
 
                 types.forEach(type => {
                     const finalKey = type === 'abil' ? `${baseKey}_abil` : baseKey;
-                    workerDb[finalKey] = { fixed: [], bugged: [] }; 
+                    workerDb[finalKey] = { fixed: [] }; 
 
                     let existingFixed = [];
-                    let existingBugged = [];
                     if (existingRaw && existingRaw.d[finalKey]) {
                         const d = existingRaw.d[finalKey];
                         if (d.fixed) existingFixed = d.fixed.flatMap(b64 => unpackBuffer(b64));
-                        if (d.bugged) existingBugged = d.bugged.flatMap(b64 => unpackBuffer(b64));
                     }
 
                     const isAbility = type === 'abil';
@@ -688,21 +679,42 @@ if (isMainThread) {
                             window.unitModesState['the_strongest_in_history'] = [0];
                         }
 
+                        const processGroup = (list, limit) => {
+                            const prioGroups = { dmg: [], spa: [], range: [], raw_dmg: [] };
+                            for (const b of list) {
+                                if (prioGroups[b.prio]) prioGroups[b.prio].push(b);
+                            }
+                            
+                            const uniqueList = [];
+                            for (const prio in prioGroups) {
+                                const prioList = prioGroups[prio];
+                                if (prioList.length === 0) continue;
+                                
+                                if (prio === 'range') {
+                                    prioList.sort((a, b) => b.range !== a.range ? (b.range || 0) - (a.range || 0) : (b.dps || 0) - (a.dps || 0));
+                                } else {
+                                    prioList.sort((a, b) => b.dps !== a.dps ? (b.dps || 0) - (a.dps || 0) : (b.dmgVal || 0) - (a.dmgVal || 0));
+                                }
+
+                                const seenKeys = new Set();
+                                let added = 0;
+                                for (const b of prioList) {
+                                    const key = b.setName + "_" + (b.headUsed || 'none') + "_" + b.mainStats.body + "_" + b.mainStats.legs;
+                                    if (!seenKeys.has(key)) {
+                                        uniqueList.push(b);
+                                        seenKeys.add(key);
+                                        added++;
+                                        if (added >= limit) break;
+                                    }
+                                }
+                            }
+                            return uniqueList;
+                        };
+
                         // Pre-process new builds to reduce size drastically before merging
                         const topNewPerTrait = [];
                         for (const trait in traitGroups) {
-                            const list = traitGroups[trait].sort(sortFn);
-                            const uniqueList = [];
-                            const seenKeys = new Set();
-                            for (const b of list) {
-                                const key = b.setName + "_" + (b.headUsed || 'none') + "_" + b.mainStats.body + "_" + b.mainStats.legs;
-                                if (!seenKeys.has(key)) {
-                                    uniqueList.push(b);
-                                    seenKeys.add(key);
-                                    if (uniqueList.length >= 15) break;
-                                }
-                            }
-                            topNewPerTrait.push(...uniqueList);
+                            topNewPerTrait.push(...processGroup(traitGroups[trait], 15));
                         }
 
                         const mergeAndReduce = (existingArr, newReduced) => {
@@ -715,27 +727,16 @@ if (isMainThread) {
                             
                             const result = [];
                             for (const trait in traitMap) {
-                                const list = traitMap[trait].sort(sortFn);
-                                const uniqueList = [];
-                                const seenKeys = new Set();
-                                for (const b of list) {
-                                    const key = b.setName + "_" + (b.headUsed || 'none') + "_" + b.mainStats.body + "_" + b.mainStats.legs;
-                                    if (!seenKeys.has(key)) {
-                                        uniqueList.push(b);
-                                        seenKeys.add(key);
-                                        if (uniqueList.length >= 20) break;
-                                    }
-                                }
-                                result.push(...uniqueList);
+                                result.push(...processGroup(traitMap[trait], 20));
                             }
-                            return result;
+                            
+                            // Final stable sort for the output
+                            return result.sort((a, b) => b.dps !== a.dps ? (b.dps || 0) - (a.dps || 0) : (b.dmgVal || 0) - (a.dmgVal || 0));
                         };
 
-                        let finalFixed = mergeAndReduce(existingFixed, topNewPerTrait).sort(sortFn);
-                        let finalBugged = mergeAndReduce(existingBugged, topNewPerTrait).sort(sortFn);
+                        let finalFixed = mergeAndReduce(existingFixed, topNewPerTrait);
 
                         workerDb[finalKey].fixed.push(finalFixed);
-                        workerDb[finalKey].bugged.push(finalBugged);
                     });
                 });
                 
