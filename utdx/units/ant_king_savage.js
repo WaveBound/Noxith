@@ -22,7 +22,7 @@ unitDatabase.push({
         passiveDmg: 0, // Max Gluttony Stacks
         trueDmg: 0,
         support: "Slow / Radiation",
-        hasRadiation: true, radiationPct: 15, radiationDuration: 6,
+
         slowPct: 20, slowDuration: 6
     },
 

@@ -607,9 +607,14 @@ function renderDotSection(data, headDotRow) {
     const gearBonus = relicDot + setDot + headDot;
     const traitMultiplier = 1 + (traitDot / 100);
     const gearMultiplier = 1 + (gearBonus / 100);
+    
+    let combinedMultiplier = traitMultiplier * gearMultiplier;
+    if (data.baseStats.id === 'ant_king_savage' || (window.isUnit && window.isUnit(data.baseStats.id, 'ant_king_savage'))) {
+        combinedMultiplier = combinedMultiplier * combinedMultiplier;
+    }
 
     // The 1.5x Flaming Donut multiplier is already included in db.base by the core engine
-    const finalTickPct = db.base * traitMultiplier * gearMultiplier;
+    const finalTickPct = db.base * combinedMultiplier;
 
     if (data.headBuffs && data.headBuffs.type === 'ninja') {
         const uptimePct = (data.headBuffs.uptime || 0);

@@ -308,12 +308,22 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         dotBreakdown.bossNativeDps = bossTotalDmg / interval;
     }
 
-    if (traitObj.hasRadiation) {
-        const radPct = (traitObj.radiationPct || 20) * traitMultiplier * gearMultiplier;
-        const totalRadDmg = finalDmg * (radPct / 100);
+    if (traitObj.hasRadiation || uStats.hasRadiation) {
+        let baseRadPct = 0;
+        let baseRadInterval = 10;
+        if (traitObj.hasRadiation) {
+            baseRadPct += (traitObj.radiationPct || 20);
+        }
+        if (uStats.hasRadiation) {
+            baseRadPct += (uStats.radiationPct || 15);
+            if (uStats.radiationDuration) baseRadInterval = uStats.radiationDuration;
+        }
+
+        const radPct = baseRadPct * combinedMultiplier;
+        const totalRadDmg = finalDmg * (radPct / 100) * dotCritMult;
         dotBreakdown.radTotalDmg = totalRadDmg;
-        dotBreakdown.radInterval = 10; 
-        dotBreakdown.radDps = totalRadDmg / 10;
+        dotBreakdown.radInterval = baseRadInterval; 
+        dotBreakdown.radDps = totalRadDmg / baseRadInterval;
     }
 
     dotDpsTotal = (dotBreakdown.nativeDps + dotBreakdown.radDps) * (canStack ? placement : 1);
