@@ -61,7 +61,9 @@ window.calcCustomSummons = function(uStats, upLevel, eLevel, finalDmg, hostFinal
             }
             let sDps = (sAvgDmg / effectiveSpa) * (s.count || 1);
 
-            summonDpsTotal += sDps;
+            if (!s.excludeFromDps) {
+                summonDpsTotal += sDps;
+            }
             summonData.summons.push({
                 name: s.name,
                 hitDmg: sHitDmg,

@@ -370,7 +370,8 @@ const guideData = [
     { unit: "revolutionary_chief_syncro", img: "images/units/RevolutionaryChiefSyncro.png", isCalculated: true },
     { unit: "strongest_swordsman_hunter", img: "images/units/StrongestSwordsman.png", isCalculated: true },
     { unit: "pirate_king", img: "images/units/PirateKing.png", isCalculated: true },
-    { unit: "marine_hero", img: "images/units/MarineHero.png", isCalculated: true }
+    { unit: "marine_hero", img: "images/units/MarineHero.png", isCalculated: true },
+    { unit: "sharpshooter_king_trapper", img: "images/units/SharpshooterKingTrapper.png", isCalculated: true }
 ];
 const elementIcons = {
     "Water": "images/elements/Water.png",
