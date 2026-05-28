@@ -230,6 +230,11 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
 
     const traitMultiplier = 1 + (traitDotBonus / 100);
     const gearMultiplier = 1 + (gearDotBonus / 100);
+    let combinedMultiplier = traitMultiplier * gearMultiplier;
+
+    if (uStats.id === 'ant_king_savage' || (typeof window !== 'undefined' && window.isUnit && window.isUnit(uStats.id, 'ant_king_savage'))) {
+        combinedMultiplier = combinedMultiplier * combinedMultiplier;
+    }
 
     let dotBreakdown = {
         nativeDps: 0,
@@ -281,12 +286,12 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
     const canStack = (traitObj.allowDotStack || traitObj.allowPlacementStack);
     if (uStats.dot > 0 || uStats.bossDot > 0) {
         // Normal Dot
-        let normalTickPct = uStats.dot * traitMultiplier * gearMultiplier;
+        let normalTickPct = uStats.dot * combinedMultiplier;
         let normalTotalDmg = finalDmg * (normalTickPct / 100) * dotCritMult;
         
         // Boss Dot (Defaults to normal dot if bossDot is not specified)
         let bossBasePct = uStats.bossDot || uStats.dot;
-        let bossTickPct = bossBasePct * traitMultiplier * gearMultiplier;
+        let bossTickPct = bossBasePct * combinedMultiplier;
         const actualFinalDmgBoss = finalDmgBoss !== undefined ? finalDmgBoss : finalDmg;
         let bossTotalDmg = actualFinalDmgBoss * (bossTickPct / 100) * dotCritMultBoss;
 

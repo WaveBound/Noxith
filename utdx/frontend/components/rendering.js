@@ -691,10 +691,30 @@ window.getLiveScore = (unit) => {
         }
 
         try {
-            const res = window.reconstructMathData(scoringEntry);
-            if (res) {
-                const score = window.isUnit(unitId, 'law') ? (res.range || 0) : Math.max(res.total || 0, res.bossTotal || 0);
-                if (score > maxScore) maxScore = score;
+            if (unit.modes && unit.modes.length > 1 && !unit.allowMultipleModes) {
+                const originalMode = window.unitModesState?.[unitId];
+                let bestModeScore = 0;
+                for (let m = 0; m < unit.modes.length; m++) {
+                    if (!window.unitModesState) window.unitModesState = {};
+                    window.unitModesState[unitId] = m;
+                    const res = window.reconstructMathData(scoringEntry);
+                    if (res) {
+                        const score = window.isUnit(unitId, 'law') ? (res.range || 0) : Math.max(res.total || 0, res.bossTotal || 0);
+                        if (score > bestModeScore) bestModeScore = score;
+                    }
+                }
+                if (bestModeScore > maxScore) maxScore = bestModeScore;
+                if (originalMode !== undefined) {
+                    window.unitModesState[unitId] = originalMode;
+                } else {
+                    delete window.unitModesState[unitId];
+                }
+            } else {
+                const res = window.reconstructMathData(scoringEntry);
+                if (res) {
+                    const score = window.isUnit(unitId, 'law') ? (res.range || 0) : Math.max(res.total || 0, res.bossTotal || 0);
+                    if (score > maxScore) maxScore = score;
+                }
             }
         } catch (e) {
             console.warn(`Error reconstructing math in getLiveScore for ${unitId}:`, e);
