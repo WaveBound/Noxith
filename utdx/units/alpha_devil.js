@@ -23,7 +23,7 @@ unitDatabase.push({
         spaCap: 4,
         crit: 0,
         cdmg: 150,
-        element: "Dark",
+        element: "Ice",
         passiveDmg: 0,
         passiveSpa: 0,
         passiveCrit: 0,
