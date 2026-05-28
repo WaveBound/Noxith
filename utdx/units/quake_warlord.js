@@ -9,7 +9,7 @@ unitDatabase.push({
     tags: ["Piece", "Warlord"],
     meta: {
         short: "Ruler",
-        long: "Sacred/Fission",
+        long: "Eternal/Sacred",
         note: "Pond Overlord: High Water AoE damage. Buffs all other Warlord units on the field."
     },
     totalCost: 73000,

@@ -659,6 +659,11 @@ window.getLiveScore = (unit) => {
 
     for (let i = 0; i < searchLimit; i++) {
         let scoringEntry = { ...buildList[i] };
+        scoringEntry.id = scoringEntry.id || `${unitId}-live`;
+        scoringEntry.traitName = scoringEntry.traitName || (typeof scoringEntry.t === 'number' ? window.traitsList?.[scoringEntry.t]?.name : scoringEntry.t) || 'Unknown Trait';
+        scoringEntry.setName = scoringEntry.setName || (typeof scoringEntry.s === 'number' ? window.SETS?.[scoringEntry.s]?.name : scoringEntry.s) || 'Unknown Set';
+        scoringEntry.headUsed = scoringEntry.headUsed || (typeof scoringEntry.h === 'number' ? window.HEADS_LIST?.[scoringEntry.h] : scoringEntry.h) || 'none';
+
         if (!scoringEntry.subStats && scoringEntry.ss) scoringEntry.subStats = scoringEntry.ss;
         if (!scoringEntry.mainStats && (scoringEntry.ms || scoringEntry.b !== undefined || scoringEntry.l !== undefined)) {
             scoringEntry.mainStats = scoringEntry.ms || {
@@ -670,11 +675,11 @@ window.getLiveScore = (unit) => {
         if (currentHead) scoringEntry.headUsed = currentHead;
 
         if (anyGlobal) {
-            const setName = scoringEntry.setName || (typeof scoringEntry.s === 'number' ? SETS[scoringEntry.s]?.id : scoringEntry.s) || window.getSetFast?.(scoringEntry.setName)?.id;
-            const traitId = scoringEntry.traitName || scoringEntry.trait || (typeof scoringEntry.t === 'number' ? traitsList[scoringEntry.t]?.id : scoringEntry.t);
+            const setName = scoringEntry.setName || (typeof scoringEntry.s === 'number' ? window.SETS[scoringEntry.s]?.id : scoringEntry.s) || window.getSetFast?.(scoringEntry.setName)?.id;
+            const traitId = scoringEntry.traitName || scoringEntry.trait || (typeof scoringEntry.t === 'number' ? window.traitsList[scoringEntry.t]?.id : scoringEntry.t);
             if (setName && traitId) {
                 const singleBuilds = window.getFilteredBuilds().filter(b => b.setName === setName);
-                const singleTrait = traitsList.find(t => t.id === traitId || t.name === traitId);
+                const singleTrait = window.traitsList.find(t => t.id === traitId || t.name === traitId);
                 const optResList = window.calculateUnitBuilds(
                     unit, null, singleBuilds, window.getValidSubCandidates(), currentHead ? [currentHead] : ['none'],
                     !window.disableSubStats, singleTrait ? [singleTrait] : null, activeType === 'abil', 'fixed'
@@ -691,7 +696,9 @@ window.getLiveScore = (unit) => {
                 const score = window.isUnit(unitId, 'law') ? (res.range || 0) : Math.max(res.total || 0, res.bossTotal || 0);
                 if (score > maxScore) maxScore = score;
             }
-        } catch (e) { }
+        } catch (e) {
+            console.warn(`Error reconstructing math in getLiveScore for ${unitId}:`, e);
+        }
     }
 
     const val = maxScore || window.getQuickScore(unit);
