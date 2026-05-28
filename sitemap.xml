@@ -4,7 +4,7 @@
    <!-- Main Homepage -->
    <url>
       <loc>https://noxith.com/</loc>
-      <lastmod>2026-05-08</lastmod>
+      <lastmod>2026-05-25</lastmod>
       <changefreq>monthly</changefreq>
       <priority>1.00</priority>
    </url>
@@ -12,7 +12,7 @@
    <!-- BloxMulti Project -->
    <url>
       <loc>https://noxith.com/bloxmulti/</loc>
-      <lastmod>2026-05-11</lastmod>
+      <lastmod>2026-05-28</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.80</priority>
    </url>
@@ -20,7 +20,7 @@
    <!-- UTDX Project -->
    <url>
       <loc>https://noxith.com/utdx/</loc>
-      <lastmod>2026-05-12</lastmod>
+      <lastmod>2026-05-27</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.80</priority>
    </url>
