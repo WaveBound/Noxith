@@ -322,7 +322,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const activeMode = 'fixed';
 
     // Units that must ALWAYS calculate dynamically because static DB is stale or complex (Syncro/Follow-ups)
-    const forceDynamicUnits = ['revolutionary_chief_syncro', 'joyful_captain', 'the_strongest_in_history', 'jinoo_shadow_monarch', 'the_strongest_of_today', 'marine_hero'];
+    const forceDynamicUnits = ['revolutionary_chief_syncro', 'joyful_captain', 'the_strongest_in_history', 'jinoo_shadow_monarch', 'the_strongest_of_today', 'marine_hero', 'sharpshooter_king_trapper'];
     
     if (!forceSync && (unitObj?.allowMultipleModes || unitId.toLowerCase().includes('syncro') || forceDynamicUnits.includes(unitId)) && !window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0]) {
         forceSync = true;
@@ -653,11 +653,6 @@ window.getLiveScore = (unit) => {
         return (window.LIVE_SCORE_CACHE[cacheKey] = window.getQuickScore(unit));
     }
 
-    if (!currentTrait && !currentHead && !anyGlobal) {
-        const topBuild = buildList[0];
-        const score = topBuild?.d || topBuild?.dps || 0;
-        if (score > 0) return (window.LIVE_SCORE_CACHE[cacheKey] = score);
-    }
 
     let maxScore = 0;
     const searchLimit = Math.min(20, buildList.length);

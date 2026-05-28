@@ -62,11 +62,9 @@ unitDatabase.push({
         {
             name: "Pop Green Traps (6 Active)",
             reqUp: 0,
-            spa: 10,
+            spa: 2.5,
             dmgMult: 7.5, // 1.25 (average of 150, 125, 100) * 6 traps
             noCrit: true,
-            hostSpaLinked: true,
-            hostAttackRatio: 1,
             isSummon: true,
             excludeFromDps: true,
             desc: [
