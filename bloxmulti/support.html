@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -140,7 +141,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 5%;
+      padding: 16px 40px;
       background: rgba(6, 5, 13, 0.75);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
@@ -668,7 +669,7 @@
     /* ── Footer ── */
     footer {
       border-top: 1px solid var(--border);
-      padding: 32px 5%;
+      padding: 32px 40px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -763,6 +764,7 @@
       }
 
       footer {
+        padding: 32px 20px;
         flex-direction: column;
         justify-content: center;
         text-align: center;
@@ -1293,7 +1295,7 @@
       margin-left: 8px;
       vertical-align: middle;
     }
-  
+
     .legal-page {
       padding: 140px 20px 80px;
       max-width: 900px;
@@ -1303,12 +1305,14 @@
       line-height: 1.8;
       color: var(--muted);
     }
+
     .legal-page h1 {
       font-family: var(--font-display);
       font-size: 40px;
       color: var(--text);
       margin-bottom: 20px;
     }
+
     .legal-page h2 {
       font-family: var(--font-display);
       font-size: 24px;
@@ -1316,35 +1320,43 @@
       margin-top: 40px;
       margin-bottom: 16px;
     }
+
     .legal-page h3 {
       font-size: 18px;
       color: var(--text);
       margin-top: 24px;
       margin-bottom: 12px;
     }
+
     .legal-page p {
       margin-bottom: 16px;
     }
-    .legal-page ul, .legal-page ol {
+
+    .legal-page ul,
+    .legal-page ol {
       margin-bottom: 16px;
       padding-left: 24px;
     }
+
     .legal-page li {
       margin-bottom: 8px;
     }
+
     .legal-page a {
       color: var(--accent);
       text-decoration: none;
     }
+
     .legal-page a:hover {
       text-decoration: underline;
     }
   </style>
 
 </head>
+
 <body>
   <div class="global-bg"></div>
-<!-- Nav -->
+  <!-- Nav -->
   <nav>
     <a href="index.html#" class="nav-logo">BloxMulti</a>
 
@@ -1391,32 +1403,40 @@
   </nav>
   <main class="legal-page">
     <h1>Support</h1>
-    
+
     <p>We're here to help you get back into the game.</p>
     <h2>Frequently Asked Questions (FAQ)</h2>
     <h3>What is BloxMulti?</h3>
-    <p>BloxMulti is a Windows desktop utility that allows you to launch and manage multiple Roblox instances simultaneously. It features a customizable, widget-based interface powered by WebView2.</p>
+    <p>BloxMulti is a Windows desktop utility that allows you to launch and manage multiple Roblox instances
+      simultaneously. It features a customizable, widget-based interface powered by WebView2.</p>
     <h3>Do I need to install anything for the UI to work?</h3>
-    <p>BloxMulti uses <strong>Microsoft Edge WebView2</strong> to render its modern interface. Most modern Windows 10 and 11 systems have this installed by default. If the app fails to open or displays a blank screen, you may need to download and install the <a href="https://developer.microsoft.com/en-us/microsoft-edge/webview2/" target="_blank">WebView2 Runtime</a> from Microsoft.</p>
+    <p>BloxMulti uses <strong>Microsoft Edge WebView2</strong> to render its modern interface. Most modern Windows 10
+      and 11 systems have this installed by default. If the app fails to open or displays a blank screen, you may need
+      to download and install the <a href="https://developer.microsoft.com/en-us/microsoft-edge/webview2/"
+        target="_blank">WebView2 Runtime</a> from Microsoft.</p>
     <h2>Troubleshooting</h2>
     <h3>The app won't open / nothing happens</h3>
     <ul>
-        <li><strong>Extract the files first:</strong> The app will <strong>not start</strong> if you run it directly from inside a <code>.zip</code> archive. You must right-click the downloaded zip file, select "Extract All...", and run <code>BloxMulti.exe</code> from the newly extracted folder.</li>
+      <li><strong>Extract the files first:</strong> The app will <strong>not start</strong> if you run it directly from
+        inside a <code>.zip</code> archive. You must right-click the downloaded zip file, select "Extract All...", and
+        run <code>BloxMulti.exe</code> from the newly extracted folder.</li>
     </ul>
     <h3>Widgets aren't saving their positions</h3>
     <p>If you close the app and your widgets reset to their default positions:</p>
     <ul>
-        <li>Ensure the app is located in a folder where it has write permissions (like your Desktop or Documents). The app needs permission to create and update its local JSON configuration file.</li>
+      <li>Ensure the app is located in a folder where it has write permissions (like your Desktop or Documents). The app
+        needs permission to create and update its local JSON configuration file.</li>
     </ul>
     <h3>Multiple instances aren't launching</h3>
     <ul>
-        <li>Ensure you are launching the Roblox instances <em>through</em> the BloxMulti interface.</li>
+      <li>Ensure you are launching the Roblox instances <em>through</em> the BloxMulti interface.</li>
     </ul>
     <h2>Contact Us</h2>
     <p>Still need help? You can reach out to us through the following channels:</p>
     <ul>
-        <li><strong>Discord:</strong> <a href="https://discord.gg/ju6ANNecQg">Join our Discord Server</a></li>
-        <li><strong>GitHub Issues:</strong> <a href="https://github.com/WaveBound/BloxMulti/issues">Submit an Issue</a></li>
+      <li><strong>Discord:</strong> <a href="https://discord.gg/ju6ANNecQg">Join our Discord Server</a></li>
+      <li><strong>GitHub Issues:</strong> <a href="https://github.com/WaveBound/BloxMulti/issues">Submit an Issue</a>
+      </li>
     </ul>
 
   </main>
@@ -1432,4 +1452,5 @@
     </div>
   </footer>
 </body>
+
 </html>

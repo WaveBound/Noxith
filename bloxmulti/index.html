@@ -1,3 +1,4 @@
+<!-- START OF FILE index.html -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -15,10 +16,8 @@
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#9d6fff" />
 
-
-  <!-- Open Graph (Facebook, Discord unfurls, etc.) -->
+  <!-- Open Graph -->
   <meta property="og:type" content="website" />
-
   <meta property="og:title" content="BloxMulti — Roblox Multi-Account Manager" />
   <meta property="og:description"
     content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — for Windows." />
@@ -131,7 +130,16 @@
           rgba(157, 111, 255, 0.015) 40px, rgba(157, 111, 255, 0.015) 41px);
     }
 
-    /* ── Nav ── */
+    /* ── Page Layout Constraint Container ── */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+    }
+
+    /* ── Nav (Edge-to-Edge) ── */
     nav {
       position: fixed;
       top: 0;
@@ -141,7 +149,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 5%;
+      padding: 16px 40px;
       background: rgba(6, 5, 13, 0.75);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
@@ -239,7 +247,7 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 140px 20px 80px;
+      padding: 140px 0 80px;
       position: relative;
       z-index: 1;
     }
@@ -258,7 +266,6 @@
       letter-spacing: 1px;
       text-transform: uppercase;
       margin-bottom: 24px;
-      animation: fade-up 0.6s ease both 0.1s;
     }
 
     .hero-badge-dot {
@@ -271,12 +278,11 @@
 
     .hero-title {
       font-family: var(--font-display);
-      font-size: clamp(40px, 8vw, 96px);
+      font-size: clamp(40px, 8vw, 90px);
       font-weight: 800;
       line-height: 1.1;
       letter-spacing: -0.03em;
       color: var(--text);
-      animation: fade-up 0.7s ease both 0.2s;
     }
 
     .hero-title span {
@@ -292,7 +298,8 @@
       color: var(--muted);
       max-width: 600px;
       line-height: 1.6;
-      animation: fade-up 0.7s ease both 0.35s;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .hero-actions {
@@ -302,9 +309,10 @@
       gap: 16px;
       flex-wrap: wrap;
       justify-content: center;
-      animation: fade-up 0.7s ease both 0.5s;
       width: 100%;
       max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .btn-primary,
@@ -318,7 +326,7 @@
       font-size: 15px;
       font-weight: 600;
       text-decoration: none;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
       cursor: pointer;
       border: none;
       flex: 1;
@@ -358,7 +366,6 @@
       gap: 20px;
       font-size: 13px;
       color: var(--muted);
-      animation: fade-up 0.7s ease both 0.65s;
     }
 
     .hero-meta-item {
@@ -371,14 +378,13 @@
       color: var(--green);
     }
 
-    /* ── App Preview Image ── */
+    /* ── Image Carousel Preview ── */
     .preview-wrap {
       margin-top: 60px;
-      animation: fade-up 0.9s ease both 0.7s;
       position: relative;
       width: 100%;
       max-width: 1000px;
-      padding: 0 10px;
+      padding: 0;
     }
 
     .preview-glow {
@@ -394,36 +400,138 @@
       filter: blur(40px);
     }
 
+    .preview-carousel-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     .preview-frame {
       width: 100%;
+      aspect-ratio: 950 / 650;
+      /* Increased height slightly as requested */
       background: rgba(10, 9, 20, 0.82);
       border: 1px solid var(--border-hi);
       border-radius: 16px;
       box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(157, 111, 255, 0.08);
       overflow: hidden;
-      display: flex;
+      position: relative;
     }
 
-    .preview-image {
+    .carousel-slides {
       width: 100%;
-      height: auto;
-      display: block;
-      object-fit: contain;
+      height: 100%;
+      position: relative;
     }
 
-    /* ── Stats ── */
+    .carousel-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease-in-out;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .carousel-slide.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .carousel-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Carousel navigation arrows */
+    .carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(10, 9, 20, 0.8);
+      border: 1px solid var(--border-hi);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+      z-index: 10;
+      outline: none;
+    }
+
+    .carousel-arrow:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+      transform: translateY(-50%) scale(1.08);
+    }
+
+    .carousel-arrow.prev {
+      left: 16px;
+    }
+
+    .carousel-arrow.next {
+      right: 16px;
+    }
+
+    /* Dot indicators */
+    .carousel-dots {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .carousel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border-hi);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .carousel-dot:hover {
+      background: var(--muted);
+    }
+
+    .carousel-dot.active {
+      background: var(--accent);
+      width: 24px;
+      border-radius: 99px;
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    /* ── Stats (Edge-to-Edge) ── */
     .stats {
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
       background: rgba(10, 9, 20, 0.6);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
       position: relative;
       z-index: 1;
       width: 100%;
+    }
+
+    .stats .container {
+      max-width: 100%;
+      padding: 0 40px;
+    }
+
+    .stats-inner {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
       flex-wrap: wrap;
     }
 
@@ -478,9 +586,7 @@
 
     /* ── Features ── */
     .features {
-      padding: 100px 20px;
-      max-width: 1200px;
-      margin: 0 auto;
+      padding: 100px 0;
       position: relative;
       z-index: 1;
     }
@@ -572,13 +678,503 @@
       line-height: 1.6;
     }
 
-    /* ── Download CTA ── */
-    .download {
-      padding: 100px 20px;
+    /* ── Interactive Tabbed Widgets Showcase ── */
+    .widgets-section {
+      padding: 100px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .widgets-intro {
+      font-size: 16px;
+      color: var(--muted);
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 60px;
+      line-height: 1.7;
+      opacity: 0;
+    }
+
+    .widgets-showcase {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 32px;
+      align-items: center;
+      opacity: 0;
+    }
+
+    .widgets-nav {
       display: flex;
       flex-direction: column;
+      gap: 12px;
+    }
+
+    .widget-tab {
+      background: rgba(10, 9, 20, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .widget-tab:hover {
+      background: rgba(15, 14, 28, 0.7);
+      border-color: rgba(157, 111, 255, 0.25);
+    }
+
+    .widget-tab.active {
+      background: rgba(157, 111, 255, 0.08);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .widget-tab-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(157, 111, 255, 0.08);
+      border: 1px solid rgba(157, 111, 255, 0.15);
+      display: flex;
       align-items: center;
+      justify-content: center;
+      color: var(--accent-light);
+      flex-shrink: 0;
+    }
+
+    .widget-tab.active .widget-tab-icon {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .widget-nav-body {
+      flex: 1;
+    }
+
+    .widget-tab-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .widget-tab-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .widgets-preview-panel {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .widget-preview-frame {
+      width: 100%;
+      max-width: 500px;
+      /* Limits excessive stretching */
+      aspect-ratio: 4 / 3;
+      /* Taller and less wide layout ratio as requested */
+      background: rgba(10, 9, 20, 0.8);
+      border: 1px solid var(--border-hi);
+      border-radius: 16px;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .widget-preview-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    @media (max-width: 900px) {
+      .widgets-showcase {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── Updates for "How to change a widget" box ── */
+    .widget-how-to {
+      margin-top: 40px;
+      background: rgba(157, 111, 255, 0.05);
+      border: 1px solid rgba(157, 111, 255, 0.15);
+      border-radius: 16px;
+      padding: 32px;
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+    }
+
+    .widget-how-to-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(157, 111, 255, 0.12);
+      border: 1px solid rgba(157, 111, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-light);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .widget-how-to-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent-light);
+      margin-bottom: 8px;
+    }
+
+    .widget-how-to-text {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .widget-how-to-steps {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .widget-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .widget-step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(157, 111, 255, 0.15);
+      border: 1px solid rgba(157, 111, 255, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 1px;
+      line-height: 1;
+    }
+
+    .widget-step-text {
+      flex: 1;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      .widget-how-to {
+        flex-direction: column;
+        padding: 24px;
+      }
+    }
+
+    /* ── Premium Section ── */
+    .premium-section {
+      padding: 100px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .premium-intro {
+      font-size: 16px;
+      color: var(--muted);
       text-align: center;
+      max-width: 580px;
+      margin: 0 auto 60px;
+      line-height: 1.7;
+      opacity: 0;
+    }
+
+    .premium-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .premium-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .premium-features-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .premium-feat {
+      display: flex;
+      align-items: stretch;
+      gap: 20px;
+      background: rgba(10, 9, 20, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.3s ease;
+      opacity: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .premium-feat::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(157, 111, 255, 0.4), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .premium-feat:hover {
+      border-color: rgba(157, 111, 255, 0.3);
+      background: rgba(15, 14, 28, 0.9);
+      transform: translateY(-2px);
+    }
+
+    .premium-feat:hover::before {
+      opacity: 1;
+    }
+
+    .premium-feat-left {
+      display: flex;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .premium-feat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 11px;
+      background: rgba(157, 111, 255, 0.1);
+      border: 1px solid rgba(157, 111, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .premium-feat-body {
+      flex: 1;
+    }
+
+    .premium-feat-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .premium-feat-desc {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .premium-feat-visual {
+      width: 140px;
+      aspect-ratio: 16 / 10;
+      background: var(--surface-2);
+      border: 1px solid var(--border-hi);
+      border-radius: 10px;
+      overflow: hidden;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    .premium-feat-visual img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    @media (max-width: 650px) {
+      .premium-feat {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .premium-feat-visual {
+        width: 100%;
+        max-width: 280px;
+        align-self: flex-start;
+      }
+    }
+
+    /* Pricing card */
+    .premium-card {
+      background: rgba(157, 111, 255, 0.06);
+      border: 1px solid rgba(157, 111, 255, 0.22);
+      border-radius: 20px;
+      padding: 36px 30px;
+      opacity: 0;
+      position: relative;
+    }
+
+    .premium-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(157, 111, 255, 0.6), transparent);
+    }
+
+    .premium-card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .premium-card-price {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .price-amount {
+      font-family: var(--font-display);
+      font-size: 52px;
+      font-weight: 800;
+      color: var(--accent-light);
+      line-height: 1;
+    }
+
+    .price-currency {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
+      align-self: flex-start;
+      margin-top: 10px;
+    }
+
+    .price-period {
+      font-size: 14px;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+
+    .premium-card-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .premium-card-divider {
+      height: 1px;
+      background: rgba(157, 111, 255, 0.15);
+      margin-bottom: 20px;
+    }
+
+    .premium-card-perks {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .premium-perk {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13.5px;
+      color: var(--text);
+    }
+
+    .premium-perk-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(42, 245, 152, 0.12);
+      border: 1px solid rgba(42, 245, 152, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--green);
+      flex-shrink: 0;
+    }
+
+    .btn-premium {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 15px 24px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 28px var(--accent-glow);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .btn-premium:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .premium-card-note {
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* premium badge on widget card */
+    .widget-premium-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(157, 111, 255, 0.12);
+      border: 1px solid rgba(157, 111, 255, 0.25);
+      border-radius: 99px;
+      padding: 3px 8px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    /* ── Download CTA ── */
+    .download {
+      padding: 100px 0;
       position: relative;
       z-index: 1;
     }
@@ -595,13 +1191,19 @@
       pointer-events: none;
     }
 
+    .download-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
     .download-title {
       font-family: var(--font-display);
       font-size: clamp(32px, 6vw, 56px);
       font-weight: 800;
       letter-spacing: -1px;
       margin-bottom: 16px;
-      opacity: 0;
     }
 
     .download-sub {
@@ -610,7 +1212,6 @@
       max-width: 500px;
       line-height: 1.6;
       margin-bottom: 40px;
-      opacity: 0;
     }
 
     .download-box {
@@ -627,7 +1228,7 @@
       gap: 20px;
       width: 100%;
       max-width: 420px;
-      opacity: 0;
+      margin: 0 auto;
     }
 
     .dl-platform {
@@ -666,15 +1267,49 @@
       line-height: 1.6;
     }
 
-    /* ── Footer ── */
+    /* Styled Download CTA button */
+    .btn-download-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px 28px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 6px 28px var(--accent-glow);
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-download-primary:hover {
+      background: var(--accent-light);
+      box-shadow: 0 8px 32px var(--accent-glow);
+      transform: translateY(-2px);
+    }
+
+    /* ── Footer (Edge-to-Edge) ── */
     footer {
       border-top: 1px solid var(--border);
-      padding: 32px 5%;
+      padding: 32px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    footer .container {
+      max-width: 100%;
+      padding: 0 40px;
+    }
+
+    .footer-inner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: relative;
-      z-index: 1;
       flex-wrap: wrap;
       gap: 20px;
     }
@@ -712,7 +1347,6 @@
 
       .nav-links {
         display: none;
-        /* Hide text links on mobile to save space */
       }
 
       .nav-actions {
@@ -721,7 +1355,6 @@
 
       .nav-btn-text {
         display: none;
-        /* Hide text, keep icons for action buttons */
       }
 
       .nav-cta,
@@ -732,7 +1365,7 @@
       }
 
       .hero {
-        padding: 120px 20px 60px;
+        padding: 120px 0 60px;
       }
 
       .hero-actions {
@@ -749,6 +1382,10 @@
         gap: 12px;
       }
 
+      .stats .container {
+        padding: 0 20px;
+      }
+
       .stat-item {
         border-right: none;
         border-bottom: 1px solid var(--border);
@@ -760,10 +1397,14 @@
       }
 
       .features {
-        padding: 80px 20px;
+        padding: 80px 0;
       }
 
-      footer {
+      footer .container {
+        padding: 0 20px;
+      }
+
+      footer .footer-inner {
         flex-direction: column;
         justify-content: center;
         text-align: center;
@@ -837,469 +1478,12 @@
       transform: none;
       transition-delay: 0.5s;
     }
-
-    /* ── Widgets Section ── */
-    .widgets-section {
-      padding: 100px 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    .widgets-section .section-label,
-    .widgets-section .section-title {
-      text-align: center;
-    }
-
-    .widgets-intro {
-      font-size: 16px;
-      color: var(--muted);
-      text-align: center;
-      max-width: 600px;
-      margin: 0 auto 60px;
-      line-height: 1.7;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.65s ease 0.1s, transform 0.65s ease 0.1s;
-    }
-
-    .widgets-intro.in {
-      opacity: 1;
-      transform: none;
-    }
-
-    .widgets-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-
-    @media (max-width: 768px) {
-      .widgets-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* ── Updates for Widget Cards ── */
-    .widget-card {
-      background: rgba(10, 9, 20, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
-      /* Reduced from 28px 24px */
-      transition: all 0.3s ease;
-      opacity: 0;
-      transform: translateY(20px);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .widget-card-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      /* Tighter gap */
-      margin-bottom: 12px;
-      /* Tighter margin */
-    }
-
-    .widget-card-icon {
-      width: 38px;
-      /* Slightly smaller icon box */
-      height: 38px;
-      border-radius: 10px;
-      background: rgba(157, 111, 255, 0.1);
-      border: 1px solid rgba(157, 111, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent);
-      flex-shrink: 0;
-    }
-
-    .widget-card-title {
-      font-size: 16px;
-      /* Slightly smaller text */
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .widget-card-desc {
-      font-size: 13.5px;
-      color: var(--muted);
-      line-height: 1.55;
-      /* Tighter line height */
-    }
-
-    /* ── Updates for "How to change a widget" box ── */
-    .widget-how-to {
-      margin-top: 24px;
-      /* Reduced from 48px to bring it closer */
-      background: rgba(157, 111, 255, 0.05);
-      border: 1px solid rgba(157, 111, 255, 0.15);
-      border-radius: 16px;
-      padding: 24px;
-      /* Reduced from 32px 36px */
-      display: flex;
-      align-items: flex-start;
-      gap: 20px;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.65s ease 0.2s, transform 0.65s ease 0.2s;
-    }
-
-    .widget-how-to-icon {
-      width: 40px;
-      /* Smaller icon box */
-      height: 40px;
-      border-radius: 10px;
-      background: rgba(157, 111, 255, 0.12);
-      border: 1px solid rgba(157, 111, 255, 0.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent-light);
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    .widget-how-to-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--accent-light);
-      margin-bottom: 6px;
-    }
-
-    .widget-how-to-text {
-      font-size: 13.5px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .widget-how-to-steps {
-      margin-top: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      /* Tighter spacing between list items */
-    }
-
-    .widget-step {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 13.5px;
-      color: var(--muted);
-    }
-
-    .widget-step-num {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: rgba(157, 111, 255, 0.15);
-      border: 1px solid rgba(157, 111, 255, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--accent);
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    @media (max-width: 600px) {
-      .widget-how-to {
-        flex-direction: column;
-        padding: 24px 20px;
-      }
-    }
-
-    /* ── Premium Section ── */
-    .premium-section {
-      padding: 100px 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    .premium-section .section-label,
-    .premium-section .section-title {
-      text-align: center;
-    }
-
-    .premium-intro {
-      font-size: 16px;
-      color: var(--muted);
-      text-align: center;
-      max-width: 580px;
-      margin: 0 auto 60px;
-      line-height: 1.7;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.65s ease 0.1s, transform 0.65s ease 0.1s;
-    }
-
-    .premium-intro.in {
-      opacity: 1;
-      transform: none;
-    }
-
-    .premium-layout {
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 24px;
-      align-items: center;
-    }
-
-    @media (max-width: 900px) {
-      .premium-layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .premium-features-list {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .premium-feat {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      background: rgba(10, 9, 20, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 22px 20px;
-      transition: all 0.3s ease;
-      opacity: 0;
-      transform: translateY(20px);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .premium-feat::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(157, 111, 255, 0.4), transparent);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .premium-feat:hover {
-      border-color: rgba(157, 111, 255, 0.3);
-      background: rgba(15, 14, 28, 0.9);
-      transform: translateY(-2px);
-    }
-
-    .premium-feat:hover::before {
-      opacity: 1;
-    }
-
-    .premium-feat.in {
-      opacity: 1;
-      transform: none;
-    }
-
-    .premium-feat-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 11px;
-      background: rgba(157, 111, 255, 0.1);
-      border: 1px solid rgba(157, 111, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent);
-      flex-shrink: 0;
-    }
-
-    .premium-feat-body {
-      flex: 1;
-    }
-
-    .premium-feat-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 5px;
-    }
-
-    .premium-feat-desc {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    /* Pricing card */
-    .premium-card {
-      background: rgba(157, 111, 255, 0.06);
-      border: 1px solid rgba(157, 111, 255, 0.22);
-      border-radius: 20px;
-      padding: 32px 28px;
-      /* Removed position: sticky and top: 100px here */
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.65s ease 0.25s, transform 0.65s ease 0.25s;
-      overflow: hidden;
-    }
-
-    .premium-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(157, 111, 255, 0.6), transparent);
-    }
-
-    .premium-card.in {
-      opacity: 1;
-      transform: none;
-    }
-
-    .premium-card-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 20px;
-    }
-
-    .premium-card-price {
-      display: flex;
-      align-items: baseline;
-      gap: 4px;
-      margin-bottom: 6px;
-    }
-
-    .price-amount {
-      font-family: var(--font-display);
-      font-size: 52px;
-      font-weight: 800;
-      color: var(--accent-light);
-      line-height: 1;
-    }
-
-    .price-currency {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--accent);
-      align-self: flex-start;
-      margin-top: 10px;
-    }
-
-    .price-period {
-      font-size: 14px;
-      color: var(--muted);
-      margin-left: 4px;
-    }
-
-    .premium-card-sub {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-
-    .premium-card-divider {
-      height: 1px;
-      background: rgba(157, 111, 255, 0.15);
-      margin-bottom: 20px;
-    }
-
-    .premium-card-perks {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 28px;
-    }
-
-    .premium-perk {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: var(--text);
-    }
-
-    .premium-perk-check {
-      width: 18px;
-      height: 18px;
-      border-radius: 5px;
-      background: rgba(42, 245, 152, 0.12);
-      border: 1px solid rgba(42, 245, 152, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--green);
-      flex-shrink: 0;
-    }
-
-    .btn-premium {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      width: 100%;
-      padding: 15px 24px;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 700;
-      text-decoration: none;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 6px 28px var(--accent-glow);
-      transition: opacity 0.2s, transform 0.2s;
-    }
-
-    .btn-premium:hover {
-      opacity: 0.9;
-      transform: translateY(-2px);
-    }
-
-    .premium-card-note {
-      margin-top: 14px;
-      font-size: 11px;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    /* premium badge on widget card */
-    .widget-premium-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      color: var(--accent);
-      background: rgba(157, 111, 255, 0.12);
-      border: 1px solid rgba(157, 111, 255, 0.25);
-      border-radius: 99px;
-      padding: 3px 8px;
-      margin-left: 8px;
-      vertical-align: middle;
-    }
   </style>
 </head>
 
 <body>
 
-  <!-- Background -->
+  <!-- Background Layer -->
   <div class="global-bg"></div>
 
   <!-- Nav -->
@@ -1317,7 +1501,7 @@
       <div class="nav-actions">
         <!-- Donate -->
         <a href="javascript:void(0)" onclick="NoxithDonations.open()" class="btn-donate heart" title="Donate">
-          <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
             stroke-linecap="round" stroke-linejoin="round">
             <path
               d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
@@ -1329,8 +1513,8 @@
         <a href="/" class="btn-donate" title="Back to Hub">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
             stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="9 22 9 12 15 12 15 22" />
           </svg>
           <span class="nav-btn-text">Hub</span>
         </a>
@@ -1348,317 +1532,413 @@
     </div>
   </nav>
 
-  <!-- Hero -->
+  <!-- Hero Section -->
   <section class="hero">
-    <div class="hero-badge">
-      v1.1.1 - Settings Modal Updated, Themes Added.
-    </div>
-
-    <h1 class="hero-title">
-      Roblox <span>Account Manager</span>
-    </h1>
-
-    <p class="hero-sub">
-      Run multiple Roblox accounts at the same time, each with its own isolated session. Customize your dashboard with
-      widgets, organize accounts into groups, and monitor every instance live.
-    </p>
-
-    <div class="hero-actions">
-      <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-primary">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
-        Download Now
-      </a>
-      <a href="#features" class="btn-secondary">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-        See Features
-      </a>
-    </div>
-
-    <div class="hero-meta">
-      <div class="hero-meta-item">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        Fast &amp; Light
+    <div class="container" style="display: flex; flex-direction: column; align-items: center;">
+      <div class="hero-badge animate">
+        <div class="hero-badge-dot"></div>
+        v1.1.2 - Custom Themes Added (Premium)
       </div>
-      <div class="hero-meta-item">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        No ads
-      </div>
-      <div class="hero-meta-item">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        Windows 10 &amp; 11
-      </div>
-    </div>
 
-    <!-- App Preview Image -->
-    <div class="preview-wrap">
-      <div class="preview-glow"></div>
-      <div class="preview-frame">
-        <img src="Preview.png" alt="BloxMulti Interface Preview" class="preview-image" />
+      <h1 class="hero-title animate" style="transition-delay:0.1s">
+        Roblox <span>Account Manager</span>
+      </h1>
+
+      <p class="hero-sub animate" style="transition-delay:0.2s">
+        Launch and manage multiple Roblox accounts at the same time, each with its own isolated session. Customize your
+        dashboard with swappable widgets, organize accounts, and monitor performance.
+      </p>
+
+      <div class="hero-actions animate" style="transition-delay:0.3s">
+        <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Download Now
+        </a>
+        <a href="#features" class="btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          See Features
+        </a>
+      </div>
+
+      <div class="hero-meta animate" style="transition-delay:0.4s">
+        <div class="hero-meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Fast &amp; Light (~1.2 MB)
+        </div>
+        <div class="hero-meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          No Installer Required
+        </div>
+        <div class="hero-meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Windows 10 &amp; 11 Compatible
+        </div>
+      </div>
+
+      <!-- App Preview Image Slider (Theme Images Only) -->
+      <div class="preview-wrap animate" style="transition-delay:0.5s">
+        <div class="preview-glow"></div>
+        <div class="preview-carousel-container">
+          <div class="preview-frame">
+            <div class="carousel-slides" id="carouselSlides">
+              <!-- Slide 1: Default Onyx Theme -->
+              <div class="carousel-slide active">
+                <img src="Preview.png" alt="Onyx Theme"
+                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 viewBox=%220 0 1000 650%22 style=%22background:%230a0915%22><rect x=%220%22 y=%220%22 width=%2260%22 height=%22650%22 fill=%22%2305040d%22 /><rect x=%2215%22 y=%2220%22 width=%2230%22 height=%2230%22 rx=%226%22 fill=%22%239d6fff%22 /><rect x=%2290%22 y=%2230%22 width=%22410%22 height=%22270%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%22520%22 y=%2230%22 width=%22450%22 height=%22270%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%2290%22 y=%22320%22 width=%22410%22 height=%22300%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%22520%22 y=%22320%22 width=%22450%22 height=%22300%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><text x=%2250%25%22 y=%2252%25%22 fill=%22%236a607e%22 font-family=%22sans-serif%22 font-size=%2218%22 text-anchor=%22middle%22>Onyx Workspace Preview Placeholder (Preview.png)</text></svg>';" />
+              </div>
+              <!-- Slide 2: Noxith Theme -->
+              <div class="carousel-slide">
+                <img src="Theme-Noxith.png" alt="Noxith Theme"
+                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 viewBox=%220 0 1000 650%22 style=%22background:%23050505%22><rect x=%220%22 y=%220%22 width=%2260%22 height=%22650%22 fill=%22%23050505%22 /><rect x=%2215%22 y=%2220%22 width=%2230%22 height=%2230%22 rx=%226%22 fill=%22%23ffffff%22 /><rect x=%2290%22 y=%2230%22 width=%22410%22 height=%22270%22 rx=%2210%22 fill=%22%23121212%22 stroke=%22%23444444%22 /><rect x=%22520%22 y=%2230%22 width=%22450%22 height=%22270%22 rx=%2210%22 fill=%22%23121212%22 stroke=%22%23444444%22 /><rect x=%2290%22 y=%22320%22 width=%22410%22 height=%22300%22 rx=%2210%22 fill=%22%23121212%22 stroke=%22%23444444%22 /><rect x=%22520%22 y=%22320%22 width=%22450%22 height=%22300%22 rx=%2210%22 fill=%22%23121212%22 stroke=%22%23444444%22 /><text x=%2250%25%22 y=%2252%25%22 fill=%22%23a0a0a0%22 font-family=%22sans-serif%22 font-size=%2218%22 text-anchor=%22middle%22>Noxith Theme Preview Placeholder (Theme-Noxith.png)</text></svg>';" />
+              </div>
+              <!-- Slide 3: Eclipse Theme -->
+              <div class="carousel-slide">
+                <img src="Theme-Eclipse.png" alt="Eclipse Theme"
+                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 viewBox=%220 0 1000 650%22 style=%22background:%23030206%22><rect x=%220%22 y=%220%22 width=%2260%22 height=%22650%22 fill=%22%23030206%22 /><rect x=%2215%22 y=%2220%22 width=%2230%22 height=%2230%22 rx=%226%22 fill=%22%23ff6a00%22 /><rect x=%2290%22 y=%2230%22 width=%22410%22 height=%22270%22 rx=%2210%22 fill=%22%230a090f%22 stroke=%22%23191724%22 /><rect x=%22520%22 y=%2230%22 width=%22450%22 height=%22270%22 rx=%2210%22 fill=%22%230a090f%22 stroke=%22%23191724%22 /><rect x=%2290%22 y=%22320%22 width=%22410%22 height=%22300%22 rx=%2210%22 fill=%22%230a090f%22 stroke=%22%23191724%22 /><rect x=%22520%22 y=%22320%22 width=%22450%22 height=%22300%22 rx=%2210%22 fill=%22%230a090f%22 stroke=%22%23191724%22 /><text x=%2250%25%22 y=%2252%25%22 fill=%22%237a768a%22 font-family=%22sans-serif%22 font-size=%2218%22 text-anchor=%22middle%22>Eclipse Theme Preview Placeholder (Theme-Eclipse.png)</text></svg>';" />
+              </div>
+              <!-- Slide 4: Crimson Theme -->
+              <div class="carousel-slide">
+                <img src="Theme-Crimson.png" alt="Crimson Theme"
+                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 viewBox=%220 0 1000 650%22 style=%22background:%23050102%22><rect x=%220%22 y=%220%22 width=%2260%22 height=%22650%22 fill=%22%23050102%22 /><rect x=%2215%22 y=%2220%22 width=%2230%22 height=%2230%22 rx=%226%22 fill=%22%23d41b2c%22 /><rect x=%2290%22 y=%2230%22 width=%22410%22 height=%22270%22 rx=%2210%22 fill=%22%230d0406%22 stroke=%22%231e090d%22 /><rect x=%22520%22 y=%2230%22 width=%22450%22 height=%22270%22 rx=%2210%22 fill=%22%230d0406%22 stroke=%22%231e090d%22 /><rect x=%2290%22 y=%22320%22 width=%22410%22 height=%22300%22 rx=%2210%22 fill=%22%230d0406%22 stroke=%22%231e090d%22 /><rect x=%22520%22 y=%22320%22 width=%22450%22 height=%22300%22 rx=%2210%22 fill=%22%230d0406%22 stroke=%22%231e090d%22 /><text x=%2250%25%22 y=%2252%25%22 fill=%22%238c7a7d%22 font-family=%22sans-serif%22 font-size=%2218%22 text-anchor=%22middle%22>Crimson Theme Preview Placeholder (Theme-Crimson.png)</text></svg>';" />
+              </div>
+              <!-- Slide 5: Custom Theme Creator -->
+              <div class="carousel-slide">
+                <img src="Theme-Custom.png" alt="Custom Designer"
+                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 viewBox=%220 0 1000 650%22 style=%22background:%2306050d%22><rect x=%220%22 y=%220%22 width=%2260%22 height=%22650%22 fill=%22%2306050d%22 /><rect x=%2215%22 y=%2220%22 width=%2230%22 height=%2230%22 rx=%226%22 fill=%22%23edeafa%22 /><rect x=%2290%22 y=%2230%22 width=%22410%22 height=%22270%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%22520%22 y=%2230%22 width=%22450%22 height=%22270%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%2290%22 y=%22320%22 width=%22410%22 height=%22300%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%22520%22 y=%22320%22 width=%22450%22 height=%22300%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><text x=%2250%25%22 y=%2252%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2218%22 text-anchor=%22middle%22>Custom Designer Preview Placeholder (Theme-Custom.png)</text></svg>';" />
+              </div>
+            </div>
+
+            <!-- Carousel Navigation (Symmetrical arrows) -->
+            <button class="carousel-arrow prev" onclick="moveSlide(-1)">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+            <button class="carousel-arrow next" onclick="moveSlide(1)">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="9 6 15 12 9 18" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Carousel Dots -->
+          <div class="carousel-dots" id="carouselDots">
+            <span class="carousel-dot active" onclick="setSlide(0)" title="Default Onyx Theme"></span>
+            <span class="carousel-dot" onclick="setSlide(1)" title="Noxith Theme"></span>
+            <span class="carousel-dot" onclick="setSlide(2)" title="Eclipse Theme"></span>
+            <span class="carousel-dot" onclick="setSlide(3)" title="Crimson Theme"></span>
+            <span class="carousel-dot" onclick="setSlide(4)" title="Custom theme creator"></span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Stats -->
+  <!-- Real-time Stats -->
   <div class="stats" id="features">
-    <div class="stat-item animate">
-      <div class="stat-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="8" r="4" />
-          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-        </svg>
-      </div>
-      <div class="stat-text">
-        <div class="stat-num"><span>Unlimited</span> accounts</div>
-        <div class="stat-label">Add as many Roblox accounts as you need</div>
-      </div>
-    </div>
-    <div class="stat-item animate" style="transition-delay:0.1s">
-      <div class="stat-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="5 3 19 12 5 21 5 3" />
-        </svg>
-      </div>
-      <div class="stat-text">
-        <div class="stat-num"><span>One-click</span> launch</div>
-        <div class="stat-label">Jump into any game instantly by Place ID</div>
-      </div>
-    </div>
-    <div class="stat-item animate" style="transition-delay:0.2s">
-      <div class="stat-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <polyline points="12 6 12 12 16 14" />
-        </svg>
-      </div>
-      <div class="stat-text">
-        <div class="stat-num"><span>Global</span> FPS cap</div>
-        <div class="stat-label">Limit your FPS to save system resources</div>
-      </div>
-    </div>
-    <div class="stat-item animate" style="transition-delay:0.3s">
-      <div class="stat-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
-      </div>
-      <div class="stat-text">
-        <div class="stat-num"><span id="stats-downloads">0</span>+ Downloads</div>
-        <div class="stat-label">Join users managing their accounts daily</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Features -->
-  <section class="features" id="features">
-    <div class="section-label animate">What's inside</div>
-    <h2 class="section-title animate">Everything you need<br />to play smarter</h2>
-
-    <div class="features-grid stagger">
-      <div class="feat-card">
-        <div class="feat-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    <div class="container stats-inner">
+      <div class="stat-item animate">
+        <div class="stat-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="8" r="4" />
             <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
           </svg>
         </div>
-        <div class="feat-title">Multi-Account Management</div>
-        <div class="feat-desc">Add and switch between multiple Roblox accounts instantly. Each account shows your avatar
-          with a clean sidebar for quick selection. Drag to reorder, pin your favourites to the top.</div>
+        <div class="stat-text">
+          <div class="stat-num"><span>Unlimited</span> Accounts</div>
+          <div class="stat-label">Save and switch between active sessions</div>
+        </div>
       </div>
-
-      <div class="feat-card">
-        <div class="feat-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="7" width="20" height="14" rx="2" />
-            <path d="M16 7V5a2 2 0 0 0-4 0v2" />
-            <path d="M8 7V5a2 2 0 0 1 4 0" />
+      <div class="stat-item animate" style="transition-delay:0.1s">
+        <div class="stat-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round">
+            <polygon points="5 3 19 12 5 21 5 3" />
           </svg>
         </div>
-        <div class="feat-title">Multi-Account Launch</div>
-        <div class="feat-desc">Shift-click to select multiple accounts and launch them all into the same game
-          simultaneously,
-          each staggered safely to avoid rate limits.</div>
-      </div>
-
-      <div class="feat-card">
-        <div class="feat-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
-          </svg>
+        <div class="stat-text">
+          <div class="stat-num"><span>Multi-Instance</span> Support</div>
+          <div class="stat-label">Launch multiple Roblox windows at the same time</div>
         </div>
-        <div class="feat-title">Cloud Synchronization</div>
-        <div class="feat-desc">Securely back up your accounts, widgets, and settings to Google Drive for free. Your data
-          is locally encrypted, ensuring complete privacy before it leaves your machine.</div>
       </div>
-
-      <div class="feat-card">
-        <div class="feat-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            <circle cx="9" cy="10" r="1" />
-            <circle cx="15" cy="10" r="1" />
-          </svg>
-        </div>
-        <div class="feat-title">Discord Rich Presence</div>
-        <div class="feat-desc">Show off your active experience on your Discord profile automatically. Displays your
-          current game and generates native, one-click join buttons so friends can jump straight into your server.</div>
-      </div>
-
-      <div class="feat-card">
-        <div class="feat-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      <div class="stat-item animate" style="transition-delay:0.2s">
+        <div class="stat-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
             stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10" />
-            <line x1="2" y1="12" x2="22" y2="12" />
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            <polyline points="12 6 12 12 16 14" />
           </svg>
         </div>
-        <div class="feat-title">Public Server Joins</div>
-        <div class="feat-desc">Connect directly to any specific running public server using its unique Job ID. Skip
-          standard matchmaking entirely to guarantee you join the exact server your friends or community are playing in.
+        <div class="stat-text">
+          <div class="stat-num"><span>Global</span> FPS Limiter</div>
+          <div class="stat-label">Tune framerate caps inside your XML configuration files</div>
+        </div>
+      </div>
+      <div class="stat-item animate" style="transition-delay:0.3s">
+        <div class="stat-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+        </div>
+        <div class="stat-text">
+          <div class="stat-num"><span id="stats-downloads">0</span>+ Downloads</div>
+          <div class="stat-label">Join users running multiple clients daily</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core Features Matrix -->
+  <section class="features">
+    <div class="container">
+      <div class="section-label animate">Core Engine</div>
+      <h2 class="section-title animate">Built for multi-account automation</h2>
+
+      <div class="features-grid stagger">
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+          </div>
+          <div class="feat-title">Multi-Instance Support</div>
+          <div class="feat-desc">Run multiple Roblox game windows at the same time with a smooth and reliable
+            experience. Easily switch between accounts, or play across several sessions without constantly reopening the
+            client.</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+          </div>
+          <div class="feat-title">Secure Local Switching</div>
+          <div class="feat-desc">Store multiple profiles. Session cookies are encrypted locally on your hard drive using
+            Windows DPAPI encryption keys to protect your data.</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+          </div>
+          <div class="feat-title">Global FPS Limiter</div>
+          <div class="feat-desc">Writes limits straight into local XML settings. Regulate client rendering to optimize
+            hardware cycles and lower system heat.</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+            </svg>
+          </div>
+          <div class="feat-title">Cloud Backup &amp; Sync</div>
+          <div class="feat-desc">Link Google accounts to export encrypted local backups to your drive. Restores
+            configurations, account profiles, and layouts across devices.</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+          </div>
+          <div class="feat-title">Isolated Browser Sessions</div>
+          <div class="feat-desc">Launches individual profile navigation containers using decoupled local directories.
+            Keeps online cookies completely isolated.</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round">
+              <path d="M21 10V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2" />
+              <path d="M7 14l-3 3v3h16v-3l-3-3" />
+              <line x1="12" y1="6" x2="12" y2="14" />
+            </svg>
+          </div>
+          <div class="feat-title">Sidebar Favoriting</div>
+          <div class="feat-desc">Pin primary accounts to the top of your sidebar, arrange visual layouts via
+            drag-and-drop mechanics, and custom-order dashboard slots.</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Widget Dashboard Section -->
+  <!-- Interactive Modular Widgets Showcase -->
   <section class="widgets-section" id="widgets">
-    <div class="section-label animate">Dashboard</div>
-    <h2 class="section-title animate">Your layout,<br />your way</h2>
-    <p class="widgets-intro animate">
-      BloxMulti's four-panel dashboard is made up of fully swappable widgets. Every panel can show a different view;
-      mix and match to build the exact setup you want.
-    </p>
+    <div class="container">
+      <div class="section-label animate">Dashboard Panels</div>
+      <h2 class="section-title animate">Modular layouts</h2>
+      <p class="widgets-intro animate">
+        Your four-panel dashboard is made up of swap-enabled utility widgets. Choose from our set of modules to
+        construct your layout.
+      </p>
 
-    <div class="widgets-grid">
-      <div class="widget-card animate" style="transition-delay:0s">
-        <div class="widget-card-header">
-          <div class="widget-card-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path
-                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
-          </div>
-          <div class="widget-card-title">Saved Games</div>
-        </div>
-        <div class="widget-card-desc">Your bookmarked games with thumbnails and pin support. Click any entry to launch
-          it
-          instantly with your selected account. Sorted by pinned first, then most recently added.</div>
-      </div>
-
-      <div class="widget-card animate" style="transition-delay:0.1s">
-        <div class="widget-card-header">
-          <div class="widget-card-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="4" />
-              <path d="M7 12h10M12 7v10" />
-            </svg>
-          </div>
-          <div class="widget-card-title">Saved Servers</div>
-        </div>
-        <div class="widget-card-desc">Private server link codes stored alongside their game. No more digging through
-          messages for links: your crew's servers are always one click away, pinnable and launchable instantly.</div>
-      </div>
-
-      <div class="widget-card animate" style="transition-delay:0.2s">
-        <div class="widget-card-header">
-          <div class="widget-card-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-          </div>
-          <div class="widget-card-title">Recent Launches</div>
-        </div>
-        <div class="widget-card-desc">A live feed of the last 10 game launches you made, with timestamps and thumbnails.
-          Great for quickly jumping back into something you were just playing without saving it first.</div>
-      </div>
-
-      <div class="widget-card animate" style="transition-delay:0.3s">
-        <div class="widget-card-header">
-          <div class="widget-card-icon"
-            style="color: var(--green); background: rgba(42,245,152,0.08); border-color: rgba(42,245,152,0.2);">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <path d="M8 21h8M12 17v4" />
-              <polyline points="7 10 10 7 13 10 17 6" />
-            </svg>
-          </div>
-          <div class="widget-card-title">
-            Running Instances
-            <span class="widget-premium-badge">
-              <svg width="8" height="8" viewBox="0 0 1024 1024" fill="currentColor">
-                <path
-                  d="M967.68 368.64l-153.6-204.8c-3.9424-5.2736-9.7792-8.8064-16.2816-9.8816l-307.2-51.2c-2.7648-0.4608-5.632-0.4608-8.3968 0l-307.2 51.2c-6.5024 1.0752-12.3392 4.608-16.2816 9.8816l-153.6 204.8c-7.3216 9.7792-6.7072 23.3984 1.4336 32.4608l460.8 512c4.864 5.376 11.776 8.4992 19.0464 8.4992s14.1824-3.072 19.0464-8.4992l460.8-512c8.192-9.1136 8.8064-22.6816 1.4336-32.4608z" />
+      <div class="widgets-showcase animate">
+        <!-- Interactive Left Navigation (Includes 5th Tab with Premium Badge) -->
+        <div class="widgets-nav">
+          <!-- Tab 1 -->
+          <div class="widget-tab active" onclick="switchWidgetTab(0)">
+            <div class="widget-tab-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round">
+                <polygon points="5 3 19 12 5 21 5 3" />
               </svg>
-              Premium
-            </span>
+            </div>
+            <div class="widget-nav-body">
+              <div class="widget-tab-title">Saved Games</div>
+              <div class="widget-tab-desc">Bookmark active places with thumbnail art and pinning.</div>
+            </div>
+          </div>
+          <!-- Tab 2 -->
+          <div class="widget-tab" onclick="switchWidgetTab(1)">
+            <div class="widget-tab-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+                <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+                <line x1="6" y1="6" x2="6.01" y2="6" />
+                <line x1="6" y1="18" x2="6.01" y2="18" />
+              </svg>
+            </div>
+            <div class="widget-nav-body">
+              <div class="widget-tab-title">Saved Private Servers</div>
+              <div class="widget-tab-desc">Keep private server invite codes stored next to their games.</div>
+            </div>
+          </div>
+          <!-- Tab 3 -->
+          <div class="widget-tab" onclick="switchWidgetTab(2)">
+            <div class="widget-tab-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </div>
+            <div class="widget-nav-body">
+              <div class="widget-tab-title">Recent Launches</div>
+              <div class="widget-tab-desc">Logs a timeline history of the last 10 game servers joined.</div>
+            </div>
+          </div>
+          <!-- Tab 4 -->
+          <div class="widget-tab" onclick="switchWidgetTab(3)">
+            <div class="widget-tab-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            <div class="widget-nav-body">
+              <div class="widget-tab-title">Online Friends</div>
+              <div class="widget-tab-desc">Track online friend locations with quick-join triggers.</div>
+            </div>
+          </div>
+          <!-- Tab 5 (Premium Running Instances) -->
+          <div class="widget-tab" onclick="switchWidgetTab(4)">
+            <div class="widget-tab-icon" style="color: var(--accent); border-color: rgba(157, 111, 255, 0.25);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8M12 17v4" />
+                <polyline points="7 10 10 7 13 10 17 6" />
+              </svg>
+            </div>
+            <div class="widget-nav-body">
+              <div class="widget-tab-title" style="display: flex; align-items: center; justify-content: space-between;">
+                Running Instances
+                <span class="widget-premium-badge">
+                  <svg width="8" height="8" viewBox="0 0 1024 1024" fill="currentColor">
+                    <path
+                      d="M967.68 368.64l-153.6-204.8c-3.9424-5.2736-9.7792-8.8064-16.2816-9.8816l-307.2-51.2c-2.7648-0.4608-5.632-0.4608-8.3968 0l-307.2 51.2c-6.5024 1.0752-12.3392 4.608-16.2816 9.8816l-153.6 204.8c-7.3216 9.7792-6.7072 23.3984 1.4336 32.4608l460.8 512c4.864 5.376 11.776 8.4992 19.0464 8.4992s14.1824-3.072 19.0464-8.4992l460.8-512c8.192-9.1136 8.8064-22.6816 1.4336-32.4608z" />
+                  </svg> Premium
+                </span>
+              </div>
+              <div class="widget-tab-desc">Monitor live hardware stats per active client window.</div>
+            </div>
           </div>
         </div>
-        <div class="widget-card-desc">A real-time monitor for every active Roblox instance on your machine. See live
-          CPU, RAM, and GPU usage per account, and kill any instance with a single click. Available to Premium users.
-        </div>
-      </div>
-    </div>
 
-    <div class="widget-how-to animate">
-      <div class="widget-how-to-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3" />
-          <path
-            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-        </svg>
+        <!-- Right Side Live Visual Panel -->
+        <div class="widgets-preview-panel">
+          <div class="widget-preview-frame">
+            <img id="widgetPreviewImg" src="Widget-SavedGames.png" alt="Saved Games"
+              onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2250%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Saved Games Widget (Widget-SavedGames.png)</text></svg>';" />
+          </div>
+        </div>
       </div>
-      <div class="widget-how-to-body">
-        <div class="widget-how-to-title">How to change a widget</div>
-        <div class="widget-how-to-text">Swapping out a panel is instant — no settings menus or restarts needed.</div>
-        <div class="widget-how-to-steps">
-          <div class="widget-step">
-            <div class="widget-step-num">1</div>
-            <span><strong style="color:var(--text);">Right-click</strong> the small label at the top of any dashboard
-              panel (e.g. "SAVED GAMES").</span>
-          </div>
-          <div class="widget-step">
-            <div class="widget-step-num">2</div>
-            <span>A picker appears showing all available widgets. Ones already in use are greyed out.</span>
-          </div>
-          <div class="widget-step">
-            <div class="widget-step-num">3</div>
-            <span>Click the widget you want — the panel swaps instantly and your choice is saved.</span>
+
+      <!-- Walkthrough Panel -->
+      <div class="widget-how-to animate">
+        <div class="widget-how-to-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </div>
+        <div class="widget-how-to-body">
+          <div class="widget-how-to-title">How to swap a widget</div>
+          <div class="widget-how-to-text">Swapping a panel is handled natively and updates in real time.</div>
+          <div class="widget-how-to-steps">
+            <div class="widget-step">
+              <div class="widget-step-num">1</div>
+              <div class="widget-step-text">
+                <strong style="color:var(--text);">Right-click</strong> the small panel label at the top of any active
+                widget slot (e.g. "SAVED GAMES").
+              </div>
+            </div>
+            <div class="widget-step">
+              <div class="widget-step-num">2</div>
+              <div class="widget-step-text">
+                A custom picker window will appear. Widgets already assigned to other slots are greyed out.
+              </div>
+            </div>
+            <div class="widget-step">
+              <div class="widget-step-num">3</div>
+              <div class="widget-step-text">
+                Select the widget you want—the panel loads immediately and your choice is saved.
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1667,207 +1947,327 @@
 
   <!-- Premium Section -->
   <section class="premium-section" id="premium">
-    <div class="section-label animate">Upgrade</div>
-    <h2 class="section-title animate">Take it further<br />with Premium</h2>
-    <p class="premium-intro animate">
-      The core app is free forever. Premium unlocks power-user features built for people running
-      serious numbers of accounts.
-    </p>
+    <div class="container">
+      <div class="section-label animate">Upgrade</div>
+      <h2 class="section-title animate">Unlock advanced utility tools</h2>
+      <p class="premium-intro animate">
+        The core app is free. Premium unlocks advanced automation and monitoring tools designed for managing larger
+        numbers of sessions.
+      </p>
 
-    <div class="premium-layout">
-      <div class="premium-features-list">
+      <div class="premium-layout">
+        <div class="premium-features-list">
+          <!-- Folders & Groups -->
+          <div class="premium-feat animate" style="transition-delay:0s">
+            <div class="premium-feat-left">
+              <div class="premium-feat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                </svg>
+              </div>
+              <div class="premium-feat-body">
+                <div class="premium-feat-title">Folders &amp; Groups</div>
+                <div class="premium-feat-desc">Sort your sidebar accounts into named folders. Select an entire group
+                  folder to batch-launch all accounts together. Launches are staggered automatically to avoid rate limit
+                  bans.</div>
+              </div>
+            </div>
+            <div class="premium-feat-visual">
+              <img src="Group-Launch.png" alt="Sidebar folders"
+                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22100%22 style=%22background:%2314132a%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%236a607e%22 font-family=%22sans-serif%22 font-size=%2211%22 text-anchor=%22middle%22>Group-Launch.png</text></svg>';" />
+            </div>
+          </div>
 
-        <div class="premium-feat animate" style="transition-delay:0s">
-          <div class="premium-feat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+          <!-- Per-Account FPS Cap (Visual Container Removed) -->
+          <div class="premium-feat animate" style="transition-delay:0.1s">
+            <div class="premium-feat-left">
+              <div class="premium-feat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <div class="premium-feat-body">
+                <div class="premium-feat-title">Per-Account FPS Cap</div>
+                <div class="premium-feat-desc">Throttle background clients to save system resources. Set an individual
+                  framerate limit for each account to override the global setting. Limit background sessions to 5 or 10
+                  FPS while keeping your primary screen smooth.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Window Renaming (Visual Container Removed) -->
+          <div class="premium-feat animate" style="transition-delay:0.2s">
+            <div class="premium-feat-left">
+              <div class="premium-feat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <path d="M8 21h8M12 17v4" />
+                  <polyline points="7 10 10 7 13 10 17 6" />
+                </svg>
+              </div>
+              <div class="premium-feat-body">
+                <div class="premium-feat-title">Roblox Window Renaming</div>
+                <div class="premium-feat-desc">The application monitors launched PIDs and renames their window title
+                  text from "Roblox" to their active account username. This allows you to identify specific sessions
+                  easily in your taskbar and Task Manager.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Running Instances Widget -->
+          <div class="premium-feat animate" style="transition-delay:0.3s">
+            <div class="premium-feat-left">
+              <div class="premium-feat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <path d="M8 21h8M12 17v4" />
+                  <polyline points="7 10 10 7 13 10 17 6" />
+                </svg>
+              </div>
+              <div class="premium-feat-body">
+                <div class="premium-feat-title">Running Instances Widget</div>
+                <div class="premium-feat-desc">An interactive dashboard monitor that maps running clients to their
+                  parent account, showing real-time CPU percentages, working memory, and GPU usage bars. Includes a
+                  quick process-kill trigger.</div>
+              </div>
+            </div>
+            <div class="premium-feat-visual">
+              <img src="Live-Monitor.png" alt="Live Monitor statistics"
+                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22100%22 style=%22background:%2314132a%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%236a607e%22 font-family=%22sans-serif%22 font-size=%2211%22 text-anchor=%22middle%22>Live-Monitor.png</text></svg>';" />
+            </div>
+          </div>
+
+          <!-- Custom Theme Designer -->
+          <div class="premium-feat animate" style="transition-delay:0.4s">
+            <div class="premium-feat-left">
+              <div class="premium-feat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.92 0 1.63-.77 1.63-1.7 0-.44-.17-.86-.44-1.18-.27-.32-.44-.74-.44-1.18 0-.93.77-1.63 1.7-1.63h1.75c2.78 0 5-2.22 5-5 0-4.42-4.03-8-8.75-8z" />
+                  <circle cx="7.5" cy="10.5" r="1" />
+                  <circle cx="11.5" cy="7.5" r="1" />
+                  <circle cx="16.5" cy="9.5" r="1" />
+                </svg>
+              </div>
+              <div class="premium-feat-body">
+                <div class="premium-feat-title">Custom Theme Color Creator</div>
+                <div class="premium-feat-desc">Personalize the dashboard styling. Unlocks color selectors in the
+                  appearance panel to set custom Hex codes for the application background, sidebar layout, glow accents,
+                  and text elements.</div>
+              </div>
+            </div>
+            <div class="premium-feat-visual">
+              <img src="Theme-Custom.png" alt="Custom styling designer"
+                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22100%22 style=%22background:%2314132a%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%236a607e%22 font-family=%22sans-serif%22 font-size=%2211%22 text-anchor=%22middle%22>Custom designer</text></svg>';" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Pricing Card -->
+        <div class="premium-card animate">
+          <div class="premium-card-label">BloxMulti Premium</div>
+          <div class="premium-card-price">
+            <span class="price-currency">$</span>
+            <span class="price-amount">5</span>
+            <span class="price-period">/ month</span>
+          </div>
+          <div class="premium-card-sub">Cancel anytime. Subscription remains active until the end of your billing cycle.
+          </div>
+          <div class="premium-card-divider"></div>
+          <div class="premium-card-perks">
+            <div class="premium-perk">
+              <div class="premium-perk-check">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              Folders &amp; Account Groups
+            </div>
+            <div class="premium-perk">
+              <div class="premium-perk-check">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              Per-Account FPS Cap
+            </div>
+            <div class="premium-perk">
+              <div class="premium-perk-check">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              Window Title Renaming
+            </div>
+            <div class="premium-perk">
+              <div class="premium-perk-check">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              Interactive Resource Monitor
+            </div>
+            <div class="premium-perk">
+              <div class="premium-perk-check">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              Theme Palette Creator
+            </div>
+          </div>
+          <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-premium">
+            <svg width="14" height="14" viewBox="0 0 1024 1024" fill="currentColor">
+              <path
+                d="M967.68 368.64l-153.6-204.8c-3.9424-5.2736-9.7792-8.8064-16.2816-9.8816l-307.2-51.2c-2.7648-0.4608-5.632-0.4608-8.3968 0l-307.2 51.2c-6.5024 1.0752-12.3392 4.608-16.2816 9.8816l-153.6 204.8c-7.3216 9.7792-6.7072 23.3984 1.4336 32.4608l460.8 512c4.864 5.376 11.776 8.4992 19.0464 8.4992s14.1824-3.072 19.0464-8.4992l460.8-512c8.192-9.1136 8.8064-22.6816 1.4336-32.4608z" />
             </svg>
-          </div>
-          <div class="premium-feat-body">
-            <div class="premium-feat-title">Groups</div>
-            <div class="premium-feat-desc">Organise your accounts into named groups and launch every account in a group
-              into a game with a single click. Perfect for managing a large roster: add the group to your sidebar just
-              like a regular account, then click to select all and launch.</div>
+            Get Premium - $5 / mo
+          </a>
+          <div class="premium-card-note">Upgrade from inside the desktop app after logging in. All sales are final.
           </div>
         </div>
-
-        <div class="premium-feat animate" style="transition-delay:0.1s">
-          <div class="premium-feat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-          </div>
-          <div class="premium-feat-body">
-            <div class="premium-feat-title">Per-Account FPS Cap</div>
-            <div class="premium-feat-desc">Set a custom FPS limit for each account independently, overriding the global
-              cap. Throttle background instances down to 30 FPS to save CPU and GPU while keeping your active account
-              silky smooth. Configure it per-account right from the account settings menu.</div>
-          </div>
-        </div>
-
-        <div class="premium-feat animate" style="transition-delay:0.2s">
-          <div class="premium-feat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <line x1="8" y1="21" x2="16" y2="21" />
-              <line x1="12" y1="17" x2="12" y2="21" />
-            </svg>
-          </div>
-          <div class="premium-feat-body">
-            <div class="premium-feat-title">Window Renaming</div>
-            <div class="premium-feat-desc">When enabled, each Roblox window is automatically renamed to the account's
-              display name as soon as it launches. Instead of five windows all called "Roblox", you see exactly which
-              account is in which window in the taskbar and Task Manager, making it trivial to switch between them.
-            </div>
-          </div>
-        </div>
-
-        <div class="premium-feat animate" style="transition-delay:0.3s">
-          <div class="premium-feat-icon"
-            style="color:var(--green); background:rgba(42,245,152,0.08); border-color:rgba(42,245,152,0.2);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <path d="M8 21h8M12 17v4" />
-              <polyline points="7 10 10 7 13 10 17 6" />
-            </svg>
-          </div>
-          <div class="premium-feat-body">
-            <div class="premium-feat-title">Running Instances Widget</div>
-            <div class="premium-feat-desc">A live dashboard widget that shows every active Roblox process matched to
-              the account that launched it, with real-time CPU, RAM, and GPU usage bars updating every few seconds.
-              Kill
-              any instance instantly with one click without hunting through Task Manager.</div>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="premium-card animate">
-        <div class="premium-card-label">BloxMulti Premium</div>
-        <div class="premium-card-price">
-          <span class="price-currency">$</span>
-          <span class="price-amount">5</span>
-          <span class="price-period">/ month</span>
-        </div>
-        <div class="premium-card-sub">Cancel anytime. Access lasts until the end of your billing period.</div>
-        <div class="premium-card-divider"></div>
-        <div class="premium-card-perks">
-          <div class="premium-perk">
-            <div class="premium-perk-check">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            Groups
-          </div>
-          <div class="premium-perk">
-            <div class="premium-perk-check">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            Per-Account FPS Cap
-          </div>
-          <div class="premium-perk">
-            <div class="premium-perk-check">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            Window Renaming
-          </div>
-          <div class="premium-perk">
-            <div class="premium-perk-check">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            Running Instances Widget
-          </div>
-          <div class="premium-perk">
-            <div class="premium-perk-check">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            All future Premium features
-          </div>
-        </div>
-        <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-premium">
-          <svg width="14" height="14" viewBox="0 0 1024 1024" fill="currentColor">
-            <path
-              d="M967.68 368.64l-153.6-204.8c-3.9424-5.2736-9.7792-8.8064-16.2816-9.8816l-307.2-51.2c-2.7648-0.4608-5.632-0.4608-8.3968 0l-307.2 51.2c-6.5024 1.0752-12.3392 4.608-16.2816 9.8816l-153.6 204.8c-7.3216 9.7792-6.7072 23.3984 1.4336 32.4608l460.8 512c4.864 5.376 11.776 8.4992 19.0464 8.4992s14.1824-3.072 19.0464-8.4992l460.8-512c8.192-9.1136 8.8064-22.6816 1.4336-32.4608z" />
-          </svg>
-          Get Premium - $5 / mo
-        </a>
-        <div class="premium-card-note">Upgrade from inside the app after signing in. No refunds: all purchases are
-          final.</div>
       </div>
     </div>
   </section>
 
-  <!-- Download CTA -->
+  <!-- Download Section -->
   <section class="download" id="download">
-    <div class="download-glow"></div>
+    <div class="container download-inner">
+      <div class="download-glow"></div>
 
-    <h2 class="download-title animate">Ready to launch?</h2>
-    <p class="download-sub animate" style="transition-delay:0.1s">
-      Download BloxMulti and manage all your Roblox accounts from one place.
-    </p>
+      <h2 class="download-title animate">Ready to launch?</h2>
+      <p class="download-sub animate">
+        Download BloxMulti to coordinate your client instances.
+      </p>
 
-    <div class="download-box animate" style="transition-delay:0.2s">
-      <div class="dl-platform">
-        <div class="dl-platform-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13.051-1.8" />
-          </svg>
+      <div class="download-box animate">
+        <div class="dl-platform">
+          <div class="dl-platform-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13.051-1.8" />
+            </svg>
+          </div>
+          Windows 10 / 11
+          <div class="dl-version">v1.1.2</div>
         </div>
-        Windows 10 / 11
-        <div class="dl-version">v1.1.1</div>
-      </div>
 
-      <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-primary" style="width: 100%;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
-        Download BloxMulti
-      </a>
+        <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-download-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Download BloxMulti
+        </a>
 
-      <div class="dl-requirements">
-        Requires Windows 10 or later &nbsp;·&nbsp; ~1,200 KB &nbsp;·&nbsp; No install needed
+        <div class="dl-requirements">
+          Requires Windows 10 or later &nbsp;·&nbsp; ~1.2 MB &nbsp;·&nbsp; Portable Executable
+        </div>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
   <footer>
-    <div class="footer-logo">BloxMulti</div>
-    <div class="footer-links">
-      <a href="https://github.com/WaveBound/BloxMulti">GitHub</a>
-      <a href="https://discord.gg/ju6ANNecQg">Discord</a>
-      <a href="support.html">Support</a>
-      <a href="privacy.html">Privacy Policy</a>
-      <a href="terms.html">Terms of Service</a>
+    <div class="container footer-inner">
+      <div class="footer-logo">BloxMulti</div>
+      <div class="footer-links">
+        <a href="https://github.com/WaveBound/BloxMulti">GitHub</a>
+        <a href="https://discord.gg/ju6ANNecQg">Discord</a>
+        <a href="support.html">Support</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+      </div>
     </div>
   </footer>
 
   <script src="../donations/donations.js"></script>
   <script>
-    // Intersection Observer for scroll animations
+    // ── Carousel Functionality ──
+    let currentSlideIdx = 0;
+    const slides = document.querySelectorAll('.carousel-slide');
+    const dots = document.querySelectorAll('.carousel-dot');
+
+    function showSlide(index) {
+      if (index >= slides.length) {
+        currentSlideIdx = 0;
+      } else if (index < 0) {
+        currentSlideIdx = slides.length - 1;
+      } else {
+        currentSlideIdx = index;
+      }
+
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === currentSlideIdx);
+      });
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentSlideIdx);
+      });
+    }
+
+    function moveSlide(delta) {
+      showSlide(currentSlideIdx + delta);
+    }
+
+    function setSlide(index) {
+      showSlide(index);
+    }
+
+    // Auto-advance loop (Pauses on Hover)
+    let autoPlayTimer = setInterval(() => moveSlide(1), 7000);
+    const container = document.querySelector('.preview-carousel-container');
+    if (container) {
+      container.addEventListener('mouseenter', () => clearInterval(autoPlayTimer));
+      container.addEventListener('mouseleave', () => {
+        clearInterval(autoPlayTimer);
+        autoPlayTimer = setInterval(() => moveSlide(1), 7000);
+      });
+    }
+
+    // ── Interactive Widgets Panel Showcase ──
+    const widgetImages = [
+      "Widget-SavedGames.png",
+      "Widget-SavedServers.png",
+      "Widget-RecentLaunches.png",
+      "Widget-OnlineFriends.png",
+      "Live-Monitor.png"
+    ];
+    const widgetFallbacks = [
+      "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Saved Games Widget (Widget-SavedGames.png)</text></svg>",
+      "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Saved Private Servers Widget (Widget-SavedServers.png)</text></svg>",
+      "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Recent Launches Widget (Widget-RecentLaunches.png)</text></svg>",
+      "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Online Friends Widget (Widget-OnlineFriends.png)</text></svg>",
+      "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%232af598%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Running Instances Monitor (Live-Monitor.png)</text></svg>"
+    ];
+
+    function switchWidgetTab(index) {
+      document.querySelectorAll('.widget-tab').forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
+      });
+      const img = document.getElementById('widgetPreviewImg');
+      if (img) {
+        img.src = widgetImages[index];
+        img.onerror = function () {
+          this.onerror = null;
+          this.src = widgetFallbacks[index];
+        };
+      }
+    }
+
+    // ── Scroll Animations (Intersection Observer) ──
     const observerOptions = {
       threshold: 0.1,
       rootMargin: '0px 0px -50px 0px'
@@ -1882,26 +2282,27 @@
       });
     }, observerOptions);
 
-    document.querySelectorAll('.animate, .stagger, .premium-feat, .widget-card, .premium-card').forEach(el => observer.observe(el));
+    document.querySelectorAll('.animate, .stagger, .premium-feat, .widget-card, .premium-card, .widgets-showcase').forEach(el => observer.observe(el));
 
-    // Safety fallback: Ensure everything is visible after a short delay
-    // in case the IntersectionObserver doesn't trigger
+    // Fallback in case Observer fails
     window.addEventListener('load', () => {
       setTimeout(() => {
-        document.querySelectorAll('.animate, .stagger, .premium-feat, .widget-card, .premium-card').forEach(el => {
+        document.querySelectorAll('.animate, .stagger, .premium-feat, .widget-card, .premium-card, .widgets-showcase').forEach(el => {
           el.classList.add('in');
         });
       }, 1000);
     });
-    // Fetch download count
+
+    // Fetch active download count securely
     fetch("https://bloxmulti-downloads.wavebound.workers.dev/count", { cache: "no-store" })
       .then(r => r.text())
       .then(count => {
         const el = document.getElementById("stats-downloads");
         if (el && count) el.innerText = count.trim();
       })
-      .catch(err => console.error("Failed to fetch download count:", err));
+      .catch(err => console.error("Failed to query download count statistics:", err));
   </script>
 </body>
 
 </html>
+<!-- END OF FILE index.html -->
