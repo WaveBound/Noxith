@@ -141,8 +141,8 @@
     bottom: 6px;
     right: 8px;
     z-index: 5;
-    background: rgba(79, 125, 245, 0.1);
-    border: 1px solid var(--border-medium);
+    background: rgba(5, 5, 10, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--text-primary);
     font-size: 0.7rem;
     font-weight: 700;
@@ -155,6 +155,7 @@
     align-items: center;
     gap: 6px;
     backdrop-filter: blur(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .trait-guide-btn:hover {
