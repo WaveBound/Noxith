@@ -46,6 +46,29 @@ window.unitBuildsCache = window.unitBuildsCache || {};
         /* Removing gradients from card internal boxes */
         .br-col, .br-res-col, .br-full-stats { background: none !important; background-image: none !important; border: none !important; }
         .fs-eff-summary { background: #08080a !important; border-color: rgba(74, 222, 128, 0.15) !important; }
+
+        .br-set-btn { display: none; }
+        @media (max-width: 768px) {
+            .br-set-info-text { display: none !important; }
+            .br-set-btn { 
+                display: inline-block !important; 
+                background: rgba(139, 92, 246, 0.15) !important;
+                border: 1px solid rgba(139, 92, 246, 0.4) !important;
+                color: #ffffff !important;
+                font-size: 0.65rem !important;
+                font-weight: 750 !important;
+                padding: 1px 4px !important;
+                border-radius: 6px !important;
+                cursor: pointer !important;
+                letter-spacing: 0.5px !important;
+                text-transform: uppercase;
+                transition: all 0.1s ease;
+            }
+            .br-set-btn:active {
+                background: rgba(139, 92, 246, 0.3) !important;
+                border-color: #ffffff !important;
+            }
+        }
     `;
     document.head.appendChild(style);
 })();
@@ -347,10 +370,13 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     return `
         <div class="build-row ${rankClass} ${sortMode === 'efficiency' ? 'is-efficiency-sort' : ''}">
             <div class="br-header" style="align-items: center; padding-top: 6px; padding-bottom: 2px;">
-                <div class="br-header-info" style="margin-top: 0; align-items: center; gap: 8px;">
+                <div class="br-header-info" style="margin-top: 0; align-items: center; gap: 4px;">
                     <span class="br-rank" style="font-size: 0.7em; width: auto;">#${globalRank || (i + 1)}</span>
-                    <span class="br-set" style="font-size: 0.75em; padding: 1px 3px; letter-spacing: -0.2px;">${r.setName.toLowerCase().includes('set') ? r.setName : r.setName + ' Set'}</span>
-                    ${headHeaderHtml}
+                    <div class="br-set-info-text" style="display: flex; align-items: center;">
+                        <span class="br-set" style="font-size: 0.75em; padding: 1px 3px; letter-spacing: -0.2px;">${r.setName.toLowerCase().includes('set') ? r.setName : r.setName + ' Set'}</span>
+                        ${headHeaderHtml}
+                    </div>
+                    <button class="br-set-btn" onclick="window.showGearDetails('${r.setName.replace(/'/g, "\\'")}', '${r.headUsed}')">RELIC</button>
                     <span class="br-sep" style="margin: 0 1px;">/</span>
                     <span class="br-trait" style="font-size: 0.75em; letter-spacing: -0.2px;">${r.traitName}</span>
                 </div>
@@ -1373,6 +1399,29 @@ window.precalculateAllLoadoutBuilds = function () {
             window.hotbarFilteredBuilds[unitId] = hydrateBuildEntry(topBuild, unitId, window.hotbarState?.slots?.some(s => s && (s.id === unitId || s.id.split('-')[0] === unitId.split('-')[0])));
         }
     });
+};
+
+window.showGearDetails = (setName, headUsed) => {
+    const headName = (headUsed && headUsed !== 'none') ? (HEAD_CONFIG[headUsed]?.name || headUsed) : 'None';
+    const content = `
+        <div style="display: flex; flex-direction: column; gap: 12px; padding: 10px;">
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 15px;">
+                <div style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; font-weight: 800;">Relic Set</div>
+                <div style="font-size: 1.1rem; font-weight: 900; color: #fff;">${setName.toLowerCase().includes('set') ? setName : setName + ' Set'}</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 15px;">
+                <div style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; font-weight: 800;">Head Piece</div>
+                <div style="font-size: 1.1rem; font-weight: 900; color: #60a5fa;">${headName}</div>
+            </div>
+        </div>
+    `;
+    if (typeof showUniversalModal === 'function') {
+        showUniversalModal({
+            title: '<span style="color: #60a5fa; font-weight: 900; letter-spacing: 1px;">EQUIPMENT DETAILS</span>',
+            content: content,
+            size: 'modal-sm'
+        });
+    }
 };
 
 // Global Exports
