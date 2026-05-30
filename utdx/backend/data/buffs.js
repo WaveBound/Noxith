@@ -129,11 +129,33 @@ const GLOBAL_BUFF_DATA = {
             const element = String(uStats.element || uStats.stats?.element || "").toLowerCase();
             let b = {};
 
-            // Check global and window scope for the leader data
-            const unrivaled = (typeof window !== 'undefined' && window.LEADER_BUFFS) 
+            // Check global and window scope for the leader data (loaded from shared/buffers/leaderBuffs.js)
+            let unrivaled = (typeof window !== 'undefined' && window.LEADER_BUFFS) 
                 ? window.LEADER_BUFFS 
                 : (typeof LEADER_BUFFS !== 'undefined' ? LEADER_BUFFS : null);
                 
+            // Fallback for local index.html use where loadModuleSync fails due to browser security (file:// protocol)
+            if (!unrivaled) {
+                unrivaled = {
+                    unrivaled_mark: {
+                        exclusive: true,
+                        subBuffs: [
+                            { type: "tag", value: "Piece", stats: { dmg: 50, costReduction: 7.5 } },
+                            { type: "tag", value: "Sword", stats: { dmg: 25, range: 10 } },
+                            { type: "element", value: "Wind", stats: { dmg: 20, cRate: 5 } }
+                        ]
+                    },
+                    kings_mark: {
+                        exclusive: true,
+                        subBuffs: [
+                            { type: "tag", value: "Magi", stats: { dmg: 50, spa: 15 } },
+                            { type: "tag", value: "Uncontrollable Power", stats: { dmg: 30, spa: 10 } },
+                            { type: "element", value: "Water", stats: { dmg: 20, spa: 10 } }
+                        ]
+                    }
+                };
+            }
+            
             if (!unrivaled) return {};
 
             // Identify which leader data to use
