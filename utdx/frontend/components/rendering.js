@@ -1,5 +1,55 @@
 // Ensure Global Caches and State are initialized
 window.unitBuildsCache = window.unitBuildsCache || {};
+
+// Inject global styles for filters to fix the "all white" issue
+(function injectStyles() {
+    if (document.getElementById('rendering-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'rendering-styles';
+    style.innerHTML = `
+        .search-input, .search-select, .sort-select, #unitElementSort, #globalModeSelect, .global-mode-select, select[onchange*="handleGlobalModeSort"], .search-container input, .search-container select {
+            background: rgba(13, 13, 18, 0.9) !important;
+            color: #f8fafc !important;
+            border: 1px solid rgba(139, 92, 246, 0.3) !important;
+            border-radius: 4px;
+            padding: 4px 8px;
+            outline: none;
+            color-scheme: dark;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        .search-input:focus, .search-select:focus {
+            border-color: #a78bfa !important;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+        }
+        .search-select option, #unitElementSort option, #globalModeSelect option {
+            background: #0f172a;
+            color: #f8fafc;
+        }
+        .filter-tab-content .search-row { gap: 8px; flex-wrap: wrap; }
+
+        .unit-card { 
+            min-height: 580px !important; 
+            background: #0d0d12 !important; 
+            border: 1px solid rgba(139, 92, 246, 0.15) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        .unit-card:hover { border-color: rgba(139, 92, 246, 0.4) !important; }
+        
+        .top-builds-list { max-height: 420px !important; }
+        .combo-section-header { 
+            background: #16161d !important; color: #c084fc; font-size: 0.65rem; font-weight: 900; 
+            padding: 4px 10px; margin: 10px 0 5px; border-radius: 4px; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.03); }
+        .fs-comparison-grid { row-gap: 6px !important; padding-bottom: 10px !important; }
+
+        /* Removing gradients from card internal boxes */
+        .br-col, .br-res-col, .br-full-stats { background: none !important; background-image: none !important; border: none !important; }
+        .fs-eff-summary { background: #08080a !important; border-color: rgba(74, 222, 128, 0.15) !important; }
+    `;
+    document.head.appendChild(style);
+})();
+
 window.cachedResults = window.cachedResults || {};
 window.unitELevels = window.unitELevels || {};
 window.unitSystemLevels = window.unitSystemLevels || {};
@@ -25,6 +75,18 @@ const HEAD_CONFIG = {
     warlord_hat: { name: 'Warlord Hat', search: 'Warlord', cls: 'custom' },
     mochi_scarf: { name: 'Mochi Scarf', search: 'Mochi', cls: 'custom' },
     flaming_donut: { name: 'Flaming Donut', search: 'Flaming Donut', cls: 'custom' }
+};
+
+const COMBO_TITLES = {
+    'dmg_dmg': 'Dmg / Dmg',
+    'dmg_cf': 'Dmg / Crate',
+    'dmg_spa': 'Dmg / Spa',
+    'cm_dmg': 'CDmg / Dmg',
+    'cm_cf': 'CDmg / Crate',
+    'cm_spa': 'CDmg / Spa',
+    'dot_dmg': 'DoT / Dmg',
+    'dot_spa': 'DoT / Spa',
+    'dot_cf': 'DoT / Crate'
 };
 
 const TOGGLE_OVERRIDES = {
@@ -111,8 +173,11 @@ function calculateBuildEfficiency(build, unitCost, unitMaxPlacement, unitId) {
 
 function getHeadBadgeHtml(headUsed) {
     if (!headUsed || headUsed === 'none') return '';
-    const h = HEAD_CONFIG[headUsed] || { name: 'Unknown', cls: 'unknown' };
-    return `<div class="stat-line"><span class="sl-label">HEAD</span><div class="badge-base border-${h.cls}"><span class="text-${h.cls}">${h.name}</span></div></div>`;
+    return `<div class="stat-line"><span class="sl-label">HEAD</span>
+                <div class="badge-base" style="border-color: rgba(249, 115, 22, 0.4);" title="Elemental Damage">
+                    <span style="color: #f97316;">ELEMENTAL</span><span class="badge-val val-main" style="color: white !important;">30%</span>
+                </div>
+            </div>`;
 }
 
 function getSynergyBadgeHtml(unit, activeMode) {
@@ -156,13 +221,13 @@ function hydrateBuildEntry(r, unitId, isHotbar) {
         subStats: r.ss || r.subStats || {},
         mainStats: r.ms || r.mainStats || {
             body: typeof r.b === 'string' ? r.b : (r.b === 1 ? 'dot' : (r.b === 2 ? 'cm' : 'dmg')),
-            legs: typeof r.l === 'string' ? r.l : (r.l === 1 ? 'spa' : (r.l === 2 ? 'cf' : (r.l === 3 ? 'range' : 'dmg')))
+            legs: typeof r.l === 'string' ? r.l : (r.l === 1 ? 'spa' : (r.l === 2 ? 'cf' : 'dmg'))
         }
     };
 
     if (typeof reconstructMathData === 'function') {
         try {
-            const fullMath = reconstructMathData(res, undefined, { isHotbar });
+            const fullMath = reconstructMathData(res, undefined, { isHotbar: isHotbar });
             if (fullMath) {
                 res.dps = fullMath.total || fullMath.dps || 0;
                 res.bossDps = fullMath.bossTotal || fullMath.bossDps || 0;
@@ -193,7 +258,7 @@ function hydrateBuildEntry(r, unitId, isHotbar) {
 
 // Rendering HTML Rows & Cards
 function generateBuildRowHTML(r, i, unitConfig = {}) {
-    const { totalCost = 50000, placement = 1, sortMode = 'dps', unitId = '', traitBenchmarks = {} } = unitConfig;
+    const { totalCost = 50000, placement = 1, sortMode = 'dps', unitId = '', traitBenchmarks = {}, globalRank } = unitConfig;
     const currentLevel = window.unitELevels[unitId] || 0;
     const nextLevel = currentLevel + 1;
     const unitObj = window.getUnitById(unitId);
@@ -222,7 +287,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
         optimalityHtml = `<div class="optimality-badge" style="color: ${color}; border-color: ${color}33; --glow-color: ${glow}; flex-direction: row; justify-content: center; gap: 6px; width: 100%; box-sizing: border-box; padding: 3px 8px; cursor: default;"><span class="opt-label" style="color: ${color}; margin-bottom: 0;">OPTIMALITY</span><span class="opt-pct">${fix1(optPct)}%</span></div>`;
     }
 
-    const prioConfig = { spa: { label: 'SPA STAT', cls: 'prio-spa' }, range: { label: 'RANGE STAT', cls: 'prio-range' }, default: { label: 'DMG STAT', cls: 'prio-dmg' } };
+    const prioConfig = { spa: { label: 'SPA STAT', cls: 'prio-spa' }, default: { label: 'DMG STAT', cls: 'prio-dmg' } };
     let prioHtml = '';
     if (r.relicIds) {
         const hId = r.relicIds.head || 'none', bId = r.relicIds.body || 'none-b', lId = r.relicIds.legs || 'none-l';
@@ -242,8 +307,8 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     const legsRow = window.disableSubStats ? '' : `<div class="stat-line"><span class="sl-label">LEGS</span>${getRichBadgeHtml(s.legs || [])}</div>`;
 
     const isBossHigher = (sortMode === 'dps') && (r.bossDps > (r.dps || 0));
-    const displayVal = sortMode === 'range' ? fix1(r.range || 0) : format(r.sortDps || r.dps || 0);
-    const displayLabel = sortMode === 'range' ? 'RNG' : (isBossHigher ? 'BOSS DPS' : 'DPS');
+    const displayVal = format(r.sortDps || r.dps || 0);
+    const displayLabel = (isBossHigher ? 'BOSS DPS' : 'DPS');
     const hasBossDps = isBossHigher || (r.bossDps && r.bossDps !== r.dps);
 
     const renderValRow = (iconKey, currentVal, nextVal, extraClass = '') => `
@@ -256,14 +321,24 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
             <span class="fs-val ${extraClass}">${nextLevel > maxLevel ? '<span style="color:#4ade80; font-weight: bold;">Maxed</span>' : nextVal}</span>
         </div>`;
 
+    let effStyle = "font-size: 0.75rem; padding: 2px 6px; height: 22px; display: flex; align-items: center; margin-top: 0;";
+
+    const headName = (r.headUsed && r.headUsed !== 'none') ? (HEAD_CONFIG[r.headUsed]?.name || r.headUsed) : '';
+    const headHeaderHtml = headName ? `<span class="br-sep" style="margin: 0 1px;">/</span><span class="br-set" style="color:#60a5fa; font-size: 0.72em; padding: 1px 3px; letter-spacing: -0.2px;">${headName.toUpperCase()}</span>` : '';
+
     return `
         <div class="build-row ${rankClass} ${sortMode === 'efficiency' ? 'is-efficiency-sort' : ''}">
-            <div class="br-header" style="align-items: flex-start; padding-top: 6px;">
-                <div class="br-header-info" style="margin-top: 2px;"><span class="br-rank">#${i + 1}</span><span class="br-set">${r.setName.toLowerCase().includes('set') ? r.setName : r.setName + ' Set'}</span><span class="br-sep">/</span><span class="br-trait">${r.traitName}</span></div>
+            <div class="br-header" style="align-items: center; padding-top: 6px; padding-bottom: 2px;">
+                <div class="br-header-info" style="margin-top: 0; align-items: center; gap: 8px;">
+                    <span class="br-rank" style="font-size: 0.7em; width: auto;">#${globalRank || (i + 1)}</span>
+                    <span class="br-set" style="font-size: 0.75em; padding: 1px 3px; letter-spacing: -0.2px;">${r.setName.toLowerCase().includes('set') ? r.setName : r.setName + ' Set'}</span>
+                    ${headHeaderHtml}
+                    <span class="br-sep" style="margin: 0 1px;">/</span>
+                    <span class="br-trait" style="font-size: 0.75em; letter-spacing: -0.2px;">${r.traitName}</span>
+                </div>
                 <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
                     <div style="display:flex; gap:6px; align-items:center;">
                         <button class="mobile-stat-toggle" onclick="toggleRelicStatDisplay(this)"><span class="m-toggle-txt">Main</span><span class="m-toggle-txt">Sub</span></button>
-                        ${hasBossDps ? `<div class="eff-score-line" onclick="event.stopPropagation(); openInfoPopup('efficiency')">${effScore} <span class="eff-label">Eff</span></div>` : ''}
                         ${prioHtml}
                     </div>
                     ${optimalityHtml}
@@ -273,7 +348,6 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
                 <div class="br-col main"><div class="br-col-title">MAIN STAT</div>${getHeadBadgeHtml(r.headUsed)}<div class="stat-line"><span class="sl-label">BODY</span> ${window.getBadgeHtml(r.mainStats.body, MAIN_STAT_VALS.body[r.mainStats.body])}</div><div class="stat-line"><span class="sl-label">LEGS</span> ${window.getBadgeHtml(r.mainStats.legs, MAIN_STAT_VALS.legs[r.mainStats.legs])}</div></div>
                 ${window.disableSubStats ? '' : `<div class="br-col sub"><div class="br-col-header"><div class="br-col-title">SUB STAT</div></div>${headRow}${bodyRow}${legsRow}</div>`}
                 <div class="br-res-col">
-                    ${!hasBossDps ? `<div class="eff-score-line" onclick="event.stopPropagation(); openInfoPopup('efficiency')">${effScore} <span class="eff-label">Eff</span></div>` : ''}
                     <div class="dps-container">
                         <span class="build-dps">${displayVal}</span>
                         <div style="display:flex; align-items:center; gap:4px; justify-content: flex-end; margin-top: 2px;">
@@ -290,6 +364,10 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
             <div class="br-full-stats">
                 <div class="fs-comparison-grid">
                     <div class="fs-col-header">CURRENT</div><div class="fs-col-header">${nextLevel > maxLevel ? 'STATUS' : 'NEXT UPGRADE'}</div>
+                    <div class="fs-eff-summary" style="grid-column: span 2; display: flex; justify-content: center; align-items: center; gap: 8px; background: rgba(74, 222, 128, 0.05); border: 1px solid rgba(74, 222, 128, 0.15); border-radius: 6px; padding: 4px; margin: 2px 0 4px; cursor: pointer;" onclick="event.stopPropagation(); openInfoPopup('efficiency')">
+                        <span style="font-size: 0.65rem; font-weight: 800; color: #4ade80; opacity: 0.8; letter-spacing: 0.5px;">COST EFFICIENCY</span>
+                        <span style="font-size: 1rem; font-weight: 900; color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);">${effScore}</span>
+                    </div>
                     ${renderValRow('dmg', format(r.dmgVal || 0), format(nextStats.dmgVal), 'val-dmg')}
                     ${renderValRow('spa', `${fix2(r.spa || 0)}s`, `${fix2(nextStats.spa)}s`, 'val-spa')}
                     ${renderValRow('range', fix1(r.range || 0), fix1(nextStats.range), 'val-range')}
@@ -323,7 +401,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     // Units that must ALWAYS calculate dynamically because static DB is stale or complex (Syncro/Follow-ups)
     const forceDynamicUnits = ['revolutionary_chief_syncro', 'joyful_captain', 'the_strongest_in_history', 'jinoo_shadow_monarch', 'the_strongest_of_today', 'marine_hero', 'sharpshooter_king_trapper'];
-    
+
     if (!forceSync && (unitObj?.allowMultipleModes || unitId.toLowerCase().includes('syncro') || forceDynamicUnits.includes(unitId)) && !window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0]) {
         forceSync = true;
     }
@@ -408,71 +486,105 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const prioSelect = card.querySelector('select[data-filter="prio"]')?.value || 'all';
     const setSelect = card.querySelector('select[data-filter="set"]')?.value || 'all';
     const headSelect = card.querySelector('select[data-filter="head"]')?.value || 'all';
+    const comboSelect = card.querySelector('select[data-filter="combo"]')?.value || 'all';
     const sortSelect = card.querySelector('select[data-filter="sort"]')?.value || 'dps';
 
     const renderListInternal = (builds, limit) => {
         if (!builds || builds.length === 0) return '<div class="msg-empty">No valid builds found.</div>';
 
-        const filterBuilds = (searchStr) => builds.map(b => hydrateBuildEntry(b, unitId, isHotbar)).filter(r => {
+        // Helper to sort a list using the current UI logic (respecting mode recommendations and sort choice)
+        const sortBuilds = (list) => {
+            return [...list].sort((a, b) => {
+                if (window.GLOBAL_MODE_SORT !== 'none' && unitObj?.meta) {
+                    const recStr = (unitObj.meta[window.GLOBAL_MODE_SORT === 'short' ? 'short' : 'long'] || '').toLowerCase();
+                    const recTraits = recStr.split('/').map(s => s.trim());
+                    const aIsRec = recTraits.some(rt => rt && a.traitName.toLowerCase().includes(rt));
+                    const bIsRec = recTraits.some(rt => rt && b.traitName.toLowerCase().includes(rt));
+                    if (aIsRec !== bIsRec) return aIsRec ? -1 : 1;
+                }
+                if (sortSelect === 'damage') {
+                    return b.dmgVal !== a.dmgVal ? (b.dmgVal || 0) - (a.dmgVal || 0) : (b.sortDps || 0) - (a.sortDps || 0);
+                }
+                return (b.sortDps || 0) - (a.sortDps || 0);
+            });
+        };
+
+        // 1. Hydrate all builds for this unit to determine their global positions
+        const allHydrated = builds.map(b => hydrateBuildEntry(b, unitId, isHotbar)).filter(Boolean);
+
+        // 2. Assign global ranks based on the full list (sorted by current preference)
+        const globalSorted = sortBuilds(allHydrated);
+        const globalRankMap = new Map();
+        globalSorted.forEach((r, idx) => globalRankMap.set(r.id, idx + 1));
+
+        // 3. Apply UI filters (Set, Head, Combo, Search)
+        const hydrated = allHydrated.filter(r => {
             if (!r) return false;
             if (prioSelect !== 'all' && r.prio !== prioSelect) return false;
             if (setSelect !== 'all' && r.setName !== setSelect) return false;
             if (headSelect !== 'all' && (r.headUsed || 'none') !== headSelect) return false;
-            return `${r.traitName} ${r.setName} ${r.prio} ${HEAD_CONFIG[r.headUsed]?.search || ''}`.toLowerCase().includes(searchStr);
+
+            const currentCombo = r.mainStats.body + '_' + r.mainStats.legs;
+            if (comboSelect !== 'all' && currentCombo !== comboSelect) return false;
+
+            const hSearch = HEAD_CONFIG[r.headUsed]?.search || '';
+            const searchText = `${r.traitName} ${r.setName} ${r.prio} ${hSearch}`.toLowerCase();
+
+            return searchText.includes(searchInput) || (isGlobalFallback && searchText.includes(''));
         });
 
-        let filtered = filterBuilds(searchInput);
-        if (filtered.length === 0 && isGlobalFallback) {
-            filtered = filterBuilds('');
-        }
+        if (hydrated.length === 0) return '<div class="msg-empty">No matches found.</div>';
 
-        if (prioSelect === 'all') {
-            const uniqueMap = new Map();
-            filtered.forEach(r => {
-                const key = r.setName + r.traitName + (r.headUsed || 'none');
-                let isBetter = !uniqueMap.has(key);
-                if (!isBetter) {
-                    const current = uniqueMap.get(key);
-                    if (sortSelect === 'damage') {
-                        isBetter = r.dmgVal > current.dmgVal || (r.dmgVal === current.dmgVal && r.sortDps > current.sortDps);
-                    } else if (sortSelect === 'range') {
-                        isBetter = r.range > current.range;
-                    } else {
-                        isBetter = r.sortDps > current.sortDps;
-                    }
+        // 4. Group by Combo and enforce Top 3 Unique Gear sets per combo
+        const comboGroups = {};
+        hydrated.forEach(r => {
+            const key = r.mainStats.body + "_" + r.mainStats.legs;
+            if (!comboGroups[key]) comboGroups[key] = [];
+            comboGroups[key].push(r);
+        });
+
+        let candidates = [];
+        for (const k in comboGroups) {
+            const comboList = comboGroups[k];
+            // Sort each combo group to find its internal top 3 unique builds
+            comboList.sort((a, b) => sortSelect === 'damage'
+                ? (b.dmgVal - a.dmgVal || b.sortDps - a.sortDps)
+                : (b.sortDps - a.sortDps));
+
+            const seenGearTrait = new Set();
+            let count = 0;
+            for (const b of comboList) {
+                const gearHash = b.setName + (b.headUsed || 'none') + b.traitName;
+                if (!seenGearTrait.has(gearHash)) {
+                    candidates.push(b);
+                    seenGearTrait.add(gearHash);
+                    if (++count >= 3) break;
                 }
-                if (isBetter) uniqueMap.set(key, r);
-            });
-            filtered = Array.from(uniqueMap.values());
+            }
         }
 
-        if (filtered.length === 0) return '<div class="msg-empty">No matches found.</div>';
+        // 5. Final global sort for the candidates from strongest to weakest across all combos
+        candidates.sort((a, b) => sortSelect === 'damage'
+            ? (b.dmgVal - a.dmgVal || b.sortDps - a.sortDps)
+            : (b.sortDps - a.sortDps));
 
-        filtered.sort((a, b) => {
-            if (window.GLOBAL_MODE_SORT !== 'none' && unitObj?.meta) {
-                const recStr = (unitObj.meta[window.GLOBAL_MODE_SORT === 'short' ? 'short' : 'long'] || '').toLowerCase();
-                const recTraits = recStr.split('/').map(s => s.trim());
-                const aIsRec = recTraits.some(rt => rt && a.traitName.toLowerCase().includes(rt));
-                const bIsRec = recTraits.some(rt => rt && b.traitName.toLowerCase().includes(rt));
-                if (aIsRec !== bIsRec) return aIsRec ? -1 : 1;
-            }
-            if (sortSelect === 'range') return (b.range || 0) - (a.range || 0);
-            if (sortSelect === 'damage') {
-                return b.dmgVal !== a.dmgVal ? (b.dmgVal || 0) - (a.dmgVal || 0) : (b.sortDps || 0) - (a.sortDps || 0);
-            }
-            return (b.sortDps || 0) - (a.sortDps || 0);
-        });
-
-        const slice = filtered.slice(0, limit);
+        const slice = candidates.slice(0, limit);
         if (slice.length > 0) {
             if (!window.hotbarFilteredBuilds) window.hotbarFilteredBuilds = {};
             const selectedTrait = window.CALCULATION_MODE === 'loadout' && window.unitTraits?.[unitId];
             window.hotbarFilteredBuilds[unitId] = selectedTrait
-                ? (slice.find(b => b.traitName?.toLowerCase() === selectedTrait.toLowerCase()) || slice[0])
+                ? (hydrated.find(b => b.traitName?.toLowerCase() === selectedTrait.toLowerCase()) || slice[0])
                 : slice[0];
         }
 
-        return slice.map((r, i) => generateBuildRowHTML(r, i, { totalCost: unitCost, placement: unitPlace, sortMode: sortSelect, unitId, traitBenchmarks })).join('');
+        return slice.map((r, i) => generateBuildRowHTML(r, i, {
+            totalCost: unitCost,
+            placement: unitPlace,
+            sortMode: sortSelect,
+            unitId,
+            traitBenchmarks,
+            globalRank: globalRankMap.get(r.id)
+        })).join('');
     };
 
     const container = document.getElementById(`results-${activeType}-${activeMode}-0-${unitId}`);
@@ -580,10 +692,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                 });
             }
 
-            calculatedResults.sort(unit.id.toLowerCase() === 'law'
-                ? (a, b) => (b.range || 0) - (a.range || 0)
-                : (a, b) => (b.dps || 0) - (a.dps || 0)
-            );
+            calculatedResults.sort((a, b) => (b.dps || 0) - (a.dps || 0));
             targetCache[i] = calculatedResults;
         }
     };
@@ -605,15 +714,11 @@ window.getQuickScore = (unit) => {
     const activeDb = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : window.STATIC_BUILD_DB;
     const list = activeDb?.[dbKey]?.fixed?.[0];
     if (list?.length > 0) {
-        return window.isUnit(unit.id, 'law') ? (list[0].range || 0) : list[0].dps;
+        return list[0].dps;
     }
 
     const activeMode = window.unitModesState?.[unit.id] || 0;
     const { upgradesArr } = getUnitCostAndPlacement(unit, activeMode);
-
-    if (window.isUnit(unit.id, 'law')) {
-        return unit.stats.range || upgradesArr?.[upgradesArr.length - 1]?.range || 0;
-    }
     let d = unit.stats.dmg, s = unit.stats.spa;
     if ((!d || !s) && upgradesArr) {
         const last = upgradesArr[upgradesArr.length - 1];
@@ -628,7 +733,7 @@ window.getLiveScore = (unit) => {
     if (window.CALCULATION_MODE === 'loadout') {
         const currentBuild = window.hotbarFilteredBuilds?.[unitId];
         if (currentBuild) {
-            return window.isUnit(unitId, 'law') ? (currentBuild.range || 0) : (currentBuild.dps || 0);
+            return currentBuild.dps || 0;
         }
         return window.getQuickScore ? window.getQuickScore(unit) : 0;
     }
@@ -668,7 +773,7 @@ window.getLiveScore = (unit) => {
         if (!scoringEntry.mainStats && (scoringEntry.ms || scoringEntry.b !== undefined || scoringEntry.l !== undefined)) {
             scoringEntry.mainStats = scoringEntry.ms || {
                 body: typeof scoringEntry.b === 'string' ? scoringEntry.b : (scoringEntry.b === 1 ? 'dot' : (scoringEntry.b === 2 ? 'cm' : 'dmg')),
-                legs: typeof scoringEntry.l === 'string' ? scoringEntry.l : (scoringEntry.l === 1 ? 'spa' : (scoringEntry.l === 2 ? 'cf' : (scoringEntry.l === 3 ? 'range' : 'dmg')))
+                legs: typeof scoringEntry.l === 'string' ? scoringEntry.l : (scoringEntry.l === 1 ? 'spa' : (scoringEntry.l === 2 ? 'cf' : 'dmg'))
             };
         }
         if (currentTrait) scoringEntry.traitName = currentTrait;
@@ -699,7 +804,7 @@ window.getLiveScore = (unit) => {
                     window.unitModesState[unitId] = m;
                     const res = window.reconstructMathData(scoringEntry);
                     if (res) {
-                        const score = window.isUnit(unitId, 'law') ? (res.range || 0) : Math.max(res.total || 0, res.bossTotal || 0);
+                        const score = Math.max(res.total || 0, res.bossTotal || 0);
                         if (score > bestModeScore) bestModeScore = score;
                     }
                 }
@@ -712,7 +817,7 @@ window.getLiveScore = (unit) => {
             } else {
                 const res = window.reconstructMathData(scoringEntry);
                 if (res) {
-                    const score = window.isUnit(unitId, 'law') ? (res.range || 0) : Math.max(res.total || 0, res.bossTotal || 0);
+                    const score = Math.max(res.total || 0, res.bossTotal || 0);
                     if (score > maxScore) maxScore = score;
                 }
             }
@@ -791,7 +896,7 @@ function renderUnitCard(unit, absoluteIndex) {
         <div class="ut-toggle-area">${initialModeIndicatorHtml}${modesBtn}${abilityToggleHtml}</div>
     </div>`;
 
-    const defaultSort = isAnyUnit(unit.id, ['sjw', 'esdeath']) ? 'damage' : (isUnit(unit.id, 'law') ? 'range' : 'dps');
+    const defaultSort = isAnyUnit(unit.id, ['sjw', 'esdeath']) ? 'damage' : 'dps';
 
     const notices = {
         king_sailor: { icon: '⚠️', text: '<strong>Notice:</strong> In-game he does 2.5x dmg currently (e.g. 147.4k dps x2.5).', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' },
@@ -818,7 +923,6 @@ function renderUnitCard(unit, absoluteIndex) {
                     <select onchange="filterList(this)" data-filter="sort" class="search-select sort-select">
                         <option value="dps" ${defaultSort === 'dps' ? 'selected' : ''}>Sort: DPS</option>
                         <option value="damage" ${defaultSort === 'damage' ? 'selected' : ''}>Sort: Damage</option>
-                        <option value="range" ${defaultSort === 'range' ? 'selected' : ''}>Sort: Range</option>
                         <option value="efficiency" ${defaultSort === 'efficiency' ? 'selected' : ''}>Sort: Efficiency</option>
                     </select>
                     <select onchange="filterList(this)" data-filter="set" class="search-select">
@@ -828,6 +932,18 @@ function renderUnitCard(unit, absoluteIndex) {
                     <select onchange="filterList(this)" data-filter="head" class="search-select">
                         <option value="all">Heads: All</option>
                         ${HEADS_LIST.map(h => `<option value="${h}">Heads: ${HEAD_CONFIG[h]?.name || h.replace('_', ' ')}</option>`).join('')}
+                    </select>
+                    <select onchange="filterList(this)" data-filter="combo" class="search-select">
+                        <option value="all">Combos: All</option>
+                        <option value="dmg_dmg">Dmg / Dmg</option>
+                        <option value="dmg_cf">Dmg / Crate</option>
+                        <option value="dmg_spa">Dmg / Spa</option>
+                        <option value="cm_dmg">CDmg / Dmg</option>
+                        <option value="cm_cf">CDmg / Crate</option>
+                        <option value="cm_spa">CDmg / Spa</option>
+                        <option value="dot_dmg">DoT / Dmg</option>
+                        <option value="dot_spa">DoT / Spa</option>
+                        <option value="dot_cf">DoT / Crate</option>
                     </select>
                 </div>
             </div>
@@ -1019,8 +1135,16 @@ window.globalFilterUnits = (term) => {
     allSorted.forEach((entry, i) => { window.unitAbsoluteRanks[entry.unit.id] = i + 1; });
 
     let filtered = unitDatabase;
+    const unitElement = document.getElementById('unitElementSort')?.value || 'none';
+    if (unitElement !== 'none') {
+        filtered = filtered.filter(unit => {
+            const el = unit.stats?.element;
+            return el === unitElement;
+        });
+    }
+
     if (searchTerm) {
-        filtered = unitDatabase.filter(unit => {
+        filtered = filtered.filter(unit => {
             const placement = (unit.placementType || 'Ground').toLowerCase();
             let matches = [unit.name, unit.role, unit.id, placement, unit.stats?.element || ''].some(v => v.toLowerCase().includes(searchTerm));
             if (!matches && (searchTerm === 'ground' || searchTerm === 'hybrid' || searchTerm === 'hill')) {
@@ -1085,17 +1209,15 @@ function openTraitBestList(unitId) {
     const bestByTrait = new Map();
     builds.forEach(b => {
         const existing = bestByTrait.get(b.traitName);
-        const isRange = unitId === 'law';
-        const curVal = isRange ? (existing?.range || 0) : (existing?.dps || existing?.d || 0);
-        const val = isRange ? (b.range || 0) : (b.dps || b.d || 0);
+        const curVal = (existing?.dps || existing?.d || 0);
+        const val = (b.dps || b.d || 0);
         if (!existing || val > curVal) bestByTrait.set(b.traitName, b);
     });
 
     const sortedTraits = Array.from(bestByTrait.values()).map(b => hydrateBuildEntry(b, unitId))
         .sort((a, b) => {
-            const isRange = unitId === 'law';
-            const valA = isRange ? (a.range || 0) : Math.max(a.dps || 0, a.bossDps || 0);
-            const valB = isRange ? (b.range || 0) : Math.max(b.dps || 0, b.bossDps || 0);
+            const valA = Math.max(a.dps || 0, a.bossDps || 0);
+            const valB = Math.max(b.dps || 0, b.bossDps || 0);
             return valB - valA;
         });
 
@@ -1138,10 +1260,9 @@ function openTraitBestList(unitId) {
     const mapStat = s => ({ cf: 'Crit', cm: 'CDmg', spa: 'SPA', range: 'Rng', dot: 'DoT' }[s] || 'Dmg');
 
     sortedTraits.forEach((b, idx) => {
-        const isRange = unitId === 'law';
-        const isBossHigher = !isRange && (b.bossDps > (b.dps || 0));
-        const val = isRange ? (b.range || 0).toFixed(1) : format(Math.max(b.dps || 0, b.bossDps || 0));
-        const label = isRange ? 'RNG' : (isBossHigher ? 'BOSS DPS' : 'DPS');
+        const isBossHigher = (b.bossDps > (b.dps || 0));
+        const val = format(Math.max(b.dps || 0, b.bossDps || 0));
+        const label = (isBossHigher ? 'BOSS DPS' : 'DPS');
         const tObj = getTraitByName(b.traitName, unitId);
         const setupText = `<b class="text-white">${b.setName}</b> <span class="text-dim text-xs">(${mapStat(b.mainStats.body)}/${mapStat(b.mainStats.legs)})</span>${b.headUsed && b.headUsed !== 'none' ? ` + ${HEAD_CONFIG[b.headUsed]?.name || 'Head'}` : ''}`;
 
@@ -1168,7 +1289,7 @@ function openTraitBestList(unitId) {
                 <div class="text-xs" style="margin-top: 2px; color: rgba(255,255,255,0.4);">Prio: <span class="text-custom" style="font-weight: 600;">${b.prio.toUpperCase()}</span></div>
             </td>
             <td style="text-align: right; padding: 10px 5px;">
-                <div class="comp-highlight" style="font-weight: 800; font-size: 1rem; ${isBossHigher ? 'color: #fca5a5;' : ''}">${val} <span class="comp-val-label ${isRange ? 'comp-val-rng' : (isBossHigher ? 'comp-val-boss' : 'comp-val-dps')}" style="${isBossHigher ? 'color: #f87171;' : ''}">${label}</span></div>
+                <div class="comp-highlight" style="font-weight: 800; font-size: 1rem; ${isBossHigher ? 'color: #fca5a5;' : ''}">${val} <span class="comp-val-label ${(isBossHigher ? 'comp-val-boss' : 'comp-val-dps')}" style="${isBossHigher ? 'color: #f87171;' : ''}">${label}</span></div>
                 ${isBossHigher ? `<div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; margin-top: 2px;">${format(b.dps)} <span style="opacity: 0.6; font-size: 0.6rem;">BASE</span></div>` : ''}
             </td>
             ${isPotential ? '' : `<td style="text-align: center; padding: 10px 5px;">${actionBtn}</td>`}

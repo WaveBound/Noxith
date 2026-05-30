@@ -149,7 +149,7 @@ function openTeamSummary() {
     };
     const MAIN_STAT_NAMES = {
         body: { 'dmg': 'Damage', 'dot': 'DoT', 'cm': 'Crit Damage' },
-        legs: { 'dmg': 'Damage', 'spa': 'SPA', 'cf': 'Crit Rate', 'range': 'Range' }
+        legs: { 'dmg': 'Damage', 'spa': 'SPA', 'cf': 'Crit Rate' }
     };
 
     // Collect active hotbar buffs
@@ -265,7 +265,7 @@ function openTeamSummary() {
         const headName = HEAD_NAMES[build.headUsed] || build.headUsed || 'None';
         const bodyName = (MAIN_STAT_NAMES.body[build.mainStats?.body] || build.mainStats?.body || 'Dmg');
         const legsName = (MAIN_STAT_NAMES.legs[build.mainStats?.legs] || build.mainStats?.legs || 'Dmg');
-        const setName = build.setName || '—';
+        const setName = build.setName === 'Rebellious Shinobi' ? 'Rebellious Set' : (build.setName === 'Reanimated Ninja' ? 'Reanimated Set' : (build.setName || '—'));
         const traitName = build.traitName || '—';
 
         // Use the same getRichBadgeHtml from utils.js for sub stat display
@@ -968,7 +968,6 @@ function initHotbar() {
         farmsMenu.onclick = (e) => e.stopPropagation();
 
         const farmUnits = [
-            { id: 'bulma', name: 'Bulma', img: 'images/units/Bulma.png', tags: ['Hero', 'Assistant'] },
             { id: 'speedwagon', name: 'Speedcart', img: 'images/units/Speedwagon.png', tags: ['Assistant'] }
         ];
 
@@ -1341,8 +1340,7 @@ function updateHotbarUI() {
         'ancient_mage': ['ancientMage'],
         'king_sailor': ['kingSailor'],
         'prodigy_mage': ['mageHill', 'mageGround'],
-        'unparalleled_armor': ['bijuu'],
-        'bulma': ['bulma']
+        'unparalleled_armor': ['bijuu']
     };
 
     const idsToCheck = [...unitIdsInHotbar];

@@ -1,13 +1,14 @@
-window.GLOBAL_BUFF_DATA = {
+// Build GLOBAL_BUFF_DATA dynamically from unitBuffs.js and leaderBuffs.js definitions
+const GLOBAL_BUFF_DATA = {
     miku: {
-        id: 'miku',                 // Used for DB filename (db_miku_...)
-        stateKey: 'mikuActive',     // window.mikuActive
+        id: 'miku',
+        stateKey: 'mikuActive',
         name: 'Miku Buff',
         desc: "Apply Miku's +100% Damage Buff",
-        color: '#4ade80',           // Color used in UI and math renders
-        math: (uStats) => ({ dmg: 100 }), // The actual math applied
+        color: '#4ade80',
+        math: (uStats) => ({ dmg: (typeof GLOBAL_UNIT_BUFFS !== 'undefined') ? GLOBAL_UNIT_BUFFS.miku.stats.dmg : 100 }),
         renderLabel: "Active: +100% Damage",
-        genType: 'boolean'          // Tells Python to generate ON/OFF states
+        genType: 'boolean'
     },
     enlightenedGod: {
         id: 'enlightenedgod',
@@ -15,7 +16,10 @@ window.GLOBAL_BUFF_DATA = {
         name: 'Enlightened God',
         desc: "Buffs allied unit's by 5% Attack, Attack Speed, and Range every 60 seconds. (Cap of 20%)",
         color: '#fbbf24',
-        math: (uStats) => ({ dmg: 20, spa: 20, range: 20 }),
+        math: (uStats) => {
+            const stats = (typeof GLOBAL_UNIT_BUFFS !== 'undefined') ? GLOBAL_UNIT_BUFFS.enlightened_god.stats : { dmg: 20, spa: 20 };
+            return { dmg: stats.dmg, spa: stats.spa, range: 20 };
+        },
         renderLabel: "Active: +20% Dmg, -20% SPA, +20% Range",
         genType: 'boolean'
     },
@@ -26,10 +30,10 @@ window.GLOBAL_BUFF_DATA = {
         desc: "Apply Bijuu Link: +25% Dmg, +25% Range, -15% SPA",
         color: '#f87171',
         math: (uStats) => {
-            // Bijuu Link comes from Unparalleled Armor — doesn't apply to providers
             const baseId = (uStats.id || "").split('-')[0];
             if (baseId === 'unparalleled_armor' || baseId === 'nutaru_beast' || baseId === 'ancient_shinob') return {};
-            return { dmg: 25, spa: 15, range: 25 };
+            const stats = (typeof GLOBAL_UNIT_BUFFS !== 'undefined') ? GLOBAL_UNIT_BUFFS.bijuu_link.stats : { dmg: 25, range: 25, spa: 15 };
+            return { dmg: stats.dmg, spa: stats.spa, range: stats.range };
         },
         renderLabel: "Active: +25% Dmg, +25% Range, -15% SPA",
         genType: 'boolean'
@@ -41,9 +45,9 @@ window.GLOBAL_BUFF_DATA = {
         desc: "Apply Ancient Mage Buff: +20% Crit Rate/Dmg",
         color: '#60a5fa',
         math: (uStats) => {
-            // Ancient Mage buff can't apply to Ancient Mage itself
             if (window.isUnit(uStats.id, 'ancient_mage')) return {};
-            return { crit: 20, cdmg: 20 };
+            const stats = (typeof GLOBAL_UNIT_BUFFS !== 'undefined') ? GLOBAL_UNIT_BUFFS.ancient_mage.stats : { cRate: 20, cDmg: 20 };
+            return { crit: stats.cRate, cdmg: stats.cDmg };
         },
         renderLabel: "Active: +20% Crit Rate/Dmg",
         genType: 'boolean'
@@ -57,11 +61,9 @@ window.GLOBAL_BUFF_DATA = {
         math: (uStats, context) => {
             const isPotential = (typeof window !== 'undefined' && window.CALCULATION_MODE !== undefined) ? (window.CALCULATION_MODE === 'potential') : true;
 
-            // In loadout mode, it ONLY applies if the unit is equipped in the hotbar
             const isLoadout = (typeof window !== 'undefined' && window.CALCULATION_MODE === 'loadout');
             if (isLoadout && (!context || !context.isHotbar)) return {};
 
-            // Determine if the buff should be active (Check all sources)
             const hState = window.hotbarState || (typeof hotbarState !== 'undefined' ? hotbarState : null);
             const leader = hState?.slots ? hState.slots[0] : null;
             const isKsLeading = leader && window.isUnit(leader.id, 'king_sailor');
@@ -72,18 +74,15 @@ window.GLOBAL_BUFF_DATA = {
 
             let isActive = globalActive || hotbarBuffActive || contextActive || isKsLeading;
 
-            // In potential mode, active by default on King Sailor himself!
             if (isPotential && window.isUnit(uStats.id, 'king_sailor')) {
                 isActive = true;
             }
 
             if (!isActive) return {};
 
-            // 1. BASE BUFF (+10% Crit, +25% CDmg)
-            // King Sailor himself does not get the base crit buffs (only other units get them)
-            let b = window.isUnit(uStats.id, 'king_sailor') ? {} : { crit: 10, cdmg: 25 };
-
-            return b;
+            if (window.isUnit(uStats.id, 'king_sailor')) return {};
+            const stats = (typeof GLOBAL_UNIT_BUFFS !== 'undefined') ? GLOBAL_UNIT_BUFFS.king_sailor.stats : { cRate: 10, cDmg: 25 };
+            return { crit: stats.cRate, cdmg: stats.cDmg };
         },
         renderLabel: "Leader: King of his People",
         genType: 'boolean'
@@ -98,18 +97,15 @@ window.GLOBAL_BUFF_DATA = {
         math: (uStats, context) => {
             const isPotential = (typeof window !== 'undefined' && window.CALCULATION_MODE !== undefined) ? (window.CALCULATION_MODE === 'potential') : true;
 
-            // In loadout mode, it ONLY applies if the unit is equipped in the hotbar
             if (!isPotential && (!context || !context.isHotbar)) return {};
 
             let isActive = false;
             let leaderId = null;
 
             if (isPotential) {
-                // In potential mode, leader buff is active ONLY on the unit providing it
                 isActive = (window.isUnit(uStats.id, 'triple_threat') || window.isUnit(uStats.id, 'king_sailor'));
                 leaderId = uStats.id;
             } else {
-                // In loadout mode, active if a unit with Unrivaled Mark is in Slot 1
                 const hState = (typeof window !== 'undefined') ? window.hotbarState : null;
                 const leader = hState?.slots ? hState.slots[0] : null;
                 if (leader) {
@@ -127,16 +123,27 @@ window.GLOBAL_BUFF_DATA = {
             const element = String(uStats.element || uStats.stats?.element || "").toLowerCase();
             let b = { dmg: 0, range: 0, crit: 0, spa: 0 };
 
-            if (window.isUnit(leaderId, 'triple_threat')) {
-                if (tags.includes('Piece')) {
-                    b.dmg = 50;
-                } else if (tags.includes('Sword')) {
-                    b.dmg = 25;
-                } else if (element === 'wind') {
-                    b.dmg = 20;
-                    b.crit = 5;
+            const unrivaled = (typeof LEADER_BUFFS !== 'undefined') ? LEADER_BUFFS.unrivaled_mark : null;
+            if (unrivaled && unrivaled.subBuffs) {
+                unrivaled.subBuffs.forEach(sub => {
+                    if (window.isUnit(leaderId, 'triple_threat')) {
+                        if (sub.type === 'tag' && tags.includes(sub.value)) {
+                            b.dmg += sub.stats.dmg || 0;
+                        } else if (sub.type === 'element' && element === sub.value.toLowerCase()) {
+                            b.dmg += sub.stats.dmg || 0;
+                            b.crit += sub.stats.cRate || 0;
+                        }
+                    }
+                });
+            } else {
+                if (window.isUnit(leaderId, 'triple_threat')) {
+                    if (tags.includes('Piece')) b.dmg = 50;
+                    else if (tags.includes('Sword')) b.dmg = 25;
+                    else if (element === 'wind') { b.dmg = 20; b.crit = 5; }
                 }
-            } else if (window.isUnit(leaderId, 'king_sailor')) {
+            }
+
+            if (window.isUnit(leaderId, 'king_sailor')) {
                 if (tags.includes('Magi')) {
                     b.dmg = 50;
                     b.spa = 15;
@@ -149,7 +156,6 @@ window.GLOBAL_BUFF_DATA = {
                 }
             }
 
-            // Remove empty keys
             if (b.spa === 0) delete b.spa;
             if (b.dmg === 0) delete b.dmg;
             if (b.crit === 0) delete b.crit;
@@ -166,16 +172,17 @@ window.GLOBAL_BUFF_DATA = {
         name: 'Fern (Hill)',
         desc: "Apply Fern (Hill) Buff: -30% SPA (Hill Only)",
         color: '#fb923c',
-        excludes: 'mageGround', // Automatically disables mageGround if checked
+        excludes: 'mageGround',
         math: (uStats, context) => {
             const uType = (uStats.placementType || 'Ground').toLowerCase();
             const isMatching = (uType === 'hill' || uType === 'hybrid');
             const isFernSelf = window.isUnit(uStats.id, 'prodigy_mage');
             if (!isMatching && !isFernSelf) return {};
 
-            if (window.CALCULATION_MODE === 'potential') return { spa: 30 };
+            const stats = (typeof GLOBAL_UNIT_BUFFS !== 'undefined') ? GLOBAL_UNIT_BUFFS.fern_hill.stats : { spa: 30 };
 
-            // Hotbar unit: context.isHotbar is set by the rendering pipeline
+            if (window.CALCULATION_MODE === 'potential') return { spa: stats.spa };
+
             if (context.isHotbar) {
                 const hotbar = window.hotbarState;
                 if (!hotbar || !hotbar.slots) return {};
@@ -184,18 +191,16 @@ window.GLOBAL_BUFF_DATA = {
                 const isFernPresent = hotbar.slots.some(s => s && window.isUnit(s.id, 'prodigy_mage'));
                 if (!isFernPresent) return {};
 
-                // "Both units" — Fern always receives her own buff when she has targets
-                if (isFernSelf) return { spa: 30 };
+                if (isFernSelf) return { spa: stats.spa };
 
                 const slotIdx = hotbar.slots.findIndex(s => s && (s.id === uStats.id || window.isUnit(s.id, uStats.id)));
-                return (slotIdx !== -1 && targets.includes(slotIdx)) ? { spa: 30 } : {};
+                return (slotIdx !== -1 && targets.includes(slotIdx)) ? { spa: stats.spa } : {};
             }
 
-            // Main list unit: apply globally
-            return { spa: 30 };
+            return { spa: stats.spa };
         },
         renderLabel: "Active: -30% SPA",
-        genType: 'exclusive:fern' // Tells Python these are mutually exclusive
+        genType: 'exclusive:fern'
     },
     mageGround: {
         id: 'mageground',
@@ -203,16 +208,17 @@ window.GLOBAL_BUFF_DATA = {
         name: 'Fern (Ground)',
         desc: "Apply Fern (Ground) Buff: +45% Crit Rate (Ground Only)",
         color: '#f472b6',
-        excludes: 'mageHill', // Automatically disables mageHill if checked
+        excludes: 'mageHill',
         math: (uStats, context) => {
             const uType = (uStats.placementType || 'Ground').toLowerCase();
             const isMatching = (uType === 'ground' || uType === 'hybrid');
             const isFernSelf = window.isUnit(uStats.id, 'prodigy_mage');
             if (!isMatching && !isFernSelf) return {};
 
-            if (window.CALCULATION_MODE === 'potential') return { crit: 45 };
+            const stats = (typeof GLOBAL_UNIT_BUFFS !== 'undefined') ? GLOBAL_UNIT_BUFFS.fern_ground.stats : { cRate: 45 };
 
-            // Hotbar unit: context.isHotbar is set by the rendering pipeline
+            if (window.CALCULATION_MODE === 'potential') return { crit: stats.cRate };
+
             if (context.isHotbar) {
                 const hotbar = window.hotbarState;
                 if (!hotbar || !hotbar.slots) return {};
@@ -221,28 +227,17 @@ window.GLOBAL_BUFF_DATA = {
                 const isFernPresent = hotbar.slots.some(s => s && window.isUnit(s.id, 'prodigy_mage'));
                 if (!isFernPresent) return {};
 
-                // "Both units" — Fern always receives her own buff when she has targets
-                if (isFernSelf) return { crit: 45 };
+                if (isFernSelf) return { crit: stats.cRate };
 
                 const slotIdx = hotbar.slots.findIndex(s => s && (s.id === uStats.id || window.isUnit(s.id, uStats.id)));
-                return (slotIdx !== -1 && targets.includes(slotIdx)) ? { crit: 45 } : {};
+                return (slotIdx !== -1 && targets.includes(slotIdx)) ? { crit: stats.cRate } : {};
             }
 
-            // Main list unit: apply globally
-            return { crit: 45 };
+            return { crit: stats.cRate };
         },
         renderLabel: "Active: +45% Crit Rate",
         genType: 'exclusive:fern'
     },
-    bulma: {
-        id: 'bulma',
-        stateKey: 'bulmaActive',
-        name: 'Bulma Buff',
-        desc: "Apply Bulma's +15% Crit Rate Buff",
-        color: '#f472b6',
-        math: (uStats) => ({ crit: 15 }),
-        renderLabel: "Active: +15% Crit Rate",
-        tags: ["Assistant"],
-        genType: 'boolean'
-    },
 };
+
+window.GLOBAL_BUFF_DATA = GLOBAL_BUFF_DATA;

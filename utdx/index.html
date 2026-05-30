@@ -161,6 +161,17 @@
 
                     <button id="globalBuffsToggleBtn" class="filter-tab-btn" onclick="toggleGlobalBuffs(this)"
                         style="height: 34px; margin-left: 8px;">Buffs ▼</button>
+
+                    <select id="unitElementSort" onchange="if(window.globalFilterUnits) window.globalFilterUnits(document.getElementById('globalSearch')?.value || '')" class="filter-tab-btn" style="height: 34px; margin-left: 8px; border-radius: 8px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: #60a5fa;">
+                        <option value="none">Element: Any</option>
+                        <option value="Water">Element: Water</option>
+                        <option value="Fire">Element: Fire</option>
+                        <option value="Rose">Element: Rose</option>
+                        <option value="Wind">Element: Wind</option>
+                        <option value="Ice">Element: Ice</option>
+                        <option value="Light">Element: Light</option>
+                        <option value="Dark">Element: Dark</option>
+                    </select>
                 </div>
 
                 <!-- Center controls (Pagination) -->
@@ -561,6 +572,46 @@
     </div>
 
     <!-- SCRIPTS -->
+    <script>
+        // Synchronously fetch and evaluate modular scripts to expose them to window before subsequent scripts run
+        (function() {
+            function loadModuleSync(url) {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', url, false); // synchronous XHR
+                xhr.send(null);
+                if (xhr.status === 200) {
+                    let code = xhr.responseText;
+                    // Strip ES module exports for standard browser execution context
+                    code = code.replace(/\bexport\s+const\b/g, 'const');
+                    code = code.replace(/\bexport\s+function\b/g, 'function');
+                    code = code.replace(/\bexport\s+default\b/g, '');
+                    
+                    const script = document.createElement('script');
+                    script.text = code + `\nif (typeof window !== 'undefined') {
+                        if (typeof ADVANTAGES !== 'undefined') window.ADVANTAGES = ADVANTAGES;
+                        if (typeof calcElementalDamageMultiplier !== 'undefined') window.calcElementalDamageMultiplier = calcElementalDamageMultiplier;
+                        if (typeof LEADER_BUFFS !== 'undefined') window.LEADER_BUFFS = LEADER_BUFFS;
+                        if (typeof GLOBAL_UNIT_BUFFS !== 'undefined') window.GLOBAL_UNIT_BUFFS = GLOBAL_UNIT_BUFFS;
+                        if (typeof SUB_STAT_BASES !== 'undefined') window.SUB_STAT_BASES = SUB_STAT_BASES;
+                        if (typeof MAIN_STAT_BASES !== 'undefined') window.MAIN_STAT_BASES = MAIN_STAT_BASES;
+                        if (typeof generateRelic !== 'undefined') window.generateRelic = generateRelic;
+                    }`;
+                    document.head.appendChild(script);
+                    script.remove();
+                } else {
+                    console.error('Failed to load module synchronously: ' + url);
+                }
+            }
+
+            loadModuleSync('shared/buffers/elementalSystem.js');
+            loadModuleSync('shared/buffers/leaderBuffs.js');
+            loadModuleSync('shared/buffers/unitBuffs.js');
+            loadModuleSync('shared/relics/relicStats.js');
+        })();
+    </script>
+    <script src="shared/relics/relicsData.js"></script>
+    <script src="shared/relics/relicPassives.js"></script>
+    <script src="shared/traits/traitsData.js"></script>
     <script src="backend/data/buffs.js"></script>
     <script src="backend/data/config.js"></script>
     <script src="frontend/data/ui-data.js"></script>

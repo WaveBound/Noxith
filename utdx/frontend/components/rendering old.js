@@ -22,7 +22,8 @@ const HEAD_CONFIG = {
     'monarch': { name: 'Monarch Cape', search: 'Monarch', cls: 'custom' },
     'warlord_hat': { name: 'Warlord Hat', search: 'Warlord', cls: 'custom' },
     'mochi_scarf': { name: 'Mochi Scarf', search: 'Mochi', cls: 'custom' },
-    'flaming_donut': { name: 'Flaming Donut', search: 'Flaming Donut', cls: 'custom' }
+    'flaming_donut': { name: 'Flaming Donut', search: 'Flaming Donut', cls: 'custom' },
+    'elemental_damage': { name: 'Elemental Mask', search: 'Elemental', cls: 'custom' }
 };
 
 // Config for Custom Ability Buttons
@@ -119,7 +120,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
         optimalityHtml = `<div class="optimality-badge" style="color: ${color}; border-color: ${color}33; --glow-color: ${glow}; flex-direction: row; justify-content: center; gap: 6px; width: 100%; box-sizing: border-box; padding: 3px 8px; cursor: default;"><span class="opt-label" style="color: ${color}; margin-bottom: 0;">OPTIMALITY</span><span class="opt-pct">${fix1(optPct)}%</span></div>`;
     }
 
-    const prioConfig = { 'spa': { label: 'SPA STAT', cls: 'prio-spa' }, 'range': { label: 'RANGE STAT', cls: 'prio-range' }, 'default': { label: 'DMG STAT', cls: 'prio-dmg' } };
+    const prioConfig = { 'spa': { label: 'SPA STAT', cls: 'prio-spa' }, 'default': { label: 'DMG STAT', cls: 'prio-dmg' } };
 
     let prioHtml = '';
     if (r.relicIds) {
@@ -148,8 +149,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
 
     const isBossHigher = (sortMode === 'dps') && (r.bossDps > (r.dps || 0));
     let displayVal = format(r.sortDps || r.dps || 0), displayLabel = "DPS";
-    if (sortMode === 'range') { displayVal = fix1(r.range || 0); displayLabel = "RNG"; }
-    else if (isBossHigher) {
+    if (isBossHigher) {
         displayLabel = `BOSS DPS`;
     }
     const hasBossDps = isBossHigher || (r.bossDps && r.bossDps !== r.dps);
@@ -157,7 +157,15 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     return `
         <div class="build-row ${rankClass} ${sortMode === 'efficiency' ? 'is-efficiency-sort' : ''}">
             <div class="br-header" style="align-items: flex-start; padding-top: 6px;">
-                <div class="br-header-info" style="margin-top: 2px;"><span class="br-rank">#${i + 1}</span><span class="br-set">${r.setName.toLowerCase().includes('set') ? r.setName : r.setName + ' Set'}</span><span class="br-sep">/</span><span class="br-trait">${r.traitName}</span></div>
+                <div class="br-header-info" style="margin-top: 2px;">
+                    <span class="br-rank">#${i + 1}</span>
+                    <span class="br-set">${(() => {
+                        let n = r.setName === 'Rebellious Shinobi' ? 'Rebellious Set' : (r.setName === 'Reanimated Ninja' ? 'Reanimated Set' : r.setName);
+                        return n.toLowerCase().includes('set') ? n : n + ' Set';
+                    })()}</span>
+                    <span class="br-sep">/</span>
+                    <span class="br-trait">${r.traitName}</span>
+                </div>
                 <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
                     <div style="display:flex; gap:6px; align-items:center;">${mobileToggle}${hasBossDps ? `<div class="eff-score-line" onclick="event.stopPropagation(); openInfoPopup('efficiency')">${effScore} <span class="eff-label">Eff</span></div>` : ''}${prioHtml}</div>
                     ${optimalityHtml}
@@ -421,6 +429,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const setSelect = card.querySelector('select[data-filter="set"]')?.value || 'all';
     const headSelect = card.querySelector('select[data-filter="head"]')?.value || 'all';
     const sortSelect = card.querySelector('select[data-filter="sort"]')?.value || 'dps';
+    const comboSelect = card.querySelector('select[data-filter="combo"]')?.value || 'all';
 
     const renderListInternal = (builds, limit) => {
         if (!builds || builds.length === 0) return '<div class="msg-empty">No valid builds found.</div>';
@@ -432,6 +441,11 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 if (!prioMatch) return false;
                 if (setSelect !== 'all' && r.setName !== setSelect) return false;
                 if (headSelect !== 'all' && (r.headUsed || 'none') !== headSelect) return false;
+
+                if (comboSelect !== 'all') {
+                    const currentCombo = `${r.mainStats.body}/${r.mainStats.legs}`.toLowerCase();
+                    if (currentCombo !== comboSelect) return false;
+                }
 
                 let hSearch = HEAD_CONFIG[r.headUsed]?.search || '';
                 const searchText = `${r.traitName} ${r.setName} ${r.prio} ${hSearch}`.toLowerCase();
@@ -453,7 +467,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         if (prioSelect === 'all') {
             const uniqueMap = new Map();
             filtered.forEach(r => {
-                const key = r.setName + r.traitName + (r.headUsed || 'none');
+                const key = r.setName + r.traitName + (r.headUsed || 'none') + r.mainStats.body + r.mainStats.legs;
 
                 let isBetter = false;
                 if (!uniqueMap.has(key)) {
@@ -464,7 +478,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                         if (r.dmgVal > currentBest.dmgVal) isBetter = true;
                         else if (r.dmgVal === currentBest.dmgVal && r.sortDps > currentBest.sortDps) isBetter = true;
                     }
-                    else if (sortSelect === 'range') isBetter = (r.range > currentBest.range);
                     else isBetter = (r.sortDps > currentBest.sortDps);
                 }
                 if (isBetter) uniqueMap.set(key, r);
@@ -489,10 +502,14 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 if (!aIsRec && bIsRec) return 1;
             }
 
-            if (sortSelect === 'range') return (b.range || 0) - (a.range || 0);
             if (sortSelect === 'damage') {
                 if (b.dmgVal !== a.dmgVal) return (b.dmgVal || 0) - (a.dmgVal || 0);
                 return (b.sortDps || 0) - (a.sortDps || 0);
+            }
+            if (sortSelect === 'combo') {
+                const comboA = `${a.mainStats.body}/${a.mainStats.legs}`;
+                const comboB = `${b.mainStats.body}/${b.mainStats.legs}`;
+                return comboA.localeCompare(comboB);
             }
             return (b.sortDps || 0) - (a.sortDps || 0);
         });
@@ -1006,8 +1023,15 @@ function renderUnitCard(unit, absoluteIndex) {
                     <select onchange="filterList(this)" data-filter="sort" class="search-select sort-select">
                         <option value="dps" ${defaultSort === 'dps' ? 'selected' : ''}>Sort: DPS</option>
                         <option value="damage" ${defaultSort === 'damage' ? 'selected' : ''}>Sort: Damage</option>
-                        <option value="range" ${defaultSort === 'range' ? 'selected' : ''}>Sort: Range</option>
                         <option value="efficiency" ${defaultSort === 'efficiency' ? 'selected' : ''}>Sort: Efficiency</option>
+                        <option value="combo">Sort: Main Combo</option>
+                    </select>
+                    <select onchange="filterList(this)" data-filter="combo" class="search-select">
+                        <option value="all">Combos: All</option>
+                        <option value="dmg/spa">Dmg / Spa</option>
+                        <option value="dmg/cf">Dmg / Crit</option>
+                        <option value="dot/spa">DoT / Spa</option>
+                        <option value="cm/cf">Crit / Crit</option>
                     </select>
                     <select onchange="filterList(this)" data-filter="set" class="search-select">
                         <option value="all">Sets: All</option>
@@ -1020,8 +1044,8 @@ function renderUnitCard(unit, absoluteIndex) {
                         <option value="Super Roku">Sets: Super Roku</option>
                         <option value="Bio-Android">Sets: Bio-Android</option>
                         <option value="Biju Set">Sets: Biju</option>
-                        <option value="Rebellious Shinobi">Sets: Rebellious</option>
-                        <option value="Reanimated Ninja">Sets: Reanimated</option>
+                        <option value="Rebellious Set">Sets: Rebellious</option>
+                        <option value="Reanimated Set">Sets: Reanimated</option>
                         <option value="Great Mage">Sets: Great Mage</option>
                         <option value="Sorcerer Hunter">Sets: S. Hunter</option>
                         <option value="Strongest Sorcerer">Sets: Strongest</option>
@@ -1299,7 +1323,12 @@ window.globalFilterUnits = (term) => {
     // 1. Compute absolute ranks from the FULL database (before any search filtering)
     const allSorted = unitDatabase.map(unit => {
         return { unit, maxScore: getLiveScore(unit) };
-    }).sort((a, b) => b.maxScore - a.maxScore);
+    }).sort((a, b) => {
+        if (window.GLOBAL_SORT_MODE === 'element') {
+            return (a.unit.stats.element || "").localeCompare(b.unit.stats.element || "");
+        }
+        return b.maxScore - a.maxScore;
+    });
 
     window.unitAbsoluteRanks = {};
     allSorted.forEach((entry, i) => { window.unitAbsoluteRanks[entry.unit.id] = i + 1; });

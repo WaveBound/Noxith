@@ -4,6 +4,15 @@ const comingSoonData = [
 
 const patchNotesData = [
     {
+        version: "v6.3",
+        date: "May 30, 2026",
+        changes: [
+            { type: "UI", text: "<b>New Layout:</b> Completely redesigned unit cards and refreshed color palette for better info density." },
+            { type: "Feature", text: "<b>Elemental Mask:</b> Added new head piece with custom elemental damage scaling." },
+            { type: "Feature", text: "<b>Advanced Sorting:</b> Added sorting by <b>Elemental Type</b> and <b>Main Stat Combinations</b> (e.g., Dmg/SPA) to build lists." }
+        ]
+    },
+    {
         version: "v6.2",
         date: "May 25, 2026",
         changes: [

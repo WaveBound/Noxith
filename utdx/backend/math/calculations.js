@@ -9,7 +9,7 @@
 // ==========================================================
 
 function calculateDPS(uStats, relicStats, context) {
-    const { dmgPoints, spaPoints, rangePoints, wave, isBoss, traitObj, placement, isSSS, headPiece, isVirtualRealm, starMult, isAbility, upgradeLevel } = context;
+    const { dmgPoints, spaPoints, rangePoints, wave, isBoss, traitObj, placement, isSSS, headPiece, isVirtualRealm, starMult, isAbility, upgradeLevel, defenderElement } = context;
 
     let lvStats = getLevelStats(uStats.dmg, uStats.spa, uStats.range || 0, dmgPoints, spaPoints, rangePoints);
     let rDmg = 0, rSpa = 0, rRange = 0;
@@ -494,16 +494,31 @@ function calculateDPS(uStats, relicStats, context) {
         }
     }
 
+    // --- ELEMENTAL DAMAGE SYSTEM ---
+    const elementalDmgBuff = (sBonus.elementalAll || 0) + (headCalc.elementalAll || 0);
+    const attackerElement = uStats.element || "None";
+    const attackerRarity = uStats.rarity || "Mythical";
+    const elemMult = (typeof window !== 'undefined' && window.calcElementalDamageMultiplier)
+        ? window.calcElementalDamageMultiplier(attackerElement, defenderElement || "None", attackerRarity, elementalDmgBuff)
+        : 1;
+
+    // Apply elemental multiplier to all damage channels
+    const elemFinalHitDps = finalHitDps * elemMult;
+    const elemFinalDotDps = finalDotDps * elemMult;
+    const elemFinalSummonDps = finalSummonDps * elemMult;
+    const elemBossHitDps = finalBossHitDps * elemMult;
+    const elemBossDotDps = finalBossDotDps * elemMult;
+
     return {
-        total: (finalHitDps + finalDotDps + finalSummonDps),
-        bossTotal: (finalHitDps + finalDotDps + finalSummonDps) * bossMult,
-        hit: finalHitDps,
+        total: (elemFinalHitDps + elemFinalDotDps + elemFinalSummonDps),
+        bossTotal: (elemBossHitDps + elemBossDotDps + elemFinalSummonDps) * bossMult,
+        hit: elemFinalHitDps,
         baseHitDps: hitDpsTotal,
         trueDmgPct,
         trueDmgVal,
         normalDmgVal: normalDmgVal + chainLightningDps,
-        dot: finalDotDps,
-        summon: finalSummonDps,
+        dot: elemFinalDotDps,
+        summon: elemFinalSummonDps,
         summonData,
         detailedBuffs: detailedBuffs,
         spa: usedSpa,
@@ -544,6 +559,13 @@ function calculateDPS(uStats, relicStats, context) {
         abilityBuff: (uStats.buffDmg || 0) + abilityDmg,
         warlordData,
         relicStats,
-        upgradeLevel: context.upgradeLevel !== undefined ? context.upgradeLevel : 6
+        upgradeLevel: context.upgradeLevel !== undefined ? context.upgradeLevel : 6,
+        elementalData: {
+            attackerElement,
+            defenderElement: defenderElement || "None",
+            attackerRarity,
+            elementalDmgBuff,
+            multiplier: elemMult
+        }
     };
 }

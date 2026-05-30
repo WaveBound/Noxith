@@ -16,6 +16,13 @@ if sys.stdout.encoding.lower() != 'utf-8':
         sys.stdout.reconfigure(encoding='utf-8')
 
 REQUIRED_FILES = [
+    "shared/buffers/elementalSystem.js",
+    "shared/buffers/leaderBuffs.js",
+    "shared/buffers/unitBuffs.js",
+    "shared/relics/relicStats.js",
+    "shared/relics/relicsData.js",
+    "shared/relics/relicPassives.js",
+    "shared/traits/traitsData.js",
     "backend/data/buffs.js",
     "backend/data/config.js",
     "shared/relics/relics.js",
@@ -52,7 +59,7 @@ if (isMainThread) {
     // ==========================================
     const jobFile = process.argv[2];
     const jobData = JSON.parse(fs.readFileSync(jobFile, 'utf-8'));
-    const { combinations, targetUnits, threads, outDir } = jobData;
+    const { combinations, targetUnits, threads, outDir, selectedHeads, selectedSets } = jobData;
     const targetSet = new Set(targetUnits);
 
     // Calculate exact total units to process for accurate progress bar
@@ -77,7 +84,7 @@ if (isMainThread) {
     function dispatchJob(worker) {
         if (jobIndex < totalJobs) {
             const combo = combinations[jobIndex++];
-            worker.postMessage({ type: 'job', combo, targetUnits, outDir });
+            worker.postMessage({ type: 'job', combo, targetUnits, outDir, selectedHeads, selectedSets });
         } else {
             worker.postMessage({ type: 'exit' });
         }
@@ -138,7 +145,6 @@ if (isMainThread) {
         if (combo[2] === '1') parts.push('bijuu');
         if (combo[3] === '1') parts.push('amage');
         if (combo[4] === '1') parts.push('ksailor');
-        if (combo[6] === '1') parts.push('bulma');
         
         if (combo[5] === 'hill') parts.push('magehill');
         else if (combo[5] === 'ground') parts.push('mageground');
@@ -146,22 +152,21 @@ if (isMainThread) {
         return parts.length === 0 ? "db_base.js" : "db_" + parts.join("_") + ".js";
     }
 
-    function generateTemplates(includeSubs, allowedHeads, allowDot, allowRange = false) {
+    function generateTemplates(includeSubs, allowedHeads, allowDot, allowedSets) {
         const templates = [];
         const cands = allowDot
-            ? ['dmg', 'spa', 'cm', 'cf', 'dot', ...(allowRange ? ['range'] : [])]
-            : ['dmg', 'spa', 'cm', 'cf', ...(allowRange ? ['range'] : [])];
+            ? ['dmg', 'spa', 'cm', 'cf', 'dot']
+            : ['dmg', 'spa', 'cm', 'cf'];
             
         // For S.H. Spirit head, remove crit subs since it disables crits
         const noCritCands = cands.filter(c => c !== 'cf' && c !== 'cm');
-        const baseBuilds = globalBuilds.filter(b => allowDot || b.dot === 0);
 
         let strategies = [];
         if (!includeSubs) {
             strategies.push({ p: null, s: null, ratio: { p: 0, s: 0 } });
         } else {
             cands.forEach(c => strategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
-            const pairs = [['dmg', 'cf'], ['dmg', 'spa'], ['dmg', 'cm'], ['cf', 'cm'], ...(allowRange ? [['dmg', 'range'], ['spa', 'range']] : [])];
+            const pairs = [['dmg', 'cf'], ['dmg', 'spa'], ['dmg', 'cm'], ['cf', 'cm']];
             const ratios = [{ p: 4, s: 3 }, { p: 3, s: 4 }, { p: 5, s: 2 }, { p: 2, s: 5 }];
             pairs.forEach(pair => {
                 const [c1, c2] = pair;
@@ -173,7 +178,7 @@ if (isMainThread) {
         let noCritStrategies = [];
         if (includeSubs) {
             noCritCands.forEach(c => noCritStrategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
-            const noCritPairs = [['dmg', 'spa'], ...(allowRange ? [['dmg', 'range'], ['spa', 'range']] : [])];
+            const noCritPairs = [['dmg', 'spa']];
             const ratios = [{ p: 4, s: 3 }, { p: 3, s: 4 }, { p: 5, s: 2 }, { p: 2, s: 5 }];
             noCritPairs.forEach(pair => {
                 const [c1, c2] = pair;
@@ -209,6 +214,23 @@ if (isMainThread) {
             return arr;
         };
 
+        const allowedCombos = new Set(['dmg_dmg', 'dmg_cf', 'dmg_spa', 'cm_dmg', 'cm_cf', 'cm_spa']);
+        if (allowDot) {
+            allowedCombos.add('dot_dmg');
+            allowedCombos.add('dot_spa');
+            allowedCombos.add('dot_cf');
+        }
+
+        const baseBuilds = globalBuilds.filter(b => {
+            if (!allowedCombos.has(b.bodyType + "_" + b.legType)) return false;
+            if (allowedSets && allowedSets.length > 0) {
+                const splitIdx = b.name.indexOf('(');
+                const setNameStr = splitIdx > 0 ? b.name.substring(0, splitIdx).trim() : b.name;
+                if (!allowedSets.includes(setNameStr)) return false;
+            }
+            return true;
+        });
+
         baseBuilds.forEach(build => {
             allowedHeads.forEach(headType => {
                 if(!allowDot && headType === 'ninja') return; 
@@ -226,7 +248,9 @@ if (isMainThread) {
                     currentAssignments.selectedHead = headType;
 
                     const splitIdx = build.name.indexOf('(');
-                    const setNameStr = splitIdx > 0 ? build.name.substring(0, splitIdx).trim() : build.name;
+                    let setNameStr = splitIdx > 0 ? build.name.substring(0, splitIdx).trim() : build.name;
+                    if (setNameStr === "Rebellious Shinobi") setNameStr = "Rebellious Set";
+                    if (setNameStr === "Reanimated Ninja") setNameStr = "Reanimated Set";
                     const cacheKeyStr = build.name + "_" + headType;
 
                     templates.push({ 
@@ -244,13 +268,19 @@ if (isMainThread) {
         return templates;
     }
 
-    function fastCalculateUnitBuilds(unit, cfg, traitsForCalc, isAbility, existingHeads) {
+    function fastCalculateUnitBuilds(unit, cfg, traitsForCalc, isAbility, existingHeads, jobHeads, selectedSets) {
         const upgradeLevel = (unit.upgrades && unit.upgrades.length > 0) ? unit.upgrades.length - 1 : 0;
         const { effectiveStats, isKiritoVR, suffix } = buildCalculationContext(unit, 'ruler', { isAbility, upgradeLevel });
         const hasPassiveDoT = effectiveStats.passives && effectiveStats.passives.some(p => p.dot && p.dot > 0);
         const hasNativeDoT = (effectiveStats.dot > 0) || (effectiveStats.burnMultiplier > 0) || isKiritoVR || hasPassiveDoT;
 
-        let allowedHeads = cfg.head ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'] : ['none'];
+        let allowedHeads = cfg.head ? (jobHeads && jobHeads.length > 0 ? jobHeads : ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut']) : ['none'];
+        
+        // Always include 'none' (baseline) when head calculation is enabled
+        if (cfg.head && !allowedHeads.includes('none')) {
+            allowedHeads = ['none', ...allowedHeads];
+        }
+
         if (existingHeads && existingHeads.length > 0) {
             allowedHeads = allowedHeads.filter(h => h === 'none' || !existingHeads.includes(h));
         }
@@ -259,7 +289,6 @@ if (isMainThread) {
         const traitGroups = {};
 
         const maxPts = ((unit.level || 1) - 1) + 30;
-        const allowRange = false;
 
         traitsForCalc.forEach(trait => {
             if (trait.id === 'none') return;
@@ -268,10 +297,10 @@ if (isMainThread) {
             const traitAddsDot = trait.dotBuff > 0 || trait.hasRadiation || trait.allowDotStack;
             const isDotPossible = hasNativeDoT || traitAddsDot;
             
-            const templatesKey = `${cfg.subs}-${isDotPossible}-${cfg.head}-${allowRange}`;
+            const templatesKey = `${cfg.subs}-${isDotPossible}-${cfg.head}-${(selectedSets||[]).join(',')}-${allowedHeads.join(',')}`;
             let templates = PRECALC_TEMPLATES[templatesKey];
             if(!templates) {
-                templates = generateTemplates(cfg.subs, allowedHeads, isDotPossible, allowRange);
+                templates = generateTemplates(cfg.subs, allowedHeads, isDotPossible, selectedSets);
                 PRECALC_TEMPLATES[templatesKey] = templates;
             }
             
@@ -337,33 +366,15 @@ if (isMainThread) {
                 }
                 pushBest(bestSpa, 'spa');
             } catch (err) { console.error(`Error calculating spa points for ${unit.id}:`, err); }
-
-            try {
-                // Pass 3: range points (only for range-enabled units)
-                if (allowRange) {
-                    context.dmgPoints = 0; context.spaPoints = 0; context.rangePoints = 99;
-                    effectiveStats.context = context;
-                    const bestRange = new Map();
-                    for (let i = 0; i < tmplLen; i++) {
-                        const t = unitTemplates[i]; context.headPiece = t.meta.headUsed;
-                        const res = calculateDPS(effectiveStats, t.stats, context);
-                        if (isNaN(res.total)) continue;
-                        const key = t.meta.key;
-                        const c = bestRange.get(key);
-                        if (!c || res.range > c.res.range || (res.range === c.res.range && res.total > c.res.total)) bestRange.set(key, { res, meta: t.meta });
-                    }
-                    pushBest(bestRange, 'range');
-                }
-            } catch (err) { console.error(`Error calculating range points for ${unit.id}:`, err); }
         });
         
         return traitGroups;
     }
 
-    function finalizeDatabase(rawDb, existingRaw, outPath) {
-        const MAP_PRIO = { 'dmg': 0, 'spa': 1, 'range': 2, 'raw_dmg': 3 };
+    function finalizeDatabase(rawDb, existingRaw, outPath, sigHeads) {
+        const MAP_PRIO = { 'dmg': 0, 'spa': 1, 'raw_dmg': 2 };
         const MAP_BODY = { 'dmg': 0, 'dot': 1, 'cm': 2 };
-        const MAP_LEGS = { 'dmg': 0, 'spa': 1, 'cf': 2, 'range': 3 };
+        const MAP_LEGS = { 'dmg': 0, 'spa': 1, 'cf': 2 };
         const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'bloodline_head': 7, 'reanimated_head': 8, 'sorcerer_hunter_spirit': 9, 'strongest_sorcerer_glasses': 10, 'monarch': 11, 'warlord_hat': 12, 'mochi_scarf': 13, 'flaming_donut': 14 };
 
         const stringPool = new Map(); const stringArr = [""]; 
@@ -440,14 +451,14 @@ if (isMainThread) {
         }
 
         const payloadStr = JSON.stringify({ s: stringArr, p: subArr, d: FINAL_DB });
-        const fileContent = `// BUILDSIG: sun_god,ninja,reaper_necklace,shadow_reaper_necklace,junior,biju_head,bloodline_head,reanimated_head,sorcerer_hunter_spirit,strongest_sorcerer_glasses,monarch,warlord_hat,mochi_scarf,flaming_donut
+        const fileContent = `// BUILDSIG: ${sigHeads || 'all'}
 (function() {
     const RAW = ${payloadStr};
     const S = RAW.s; const P = RAW.p; const D = RAW.d;
-    const PRIO = ['dmg', 'spa', 'range', 'raw_dmg'];
-    const BODY = ['dmg', 'dot', 'cm']; const LEGS = ['dmg', 'spa', 'cf', 'range'];
+    const PRIO = ['dmg', 'spa', 'raw_dmg'];
+    const BODY = ['dmg', 'dot', 'cm']; const LEGS = ['dmg', 'spa', 'cf'];
     const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'];
-    const DESC_BODY = ['Dmg', 'DoT', 'Crit Dmg']; const DESC_LEGS = ['Dmg', 'Spa', 'Crit Rate', 'Range'];
+    const DESC_BODY = ['Dmg', 'DoT', 'Crit Dmg']; const DESC_LEGS = ['Dmg', 'Spa', 'Crit Rate'];
     const ROW_SIZE = 18;
 
     const decode = (b64) => {
@@ -516,15 +527,18 @@ if (isMainThread) {
     parentPort.on('message', (msg) => {
         if (msg.type === 'exit') process.exit(0);
         if (msg.type === 'job') {
-            const { combo, targetUnits, outDir } = msg;
+            const { combo, targetUnits, outDir, selectedHeads, selectedSets } = msg;
             const targetSet = new Set(targetUnits);
             const outName = getDbName(combo);
             const outPath = outDir + '/' + outName;
 
-            window.mikuActive = combo[0] === '1'; window.enlightenedGodActive = combo[1] === '1';
-            window.bijuuActive = combo[2] === '1'; window.ancientMageActive = combo[3] === '1';
-            window.kingSailorActive = combo[4] === '1'; window.bulmaActive = combo[6] === '1';
-            window.fernHillActive = combo[5] === 'hill'; window.fernGroundActive = combo[5] === 'ground';
+            window.mikuActive = combo[0] === '1'; 
+            window.enlightenedGodActive = combo[1] === '1';
+            window.bijuuActive = combo[2] === '1'; 
+            window.ancientMageActive = combo[3] === '1';
+            window.kingSailorActive = combo[4] === '1';
+            window.fernHillActive = combo[5] === 'hill'; 
+            window.fernGroundActive = combo[5] === 'ground';
             window.CALCULATION_MODE = 'potential';
  
             // Assume full modes for Sukuna for DB ranking
@@ -574,9 +588,9 @@ if (isMainThread) {
             });
 
             const ROW_SIZE = 18;
-            const PRIO = ['dmg', 'spa', 'range', 'raw_dmg'];
+            const PRIO = ['dmg', 'spa', 'raw_dmg'];
             const BODY = ['dmg', 'dot', 'cm'];
-            const LEGS = ['dmg', 'spa', 'cf', 'range'];
+            const LEGS = ['dmg', 'spa', 'cf'];
             const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'];
 
             const decode = (b64) => {
@@ -664,13 +678,13 @@ if (isMainThread) {
                     const isAbility = type === 'abil';
 
                     CONFIGS.forEach(cfg => {
-                        const traitGroups = fastCalculateUnitBuilds(u, cfg, traitsForCalc, isAbility, existingHeads);
+                        const traitGroups = fastCalculateUnitBuilds(u, cfg, traitsForCalc, isAbility, existingHeads, selectedHeads, selectedSets);
  
                         if (u.id === 'the_strongest_in_history' && cfg.subs) {
                             window.unitModesState['the_strongest_in_history'] = [1, 2];
                             const monarchTrait = traitsForCalc.find(t => t.name === 'Ruler' || t.name === 'Godly');
                             if (monarchTrait) {
-                                const mBuilds = fastCalculateUnitBuilds(u, { head: true, subs: true }, [monarchTrait], isAbility, existingHeads);
+                                const mBuilds = fastCalculateUnitBuilds(u, { head: true, subs: true }, [monarchTrait], isAbility, existingHeads, selectedHeads, selectedSets);
                                 if (mBuilds[monarchTrait.name]) {
                                     if (!traitGroups[monarchTrait.name]) traitGroups[monarchTrait.name] = [];
                                     traitGroups[monarchTrait.name].push(...mBuilds[monarchTrait.name]);
@@ -679,8 +693,8 @@ if (isMainThread) {
                             window.unitModesState['the_strongest_in_history'] = [0];
                         }
 
-                        const processGroup = (list, limit) => {
-                            const prioGroups = { dmg: [], spa: [], range: [], raw_dmg: [] };
+                        const processGroup = (list) => {
+                            const prioGroups = { dmg: [], spa: [], raw_dmg: [] };
                             for (const b of list) {
                                 if (prioGroups[b.prio]) prioGroups[b.prio].push(b);
                             }
@@ -690,21 +704,21 @@ if (isMainThread) {
                                 const prioList = prioGroups[prio];
                                 if (prioList.length === 0) continue;
                                 
-                                if (prio === 'range') {
-                                    prioList.sort((a, b) => b.range !== a.range ? (b.range || 0) - (a.range || 0) : (b.dps || 0) - (a.dps || 0));
-                                } else {
-                                    prioList.sort((a, b) => b.dps !== a.dps ? (b.dps || 0) - (a.dps || 0) : (b.dmgVal || 0) - (a.dmgVal || 0));
-                                }
+                                prioList.sort((a, b) => b.dps !== a.dps ? (b.dps || 0) - (a.dps || 0) : (b.dmgVal || 0) - (a.dmgVal || 0));
 
                                 const seenKeys = new Set();
-                                let added = 0;
+                                const comboCounts = {};
                                 for (const b of prioList) {
-                                    const key = b.setName + "_" + (b.headUsed || 'none') + "_" + b.mainStats.body + "_" + b.mainStats.legs;
-                                    if (!seenKeys.has(key)) {
+                                    const comboKey = b.mainStats.body + "_" + b.mainStats.legs;
+                                    const exactKey = b.setName + "_" + (b.headUsed || 'none') + "_" + comboKey;
+                                    
+                                    if (!comboCounts[comboKey]) comboCounts[comboKey] = 0;
+                                    if (comboCounts[comboKey] >= 3) continue;
+
+                                    if (!seenKeys.has(exactKey)) {
                                         uniqueList.push(b);
-                                        seenKeys.add(key);
-                                        added++;
-                                        if (added >= limit) break;
+                                        seenKeys.add(exactKey);
+                                        comboCounts[comboKey]++;
                                     }
                                 }
                             }
@@ -714,7 +728,7 @@ if (isMainThread) {
                         // Pre-process new builds to reduce size drastically before merging
                         const topNewPerTrait = [];
                         for (const trait in traitGroups) {
-                            topNewPerTrait.push(...processGroup(traitGroups[trait], 15));
+                            topNewPerTrait.push(...processGroup(traitGroups[trait]));
                         }
 
                         const mergeAndReduce = (existingArr, newReduced) => {
@@ -727,7 +741,7 @@ if (isMainThread) {
                             
                             const result = [];
                             for (const trait in traitMap) {
-                                result.push(...processGroup(traitMap[trait], 20));
+                                result.push(...processGroup(traitMap[trait]));
                             }
                             
                             // Final stable sort for the output
@@ -745,7 +759,7 @@ if (isMainThread) {
             });
 
             parentPort.postMessage({ type: 'log', outName, data: 'Writing database file to disk...' });
-            finalizeDatabase(workerDb, existingRaw, outPath);
+            finalizeDatabase(workerDb, existingRaw, outPath, selectedHeads.join(','));
             workerDb = null;
             existingRaw = null;
             if (typeof global.gc === 'function') global.gc();
@@ -783,10 +797,10 @@ class GeneratorApp:
 
     def get_units(self): return self.units
 
-    def start_generation(self, selected_units, threads, mode='all', buffs=None):
+    def start_generation(self, selected_units, threads, mode='all', buffs=None, selected_heads=None, selected_sets=None):
         if self.is_running: return "Already running"
         self.is_running = True
-        threading.Thread(target=self._run_logic, args=(selected_units, threads, mode, buffs), daemon=True).start()
+        threading.Thread(target=self._run_logic, args=(selected_units, threads, mode, buffs, selected_heads, selected_sets), daemon=True).start()
         return "Started"
 
     def stop_generation(self):
@@ -800,7 +814,7 @@ class GeneratorApp:
             self.temp_dir = None
             threading.Thread(target=shutil.rmtree, args=(tmp,), kwargs={"ignore_errors": True}, daemon=True).start()
 
-    def _run_logic(self, selected_units, threads, mode='all', buffs=None):
+    def _run_logic(self, selected_units, threads, mode='all', buffs=None, selected_heads=None, selected_sets=None):
         try:
             self.window.evaluate_js("updateStatus('Preparing highly optimized build scripts...')")
             
@@ -816,7 +830,25 @@ class GeneratorApp:
                     if filename.startswith("utdx/"): file_path = filename[5:]
                     elif os.path.exists(os.path.join("utdx", filename)): file_path = os.path.join("utdx", filename)
                 if os.path.exists(file_path):
-                    with open(file_path, "r", encoding="utf-8") as f: combined_js_parts.append(f.read() + "\n")
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        content = f.read()
+                        # Strip ES module exports for standard Node execution context
+                        content = re.sub(r'\bexport\s+const\b', 'const', content)
+                        content = re.sub(r'\bexport\s+function\b', 'function', content)
+                        content = re.sub(r'\bexport\s+default\b', '', content)
+                        combined_js_parts.append(content + "\n")
+
+            # Expose library constants to global/window once all are defined to avoid TDZ errors
+            combined_js_parts.append("""
+if (typeof window !== 'undefined') {
+    if (typeof ADVANTAGES !== 'undefined') window.ADVANTAGES = ADVANTAGES;
+    if (typeof LEADER_BUFFS !== 'undefined') window.LEADER_BUFFS = LEADER_BUFFS;
+    if (typeof GLOBAL_UNIT_BUFFS !== 'undefined') window.GLOBAL_UNIT_BUFFS = GLOBAL_UNIT_BUFFS;
+    if (typeof SUB_STAT_BASES !== 'undefined') window.SUB_STAT_BASES = SUB_STAT_BASES;
+    if (typeof MAIN_STAT_BASES !== 'undefined') window.MAIN_STAT_BASES = MAIN_STAT_BASES;
+    if (typeof generateRelic !== 'undefined') window.generateRelic = generateRelic;
+}
+""")
             
             units_dir = 'units' if os.path.exists('units') else os.path.join('utdx', 'units')
             if os.path.exists(units_dir):
@@ -846,9 +878,8 @@ class GeneratorApp:
             b_amage = get_states('amage')
             b_ksailor = get_states('ksailor')
             b_fern = get_states('fern', ['none', 'hill', 'ground'])
-            b_bulma = get_states('bulma')
 
-            all_combos = list(itertools.product(b_miku, b_enlightened, b_bijuu, b_amage, b_ksailor, b_fern, b_bulma))
+            all_combos = list(itertools.product(b_miku, b_enlightened, b_bijuu, b_amage, b_ksailor, b_fern))
             db_dir = "databases" if os.path.exists("databases") else os.path.join("utdx", "databases")
             os.makedirs(db_dir, exist_ok=True)
 
@@ -860,7 +891,6 @@ class GeneratorApp:
                 if c[2] == '1': p.append('bijuu')
                 if c[3] == '1': p.append('amage')
                 if c[4] == '1': p.append('ksailor')
-                if c[6] == '1': p.append('bulma')
                 if c[5] == 'hill': p.append('magehill')
                 elif c[5] == 'ground': p.append('mageground')
                 return "db_base.js" if not p else "db_" + "_".join(p) + ".js"
@@ -892,7 +922,9 @@ class GeneratorApp:
                 "combinations": combinations,
                 "targetUnits": [str(u) for u in selected_units],
                 "threads": int(threads),
-                "outDir": db_dir
+                "outDir": db_dir,
+                "selectedHeads": selected_heads,
+                "selectedSets": selected_sets
             }
             job_file = os.path.join(self.temp_dir, "job.json")
             with open(job_file, "w", encoding="utf-8") as f: json.dump(job_data, f)
@@ -942,18 +974,18 @@ HTML = """
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --accent: #38bdf8;
+            --bg: #0d0d12;
+            --card-bg: #16161d;
+            --accent: #a855f7;
             --text: #f8fafc;
             --text-dim: #94a3b8;
         }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
-        header { padding: 20px 40px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        header { padding: 20px 40px; background: rgba(2, 6, 23, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(168, 85, 247, 0.2); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
         .title h1 { margin: 0; font-size: 1.5rem; color: var(--accent); }
         .title p { margin: 5px 0 0; font-size: 0.85rem; color: var(--text-dim); }
         .main-container { flex: 1; display: flex; overflow: hidden; }
-        .sidebar { width: 300px; padding: 20px; background: rgba(30, 41, 59, 0.3); border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 20px; }
+        .sidebar { width: 300px; padding: 20px; background: rgba(15, 23, 42, 0.4); border-right: 1px solid rgba(168, 85, 247, 0.1); display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
         .unit-grid { flex: 1; padding: 25px; display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 20px; overflow-y: auto; align-content: start; }
         .unit-card { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .unit-card:hover { transform: translateY(-5px); background: rgba(51, 65, 85, 0.9); border-color: var(--accent); }
@@ -963,7 +995,9 @@ HTML = """
         .unit-name { font-size: 0.85rem; font-weight: 600; color: var(--text); text-shadow: 0 2px 4px rgba(0,0,0,0.3); text-align: center; line-height: 1.2; }
         .control-group { display: flex; flex-direction: column; gap: 8px; }
         .control-group label { font-size: 0.85rem; color: var(--text-dim); }
-        input[type="number"] { background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255,255,255,0.1); color: var(--text); padding: 8px; border-radius: 6px; outline: none; }
+        input[type="number"], select, input[type="text"] { background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255,255,255,0.1); color: var(--text); padding: 8px; border-radius: 6px; outline: none; }
+        select option { background: #1e293b; color: white; }
+        input::placeholder { color: rgba(255,255,255,0.3); }
         .btn { background: var(--accent); color: var(--bg); border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
         .btn:hover { opacity: 0.9; transform: scale(1.02); }
         .btn:disabled { background: var(--text-dim); cursor: not-allowed; }
@@ -1005,6 +1039,20 @@ HTML = """
                     <option value="custom">Custom Buff Selection</option>
                 </select>
             </div>
+            <div class="control-group">
+                <label>Relic Sets to Include</label>
+                <input type="text" id="set-search" placeholder="Search sets..." onkeyup="renderGearSelection()" style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255,255,255,0.1); color: var(--text); padding: 6px 10px; border-radius: 6px; outline: none; font-size: 0.75rem; margin-bottom: 5px;">
+                <div id="set-selection" style="max-height: 120px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 4px;">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 4px;"><button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.7rem;" onclick="toggleAllGear('.set-cb', true)">All</button><button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.7rem;" onclick="toggleAllGear('.set-cb', false)">None</button></div>
+            </div>
+            <div class="control-group">
+                <label>Head Pieces to Include</label>
+                <input type="text" id="head-search" placeholder="Search heads..." onkeyup="renderGearSelection()" style="background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255,255,255,0.1); color: var(--text); padding: 6px 10px; border-radius: 6px; outline: none; font-size: 0.75rem; margin-bottom: 5px;">
+                <div id="head-selection" style="max-height: 120px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: 4px;">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 4px;"><button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.7rem;" onclick="toggleAllGear('.head-cb', true)">All</button><button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.7rem;" onclick="toggleAllGear('.head-cb', false)">None</button></div>
+            </div>
             <div id="buff-selection" style="display: none; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
                 <div style="display: grid; grid-template-columns: 1fr 60px 60px; gap: 10px; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
                     <span style="font-size: 0.7rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase;">Buff Name</span>
@@ -1039,11 +1087,6 @@ HTML = """
                         <input type="checkbox" data-buff="ksailor" data-type="force" style="justify-self: center;">
                     </div>
                     <div class="buff-row" style="display: grid; grid-template-columns: 1fr 60px 60px; gap: 10px; align-items: center;">
-                        <span style="font-size: 0.85rem; color: var(--text);">Bulma</span>
-                        <input type="checkbox" data-buff="bulma" data-type="permute" checked style="justify-self: center;">
-                        <input type="checkbox" data-buff="bulma" data-type="force" style="justify-self: center;">
-                    </div>
-                    <div class="buff-row" style="display: grid; grid-template-columns: 1fr 60px 60px; gap: 10px; align-items: center;">
                         <span style="font-size: 0.85rem; color: var(--text);">Fern (Hill/Ground)</span>
                         <input type="checkbox" data-buff="fern" data-type="permute" checked style="justify-self: center;">
                         <span style="font-size: 0.7rem; color: var(--text-dim); text-align: center;">N/A</span>
@@ -1068,10 +1111,15 @@ HTML = """
 
     <script>
         let units = []; let selected = new Set();
+        const relicSets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi'];
+        const headPieces = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'];
+        let selectedSets = new Set(relicSets);
+        let selectedHeads = new Set(headPieces);
         
         window.addEventListener('pywebviewready', async () => {
             units = await pywebview.api.get_units();
             renderUnits();
+            renderGearSelection();
         });
         
         function renderUnits() {
@@ -1083,6 +1131,15 @@ HTML = """
             `).join('');
         }
         
+        function renderGearSelection() {
+            document.getElementById('set-selection').innerHTML = relicSets.map(s => `<div style="display: flex; gap: 8px; font-size: 0.75rem;"><input type="checkbox" class="set-cb" value="${s}" checked> <span>${s}</span></div>`).join('');
+            document.getElementById('head-selection').innerHTML = headPieces.map(h => `<div style="display: flex; gap: 8px; font-size: 0.75rem;"><input type="checkbox" class="head-cb" value="${h}" checked> <span>${h.replace(/_/g, ' ').toUpperCase()}</span></div>`).join('');
+        }
+        
+        function toggleAllGear(selector, val) {
+            document.querySelectorAll(selector).forEach(i => i.checked = val);
+        }
+
         function toggleBuffSelect() {
             document.getElementById('buff-selection').style.display = document.getElementById('gen-mode').value === 'custom' ? 'block' : 'none';
         }
@@ -1093,6 +1150,9 @@ HTML = """
         function start() {
             const mode = document.getElementById('gen-mode').value;
             const buffs = {};
+            const finalHeads = Array.from(selectedHeads);
+            const finalSets = Array.from(selectedSets);
+
             document.querySelectorAll('#buff-selection input[type="checkbox"]').forEach(i => {
                 const b = i.getAttribute('data-buff');
                 const t = i.getAttribute('data-type');
@@ -1105,7 +1165,7 @@ HTML = """
             document.getElementById('progress-log').innerText = 'Starting Node.js workers...';
             document.getElementById('stop-gen-btn').style.display = 'block';
             
-            pywebview.api.start_generation(Array.from(selected), document.getElementById('threads').value, mode, buffs);
+            pywebview.api.start_generation(Array.from(selected), document.getElementById('threads').value, mode, buffs, finalHeads, finalSets);
         }
 
         function stopGeneration() {

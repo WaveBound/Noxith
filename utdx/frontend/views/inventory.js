@@ -5,13 +5,13 @@
 const RELIC_STORAGE_KEY = 'uto_relic_inventory_v1';
 
 const RELIC_COLORS = {
-    'ninja': 'linear-gradient(135deg, #eee, #999)',
-    'sun_god': 'linear-gradient(135deg, #eee, #999)',
-    'laughing': 'linear-gradient(135deg, #eee, #999)',
-    'ex': 'linear-gradient(135deg, #eee, #999)',
-    'shadow_reaper': 'linear-gradient(135deg, #eee, #999)',
-    'reaper_set': 'linear-gradient(135deg, #eee, #999)',
-    'default': 'linear-gradient(135deg, #eee, #999)'
+    'ninja': 'linear-gradient(135deg, #1e1b4b, #020617)',
+    'sun_god': 'linear-gradient(135deg, #1e1b4b, #020617)',
+    'laughing': 'linear-gradient(135deg, #1e1b4b, #020617)',
+    'ex': 'linear-gradient(135deg, #1e1b4b, #020617)',
+    'shadow_reaper': 'linear-gradient(135deg, #1e1b4b, #020617)',
+    'reaper_set': 'linear-gradient(135deg, #1e1b4b, #020617)',
+    'default': 'linear-gradient(135deg, #1e1b4b, #020617)'
 };
 
 // Refactored to use Constants dynamically
@@ -627,4 +627,3 @@ window.runOptimalityCalc = function (relicId) {
     circle.style.borderColor = color;
     document.getElementById('optPercent').style.color = color;
 };
-

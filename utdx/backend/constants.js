@@ -1,6 +1,6 @@
 const MAIN_STAT_VALS = {
     body: { dmg: 60, dot: 75, cm: 120 },
-    legs: { dmg: 60, spa: 22.5, cf: 37.5, range: 30 },
+    legs: { dmg: 60, spa: 22.5, cf: 37.5 },
     // Visual values for Head (Math engine ignores these currently)
     head: { potency: 45, elemental: 30 } 
 };
@@ -21,7 +21,7 @@ const STAT_CODE_TO_CLASS = {
 
 const STAT_LABELS = {
     dmg: 'Dmg', spa: 'SPA', cdmg: 'Crit Dmg', crit: 'Crit Rate', dot: 'DoT', range: 'Range',
-    potency: 'Potency', elemental: 'Elem Dmg', // New Labels
+    potency: 'Potency', elemental: 'Elemental', // New Labels
     cm: 'Crit Dmg', cf: 'Crit Rate',
     meter: 'Meter Gain', hyper: 'Hyper Dmg'
 };
@@ -94,8 +94,7 @@ const infoDefinitions = {
         title: "Level Scaling Formula",
         formula: `
         <span class="ip-var">Dmg</span> = <span class="ip-var">Base</span> * (1.0045125 ^ <span class="ip-var">Lv</span>)<br>
-        <span class="ip-var">SPA</span> = <span class="ip-var">Base</span> * (0.9954875 ^ <span class="ip-var">Lv</span>)<br>
-        <span class="ip-var">Range</span> = <span class="ip-var">Base</span> * (1.0045125 ^ <span class="ip-var">Lv</span>)
+        <span class="ip-var">SPA</span> = <span class="ip-var">Base</span> * (0.9954875 ^ <span class="ip-var">Lv</span>)
         `,
         desc: "Damage <b>and Range</b> increase exponentially by approx <span class='text-white'>0.45%</span> per level.<br>SPA decreases by approx <span class='text-white'>0.45%</span> per level.<br><br><b>SSS Rank:</b> Adds a flat multiplier (<span class='ip-num'>x1.2</span> Dmg/Rng, <span class='ip-num'>x0.92</span> SPA) applied <i>after</i> level scaling."
     },

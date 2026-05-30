@@ -23,70 +23,114 @@ window.calcRelicStats = function(relicStats, uStats, headPiece, context, traitOb
 
     return { sBonus, tagBuffs, setPerkDmg, baseR_Dmg, baseR_Spa, baseR_Cm, baseR_Cf, baseR_Dot, baseR_Range };
 };
-// RELIC-BACKEND.JS - Centralized Math for Relic Stats and Substats
-// ============================================================================
 
 window._calcSetAndTagBonuses = function(relicStats, uStats, headPiece, context = {}) {
-    let sBonus = { ...((typeof setBonuses !== 'undefined' ? setBonuses[relicStats.set] : null) || { dmg: 0, spa: 0, range: 0, cf: 0, cm: 0, dot: 0 }) };
-    let tagBuffs = { dmg: 0, spa: 0, cm: 0, cf: 0, range: 0, dot: 0 };
+    let sBonus = { dmg: 0, spa: 0, range: 0, cf: 0, cm: 0, dot: 0, bossDmg: 0, trueDmg: 0, elementalAll: 0, hyperArmor: 0 };
+    let tagBuffs = { dmg: 0, spa: 0, cm: 0, cf: 0, range: 0, dot: 0, elementalAll: 0, hyperArmor: 0 };
     let setPerkDmg = 0;
 
-    if (headPiece === 'reaper_necklace') {
-        if (relicStats.set !== 'reaper_set') { sBonus.spa = (sBonus.spa || 0) + 7.5; sBonus.range = (sBonus.range || 0) + 15; }
-    } else if (headPiece === 'shadow_reaper_necklace') {
-        if (relicStats.set !== 'shadow_reaper') { sBonus.dmg = (sBonus.dmg || 0) + 2.5; sBonus.range = (sBonus.range || 0) + 10; sBonus.cf = (sBonus.cf || 0) + 5; sBonus.cm = (sBonus.cm || 0) + 5; }
+    const setObj = (typeof SETS !== 'undefined') ? SETS.find(s => s.id === relicStats.set) : null;
+    if (setObj && setObj.bonus) {
+        const b = setObj.bonus;
+        sBonus.dmg = b.dmg || 0;
+        sBonus.spa = b.spa || 0;
+        sBonus.range = b.range || 0;
+        sBonus.cf = b.cRate || 0;
+        sBonus.cm = b.cDmg || 0;
+        sBonus.dot = b.dot || 0;
+        sBonus.bossDmg = b.bossDmg || 0;
+        sBonus.trueDmg = b.trueDmg || 0;
+        sBonus.hyperArmor = b.hyperArmor || 0;
+        sBonus.armorDmg = b.armorDmg || 0;
+        
+        // Handle set elemental bonus if matching attacker element
+        const unitElement = uStats.element || "None";
+        if (b.elemental && b.elemental[unitElement]) {
+            sBonus.dmg += b.elemental[unitElement];
+        }
     }
 
-    const unitElement = uStats.element || "None";
+    // Accessory raw stats if wearing accessory from another set
+    const headSetIdMap = {
+        reaper_necklace: 'reaper_set',
+        shadow_reaper_necklace: 'shadow_reaper',
+        junior: 'ninja',
+        biju_head: 'biju_set',
+        reanimated_head: 'reanimated_ninja',
+        sorcerer_hunter_spirit: 'sorcerer_killer',
+        strongest_sorcerer_glasses: 'strongest_sorcerer',
+        monarch: 'monarch',
+        monarch_cape: 'monarch',
+        monarch_head: 'monarch',
+        warlord_hat: 'warlord',
+        sun_god: 'sun_god',
+        ninja: 'ninja'
+    };
+
+    const mappedHeadSetId = headSetIdMap[headPiece];
+    if (mappedHeadSetId && relicStats.set !== mappedHeadSetId) {
+        const headSetObj = (typeof SETS !== 'undefined') ? SETS.find(s => s.id === mappedHeadSetId) : null;
+        if (headSetObj && headSetObj.accessory) {
+            const acc = headSetObj.accessory;
+            sBonus.dmg += acc.dmg || 0;
+            sBonus.spa += acc.spa || 0;
+            sBonus.range += acc.range || 0;
+            sBonus.cf += acc.cRate || 0;
+            sBonus.cm += acc.cDmg || 0;
+            sBonus.dot += acc.dot || 0;
+            sBonus.bossDmg += acc.bossDmg || 0;
+            sBonus.trueDmg += acc.trueDmg || 0;
+            sBonus.hyperArmor += acc.hyperArmor || 0;
+            sBonus.armorDmg += acc.armorDmg || 0;
+        }
+    }
+
     const tags = uStats.tags || [];
 
-    if (relicStats.set === 'ninja' && ["Dark", "Rose", "Fire"].includes(unitElement)) sBonus.dmg += 10;
-    else if (relicStats.set === 'sun_god' && ["Ice", "Light", "Water"].includes(unitElement)) sBonus.dmg += 10;
+    // Apply tag perks from TAG_PERKS
+    const perks = (typeof TAG_PERKS !== 'undefined') ? TAG_PERKS[relicStats.set] : null;
+    if (perks) {
+        perks.forEach(perk => {
+            if (tags.includes(perk.tag)) {
+                const b = perk.bonus || {};
+                sBonus.dmg += b.dmg || 0;
+                sBonus.spa += b.spa || 0;
+                sBonus.range += b.range || 0;
+                sBonus.cf += b.cRate || 0;
+                sBonus.cm += b.cDmg || 0;
+                sBonus.dot += b.dot || 0;
+                sBonus.bossDmg += b.bossDmg || 0;
+                sBonus.trueDmg += b.trueDmg || 0;
+                sBonus.elementalAll = (sBonus.elementalAll || 0) + (b.elementalAll || 0);
+                sBonus.hyperArmor += b.hyperArmor || 0;
 
-    // Rebellious Shinobi: +30% Dmg on CC Application (uses shared CC utility)
+                tagBuffs.dmg += b.dmg || 0;
+                tagBuffs.spa += b.spa || 0;
+                tagBuffs.range += b.range || 0;
+                tagBuffs.cf += b.cRate || 0;
+                tagBuffs.cm += b.cDmg || 0;
+                tagBuffs.dot += b.dot || 0;
+                tagBuffs.elementalAll = (tagBuffs.elementalAll || 0) + (b.elementalAll || 0);
+                tagBuffs.hyperArmor += b.hyperArmor || 0;
+            }
+        });
+    }
+
+    // Hardcoded CC check for Rebellious
     const hasCC = window.unitHasCC ? window.unitHasCC(uStats) : false;
     context.hasCC = hasCC;
-
-    if (relicStats.set === 'rebellious_set' && hasCC) {
-        // Return a flag to handle dynamic uptime in _calcHeadDynamicBuffs
+    if (relicStats.set === 'rebellious' && hasCC) {
         context.rebelliousCCActive = true;
     }
 
+    // Great Mage set type advantage hit bonus (kept for dynamic Mage compatibility)
     const isMage = window.isUnit && (window.isUnit(uStats.id, 'ancient_mage') || window.isUnit(uStats.id, 'megumin') || window.isUnit(uStats.id, 'maid') || window.isUnit(uStats.id, 'water_god') || (uStats.name && uStats.name.includes('Mage')));
-
-    // Great Mage: +20% Dmg on Type Advantage Hit (Uptime ~90%)
     if (relicStats.set === 'great_mage' && isMage) {
         sBonus.dmg += 18;
         setPerkDmg += 18;
     }
 
-    const applyTagBuff = (bonusName, tagName, stats) => {
-        if (relicStats.set === bonusName && tags.includes(tagName)) {
-            for (let k in stats) {
-                sBonus[k] = (sBonus[k] || 0) + stats[k];
-                tagBuffs[k] = (tagBuffs[k] || 0) + stats[k];
-            }
-        }
-    };
-
-    applyTagBuff('shadow_reaper', 'Peroxide', { spa: 10 });
-    applyTagBuff('shadow_reaper', 'Reaper', { dmg: 25, spa: 12.5 });
-    applyTagBuff('shadow_reaper', 'Rage', { dmg: 15, spa: 8.5, dot: 10 });
-    applyTagBuff('shadow_reaper', 'Hollow', { cf: 20, cm: 12.5 });
-    applyTagBuff('reaper_set', 'Peroxide', { dmg: 10, dot: 5, cm: 8.5 });
-    applyTagBuff('reaper_set', 'Reaper', { range: 15 });
-    applyTagBuff('reaper_set', 'Rage', { cm: 25, cf: 10, range: 10 });
-    applyTagBuff('reaper_set', 'Hollow', { dmg: 12.5, spa: 7.5, range: 15 });
-
-    // NEW SET TAG PERKS
-    applyTagBuff('rebellious_set', 'Ninjaverse', { cf: 15, cm: 20 });
-    applyTagBuff('rebellious_set', 'Sage', {}); // Element and Hyperarmor ignored per request
-    applyTagBuff('rebellious_set', 'Bloodline', { dmg: 15, range: 20 });
-    
-    applyTagBuff('warlord', 'Piece', { dmg: 20, spa: 5, cf: 10, dot: 20 });
-    applyTagBuff('warlord', 'Villain', { dmg: 10, cm: 20, range: 15 });
-
-    // Universal Magi Tag Buff
+    // Universal Magi Tag Buff (generic, non-relic logic)
     if (tags.includes('Magi') && window.isUnit && !window.isUnit(uStats.id, 'king_sailor')) {
         sBonus.dmg = (sBonus.dmg || 0) + 50;
         sBonus.spa = (sBonus.spa || 0) + 15;
@@ -94,7 +138,7 @@ window._calcSetAndTagBonuses = function(relicStats, uStats, headPiece, context =
         tagBuffs.spa = (tagBuffs.spa || 0) + 15;
     }
 
-    // Monarch Dynamic Bonus (Set)
+    // Monarch Dynamic Placements/Summon Bonus
     if (relicStats.set === 'monarch') {
         const upLevel = context.upgradeLevel !== undefined ? context.upgradeLevel : 6;
         let summonCount = 0;
@@ -139,25 +183,16 @@ window._calcSetAndTagBonuses = function(relicStats, uStats, headPiece, context =
             if (window.isUnit && window.isUnit(uStats.id, 'gluttonous_warlord')) summonCount = (upLevel >= 6) ? 12 : 10;
         }
 
-        if (summonCount > 0) {
-            const perk = Math.min(40, summonCount * 10);
+        // Apply Monarch passive dynamically based on trigger configuration
+        const monPassiveObj = (typeof PASSIVES !== 'undefined') ? PASSIVES.monarch : null;
+        if (summonCount > 0 && monPassiveObj) {
+            const perk = Math.min(monPassiveObj.maxDmgBuff, summonCount * monPassiveObj.dmgBuffPerSummon);
             sBonus.dmg += perk;
             setPerkDmg += perk;
         }
-
-        if (tags.includes('Leveling')) {
-            sBonus.dmg += 20;
-            tagBuffs.dmg += 20;
-            sBonus.bossDmg = (sBonus.bossDmg || 0) + 15;
-        }
-        if (tags.includes('King')) {
-            sBonus.dmg += 15;
-            tagBuffs.dmg += 15;
-            sBonus.dot = (sBonus.dot || 0) + 20;
-        }
     }
 
-    // Mochi Set: +40% Dmg when enemy has Time Snail (works for Time Snail units)
+    // Mochi Set fallback (keeps compatibility if old set used)
     if (relicStats.set === 'mochi') {
         const hasTimeSnail = window.unitHasTimeSnail ? window.unitHasTimeSnail(uStats) : false;
         if (hasTimeSnail) {
@@ -171,50 +206,124 @@ window._calcSetAndTagBonuses = function(relicStats, uStats, headPiece, context =
 
 window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats, relicStats = {}, context = {}) {
     let headDmgBase = 0, headDmgPassive = 0, headDmgTag = 0, headDotBuff = 0;
-    let headCalc = { type: headPiece, uptime: 1, trigger: 0, duration: 0, attacks: 0 };
-    const isMage = window.isUnit && (window.isUnit(uStats.id, 'ancient_mage') || window.isUnit(uStats.id, 'megumin') || window.isUnit(uStats.id, 'maid') || window.isUnit(uStats.id, 'water_god') || (uStats.name && uStats.name.includes('Mage')));
+    let headCalc = { type: headPiece, uptime: 1, trigger: 0, duration: 0, attacks: 0, cf: 0, cm: 0, elementalAll: 0, hyperArmor: 0 };
+    
+    // Map of headPiece ID to Set ID
+    const headSetIdMap = {
+        sun_god: 'sun_god',
+        ninja: 'ninja',
+        reaper_necklace: 'reaper_set',
+        shadow_reaper_necklace: 'shadow_reaper',
+        junior: 'ninja',
+        biju_head: 'biju_set',
+        reanimated_head: 'reanimated_ninja',
+        sorcerer_hunter_spirit: 'sorcerer_killer',
+        strongest_sorcerer_glasses: 'strongest_sorcerer',
+        monarch: 'monarch',
+        monarch_cape: 'monarch',
+        monarch_head: 'monarch',
+        warlord_hat: 'warlord'
+    };
 
-    if (headPiece === 'sun_god') {
-        headCalc.attacks = 6; headCalc.duration = 7;
-        const timeToTrigger = headCalc.attacks * finalSpa;
-        headCalc.trigger = timeToTrigger;
-        headCalc.uptime = Math.min(1, headCalc.duration / timeToTrigger);
-        headDmgBase = finalRange * headCalc.uptime;
-    } else if (headPiece === 'ninja') {
-        headCalc.attacks = 5; headCalc.duration = 10;
-        const timeToTrigger = headCalc.attacks * finalSpa;
-        headCalc.trigger = timeToTrigger;
-        headCalc.uptime = Math.min(1, headCalc.duration / timeToTrigger);
-        headDotBuff += 20 * headCalc.uptime;
-    } else if (headPiece === 'reaper_necklace') {
-        headDmgBase = 0; headCalc.type = 'reaper';
-    } else if (headPiece === 'shadow_reaper_necklace') {
-        headDmgBase = 0; headCalc.type = 'shadow_reaper';
-    } else if (headPiece === 'junior') {
-        headDmgBase = 0; headCalc.type = 'junior'; headCalc.multiplier = 1.1;
-    } else if (headPiece === 'biju_head') {
+    const mappedSetId = headSetIdMap[headPiece];
+    let passiveId = null;
+
+    if (mappedSetId) {
+        const setObj = (typeof SETS !== 'undefined') ? SETS.find(s => s.id === mappedSetId) : null;
+        if (setObj && setObj.accessory) {
+            const acc = setObj.accessory;
+            headDmgBase = acc.dmg || 0;
+            headCalc.spa = acc.spa || 0;
+            headCalc.range = acc.range || 0;
+            headCalc.cf = acc.cRate || 0;
+            headCalc.cm = acc.cDmg || 0;
+            headDotBuff = acc.dot || 0;
+            headCalc.hyperArmor = acc.hyperArmor || 0;
+            headCalc.elementalAll = (acc.elementalAll || 0) + 30;
+            
+            passiveId = acc.passive;
+        }
+    }
+
+    // Apply accessory passive if defined
+    if (passiveId && typeof applyPassiveBonus === 'function') {
+        const uCrit = uStats.crit || 0;
+        const uCDmg = uStats.cdmg || 0;
+        
+        const unitStatsSim = {
+            dmg: 1000,
+            spa: finalSpa,
+            range: finalRange,
+            critRate: uCrit,
+            critDmg: uCDmg,
+            trueDmg: 0,
+            dot: 0
+        };
+
         const isSasuke = uStats.id && (uStats.id.includes('sasuke') || (uStats._fileName && uStats._fileName.includes('sasuke')));
         const isTripleThreat = uStats.id && (uStats.id.includes('triple_threat') || (uStats._fileName && uStats._fileName.includes('triple_threat')));
-        if (isSasuke) {
-            headCalc.attacks = 3;
-            headCalc.duration = 10;
-            const timeToTrigger = headCalc.attacks * finalSpa;
-            headCalc.uptime = Math.min(1, headCalc.duration / timeToTrigger);
-            headCalc.trigger = timeToTrigger;
-            headDmgPassive = 70 * headCalc.uptime;
-            headCalc.type = 'biju';
-        } else if (isTripleThreat) {
-            headCalc.uptime = 1;
-            headDmgPassive = 70;
-            headCalc.type = 'biju';
+        
+        if (passiveId === 'biju_acc') {
+            // ONLY works on specific charged attack units
+            const isBijuAllowed = uStats.id && (
+                uStats.id.includes('triple_threat') || 
+                uStats.id === 'alpha_devil' ||
+                uStats.id === 'devil_hunter' ||
+                (uStats._fileName && uStats._fileName.includes('triple_threat'))
+            );
+
+            if (!isBijuAllowed) {
+                headDmgPassive = 0;
+                headCalc.type = 'biju';
+            } else if (uStats.id.includes('triple_threat') || (uStats._fileName && uStats._fileName.includes('triple_threat'))) {
+                headCalc.uptime = 1;
+                headDmgPassive = 70;
+                headCalc.type = 'biju';
+            } else {
+                // Alpha Devil and Devil Hunter
+                // 5 attacks to charge → 10 buffed attacks → repeat
+                const chargeAttacks = 5;
+                const buffedAttacks = 10;
+                const totalCycle = chargeAttacks + buffedAttacks; // 15 attacks
+                const uptime = buffedAttacks / totalCycle; // 10/15 ≈ 0.6667
+
+                headCalc.attacks = chargeAttacks;
+                headCalc.duration = buffedAttacks;
+                headCalc.uptime = uptime;
+                headCalc.trigger = chargeAttacks * finalSpa;
+                headCalc.note = `Charged: ${chargeAttacks} atks to fill → ${buffedAttacks} buffed atks (Biju active)`;
+                headDmgPassive = 70 * uptime;
+                headCalc.type = 'biju';
+            }
+        } else {
+            const passRes = window.applyPassiveBonus(passiveId, unitStatsSim);
+            const eff = passRes.effectiveStats;
+            if (eff.dmg !== unitStatsSim.dmg) {
+                headDmgPassive = ((eff.dmg / unitStatsSim.dmg) - 1) * 100;
+            }
+            if (eff.trueDmg) {
+                headCalc.trueDmg = eff.trueDmg;
+            }
+            if (eff.dot) {
+                headDotBuff += eff.dot;
+            }
+            if (passRes.uptimeInfo) {
+                headCalc.uptime = passRes.uptimeInfo.uptime !== undefined ? passRes.uptimeInfo.uptime / 100 : 1;
+                headCalc.trigger = passRes.uptimeInfo.timeToProc || 0;
+                headCalc.note = passRes.uptimeInfo.note;
+            }
+            if (passiveId.endsWith('_acc')) {
+                headCalc.type = passiveId.replace('_acc', '');
+            } else {
+                headCalc.type = passiveId;
+            }
         }
-    } else if (headPiece === 'reanimated_head') {
-        headCalc.attacks = 5; headCalc.duration = 10;
-        const timeToTrigger = headCalc.attacks * finalSpa;
-        headCalc.trigger = timeToTrigger;
-        headCalc.uptime = Math.min(1, headCalc.duration / timeToTrigger);
-        headDotBuff += finalRange * headCalc.uptime;
-        headCalc.type = 'reanimated';
+    }
+
+    const tags = uStats.tags || [];
+
+    if (headPiece === 'junior') {
+        headDmgBase = 0; headCalc.type = 'junior'; headCalc.multiplier = 1.1;
     } else if (headPiece === 'sorcerer_hunter_spirit') {
         headDmgBase = 60; headCalc.type = 'sorcerer_hunter';
         headCalc.noCrits = true;
@@ -228,11 +337,8 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
         const isBloodline = window.isAnyUnit && window.isAnyUnit(uStats.id, ['alpha_devil', 'devil_hunter', 'ancient_mage', 'mimicry_sorcerer']);
         headDmgPassive = isBloodline ? 30 : 0;
         headCalc.type = isBloodline ? 'bloodline' : 'none';
-    } else if (headPiece === 'warlord_hat') {
-        headCalc.type = 'warlord';
     } else if (headPiece === 'mochi_scarf') {
         const hasStatus = window.unitHasStatusEffect ? window.unitHasStatusEffect(uStats) : false;
-        // Skip scarf burn if unit already applies native Burn DoT (would not stack)
         const hasNativeDot = (uStats.dot > 0) ||
             (uStats.stats && uStats.stats.dot > 0) ||
             (uStats.passives && uStats.passives.some(p => p.dot > 0));
@@ -296,19 +402,22 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
         }
 
         const hStarMult = context.headStarMult || context.starMult || 1;
-        if (summonCount > 0) {
-            headDmgPassive += Math.min(60, summonCount * 10) * hStarMult;
+        const monAccPassiveObj = (typeof PASSIVES !== 'undefined') ? PASSIVES.monarch_acc : null;
+        if (summonCount > 0 && monAccPassiveObj) {
+            headDmgPassive += Math.min(monAccPassiveObj.maxDmgBuff, summonCount * monAccPassiveObj.dmgBuffPerAliveSummon) * hStarMult;
         }
 
-        const tags = uStats.tags || [];
-        if (tags.includes('Leveling')) {
-            headDmgTag += 20; 
-            headCalc.cf = (headCalc.cf || 0) + 5;
-            headCalc.cm = (headCalc.cm || 0) + 15;
-        }
-        if (tags.includes('King')) {
-            headDmgTag += 15; 
-            headDotBuff -= 12.5;
+        const monAccPerks = (typeof TAG_PERKS !== 'undefined') ? TAG_PERKS.monarch_acc : null;
+        if (monAccPerks) {
+            monAccPerks.forEach(perk => {
+                if (tags.includes(perk.tag)) {
+                    const b = perk.bonus || {};
+                    headDmgTag += b.dmg || 0;
+                    headCalc.cf += b.cRate || 0;
+                    headCalc.cm += b.cDmg || 0;
+                    headDotBuff += b.dot || 0;
+                }
+            });
         }
         headCalc.type = 'monarch';
     }

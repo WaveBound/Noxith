@@ -78,7 +78,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
 
                         const isAssistant = (sUnit?.tags && sUnit.tags.includes('Assistant')) ||
                             (s.tags && s.tags.includes('Assistant')) ||
-                            (window.isUnit && (window.isUnit(s.id, 'speedwagon') || window.isUnit(s.id, 'bulma')));
+                            (window.isUnit && window.isUnit(s.id, 'speedwagon'));
 
                         if (isAssistant) {
                             sPlacement = 1;

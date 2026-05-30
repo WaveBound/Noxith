@@ -620,7 +620,6 @@
         };
 
         populateMenu('.farms-menu', [
-            { id: 'bulma', name: 'Bulma', img: 'images/units/Bulma.png', tags: ['Hero', 'Assistant'] },
             { id: 'speedwagon', name: 'Speedcart', img: 'images/units/Speedwagon.png', tags: ['Assistant'] }
         ]);
 
@@ -847,7 +846,7 @@
         const BUFF_PROVIDERS = {
             'miku': ['miku'], 'enlightenedgod': ['enlightenedGod'], 'ancient_mage': ['ancientMage'],
             'king_sailor': ['kingSailor'], 'prodigy_mage': ['mageHill', 'mageGround'],
-            'unparalleled_armor': ['bijuu'], 'bulma': ['bulma']
+            'unparalleled_armor': ['bijuu']
         };
 
         const idsToCheck = [...hotbarUnitIds, ...(hotbarState.fusionMode ? activeFusions.map(f => f.id) : [])];
