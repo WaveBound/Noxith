@@ -27,17 +27,17 @@ window.unitBuildsCache = window.unitBuildsCache || {};
             background: #0f172a;
             color: #f8fafc;
         }
-        .filter-tab-content .search-row { gap: 8px; flex-wrap: wrap; }
+        .filter-tab-content .search-ro      { gap: 8px; flex-wrap: wrap; }
 
         .unit-card { 
-            min-height: 460px !important; 
+            min-height: 575px !important; 
             background: #0d0d12 !important; 
             border: 1px solid rgba(139, 92, 246, 0.15) !important;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
         .unit-card:hover { border-color: rgba(139, 92, 246, 0.4) !important; }
         
-        .top-builds-list { max-height: 300px !important; }
+        .top-builds-list { max-height: 420px !important; }
         .combo-section-header { 
             background: #16161d !important; color: #c084fc; font-size: 0.65rem; font-weight: 900; 
             padding: 4px 10px; margin: 10px 0 5px; border-radius: 4px; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.03); }
@@ -56,7 +56,6 @@ window.unitBuildsCache = window.unitBuildsCache || {};
 window.getUnitsPerPage = () => {
     const w = window.innerWidth;
     // Sidebar width is 260px. Grid padding is 20px on each side (40px total).
-    // On mobile (< 768px), sidebar is hidden/overlayed.
     const sidebarWidth = w > 768 ? 260 : 0;
     const gridPadding = 40; 
     const availableWidth = w - sidebarWidth - gridPadding;
@@ -192,18 +191,11 @@ function calculateBuildEfficiency(build, unitCost, unitMaxPlacement, unitId) {
 
 function getHeadBadgeHtml(headUsed) {
     if (!headUsed || headUsed === 'none') return '';
-    const h = HEAD_CONFIG[headUsed] || { name: 'Unknown', cls: 'unknown' };
-    
-    // Special handling for the Elemental Mask/Accessory
-    if (headUsed === 'elemental_damage' || headUsed === 'sun_god' || headUsed === 'ninja') {
-        return `<div class="stat-line"><span class="sl-label">HEAD</span>
-                    <div class="badge-base" style="border-color: rgba(249, 115, 22, 0.4);" title="Elemental Damage">
-                        <span style="color: #f97316;">ELEMENTAL</span><span class="badge-val val-main" style="color: white !important;">30%</span>
-                    </div>
-                </div>`;
-    }
-    
-    return `<div class="stat-line"><span class="sl-label">HEAD</span><div class="badge-base border-${h.cls}"><span class="text-${h.cls}">${h.name}</span></div></div>`;
+    return `<div class="stat-line"><span class="sl-label">HEAD</span>
+                <div class="badge-base" style="border-color: rgba(249, 115, 22, 0.4);" title="Elemental Damage">
+                    <span style="color: #f97316;">ELEMENTAL</span><span class="badge-val val-main" style="color: white !important;">30%</span>
+                </div>
+            </div>`;
 }
 
 function getSynergyBadgeHtml(unit, activeMode) {
@@ -352,35 +344,6 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     const headName = (r.headUsed && r.headUsed !== 'none') ? (HEAD_CONFIG[r.headUsed]?.name || r.headUsed) : '';
     const headHeaderHtml = headName ? `<span class="br-sep" style="margin: 0 1px;">/</span><span class="br-set" style="color:#60a5fa; font-size: 0.72em; padding: 1px 3px; letter-spacing: -0.2px;">${headName.toUpperCase()}</span>` : '';
 
-    // --- RESTORED LEADER BUFF UI LOGIC ---
-    let ksBonus = null;
-    let ttBonus = null;
-    const leader = window.hotbarState?.slots?.[0];
-    const isPotential = window.CALCULATION_MODE === 'potential';
-    const isLoadout = window.CALCULATION_MODE === 'loadout';
-    
-    // Check for King Sailor bonus
-    const isKsLeading = isPotential || (leader && isUnit(leader.id, 'king_sailor'));
-    const isKsActive = isPotential || (isLoadout && isKsLeading) || window.kingSailorActive || (window.hotbarState?.buffState?.kingSailor && isKsLeading);
-    if (isKsActive && isKsLeading) {
-        const tags = unitObj?.tags || [];
-        const el = String(unitObj?.stats?.element || '').toLowerCase();
-        if (tags.includes('Magi')) ksBonus = 'MAGI: +50% DMG / +15% SPA';
-        else if (tags.includes('Uncontrollable Power')) ksBonus = 'UNCONTROLLABLE: +30% DMG / +10% SPA';
-        else if (el === 'water') ksBonus = 'WATER: +20% DMG / +10% SPA';
-    }
-
-    // Check for Triple Threat bonus
-    const isTtLeading = isPotential || (leader && isUnit(leader.id, 'triple_threat'));
-    const isTtActive = isPotential || (isLoadout && isTtLeading) || window.tripleThreatActive || (window.hotbarState?.buffState?.triple_threat && isTtLeading);
-    if (isTtActive && isTtLeading) {
-        const tags = unitObj?.tags || [];
-        const el = String(unitObj?.stats?.element || '').toLowerCase();
-        if (tags.includes('Sword')) ttBonus = 'UNRIVALED: +50% DMG (Sword)';
-        else if (tags.includes('Piece')) ttBonus = 'UNRIVALED: +25% DMG / +10% RNG (Piece)';
-        else if (el === 'wind') ttBonus = 'UNRIVALED: +20% DMG / +5% CRIT (Wind)';
-    }
-
     return `
         <div class="build-row ${rankClass} ${sortMode === 'efficiency' ? 'is-efficiency-sort' : ''}">
             <div class="br-header" style="align-items: center; padding-top: 6px; padding-bottom: 2px;">
@@ -432,10 +395,6 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
                     <div class="fs-item-sm"><span class="fs-label">CDmg</span><span class="fs-val val-cdmg">${(s.finalCm || 0).toFixed(0)}%</span></div>
                     <div class="fs-item-sm"><span class="fs-label">DoT Dmg</span><span class="fs-val val-dot">${format(r.dotTotal || 0)}</span></div>
                 </div>
-                ${(ksBonus || ttBonus) ? `<div class="ts-lower-row" style="padding: 0 15px 8px; margin-top: -4px;">
-                    ${ksBonus ? `<div class="ts-bonus-pill" style="margin-bottom: 4px; display: inline-block; background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.3); padding: 2px 8px; border-radius: 4px;"><span class="ks-text" style="color: #fbbf24; font-size: 0.65rem; font-weight: 800;">${ksBonus}</span></div>` : ''}
-                    ${ttBonus ? `<div class="ts-bonus-pill" style="margin-bottom: 4px; display: inline-block; background: rgba(167, 243, 208, 0.08); border: 1px solid rgba(167, 243, 208, 0.3); padding: 2px 8px; border-radius: 4px;"><span class="ks-text" style="color: #a7f3d0; font-size: 0.65rem; font-weight: 800;">${ttBonus}</span></div>` : ''}
-                </div>` : ''}
             </div>
         </div>`;
 }
@@ -459,7 +418,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const activeMode = 'fixed';
 
     // Units that must ALWAYS calculate dynamically because static DB is stale or complex (Syncro/Follow-ups)
-    const forceDynamicUnits = ['revolutionary_chief_syncro', 'joyful_captain', 'the_strongest_in_history', 'jinoo_shadow_monarch', 'the_strongest_of_today', 'marine_hero', 'sharpshooter_king_trapper', 'king_sailor', 'triple_threat'];
+    const forceDynamicUnits = ['revolutionary_chief_syncro', 'joyful_captain', 'the_strongest_in_history', 'jinoo_shadow_monarch', 'the_strongest_of_today', 'marine_hero', 'sharpshooter_king_trapper'];
 
     if (!forceSync && (unitObj?.allowMultipleModes || unitId.toLowerCase().includes('syncro') || forceDynamicUnits.includes(unitId)) && !window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0]) {
         forceSync = true;

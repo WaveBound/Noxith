@@ -80,7 +80,13 @@ const GLOBAL_BUFF_DATA = {
 
             if (!isActive) return {};
 
-            if (window.isUnit(uStats.id, 'king_sailor')) return {};
+            // King Sailor should benefit from his own presence in Potential mode
+            if (isPotential && isUnit(uStats.id, 'king_sailor')) {
+                // Proceed to apply stats
+            } else if (isUnit(uStats.id, 'king_sailor')) {
+                return {};
+            }
+            
             const stats = (typeof GLOBAL_UNIT_BUFFS !== 'undefined') ? GLOBAL_UNIT_BUFFS.king_sailor.stats : { cRate: 10, cDmg: 25 };
             return { crit: stats.cRate, cdmg: stats.cDmg };
         },

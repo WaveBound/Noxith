@@ -649,10 +649,10 @@
    ========================================================= */
 .br-grid {
     /* 1. Increase --col-main to push the sub-stats column further to the right */
-    --col-main: 1.3fr;
+    --col-main: 1.4fr;
 
     /* 2. Controls the width of the Sub-stats column */
-    --col-sub: 1.2fr;
+    --col-sub: 1.4fr;
 
     /* 3. Controls the width of the DPS/Results column at the end */
     --col-res: 0.6fr;
@@ -838,12 +838,12 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5px;
-    padding: 1px 3px;
+    padding: 1px 2px;
     height: 18px;
-    border-radius: 7px;
+    border-radius: 6px;
     font-size: 0.55rem;
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    font-weight: 750;
+    font-weight: 800;
     text-transform: uppercase;
     border: 1px solid transparent;
     white-space: nowrap;
