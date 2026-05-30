@@ -121,40 +121,39 @@ const GLOBAL_BUFF_DATA = {
 
             const tags = uStats.tags || [];
             const element = String(uStats.element || uStats.stats?.element || "").toLowerCase();
-            let b = { dmg: 0, range: 0, crit: 0, spa: 0 };
+            let b = {};
 
-            const unrivaled = (typeof LEADER_BUFFS !== 'undefined') ? LEADER_BUFFS.unrivaled_mark : null;
-            if (unrivaled && unrivaled.subBuffs) {
-                unrivaled.subBuffs.forEach(sub => {
-                    if (window.isUnit(leaderId, 'triple_threat')) {
-                        if (sub.type === 'tag' && tags.includes(sub.value)) {
-                            b.dmg += sub.stats.dmg || 0;
-                        } else if (sub.type === 'element' && element === sub.value.toLowerCase()) {
-                            b.dmg += sub.stats.dmg || 0;
-                            b.crit += sub.stats.cRate || 0;
-                        }
-                    }
-                });
-            } else {
-                if (window.isUnit(leaderId, 'triple_threat')) {
-                    if (tags.includes('Piece')) b.dmg = 50;
-                    else if (tags.includes('Sword')) b.dmg = 25;
-                    else if (element === 'wind') { b.dmg = 20; b.crit = 5; }
-                }
+            const unrivaled = (typeof LEADER_BUFFS !== 'undefined') ? LEADER_BUFFS : null;
+            if (!unrivaled) return {};
+
+            // Identify which leader data to use
+            let leaderData = null;
+            if (window.isUnit(leaderId, 'triple_threat')) leaderData = unrivaled.unrivaled_mark;
+            else if (window.isUnit(leaderId, 'king_sailor')) leaderData = unrivaled.kings_mark;
+
+            if (!leaderData || !leaderData.subBuffs) return {};
+
+            // Collect all matching buffs
+            let matches = leaderData.subBuffs.filter(sub => {
+                if (sub.type === 'tag' && tags.includes(sub.value)) return true;
+                if (sub.type === 'element' && element === sub.value.toLowerCase()) return true;
+                return false;
+            });
+
+            if (matches.length === 0) return {};
+
+            // Apply exclusivity logic: pick the match with the highest damage
+            if (leaderData.exclusive) {
+                matches.sort((a, b) => (b.stats.dmg || 0) - (a.stats.dmg || 0));
+                matches = [matches[0]];
             }
 
-            if (window.isUnit(leaderId, 'king_sailor')) {
-                if (tags.includes('Magi')) {
-                    b.dmg = 50;
-                    b.spa = 15;
-                } else if (tags.includes('Uncontrollable Power')) {
-                    b.dmg = 30;
-                    b.spa = 10;
-                } else if (element === 'water') {
-                    b.dmg = 20;
-                    b.spa = 10;
-                }
-            }
+            matches.forEach(m => {
+                if (m.stats.dmg) b.dmg = (b.dmg || 0) + m.stats.dmg;
+                if (m.stats.spa) b.spa = (b.spa || 0) + m.stats.spa;
+                if (m.stats.range) b.range = (b.range || 0) + m.stats.range;
+                if (m.stats.cRate) b.crit = (b.crit || 0) + m.stats.cRate;
+            });
 
             if (b.spa === 0) delete b.spa;
             if (b.dmg === 0) delete b.dmg;

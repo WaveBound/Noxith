@@ -24,5 +24,28 @@ export const LEADER_BUFFS = {
                 stats: { dmg: 20, cRate: 5 }
             }
         ]
+    },
+    kings_mark: {
+        id: "kings_mark",
+        name: "King's Mark",
+        source: "King Sailor",
+        exclusive: true,
+        subBuffs: [
+            {
+                type: "tag",
+                value: "Magi",
+                stats: { dmg: 50, spa: 15 }
+            },
+            {
+                type: "tag",
+                value: "Uncontrollable Power",
+                stats: { dmg: 30, spa: 10 }
+            },
+            {
+                type: "element",
+                value: "Water",
+                stats: { dmg: 20, spa: 10 }
+            }
+        ]
     }
 };

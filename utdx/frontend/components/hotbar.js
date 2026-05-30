@@ -845,7 +845,8 @@
         const activeBuffsInHotbar = new Set();
         const BUFF_PROVIDERS = {
             'miku': ['miku'], 'enlightenedgod': ['enlightenedGod'], 'ancient_mage': ['ancientMage'],
-            'king_sailor': ['kingSailor'], 'prodigy_mage': ['mageHill', 'mageGround'],
+            'king_sailor': ['kingSailor', 'unrivaledMark'], 'prodigy_mage': ['mageHill', 'mageGround'],
+            'triple_threat': ['unrivaledMark'],
             'unparalleled_armor': ['bijuu']
         };
 
@@ -857,8 +858,8 @@
         const avConfigs = [];
         if (window.GLOBAL_BUFF_DATA) {
             Object.keys(window.GLOBAL_BUFF_DATA).forEach(k => {
-                if (activeBuffsInHotbar.has(k) && !window.GLOBAL_BUFF_DATA[k].hideButton) {
-                    avConfigs.push({ configKey: k, config: window.GLOBAL_BUFF_DATA[k] });
+                if (activeBuffsInHotbar.has(k)) {
+                    if (!window.GLOBAL_BUFF_DATA[k].hideButton) avConfigs.push({ configKey: k, config: window.GLOBAL_BUFF_DATA[k] });
                 } else if (hotbarState.buffState[k]) {
                     hotbarState.buffState[k] = false;
                     if (window.HOTBAR_BUFF_STATE) window.HOTBAR_BUFF_STATE[k] = false;
