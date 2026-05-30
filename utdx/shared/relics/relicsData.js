@@ -63,7 +63,7 @@ const SETS = [
     },
     {
         id: "bio_android", name: "Bio-Android", rarity: "Mythical", source: "Story",
-        bonus: { dmg: 10, spa: 5, range: 5, cRate: 5, cDmg: 15, dot: 0, bossDmg: 0, trueDmg: 0, hyperArmor: 0, armorDmg: 0 },
+        bonus: { dmg: 10, spa: 0, range: 5, cRate: 5, cDmg: 15, dot: 0, bossDmg: 0, trueDmg: 0, hyperArmor: 0, armorDmg: 0 },
         accessory: { dmg: 0, spa: 0, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, hyperArmor: 0, armorDmg: 0, passive: "bio_android_acc" }
     },
     {
@@ -77,9 +77,9 @@ const SETS = [
         accessory: { dmg: 0, spa: 0, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, hyperArmor: 0, armorDmg: 0, passive: "great_mage_acc" }
     },
     {
-        id: "sorcerer_killer", name: "Sorcerer Killer", rarity: "Mythical", source: "Story",
+        id: "sorcerer_hunter", name: "Sorcerer Hunter", rarity: "Mythical", source: "Story",
         bonus: { dmg: 10, spa: 7.5, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 15, hyperArmor: 0, armorDmg: 0 },
-        accessory: { dmg: 0, spa: 0, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, hyperArmor: 0, armorDmg: 0, passive: "sorcerer_killer_acc" }
+        accessory: { dmg: 0, spa: 0, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, hyperArmor: 0, armorDmg: 0, passive: "sorcerer_hunter_acc" }
     },
     {
         id: "strongest_sorcerer", name: "Strongest Sorcerer", rarity: "Mythical", source: "Story",
