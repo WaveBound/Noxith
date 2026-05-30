@@ -8,7 +8,7 @@
     display: flex;
     flex-direction: column;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    height: 500px;
+    height: 460px;
     content-visibility: auto;
     contain-intrinsic-size: 500px;
     contain: layout paint style;
@@ -649,10 +649,10 @@
    ========================================================= */
 .br-grid {
     /* 1. Increase --col-main to push the sub-stats column further to the right */
-    --col-main: 1.4fr;
+    --col-main: 1.3fr;
 
     /* 2. Controls the width of the Sub-stats column */
-    --col-sub: 1.4fr;
+    --col-sub: 1.2fr;
 
     /* 3. Controls the width of the DPS/Results column at the end */
     --col-res: 0.6fr;
@@ -837,13 +837,13 @@
 .badge-base {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
-    padding: 1px 5px;
-    height: 19px;
-    border-radius: 4px;
+    gap: 0.5px;
+    padding: 1px 3px;
+    height: 18px;
+    border-radius: 7px;
     font-size: 0.55rem;
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    font-weight: 800;
+    font-weight: 750;
     text-transform: uppercase;
     border: 1px solid transparent;
     white-space: nowrap;
