@@ -24,10 +24,10 @@ unitDatabase.push({
     upgrades: [
         { dmg: 360, spa: 7, range: 24, cost: 0 },     // Up 0 (Base)
         { dmg: 780, spa: 7, range: 25, cost: 6000 },  // Up 1
-        { dmg: 1350, spa: 7, range: 26, cost: 9000 }, // Up 2
-        { dmg: 2000, spa: 8.5, range: 28, cost: 13000 }, // Up 3
-        { dmg: 4400, spa: 12, range: 30, cost: 18000 }, // Up 4
-        { dmg: 5000, spa: 12, range: 31, cost: 25000 }, // Up 5
+        { dmg: 1560, spa: 7, range: 26, cost: 9000 }, // Up 2
+        { dmg: 2040, spa: 8.5, range: 28, cost: 13000 }, // Up 3
+        { dmg: 4440, spa: 12, range: 30, cost: 18000 }, // Up 4
+        { dmg: 5040, spa: 12, range: 31, cost: 25000 }, // Up 5
         { dmg: 7200, spa: 12, range: 33, cost: 30000 }  // Up 6
     ],
     passives: [
