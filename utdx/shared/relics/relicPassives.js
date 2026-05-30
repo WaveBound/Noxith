@@ -87,7 +87,7 @@ const PASSIVES = {
         duration: 10,
         cooldown: 10
     },
-    sorcerer_killer_acc: {
+    sorcerer_hunter_acc: {
         name: "Heavenly Restriction",
         desc: "Units can no longer do Critical Hits with this equipped, instead they will be given 60% damage.",
         trigger: "passive",
