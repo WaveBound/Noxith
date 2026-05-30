@@ -81,9 +81,9 @@ const GLOBAL_BUFF_DATA = {
             if (!isActive) return {};
 
             // King Sailor should benefit from his own presence in Potential mode
-            if (isPotential && isUnit(uStats.id, 'king_sailor')) {
+            if (isPotential && window.isUnit(uStats.id, 'king_sailor')) {
                 // Proceed to apply stats
-            } else if (isUnit(uStats.id, 'king_sailor')) {
+            } else if (window.isUnit(uStats.id, 'king_sailor')) {
                 return {};
             }
             
@@ -129,7 +129,11 @@ const GLOBAL_BUFF_DATA = {
             const element = String(uStats.element || uStats.stats?.element || "").toLowerCase();
             let b = {};
 
-            const unrivaled = (typeof LEADER_BUFFS !== 'undefined') ? LEADER_BUFFS : null;
+            // Check global and window scope for the leader data
+            const unrivaled = (typeof window !== 'undefined' && window.LEADER_BUFFS) 
+                ? window.LEADER_BUFFS 
+                : (typeof LEADER_BUFFS !== 'undefined' ? LEADER_BUFFS : null);
+                
             if (!unrivaled) return {};
 
             // Identify which leader data to use
