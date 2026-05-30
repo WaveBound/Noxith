@@ -11,17 +11,17 @@ export const LEADER_BUFFS = {
             {
                 type: "tag",
                 value: "Piece",
-                stats: { dmg: 0, costReduction: 0 } // Note: costReduction is positive representing a discount %
+                stats: { dmg: 50, costReduction: 7.5 } // Note: costReduction is positive representing a discount %
             },
             {
                 type: "tag",
                 value: "Sword",
-                stats: { dmg: 0, range: 0 }
+                stats: { dmg: 25, range: 10 }
             },
             {
                 type: "element",
                 value: "Wind",
-                stats: { dmg: 0, cRate: 0 }
+                stats: { dmg: 20, cRate: 5 }
             }
         ]
     }
