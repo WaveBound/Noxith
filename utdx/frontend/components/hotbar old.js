@@ -168,7 +168,7 @@ function openTeamSummary() {
         const config = (window.GLOBAL_BUFF_DATA || {}).kingSailor;
         if (config) {
             activeBuffs.push({
-                name: "King's Mark",
+                name: "Unrivaled Mark",
                 color: config.color,
                 renderLabel: "Mark Synergy: Magi (+15% SPA +50% Dmg), Uncontrollable (+10% SPA +30% Dmg), Water (+10% SPA +20% Dmg)"
             });
@@ -538,10 +538,9 @@ function openTeamSummary() {
                         // Special logic for King Sailor and Triple Threat conditional passives
                         if (p.name === "Unrivaled Mark") {
                             if (window.isUnit(unit.id, 'king_sailor')) {
-                                if (!isKsActive || !isKsLeading) return null;
+                                return null; // King Sailor doesn't get his own mark bonus
                             } else if (window.isUnit(unit.id, 'triple_threat')) {
-                                const isTtLeading = isPotential || (leader && window.isUnit(leader.id, 'triple_threat'));
-                                if (!isTtLeading) return null;
+                                return null; // Triple Threat doesn't get his own mark bonus
                             }
                         }
 

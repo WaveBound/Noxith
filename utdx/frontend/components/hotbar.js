@@ -188,7 +188,7 @@
 
         const leader = hotbarState.slots[0];
         if (leader && isUnit(leader.id, 'king_sailor') && window.GLOBAL_BUFF_DATA?.kingSailor) {
-            activeBuffs.push({ name: "King's Mark", color: window.GLOBAL_BUFF_DATA.kingSailor.color, renderLabel: "Mark Synergy: Magi (+15% SPA +50% Dmg), Uncontrollable (+10% SPA +30% Dmg), Water (+10% SPA +20% Dmg)" });
+            activeBuffs.push({ name: "Unrivaled Mark", color: window.GLOBAL_BUFF_DATA.kingSailor.color, renderLabel: "Mark Synergy: Magi (+15% SPA +50% Dmg), Uncontrollable (+10% SPA +30% Dmg), Water (+10% SPA +20% Dmg)" });
         }
 
         let html = `
@@ -372,10 +372,9 @@
                         passiveHtml = activePassives.map(p => {
                             if (p.name === "Unrivaled Mark") {
                                 if (isUnit(unit.id, 'king_sailor')) {
-                                    const isKsActive = isPotential || (isLoadout && (window.CALCULATION_MODE === 'potential' || (leader && isUnit(leader.id, 'king_sailor')))) || window.kingSailorActive || (hotbarState.buffState.kingSailor && (window.CALCULATION_MODE === 'potential' || (leader && isUnit(leader.id, 'king_sailor'))));
-                                    if (!isKsActive) return null;
+                                    return null; // King Sailor doesn't get his own mark bonus
                                 } else if (isUnit(unit.id, 'triple_threat')) {
-                                    if (!(isPotential || (leader && isUnit(leader.id, 'triple_threat')))) return null;
+                                    return null; // Triple Threat doesn't get his own mark bonus
                                 }
                             }
                             if (p.name === "Monarch's Devotion" && isLoadout && !jinooInLoadout) return null;

@@ -59,34 +59,19 @@ const GLOBAL_BUFF_DATA = {
         desc: "Passive: King of his People. +10% Crit Rate, +25% Crit Damage.",
         color: '#a7f3d0',
         math: (uStats, context) => {
-            const isPotential = (typeof window !== 'undefined' && window.CALCULATION_MODE !== undefined) ? (window.CALCULATION_MODE === 'potential') : true;
+            if (window.isUnit(uStats.id, 'king_sailor')) return {}; // Cannot buff self
 
+            const isPotential = (typeof window !== 'undefined' && window.CALCULATION_MODE !== undefined) ? (window.CALCULATION_MODE === 'potential') : true;
             const isLoadout = (typeof window !== 'undefined' && window.CALCULATION_MODE === 'loadout');
             if (isLoadout && (!context || !context.isHotbar)) return {};
-
             const hState = window.hotbarState || (typeof hotbarState !== 'undefined' ? hotbarState : null);
             const leader = hState?.slots ? hState.slots[0] : null;
             const isKsLeading = leader && window.isUnit(leader.id, 'king_sailor');
-
             const hotbarBuffActive = hState?.buffState?.kingSailor || hState?.buffState?.ksailor;
             const globalActive = window.kingSailorActive;
             const contextActive = context?.kingSailorActive;
-
             let isActive = globalActive || hotbarBuffActive || contextActive || isKsLeading;
-
-            if (isPotential && window.isUnit(uStats.id, 'king_sailor')) {
-                isActive = true;
-            }
-
             if (!isActive) return {};
-
-            // King Sailor should benefit from his own presence in Potential mode
-            if (isPotential && window.isUnit(uStats.id, 'king_sailor')) {
-                // Proceed to apply stats
-            } else if (window.isUnit(uStats.id, 'king_sailor')) {
-                return {};
-            }
-            
             const stats = (typeof GLOBAL_UNIT_BUFFS !== 'undefined') ? GLOBAL_UNIT_BUFFS.king_sailor.stats : { cRate: 10, cDmg: 25 };
             return { crit: stats.cRate, cdmg: stats.cDmg };
         },
@@ -114,15 +99,11 @@ const GLOBAL_BUFF_DATA = {
             } else {
                 const hState = (typeof window !== 'undefined') ? window.hotbarState : null;
                 const leader = hState?.slots ? hState.slots[0] : null;
-                if (leader) {
-                    const lId = leader.id;
-                    if (window.isUnit(lId, 'triple_threat') || window.isUnit(lId, 'king_sailor')) {
-                        isActive = true;
-                        leaderId = lId;
-                    }
+                if (leader && (window.isUnit(leader.id, 'triple_threat') || window.isUnit(leader.id, 'king_sailor'))) {
+                    isActive = true;
+                    leaderId = leader.id;
                 }
             }
-
             if (!isActive || !leaderId) return {};
 
             const tags = uStats.tags || [];
@@ -155,10 +136,7 @@ const GLOBAL_BUFF_DATA = {
                     }
                 };
             }
-            
-            if (!unrivaled) return {};
 
-            // Identify which leader data to use
             let leaderData = null;
             if (window.isUnit(leaderId, 'triple_threat')) leaderData = unrivaled.unrivaled_mark;
             else if (window.isUnit(leaderId, 'king_sailor')) leaderData = unrivaled.kings_mark;

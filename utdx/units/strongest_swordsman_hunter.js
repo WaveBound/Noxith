@@ -12,7 +12,7 @@ unitDatabase.push({
     // META (Build Guide tab)
     meta: {
         short: "Ruler",
-        long: "Ruler",
+        long: "Duelist/Ruler",
         note: "Top-tier Hill DPS. Excels at long-range precision and provides powerful synergies to Warlord and Piece teams."
     },
 

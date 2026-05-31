@@ -537,21 +537,26 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         if (!builds || builds.length === 0) return '<div class="msg-empty">No valid builds found.</div>';
 
         // Helper to sort a list using the current UI logic (respecting mode recommendations and sort choice)
-        const sortBuilds = (list) => {
-            return [...list].sort((a, b) => {
-                if (window.GLOBAL_MODE_SORT !== 'none' && unitObj?.meta) {
-                    const recStr = (unitObj.meta[window.GLOBAL_MODE_SORT === 'short' ? 'short' : 'long'] || '').toLowerCase();
-                    const recTraits = recStr.split('/').map(s => s.trim());
-                    const aIsRec = recTraits.some(rt => rt && a.traitName.toLowerCase().includes(rt));
-                    const bIsRec = recTraits.some(rt => rt && b.traitName.toLowerCase().includes(rt));
-                    if (aIsRec !== bIsRec) return aIsRec ? -1 : 1;
-                }
-                if (sortSelect === 'damage') {
-                    return b.dmgVal !== a.dmgVal ? (b.dmgVal || 0) - (a.dmgVal || 0) : (b.sortDps || 0) - (a.sortDps || 0);
-                }
+        const sortBuilds = (list) => [...list].sort((a, b) => {
+            if (window.GLOBAL_MODE_SORT !== 'none' && unitObj?.meta) {
+                const modeKey = window.GLOBAL_MODE_SORT === 'short' ? 'short' : 'long';
+                const recStr = (unitObj.meta[modeKey] || '').toLowerCase();
+                const recTraits = recStr.split('/').map(s => s.trim());
+                const aIsRec = recTraits.some(rt => rt && a.traitName.toLowerCase().includes(rt));
+                const bIsRec = recTraits.some(rt => rt && b.traitName.toLowerCase().includes(rt));
+                if (aIsRec !== bIsRec) return aIsRec ? -1 : 1;
+            }
+            if (sortSelect === 'damage') {
+                if (b.dmgVal !== a.dmgVal) return (b.dmgVal || 0) - (a.dmgVal || 0);
                 return (b.sortDps || 0) - (a.sortDps || 0);
-            });
-        };
+            }
+            if (sortSelect === 'efficiency') {
+                const effA = calculateBuildEfficiency(a, unitCost, unitPlace, unitId);
+                const effB = calculateBuildEfficiency(b, unitCost, unitPlace, unitId);
+                return effB - effA;
+            }
+            return (b.sortDps || 0) - (a.sortDps || 0);
+        });
 
         // 1. Hydrate all builds for this unit to determine their global positions
         const allHydrated = builds.map(b => hydrateBuildEntry(b, unitId, isHotbar)).filter(Boolean);
@@ -591,13 +596,11 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         for (const k in comboGroups) {
             const comboList = comboGroups[k];
             // Sort each combo group to find its internal top 3 unique builds
-            comboList.sort((a, b) => sortSelect === 'damage'
-                ? (b.dmgVal - a.dmgVal || b.sortDps - a.sortDps)
-                : (b.sortDps - a.sortDps));
+            const sortedCombo = sortBuilds(comboList);
 
             const seenGearTrait = new Set();
             let count = 0;
-            for (const b of comboList) {
+            for (const b of sortedCombo) {
                 const gearHash = b.setName + (b.headUsed || 'none') + b.traitName;
                 if (!seenGearTrait.has(gearHash)) {
                     candidates.push(b);
@@ -608,9 +611,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         }
 
         // 5. Final global sort for the candidates from strongest to weakest across all combos
-        candidates.sort((a, b) => sortSelect === 'damage'
-            ? (b.dmgVal - a.dmgVal || b.sortDps - a.sortDps)
-            : (b.sortDps - a.sortDps));
+        candidates = sortBuilds(candidates);
 
         const slice = candidates.slice(0, limit);
         if (slice.length > 0) {
@@ -791,9 +792,11 @@ window.getLiveScore = (unit) => {
     const activeType = window.activeAbilityIds?.has(unitId) ? 'abil' : 'base';
     const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(b => !b.hideButton && !!window[b.stateKey]) || window.disableSubStats;
     const activeModeIdx = window.unitModesState?.[unitId] || 0;
-    const cacheKey = `${unitId}-${currentTrait || ''}-${currentHead || ''}-${activeType}-${anyGlobal ? 'buffed' : 'base'}-${activeModeIdx}`;
+    const cacheKey = `${unitId}-${currentTrait || ''}-${currentHead || ''}-${activeType}-${anyGlobal ? 'buffed' : 'base'}-${activeModeIdx}-${window.GLOBAL_MODE_SORT}`;
 
     if (window.LIVE_SCORE_CACHE[cacheKey] !== undefined) return window.LIVE_SCORE_CACHE[cacheKey];
+
+    const isOptimizing = !!(currentTrait || currentHead || anyGlobal || (window.GLOBAL_MODE_SORT && window.GLOBAL_MODE_SORT !== 'none'));
 
     const dbKey = unitId + (activeType === 'abil' && !unit.allowMultipleModes ? '_abil' : '');
     const buildList = window.STATIC_BUILD_DB?.[dbKey]?.fixed?.[0];
@@ -823,7 +826,7 @@ window.getLiveScore = (unit) => {
         if (currentTrait) scoringEntry.traitName = currentTrait;
         if (currentHead) scoringEntry.headUsed = currentHead;
 
-        if (anyGlobal) {
+        if (isOptimizing) {
             const setName = scoringEntry.setName || (typeof scoringEntry.s === 'number' ? SETS[scoringEntry.s]?.id : scoringEntry.s) || window.getSetFast?.(scoringEntry.setName)?.id;
             const traitId = scoringEntry.traitName || scoringEntry.trait || (typeof scoringEntry.t === 'number' ? traitsList[scoringEntry.t]?.id : scoringEntry.t);
             if (setName && traitId) {
@@ -1348,6 +1351,9 @@ window.applyUnitTrait = function (unitId, traitName) {
     window.unitTraits = window.unitTraits || {};
     window.unitTraits[unitId] = traitName;
 
+    // Clear caches for this unit specifically to force recalculation with new trait
+    if (typeof window.resetCachesForBuffChange === 'function') window.resetCachesForBuffChange(unitId);
+
     delete window.hotbarFilteredBuilds?.[unitId];
     if (window.LIVE_SCORE_CACHE) {
         Object.keys(window.LIVE_SCORE_CACHE).forEach(k => {
@@ -1355,9 +1361,19 @@ window.applyUnitTrait = function (unitId, traitName) {
         });
     }
 
+    // Update the unit card display directly to show the new trait choice
+    if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(unitId, true);
+
     window.precalculateAllLoadoutBuilds?.();
     window.recalculateHotbarTeam?.();
     window.updateHotbarUI?.();
+
+    // If in potential mode, re-sort the database view as the unit's score has likely changed
+    if (window.CALCULATION_MODE !== 'loadout') {
+        if (typeof window.resortUnitCardsInPlace === 'function') {
+            window.resortUnitCardsInPlace();
+        }
+    }
 
     openTraitBestList(unitId);
     if (typeof showToast === 'function') {

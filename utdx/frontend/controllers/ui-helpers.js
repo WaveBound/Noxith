@@ -67,7 +67,10 @@ window.handleGlobalModeSort = function (value) {
         else el.innerText = labelText;
     });
 
-    window.resetCachesForBuffChange();
+    // Fully clear caches to force getLiveScore to recalculate with new mode hints for all units
+    if (typeof window.resetCachesForBuffChange === 'function') {
+        window.resetCachesForBuffChange();
+    }
     callIfFn('resetAndRender');
 };
 

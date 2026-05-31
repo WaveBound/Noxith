@@ -26,8 +26,8 @@ export const LEADER_BUFFS = {
         ]
     },
     kings_mark: {
-        id: "kings_mark",
-        name: "King's Mark",
+        id: "unrivaled_mark",
+        name: "Unrivaled Mark",
         source: "King Sailor",
         exclusive: true,
         subBuffs: [

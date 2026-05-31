@@ -802,10 +802,12 @@ window.getLiveScore = (unit) => {
 
     const anyGlobal = (window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(buff => !buff.hideButton && !!window[buff.stateKey])) || window.disableSubStats;
     const activeModeIdx = (window.unitModesState && window.unitModesState[unitId] !== undefined) ? window.unitModesState[unitId] : 0;
-    const cacheKey = `${unitId}-${currentTrait || ''}-${currentHead || ''}-${activeType}-${anyGlobal ? 'buffed' : 'base'}-${activeModeIdx}`;
+    const cacheKey = `${unitId}-${currentTrait || ''}-${currentHead || ''}-${activeType}-${anyGlobal ? 'buffed' : 'base'}-${activeModeIdx}-${window.GLOBAL_MODE_SORT}`;
     if (window.LIVE_SCORE_CACHE[cacheKey] !== undefined) {
         return window.LIVE_SCORE_CACHE[cacheKey];
     }
+
+    const isOptimizing = !!(currentTrait || currentHead || anyGlobal || (window.GLOBAL_MODE_SORT && window.GLOBAL_MODE_SORT !== 'none'));
 
     let dbKey = unitId;
     if (activeType === 'abil' && !unit.allowMultipleModes) dbKey += '_abil';
@@ -821,7 +823,7 @@ window.getLiveScore = (unit) => {
     // FAST PATH: If no custom trait/head is set, and no global buffer is active,
     // we can just read the pre-saved dps directly from the #1 build in the database!
     // This is instant and avoids thousands of reconstructMathData calls on load.
-    if (!currentTrait && !currentHead && !anyGlobal) {
+    if (!isOptimizing) {
         const topBuild = buildList[0];
         if (topBuild) {
             let score = topBuild.d || topBuild.dps || 0;
@@ -856,7 +858,7 @@ window.getLiveScore = (unit) => {
         if (currentHead) scoringEntry.headUsed = currentHead;
 
         let finalScoringEntry = scoringEntry;
-        if (anyGlobal) {
+        if (isOptimizing) {
             const setName = scoringEntry.setName || (typeof scoringEntry.s === 'number' ? SETS[scoringEntry.s]?.id : scoringEntry.s) || (window.getSetFast && window.getSetFast(scoringEntry.setName)?.id);
             const traitId = scoringEntry.traitName || scoringEntry.trait || (typeof scoringEntry.t === 'number' ? traitsList[scoringEntry.t]?.id : scoringEntry.t);
             if (setName && traitId) {
@@ -1606,6 +1608,9 @@ window.applyUnitTrait = function (unitId, traitName) {
     window.unitTraits = window.unitTraits || {};
     window.unitTraits[unitId] = traitName;
 
+    // Clear caches for this unit
+    if (typeof window.resetCachesForBuffChange === 'function') window.resetCachesForBuffChange(unitId);
+
     // Clear the stale hotbarFilteredBuilds entry for this unit so the recalculation
     // writes a fresh hydrated build for the newly selected trait.
     if (window.hotbarFilteredBuilds) {
@@ -1618,11 +1623,14 @@ window.applyUnitTrait = function (unitId, traitName) {
         });
     }
 
+    // Update the unit card display directly to show the new trait choice
+    if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(unitId, true);
+
     // Re-hydrate hotbarFilteredBuilds with the selected trait's best build
     if (typeof window.precalculateAllLoadoutBuilds === 'function') {
         window.precalculateAllLoadoutBuilds();
     }
-
+    
     // Force a full recalculation with proper hotbar buff context.
     // recalculateHotbarTeam swaps to HOTBAR_STATIC_BUILD_DB + hotbar buff state,
     // then calls updateBuildListDisplay which writes the final hydrated build
@@ -1634,6 +1642,13 @@ window.applyUnitTrait = function (unitId, traitName) {
     // Refresh the hotbar slot stats overlay (reads from hotbarFilteredBuilds)
     if (typeof window.updateHotbarUI === 'function') {
         window.updateHotbarUI();
+    }
+
+    // If in potential mode, re-sort the database view as the unit's score has likely changed
+    if (window.CALCULATION_MODE !== 'loadout') {
+        if (typeof window.resortUnitCardsInPlace === 'function') {
+            window.resortUnitCardsInPlace();
+        }
     }
 
     // Re-render the modal in-place so the selected trait gets the "ACTIVE" tag

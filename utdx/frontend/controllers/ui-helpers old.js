@@ -80,7 +80,11 @@ window.handleGlobalModeSort = function (value) {
         }
     });
 
-    window.resetCachesForBuffChange();
+    // Fully clear caches to force getLiveScore to recalculate with new mode hints for all units
+    if (typeof window.resetCachesForBuffChange === 'function') {
+        window.resetCachesForBuffChange();
+    }
+    
     if (typeof window.resetAndRender === 'function') window.resetAndRender();
 };
 
@@ -549,7 +553,7 @@ window.switchPage = function (pid) {
         btn.classList.toggle('active', onClickAttr.includes(`switchPage('${pid}')`) || (pid === 'inventory' && onClickAttr.includes('resetAndOpenInventory')));
     });
 
-    const toolbars = { 'db': 'dbInjector', 'guides': 'guidesToolbar', 'inventory': 'inventoryToolbar' };
+    const toolbars = { 'db': 'dbInjector', 'guides': 'guidesToolbar', 'inventory': 'inventoryToolbar', 'relics': 'relicsToolbar' };
 
     Object.values(toolbars).forEach(id => {
         const el = document.getElementById(id);
@@ -571,6 +575,9 @@ window.switchPage = function (pid) {
         document.getElementById('inventoryPage').classList.add('active');
         const invBtn = document.querySelector(`button[onclick*="switchPage('inventory')"]`) || document.querySelector(`button[onclick*="resetAndOpenInventory()"]`);
         if (invBtn) invBtn.classList.add('active');
+    } else if (pid === 'relics') {
+        document.getElementById('relicsPage').classList.add('active');
+        if (typeof renderRelicDatabase === 'function') renderRelicDatabase('story');
     }
 };
 
