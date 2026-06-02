@@ -775,36 +775,45 @@ window.getQuickScore = (unit) => {
 
 window.getLiveScore = (unit) => {
     const unitId = unit.id;
+    const isLaw = window.isUnit?.(unitId, 'law');
+
     if (window.CALCULATION_MODE === 'loadout') {
         const currentBuild = window.hotbarFilteredBuilds?.[unitId];
         if (currentBuild) {
-            return currentBuild.dps || 0;
+            return isLaw ? (currentBuild.range || 0) : Math.max(currentBuild.dps || 0, currentBuild.bossDps || 0);
         }
         return window.getQuickScore ? window.getQuickScore(unit) : 0;
     }
 
     window.LIVE_SCORE_CACHE = window.LIVE_SCORE_CACHE || {};
     let currentTrait = window.unitTraits?.[unitId];
-    if (!currentTrait && window.GLOBAL_MODE_SORT !== 'none' && unit.meta?.[window.GLOBAL_MODE_SORT]) {
-        currentTrait = unit.meta[window.GLOBAL_MODE_SORT].split('/')[0].trim();
+    const guideMode = window.GLOBAL_MODE_SORT || 'none';
+    if (!currentTrait && guideMode !== 'none' && unit.meta?.[guideMode]) {
+        currentTrait = unit.meta[guideMode].split('/')[0].trim();
     }
     const currentHead = window.unitHeads?.[unitId];
     const activeType = window.activeAbilityIds?.has(unitId) ? 'abil' : 'base';
     const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(b => !b.hideButton && !!window[b.stateKey]) || window.disableSubStats;
-    const activeModeIdx = window.unitModesState?.[unitId] || 0;
-    const cacheKey = `${unitId}-${currentTrait || ''}-${currentHead || ''}-${activeType}-${anyGlobal ? 'buffed' : 'base'}-${activeModeIdx}-${window.GLOBAL_MODE_SORT}`;
+    
+    // Stability: Ignore dynamic card state (modes/summons) for global ranking to prevent "jumping" UI.
+    // We evaluate the unit's base potential (Mode 0) under the current Optimization Strategy.
+    const rankingModeIdx = 0;
+    const cacheKey = `${unitId}-${currentTrait || ''}-${currentHead || ''}-${activeType}-${anyGlobal ? 'buffed' : 'base'}-${rankingModeIdx}-${guideMode}`;
 
     if (window.LIVE_SCORE_CACHE[cacheKey] !== undefined) return window.LIVE_SCORE_CACHE[cacheKey];
 
-    const isOptimizing = !!(currentTrait || currentHead || anyGlobal || (window.GLOBAL_MODE_SORT && window.GLOBAL_MODE_SORT !== 'none'));
+    const isOptimizing = !!(currentTrait || currentHead || anyGlobal || (guideMode && guideMode !== 'none'));
 
-    const dbKey = unitId + (activeType === 'abil' && !unit.allowMultipleModes ? '_abil' : '');
+    let dbKey = unitId;
+    if (activeType === 'abil' && !unit.allowMultipleModes) {
+        const abilKey = unitId + '_abil';
+        if (window.STATIC_BUILD_DB?.[abilKey]) dbKey = abilKey;
+    }
     const buildList = window.STATIC_BUILD_DB?.[dbKey]?.fixed?.[0];
 
     if (!buildList || buildList.length === 0) {
         return (window.LIVE_SCORE_CACHE[cacheKey] = window.getQuickScore(unit));
     }
-
 
     let maxScore = 0;
     const searchLimit = Math.min(20, buildList.length);
@@ -820,7 +829,7 @@ window.getLiveScore = (unit) => {
         if (!scoringEntry.mainStats && (scoringEntry.ms || scoringEntry.b !== undefined || scoringEntry.l !== undefined)) {
             scoringEntry.mainStats = scoringEntry.ms || {
                 body: typeof scoringEntry.b === 'string' ? scoringEntry.b : (scoringEntry.b === 1 ? 'dot' : (scoringEntry.b === 2 ? 'cm' : 'dmg')),
-                legs: typeof scoringEntry.l === 'string' ? scoringEntry.l : (scoringEntry.l === 1 ? 'spa' : (scoringEntry.l === 2 ? 'cf' : 'dmg'))
+                legs: typeof scoringEntry.l === 'string' ? scoringEntry.l : (scoringEntry.l === 1 ? 'spa' : (scoringEntry.l === 2 ? 'cf' : (scoringEntry.l === 3 ? 'range' : 'dmg')))
             };
         }
         if (currentTrait) scoringEntry.traitName = currentTrait;
@@ -843,31 +852,17 @@ window.getLiveScore = (unit) => {
         }
 
         try {
-            if (unit.modes && unit.modes.length > 1 && !unit.allowMultipleModes) {
-                const originalMode = window.unitModesState?.[unitId];
-                let bestModeScore = 0;
-                for (let m = 0; m < unit.modes.length; m++) {
-                    if (!window.unitModesState) window.unitModesState = {};
-                    window.unitModesState[unitId] = m;
-                    const res = window.reconstructMathData(scoringEntry);
-                    if (res) {
-                        const score = Math.max(res.total || 0, res.bossTotal || 0);
-                        if (score > bestModeScore) bestModeScore = score;
-                    }
-                }
-                if (bestModeScore > maxScore) maxScore = bestModeScore;
-                if (originalMode !== undefined) {
-                    window.unitModesState[unitId] = originalMode;
-                } else {
-                    delete window.unitModesState[unitId];
-                }
-            } else {
-                const res = window.reconstructMathData(scoringEntry);
-                if (res) {
-                    const score = Math.max(res.total || 0, res.bossTotal || 0);
-                    if (score > maxScore) maxScore = score;
-                }
+            // Temporarily swap to baseline mode for stable ranking calculation
+            const savedMode = window.unitModesState[unitId];
+            window.unitModesState[unitId] = rankingModeIdx;
+
+            const res = window.reconstructMathData(scoringEntry);
+            if (res) {
+                const score = isLaw ? (res.range || 0) : Math.max(res.total || 0, res.bossTotal || 0);
+                if (score > maxScore) maxScore = score;
             }
+            
+            window.unitModesState[unitId] = savedMode;
         } catch (e) {
             console.warn(`Error reconstructing math in getLiveScore for ${unitId}:`, e);
         }
