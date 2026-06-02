@@ -1,5 +1,5 @@
 // ============================================================================
-// CALCULATOR.JS - Custom Calculator Modal Logic
+// CALCULATOR.JS - Custom Calculator Modal Logic (Optimized & Connected)
 // ============================================================================
 
 // Scale sub-stats when stars change (Refactored to use shared utility)
@@ -122,7 +122,13 @@ function openCalc(unitId) {
 
     document.getElementById('calcUnitImg').src = unit.img;
     document.getElementById('calcUnitName').innerText = unit.name;
-    document.getElementById('calcUnitRole').innerText = unit.role + (unit.stats.element ? ` • ${unit.stats.element}` : '');
+    
+    // Inject the active mode name inside the subtitle description for visibility
+    const activeModeIdx = window.unitModesState?.[unitId] || 0;
+    const modeName = unit.modes?.[activeModeIdx]?.name || '';
+    document.getElementById('calcUnitRole').innerText = unit.role + 
+        (unit.stats.element ? ` • ${unit.stats.element}` : '') + 
+        (modeName ? ` (${modeName.toUpperCase()})` : '');
     
     const traitSelect = document.getElementById('calcTrait');
     traitSelect.innerHTML = '';
@@ -226,14 +232,13 @@ function openCalc(unitId) {
     updateLegsStarVisibility();
     updateCalcUI(true);
 
-    // Fix static labels in the modal if they exist (matches Inventory fix)
+    // Fix static labels in the modal if they exist
     document.querySelectorAll('#calcModal .sub-label.sub-cm').forEach(el => el.textContent = 'Crit Dmg');
     document.querySelectorAll('#calcModal .sub-label.sub-cf').forEach(el => el.textContent = 'Crit Rate');
 
     // Attach input listeners using SHARED Logic
     const subStatInputs = document.querySelectorAll('#calcModal .gear-subs input.sub-val-input');
     subStatInputs.forEach(inputElement => {
-        // Dynamic getter for specific card's star multiplier
         const getMyMult = () => {
             const parentCard = inputElement.closest('.gear-card');
             if (!parentCard) return 1;
@@ -304,13 +309,16 @@ function runCustomCalc() {
         const headStarsSelect = document.getElementById('calcHeadStars');
         const headStarMult = (!headStarsSelect.classList.contains('hidden')) ? parseFloat(headStarsSelect.value) : 1;
 
-        // USE UNIFIED CONTEXT BUILDER
+        // Pass the currently selected mode index dynamically so that calculated context is mode-appropriate
+        const activeModeIdx = window.unitModesState?.[unit.id] || 0;
+
         const { effectiveStats, context } = buildCalculationContext(unit, traitId, {
             isAbility: activeAbilityIds.has(unit.id),
             dmgPoints, spaPoints, rangePoints,
             headPiece: headId,
             starMult: bodyStarMult,
             headStarMult: headStarMult,
+            activeModeIdx: activeModeIdx,
             rankData: { dmg: rankDmg, spa: rankSpa, range: rankRange }
         });
 

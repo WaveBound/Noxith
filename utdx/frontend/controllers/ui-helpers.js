@@ -167,7 +167,6 @@ window.resetCachesForBuffChange = (unitId, excludeIds = []) => {
     window.modeBenchmarks = {};
 
     if (!unitId && excludeIds.length === 0) {
-        // Fast O(1) reset
         window.unitBuildsCache = {};
         window.cachedResults = {};
         window.hotbarFilteredBuilds = {};
@@ -271,6 +270,13 @@ window.setSystemLevel = function (unitId, value) {
     const input = document.querySelector(`#system-level-${unitId}`);
     if (input && parseInt(input.value) !== lvl) input.value = lvl;
 
+    // Bust the sorting cache for this unit so ranks update instantly
+    if (window.LIVE_SCORE_CACHE) {
+        Object.keys(window.LIVE_SCORE_CACHE).forEach(k => {
+            if (k.startsWith(unitId)) delete window.LIVE_SCORE_CACHE[k];
+        });
+    }
+
     if (window.unitBuildsCache?.[unitId]) {
         window.unitBuildsCache[unitId] = { base: { fixed: [null] }, abil: { fixed: [null] } };
     }
@@ -278,6 +284,10 @@ window.setSystemLevel = function (unitId, value) {
     setTimeout(() => {
         callIfFn('updateBuildListDisplay', unitId);
         callIfFn('updateHotbarUI');
+        // Re-sort card in database list dynamically since its score updated
+        if (window.CALCULATION_MODE !== 'loadout' && typeof window.resortUnitCardsInPlace === 'function') {
+            window.resortUnitCardsInPlace();
+        }
     }, 10);
 };
 
@@ -438,32 +448,7 @@ window.resetAndOpenInventory = () => {
     window.switchPage('inventory');
 };
 
-window.getQuickScore = (unit) => {
-    let dbKey = unit.id;
-    if (unit.ability) {
-        const ab = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
-        if (ab.noToggle && !unit.allowMultipleModes && window.STATIC_BUILD_DB?.[unit.id + "_abil"]) {
-            dbKey = unit.id + "_abil";
-        }
-    }
-
-    const list = window.STATIC_BUILD_DB?.[dbKey]?.fixed?.[0];
-    if (list?.length) {
-        return window.isUnit?.(unit.id, 'law') ? (list[0].range || 0) : list[0].dps;
-    }
-    if (window.isUnit?.(unit.id, 'law')) {
-        return unit.stats.range || unit.upgrades?.[unit.upgrades.length - 1]?.range || 0;
-    }
-    let d = unit.stats.dmg, s = unit.stats.spa;
-    if ((!d || !s) && unit.upgrades?.length) {
-        const last = unit.upgrades[unit.upgrades.length - 1];
-        d = d || last.dmg;
-        s = s || last.spa;
-    }
-    return ((d || 0) / (s || 1)) * 35;
-};
-
-// --- VISUAL TOOGLE HELPERS ---
+// --- VISUAL TOGGLE HELPERS ---
 window.toggleDeepDive = (btn) => {
     const content = btn.nextElementSibling, arrow = btn.querySelector('.dd-arrow');
     if (content && arrow) {

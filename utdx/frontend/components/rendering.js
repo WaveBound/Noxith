@@ -350,7 +350,6 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     const isBossHigher = (sortMode === 'dps') && (r.bossDps > (r.dps || 0));
     const displayVal = format(r.sortDps || r.dps || 0);
     const displayLabel = (isBossHigher ? 'BOSS DPS' : 'DPS');
-    const hasBossDps = isBossHigher || (r.bossDps && r.bossDps !== r.dps);
 
     const renderValRow = (iconKey, currentVal, nextVal, extraClass = '') => `
         <div class="fs-item-lg ${iconKey}-row">
@@ -361,8 +360,6 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
             <span class="fs-icon-box ${iconKey}-bg">${SVGS[iconKey]}</span>
             <span class="fs-val ${extraClass}">${nextLevel > maxLevel ? '<span style="color:#4ade80; font-weight: bold;">Maxed</span>' : nextVal}</span>
         </div>`;
-
-    let effStyle = "font-size: 0.75rem; padding: 2px 6px; height: 22px; display: flex; align-items: center; margin-top: 0;";
 
     const headName = (r.headUsed && r.headUsed !== 'none') ? (HEAD_CONFIG[r.headUsed]?.name || r.headUsed) : '';
     const headHeaderHtml = headName ? `<span class="br-sep" style="margin: 0 1px;">/</span><span class="br-set" style="color:#60a5fa; font-size: 0.72em; padding: 1px 3px; letter-spacing: -0.2px;">${headName.toUpperCase()}</span>` : '';
@@ -715,7 +712,11 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                             unit, null, singleBuilds, window.getValidSubCandidates(), HEADS_LIST,
                             cfg.subs, singleTrait ? [singleTrait] : null, useAbility, mode
                         );
-                        return optResList?.reduce((best, cur) => cur.dps > best.dps ? cur : best, optResList[0]) || r;
+                        return optResList?.reduce((best, cur) => {
+                            const curDps = Math.max(cur.dps || 0, cur.bossDps || 0);
+                            const bestDps = Math.max(best.dps || 0, best.bossDps || 0);
+                            return curDps > bestDps ? cur : best;
+                        }, optResList[0]) || r;
                     });
                 }
             }
@@ -737,7 +738,11 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                 });
             }
 
-            calculatedResults.sort((a, b) => (b.dps || 0) - (a.dps || 0));
+            calculatedResults.sort((a, b) => {
+                const bVal = Math.max(b.dps || 0, b.bossDps || 0);
+                const aVal = Math.max(a.dps || 0, a.bossDps || 0);
+                return bVal - aVal;
+            });
             targetCache[i] = calculatedResults;
         }
     };
@@ -756,10 +761,10 @@ window.getQuickScore = (unit) => {
         }
     }
 
-    const activeDb = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : window.STATIC_BUILD_DB;
+    const activeDb = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
     const list = activeDb?.[dbKey]?.fixed?.[0];
     if (list?.length > 0) {
-        return list[0].dps;
+        return Math.max(list[0].dps || 0, list[0].bossDps || 0);
     }
 
     const activeMode = window.unitModesState?.[unit.id] || 0;
@@ -775,12 +780,11 @@ window.getQuickScore = (unit) => {
 
 window.getLiveScore = (unit) => {
     const unitId = unit.id;
-    const isLaw = window.isUnit?.(unitId, 'law');
 
     if (window.CALCULATION_MODE === 'loadout') {
         const currentBuild = window.hotbarFilteredBuilds?.[unitId];
         if (currentBuild) {
-            return isLaw ? (currentBuild.range || 0) : Math.max(currentBuild.dps || 0, currentBuild.bossDps || 0);
+            return Math.max(currentBuild.dps || 0, currentBuild.bossDps || 0);
         }
         return window.getQuickScore ? window.getQuickScore(unit) : 0;
     }
@@ -790,40 +794,53 @@ window.getLiveScore = (unit) => {
     const guideMode = window.GLOBAL_MODE_SORT || 'none';
     if (!currentTrait && guideMode !== 'none' && unit.meta?.[guideMode]) {
         currentTrait = unit.meta[guideMode].split('/')[0].trim();
-    }
+        }
     const currentHead = window.unitHeads?.[unitId];
     const activeType = window.activeAbilityIds?.has(unitId) ? 'abil' : 'base';
     const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(b => !b.hideButton && !!window[b.stateKey]) || window.disableSubStats;
-    
-    // Stability: Ignore dynamic card state (modes/summons) for global ranking to prevent "jumping" UI.
-    // We evaluate the unit's base potential (Mode 0) under the current Optimization Strategy.
-    const rankingModeIdx = 0;
-    const cacheKey = `${unitId}-${currentTrait || ''}-${currentHead || ''}-${activeType}-${anyGlobal ? 'buffed' : 'base'}-${rankingModeIdx}-${guideMode}`;
+
+    // Requirement: Stable Default Sorting.
+    // Sorting uses the unit's "Default" configuration (e.g. Base Form, Default Charges) for the Database rank,
+    // so units don't jump around when you MESS with sliders or forms on the card UI.
+    const stableModeIdx = unit.allowMultipleModes ? [0] : 0;
+    const stableSystemLvl = unit.systemLevel?.default ?? 0;
+
+    const cacheKey = `DEFAULT-${unitId}-${currentTrait || ''}-${currentHead || ''}-${activeType}-${anyGlobal ? 'buffed' : 'base'}-${JSON.stringify(stableModeIdx)}-${guideMode}-${stableSystemLvl}`;
 
     if (window.LIVE_SCORE_CACHE[cacheKey] !== undefined) return window.LIVE_SCORE_CACHE[cacheKey];
 
-    const isOptimizing = !!(currentTrait || currentHead || anyGlobal || (guideMode && guideMode !== 'none'));
+    // Force dynamic calculations on complex units (charges, custom modes, fusions)
+    const forceDynamicUnits = ['revolutionary_chief_syncro', 'joyful_captain', 'the_strongest_in_history', 'jinoo_shadow_monarch', 'the_strongest_of_today', 'marine_hero', 'sharpshooter_king_trapper'];
+    const isOptimizing = !!(currentTrait || currentHead || anyGlobal || (guideMode && guideMode !== 'none') || forceDynamicUnits.includes(unitId));
 
     let dbKey = unitId;
     if (activeType === 'abil' && !unit.allowMultipleModes) {
         const abilKey = unitId + '_abil';
         if (window.STATIC_BUILD_DB?.[abilKey]) dbKey = abilKey;
     }
-    const buildList = window.STATIC_BUILD_DB?.[dbKey]?.fixed?.[0];
+    const buildList = window.STATIC_BUILD_DB?.[dbKey]?.fixed?.[0] || window.STATIC_BUILD_DB?.[unitId]?.fixed?.[0];
 
     if (!buildList || buildList.length === 0) {
         return (window.LIVE_SCORE_CACHE[cacheKey] = window.getQuickScore(unit));
     }
 
+    
+    // Temporarily override context for Stable Rank calculation
+    const savedModes = window.unitModesState[unitId];
+    const savedSysLvl = window.unitSystemLevels[unitId];
+    window.unitModesState[unitId] = stableModeIdx;
+    window.unitSystemLevels[unitId] = stableSystemLvl;
+
+    try {
     let maxScore = 0;
     const searchLimit = Math.min(20, buildList.length);
 
     for (let i = 0; i < searchLimit; i++) {
         let scoringEntry = { ...buildList[i] };
         scoringEntry.id = scoringEntry.id || `${unitId}-live`;
-        scoringEntry.traitName = scoringEntry.traitName || (typeof scoringEntry.t === 'number' ? traitsList?.[scoringEntry.t]?.name : scoringEntry.t) || 'Unknown Trait';
-        scoringEntry.setName = scoringEntry.setName || (typeof scoringEntry.s === 'number' ? SETS?.[scoringEntry.s]?.name : scoringEntry.s) || 'Unknown Set';
-        scoringEntry.headUsed = scoringEntry.headUsed || (typeof scoringEntry.h === 'number' ? HEADS_LIST?.[scoringEntry.h] : scoringEntry.h) || 'none';
+        scoringEntry.traitName = scoringEntry.traitName || (typeof scoringEntry.t === 'number' && typeof traitsList !== 'undefined' ? traitsList[scoringEntry.t]?.name : scoringEntry.t) || 'Unknown Trait';
+        scoringEntry.setName = scoringEntry.setName || (typeof scoringEntry.s === 'number' && typeof SETS !== 'undefined' ? SETS[scoringEntry.s]?.name : scoringEntry.s) || 'Unknown Set';
+        scoringEntry.headUsed = scoringEntry.headUsed || (typeof scoringEntry.h === 'number' ? HEADS_LIST[scoringEntry.h] : (scoringEntry.headUsed || scoringEntry.h)) || 'none';
 
         if (!scoringEntry.subStats && scoringEntry.ss) scoringEntry.subStats = scoringEntry.ss;
         if (!scoringEntry.mainStats && (scoringEntry.ms || scoringEntry.b !== undefined || scoringEntry.l !== undefined)) {
@@ -836,33 +853,32 @@ window.getLiveScore = (unit) => {
         if (currentHead) scoringEntry.headUsed = currentHead;
 
         if (isOptimizing) {
-            const setName = scoringEntry.setName || (typeof scoringEntry.s === 'number' ? SETS[scoringEntry.s]?.id : scoringEntry.s) || window.getSetFast?.(scoringEntry.setName)?.id;
-            const traitId = scoringEntry.traitName || scoringEntry.trait || (typeof scoringEntry.t === 'number' ? traitsList[scoringEntry.t]?.id : scoringEntry.t);
+            const setName = scoringEntry.setName || (typeof scoringEntry.s === 'number' && typeof SETS !== 'undefined' ? SETS[scoringEntry.s]?.id : scoringEntry.s) || window.getSetFast?.(scoringEntry.setName)?.id;
+            const traitId = scoringEntry.traitName || scoringEntry.trait || (typeof scoringEntry.t === 'number' && typeof traitsList !== 'undefined' ? traitsList[scoringEntry.t]?.id : scoringEntry.t);
+            const headToUse = currentHead || scoringEntry.headUsed || 'none';
             if (setName && traitId) {
                 const singleBuilds = window.getFilteredBuilds().filter(b => b.setName === setName);
-                const singleTrait = traitsList.find(t => t.id === traitId || t.name === traitId);
+                const singleTrait = typeof traitsList !== 'undefined' && traitsList.find(t => t.id === traitId || t.name === traitId);
                 const optResList = window.calculateUnitBuilds(
-                    unit, null, singleBuilds, window.getValidSubCandidates(), currentHead ? [currentHead] : ['none'],
+                    unit, null, singleBuilds, window.getValidSubCandidates(), [headToUse],
                     !window.disableSubStats, singleTrait ? [singleTrait] : null, activeType === 'abil', 'fixed'
                 );
                 if (optResList?.length > 0) {
-                    scoringEntry = optResList.reduce((best, cur) => cur.dps > best.dps ? cur : best, optResList[0]);
+                    scoringEntry = optResList.reduce((best, cur) => {
+                        const curDps = Math.max(cur.dps || 0, cur.bossDps || 0);
+                        const bestDps = Math.max(best.dps || 0, best.bossDps || 0);
+                        return curDps > bestDps ? cur : best;
+                    }, optResList[0]);
                 }
             }
         }
 
         try {
-            // Temporarily swap to baseline mode for stable ranking calculation
-            const savedMode = window.unitModesState[unitId];
-            window.unitModesState[unitId] = rankingModeIdx;
-
             const res = window.reconstructMathData(scoringEntry);
             if (res) {
-                const score = isLaw ? (res.range || 0) : Math.max(res.total || 0, res.bossTotal || 0);
+                const score = Math.max(res.total || 0, res.bossTotal || 0);
                 if (score > maxScore) maxScore = score;
             }
-            
-            window.unitModesState[unitId] = savedMode;
         } catch (e) {
             console.warn(`Error reconstructing math in getLiveScore for ${unitId}:`, e);
         }
@@ -870,6 +886,11 @@ window.getLiveScore = (unit) => {
 
     const val = maxScore || window.getQuickScore(unit);
     return (window.LIVE_SCORE_CACHE[cacheKey] = val);
+    } finally {
+        // ALWAYS restore user's card state
+        window.unitModesState[unitId] = savedModes;
+        window.unitSystemLevels[unitId] = savedSysLvl;
+    }
 };
 
 window.resortUnitCards = function () {

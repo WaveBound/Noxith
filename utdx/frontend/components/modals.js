@@ -513,6 +513,13 @@
             window.unitModesState[unitId] = modeIdx;
         }
 
+        // Bust sorting and build caches for this unit dynamically
+        if (window.LIVE_SCORE_CACHE) {
+            Object.keys(window.LIVE_SCORE_CACHE).forEach(k => {
+                if (k.startsWith(unitId)) delete window.LIVE_SCORE_CACHE[k];
+            });
+        }
+
         if (window.unitBuildsCache) delete window.unitBuildsCache[unitId];
         window.updateBuildListDisplay?.(unitId, true);
 
@@ -527,6 +534,11 @@
 
         window.updateHotbarUI?.();
         window.updateOverlaySlider?.(unitId, modeIdx);
+
+        // Dynamically re-sort if we are in Database page to reflect the new mode's dps/ranking
+        if (window.CALCULATION_MODE !== 'loadout' && typeof window.resortUnitCardsInPlace === 'function') {
+            window.resortUnitCardsInPlace();
+        }
 
         if (!isMulti && unitId !== 'joyful_captain') {
             setTimeout(window.closeModesOverlay, 100);

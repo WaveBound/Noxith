@@ -1,11 +1,13 @@
 // ============================================================================
-// INIT.JS - Application Initialization
+// INIT.JS - Application Initialization (Safe Bootstrapping)
 // ============================================================================
 
 function initApp() {
-    // 0. Populate default abilities safely regardless of current IDs
+    // 0. Ensure ability tracking Set is declared safely before populating
+    window.activeAbilityIds = window.activeAbilityIds || new Set();
+
     ['phantom_captain', 'megumin', 'ancient_shinob', 'triple_threat', 'marine_hero'].forEach(file => {
-        const dynamicId = window.getUnitId(file);
+        const dynamicId = window.getUnitId?.(file);
         if (dynamicId) activeAbilityIds.add(dynamicId);
     });
 
@@ -71,7 +73,6 @@ function initApp() {
             }
         }, 500);
     }
-
 }
 
 // Wait for DOMContentLoaded AND all unit scripts before initialising.

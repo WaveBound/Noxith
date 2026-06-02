@@ -262,12 +262,12 @@
             const traitName = build.traitName || '—';
             const subs = build.subStats || {};
             const stats = unit.stats || {};
-            const effects = [];
+            const htmlArr = [];
 
-            if (stats.slowPct) effects.push({ label: 'Slow', val: `${stats.slowPct}% (${stats.slowDuration || 0}s)`, color: '#60a5fa' });
-            if (stats.stunDuration) effects.push({ label: 'Stun', val: `${stats.stunDuration}s`, color: '#fbbf24' });
-            if (stats.timestopDuration) effects.push({ label: 'Timestop', val: `${stats.timestopDuration}s`, color: '#a78bfa' });
-            if (stats.hasRadiation) effects.push({ label: 'Radiation', val: `+${stats.radiationPct || 20}% Dmg Taken (${stats.radiationDuration || 6}s)`, color: '#f87171' });
+            if (stats.slowPct) htmlArr.push({ label: 'Slow', val: `${stats.slowPct}% (${stats.slowDuration || 0}s)`, color: '#60a5fa' });
+            if (stats.stunDuration) htmlArr.push({ label: 'Stun', val: `${stats.stunDuration}s`, color: '#fbbf24' });
+            if (stats.timestopDuration) htmlArr.push({ label: 'Timestop', val: `${stats.timestopDuration}s`, color: '#a78bfa' });
+            if (stats.hasRadiation) htmlArr.push({ label: 'Radiation', val: `+${stats.radiationPct || 20}% Dmg Taken (${stats.radiationDuration || 6}s)`, color: '#f87171' });
 
             let activeModeName = null, activeModes = [];
             if (unit.modes && Array.isArray(unit.modes)) {
@@ -278,11 +278,11 @@
 
             if (CUSTOM_EFFECTS_MAP[unit.id]) {
                 CUSTOM_EFFECTS_MAP[unit.id](unit, activeModeName, activeModes).forEach(e => {
-                    e.isTeam ? teamEffects.push({ ...e, unitName: unit.name }) : effects.push(e);
+                    e.isTeam ? teamEffects.push({ ...e, unitName: unit.name }) : htmlArr.push(e);
                 });
             }
 
-            effects.forEach(e => { if (!e.skipTeam) teamEffects.push({ ...e, unitName: unit.name }); });
+            htmlArr.forEach(e => { if (!e.skipTeam) teamEffects.push({ ...e, unitName: unit.name }); });
 
             const spaStr = build.spa ? fix2Val(build.spa) + 's' : '—';
             const rangeStr = build.range ? fix1Val(build.range) : '—';
@@ -303,12 +303,11 @@
             });
 
             const isLoadout = window.CALCULATION_MODE === 'loadout';
-            const isPotential = window.CALCULATION_MODE === 'potential';
 
             html += `
                 <div class="ts-unit-card">
-<div class="ts-header-left" style="display: flex; gap: 15px; align-items: center;">
-                    <div class="ts-img-container"><img src="${unit.img}" class="ts-unit-img"></div>
+                    <div class="ts-header-left" style="display: flex; gap: 15px; align-items: center;">
+                        <div class="ts-img-container"><img src="${unit.img}" class="ts-unit-img"></div>
                         <div class="ts-unit-info">
                             <div style="display: flex; align-items: center; flex-wrap: wrap;"><span class="ts-unit-name">${unit.name}</span></div>
                             <div class="ts-unit-trait">${traitName}</div>
@@ -436,7 +435,7 @@
                     <div class="ts-lower-row" style="margin-top: auto;">
                         ${ksBonus ? `<div class="ts-bonus-pill" style="margin-bottom: 8px; display: inline-block;"><span class="ks-text">${ksBonus}</span></div>` : ''}
                         ${ttBonus ? `<div class="ts-bonus-pill" style="border-color: rgba(167, 243, 208, 0.4); background: rgba(167, 243, 208, 0.08); color: #a7f3d0; padding: 4px 10px; font-size: 0.7rem; height: auto; margin-bottom: 8px; display: inline-block; width: fit-content; line-height: 1.2;"><span class="ks-text" style="color: #a7f3d0;">${ttBonus}</span></div>` : ''}
-                        ${effects.length ? `<div class="ts-effect-badges">${effects.map(e => `<div class="ts-effect-badge" style="--effect-color: ${e.color};"><span class="ts-effect-dot" style="background: ${e.color};"></span>${e.label}<span class="ts-effect-val">${e.val}</span></div>`).join('')}</div>` : ''}
+                        ${htmlArr.length ? `<div class="ts-effect-badges">${htmlArr.map(e => `<div class="ts-effect-badge" style="--effect-color: ${e.color};"><span class="ts-effect-dot" style="background: ${e.color};"></span>${e.label}<span class="ts-effect-val">${e.val}</span></div>`).join('')}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -781,16 +780,16 @@
     function showFusionImages(armorIds) {
         if (!armorIds || !armorIds.length) return;
         const bestBuilds = {
-            [callWin('getUnitId', 'unparalleled_armor')]: { dmg: '251.2k', spa: '5.39s', range: '75.2', crit: '77.5%', cdmg: '189%', dot: '0' },
-            [callWin('getUnitId', 'majestic_armor')]: { dmg: '132.4k', spa: '7.12s', range: '52.5', crit: '95%', cdmg: '284%', dot: '0' },
-            [callWin('getUnitId', 'sjw')]: { dmg: '312.5k', spa: '3.82s', range: '82.4', crit: '85%', cdmg: '215%', dot: '0' }
+            [callWin('getUnitId', 'unparalleled_armor')]: { dmg: '251.2k', spa: '5.39s', range: '75.2', Math: '77.5%', cdmg: '189%', dot: '0' },
+            [callWin('getUnitId', 'majestic_armor')]: { dmg: '132.4k', spa: '7.12s', range: '52.5', Math: '95%', cdmg: '284%', dot: '0' },
+            [callWin('getUnitId', 'sjw')]: { dmg: '312.5k', spa: '3.82s', range: '82.4', Math: '85%', cdmg: '215%', dot: '0' }
         };
 
         let contentHtml = '';
         armorIds.forEach(id => {
             const u = typeof unitDatabase !== 'undefined' && unitDatabase.find(x => x.id === id);
             if (u) {
-                const b = bestBuilds[id] || { dmg: '0', spa: '0', range: '0', crit: '0%', cdmg: '0%', dot: '0' };
+                const b = bestBuilds[id] || { dmg: '0', spa: '0', range: '0', Math: '0%', cdmg: '0%', dot: '0' };
                 const isFused = hotbarState.activeFusionIds.includes(id);
                 contentHtml += `
                     <div class="fusion-card-overlay" onclick="event.stopPropagation();">
@@ -811,7 +810,7 @@
                                 </div>
                             </div>
                             <div class="fs-sub-row">
-                                <div class="fs-item-sm"><span class="fs-label">Crit %</span><span class="fs-val val-crit">${b.crit}</span></div>
+                                <div class="fs-item-sm"><span class="fs-label">Crit %</span><span class="fs-val val-crit">${b.Math}</span></div>
                                 <div class="fs-item-sm"><span class="fs-label">CDmg</span><span class="fs-val val-cdmg">${b.cdmg}</span></div>
                                 <div class="fs-item-sm"><span class="fs-label">DoT Dmg</span><span class="fs-val val-dot">${b.dot}</span></div>
                             </div>

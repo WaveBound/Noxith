@@ -1,3 +1,7 @@
+// ============================================================================
+// CUSTOM-PAIR.JS - Custom Trait Combination Creator (Optimized & Safe)
+// ============================================================================
+
 let cpUnitSelection = new Set(['all']);
 let cpT1 = 'ruler';
 let cpT2 = 'none';
@@ -100,16 +104,19 @@ function renderCustomPairUI() {
         }
     }
 
-    const t1Name = traitsList.find(t => t.id === cpT1).name;
-    const t2Name = (cpT2 === 'none') ? '(None)' : traitsList.find(t => t.id === cpT2).name;
+    const t1Obj = traitsList.find(t => t.id === cpT1);
+    const t1Name = t1Obj ? t1Obj.name : cpT1;
+
+    const t2Obj = cpT2 === 'none' ? null : traitsList.find(t => t.id === cpT2);
+    const t2Name = t2Obj ? t2Obj.name : '(None)';
 
     document.getElementById('cpPreviewText').innerHTML = `${uName} <span class="text-dim">+</span> <span class="text-accent-start">${t1Name}</span> <span class="text-dim">+</span> <span class="text-accent-end">${t2Name}</span>`;
 }
 
 function confirmAddCustomPair() {
-    // USE UNIFIED TRAIT HELPER
-    const t1 = window.getTraitFast(cpT1);
-    const t2 = window.getTraitFast(cpT2);
+    // Safe lookup of selected traits
+    const t1 = typeof window.getTraitFast === 'function' ? window.getTraitFast(cpT1) : traitsList.find(t => t.id === cpT1);
+    const t2 = cpT2 === 'none' ? { id: 'none', name: 'None' } : (typeof window.getTraitFast === 'function' ? window.getTraitFast(cpT2) : traitsList.find(t => t.id === cpT2));
 
     if (t1 && t2) {
         const combo = combineTraits(t1, t2);
@@ -139,7 +146,6 @@ function confirmAddCustomPair() {
                 const alreadyExists = unitList.some(t => t.name === combo.name);
 
                 if (!alreadyExists && combo.id !== 'none') {
-                    // We push a clone or the same ref (same ref is fine for read-only)
                     unitSpecificTraits[unitId].push(combo);
                     successCount++;
                 }
