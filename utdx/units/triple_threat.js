@@ -25,7 +25,6 @@ unitDatabase.push({
         dot: 0,
         dotStacks: 1,
         spaCap: 3.5,
-        bossDmg: 45,
         passiveDmg: 0,
         element: "Wind",
         dotDuration: 0,

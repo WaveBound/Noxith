@@ -1,6 +1,6 @@
 const MAIN_STAT_VALS = {
-    body: { dmg: 60, dot: 75, cm: 120 },
-    legs: { dmg: 60, spa: 22.5, cf: 37.5 },
+    body: { dmg: 70, dot: 99, cm: 120 },
+    legs: { dmg: 70, spa: 22.5, cf: 37.5 },
     // Visual values for Head (Math engine ignores these currently)
     head: { potency: 45, elemental: 30 } 
 };

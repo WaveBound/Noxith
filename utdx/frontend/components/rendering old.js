@@ -1006,12 +1006,6 @@ function renderUnitCard(unit, absoluteIndex) {
             <span style="font-size: 0.85rem; line-height: 1;">⚠️</span>
             <span><strong>Notice:</strong> Mochi Pirate is bugged; he does not apply Time Snail currently / Crit Time snail enemies.</span>
         </div>`;
-    } else if (unit.id === 'triple_threat') {
-        customNoticeHtml = `
-        <div class="unit-card-warning" style="padding: 6px 12px; background: rgba(34, 197, 94, 0.08); border-bottom: 1px solid rgba(34, 197, 94, 0.15); display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 700; color: #4ade80;">
-            <span style="font-size: 0.85rem; line-height: 1;">⚔️</span>
-            <span><strong>Notice:</strong> Hidden Passive: Deals 1.45x damage to Bosses.</span>
-        </div>`;
     }
 
     const bottomControls = `
