@@ -50,3 +50,4 @@ var paginatedSortedUnits = [];
 
 // Inventory
 var relicInventory = [];
+var inventoryUnitTraits = {};

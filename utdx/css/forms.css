@@ -1,9 +1,19 @@
 --- START OF FILE forms.css ---
 
 /* GLOBAL INPUTS */
-input, select { width: 100%; background-color: #050505; border: 1px solid var(--card-border); padding: 8px; border-radius: 6px; color: #fff; transition: border-color 0.15s; font-size: 0.85rem; }
+input, select { width: 100%; background-color: #050505; border: 1px solid var(--card-border); padding: 8px; border-radius: 6px; color: #fff; transition: border-color 0.15s; font-size: 0.85rem; color-scheme: dark; }
 input:focus, select:focus { border-color: var(--accent-start); outline: none; }
 select { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22white%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 20px; padding-right: 30px; cursor: pointer; }
+select option {
+    background: #0b0c10;
+    color: #f8fafc;
+}
+
+select option:checked,
+select option:hover {
+    background: #2563eb;
+    color: #ffffff;
+}
 /* CUSTOM SPIN BUTTONS */
 input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; }

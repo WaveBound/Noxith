@@ -3,6 +3,7 @@
 // ============================================================================
 
 const RELIC_STORAGE_KEY = 'uto_relic_inventory_v1';
+const INVENTORY_ASSIGNMENTS_STORAGE_KEY = 'uto_inventory_unit_traits_v1';
 
 const RELIC_COLORS = {
     'ninja': 'linear-gradient(135deg, #1e1b4b, #020617)',
@@ -46,6 +47,7 @@ const REVERSE_STAT_MAPPING = {
 };
 
 let inventoryGrid;
+let inventoryAssignmentPanel;
 let highlightedRelicIds = new Set();
 
 function initInventory() {
@@ -57,6 +59,7 @@ function initInventory() {
 
     setupModalInputs();
     loadInventory();
+    loadInventoryAssignments();
     renderInventory();
     updateInventoryToggleState();
 
@@ -70,6 +73,144 @@ function initInventory() {
 function saveInventory() {
     try { localStorage.setItem(RELIC_STORAGE_KEY, JSON.stringify(relicInventory)); } catch (e) { console.error(e); }
 }
+
+function saveInventoryAssignments() {
+    try { localStorage.setItem(INVENTORY_ASSIGNMENTS_STORAGE_KEY, JSON.stringify(inventoryUnitTraits || {})); } catch (e) { console.error(e); }
+}
+
+function loadInventoryAssignments() {
+    try {
+        const stored = localStorage.getItem(INVENTORY_ASSIGNMENTS_STORAGE_KEY);
+        inventoryUnitTraits = stored ? JSON.parse(stored) : {};
+    } catch (e) {
+        inventoryUnitTraits = {};
+    }
+    window.inventoryUnitTraits = inventoryUnitTraits;
+}
+
+function getInventoryAssignedTrait(unitId) {
+    return (inventoryUnitTraits && inventoryUnitTraits[unitId]) || null;
+}
+window.getInventoryAssignedTrait = getInventoryAssignedTrait;
+
+function hasInventoryAssignments() {
+    return !!(inventoryUnitTraits && Object.keys(inventoryUnitTraits).length > 0);
+}
+window.hasInventoryAssignments = hasInventoryAssignments;
+
+function refreshInventoryAssignmentCalculations() {
+    if (typeof window.resetCachesForBuffChange === 'function') window.resetCachesForBuffChange();
+    if (typeof window.resetAndRender === 'function') window.resetAndRender();
+    if (document.getElementById('guidesPage')?.classList.contains('active') && typeof window.renderGuides === 'function') window.renderGuides();
+}
+
+function renderInventoryAssignments() {
+    inventoryAssignmentPanel = document.getElementById('inventoryAssignmentPanel');
+    if (!inventoryAssignmentPanel) return;
+
+    const sortedUnits = (unitDatabase || [])
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name));
+    const unitChoices = sortedUnits.map(u => `
+        <label class="inventory-unit-choice" data-unit-name="${u.name.toLowerCase()}">
+            <input type="checkbox" value="${u.id}" onchange="refreshInventoryTraitOptions()">
+            <img src="${u.img}" alt="${u.name}" onerror="this.style.display='none'">
+            <span>${u.name}</span>
+        </label>
+    `).join('');
+    const firstUnitId = sortedUnits[0]?.id;
+    const traitOptions = getInventoryTraitOptionsHtml(firstUnitId);
+
+    const assignments = Object.entries(inventoryUnitTraits || {}).map(([unitId, traitId]) => {
+        const unit = unitDatabase.find(u => u.id === unitId);
+        const trait = traitsList.find(t => t.id === traitId) || customTraits.find(t => t.id === traitId) || (unitSpecificTraits[unitId] || []).find(t => t.id === traitId);
+        if (!unit || !trait) return '';
+        return `
+            <div class="inventory-assignment-chip">
+                <img src="${unit.img}" alt="${unit.name}" onerror="this.style.display='none'">
+                <span class="ia-unit">${unit.name}</span>
+                <span class="ia-trait">${trait.name}</span>
+                <button type="button" onclick="removeInventoryAssignment('${unitId}')" title="Remove assignment">x</button>
+            </div>`;
+    }).join('');
+
+    inventoryAssignmentPanel.innerHTML = `
+        <div class="inventory-assignment-header">
+            <div>
+                <div class="inventory-assignment-title">Inventory Unit Traits</div>
+                <div class="inventory-assignment-subtitle">Inventory mode only calculates relic builds for these unit and trait pairs.</div>
+            </div>
+        </div>
+        <div class="inventory-assignment-controls">
+            <input id="inventoryAssignSearch" class="inventory-assignment-search" type="text" placeholder="Search units..." oninput="filterInventoryAssignmentUnits(this.value)">
+            <select id="inventoryAssignTrait" class="inventory-assignment-select">${traitOptions}</select>
+            <button type="button" class="inventory-assignment-add" onclick="addInventoryAssignment()">Add</button>
+        </div>
+        <div id="inventoryAssignUnitList" class="inventory-unit-choice-list">${unitChoices}</div>
+        <div class="inventory-assignment-list">
+            ${assignments || '<div class="inventory-assignment-empty">Add a unit and trait to use Inventory mode for that unit.</div>'}
+        </div>
+    `;
+}
+window.renderInventoryAssignments = renderInventoryAssignments;
+
+function getInventoryTraitOptionsHtml(unitId) {
+    const allTraits = [...(traitsList || []), ...(customTraits || []), ...((unitSpecificTraits && unitSpecificTraits[unitId]) || [])];
+    return allTraits
+        .filter((t, index, self) => t.id !== 'none' && index === self.findIndex(x => x.id === t.id))
+        .map(t => `<option value="${t.id}">${t.name}</option>`)
+        .join('');
+}
+
+window.refreshInventoryTraitOptions = function () {
+    const selectedUnits = Array.from(document.querySelectorAll('#inventoryAssignUnitList input:checked')).map(input => input.value);
+    const unitId = selectedUnits[0] || document.querySelector('#inventoryAssignUnitList input')?.value;
+    const traitSelect = document.getElementById('inventoryAssignTrait');
+    if (!traitSelect) return;
+    traitSelect.innerHTML = getInventoryTraitOptionsHtml(unitId);
+};
+
+window.filterInventoryAssignmentUnits = function (query) {
+    const q = (query || '').trim().toLowerCase();
+    document.querySelectorAll('#inventoryAssignUnitList .inventory-unit-choice').forEach(item => {
+        const name = item.dataset.unitName || '';
+        item.classList.toggle('hidden', q && !name.includes(q));
+    });
+};
+
+window.openInventoryAssignmentsMenu = function () {
+    if (typeof window.showUniversalModal !== 'function') return;
+    window.showUniversalModal({
+        title: 'INVENTORY MODE',
+        content: '<div id="inventoryAssignmentPanel" class="inventory-assignment-panel inventory-assignment-modal"></div>',
+        footerButtons: '<button class="action-btn secondary" onclick="closeModal(\'universalModal\')">Close</button>',
+        size: 'modal-md'
+    });
+    renderInventoryAssignments();
+};
+
+window.addInventoryAssignment = function () {
+    const unitIds = Array.from(document.querySelectorAll('#inventoryAssignUnitList input:checked')).map(input => input.value);
+    const traitId = document.getElementById('inventoryAssignTrait')?.value;
+    if (unitIds.length === 0 || !traitId) return;
+
+    unitIds.forEach(unitId => {
+        inventoryUnitTraits[unitId] = traitId;
+    });
+    window.inventoryUnitTraits = inventoryUnitTraits;
+    saveInventoryAssignments();
+    renderInventoryAssignments();
+    refreshInventoryAssignmentCalculations();
+};
+
+window.removeInventoryAssignment = function (unitId) {
+    if (!inventoryUnitTraits || !inventoryUnitTraits[unitId]) return;
+    delete inventoryUnitTraits[unitId];
+    window.inventoryUnitTraits = inventoryUnitTraits;
+    saveInventoryAssignments();
+    renderInventoryAssignments();
+    refreshInventoryAssignmentCalculations();
+};
 
 function loadInventory() {
     try {
@@ -124,8 +265,7 @@ function updateSetOptions(slot) {
     const setSelect = document.getElementById('newRelicSet');
     if (!setSelect) return;
     const currentSelection = setSelect.value;
-    const invalidHeadSets = ['laughing', 'ex'];
-    const filteredSets = SETS.filter(s => slot === 'Head' ? !invalidHeadSets.includes(s.id) : true);
+    const filteredSets = SETS;
 
     setSelect.innerHTML = filteredSets.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
 
@@ -140,7 +280,8 @@ function updateStarVisibility() {
     const starSelect = document.getElementById('newRelicStars');
     if (!starSelect) return;
 
-    const showStars = (setId === 'shadow_reaper' || setId === 'reaper_set' || setId === 'warlord' || setId === 'monarch');
+    const selectedSet = SETS.find(s => s.id === setId);
+    const showStars = selectedSet?.rarity === 'Secret';
     if (showStars) {
         starSelect.parentElement.classList.remove('hidden');
     } else {
@@ -275,6 +416,7 @@ function addRelic() {
         if (setKey === 'shadow_reaper') setKey = 'shadow_reaper_necklace';
         if (setKey === 'reaper_set') setKey = 'reaper_necklace';
         if (setKey === 'warlord') setKey = 'warlord_hat';
+        if (setKey === 'rebellious') setKey = 'rebellious';
         if (setKey === 'biju_set') setKey = 'biju_head';
         if (setKey === 'reanimated_ninja') setKey = 'reanimated_head';
         if (setKey === 'sorcerer_hunter') setKey = 'sorcerer_hunter_spirit';

@@ -123,7 +123,16 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
 
     // 1. Determine Traits List
     let activeTraits = [];
-    if (specificTraitsOnly && Array.isArray(specificTraitsOnly)) {
+    const assignedTraitId = (typeof window.getInventoryAssignedTrait === 'function') ? window.getInventoryAssignedTrait(unit.id) : ((window.inventoryUnitTraits || {})[unit.id] || null);
+    if (assignedTraitId) {
+        const specificTraits = unitSpecificTraits[unit.id] || [];
+        const allTraits = [...traitsList, ...customTraits, ...specificTraits];
+        const assignedTrait = allTraits.find(t => t.id === assignedTraitId || t.name === assignedTraitId);
+        if (!assignedTrait || assignedTrait.id === 'none') return [];
+        activeTraits = [assignedTrait];
+    } else if (!forcedRelic) {
+        return [];
+    } else if (specificTraitsOnly && Array.isArray(specificTraitsOnly)) {
         activeTraits = specificTraitsOnly;
     } else {
         const specificTraits = unitSpecificTraits[unit.id] || [];

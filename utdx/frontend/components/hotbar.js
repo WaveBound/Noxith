@@ -618,7 +618,8 @@
         };
 
         populateMenu('.farms-menu', [
-            { id: 'speedwagon', name: 'Speedcart', img: 'images/units/Speedwagon.png', tags: ['Assistant'] }
+            { id: 'speedwagon', name: 'Speedcart', img: 'images/units/Speedwagon.png', tags: ['Assistant', 'Miner'] },
+            { id: 'bulma', name: 'Bulma', img: 'images/units/Bulma.png', tags: ['Assistant', 'Miner'] }
         ]);
 
         populateMenu('.buffers-menu', [
