@@ -21,11 +21,11 @@ if (!setBonuses.none) {
     setBonuses.none = { dmg: 0, spa: 0, cf: 0, cm: 0, range: 0 };
 }
 
-const BODY_DMG = { dmg: 60, dot: 0, cm: 0, desc: "Dmg", type: "dmg" };
-const BODY_DOT = { dmg: 0, dot: 75, cm: 0, desc: "DoT", type: "dot" };
+const BODY_DMG = { dmg: 70, dot: 0, cm: 0, desc: "Dmg", type: "dmg" };
+const BODY_DOT = { dmg: 0, dot: 99, cm: 0, desc: "DoT", type: "dot" };
 const BODY_CDMG = { dmg: 0, dot: 0, cm: 120, desc: "Crit Dmg", type: "cm" };
 
-const LEG_DMG = { dmg: 60, spa: 0, desc: "Dmg", type: "dmg" };
+const LEG_DMG = { dmg: 70, spa: 0, desc: "Dmg", type: "dmg" };
 const LEG_SPA = { dmg: 0, spa: 22.5, desc: "Spa", type: "spa" };
 const LEG_CRIT = { dmg: 0, spa: 0, desc: "Crit Rate", type: "cf", cf: 37.5 };
 const LEG_RANGE = { dmg: 0, spa: 0, desc: "Range", type: "range", range: 30 };

@@ -289,7 +289,7 @@ function hydrateBuildEntry(r, unitId, isHotbar) {
                 res.subStats.finalCm = fullMath.critData ? fullMath.critData.cdmg : 0;
             }
             res.dps = res.dps || 0;
-            res.sortDps = Math.max(res.dps || 0, res.bossDps || 0);
+            res.sortDps = res.dps || 0;
         } catch (e) {
             console.warn("Hydration Math Error for", res.id, e);
         }
@@ -342,13 +342,17 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
         prioHtml = unitId === 'joyful_captain' ? '' : `<span class="prio-badge ${pCfg.cls}">${pCfg.label}</span>`;
     }
 
-    const s = window.disableSubStats ? {} : (r.subStats || {});
+    const s = window.disableSubStats ? {} : { ...(r.subStats || {}) };
+    if (!window.disableSubStats && unitId === 'ant_king_savage' && r.mainStats?.body === 'dot' && (!Array.isArray(s.body) || s.body.length === 0)) {
+        s.body = [{ type: 'dmg', val: (typeof PERFECT_SUBS !== 'undefined' ? PERFECT_SUBS.dmg : 4) * 6 }];
+    }
     const headRow = (!window.disableSubStats && r.headUsed && r.headUsed !== 'none') ? `<div class="stat-line"><span class="sl-label">HEAD</span>${getRichBadgeHtml(s.head || [])}</div>` : '';
     const bodyRow = window.disableSubStats ? '' : `<div class="stat-line"><span class="sl-label">BODY</span>${getRichBadgeHtml(s.body || [])}</div>`;
     const legsRow = window.disableSubStats ? '' : `<div class="stat-line"><span class="sl-label">LEGS</span>${getRichBadgeHtml(s.legs || [])}</div>`;
 
-    const isBossHigher = (sortMode === 'dps') && (r.bossDps > (r.dps || 0));
-    const displayVal = format(r.sortDps || r.dps || 0);
+    const isBossSort = sortMode === 'boss';
+    const isBossHigher = isBossSort && (r.bossDps > (r.dps || 0));
+    const displayVal = format(isBossSort ? Math.max(r.dps || 0, r.bossDps || 0) : (r.dps || 0));
     const displayLabel = (isBossHigher ? 'BOSS DPS' : 'DPS');
 
     const renderValRow = (iconKey, currentVal, nextVal, extraClass = '') => `
@@ -545,14 +549,14 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             }
             if (sortSelect === 'damage') {
                 if (b.dmgVal !== a.dmgVal) return (b.dmgVal || 0) - (a.dmgVal || 0);
-                return (b.sortDps || 0) - (a.sortDps || 0);
+                return (b.sortDps || b.dps || 0) - (a.sortDps || a.dps || 0);
             }
             if (sortSelect === 'efficiency') {
                 const effA = calculateBuildEfficiency(a, unitCost, unitPlace, unitId);
                 const effB = calculateBuildEfficiency(b, unitCost, unitPlace, unitId);
                 return effB - effA;
             }
-            return (b.sortDps || 0) - (a.sortDps || 0);
+            return (b.sortDps || b.dps || 0) - (a.sortDps || a.dps || 0);
         });
 
         // 1. Hydrate all builds for this unit to determine their global positions
@@ -713,8 +717,8 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                             cfg.subs, singleTrait ? [singleTrait] : null, useAbility, mode
                         );
                         return optResList?.reduce((best, cur) => {
-                            const curDps = Math.max(cur.dps || 0, cur.bossDps || 0);
-                            const bestDps = Math.max(best.dps || 0, best.bossDps || 0);
+                            const curDps = cur.dps || 0;
+                            const bestDps = best.dps || 0;
                             return curDps > bestDps ? cur : best;
                         }, optResList[0]) || r;
                     });
@@ -739,9 +743,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
             }
 
             calculatedResults.sort((a, b) => {
-                const bVal = Math.max(b.dps || 0, b.bossDps || 0);
-                const aVal = Math.max(a.dps || 0, a.bossDps || 0);
-                return bVal - aVal;
+                return (b.dps || 0) - (a.dps || 0);
             });
             targetCache[i] = calculatedResults;
         }
@@ -764,7 +766,7 @@ window.getQuickScore = (unit) => {
     const activeDb = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
     const list = activeDb?.[dbKey]?.fixed?.[0];
     if (list?.length > 0) {
-        return Math.max(list[0].dps || 0, list[0].bossDps || 0);
+        return list[0].dps || 0;
     }
 
     const activeMode = window.unitModesState?.[unit.id] || 0;
@@ -784,7 +786,7 @@ window.getLiveScore = (unit) => {
     if (window.CALCULATION_MODE === 'loadout') {
         const currentBuild = window.hotbarFilteredBuilds?.[unitId];
         if (currentBuild) {
-            return Math.max(currentBuild.dps || 0, currentBuild.bossDps || 0);
+            return currentBuild.dps || 0;
         }
         return window.getQuickScore ? window.getQuickScore(unit) : 0;
     }
@@ -865,8 +867,8 @@ window.getLiveScore = (unit) => {
                 );
                 if (optResList?.length > 0) {
                     scoringEntry = optResList.reduce((best, cur) => {
-                        const curDps = Math.max(cur.dps || 0, cur.bossDps || 0);
-                        const bestDps = Math.max(best.dps || 0, best.bossDps || 0);
+                        const curDps = cur.dps || 0;
+                        const bestDps = best.dps || 0;
                         return curDps > bestDps ? cur : best;
                     }, optResList[0]);
                 }
@@ -876,7 +878,7 @@ window.getLiveScore = (unit) => {
         try {
             const res = window.reconstructMathData(scoringEntry);
             if (res) {
-                const score = Math.max(res.total || 0, res.bossTotal || 0);
+                const score = res.total || 0;
                 if (score > maxScore) maxScore = score;
             }
         } catch (e) {
@@ -1190,13 +1192,17 @@ window.globalFilterUnits = (term) => {
     const clearBtn = document.getElementById('globalSearchClear');
     if (clearBtn) clearBtn.style.display = searchTerm ? 'flex' : 'none';
 
-    const allSorted = unitDatabase.map(unit => ({ unit, maxScore: getLiveScore(unit) }))
+    const assignedInventoryUnitIds = new Set(Object.keys(window.inventoryUnitTraits || {}));
+    let filtered = inventoryMode
+        ? unitDatabase.filter(unit => assignedInventoryUnitIds.has(unit.id))
+        : unitDatabase;
+
+    const allSorted = filtered.map(unit => ({ unit, maxScore: getLiveScore(unit) }))
         .sort((a, b) => b.maxScore - a.maxScore);
 
     window.unitAbsoluteRanks = {};
     allSorted.forEach((entry, i) => { window.unitAbsoluteRanks[entry.unit.id] = i + 1; });
 
-    let filtered = unitDatabase;
     const unitElement = document.getElementById('unitElementSort')?.value || 'none';
     if (unitElement !== 'none') {
         filtered = filtered.filter(unit => {
@@ -1278,9 +1284,7 @@ function openTraitBestList(unitId) {
 
     const sortedTraits = Array.from(bestByTrait.values()).map(b => hydrateBuildEntry(b, unitId))
         .sort((a, b) => {
-            const valA = Math.max(a.dps || 0, a.bossDps || 0);
-            const valB = Math.max(b.dps || 0, b.bossDps || 0);
-            return valB - valA;
+            return (b.dps || 0) - (a.dps || 0);
         });
 
     let tagsHtml = '';
@@ -1322,9 +1326,9 @@ function openTraitBestList(unitId) {
     const mapStat = s => ({ cf: 'Crit', cm: 'CDmg', spa: 'SPA', range: 'Rng', dot: 'DoT' }[s] || 'Dmg');
 
     sortedTraits.forEach((b, idx) => {
-        const isBossHigher = (b.bossDps > (b.dps || 0));
-        const val = format(Math.max(b.dps || 0, b.bossDps || 0));
-        const label = (isBossHigher ? 'BOSS DPS' : 'DPS');
+        const isBossHigher = false;
+        const val = format(b.dps || 0);
+        const label = 'DPS';
         const tObj = getTraitByName(b.traitName, unitId);
         const setupText = `<b class="text-white">${b.setName}</b> <span class="text-dim text-xs">(${mapStat(b.mainStats.body)}/${mapStat(b.mainStats.legs)})</span>${b.headUsed && b.headUsed !== 'none' ? ` + ${HEAD_CONFIG[b.headUsed]?.name || 'Head'}` : ''}`;
 

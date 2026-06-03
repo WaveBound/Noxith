@@ -260,7 +260,10 @@
             const legsName = MAIN_STAT_NAMES.legs[build.mainStats?.legs] || build.mainStats?.legs || 'Dmg';
             const setName = build.setName || '—';
             const traitName = build.traitName || '—';
-            const subs = build.subStats || {};
+            const subs = { ...(build.subStats || {}) };
+            if (unit.id === 'ant_king_savage' && build.mainStats?.body === 'dot' && (!Array.isArray(subs.body) || subs.body.length === 0)) {
+                subs.body = [{ type: 'dmg', val: (typeof PERFECT_SUBS !== 'undefined' ? PERFECT_SUBS.dmg : 4) * 6 }];
+            }
             const stats = unit.stats || {};
             const htmlArr = [];
 

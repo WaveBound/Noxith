@@ -166,7 +166,7 @@ if (isMainThread) {
             strategies.push({ p: null, s: null, ratio: { p: 0, s: 0 } });
         } else {
             cands.forEach(c => strategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
-            const pairs = [['dmg', 'cf'], ['dmg', 'spa'], ['dmg', 'cm'], ['cf', 'cm']];
+            const pairs = [['dmg', 'cf'], ['dmg', 'spa'], ['dmg', 'cm'], ['cf', 'cm'], ['dot', 'dmg'], ['dot', 'spa'], ['dot', 'cf']];
             const ratios = [{ p: 4, s: 3 }, { p: 3, s: 4 }, { p: 5, s: 2 }, { p: 2, s: 5 }];
             pairs.forEach(pair => {
                 const [c1, c2] = pair;
@@ -178,7 +178,7 @@ if (isMainThread) {
         let noCritStrategies = [];
         if (includeSubs) {
             noCritCands.forEach(c => noCritStrategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
-            const noCritPairs = [['dmg', 'spa']];
+            const noCritPairs = [['dmg', 'spa'], ['dot', 'dmg'], ['dot', 'spa']];
             const ratios = [{ p: 4, s: 3 }, { p: 3, s: 4 }, { p: 5, s: 2 }, { p: 2, s: 5 }];
             noCritPairs.forEach(pair => {
                 const [c1, c2] = pair;

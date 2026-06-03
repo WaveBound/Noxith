@@ -11,15 +11,15 @@ export const SUB_STAT_BASES = {
 
 export const MAIN_STAT_BASES = {
     Top: [
-        { stat: "dmg", value: 60 },
+        { stat: "dmg", value: 70 },
         { stat: "cDmg", value: 120 },
-        { stat: "dot", value: 75 },
+        { stat: "dot", value: 99 },
         { stat: "hyperArmor", value: 100 }
     ],
     Bottom: [
         { stat: "range", value: 30 },
         { stat: "spa", value: 22.5 }, // spa is cooldown reduction internally
-        { stat: "dmg", value: 60 },
+        { stat: "dmg", value: 70 },
         { stat: "cRate", value: 37.5 }
     ],
     Accessory: [

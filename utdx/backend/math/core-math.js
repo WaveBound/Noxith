@@ -139,7 +139,7 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
 
         let strategies = [];
         activeCandidates.forEach(c => strategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
-        const pairs = [['dmg', 'cf'], ['dmg', 'spa'], ['dmg', 'range'], ['dmg', 'cm'], ['cf', 'cm'], ['spa', 'range']];
+        const pairs = [['dmg', 'cf'], ['dmg', 'spa'], ['dmg', 'range'], ['dmg', 'cm'], ['cf', 'cm'], ['spa', 'range'], ['dot', 'dmg'], ['dot', 'spa'], ['dot', 'cf']];
         const ratios = [{ p: 4, s: 3 }, { p: 3, s: 4 }, { p: 5, s: 2 }, { p: 2, s: 5 }];
 
         pairs.forEach(pair => {
@@ -331,4 +331,4 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
 
     return { dotDpsTotal, bossDotDpsTotal, dotBreakdown };
 }
-
+

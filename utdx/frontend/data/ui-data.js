@@ -4,6 +4,17 @@ const comingSoonData = [
 
 const patchNotesData = [
     {
+        version: "v6.4",
+        date: "Jun 03, 2026",
+        changes: [
+            { type: "Balance", text: "<b>Relic Main Stats:</b> Dmg main stat increased from <b>60%</b> to <b>70%</b>." },
+            { type: "Balance", text: "<b>Relic Main Stats:</b> DoT main stat increased from <b>75%</b> to <b>99%</b>." },
+            { type: "Fix", text: "<b>Build Sorting:</b> Fixed several sorting issues across build lists." },
+            { type: "Feature", text: "<b>Inventory Mode:</b> Updated unit selection so new units can be chosen in inventory calculations." },
+            { type: "Fix", text: "<b>Ant King (Savage):</b> DoT-main relic builds now consider valid sub-stat pairings like <b>Dmg</b> instead of falling back to <b>None</b>." }
+        ]
+    },
+    {
         version: "v6.3",
         date: "May 30, 2026",
         changes: [
