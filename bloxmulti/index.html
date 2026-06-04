@@ -4,20 +4,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BloxMulti — Roblox Account Manager for Windows</title>
+  <title>BloxMulti — Roblox Multi-Account Manager for Windows</title>
 
   <!-- Primary SEO -->
   <meta name="description"
     content="BloxMulti is a powerful Windows app that lets you manage multiple Roblox accounts at once. Switch accounts instantly, launch any game by Place ID, and save private server codes — all in one app." />
   <meta name="keywords"
-    content="Roblox account manager, Roblox account switcher, BloxMulti, multiple Roblox accounts Windows, Roblox account manager app, Roblox private server codes, launch multiple Roblox accounts simultaneously, Roblox alt account manager" />
+    content="Roblox multi account manager, Roblox account switcher, BloxMulti, multiple Roblox accounts Windows, Roblox account manager app, Roblox private server codes, launch multiple Roblox accounts simultaneously, Roblox alt account manager" />
   <meta name="author" content="BloxMulti" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#9d6fff" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="BloxMulti — Roblox Account Manager" />
+  <meta property="og:title" content="BloxMulti — Roblox Multi-Account Manager" />
   <meta property="og:description"
     content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — for Windows." />
   <meta property="og:image" content="og-image.png" />
@@ -25,7 +25,7 @@
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="BloxMulti — Roblox Account Manager" />
+  <meta name="twitter:title" content="BloxMulti — Roblox Multi-Account Manager" />
   <meta name="twitter:description"
     content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — for Windows." />
   <meta name="twitter:image" content="og-image.png" />
@@ -777,10 +777,10 @@
 
     .widget-preview-frame {
       width: 100%;
-      max-width: 500px;
+      max-width: 600px;
       /* Limits excessive stretching */
-      aspect-ratio: 4 / 3;
-      /* Taller and less wide layout ratio as requested */
+      aspect-ratio: 5 / 3.5;
+      /* Adjusted to make the frame taller */
       background: rgba(10, 9, 20, 0.8);
       border: 1px solid var(--border-hi);
       border-radius: 16px;
@@ -1542,7 +1542,7 @@
     <div class="container" style="display: flex; flex-direction: column; align-items: center;">
       <div class="hero-badge animate">
         <div class="hero-badge-dot"></div>
-        v1.1.3 - Window Layout Coordinator Added (Premium), Ghost Process Terminator Added (Free)
+        v1.1.4 - Roblox Launch Fixes, Logs Widget
       </div>
 
       <h1 class="hero-title animate" style="transition-delay:0.1s">
@@ -1881,6 +1881,23 @@
             <div class="widget-tab-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
+            <div class="widget-nav-body">
+              <div class="widget-tab-title">Launch Logs</div>
+              <div class="widget-tab-desc">Track real-time process events, connection statuses, and launcher logs.</div>
+            </div>
+          </div>
+          <!-- Tab 5 -->
+          <div class="widget-tab" onclick="switchWidgetTab(4)">
+            <div class="widget-tab-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -1892,8 +1909,8 @@
               <div class="widget-tab-desc">Track online friend locations with quick-join triggers.</div>
             </div>
           </div>
-          <!-- Tab 5 (Premium Running Instances) -->
-          <div class="widget-tab" onclick="switchWidgetTab(4)">
+          <!-- Tab 6 (Premium Running Instances) -->
+          <div class="widget-tab" onclick="switchWidgetTab(5)">
             <div class="widget-tab-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                 stroke-linecap="round" stroke-linejoin="round">
@@ -2177,7 +2194,7 @@
             </svg>
           </div>
           Windows 10 / 11
-          <div class="dl-version">v1.1.3</div>
+          <div class="dl-version">v1.1.4</div>
         </div>
 
         <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-download-primary">
@@ -2191,7 +2208,7 @@
         </a>
 
         <div class="dl-requirements">
-          Requires Windows 10 or later &nbsp;·&nbsp; ~1.2 MB &nbsp;·&nbsp; Portable Executable
+          Requires Windows 10 or later &nbsp;·&nbsp; ~1.3 MB &nbsp;·&nbsp; Portable Executable
         </div>
       </div>
     </div>
@@ -2259,6 +2276,7 @@
       "Widget-SavedGames.png",
       "Widget-SavedServers.png",
       "Widget-RecentLaunches.png",
+      "Widget-LaunchLogs.png",
       "Widget-OnlineFriends.png",
       "Live-Monitor.png"
     ];
@@ -2266,6 +2284,7 @@
       "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Saved Games Widget (Widget-SavedGames.png)</text></svg>",
       "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Saved Private Servers Widget (Widget-SavedServers.png)</text></svg>",
       "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Recent Launches Widget (Widget-RecentLaunches.png)</text></svg>",
+      "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Launch Logs Widget (Widget-LaunchLogs.png)</text></svg>",
       "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Online Friends Widget (Widget-OnlineFriends.png)</text></svg>",
       "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%232af598%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Running Instances Monitor (Live-Monitor.png)</text></svg>"
     ];
