@@ -2,6 +2,66 @@
 window.unitBuildsCache = window.unitBuildsCache || {};
 window.unitActiveBuilds = window.unitActiveBuilds || {};
 
+// Bulletproof database key resolution helper to handle Fused Warrior and other ID mismatches
+window.getRelicDbEntry = function (db, unitId, activeType) {
+    if (!db) return null;
+    
+    const activeMode = 'fixed';
+    const suffix = activeType === 'abil' ? '_abil' : '';
+    const dbKey = unitId + suffix;
+    
+    // 1. Direct match
+    let entry = db[dbKey] || db[unitId];
+    if (entry) return entry[activeMode]?.[0] || null;
+    
+    // 2. Fallbacks for Fused Warrior mismatch variations
+    if (unitId.includes('fused') || unitId.includes('warrior')) {
+        const keys = ['ultimate_fused_warrior', 'fused_warrior', 'ultimate_fused', 'fused_warrior_set', 'fused', 'fused_set'];
+        for (const k of keys) {
+            const altEntry = db[k + suffix] || db[k];
+            if (altEntry) return altEntry[activeMode]?.[0] || null;
+        }
+    }
+
+    // 3. Fallbacks for Jinwoo / Shadow Monarch mismatch variations
+    if (unitId.includes('jinoo') || unitId.includes('monarch') || unitId.includes('sjw')) {
+        const keys = ['jinoo_shadow_monarch', 'sjw', 'jinoo'];
+        for (const k of keys) {
+            const altEntry = db[k + suffix] || db[k];
+            if (altEntry) return altEntry[activeMode]?.[0] || null;
+        }
+    }
+
+    // 4. Fallbacks for Sukuna mismatch variations
+    if (unitId.includes('strongest') || unitId.includes('history') || unitId.includes('sukuna')) {
+        const keys = ['the_strongest_in_history', 'sukuna', 'strongest_in_history'];
+        for (const k of keys) {
+            const altEntry = db[k + suffix] || db[k];
+            if (altEntry) return altEntry[activeMode]?.[0] || null;
+        }
+    }
+
+    // 5. Fallbacks for Gojo mismatch variations
+    if (unitId.includes('today') || unitId.includes('gojo') || unitId.includes('strongest_of_today')) {
+        const keys = ['the_strongest_of_today', 'strongest_of_today', 'gojo'];
+        for (const k of keys) {
+            const altEntry = db[k + suffix] || db[k];
+            if (altEntry) return altEntry[activeMode]?.[0] || null;
+        }
+    }
+
+    // 6. Fallbacks for Revolutionary Chief mismatch variations
+    if (unitId.includes('chief') || unitId.includes('revolutionary')) {
+        const keys = ['revolutionary_chief_syncro', 'revolutionary_chief', 'chief'];
+        for (const k of keys) {
+            const altEntry = db[k + suffix] || db[k];
+            if (altEntry) return altEntry[activeMode]?.[0] || null;
+        }
+    }
+    
+    return null;
+};
+
 // Inject global styles for filters to fix the "all white" issue
 (function injectStyles() {
     if (document.getElementById('rendering-styles')) return;
@@ -424,6 +484,7 @@ function hydrateBuildEntry(r, unitId, isHotbar) {
         traitName: (typeof r.t === 'number' ? (traitsList[r.t]?.name) : (r.traitName || r.t)) || 'Unknown Trait',
         setName: (typeof r.s === 'number' ? (SETS[r.s]?.name) : (r.setName || r.s)) || 'Unknown Set',
         dps: r.d || r.dps || 0,
+        bossDps: r.bd || r.bossDps || r.bossTotal || 0,
         dmgVal: r.dv || r.dmgVal || 0,
         spa: r.sp || r.spa || 0,
         range: r.ra || r.range || 0,
@@ -460,12 +521,29 @@ function hydrateBuildEntry(r, unitId, isHotbar) {
                 res.subStats.finalCf = fullMath.critData ? fullMath.critData.rawRate : 0;
                 res.subStats.finalCm = fullMath.critData ? fullMath.critData.cdmg : 0;
             }
-            res.sortDps = Math.max(res.dps || 0, res.bossDps || 0);
         } catch (e) {
             console.warn("Hydration Math Error for", res.id, e);
         }
     }
+    res.bossDps = res.bossDps || res.bd || res.bossTotal || 0;
+    res.dps = res.dps || res.d || 0;
+    res.sortDps = Math.max(res.dps || 0, res.bossDps || 0);
     return res;
+}
+
+function getBuildSortScore(build) {
+    if (!build) return 0;
+    return Math.max(
+        build.sortDps || 0,
+        build.dps || build.d || 0,
+        build.bossDps || build.bd || build.bossTotal || 0
+    );
+}
+
+function getBestHydratedBuild(builds, unitId, isHotbar) {
+    const hydrated = (builds || []).map(b => hydrateBuildEntry(b, unitId, isHotbar)).filter(Boolean);
+    if (!hydrated.length) return null;
+    return hydrated.reduce((best, cur) => getBuildSortScore(cur) > getBuildSortScore(best) ? cur : best, hydrated[0]);
 }
 
 // Rendering HTML Rows & Cards
@@ -616,10 +694,7 @@ window.refreshActiveBuild = function (unit) {
 
     let builds = null;
     const db = (isHotbar && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
-    if (db) {
-        const dbKey = unitId + (activeType === 'abil' ? '_abil' : '');
-        builds = db[dbKey]?.[activeMode]?.[0] || db[unitId]?.[activeMode]?.[0];
-    }
+    builds = window.getRelicDbEntry(db, unitId, activeType);
 
     if (!builds || builds.length === 0) return null;
 
@@ -636,7 +711,7 @@ window.refreshActiveBuild = function (unit) {
     });
 
     if (matches.length > 0) {
-        topBuild = matches[0];
+        topBuild = getBestHydratedBuild(matches, unitId, isHotbar) || matches[0];
     } else if (selectedTrait) {
         // FALLBACK: If the selected trait is not in the precompiled builds list,
         // dynamically generate/calculate the build for this trait on the fly!
@@ -950,7 +1025,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     }
 }
 
-function processUnitCache(unit, specificCfg = null, specificType = null) {
+processUnitCache = function (unit, specificCfg = null, specificType = null) {
     if (!window.unitBuildsCache[unit.id]) {
         window.unitBuildsCache[unit.id] = { base: { fixed: [null] }, abil: { fixed: [null] } };
     }
@@ -967,7 +1042,7 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
             let calculatedResults = [];
 
             if (!useInventory) {
-                const dbTable = window.STATIC_BUILD_DB?.[dbKey];
+                const dbTable = window.STATIC_BUILD_DB?.[dbKey] || window.STATIC_BUILD_DB?.[unit.id];
                 const dbList = dbTable?.[mode] || dbTable?.[mode === 'fixed' ? 'f' : 'b'];
                 if (dbList && dbList[i]) {
                     calculatedResults = dbList[i].map(r => ({ ...r }));
@@ -1013,7 +1088,9 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
             }
 
             calculatedResults.sort((a, b) => {
-                return (b.dps || 0) - (a.dps || 0);
+                const scoreA = Math.max(a.dps || a.d || 0, a.bossDps || a.bd || a.bossTotal || 0);
+                const scoreB = Math.max(b.dps || b.d || 0, b.bossDps || b.bd || b.bossTotal || 0);
+                return scoreB - scoreA;
             });
             targetCache[i] = calculatedResults;
         }
@@ -1034,27 +1111,30 @@ window.getQuickScore = (unit) => {
     }
 
     const activeDb = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
-    const list = activeDb?.[dbKey]?.fixed?.[0];
+    const list = window.getRelicDbEntry(activeDb, unit.id, unit.ability && window.activeAbilityIds?.has(unit.id) ? 'abil' : 'base');
     if (list?.length > 0) {
         const activeModeIdx = window.unitModesState?.[unit.id] || 0;
         const currentHead = window.unitHeads?.[unit.id] || 'none';
         const currentTrait = window.unitTraits?.[unit.id];
         
-        let matchedBuild = list[0];
+        let matchedBuild = getBestHydratedBuild(list, unit.id) || list[0];
         if (currentTrait || currentHead !== 'none') {
-            const found = list.find(b => {
+            const matchingBuilds = list.filter(b => {
                 const tName = (typeof b.t === 'number' ? traitsList[b.t]?.name : b.traitName || b.t) || '';
                 const hName = (typeof b.h === 'number' ? HEADS_LIST[b.h] : b.headUsed || b.h) || 'none';
                 if (currentTrait && tName.toLowerCase() !== currentTrait.toLowerCase()) return false;
                 if (currentHead !== 'none' && hName !== currentHead) return false;
                 return true;
             });
-            if (found) matchedBuild = found;
+            if (matchingBuilds.length) {
+                matchedBuild = getBestHydratedBuild(matchingBuilds, unit.id) || matchingBuilds[0];
+            }
         }
 
+        const hydratedMatch = matchedBuild?.sortDps !== undefined ? matchedBuild : hydrateBuildEntry(matchedBuild, unit.id);
         return window.isUnit(unit.id, 'law') 
-            ? (matchedBuild.range || 0) 
-            : Math.max(matchedBuild.dps || matchedBuild.d || 0, matchedBuild.bossDps || matchedBuild.bd || matchedBuild.bossTotal || 0);
+            ? (hydratedMatch?.range || matchedBuild.range || 0) 
+            : getBuildSortScore(hydratedMatch || matchedBuild);
     }
 
     const activeMode = window.unitModesState?.[unit.id] || 0;
@@ -1074,7 +1154,7 @@ window.getLiveScore = (unit) => {
     if (active) {
         return window.isUnit(unitId, 'law') 
             ? (active.range || 0) 
-            : (active.sortDps || Math.max(active.dps || 0, active.bossDps || 0));
+            : getBuildSortScore(active);
     }
     return window.getQuickScore ? window.getQuickScore(unit) : 0;
 };
@@ -1368,6 +1448,18 @@ function renderCurrentPage() {
     }, { rootMargin: '200px' });
 
     container.querySelectorAll('.lazy-build-load').forEach(c => window.buildLoadObserver.observe(c));
+
+    const hasGlobalSearch = !!(document.getElementById('globalSearch')?.value || document.getElementById('sidebarSearch')?.value || '').trim();
+    if (!hasGlobalSearch && !window.__resortingAfterRender) {
+        window.__resortingAfterRender = true;
+        requestAnimationFrame(() => {
+            try {
+                window.resortUnitCardsInPlace?.();
+            } finally {
+                window.__resortingAfterRender = false;
+            }
+        });
+    }
 }
 
 window.goToPage = function (page) {
@@ -1591,6 +1683,12 @@ window.applyUnitTrait = function (unitId, traitName) {
         });
     }
 
+    // Update unit active builds cache immediately for the selected trait
+    const unit = window.getUnitById(unitId);
+    if (unit && typeof window.refreshActiveBuild === 'function') {
+        window.refreshActiveBuild(unit);
+    }
+
     // Update the unit card display directly to show the new trait choice
     if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(unitId, true);
 
@@ -1613,38 +1711,7 @@ window.applyUnitTrait = function (unitId, traitName) {
 };
 
 window.precalculateAllLoadoutBuilds = function () {
-    const activeDb = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : window.STATIC_BUILD_DB;
-    if (!activeDb) return;
-    window.hotbarFilteredBuilds = window.hotbarFilteredBuilds || {};
-
-    unitDatabase.forEach(unit => {
-        const unitId = unit.id;
-        const activeType = (window.activeAbilityIds?.has(unitId) && unit.ability) ? 'abil' : 'base';
-        const activeMode = 'fixed';
-
-        let builds = activeDb[unitId + (activeType === 'abil' ? '_abil' : '')]?.[activeMode]?.[0];
-        const cacheBuilds = window.unitBuildsCache?.[unitId]?.[activeType]?.[activeMode]?.[0];
-        if (cacheBuilds?.length > 0) builds = cacheBuilds;
-
-        if (builds?.length > 0) {
-            let topBuild = builds[0];
-            const selectedTrait = window.unitTraits?.[unitId];
-            if (selectedTrait) {
-                const matches = builds.filter(b => {
-                    const tName = (typeof b.t === 'number' ? traitsList[b.t]?.name : b.traitName || b.t) || '';
-                    return tName.toLowerCase() === selectedTrait.toLowerCase();
-                });
-                if (matches.length > 0) {
-                    topBuild = matches.reduce((best, cur) => {
-                        const bestScore = Math.max(best.d || best.dps || 0, best.bossDps || 0);
-                        const curScore = Math.max(cur.d || cur.dps || 0, cur.bossDps || 0);
-                        return curScore > bestScore ? cur : best;
-                    }, matches[0]);
-                }
-            }
-            window.hotbarFilteredBuilds[unitId] = hydrateBuildEntry(topBuild, unitId, window.hotbarState?.slots?.some(s => s && (s.id === unitId || s.id.split('-')[0] === unitId.split('-')[0])));
-        }
-    });
+    window.refreshAllActiveBuilds();
 };
 
 

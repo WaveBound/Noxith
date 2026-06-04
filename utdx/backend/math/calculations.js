@@ -52,7 +52,7 @@ function calculateDPS(uStats, relicStats, context) {
 
     const tags = uStats.tags || [];
 
-    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (uStats.id === 'king_sailor' ? 10 : 0);
+    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (window.isUnit(uStats.id, 'king_sailor') ? 10 : 0);
     let finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
 
     let setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa;
@@ -84,7 +84,7 @@ function calculateDPS(uStats, relicStats, context) {
     const rawFinalSpa = spaAfterRelic * (1 - setAndPassiveSpa / 100);
     let finalSpa = Math.max(rawFinalSpa, effectiveSpaCap);
 
-    if (uStats.id === 'joyful_captain') {
+    if (window.isUnit(uStats.id, 'joyful_captain')) {
         const activeModeIdx = (typeof window !== 'undefined' && window.unitModesState && window.unitModesState['joyful_captain'] !== undefined) ? window.unitModesState['joyful_captain'] : 0;
         if (activeModeIdx === 0 || activeModeIdx === 1) {
             const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels['joyful_captain'] !== undefined) ? window.unitSystemLevels['joyful_captain'] : 10;
@@ -105,7 +105,7 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     let headDmgPassiveMod = headDmgPassive;
-    if (headPiece === 'biju_head' && uStats.id === 'triple_threat') {
+    if (headPiece === 'biju_head' && window.isUnit(uStats.id, 'triple_threat')) {
         const buffedAtks = Math.floor(10 / finalSpa);
         const totalAtks = buffedAtks + 1;
         const uptime = totalAtks > 0 ? (buffedAtks / totalAtks) : 0;
@@ -148,11 +148,14 @@ function calculateDPS(uStats, relicStats, context) {
 
     let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassiveMod + headDmgTag + globalDmg + abilityDmg;
 
+    // Failsafe identity tracker for Ultimate Fused Warrior
+    const isFusedWarrior = window.isUnit(uStats.id, 'ultimate_fused_warrior') || window.isUnit(uStats.id, 'fused_warrior') || (uStats.id && uStats.id.toLowerCase().includes('fused'));
+
     // --- WARLORD DYNAMIC SET BONUS ---
     let warlordData = null;
     if (relicStats.set === 'warlord') {
         let estCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
-        if (uStats.id === 'pirate_king') {
+        if (window.isUnit(uStats.id, 'pirate_king')) {
             estCritRate = 40;
         }
         if (headPiece === 'sorcerer_hunter_spirit') {
@@ -212,17 +215,17 @@ function calculateDPS(uStats, relicStats, context) {
     
     // Calculate raw, uncapped crit rate first
     let rawCritRate = uStats.crit + traitCritRate + globalCrit + (headCalc.cf || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives;
-    if (uStats.id === 'kirito' || uStats.id === 'the_strongest_of_today') {
+    if (window.isUnit(uStats.id, 'kirito') || window.isUnit(uStats.id, 'the_strongest_of_today')) {
         rawCritRate = Math.min(rawCritRate, uStats.crit);
     }
-    if (uStats.id === 'pirate_king') {
+    if (window.isUnit(uStats.id, 'pirate_king')) {
         rawCritRate = 40;
     }
     if (headPiece === 'sorcerer_hunter_spirit') rawCritRate = 0;
 
     let finalCritRate = Math.min(rawCritRate, 100);
 
-    if (uStats.id === 'angel_born_in_hell') {
+    if (window.isUnit(uStats.id, 'angel_born_in_hell')) {
         // Angel Born in Hell has a fixed 50% Crit Rate (bugged behavior)
         finalCritRate = 50;
         rawCritRate = 50;
@@ -276,7 +279,7 @@ function calculateDPS(uStats, relicStats, context) {
     let finalDmgBoss = finalDmgNormal;
 
     let finalCritRateBoss = finalCritRate;
-    if (uStats.id === 'marine_hero') {
+    if (window.isUnit(uStats.id, 'marine_hero')) {
         finalCritRateBoss = Math.min(finalCritRateBoss + 100, 100);
     }
     let finalCdmgStatBoss = finalCdmgStat;
@@ -304,7 +307,7 @@ function calculateDPS(uStats, relicStats, context) {
         usedSpa = ar.usedSpa;
         attackMultiplier = ar.attackMultiplier;
         extraAttacksData = ar.extraAttacksData;
-    } else if (uStats.id === 'ultimate_fused_warrior') {
+    } else if (isFusedWarrior) {
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
         const followUp2Chance = (eLevel >= 2) ? 0.70 : 0.50;
         
@@ -322,7 +325,7 @@ function calculateDPS(uStats, relicStats, context) {
             label: "Fused Godly Might",
             usedSpa: usedSpa
         };
-    } else if (uStats.id === 'strongest_swordsman_hunter') {
+    } else if (window.isUnit(uStats.id, 'strongest_swordsman_hunter')) {
         // --- DUAL-STATE EVALUATION FOR STRONGEST SWORDSMAN ---
         // Stance 1 & 3 (6 attacks): Base damage, Base crit rate
         // Stance 2 (3 attacks): +60% Damage (+40% if E0-E5), +20% Crit Rate (+15% if E0-E5)
@@ -366,7 +369,7 @@ function calculateDPS(uStats, relicStats, context) {
             unbuffedCrit: unbuffedCrit,
             buffedCrit: buffedCrit
         };
-    } else if (uStats.id === 'water_god' && uStats.followUp) {
+    } else if (window.isUnit(uStats.id, 'water_god') && uStats.followUp) {
         usedSpa = Math.max(finalSpa, effectiveSpaCap * 2);
         attackMultiplier = 2;
         extraAttacksData = {
@@ -377,7 +380,7 @@ function calculateDPS(uStats, relicStats, context) {
             mult: attackMultiplier,
             label: `Water God Follow-up (${effectiveSpaCap}s window)`
         };
-    } else if (uStats.id === 'king_sailor') {
+    } else if (window.isUnit(uStats.id, 'king_sailor')) {
         const tickCount = 1;
         const tickDmg = 0.20;
         attackMultiplier = 1;
@@ -415,7 +418,7 @@ function calculateDPS(uStats, relicStats, context) {
             label: "Shadow Emerge",
             usedSpa: usedSpa
         };
-    } else if (uStats.id === 'alpha_devil') {
+    } else if (window.isUnit(uStats.id, 'alpha_devil')) {
         const swordCount = 2;
         const swordDmgPct = 0.10;
         const swordTicks = 10;
@@ -449,7 +452,7 @@ function calculateDPS(uStats, relicStats, context) {
     let bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
     let normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
 
-    if (uStats.id === 'ultimate_fused_warrior' && isAbility) {
+    if (isFusedWarrior && isAbility) {
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
         const abilityDmgPct = (eLevel >= 6) ? 0.30 : 0.20;
         
@@ -464,7 +467,7 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     let tripleThreatFuaDmgNormal = finalDmgNormal;
-    if (uStats.id === 'triple_threat') {
+    if (window.isUnit(uStats.id, 'triple_threat')) {
         const fuaAdditiveTotal = additiveTotal - 25;
         tripleThreatFuaDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * Math.max(0, 1 + fuaAdditiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
 
@@ -488,7 +491,7 @@ function calculateDPS(uStats, relicStats, context) {
     let finalBossHitDps = bossHitDpsTotal;
 
     let chainLightningDps = 0;
-    if (uStats.id === 'king_sailor') {
+    if (window.isUnit(uStats.id, 'king_sailor')) {
         chainLightningDps = ((finalDmg * 0.20) / usedSpa) * placement;
         finalHitDps += chainLightningDps;
         finalBossHitDps += ((finalDmgBoss * 0.20) / usedSpa) * placement;
@@ -562,7 +565,7 @@ function calculateDPS(uStats, relicStats, context) {
     let finalDotDps = dotDpsTotal;
     let finalBossDotDps = bossDotDpsTotal;
 
-    if (uStats.id === 'ultimate_fused_warrior') {
+    if (isFusedWarrior) {
         const traitMultiplier = 1 + (traitDotBuff / 100);
         const gearMultiplier = 1 + (gearDotBonus / 100);
         const dotPct = 70 * traitMultiplier * gearMultiplier;
@@ -597,7 +600,7 @@ function calculateDPS(uStats, relicStats, context) {
         }
     }
 
-    if (uStats.id === 'triple_threat') {
+    if (window.isUnit(uStats.id, 'triple_threat')) {
         const traitMultiplier = 1 + (traitDotBuff / 100);
         const gearMultiplier = 1 + (gearDotBonus / 100);
         const bleedPct = ((upgradeLevel >= 6) ? 120 : 100) * traitMultiplier * gearMultiplier;
