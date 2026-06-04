@@ -12,17 +12,17 @@
    <!-- BloxMulti Project -->
    <url>
       <loc>https://noxith.com/bloxmulti/</loc>
-      <lastmod>2026-05-28</lastmod>
+      <lastmod>2026-06-4</lastmod>
       <changefreq>monthly</changefreq>
-      <priority>0.80</priority>
+      <priority>0.90</priority>
    </url>
 
    <!-- UTDX Project -->
    <url>
       <loc>https://noxith.com/utdx/</loc>
-      <lastmod>2026-05-27</lastmod>
+      <lastmod>2026-06-3</lastmod>
       <changefreq>monthly</changefreq>
-      <priority>0.80</priority>
+      <priority>0.90</priority>
    </url>
 
    <!-- Wavebound Project -->
@@ -30,7 +30,7 @@
       <loc>https://noxith.com/wavebound/</loc>
       <lastmod>2026-05-01</lastmod>
       <changefreq>monthly</changefreq>
-      <priority>0.80</priority>
+      <priority>0.60</priority>
    </url>
 
 </urlset>
