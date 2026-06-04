@@ -225,6 +225,7 @@ function loadInventory() {
                 if (r.setKey === 'sorcerer_hunter') r.setKey = 'sorcerer_hunter_spirit';
                 if (r.setKey === 'strongest_sorcerer') r.setKey = 'strongest_sorcerer_glasses';
                 if (r.setKey === 'mochi') r.setKey = 'mochi_scarf';
+                if (r.setKey === 'fused_set') r.setKey = 'fused_earrings';
             }
         });
     } catch (e) {
@@ -422,6 +423,7 @@ function addRelic() {
         if (setKey === 'sorcerer_hunter') setKey = 'sorcerer_hunter_spirit';
         if (setKey === 'strongest_sorcerer') setKey = 'strongest_sorcerer_glasses';
         if (setKey === 'mochi') setKey = 'mochi_scarf';
+        if (setKey === 'fused_set') setKey = 'fused_earrings';
     }
 
     const newRelic = {
@@ -464,6 +466,8 @@ function getRelicVisuals(setKey, slot) {
     if (visualKey === 'strongest_sorcerer_glasses') visualKey = 'strongest_sorcerer';
     if (visualKey === 'sorcerer_hunter_spirit') visualKey = 'sorcerer_hunter';
     if (visualKey === 'junior') visualKey = 'ninja';
+    if (visualKey === 'rebellious') visualKey = 'rebellious_set';
+    if (visualKey === 'fused_earrings') visualKey = 'fused_set';
 
     const customImages = {
         'ninja': { 'Head': 'JuniorMask.png', 'Body': 'JuniorTop.png', 'Legs': 'JuniorBottom.png' },
@@ -542,9 +546,10 @@ function renderInventory() {
         if (lookupKey === 'shadow_reaper_necklace') lookupKey = 'shadow_reaper';
         if (lookupKey === 'reaper_necklace') lookupKey = 'reaper_set';
         if (lookupKey === 'warlord_hat') lookupKey = 'warlord';
+        if (lookupKey === 'fused_earrings') lookupKey = 'fused_set';
 
         let starCount = 0;
-        if (lookupKey === 'shadow_reaper' || lookupKey === 'reaper_set' || lookupKey === 'warlord' || lookupKey === 'monarch') {
+        if (lookupKey === 'shadow_reaper' || lookupKey === 'reaper_set' || lookupKey === 'warlord' || lookupKey === 'monarch' || lookupKey === 'fused_set') {
             if (relic.stars >= 1.05) starCount = 3;
             else if (relic.stars >= 1.025) starCount = 2;
             else if (relic.stars >= 1) starCount = 1;

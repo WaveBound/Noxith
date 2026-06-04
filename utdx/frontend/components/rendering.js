@@ -1,5 +1,6 @@
 // Ensure Global Caches and State are initialized
 window.unitBuildsCache = window.unitBuildsCache || {};
+window.unitActiveBuilds = window.unitActiveBuilds || {};
 
 // Inject global styles for filters to fix the "all white" issue
 (function injectStyles() {
@@ -41,32 +42,195 @@ window.unitBuildsCache = window.unitBuildsCache || {};
         .combo-section-header { 
             background: #16161d !important; color: #c084fc; font-size: 0.65rem; font-weight: 900; 
             padding: 4px 10px; margin: 10px 0 5px; border-radius: 4px; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.03); }
-        .fs-comparison-grid { row-gap: 6px !important; padding-bottom: 10px !important; }
+        
+.fs-comparison-grid {
+            display: grid !important;
+            grid-template-columns: 1.8fr 1fr !important;
+            gap: 12px !important;
+            padding: 12px 14px !important;
+            background: #0d0d12 !important;
+            border: 1px solid rgba(255, 255, 255, 0.04) !important;
+            border-radius: 10px !important;
+            margin: 0 !important;
+            box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.4) !important;
+        }
+        .fs-stats-subgrid {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 6px 8px !important;
+            align-content: center !important;
+        }
 
         /* Removing gradients from card internal boxes */
         .br-col, .br-res-col, .br-full-stats { background: none !important; background-image: none !important; border: none !important; }
-        .fs-eff-summary { background: #08080a !important; border-color: rgba(74, 222, 128, 0.15) !important; }
+        
+        .fs-eff-summary {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            background: none !important;
+            border: none !important;
+            border-left: 1px solid rgba(255, 255, 255, 0.06) !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+            padding-left: 12px !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            gap: 6px !important;
+        }
+        .fs-eff-summary .eff-label {
+            font-size: 0.55rem !important;
+            font-weight: 800 !important;
+            color: #94a3b8 !important;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            opacity: 0.8;
+            text-align: center;
+        }
+        .fs-eff-summary .eff-divider {
+            width: 70%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.06);
+            margin: 4px 0;
+        }
+        .fs-eff-summary .eff-val {
+            font-size: 1.45rem !important;
+            font-weight: 900 !important;
+            color: #4ade80 !important;
+            text-shadow: 0 0 12px rgba(74, 222, 128, 0.35) !important;
+            line-height: 1.1;
+        }
 
-        .br-set-btn { display: none; }
+        /* Sub Row (Crit %, CDmg, etc.) - Seperate standalone blocks */
+        .fs-sub-row {
+            display: flex !important;
+            justify-content: space-between !important;
+            gap: 8px !important;
+            padding: 0 !important;
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            margin: 8px 0 0 0 !important;
+        }
+        .fs-sub-row .fs-item-sm {
+            flex: 1 !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            background: #0d0d12 !important;
+            border: 1px solid rgba(255, 255, 255, 0.04) !important;
+            border-radius: 8px !important;
+            padding: 6px 12px !important;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+        }
+
+.fs-item-lg {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #121217 !important; /* Keeps the target panel lighter */
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border-radius: 8px;
+    padding: 3px 8px;
+    min-width: 0;
+    transition: background 0.2s;
+}
+        .fs-item-lg.is-maxed {
+            border-color: rgba(74, 222, 128, 0.2) !important;
+            background: rgba(74, 222, 128, 0.02) !important;
+        }
+        .fs-item-lg.is-maxed .val-maxed {
+            color: #4ade80 !important;
+            font-weight: bold !important;
+        }
+        .br-col-header {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            width: 100% !important;
+        }
+        .br-col.sub .sl-label {
+            display: none !important; /* Completely hides HEAD, BODY, LEGS in the sub-stat panel */
+        }
+        .mobile-stat-toggle {
+            display: none !important; /* Disables and hides the toggle switch */
+        }
+
+        /* MAIN STATS & SUB STATS Card Enclosures */
+        .br-grid {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr 0.6fr !important;
+            gap: 8px !important;
+            padding: 6px 10px !important;
+        }
+        .br-grid.no-subs {
+            grid-template-columns: 2fr 0.6fr !important;
+        }
+        .br-col.main, .br-col.sub {
+            background: #0d0d12 !important;
+            border: 1px solid rgba(255, 255, 255, 0.04) !important;
+            border-radius: 10px !important;
+            padding: 10px 6px !important; /* Reduced horizontal padding */
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 6px !important;
+            border-right: none !important;
+            padding-right: 6px !important;  /* Reduced horizontal padding */
+            padding-left: 6px !important;   /* Reduced horizontal padding */
+        }
+        .br-col-title {
+            font-size: 0.65rem !important;
+            color: #94a3b8 !important;
+            font-weight: 800 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            text-align: center !important;
+            margin-bottom: 4px !important;
+        }
+.br-col .stat-line {
+            display: flex !important;
+            justify-content: flex-start !important; /* Align everything cleanly to the left */
+            align-items: center !important;
+            background: rgba(255, 255, 255, 0.02) !important;
+            border: 1px solid rgba(255, 255, 255, 0.04) !important;
+            border-radius: 8px !important;
+            padding: 4px 6px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            gap: 8px !important; /* Consistent horizontal gap between label and badge */
+        }
+        .br-col.main .stat-line .sl-label {
+            background: none !important;
+            border: none !important;
+            color: #94a3b8 !important;
+            font-size: 0.65rem !important;
+            font-weight: 800 !important;
+            padding: 0 !important;
+            min-width: 30px !important;
+            display: inline-block !important;
+            text-align: left !important;
+        }
+
+        .br-set-info-text {
+            cursor: pointer !important;
+            transition: opacity 0.15s ease;
+        }
+        .br-set-info-text:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
         @media (max-width: 768px) {
-            .br-set-info-text { display: none !important; }
-            .br-set-btn { 
-                display: inline-block !important; 
-                background: rgba(139, 92, 246, 0.15) !important;
-                border: 1px solid rgba(139, 92, 246, 0.4) !important;
-                color: #ffffff !important;
-                font-size: 0.65rem !important;
-                font-weight: 750 !important;
-                padding: 1px 4px !important;
-                border-radius: 6px !important;
-                cursor: pointer !important;
-                letter-spacing: 0.5px !important;
-                text-transform: uppercase;
-                transition: all 0.1s ease;
+            /* Stack main and sub stats vertically at full width on mobile screens */
+            .br-grid {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
             }
-            .br-set-btn:active {
-                background: rgba(139, 92, 246, 0.3) !important;
-                border-color: #ffffff !important;
+            .br-col.main, .br-col.sub {
+                display: flex !important;
+                width: 100% !important;
             }
         }
     `;
@@ -80,7 +244,7 @@ window.getUnitsPerPage = () => {
     const w = window.innerWidth;
     // Sidebar width is 260px. Grid padding is 20px on each side (40px total).
     const sidebarWidth = w > 768 ? 260 : 0;
-    const gridPadding = 40; 
+    const gridPadding = 40;
     const availableWidth = w - sidebarWidth - gridPadding;
 
     // Matches CSS: minmax(380px, 1fr) with an 18px gap.
@@ -99,7 +263,7 @@ window.unitHeads = window.unitHeads || {};
 window.unitModesState = window.unitModesState || {};
 
 // Constants & Configurations
-const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'];
+const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings'];
 
 const HEAD_CONFIG = {
     sun_god: { name: 'Sun God', search: 'Sun God', cls: 'sungod' },
@@ -115,7 +279,8 @@ const HEAD_CONFIG = {
     monarch: { name: 'Monarch Cape', search: 'Monarch', cls: 'custom' },
     warlord_hat: { name: 'Warlord Hat', search: 'Warlord', cls: 'custom' },
     mochi_scarf: { name: 'Mochi Scarf', search: 'Mochi', cls: 'custom' },
-    flaming_donut: { name: 'Flaming Donut', search: 'Flaming Donut', cls: 'custom' }
+    flaming_donut: { name: 'Flaming Donut', search: 'Flaming Donut', cls: 'custom' },
+    fused_earrings: { name: 'Earings', search: 'Earings', cls: 'custom' }
 };
 
 const COMBO_TITLES = {
@@ -214,9 +379,15 @@ function calculateBuildEfficiency(build, unitCost, unitMaxPlacement, unitId) {
 
 function getHeadBadgeHtml(headUsed) {
     if (!headUsed || headUsed === 'none') return '';
+
+    const h = HEAD_CONFIG[headUsed] || { name: 'Unknown', cls: 'custom' };
+    const label = "Elemental";
+    const val = "30%";
+    const color = "#f97316"; // Always orange
+
     return `<div class="stat-line"><span class="sl-label">HEAD</span>
-                <div class="badge-base" style="border-color: rgba(249, 115, 22, 0.4);" title="Elemental Damage">
-                    <span style="color: #f97316;">ELEMENTAL</span><span class="badge-val val-main" style="color: white !important;">30%</span>
+                <div class="badge-base" style="border-color: ${color}66;" title="${h.name}">
+                    <span style="color: ${color};">${label}</span><span class="badge-val val-main" style="color: white !important;">${val}</span>
                 </div>
             </div>`;
 }
@@ -284,12 +455,12 @@ function hydrateBuildEntry(r, unitId, isHotbar) {
                 ) : 0;
                 res.placement = fullMath.placement;
                 res.detailedBuffs = fullMath.detailedBuffs;
+                res.critData = fullMath.critData;
                 if (!res.subStats) res.subStats = {};
                 res.subStats.finalCf = fullMath.critData ? fullMath.critData.rate : 0;
                 res.subStats.finalCm = fullMath.critData ? fullMath.critData.cdmg : 0;
             }
-            res.dps = res.dps || 0;
-            res.sortDps = res.dps || 0;
+            res.sortDps = Math.max(res.dps || 0, res.bossDps || 0);
         } catch (e) {
             console.warn("Hydration Math Error for", res.id, e);
         }
@@ -350,20 +521,22 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     const bodyRow = window.disableSubStats ? '' : `<div class="stat-line"><span class="sl-label">BODY</span>${getRichBadgeHtml(s.body || [])}</div>`;
     const legsRow = window.disableSubStats ? '' : `<div class="stat-line"><span class="sl-label">LEGS</span>${getRichBadgeHtml(s.legs || [])}</div>`;
 
-    const isBossSort = sortMode === 'boss';
-    const isBossHigher = isBossSort && (r.bossDps > (r.dps || 0));
-    const displayVal = format(isBossSort ? Math.max(r.dps || 0, r.bossDps || 0) : (r.dps || 0));
-    const displayLabel = (isBossHigher ? 'BOSS DPS' : 'DPS');
+    const isBossHigher = (r.bossDps > (r.dps || 0));
+    const displayVal = format(isBossHigher ? r.bossDps : (r.dps || 0));
+    const displayLabel = isBossHigher ? 'BOSS DPS' : 'DPS';
 
-    const renderValRow = (iconKey, currentVal, nextVal, extraClass = '') => `
+    const renderValRow = (iconKey, currentVal, nextVal, extraClass = '') => {
+        const isMaxed = nextLevel > maxLevel;
+        return `
         <div class="fs-item-lg ${iconKey}-row">
             <span class="fs-icon-box ${iconKey}-bg">${SVGS[iconKey]}</span>
             <span class="fs-val ${extraClass}">${currentVal}</span>
         </div>
-        <div class="fs-item-lg ${iconKey}-row">
+        <div class="fs-item-lg ${iconKey}-row ${isMaxed ? 'is-maxed' : ''}">
             <span class="fs-icon-box ${iconKey}-bg">${SVGS[iconKey]}</span>
-            <span class="fs-val ${extraClass}">${nextLevel > maxLevel ? '<span style="color:#4ade80; font-weight: bold;">Maxed</span>' : nextVal}</span>
+            <span class="fs-val ${isMaxed ? 'val-maxed' : extraClass}">${isMaxed ? 'Maxed' : nextVal}</span>
         </div>`;
+    };
 
     const headName = (r.headUsed && r.headUsed !== 'none') ? (HEAD_CONFIG[r.headUsed]?.name || r.headUsed) : '';
     const headHeaderHtml = headName ? `<span class="br-sep" style="margin: 0 1px;">/</span><span class="br-set" style="color:#60a5fa; font-size: 0.72em; padding: 1px 3px; letter-spacing: -0.2px;">${headName.toUpperCase()}</span>` : '';
@@ -373,49 +546,49 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
             <div class="br-header" style="align-items: center; padding-top: 6px; padding-bottom: 2px;">
                 <div class="br-header-info" style="margin-top: 0; align-items: center; gap: 4px;">
                     <span class="br-rank" style="font-size: 0.7em; width: auto;">#${globalRank || (i + 1)}</span>
-                    <div class="br-set-info-text" style="display: flex; align-items: center;">
+                    <div class="br-set-info-text" style="display: flex; align-items: center;" onclick="window.viewBuildRelicDatabase('${r.id}', '${unitId}')" title="Click to view map locations in Relic Database">
                         <span class="br-set" style="font-size: 0.75em; padding: 1px 3px; letter-spacing: -0.2px;">${r.setName.toLowerCase().includes('set') ? r.setName : r.setName + ' Set'}</span>
                         ${headHeaderHtml}
                     </div>
-                    <button class="br-set-btn" onclick="window.showGearDetails('${r.setName.replace(/'/g, "\\'")}', '${r.headUsed}')">RELIC</button>
                     <span class="br-sep" style="margin: 0 1px;">/</span>
                     <span class="br-trait" style="font-size: 0.75em; letter-spacing: -0.2px;">${r.traitName}</span>
                 </div>
                 <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
                     <div style="display:flex; gap:6px; align-items:center;">
-                        <button class="mobile-stat-toggle" onclick="toggleRelicStatDisplay(this)"><span class="m-toggle-txt">Main</span><span class="m-toggle-txt">Sub</span></button>
                         ${prioHtml}
                     </div>
                     ${optimalityHtml}
                 </div>
             </div>
-            <div class="br-grid ${window.disableSubStats ? 'no-subs' : ''}">
-                <div class="br-col main"><div class="br-col-title">MAIN STAT</div>${getHeadBadgeHtml(r.headUsed)}<div class="stat-line"><span class="sl-label">BODY</span> ${window.getBadgeHtml(r.mainStats.body, MAIN_STAT_VALS.body[r.mainStats.body])}</div><div class="stat-line"><span class="sl-label">LEGS</span> ${window.getBadgeHtml(r.mainStats.legs, MAIN_STAT_VALS.legs[r.mainStats.legs])}</div></div>
-                ${window.disableSubStats ? '' : `<div class="br-col sub"><div class="br-col-header"><div class="br-col-title">SUB STAT</div></div>${headRow}${bodyRow}${legsRow}</div>`}
-                <div class="br-res-col">
-                    <div class="dps-container">
-                        <span class="build-dps">${displayVal}</span>
-                        <div style="display:flex; align-items:center; gap:4px; justify-content: flex-end; margin-top: 2px;">
-                            <span class="dps-label" style="margin:0; ${isBossHigher ? 'color: #fca5a5;' : ''}">${displayLabel}</span>
-                            <button class="info-btn" onclick="showMath('${r.id}')">?</button>
-                        </div>
-                        <div class="boss-dps-mini" style="font-size: 0.75rem; color: #94a3b8; font-weight: 700; margin-top: 4px; display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
-                            ${isBossHigher ? `<div style="display: flex; gap: 4px; color: #cbd5e1;"><span style="opacity: 0.6; font-weight: 500;">BASE:</span> ${format(r.dps)}</div>` : ''}
-                            ${(!isBossHigher && r.bossDps && r.bossDps !== r.dps) ? `<div style="display: flex; gap: 4px; color: #fca5a5;"><span style="opacity: 0.6; font-weight: 500;">BOSS:</span> ${format(r.bossDps)}</div>` : ''}
-                        </div>
-                    </div>
-                </div>
+            <div class="br-grid ${window.disableSubStats ? 'no-subs' : ''}" style="display: grid !important; grid-template-columns: ${window.disableSubStats ? '1fr' : '1fr 1fr'} !important; gap: 8px !important; width: 100% !important; box-sizing: border-box !important; padding: 4px 10px !important;">
+                <div class="br-col main" style="flex: 1 !important; width: 100% !important; box-sizing: border-box !important;"><div class="br-col-title">MAIN STAT</div>${getHeadBadgeHtml(r.headUsed)}<div class="stat-line"><span class="sl-label">BODY</span> ${window.getBadgeHtml(r.mainStats.body, MAIN_STAT_VALS.body[r.mainStats.body])}</div><div class="stat-line"><span class="sl-label">LEGS</span> ${window.getBadgeHtml(r.mainStats.legs, MAIN_STAT_VALS.legs[r.mainStats.legs])}</div></div>
+                ${window.disableSubStats ? '' : `<div class="br-col sub" style="flex: 1 !important; width: 100% !important; box-sizing: border-box !important;"><div class="br-col-header"><div class="br-col-title">SUB STAT</div></div>${headRow}${bodyRow}${legsRow}</div>`}
             </div>
             <div class="br-full-stats">
                 <div class="fs-comparison-grid">
-                    <div class="fs-col-header">CURRENT</div><div class="fs-col-header">${nextLevel > maxLevel ? 'STATUS' : 'NEXT UPGRADE'}</div>
-                    <div class="fs-eff-summary" style="grid-column: span 2; display: flex; justify-content: center; align-items: center; gap: 8px; background: rgba(74, 222, 128, 0.05); border: 1px solid rgba(74, 222, 128, 0.15); border-radius: 6px; padding: 4px; margin: 2px 0 4px; cursor: pointer;" onclick="event.stopPropagation(); openInfoPopup('efficiency')">
-                        <span style="font-size: 0.65rem; font-weight: 800; color: #4ade80; opacity: 0.8; letter-spacing: 0.5px;">COST EFFICIENCY</span>
-                        <span style="font-size: 1rem; font-weight: 900; color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);">${effScore}</span>
+                    <div class="fs-stats-subgrid">
+                        ${renderValRow('dmg', format(r.dmgVal || 0), format(nextStats.dmgVal), 'val-dmg')}
+                        ${renderValRow('spa', `${fix2(r.spa || 0)}s`, `${fix2(nextStats.spa)}s`, 'val-spa')}
+                        ${renderValRow('range', fix1(r.range || 0), fix1(nextStats.range), 'val-range')}
                     </div>
-                    ${renderValRow('dmg', format(r.dmgVal || 0), format(nextStats.dmgVal), 'val-dmg')}
-                    ${renderValRow('spa', `${fix2(r.spa || 0)}s`, `${fix2(nextStats.spa)}s`, 'val-spa')}
-                    ${renderValRow('range', fix1(r.range || 0), fix1(nextStats.range), 'val-range')}
+                    <div class="fs-eff-summary">
+                        <div class="eff-group" onclick="event.stopPropagation(); openInfoPopup('efficiency')" style="display: flex; flex-direction: column; align-items: center; cursor: pointer; width: 100%;">
+                            <span class="eff-label">COST EFFICIENCY</span>
+                            <span class="eff-val">${effScore}</span>
+                        </div>
+                        <div class="eff-divider"></div>
+                        <div class="dps-group" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                            <div style="display: flex; align-items: center; gap: 4px; justify-content: center; width: 100%;">
+                                <span class="build-dps" style="font-size: 1.15rem; font-weight: 850; color: #fff; line-height: 1;">${displayVal}</span>
+                                <button class="info-btn" onclick="showMath('${r.id}')" style="width: 13px; height: 13px; font-size: 0.55rem; padding: 0; display: inline-flex; align-items: center; justify-content: center; line-height: 1;">?</button>
+                            </div>
+                            <span class="dps-label" style="font-size: 0.55rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin: 2px 0 0 0; line-height: 1; text-align: center; ${isBossHigher ? 'color: #fca5a5;' : ''}">${displayLabel}</span>
+                            ${(isBossHigher || (r.bossDps && r.bossDps !== r.dps)) ? `
+                            <div class="boss-dps-mini" style="font-size: 0.6rem; color: #94a3b8; font-weight: 700; display: flex; gap: 4px; line-height: 1; margin-top: 4px; justify-content: center;">
+                                ${isBossHigher ? `<span style="opacity: 0.6; font-weight: 500;">BASE:</span> ${format(r.dps)}` : `<span style="opacity: 0.6; font-weight: 500; color: #fca5a5;">BOSS:</span> ${format(r.bossDps)}`}
+                            </div>` : ''}
+                        </div>
+                    </div>
                 </div>
                 <div class="fs-sub-row">
                     <div class="fs-item-sm"><span class="fs-label">Crit %</span><span class="fs-val val-crit">${fix1(s.finalCf || 0)}%</span></div>
@@ -426,6 +599,69 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
         </div>`;
 }
 
+// Unified Active Build calculation & tracking
+window.refreshActiveBuild = function (unit) {
+    const unitId = unit.id;
+    const isLoadout = (window.CALCULATION_MODE === 'loadout');
+    const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unitId || s.id.split('-')[0] === unitId.split('-')[0]));
+    const isHotbar = isLoadout && isInHotbarState;
+
+    const activeType = (window.activeAbilityIds?.has(unitId) && unit.ability) ? 'abil' : 'base';
+    const activeMode = 'fixed';
+
+    // Pre-initialize unit system levels if undefined to prevent Joyful Captain default-to-100 bug
+    if (unit.systemLevel && window.unitSystemLevels[unitId] === undefined) {
+        window.unitSystemLevels[unitId] = unit.systemLevel.default !== undefined ? unit.systemLevel.default : (unit.systemLevel.max || 100);
+    }
+
+    let builds = null;
+    const db = (isHotbar && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
+    if (db) {
+        const dbKey = unitId + (activeType === 'abil' ? '_abil' : '');
+        builds = db[dbKey]?.[activeMode]?.[0] || db[unitId]?.[activeMode]?.[0];
+    }
+
+    if (!builds || builds.length === 0) return null;
+
+    let topBuild = builds[0];
+    const selectedTrait = window.unitTraits?.[unitId];
+    const selectedHead = window.unitHeads?.[unitId];
+
+    const matches = builds.filter(b => {
+        const tName = (typeof b.t === 'number' ? traitsList[b.t]?.name : b.traitName || b.t) || '';
+        const hName = (typeof b.h === 'number' ? HEADS_LIST[b.h] : b.headUsed || b.h) || 'none';
+        if (selectedTrait && tName.toLowerCase() !== selectedTrait.toLowerCase()) return false;
+        if (selectedHead && selectedHead !== 'none' && hName !== selectedHead) return false;
+        return true;
+    });
+
+    if (matches.length > 0) {
+        topBuild = matches[0];
+    }
+
+    const hydrated = hydrateBuildEntry(topBuild, unitId, isHotbar);
+    if (hydrated) {
+        if (!window.unitActiveBuilds) window.unitActiveBuilds = {};
+        window.unitActiveBuilds[unitId] = hydrated;
+
+        if (!window.hotbarFilteredBuilds) window.hotbarFilteredBuilds = {};
+        window.hotbarFilteredBuilds[unitId] = hydrated;
+    }
+    return hydrated;
+};
+
+window.refreshAllActiveBuilds = function () {
+    window.unitActiveBuilds = window.unitActiveBuilds || {};
+    const list = window.paginatedSortedUnits?.length > 0
+        ? window.paginatedSortedUnits.map(e => e.unit)
+        : (unitDatabase || []);
+
+    list.forEach(unit => {
+        window.refreshActiveBuild(unit);
+    });
+};
+
+// Update Build List display for a card
 function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const card = document.getElementById('card-' + unitId);
     if (!card) return;
@@ -443,13 +679,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     const activeType = (window.activeAbilityIds?.has(unitId) && unitObj?.ability) ? 'abil' : 'base';
     const activeMode = 'fixed';
-
-    // Units that must ALWAYS calculate dynamically because static DB is stale or complex (Syncro/Follow-ups)
-    const forceDynamicUnits = ['revolutionary_chief_syncro', 'joyful_captain', 'the_strongest_in_history', 'jinoo_shadow_monarch', 'the_strongest_of_today', 'marine_hero', 'sharpshooter_king_trapper'];
-
-    if (!forceSync && (unitObj?.allowMultipleModes || unitId.toLowerCase().includes('syncro') || forceDynamicUnits.includes(unitId)) && !window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0]) {
-        forceSync = true;
-    }
 
     const { unitCost, unitPlace } = getUnitCostAndPlacement(unitObj, activeModeIdx);
 
@@ -482,8 +711,8 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 'jinoo_shadow_monarch': [0, 1, 2, 3, 4]
             };
 
-            // Force dynamic recalculation of benchmark if missing or if unit logic is known to have changed (Syncro/Modes)
-            const needsDynamicBench = !traitBenchmarks['peak'] || forceSync || unitObj?.modes || unitId.toLowerCase().includes('syncro') || forceDynamicUnits.includes(unitId);
+            // Force dynamic recalculation of benchmark if missing or if logic has changed (Syncro/Modes)
+            const needsDynamicBench = !traitBenchmarks['peak'] || forceSync || unitObj?.modes || unitId.toLowerCase().includes('syncro');
 
             if (needsDynamicBench && unitObj) {
                 // Temporarily swap to peak mode state for benchmarking to get true 100% target
@@ -514,10 +743,9 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     traitBenchmarks['peak'] = dynamicResults[0].dps || 0;
 
                     if (!window.modeBenchmarks) window.modeBenchmarks = {};
-                    // FIX: Cache peak benchmark by unit ID and type only, ignoring current mode state
                     window.modeBenchmarks[`${unitId}-${activeType}`] = traitBenchmarks;
                 }
-            } else if (unitObj?.modes || unitId.toLowerCase().includes('syncro') || forceDynamicUnits.includes(unitId)) {
+            } else if (unitObj?.modes || unitId.toLowerCase().includes('syncro')) {
                 traitBenchmarks = window.modeBenchmarks?.[`${unitId}-${activeType}`] || {};
             }
         }
@@ -546,6 +774,9 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 const aIsRec = recTraits.some(rt => rt && a.traitName.toLowerCase().includes(rt));
                 const bIsRec = recTraits.some(rt => rt && b.traitName.toLowerCase().includes(rt));
                 if (aIsRec !== bIsRec) return aIsRec ? -1 : 1;
+            }
+            if (sortSelect === 'boss') {
+                return (b.bossDps || b.dps || 0) - (a.bossDps || a.dps || 0);
             }
             if (sortSelect === 'damage') {
                 if (b.dmgVal !== a.dmgVal) return (b.dmgVal || 0) - (a.dmgVal || 0);
@@ -621,6 +852,10 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             window.hotbarFilteredBuilds[unitId] = selectedTrait
                 ? (hydrated.find(b => b.traitName?.toLowerCase() === selectedTrait.toLowerCase()) || slice[0])
                 : slice[0];
+
+            // Sync with unitActiveBuilds registry
+            if (!window.unitActiveBuilds) window.unitActiveBuilds = {};
+            window.unitActiveBuilds[unitId] = window.hotbarFilteredBuilds[unitId];
         }
 
         return slice.map((r, i) => generateBuildRowHTML(r, i, {
@@ -636,21 +871,15 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const container = document.getElementById(`results-${activeType}-${activeMode}-0-${unitId}`);
     if (!container) return;
 
-    let buildData = window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0];
-    if (!buildData && activeType === 'abil') {
-        buildData = window.unitBuildsCache[unitId]?.base?.[activeMode]?.[0];
-    }
-    if (!buildData && unitObj) {
-        processUnitCache(unitObj, 0, activeType, false);
-        buildData = window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0];
+    let buildData = null;
+    const db = (isHotbar && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
+    if (db) {
+        const dbKey = unitId + (activeType === 'abil' ? '_abil' : '');
+        buildData = db[dbKey]?.[activeMode]?.[0] || db[unitId]?.[activeMode]?.[0];
     }
 
     if (buildData) {
         container.innerHTML = renderListInternal(buildData, renderLimit);
-    } else if (forceSync && unitObj) {
-        processUnitCache(unitObj, 0, activeType);
-        const finalData = window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0];
-        if (finalData) container.innerHTML = renderListInternal(finalData, renderLimit);
     } else {
         container.innerHTML = `<div class="msg-loading"><div class="loading-spinner"></div><span>Calculating...</span></div>`;
     }
@@ -701,7 +930,9 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
             if (!useInventory) {
                 const dbTable = window.STATIC_BUILD_DB?.[dbKey];
                 const dbList = dbTable?.[mode] || dbTable?.[mode === 'fixed' ? 'f' : 'b'];
-                if (dbList?.[i]) calculatedResults = dbList[i].map(r => ({ ...r }));
+                if (dbList && dbList[i]) {
+                    calculatedResults = dbList[i].map(r => ({ ...r }));
+                }
 
                 const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(b => !b.hideButton && !!window[b.stateKey]) || window.disableSubStats;
                 if (anyGlobal && calculatedResults.length > 0) {
@@ -717,9 +948,9 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
                             cfg.subs, singleTrait ? [singleTrait] : null, useAbility, mode
                         );
                         return optResList?.reduce((best, cur) => {
-                            const curDps = cur.dps || 0;
-                            const bestDps = best.dps || 0;
-                            return curDps > bestDps ? cur : best;
+                            const curScore = Math.max(cur.dps || 0, cur.bossDps || 0);
+                            const bestScore = Math.max(best.dps || 0, best.bossDps || 0);
+                            return curScore > bestScore ? cur : best;
                         }, optResList[0]) || r;
                     });
                 }
@@ -758,7 +989,7 @@ window.getQuickScore = (unit) => {
     let dbKey = unit.id;
     if (unit.ability) {
         const ab = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
-        if (ab.noToggle && !unit.allowMultipleModes && window.STATIC_BUILD_DB?.[unit.id + "_abil"]) {
+        if (ab.noToggle && !unit.allowMultipleModes && window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[unit.id + "_abil"]) {
             dbKey = unit.id + "_abil";
         }
     }
@@ -766,7 +997,25 @@ window.getQuickScore = (unit) => {
     const activeDb = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
     const list = activeDb?.[dbKey]?.fixed?.[0];
     if (list?.length > 0) {
-        return list[0].dps || 0;
+        const activeModeIdx = window.unitModesState?.[unit.id] || 0;
+        const currentHead = window.unitHeads?.[unit.id] || 'none';
+        const currentTrait = window.unitTraits?.[unit.id];
+
+        let matchedBuild = list[0];
+        if (currentTrait || currentHead !== 'none') {
+            const found = list.find(b => {
+                const tName = (typeof b.t === 'number' ? traitsList[b.t]?.name : b.traitName || b.t) || '';
+                const hName = (typeof b.h === 'number' ? HEADS_LIST[b.h] : b.headUsed || b.h) || 'none';
+                if (currentTrait && tName.toLowerCase() !== currentTrait.toLowerCase()) return false;
+                if (currentHead !== 'none' && hName !== currentHead) return false;
+                return true;
+            });
+            if (found) matchedBuild = found;
+        }
+
+        return window.isUnit(unit.id, 'law')
+            ? (matchedBuild.range || 0)
+            : Math.max(matchedBuild.dps || matchedBuild.d || 0, matchedBuild.bossDps || matchedBuild.bd || matchedBuild.bossTotal || 0);
     }
 
     const activeMode = window.unitModesState?.[unit.id] || 0;
@@ -782,139 +1031,51 @@ window.getQuickScore = (unit) => {
 
 window.getLiveScore = (unit) => {
     const unitId = unit.id;
-
-    if (window.CALCULATION_MODE === 'loadout') {
-        const currentBuild = window.hotbarFilteredBuilds?.[unitId];
-        if (currentBuild) {
-            return currentBuild.dps || 0;
-        }
-        return window.getQuickScore ? window.getQuickScore(unit) : 0;
+    const active = window.unitActiveBuilds?.[unitId];
+    if (active) {
+        return window.isUnit(unitId, 'law')
+            ? (active.range || 0)
+            : (active.sortDps || Math.max(active.dps || 0, active.bossDps || 0));
     }
-
-    window.LIVE_SCORE_CACHE = window.LIVE_SCORE_CACHE || {};
-    let currentTrait = window.unitTraits?.[unitId];
-    const guideMode = window.GLOBAL_MODE_SORT || 'none';
-    if (!currentTrait && guideMode !== 'none' && unit.meta?.[guideMode]) {
-        currentTrait = unit.meta[guideMode].split('/')[0].trim();
-        }
-    const currentHead = window.unitHeads?.[unitId];
-    const activeType = window.activeAbilityIds?.has(unitId) ? 'abil' : 'base';
-    const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(b => !b.hideButton && !!window[b.stateKey]) || window.disableSubStats;
-
-    // Requirement: Stable Default Sorting.
-    // Sorting uses the unit's "Default" configuration (e.g. Base Form, Default Charges) for the Database rank,
-    // so units don't jump around when you MESS with sliders or forms on the card UI.
-    const stableModeIdx = unit.allowMultipleModes ? [0] : 0;
-    const stableSystemLvl = unit.systemLevel?.default ?? 0;
-
-    const cacheKey = `DEFAULT-${unitId}-${currentTrait || ''}-${currentHead || ''}-${activeType}-${anyGlobal ? 'buffed' : 'base'}-${JSON.stringify(stableModeIdx)}-${guideMode}-${stableSystemLvl}`;
-
-    if (window.LIVE_SCORE_CACHE[cacheKey] !== undefined) return window.LIVE_SCORE_CACHE[cacheKey];
-
-    // Force dynamic calculations on complex units (charges, custom modes, fusions)
-    const forceDynamicUnits = ['revolutionary_chief_syncro', 'joyful_captain', 'the_strongest_in_history', 'jinoo_shadow_monarch', 'the_strongest_of_today', 'marine_hero', 'sharpshooter_king_trapper'];
-    const isOptimizing = !!(currentTrait || currentHead || anyGlobal || (guideMode && guideMode !== 'none') || forceDynamicUnits.includes(unitId));
-
-    let dbKey = unitId;
-    if (activeType === 'abil' && !unit.allowMultipleModes) {
-        const abilKey = unitId + '_abil';
-        if (window.STATIC_BUILD_DB?.[abilKey]) dbKey = abilKey;
-    }
-    const buildList = window.STATIC_BUILD_DB?.[dbKey]?.fixed?.[0] || window.STATIC_BUILD_DB?.[unitId]?.fixed?.[0];
-
-    if (!buildList || buildList.length === 0) {
-        return (window.LIVE_SCORE_CACHE[cacheKey] = window.getQuickScore(unit));
-    }
-
-    
-    // Temporarily override context for Stable Rank calculation
-    const savedModes = window.unitModesState[unitId];
-    const savedSysLvl = window.unitSystemLevels[unitId];
-    window.unitModesState[unitId] = stableModeIdx;
-    window.unitSystemLevels[unitId] = stableSystemLvl;
-
-    try {
-    let maxScore = 0;
-    const searchLimit = Math.min(20, buildList.length);
-
-    for (let i = 0; i < searchLimit; i++) {
-        let scoringEntry = { ...buildList[i] };
-        scoringEntry.id = scoringEntry.id || `${unitId}-live`;
-        scoringEntry.traitName = scoringEntry.traitName || (typeof scoringEntry.t === 'number' && typeof traitsList !== 'undefined' ? traitsList[scoringEntry.t]?.name : scoringEntry.t) || 'Unknown Trait';
-        scoringEntry.setName = scoringEntry.setName || (typeof scoringEntry.s === 'number' && typeof SETS !== 'undefined' ? SETS[scoringEntry.s]?.name : scoringEntry.s) || 'Unknown Set';
-        scoringEntry.headUsed = scoringEntry.headUsed || (typeof scoringEntry.h === 'number' ? HEADS_LIST[scoringEntry.h] : (scoringEntry.headUsed || scoringEntry.h)) || 'none';
-
-        if (!scoringEntry.subStats && scoringEntry.ss) scoringEntry.subStats = scoringEntry.ss;
-        if (!scoringEntry.mainStats && (scoringEntry.ms || scoringEntry.b !== undefined || scoringEntry.l !== undefined)) {
-            scoringEntry.mainStats = scoringEntry.ms || {
-                body: typeof scoringEntry.b === 'string' ? scoringEntry.b : (scoringEntry.b === 1 ? 'dot' : (scoringEntry.b === 2 ? 'cm' : 'dmg')),
-                legs: typeof scoringEntry.l === 'string' ? scoringEntry.l : (scoringEntry.l === 1 ? 'spa' : (scoringEntry.l === 2 ? 'cf' : (scoringEntry.l === 3 ? 'range' : 'dmg')))
-            };
-        }
-        if (currentTrait) scoringEntry.traitName = currentTrait;
-        if (currentHead) scoringEntry.headUsed = currentHead;
-
-        if (isOptimizing) {
-            const setName = scoringEntry.setName || (typeof scoringEntry.s === 'number' && typeof SETS !== 'undefined' ? SETS[scoringEntry.s]?.id : scoringEntry.s) || window.getSetFast?.(scoringEntry.setName)?.id;
-            const traitId = scoringEntry.traitName || scoringEntry.trait || (typeof scoringEntry.t === 'number' && typeof traitsList !== 'undefined' ? traitsList[scoringEntry.t]?.id : scoringEntry.t);
-            const headToUse = currentHead || scoringEntry.headUsed || 'none';
-            if (setName && traitId) {
-                const singleBuilds = window.getFilteredBuilds().filter(b => b.setName === setName);
-                const singleTrait = typeof traitsList !== 'undefined' && traitsList.find(t => t.id === traitId || t.name === traitId);
-                const optResList = window.calculateUnitBuilds(
-                    unit, null, singleBuilds, window.getValidSubCandidates(), [headToUse],
-                    !window.disableSubStats, singleTrait ? [singleTrait] : null, activeType === 'abil', 'fixed'
-                );
-                if (optResList?.length > 0) {
-                    scoringEntry = optResList.reduce((best, cur) => {
-                        const curDps = cur.dps || 0;
-                        const bestDps = best.dps || 0;
-                        return curDps > bestDps ? cur : best;
-                    }, optResList[0]);
-                }
-            }
-        }
-
-        try {
-            const res = window.reconstructMathData(scoringEntry);
-            if (res) {
-                const score = res.total || 0;
-                if (score > maxScore) maxScore = score;
-            }
-        } catch (e) {
-            console.warn(`Error reconstructing math in getLiveScore for ${unitId}:`, e);
-        }
-    }
-
-    const val = maxScore || window.getQuickScore(unit);
-    return (window.LIVE_SCORE_CACHE[cacheKey] = val);
-    } finally {
-        // ALWAYS restore user's card state
-        window.unitModesState[unitId] = savedModes;
-        window.unitSystemLevels[unitId] = savedSysLvl;
-    }
+    return window.getQuickScore ? window.getQuickScore(unit) : 0;
 };
 
 window.resortUnitCards = function () {
     if (!paginatedSortedUnits || paginatedSortedUnits.length === 0) return;
+    window.refreshAllActiveBuilds();
     paginatedSortedUnits.sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
     renderCurrentPage();
 };
 
 window.resortUnitCardsInPlace = function () {
     if (!paginatedSortedUnits || paginatedSortedUnits.length === 0) return;
+    window.refreshAllActiveBuilds();
     paginatedSortedUnits.sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
+
+    // Re-assign absolute ranks
+    window.unitAbsoluteRanks = {};
+    paginatedSortedUnits.forEach((entry, i) => {
+        window.unitAbsoluteRanks[entry.unit.id] = i + 1;
+    });
+
     const container = document.getElementById('dbPage');
     if (!container) return;
     paginatedSortedUnits.forEach(entry => {
         const card = document.getElementById('card-' + entry.unit.id);
-        if (card) container.appendChild(card);
+        if (card) {
+            container.appendChild(card);
+            // Dynamically update rank badge
+            const rankBadge = card.querySelector('.placement-badge:nth-child(3)');
+            if (rankBadge) {
+                rankBadge.innerText = `DPS Rank: #${window.unitAbsoluteRanks[entry.unit.id]}`;
+            }
+        }
     });
 };
 
 function renderUnitCard(unit, absoluteIndex) {
     const activeMode = window.unitModesState?.[unit.id] || 0;
-    const { upgradesArr } = getUnitCostAndPlacement(unit, activeMode);
+    const { upgradesArr = null } = getUnitCostAndPlacement(unit, activeMode);
 
     if (window.unitELevels[unit.id] === undefined && upgradesArr) {
         window.unitELevels[unit.id] = upgradesArr.length - 1;
@@ -967,7 +1128,8 @@ function renderUnitCard(unit, absoluteIndex) {
         king_sailor: { icon: '⚠️', text: '<strong>Notice:</strong> In-game he does 2.5x dmg currently (e.g. 147.4k dps x2.5).', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' },
         mochi_pirate: { icon: '⚠️', text: '<strong>Notice:</strong> Mochi Pirate is bugged; he does not apply Time Snail currently / Crit Time snail enemies.', color: '#f87171', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.15)' },
         revolutionary_chief_syncro: { icon: '🔥', text: '<strong>Notice:</strong> DoT restarts duration if attacked again. DPS is calculated as 1 continuous tick per second.', color: '#60a5fa', bg: 'rgba(96, 165, 250, 0.08)', border: 'rgba(96, 165, 250, 0.15)' },
-        ant_king_savage: { icon: '⚠️', text: '<strong>Notice:</strong> Ant King is bugged; any DoT%+ buffs applied to him are calculated twice.', color: '#f87171', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.15)' }
+        ant_king_savage: { icon: '⚠️', text: '<strong>Notice:</strong> Ant King is bugged; any DoT%+ buffs applied to him are calculated twice.', color: '#f87171', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.15)' },
+        angel_born_in_hell: { icon: '⚠️', text: '<strong>Notice:</strong> Angel in Hell is bugged; he has a fixed 50% crit rate that cannot change, and crits work, though he is not meant to crit.', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' }
     };
     const notice = notices[unit.id];
     const customNoticeHtml = notice ? `
@@ -986,12 +1148,13 @@ function renderUnitCard(unit, absoluteIndex) {
                 <div class="search-row">
                     <select onchange="filterList(this)" data-filter="sort" class="search-select sort-select">
                         <option value="dps" ${defaultSort === 'dps' ? 'selected' : ''}>Sort: DPS</option>
+                        <option value="boss">Sort: Boss DPS</option>
                         <option value="damage" ${defaultSort === 'damage' ? 'selected' : ''}>Sort: Damage</option>
                         <option value="efficiency" ${defaultSort === 'efficiency' ? 'selected' : ''}>Sort: Efficiency</option>
                     </select>
                     <select onchange="filterList(this)" data-filter="set" class="search-select">
                         <option value="all">Sets: All</option>
-                        ${['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Shinobi', 'Reanimated Ninja', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi'].map(set => `<option value="${set}">Sets: ${set.replace(' Set', '').replace('Captain', '')}</option>`).join('')}
+                        ${['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Shinobi', 'Reanimated Ninja', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi', 'Fusion'].map(set => `<option value="${set}">Sets: ${set.replace(' Set', '').replace('Captain', '')}</option>`).join('')}
                     </select>
                     <select onchange="filterList(this)" data-filter="head" class="search-select">
                         <option value="all">Heads: All</option>
@@ -1092,13 +1255,13 @@ function buildPaginationControls(totalUnits, activePage, totalPages) {
     if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
 
     if (startPage > 1) pageButtons += `<button class="pg-btn" onclick="goToPage(1)">1</button>`;
-    if (startPage > 2) pageButtons += `<span class="pg-ellipsis">…</span>`;
+    if (startPage > 2) pageButtons += `<span class="pg-ellipsis">...</span>`;
 
     for (let p = startPage; p <= endPage; p++) {
         pageButtons += `<button class="pg-btn${p === activePage ? ' pg-active' : ''}" onclick="goToPage(${p})">${p}</button>`;
     }
 
-    if (endPage < totalPages - 1) pageButtons += `<span class="pg-ellipsis">…</span>`;
+    if (endPage < totalPages - 1) pageButtons += `<span class="pg-ellipsis">...</span>`;
     if (endPage < totalPages) pageButtons += `<button class="pg-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
 
     return `<div class="pagination-bar">
@@ -1196,6 +1359,15 @@ window.globalFilterUnits = (term) => {
     let filtered = inventoryMode
         ? unitDatabase.filter(unit => assignedInventoryUnitIds.has(unit.id))
         : unitDatabase;
+
+    // Force pre-calculating all active builds across all units so they are completely fresh and accurate before sorting!
+    window.paginatedSortedUnits = filtered.map(unit => ({ unit, maxScore: 0 }));
+
+    // Refresh builds only if the database is loaded
+    const db = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
+    if (db) {
+        window.refreshAllActiveBuilds();
+    }
 
     const allSorted = filtered.map(unit => ({ unit, maxScore: getLiveScore(unit) }))
         .sort((a, b) => b.maxScore - a.maxScore);
@@ -1299,7 +1471,7 @@ function openTraitBestList(unitId) {
         tagsHtml += `<span style="background: rgba(168, 85, 247, 0.2); color: #c084fc; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; border: 1px solid rgba(168, 85, 247, 0.3);">Ability Active</span>`;
     }
 
-    let html = `<div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+    let html = `<div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
         <div style="width: 56px; height: 56px; flex-shrink: 0; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1);">
             <img src="${unit.img}" style="width: 110%; height: 110%; object-fit: cover;">
         </div>
@@ -1425,9 +1597,9 @@ window.precalculateAllLoadoutBuilds = function () {
                 });
                 if (matches.length > 0) {
                     topBuild = matches.reduce((best, cur) => {
-                        const bestDps = best.d || best.dps || 0;
-                        const curDps = cur.d || cur.dps || 0;
-                        return curDps > bestDps ? cur : best;
+                        const bestScore = Math.max(best.d || best.dps || 0, best.bossDps || 0);
+                        const curScore = Math.max(cur.d || cur.dps || 0, cur.bossDps || 0);
+                        return curScore > bestScore ? cur : best;
                     }, matches[0]);
                 }
             }
@@ -1436,26 +1608,51 @@ window.precalculateAllLoadoutBuilds = function () {
     });
 };
 
-window.showGearDetails = (setName, headUsed) => {
-    const headName = (headUsed && headUsed !== 'none') ? (HEAD_CONFIG[headUsed]?.name || headUsed) : 'None';
-    const content = `
-        <div style="display: flex; flex-direction: column; gap: 12px; padding: 10px;">
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 15px;">
-                <div style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; font-weight: 800;">Relic Set</div>
-                <div style="font-size: 1.1rem; font-weight: 900; color: #fff;">${setName.toLowerCase().includes('set') ? setName : setName + ' Set'}</div>
-            </div>
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 15px;">
-                <div style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; font-weight: 800;">Head Piece</div>
-                <div style="font-size: 1.1rem; font-weight: 900; color: #60a5fa;">${headName}</div>
-            </div>
-        </div>
-    `;
-    if (typeof showUniversalModal === 'function') {
-        showUniversalModal({
-            title: '<span style="color: #60a5fa; font-weight: 900; letter-spacing: 1px;">EQUIPMENT DETAILS</span>',
-            content: content,
-            size: 'modal-sm'
-        });
+
+window.viewBuildRelicDatabase = function (buildId, unitId) {
+    let build = window.cachedResults[buildId];
+    if (!build && window.unitBuildsCache[unitId]) {
+        const cache = window.unitBuildsCache[unitId];
+        const allBuilds = [
+            ...(cache.base?.fixed?.[0] || []),
+            ...(cache.abil?.fixed?.[0] || [])
+        ];
+        build = allBuilds.find(b => b.id === buildId);
+    }
+    if (!build) return;
+
+    let headSetId = build.headUsed || 'none';
+    let bodySetId = 'none';
+    let legsSetId = 'none';
+
+    if (build.relicIds) {
+        const headRelic = (window.relicInventory || []).find(relic => relic.id === build.relicIds.head);
+        const bodyRelic = (window.relicInventory || []).find(relic => relic.id === build.relicIds.body);
+        const legsRelic = (window.relicInventory || []).find(relic => relic.id === build.relicIds.legs);
+        if (headRelic) headSetId = headRelic.setKey;
+        if (bodyRelic) bodySetId = bodyRelic.setKey;
+        if (legsRelic) legsSetId = legsRelic.setKey;
+    } else {
+        const foundSet = (window.SETS || []).find(s => s.name === build.setName || s.id === build.setName || (s.name + ' Set') === build.setName || s.name.toLowerCase() === build.setName.toLowerCase());
+        if (foundSet) {
+            bodySetId = foundSet.id;
+            legsSetId = foundSet.id;
+        }
+    }
+
+    window.customRelicSetup = {
+        head: headSetId,
+        body: bodySetId,
+        legs: legsSetId,
+        buildName: build.setName,
+        traitName: build.traitName
+    };
+
+    if (typeof switchPage === 'function') {
+        switchPage('relics');
+    }
+    if (typeof window.renderRelicDatabase === 'function') {
+        window.renderRelicDatabase();
     }
 };
 

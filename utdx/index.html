@@ -71,6 +71,9 @@
             <button class="nav-btn"
                 onclick="resetAndOpenInventory(); window.toggleMobileMenu && window.toggleMobileMenu(false)">Relic
                 Inventory</button>
+            <button class="nav-btn"
+                onclick="switchPage('relics'); window.toggleMobileMenu && window.toggleMobileMenu(false)">Relic
+                Database</button>
             <button class="nav-btn mobile-only-btn"
                 onclick="openTraitTierList(); window.toggleMobileMenu && window.toggleMobileMenu(false)">Trait Tier
                 List</button>
@@ -229,6 +232,9 @@
                         Relic</button>
                 </div>
             </div>
+
+            <!-- Relics Database Toolbar -->
+            <div id="relicsToolbar" class="injector-panel hidden"></div>
         </div>
 
         <!-- PAGES -->
@@ -243,6 +249,9 @@
                             id="dispGuideUnit">All</b> with <b class="color-accent" id="dispGuideTrait">Auto</b></div>
                     <div id="guideList" class="guide-grid"></div>
                 </div>
+            </div>
+            <div id="relicsPage" class="page">
+                <!-- Dynamic Relic Wiki/Database will render here -->
             </div>
         </div>
     </main>
@@ -642,10 +651,11 @@
     <script src="frontend/components/custom-pair.js"></script>
     <script src="frontend/controllers/calculator.js"></script>
     <script src="frontend/components/math-render.js"></script>
+    <script src="frontend/views/relics.js"></script>
     <script src="frontend/views/inventory.js"></script>
     <script src="frontend/views/feedback.js"></script>
     <script src="frontend/components/hotbar.js"></script>
     <script src="frontend/views/tutorials.js"></script>
-    <script src="frontend/controllers/init.js"></script>
+    <script src="frontend/controllers/init.js"></script></body>
 
-</body>
+</html>

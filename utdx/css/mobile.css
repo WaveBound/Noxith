@@ -91,7 +91,7 @@ body.menu-open::after {
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     }
 
-    .injector-panel {
+    .injector-panel:not(.hidden) {
         display: flex !important;
         height: 100%;
         padding: 0 5px !important;

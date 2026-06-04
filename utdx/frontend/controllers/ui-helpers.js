@@ -270,7 +270,7 @@ window.setSystemLevel = function (unitId, value) {
     const input = document.querySelector(`#system-level-${unitId}`);
     if (input && parseInt(input.value) !== lvl) input.value = lvl;
 
-    // Bust the sorting cache for this unit so ranks update instantly
+    // Bust sorting cache for this unit so calculations update
     if (window.LIVE_SCORE_CACHE) {
         Object.keys(window.LIVE_SCORE_CACHE).forEach(k => {
             if (k.startsWith(unitId)) delete window.LIVE_SCORE_CACHE[k];
@@ -280,14 +280,16 @@ window.setSystemLevel = function (unitId, value) {
     if (window.unitBuildsCache?.[unitId]) {
         window.unitBuildsCache[unitId] = { base: { fixed: [null] }, abil: { fixed: [null] } };
     }
-    callIfFn('processUnitCache', unit);
+
+    // Refresh dynamic active build parameters for the unit in the global registry
+    if (typeof window.refreshActiveBuild === 'function' && unit) {
+        window.refreshActiveBuild(unit);
+    }
+
+    // Update the card display to reflect changes, keeping card in place
     setTimeout(() => {
-        callIfFn('updateBuildListDisplay', unitId);
+        callIfFn('updateBuildListDisplay', unitId, true);
         callIfFn('updateHotbarUI');
-        // Re-sort card in database list dynamically since its score updated
-        if (window.CALCULATION_MODE !== 'loadout' && typeof window.resortUnitCardsInPlace === 'function') {
-            window.resortUnitCardsInPlace();
-        }
     }, 10);
 };
 
@@ -325,7 +327,14 @@ window.selectELevel = function (unitId, level) {
             }
         }
     }
-    callIfFn('updateBuildListDisplay', unitId);
+
+    // Refresh dynamic active build parameters for the unit in the global registry
+    if (typeof window.refreshActiveBuild === 'function' && unit) {
+        window.refreshActiveBuild(unit);
+    }
+
+    // Update the card display to reflect changes, keeping card in place
+    callIfFn('updateBuildListDisplay', unitId, true);
 };
 
 window.filterList = function (element) {
@@ -430,14 +439,15 @@ window.switchPage = (pid) => {
         btn.classList.toggle('active', click.includes(`switchPage('${pid}')`) || (pid === 'inventory' && click.includes('resetAndOpenInventory')));
     });
 
-    const toolbars = { db: 'dbInjector', guides: 'guidesToolbar', inventory: 'inventoryToolbar' };
+    const toolbars = { db: 'dbInjector', guides: 'guidesToolbar', inventory: 'inventoryToolbar', relics: 'relicsToolbar' };
     Object.entries(toolbars).forEach(([id, target]) => getEl(target)?.classList.toggle('hidden', id !== pid));
 
-    const pageMap = { db: 'dbPage', guides: 'guidesPage', inventory: 'inventoryPage' };
+    const pageMap = { db: 'dbPage', guides: 'guidesPage', inventory: 'inventoryPage', relics: 'relicsPage' };
     getEl(pageMap[pid])?.classList.add('active');
 
     if (pid === 'db') window.injectDbToolbarButtons();
     else if (pid === 'guides') callIfFn('renderGuides');
+    else if (pid === 'relics') callIfFn('renderRelicDatabase');
     else if (pid === 'inventory') {
         const invBtn = document.querySelector(`button[onclick*="switchPage('inventory')"], button[onclick*="resetAndOpenInventory()"]`);
         invBtn?.classList.add('active');
@@ -507,8 +517,6 @@ window.toggleFilterTab = (btn) => {
         btn.classList.toggle('active', !isHidden);
     }
 };
-
-window.toggleRelicStatDisplay = (btn) => btn.closest('.build-row')?.classList.toggle('show-subs-mobile');
 
 window.toggleMobileMenu = (show = null) => {
     document.body.classList.toggle('mobile-menu-open', show !== null ? show : !document.body.classList.contains('mobile-menu-open'));

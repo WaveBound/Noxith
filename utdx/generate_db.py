@@ -194,7 +194,16 @@ if (isMainThread) {
             
             if (pStat === mainStat) { sWeight = Math.min(6, sWeight + pWeight); pWeight = 0; } 
             else if (sStat === mainStat) { pWeight = Math.min(6, pWeight + sWeight); sWeight = 0; }
-            if (pStat === mainStat && sStat === mainStat) { pWeight = 0; sWeight = 0; }
+            if (pStat === mainStat && sStat === mainStat) {
+                const fallback = cands.find(c => c !== mainStat);
+                if (fallback) {
+                    pStat = fallback;
+                    pWeight = 6;
+                    sWeight = 0;
+                } else {
+                    pWeight = 0; sWeight = 0;
+                }
+            }
 
             let pVal = 0, sVal = 0;
             if (pWeight > 0) { pVal = PERFECT_SUBS[pStat] * pWeight; b[pStat] = (b[pStat] || 0) + pVal; }
@@ -274,7 +283,7 @@ if (isMainThread) {
         const hasPassiveDoT = effectiveStats.passives && effectiveStats.passives.some(p => p.dot && p.dot > 0);
         const hasNativeDoT = (effectiveStats.dot > 0) || (effectiveStats.burnMultiplier > 0) || isKiritoVR || hasPassiveDoT;
 
-        let allowedHeads = cfg.head ? (jobHeads && jobHeads.length > 0 ? jobHeads : ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut']) : ['none'];
+        let allowedHeads = cfg.head ? (jobHeads && jobHeads.length > 0 ? jobHeads : ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings']) : ['none'];
         
         // Always include 'none' (baseline) when head calculation is enabled
         if (cfg.head && !allowedHeads.includes('none')) {
@@ -323,6 +332,7 @@ if (isMainThread) {
                     traitGroups[trait.name].push({
                         setName: best.meta.setName, buildName: best.meta.buildName,
                         traitName: trait.name, dps: best.res.total, dmgVal: best.res.dmgVal,
+                        bossDps: best.res.bossTotal,
                         spa: best.res.spa, range: best.res.range, prio,
                         mainStats: { body: best.meta.bodyType, legs: best.meta.legType },
                         subStats: best.meta.assignments, headUsed: best.meta.headUsed,
@@ -340,9 +350,11 @@ if (isMainThread) {
                     const t = unitTemplates[i]; context.headPiece = t.meta.headUsed;
                     const res = calculateDPS(effectiveStats, t.stats, context);
                     if (isNaN(res.total)) continue;
+                    const currentScore = Math.max(res.total || 0, res.bossTotal || 0);
                     const key = t.meta.key;
                     const cd = bestDps.get(key);
-                    if (!cd || res.total > cd.res.total) bestDps.set(key, { res, meta: t.meta });
+                    const bestKnownScore = cd ? Math.max(cd.res.total || 0, cd.res.bossTotal || 0) : -1;
+                    if (!cd || currentScore > bestKnownScore) bestDps.set(key, { res, meta: t.meta });
                     const cr = bestRaw.get(key);
                     if (!cr || res.dmgVal > cr.res.dmgVal || (res.dmgVal === cr.res.dmgVal && res.total > cr.res.total)) bestRaw.set(key, { res, meta: t.meta });
                 }
@@ -361,7 +373,9 @@ if (isMainThread) {
                     if (isNaN(res.total)) continue;
                     const key = t.meta.key;
                     const c = bestSpa.get(key);
-                    if (!c || res.total > c.res.total) bestSpa.set(key, { res, meta: t.meta });
+                    const currentScore = Math.max(res.total || 0, res.bossTotal || 0);
+                    const bestKnownScore = c ? Math.max(c.res.total || 0, c.res.bossTotal || 0) : -1;
+                    if (!c || currentScore > bestKnownScore) bestSpa.set(key, { res, meta: t.meta });
                 }
                 pushBest(bestSpa, 'spa');
             } catch (err) { console.error(`Error calculating spa points for ${unit.id}:`, err); }
@@ -374,7 +388,7 @@ if (isMainThread) {
         const MAP_PRIO = { 'dmg': 0, 'spa': 1, 'raw_dmg': 2 };
         const MAP_BODY = { 'dmg': 0, 'dot': 1, 'cm': 2 };
         const MAP_LEGS = { 'dmg': 0, 'spa': 1, 'cf': 2 };
-        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'bloodline_head': 7, 'reanimated_head': 8, 'sorcerer_hunter_spirit': 9, 'strongest_sorcerer_glasses': 10, 'monarch': 11, 'warlord_hat': 12, 'mochi_scarf': 13, 'flaming_donut': 14 };
+        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'bloodline_head': 7, 'reanimated_head': 8, 'sorcerer_hunter_spirit': 9, 'strongest_sorcerer_glasses': 10, 'monarch': 11, 'warlord_hat': 12, 'mochi_scarf': 13, 'flaming_donut': 14, 'fused_earrings': 15 };
 
         const stringPool = new Map(); const stringArr = [""]; 
         const subPool = new Map(); const subArr = [null]; 
@@ -456,7 +470,7 @@ if (isMainThread) {
     const S = RAW.s; const P = RAW.p; const D = RAW.d;
     const PRIO = ['dmg', 'spa', 'raw_dmg'];
     const BODY = ['dmg', 'dot', 'cm']; const LEGS = ['dmg', 'spa', 'cf'];
-    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'];
+    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings'];
     const DESC_BODY = ['Dmg', 'DoT', 'Crit Dmg']; const DESC_LEGS = ['Dmg', 'Spa', 'Crit Rate'];
     const ROW_SIZE = 18;
 
@@ -590,7 +604,7 @@ if (isMainThread) {
             const PRIO = ['dmg', 'spa', 'raw_dmg'];
             const BODY = ['dmg', 'dot', 'cm'];
             const LEGS = ['dmg', 'spa', 'cf'];
-            const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'];
+            const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings'];
 
             const decode = (b64) => {
                 const bin = Buffer.from(b64, 'base64').toString('binary');
@@ -703,7 +717,11 @@ if (isMainThread) {
                                 const prioList = prioGroups[prio];
                                 if (prioList.length === 0) continue;
                                 
-                                prioList.sort((a, b) => b.dps !== a.dps ? (b.dps || 0) - (a.dps || 0) : (b.dmgVal || 0) - (a.dmgVal || 0));
+                                prioList.sort((a, b) => {
+                                    const scoreA = Math.max(a.dps || 0, a.bossDps || 0);
+                                    const scoreB = Math.max(b.dps || 0, b.bossDps || 0);
+                                    return scoreB !== scoreA ? scoreB - scoreA : (b.dmgVal || 0) - (a.dmgVal || 0);
+                                });
 
                                 const seenKeys = new Set();
                                 const comboCounts = {};
@@ -744,7 +762,11 @@ if (isMainThread) {
                             }
                             
                             // Final stable sort for the output
-                            return result.sort((a, b) => b.dps !== a.dps ? (b.dps || 0) - (a.dps || 0) : (b.dmgVal || 0) - (a.dmgVal || 0));
+                            return result.sort((a, b) => {
+                                const scoreA = Math.max(a.dps || 0, a.bossDps || 0);
+                                const scoreB = Math.max(b.dps || 0, b.bossDps || 0);
+                                return scoreB !== scoreA ? scoreB - scoreA : (b.dmgVal || 0) - (a.dmgVal || 0);
+                            });
                         };
 
                         let finalFixed = mergeAndReduce(existingFixed, topNewPerTrait);
@@ -808,10 +830,164 @@ class GeneratorApp:
             try: self.process.kill()
             except: pass
             self.process = None
+
+    def cleanup_on_close(self):
+        self.stop_generation()
         if self.temp_dir and os.path.exists(self.temp_dir):
-            tmp = self.temp_dir
+            shutil.rmtree(self.temp_dir, ignore_errors=True)
             self.temp_dir = None
-            threading.Thread(target=shutil.rmtree, args=(tmp,), kwargs={"ignore_errors": True}, daemon=True).start()
+
+    def run_headless(self, selected_units, threads, mode='all', buffs=None, selected_heads=None, selected_sets=None):
+        try:
+            print("Preparing highly optimized build scripts...")
+            
+            combined_js_parts = [
+                "if (typeof window === 'undefined') { global.window = global; }\n",
+                "if (typeof document === 'undefined') { global.document = { createElement: () => ({}), head: { appendChild: () => {} } }; }\n",
+                "global.unitDatabase = global.unitDatabase || []; global.unitSpecificTraits = global.unitSpecificTraits || {};\n",
+            ]
+            
+            for filename in REQUIRED_FILES:
+                file_path = filename
+                if not os.path.exists(file_path):
+                    if filename.startswith("utdx/"): file_path = filename[5:]
+                    elif os.path.exists(os.path.join("utdx", filename)): file_path = os.path.join("utdx", filename)
+                if os.path.exists(file_path):
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        content = f.read()
+                        # Strip ES module exports for standard Node execution context
+                        content = re.sub(r'\bexport\s+const\b', 'const', content)
+                        content = re.sub(r'\bexport\s+function\b', 'function', content)
+                        content = re.sub(r'\bexport\s+default\b', '', content)
+                        combined_js_parts.append(content + "\n")
+
+            # Expose library constants to global/window once all are defined to avoid TDZ errors
+            combined_js_parts.append("""
+if (typeof window !== 'undefined') {
+    if (typeof ADVANTAGES !== 'undefined') window.ADVANTAGES = ADVANTAGES;
+    if (typeof LEADER_BUFFS !== 'undefined') window.LEADER_BUFFS = LEADER_BUFFS;
+    if (typeof GLOBAL_UNIT_BUFFS !== 'undefined') window.GLOBAL_UNIT_BUFFS = GLOBAL_UNIT_BUFFS;
+    if (typeof SUB_STAT_BASES !== 'undefined') window.SUB_STAT_BASES = SUB_STAT_BASES;
+    if (typeof MAIN_STAT_BASES !== 'undefined') window.MAIN_STAT_BASES = MAIN_STAT_BASES;
+    if (typeof generateRelic !== 'undefined') window.generateRelic = generateRelic;
+}
+""")
+            
+            units_dir = 'units' if os.path.exists('units') else os.path.join('utdx', 'units')
+            if os.path.exists(units_dir):
+                for u_file in sorted(os.listdir(units_dir)):
+                    if u_file.endswith('.js'):
+                        clean_name = u_file.replace('.js', '')
+                        combined_js_parts.append(f"global.__currentUnitFile = '{clean_name}';\n")
+                        with open(os.path.join(units_dir, u_file), "r", encoding="utf-8") as f: combined_js_parts.append(f.read() + "\n")
+
+            combined_js_parts.append(GENERATOR_SCRIPT)
+            combined_js = "".join(combined_js_parts)
+            temp_runner = os.path.join(self.temp_dir, "db_runner.js")
+            with open(temp_runner, "w", encoding="utf-8") as f: f.write(combined_js)
+
+            # --- DYNAMIC COMBO GENERATION ---
+            def get_states(b_key, default_vals=['0', '1']):
+                if mode != 'custom' or not buffs: return default_vals
+                cfg = buffs.get(b_key, {'permute': True, 'force': False})
+                if cfg.get('force'): 
+                    return ['1'] if default_vals == ['0', '1'] else ['hill']
+                if cfg.get('permute'): return default_vals
+                return [default_vals[0]]
+
+            b_miku = get_states('miku')
+            b_enlightened = get_states('enlightenedgod')
+            b_bijuu = get_states('bijuu')
+            b_amage = get_states('amage')
+            b_ksailor = get_states('ksailor')
+            b_fern = get_states('fern', ['none', 'hill', 'ground'])
+
+            all_combos = list(itertools.product(b_miku, b_enlightened, b_bijuu, b_amage, b_ksailor, b_fern))
+            db_dir = "databases" if os.path.exists("databases") else os.path.join("utdx", "databases")
+            os.makedirs(db_dir, exist_ok=True)
+
+            # Helper for name calculation (same logic as Node)
+            def get_name(c):
+                p = []
+                if c[0] == '1': p.append('miku')
+                if c[1] == '1': p.append('enlightenedgod')
+                if c[2] == '1': p.append('bijuu')
+                if c[3] == '1': p.append('amage')
+                if c[4] == '1': p.append('ksailor')
+                if c[5] == 'hill': p.append('magehill')
+                elif c[5] == 'ground': p.append('mageground')
+                return "db_base.js" if not p else "db_" + "_".join(p) + ".js"
+
+            if mode == 'missing':
+                combinations = []
+                for c in all_combos:
+                    fpath = os.path.join(db_dir, get_name(c))
+                    if not os.path.exists(fpath):
+                        combinations.append(c)
+                    else:
+                        try:
+                            with open(fpath, "r", encoding="utf-8") as f:
+                                first_lines = "".join([f.readline() for _ in range(5)])
+                                if "// BUILDSIG:" not in first_lines or "flaming_donut" not in first_lines or "fused_earrings" not in first_lines:
+                                    combinations.append(c)
+                        except Exception:
+                            combinations.append(c)
+            else:
+                combinations = all_combos
+
+            if not combinations:
+                print("All databases already exist. Nothing to generate.")
+                self.is_running = False
+                return
+
+            if selected_heads is None:
+                selected_heads = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings']
+            if selected_sets is None:
+                selected_sets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi', 'Fused Warrior']
+
+            job_data = {
+                "combinations": combinations,
+                "targetUnits": [str(u) for u in selected_units],
+                "threads": int(threads),
+                "outDir": db_dir,
+                "selectedHeads": selected_heads,
+                "selectedSets": selected_sets
+            }
+            job_file = os.path.join(self.temp_dir, "job.json")
+            with open(job_file, "w", encoding="utf-8") as f: json.dump(job_data, f)
+
+            overall_start = time.time()
+            self.process = subprocess.Popen(["node", "--expose-gc", temp_runner, job_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8")
+
+            def read_err():
+                for line in self.process.stderr:
+                    print(f"Node Error: {line.strip()}")
+            threading.Thread(target=read_err, daemon=True).start()
+
+            for line in self.process.stdout:
+                line = line.strip()
+                if line.startswith("__STATUS__:"):
+                    parts = line.split(":", 3)
+                    if len(parts) >= 3:
+                        msg_type = parts[1]
+                        if msg_type == "PROGRESS":
+                            pct = float(parts[2])
+                            msg = parts[3] if len(parts) > 3 else ""
+                            print(f"Progress: {pct:.1f}% - {msg}")
+                        elif msg_type == "LOG":
+                            out_name = parts[2]
+                            msg = parts[3] if len(parts) > 3 else ""
+                            print(f"[{out_name}] {msg}")
+                        elif msg_type == "ALL_DONE":
+                            print("Finalizing saving process...")
+                            break
+
+            self.process.wait()
+            print(f"Generation completed in {time.time() - overall_start:.2f} seconds.")
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            self.is_running = False
 
     def _run_logic(self, selected_units, threads, mode='all', buffs=None, selected_heads=None, selected_sets=None):
         try:
@@ -904,7 +1080,7 @@ if (typeof window !== 'undefined') {
                         try:
                             with open(fpath, "r", encoding="utf-8") as f:
                                 first_lines = "".join([f.readline() for _ in range(5)])
-                                if "// BUILDSIG:" not in first_lines or "flaming_donut" not in first_lines:
+                                if "// BUILDSIG:" not in first_lines or "flaming_donut" not in first_lines or "fused_earrings" not in first_lines:
                                     combinations.append(c)
                         except Exception:
                             combinations.append(c)
@@ -1110,8 +1286,8 @@ HTML = """
 
     <script>
         let units = []; let selected = new Set();
-        const relicSets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi'];
-        const headPieces = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut'];
+        const relicSets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi', 'Fused Warrior'];
+        const headPieces = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings'];
         let selectedSets = new Set(relicSets);
         let selectedHeads = new Set(headPieces);
         
@@ -1139,6 +1315,10 @@ HTML = """
             document.querySelectorAll(selector).forEach(i => i.checked = val);
         }
 
+        function toggleAllGear(selector, val) {
+            document.querySelectorAll(selector).forEach(i => i.checked = val);
+        }
+
         function toggleBuffSelect() {
             document.getElementById('buff-selection').style.display = document.getElementById('gen-mode').value === 'custom' ? 'block' : 'none';
         }
@@ -1149,8 +1329,8 @@ HTML = """
         function start() {
             const mode = document.getElementById('gen-mode').value;
             const buffs = {};
-            const finalHeads = Array.from(selectedHeads);
-            const finalSets = Array.from(selectedSets);
+            const finalHeads = Array.from(document.querySelectorAll('.head-cb:checked')).map(cb => cb.value);
+            const finalSets = Array.from(document.querySelectorAll('.set-cb:checked')).map(cb => cb.value);
 
             document.querySelectorAll('#buff-selection input[type="checkbox"]').forEach(i => {
                 const b = i.getAttribute('data-buff');
@@ -1216,15 +1396,23 @@ def main():
             # Symlinks unavailable (e.g. Windows without dev mode) — copy async so startup isn't blocked
             threading.Thread(target=shutil.copytree, args=(abs_img_src, img_link), daemon=True).start()
 
-    gui_path = os.path.join(app.temp_dir, "index.html")
-    with open(gui_path, "w", encoding="utf-8") as f: f.write(HTML)
-    
-    window = webview.create_window('UTD Database Generator', url=gui_path, width=1000, height=750)
-    app.window = window
-    window.expose(app.get_units, app.start_generation, app.stop_generation)
-    window.events.closed += app.stop_generation
-    
-    webview.start()
+    if "--headless" in sys.argv or "headless" in sys.argv:
+        # Run headless with all units selected, 4 threads, and all mode
+        selected_units = [u["id"] for u in app.get_units()]
+        app.run_headless(selected_units=selected_units, threads=4, mode="all")
+        # Cleanup temp directory
+        if app.temp_dir and os.path.exists(app.temp_dir):
+            shutil.rmtree(app.temp_dir, ignore_errors=True)
+    else:
+        gui_path = os.path.join(app.temp_dir, "index.html")
+        with open(gui_path, "w", encoding="utf-8") as f: f.write(HTML)
+        
+        window = webview.create_window('UTD Database Generator', url=gui_path, width=1000, height=750)
+        app.window = window
+        window.expose(app.get_units, app.start_generation, app.stop_generation)
+        window.events.closed += app.cleanup_on_close
+        
+        webview.start()
 
 if __name__ == "__main__":
     main()

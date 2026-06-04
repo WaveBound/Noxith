@@ -137,7 +137,19 @@ const PASSIVES = {
         attacksNeeded: 5,
         duration: 10,
         dotBuff: 20
-    }
+    },
+    fused_set: {
+        name: "Fused Potential",
+        desc: "When the unit inflicts DoT, buff Crit DMG by 50% for 15 seconds. (7.5s Cooldown)",
+        duration: 15,
+        cooldown: 7.5,
+        cDmgBuff: 50
+    },
+    fused_earrings_acc: {
+        name: "Fused Earrings",
+        desc: "If unit can synchro clash/fuse, in non synchro form gain 50% dmg, in synchro form gain 25% range and 15% dmg buff.",
+        trigger: "passive"
+    },
 };
 
 // ─── TAG PERKS ──────────────────────────────────────────────
@@ -168,7 +180,15 @@ const TAG_PERKS = {
     monarch_acc: [
         { tag: "Leveling", bonus: { dmg: 20, spa: 0, range: 0, cRate: 5, cDmg: 15, dot: 0, bossDmg: 0, trueDmg: 0, elementalAll: 20 } },
         { tag: "King", bonus: { dmg: 15, spa: 0, range: 0, cRate: 0, cDmg: 0, dot: -12.5, bossDmg: 0, trueDmg: 0, elementalAll: 15 } },
-    ]
+    ],
+    fused_set: [
+        { tag: "Fusion", bonus: { dmg: 10, range: 20, armorDmg: 20, hyperArmor: 20 } },
+        { tag: "Super Warrior", bonus: { dmg: 20, spa: 10, cRate: 10 } },
+    ],
+    fused_earrings_acc: [
+        { tag: "Hero", bonus: { dmg: 10, dot: 20 } },
+        { tag: "Fusion", bonus: { dmg: 10, bossDmg: 25 } },
+    ],
 };
 
 // ─── PASSIVE MATH ───────────────────────────────────────────

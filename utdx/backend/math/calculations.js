@@ -53,7 +53,7 @@ function calculateDPS(uStats, relicStats, context) {
     const tags = uStats.tags || [];
 
     const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (uStats.id === 'king_sailor' ? 10 : 0);
-    const finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
+    let finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
 
     let setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa;
     let warlordSpa = 0;
@@ -93,6 +93,16 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     const { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc } = window._calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicStats, context);
+
+    if (headCalc && headCalc.range) {
+        finalRange *= (1 + headCalc.range / 100);
+    }
+
+    // Apply relic set bossDmg and head accessory bossDmg into bossMult (computed early from traits only)
+    const relicBossDmg = (sBonus.bossDmg || 0) + (headCalc.bossDmg || 0);
+    if (relicBossDmg > 0) {
+        bossMult = (bossMult - 1 + relicBossDmg / 100) + 1;
+    }
 
     let headDmgPassiveMod = headDmgPassive;
     if (headPiece === 'biju_head' && uStats.id === 'triple_threat') {
@@ -198,27 +208,85 @@ function calculateDPS(uStats, relicStats, context) {
         passiveBreakdown: passiveBreakdown
     };
 
+    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cm || 0) + passiveCdmgFromPassives;
+    
+    // Calculate raw, uncapped crit rate first
+    let rawCritRate = uStats.crit + traitCritRate + globalCrit + (headCalc.cf || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives;
+    if (uStats.id === 'kirito' || uStats.id === 'the_strongest_of_today') {
+        rawCritRate = Math.min(rawCritRate, uStats.crit);
+    }
+    if (uStats.id === 'pirate_king') {
+        rawCritRate = 40;
+    }
+    if (headPiece === 'sorcerer_hunter_spirit') rawCritRate = 0;
+
+    let finalCritRate = Math.min(rawCritRate, 100);
+
+    if (uStats.id === 'angel_born_in_hell') {
+        // Angel Born in Hell has a fixed 50% Crit Rate (bugged behavior)
+        finalCritRate = 50;
+        rawCritRate = 50;
+
+        // Converts crit rate of other hotbar units into a dmg bonus, accounting for placements
+        let otherCritRateSum = 0;
+        if (typeof window !== 'undefined' && window.hotbarState?.slots) {
+            window.hotbarState.slots.forEach(slot => {
+                if (!slot) return;
+                const baseId = slot.id.split('-')[0];
+                if (baseId === 'angel_born_in_hell') return;
+                
+                const uDb = window.unitDatabase || [];
+                const matchedUnit = uDb.find(u => u.id === baseId);
+                
+                // Pull active uncapped crit rate (finalCf) from the builds registry to support external buffs
+                const activeBuildOfAlly = window.unitActiveBuilds?.[baseId];
+                const critRate = activeBuildOfAlly ? (activeBuildOfAlly.subStats?.finalCf || 0) : (matchedUnit?.stats?.crit || 0);
+                
+                const placementVal = matchedUnit?.placement || 1;
+                otherCritRateSum += (critRate * placementVal);
+            });
+        }
+
+        // Include other placements of himself if placement > 1 (they each have a fixed 50% crit rate)
+        if (placement > 1) {
+            otherCritRateSum += (placement - 1) * 50;
+        }
+
+        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+        const conversionMultiplier = (eLevel >= 4) ? 1.0 : 0.5;
+        const critRateToDmgBonus = otherCritRateSum * conversionMultiplier;
+
+        if (critRateToDmgBonus > 0) {
+            additiveTotal += critRateToDmgBonus;
+            detailedBuffs.unitPassive = (detailedBuffs.unitPassive || 0) + critRateToDmgBonus;
+            passiveBreakdown.push({
+                name: `Purified Energy (Allied Crit Rate to Dmg)`,
+                dmg: critRateToDmgBonus,
+                spa: 0,
+                range: 0,
+                trueDmg: 0,
+                crit: 0,
+                cdmg: 0
+            });
+        }
+    }
+
     let finalDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
     let finalDmg = finalDmgNormal;
     let finalDmgBoss = finalDmgNormal;
-
-    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cdmg || 0) + passiveCdmgFromPassives;
-    let finalCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
-    if (uStats.id === 'kirito' || uStats.id === 'the_strongest_of_today') {
-        finalCritRate = Math.min(finalCritRate, uStats.crit);
-    }
-
-    if (uStats.id === 'pirate_king') {
-        finalCritRate = 40;
-    }
-
-    if (headPiece === 'sorcerer_hunter_spirit') finalCritRate = 0;
 
     let finalCritRateBoss = finalCritRate;
     if (uStats.id === 'marine_hero') {
         finalCritRateBoss = Math.min(finalCritRateBoss + 100, 100);
     }
     let finalCdmgStatBoss = finalCdmgStat;
+
+    // Apply Heavenly Restriction / No Crits check here to override ALL crits, even Angel Born in Hell & Marine Hero
+    if (headCalc && headCalc.noCrits) {
+        finalCritRate = 0;
+        finalCritRateBoss = 0;
+        rawCritRate = 0;
+    }
 
     let avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
     let avgCritMultBoss = (1 + ((finalCdmgStatBoss / 100) * (finalCritRateBoss / 100)));
@@ -236,6 +304,24 @@ function calculateDPS(uStats, relicStats, context) {
         usedSpa = ar.usedSpa;
         attackMultiplier = ar.attackMultiplier;
         extraAttacksData = ar.extraAttacksData;
+    } else if (uStats.id === 'ultimate_fused_warrior') {
+        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+        const followUp2Chance = (eLevel >= 2) ? 0.70 : 0.50;
+        
+        // Attack: 1x, Guaranteed Follow-up: 1x, 50%/70% chance second Follow-up: 1x
+        // Average multiplier: 1 + 1 + chance = 2.5x (or 2.7x at E2+)
+        attackMultiplier = 1 + 1 + followUp2Chance;
+        usedSpa = finalSpa;
+        
+        extraAttacksData = {
+            req: "Guaranteed Follow-ups",
+            hits: `1 + 1 + ${(followUp2Chance * 100).toFixed(0)}% chance`,
+            extra: 1 + followUp2Chance,
+            attacksNeeded: 1,
+            mult: attackMultiplier,
+            label: "Fused Godly Might",
+            usedSpa: usedSpa
+        };
     } else if (uStats.id === 'strongest_swordsman_hunter') {
         // --- DUAL-STATE EVALUATION FOR STRONGEST SWORDSMAN ---
         // Stance 1 & 3 (6 attacks): Base damage, Base crit rate
@@ -363,6 +449,20 @@ function calculateDPS(uStats, relicStats, context) {
     let bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
     let normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
 
+    if (uStats.id === 'ultimate_fused_warrior' && isAbility) {
+        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+        const abilityDmgPct = (eLevel >= 6) ? 0.30 : 0.20;
+        
+        const abilityAvgHit = finalDmg * abilityDmgPct * avgCritMult;
+        const abilityAvgHitBoss = finalDmgBoss * abilityDmgPct * avgCritMultBoss;
+        
+        const abilityDps = (abilityAvgHit / 1.0) * placement;
+        const abilityDpsBoss = (abilityAvgHitBoss / 1.0) * placement;
+        
+        hitDpsTotal += abilityDps;
+        bossHitDpsTotal += abilityDpsBoss;
+    }
+
     let tripleThreatFuaDmgNormal = finalDmgNormal;
     if (uStats.id === 'triple_threat') {
         const fuaAdditiveTotal = additiveTotal - 25;
@@ -410,17 +510,92 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     const gearDotBonus = baseR_Dot + headDotBuff + (sBonus.dot || 0);
-    let baseDotVal = (uStats.dot || 0) + passiveDotFromPassives;
+
+    // Separate base DoT percentage from passive/ability buffs
+    const passiveDots = (uStats.passives || []).map(p => p.dot || 0);
+    let baseDotVal = uStats.dot || 0;
+    let passiveDotBuff = 0;
+
+    if (baseDotVal > 0) {
+        passiveDotBuff = passiveDots.reduce((a, b) => a + b, 0);
+    } else if (passiveDots.length > 0) {
+        const maxDot = Math.max(...passiveDots, 0);
+        let foundBase = false;
+        baseDotVal = maxDot;
+        passiveDotBuff = passiveDots.reduce((a, b) => {
+            if (b === maxDot && !foundBase) {
+                foundBase = true;
+                return a;
+            }
+            return a + b;
+        }, 0);
+    }
+
+    if (uStats.dotBuff) {
+        passiveDotBuff += uStats.dotBuff;
+    }
+
+    let globalDotMult = 1.0;
     if (headPiece === 'mochi_scarf' && (uStats.id === 'ace' || (window.isUnit && window.isUnit(uStats.id, 'ace')))) {
-        baseDotVal *= 1.5;
+        globalDotMult *= 1.5;
     }
     if (headPiece === 'flaming_donut' && (uStats.id === 'ace' || (window.isUnit && window.isUnit(uStats.id, 'ace')))) {
-        baseDotVal *= 1.5;
+        globalDotMult *= 1.5;
     }
-    const { dotDpsTotal, bossDotDpsTotal, dotBreakdown } = _calcDoTDPS({ ...uStats, dot: baseDotVal, isBoss: context.isBoss }, traitObj, traitDotBuff, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult, finalDmgBoss, avgCritMultBoss);
+
+    const { dotDpsTotal, bossDotDpsTotal, dotBreakdown } = _calcDoTDPS(
+        { ...uStats, dot: baseDotVal, isBoss: context.isBoss },
+        traitObj,
+        traitDotBuff,
+        gearDotBonus,
+        finalDmg,
+        finalSpa,
+        placement,
+        isVirtualRealm,
+        avgCritMult,
+        finalDmgBoss,
+        avgCritMultBoss,
+        passiveDotBuff,
+        globalDotMult
+    );
 
     let finalDotDps = dotDpsTotal;
     let finalBossDotDps = bossDotDpsTotal;
+
+    if (uStats.id === 'ultimate_fused_warrior') {
+        const traitMultiplier = 1 + (traitDotBuff / 100);
+        const gearMultiplier = 1 + (gearDotBonus / 100);
+        const dotPct = 70 * traitMultiplier * gearMultiplier;
+        
+        // Ionized DoT is 70% of the unit's damage over 5 seconds (5 ticks)
+        const ionizedDotDmg = finalDmg * (dotPct / 100);
+        const ionizedDotDmgBoss = finalDmgBoss * (dotPct / 100);
+        
+        // Triggers only when a crit is landed: multiply average DoT DPS by the critical rate (0.0 to 1.0)
+        // Since DoT does not crit, base damage is ionizedDotDmg, and we apply it based on finalCritRate chance.
+        const critChance = finalCritRate / 100;
+        const critChanceBoss = finalCritRateBoss / 100;
+        
+        // 5 ticks over 5 seconds means 1 tick per second. DPS = (Total DoT Dmg / 5) * 5 (since duration is 5s, total dmg is 5 ticks * tick_dmg, tick_dmg = total_dmg / 5, so DPS = tick_dmg = total_dmg / 5).
+        // Wait, standard DoT DPS formula: (Total DoT Damage / duration) * ticks_per_second.
+        // Let's calculate: tick_dmg = ionizedDotDmg / 5. DPS = tick_dmg * 1 = ionizedDotDmg / 5.
+        const baseDotDps = (ionizedDotDmg / 5) * critChance;
+        const baseDotDpsBoss = (ionizedDotDmgBoss / 5) * critChanceBoss;
+        
+        const fuaDotDps = baseDotDps * placement;
+        const fuaDotDpsBoss = baseDotDpsBoss * placement;
+        
+        finalDotDps += fuaDotDps;
+        finalBossDotDps += fuaDotDpsBoss;
+        
+        if (dotBreakdown) {
+            dotBreakdown.fuaDotDps = fuaDotDps / placement;
+            dotBreakdown.fuaDotTotalDmg = ionizedDotDmg;
+            dotBreakdown.fuaDotDuration = 5;
+            dotBreakdown.fuaChance = finalCritRate; // Display the crit chance as the apply chance
+            dotBreakdown.fuaLabel = "Ionized DoT (On Crit)";
+        }
+    }
 
     if (uStats.id === 'triple_threat') {
         const traitMultiplier = 1 + (traitDotBuff / 100);
@@ -498,9 +673,12 @@ function calculateDPS(uStats, relicStats, context) {
     const elementalDmgBuff = (sBonus.elementalAll || 0) + (headCalc.elementalAll || 0);
     const attackerElement = uStats.element || "None";
     const attackerRarity = uStats.rarity || "Mythical";
-    const elemMult = (typeof window !== 'undefined' && window.calcElementalDamageMultiplier)
+    let elemMult = (typeof window !== 'undefined' && window.calcElementalDamageMultiplier)
         ? window.calcElementalDamageMultiplier(attackerElement, defenderElement || "None", attackerRarity, elementalDmgBuff)
         : 1;
+    if (uStats.id === 'angel_born_in_hell') {
+        elemMult = 1.1;
+    }
 
     // Apply elemental multiplier to all damage channels
     const elemFinalHitDps = finalHitDps * elemMult;
@@ -526,7 +704,7 @@ function calculateDPS(uStats, relicStats, context) {
         range: finalRange,
         passiveRange: (uStats.passiveRange || 0) + eternalRangeBuff,
         dmgVal: finalDmg,
-        bossDmgVal: (uStats.id === 'triple_threat' ? finalDmgBoss : finalDmg),
+        bossDmgVal: finalDmgNormal,
         lvStats,
         traitBuffs: { dmg: traitDmgPct, spa: traitSpaPct, range: traitRangePct },
         traitObj,
@@ -543,7 +721,7 @@ function calculateDPS(uStats, relicStats, context) {
         conditionalData: uStats.burnMultiplier ? { name: "Target: Burn", val: uStats.burnMultiplier, mult: (1 + uStats.burnMultiplier / 100) } : (uStats.finalMult > 1 ? { name: uStats.id === 'mochi_pirate' ? "Evercrush Dough" : "Raw Multiplier", val: 0, mult: uStats.finalMult } : null),
         headBuffs: { dmg: headDmgBase + headDmgPassiveMod + headDmgTag, headBase: headDmgBase, passiveDmg: headDmgPassiveMod, tagDmg: headDmgTag, dot: headDotBuff, type: headPiece, warlordSpa, ...headCalc },
         dotData: dotBreakdown,
-        critData: { rate: finalCritRate, cdmg: finalCdmgStat, baseCdmg: uStats.cdmg, relicCmPct: baseR_Cm, setCm: sBonus.cm, totalCmBuff: (sBonus.cm || 0) + baseR_Cm, preRelicCdmg: uStats.cdmg, avgMult: avgCritMult },
+        critData: { rate: finalCritRate, rawRate: rawCritRate, cdmg: finalCdmgStat, baseCdmg: uStats.cdmg, relicCmPct: baseR_Cm, setCm: sBonus.cm, totalCmBuff: (sBonus.cm || 0) + baseR_Cm, preRelicCdmg: uStats.cdmg, avgMult: avgCritMult },
         placement,
         isSSS,
         rawFinalSpa,

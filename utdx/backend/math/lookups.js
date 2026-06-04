@@ -130,8 +130,12 @@ window.getTraitById = window.getTraitFast;
 window.getTraitByName = window.getTraitFast;
 
 const getSetFast = (name) => {
+    if (!name) return null;
     if (_setCacheMap.size === 0) {
-        SETS.forEach(s => _setCacheMap.set(s.name, s));
+        SETS.forEach(s => {
+            _setCacheMap.set(s.name, s);
+            _setCacheMap.set(s.id, s);
+        });
     }
     return _setCacheMap.get(name);
 };

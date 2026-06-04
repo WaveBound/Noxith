@@ -28,8 +28,8 @@
         const getUId = name => callWin('getUnitId', name);
         const has = name => ids.includes(getUId(name));
         const fusions = [];
-        if (has('nutaru_beast') && has('ancient_shinob')) fusions.push({ id: getUId('unparalleled_armor'), name: 'Unparalleled Armor', img: 'images/units/UnparalleledArmor.png', components: [getUId('nutaru_beast'), getUId('ancient_shinob')] });
-        if (has('nutaru_beast') && has('sasuke_great_war')) fusions.push({ id: getUId('majestic_armor'), name: 'Majestic Armor', img: 'images/units/MajesticArmor.png', components: [getUId('nutaru_beast'), getUId('sasuke_great_war')] });
+        if (has('nutaru_beast') && has('ancient_shinob')) fusions.push({ id: getUId('unparalleled_armor'), name: 'Unparalleled Armor (Syncro)', img: 'images/units/UnparalleledArmor.png', components: [getUId('nutaru_beast'), getUId('ancient_shinob')] });
+        if (has('nutaru_beast') && has('sasuke_great_war')) fusions.push({ id: getUId('majestic_armor'), name: 'Majestic Armor (Syncro)', img: 'images/units/MajesticArmor.png', components: [getUId('nutaru_beast'), getUId('sasuke_great_war')] });
         return fusions;
     };
 
@@ -187,8 +187,14 @@
         }
 
         const leader = hotbarState.slots[0];
-        if (leader && isUnit(leader.id, 'king_sailor') && window.GLOBAL_BUFF_DATA?.kingSailor) {
-            activeBuffs.push({ name: "Unrivaled Mark", color: window.GLOBAL_BUFF_DATA.kingSailor.color, renderLabel: "Mark Synergy: Magi (+15% SPA +50% Dmg), Uncontrollable (+10% SPA +30% Dmg), Water (+10% SPA +20% Dmg)" });
+        if (leader) {
+            if (isUnit(leader.id, 'triple_threat')) {
+                activeBuffs.push({ name: "Unrivaled Mark", color: '#a7f3d0', renderLabel: "Mark Synergy: Piece (+50% Dmg -7.5% Cost), Sword (+25% Dmg +10% Range), Wind (+20% Dmg +5% Crit)" });
+            } else if (isUnit(leader.id, 'king_sailor') && window.GLOBAL_BUFF_DATA?.kingSailor) {
+                activeBuffs.push({ name: "Unrivaled Mark", color: window.GLOBAL_BUFF_DATA.kingSailor.color, renderLabel: "Mark Synergy: Magi (+15% SPA +50% Dmg), Uncontrollable (+10% SPA +30% Dmg), Water (+10% SPA +20% Dmg)" });
+            } else if (isUnit(leader.id, 'angel_born_in_hell')) {
+                activeBuffs.push({ name: "Unrivaled Mark", color: '#a7f3d0', renderLabel: "Mark Synergy: Fused (+50% Dmg +50% Crit Dmg), Super Warrior (+30% Dmg -10% CD), Light (+20% Dmg +5% Crit)" });
+            }
         }
 
         let html = `
@@ -303,6 +309,12 @@
                 if (t.includes('Piece')) return 'UNRIVALED: +50% DMG (Piece)';
                 if (t.includes('Sword')) return 'UNRIVALED: +25% DMG (Sword)';
                 if (e === 'wind') return 'UNRIVALED: +20% DMG / +5% CRIT (Wind)';
+            });
+
+            const abhBonus = getLeaderBonus(leader, 'angel_born_in_hell', 'unrivaledMark', tags, element, (t, e) => {
+                if (t.includes('Fused')) return 'UNRIVALED: +50% DMG / +50% CDMG (Fused)';
+                if (t.includes('Super Warrior')) return 'UNRIVALED: +30% DMG / -10% CD (Super Warrior)';
+                if (e === 'light') return 'UNRIVALED: +20% DMG / +5% CRIT (Light)';
             });
 
             const isLoadout = window.CALCULATION_MODE === 'loadout';
@@ -438,6 +450,7 @@
                     <div class="ts-lower-row" style="margin-top: auto;">
                         ${ksBonus ? `<div class="ts-bonus-pill" style="margin-bottom: 8px; display: inline-block;"><span class="ks-text">${ksBonus}</span></div>` : ''}
                         ${ttBonus ? `<div class="ts-bonus-pill" style="border-color: rgba(167, 243, 208, 0.4); background: rgba(167, 243, 208, 0.08); color: #a7f3d0; padding: 4px 10px; font-size: 0.7rem; height: auto; margin-bottom: 8px; display: inline-block; width: fit-content; line-height: 1.2;"><span class="ks-text" style="color: #a7f3d0;">${ttBonus}</span></div>` : ''}
+                        ${abhBonus ? `<div class="ts-bonus-pill" style="border-color: rgba(167, 243, 208, 0.4); background: rgba(167, 243, 208, 0.08); color: #a7f3d0; padding: 4px 10px; font-size: 0.7rem; height: auto; margin-bottom: 8px; display: inline-block; width: fit-content; line-height: 1.2;"><span class="ks-text" style="color: #a7f3d0;">${abhBonus}</span></div>` : ''}
                         ${htmlArr.length ? `<div class="ts-effect-badges">${htmlArr.map(e => `<div class="ts-effect-badge" style="--effect-color: ${e.color};"><span class="ts-effect-dot" style="background: ${e.color};"></span>${e.label}<span class="ts-effect-val">${e.val}</span></div>`).join('')}</div>` : ''}
                     </div>
                 </div>
@@ -985,7 +998,7 @@
                     modB?.remove();
                 }
 
-                const isLeader = i === 0 && (isUnit(u.id, 'king_sailor') || isUnit(u.id, 'triple_threat'));
+                const isLeader = i === 0 && (isUnit(u.id, 'king_sailor') || isUnit(u.id, 'triple_threat') || isUnit(u.id, 'angel_born_in_hell'));
                 let leadB = $('.leader-badge', slot);
                 if (isLeader) {
                     if (!leadB) {

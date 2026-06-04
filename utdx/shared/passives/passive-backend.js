@@ -160,7 +160,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                 if (!isPotential) {
                     const hotbar = window.hotbarState;
                     if (hotbar && hotbar.slots) {
-                        const slotIdx = hotbar.slots.findIndex(s => s && (s.id === uStats.id || s.id.split('-')[0] === uStats.id));
+                        const slotIdx = hotbar.slots.findIndex(s => s && (s.id.split('-')[0] === uStats.id.split('-')[0]));
                         if (slotIdx !== 0) return;
                     }
                 }
@@ -181,6 +181,33 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
             const isAkDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'ant_king_savage') && p.name === "Monarch's Devotion");
             const isUgDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother");
             const isMhDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'marine_hero') && p.name === "Hero of the Marines");
+            const isAbhDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'angel_born_in_hell') && p.name === "Warrior that destroys Evil");
+
+            if (isAbhDynamic) {
+                pDmg = 0;
+                let totalAlliedCrit = 0;
+                const hotbarSlots = window.hotbarState?.slots || [];
+                hotbarSlots.forEach(s => {
+                    if (!s) return;
+                    if (s.id === uStats.id || (window.isUnit && window.isUnit(s.id, uStats.id))) return;
+                    
+                    const build = window.hotbarFilteredBuilds?.[s.id];
+                    if (build) {
+                        const rate = build.subStats?.finalCf !== undefined 
+                            ? build.subStats.finalCf 
+                            : (build.critData?.rate !== undefined ? build.critData.rate : 0);
+                        totalAlliedCrit += rate;
+                    } else {
+                        const sUnit = window.getUnitById ? window.getUnitById(s.id) : null;
+                        if (sUnit) {
+                            totalAlliedCrit += (sUnit.stats?.crit !== undefined ? sUnit.stats.crit : (sUnit.crit || 0));
+                        }
+                    }
+                });
+                const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+                const mult = (eLevel >= 4) ? 1.0 : 0.5;
+                pDmg = totalAlliedCrit * mult;
+            }
 
             if (p.name === "Pirate Hunter") {
                 if (context.isBoss || context.isAbility) {
@@ -192,10 +219,13 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                     pCrit += 65;
                 }
             }
+            if (p.name === "Does that hurt?") {
+                pDmg += 30;
+            }
 
 
 
-            if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || isKsDynamic || isAkDynamic || isUgDynamic || isMhDynamic) {
+            if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || isKsDynamic || isAkDynamic || isUgDynamic || isMhDynamic || isAbhDynamic) {
                 passivePcent += pDmg;
                 passiveSpaPcent += pSpa;
                 passiveRangePcent += pRange;
@@ -224,7 +254,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                 }
 
                 passivePcent += buffDmg;
-                passiveBreakdown.push({ name: "Strongest Hunter", dmg: buffDmg, spa: 0, range: 0, trueDmg: 0, crit: 0, cdmg: 0, dot: 0 });
+                passiveBreakdown.push({ name: "Shadow Legion Support", dmg: buffDmg, spa: 0, range: 0, trueDmg: 0, crit: 0, cdmg: 0, dot: 0 });
             }
         }
     }
@@ -242,6 +272,18 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
         if (hasQuakeWarlord) {
             passivePcent += 40;
             passiveBreakdown.push({ name: "My Sons", dmg: 40, spa: 0, range: 0, trueDmg: 0, crit: 0, cdmg: 0, dot: 0 });
+        }
+    }
+
+    if (window.CALCULATION_MODE === 'loadout' && context && context.isHotbar && window.isUnit && !window.isUnit(uStats.id, 'angel_born_in_hell')) {
+        const hasABH = window.hotbarState?.slots.some(s => s && window.isUnit(s.id, 'angel_born_in_hell'));
+        const doesFUA = uStats.id === 'ultimate_fused_warrior' || uStats.id === 'strongest_swordsman_hunter' || uStats.id === 'water_god' || uStats.id === 'triple_threat';
+        if (hasABH && doesFUA) {
+            const abhSlot = window.hotbarState.slots.find(s => s && window.isUnit(s.id, 'angel_born_in_hell'));
+            const abhELevel = abhSlot ? (window.unitELevels?.[abhSlot.id] ?? 6) : 6;
+            const holyAuraDmg = (abhELevel >= 2) ? 50 : 30;
+            passivePcent += holyAuraDmg;
+            passiveBreakdown.push({ name: "Holy Aura (ABH Buff)", dmg: holyAuraDmg, spa: 0, range: 0, trueDmg: 0, crit: 0, cdmg: 0, dot: 0 });
         }
     }
 

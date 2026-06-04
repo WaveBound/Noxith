@@ -94,12 +94,12 @@ const GLOBAL_BUFF_DATA = {
             let leaderId = null;
 
             if (isPotential) {
-                isActive = (window.isUnit(uStats.id, 'triple_threat') || window.isUnit(uStats.id, 'king_sailor'));
+                isActive = (window.isUnit(uStats.id, 'triple_threat') || window.isUnit(uStats.id, 'king_sailor') || window.isUnit(uStats.id, 'angel_born_in_hell'));
                 leaderId = uStats.id;
             } else {
                 const hState = (typeof window !== 'undefined') ? window.hotbarState : null;
                 const leader = hState?.slots ? hState.slots[0] : null;
-                if (leader && (window.isUnit(leader.id, 'triple_threat') || window.isUnit(leader.id, 'king_sailor'))) {
+                if (leader && (window.isUnit(leader.id, 'triple_threat') || window.isUnit(leader.id, 'king_sailor') || window.isUnit(leader.id, 'angel_born_in_hell'))) {
                     isActive = true;
                     leaderId = leader.id;
                 }
@@ -133,6 +133,14 @@ const GLOBAL_BUFF_DATA = {
                             { type: "tag", value: "Uncontrollable Power", stats: { dmg: 30, spa: 10 } },
                             { type: "element", value: "Water", stats: { dmg: 20, spa: 10 } }
                         ]
+                    },
+                    angel_unrivaled_mark: {
+                        exclusive: true,
+                        subBuffs: [
+                            { type: "tag", value: "Fused", stats: { dmg: 50, cDmg: 50 } },
+                            { type: "tag", value: "Super Warrior", stats: { dmg: 30, cdReduction: 10 } },
+                            { type: "element", value: "Light", stats: { dmg: 20, cRate: 5 } }
+                        ]
                     }
                 };
             }
@@ -140,6 +148,7 @@ const GLOBAL_BUFF_DATA = {
             let leaderData = null;
             if (window.isUnit(leaderId, 'triple_threat')) leaderData = unrivaled.unrivaled_mark;
             else if (window.isUnit(leaderId, 'king_sailor')) leaderData = unrivaled.kings_mark;
+            else if (window.isUnit(leaderId, 'angel_born_in_hell')) leaderData = unrivaled.angel_unrivaled_mark;
 
             if (!leaderData || !leaderData.subBuffs) return {};
 
@@ -163,12 +172,16 @@ const GLOBAL_BUFF_DATA = {
                 if (m.stats.spa) b.spa = (b.spa || 0) + m.stats.spa;
                 if (m.stats.range) b.range = (b.range || 0) + m.stats.range;
                 if (m.stats.cRate) b.crit = (b.crit || 0) + m.stats.cRate;
+                if (m.stats.cDmg) b.cdmg = (b.cdmg || 0) + m.stats.cDmg;
+                if (m.stats.cdReduction) b.cdReduction = (b.cdReduction || 0) + m.stats.cdReduction;
             });
 
             if (b.spa === 0) delete b.spa;
             if (b.dmg === 0) delete b.dmg;
             if (b.crit === 0) delete b.crit;
             if (b.range === 0) delete b.range;
+            if (b.cdmg === 0) delete b.cdmg;
+            if (b.cdReduction === 0) delete b.cdReduction;
 
             return Object.keys(b).length > 0 ? b : {};
         },
@@ -246,7 +259,7 @@ const GLOBAL_BUFF_DATA = {
         },
         renderLabel: "Active: +45% Crit Rate",
         genType: 'exclusive:fern'
-    },
+    }
 };
 
 window.GLOBAL_BUFF_DATA = GLOBAL_BUFF_DATA;

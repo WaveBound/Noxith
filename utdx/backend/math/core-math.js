@@ -99,7 +99,17 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
 
         if (pStat === mainStat) { sWeight = Math.min(6, sWeight + pWeight); pWeight = 0; }
         else if (sStat === mainStat) { pWeight = Math.min(6, pWeight + sWeight); sWeight = 0; }
-        if (pStat === mainStat && sStat === mainStat) { pWeight = 0; sWeight = 0; }
+        if (pStat === mainStat && sStat === mainStat) {
+            const fallback = candidates.find(c => c !== mainStat);
+            if (fallback) {
+                pStat = fallback;
+                pWeight = 6;
+                sWeight = 0;
+            } else {
+                pWeight = 0;
+                sWeight = 0;
+            }
+        }
 
         let pVal = 0, sVal = 0;
         if (pWeight > 0) { pVal = PERFECT_SUBS[pStat] * pWeight; b[pStat] = (b[pStat] || 0) + pVal; }
@@ -206,7 +216,7 @@ function _calcSummonDPS(uStats, finalDmg, finalSpa, placement) {
     return { summonDpsTotal: (avgOnePlaneDps * actualCount) * placement, summonData: { count: actualCount, max: s.maxCount, avgPlaneDps: avgOnePlaneDps, hostSpa: finalSpa, avgDuration: avgDuration, dpsA: dpsA, dpsB: dpsB } };
 }
 
-function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult, finalDmgBoss = undefined, avgCritMultBoss = undefined) {
+function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult, finalDmgBoss = undefined, avgCritMultBoss = undefined, passiveDotBuff = 0, globalDotMult = 1) {
     let dotDpsTotal = 0;
     let bossDotDpsTotal = 0;
     let dotCritMult = isVirtualRealm ? avgCritMult : 1;
@@ -230,11 +240,8 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
 
     const traitMultiplier = 1 + (traitDotBonus / 100);
     const gearMultiplier = 1 + (gearDotBonus / 100);
-    let combinedMultiplier = traitMultiplier * gearMultiplier;
-
-    if (uStats.id === 'ant_king_savage' || (typeof window !== 'undefined' && window.isUnit && window.isUnit(uStats.id, 'ant_king_savage'))) {
-        combinedMultiplier = combinedMultiplier * combinedMultiplier;
-    }
+    const passiveMultiplier = 1 + (passiveDotBuff / 100);
+    let combinedMultiplier = traitMultiplier * gearMultiplier * passiveMultiplier * globalDotMult;
 
     let dotBreakdown = {
         nativeDps: 0,

@@ -248,7 +248,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     let suffix = isAbility ? '-ABILITY' : '-BASE';
     const modeTag = (mode === 'bugged') ? '-b-' : '-f-';
 
-    const context = { dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: false, headPiece, starMult, headStarMult: options.headStarMult || starMult, rankData, isAbility, maxPts, upgradeLevel, isHotbar };
+    const context = { mode, dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: false, headPiece, starMult, headStarMult: options.headStarMult || starMult, rankData, isAbility, maxPts, upgradeLevel, isHotbar };
     return { effectiveStats, traitObj, context, isKiritoVR: false, suffix, modeTag };
 }
 

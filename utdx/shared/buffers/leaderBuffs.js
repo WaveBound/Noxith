@@ -47,5 +47,28 @@ export const LEADER_BUFFS = {
                 stats: { dmg: 20, spa: 10 }
             }
         ]
+    },
+    angel_unrivaled_mark: {
+        id: "unrivaled_mark",
+        name: "Unrivaled Mark",
+        source: "Angel Born in Hell",
+        exclusive: true,
+        subBuffs: [
+            {
+                type: "tag",
+                value: "Fusion",
+                stats: { dmg: 50, cDmg: 50 }
+            },
+            {
+                type: "tag",
+                value: "Super Warrior",
+                stats: { dmg: 30, cdReduction: 10 }
+            },
+            {
+                type: "element",
+                value: "Light",
+                stats: { dmg: 20, cRate: 5 }
+            }
+        ]
     }
 };

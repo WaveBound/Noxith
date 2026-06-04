@@ -520,8 +520,17 @@
             });
         }
 
-        if (window.unitBuildsCache) delete window.unitBuildsCache[unitId];
-        window.updateBuildListDisplay?.(unitId, true);
+        if (window.unitBuildsCache?.[unitId]) delete window.unitBuildsCache[unitId];
+
+        // Refresh dynamic active build parameters for the unit in the global registry
+        if (typeof window.refreshActiveBuild === 'function') {
+            window.refreshActiveBuild(unit);
+        }
+
+        // Update the card display to reflect changes, keeping card in place
+        if (typeof window.updateBuildListDisplay === 'function') {
+            window.updateBuildListDisplay(unitId, true);
+        }
 
         if (unitId === 'jinoo_shadow_monarch') {
             renderShadowMonarchSpecialUI(unit, getEl('modesOverlayGrid'), getEl('modesOverlay'));
@@ -534,11 +543,6 @@
 
         window.updateHotbarUI?.();
         window.updateOverlaySlider?.(unitId, modeIdx);
-
-        // Dynamically re-sort if we are in Database page to reflect the new mode's dps/ranking
-        if (window.CALCULATION_MODE !== 'loadout' && typeof window.resortUnitCardsInPlace === 'function') {
-            window.resortUnitCardsInPlace();
-        }
 
         if (!isMulti && unitId !== 'joyful_captain') {
             setTimeout(window.closeModesOverlay, 100);
@@ -641,7 +645,7 @@
         const getUnitScore = (u) => {
             const list = window.STATIC_BUILD_DB?.[u.id]?.['fixed']?.[0];
             if (list?.length) {
-                return window.isUnit?.(u.id, 'law') ? (list[0].range || 0) : list[0].dps;
+                return window.isUnit(u.id, 'law') ? (list[0].range || 0) : list[0].dps;
             }
             return u.stats.dmg || 0;
         };
@@ -667,7 +671,7 @@
 
                 const cleanT = t.split('(')[0].trim();
                 const tObj = traitsList.find(x => x.name.toLowerCase() === cleanT.toLowerCase() || x.id === cleanT.toLowerCase());
-                const traitImg = tObj ? `<div class="trait-img-rainbow tier-trait-icon"><img src="images/traits/${tObj.name}.png" onerror="this.parentElement.style.display='none'"></div>` : '';
+                const traitImg = tObj ? `<div class="trait-img-rainbow" style="width: 22px; height: 22px; margin-right: 10px; flex-shrink: 0;"><img src="images/traits/${tObj.name}.png" onerror="this.parentElement.style.display='none'"></div>` : '';
 
                 return `
                     <div class="tier-row">

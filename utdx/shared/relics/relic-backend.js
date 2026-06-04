@@ -72,7 +72,8 @@ window._calcSetAndTagBonuses = function(relicStats, uStats, headPiece, context =
         monarch_head: 'monarch',
         warlord_hat: 'warlord',
         sun_god: 'sun_god',
-        ninja: 'ninja'
+        ninja: 'ninja',
+        fused_earrings: 'fused_set'
     };
 
     const mappedHeadSetId = headSetIdMap[headPiece];
@@ -209,6 +210,15 @@ window._calcSetAndTagBonuses = function(relicStats, uStats, headPiece, context =
         }
     }
 
+    // Fused Warrior Set logic
+    if (relicStats.set === 'fused_set') {
+        // 2-Piece Passive: Crit DMG on DoT (Averaged Uptime: 15 / 22.5 = 66.7%)
+        if (uStats.dot > 0 || (uStats.stats && uStats.stats.dot > 0)) {
+            const uptime = 15 / (15 + 7.5);
+            sBonus.cm += 50 * uptime;
+        }
+    }
+
     return { sBonus, tagBuffs, setPerkDmg };
 };
 
@@ -238,7 +248,8 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
         monarch: 'monarch',
         monarch_cape: 'monarch',
         monarch_head: 'monarch',
-        warlord_hat: 'warlord'
+        warlord_hat: 'warlord',
+        fused_earrings: 'fused_set'
     };
 
     const mappedSetId = headSetIdMap[headPiece];
@@ -436,6 +447,43 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
             });
         }
         headCalc.type = 'monarch';
+    }
+
+    // Fused Earrings accessory tag perks
+    if (headPiece === 'fused_earrings') {
+        const fusionAccPerks = (typeof TAG_PERKS !== 'undefined') ? TAG_PERKS.fused_earrings_acc : null;
+        if (fusionAccPerks) {
+            fusionAccPerks.forEach(perk => {
+                if (tags.includes(perk.tag)) {
+                    const b = perk.bonus || {};
+                    headDmgTag += b.dmg || 0;
+                    headCalc.cf += b.cRate || 0;
+                    headCalc.cm += b.cDmg || 0;
+                    headDotBuff += b.dot || 0;
+                    headCalc.bossDmg = (headCalc.bossDmg || 0) + (b.bossDmg || 0);
+                }
+            });
+        }
+
+        // Synchro/Clash bonuses
+        const isSynchroNamed = uStats.name && uStats.name.toLowerCase().includes('syncro');
+        const hasClashAbility = uStats.ability && (
+            (Array.isArray(uStats.ability) ? uStats.ability[0].abilityName : uStats.ability.abilityName) === "Synchro Clash"
+        );
+        const isClashPartner = uStats.id === 'quake_warlord';
+        const canFuse = ['nutaru_beast', 'ancient_shinob', 'sasuke_great_war'].includes(uStats.id);
+        const isFusedUnit = ['unparalleled_armor', 'majestic_armor', 'sjw'].includes(uStats.id);
+
+        if (isSynchroNamed || hasClashAbility || canFuse || isFusedUnit) {
+            if (isSynchroNamed || canFuse) {
+                headDmgPassive += 50;
+            } else {
+                headDmgPassive += 15;
+                headCalc.range = (headCalc.range || 0) + 25;
+            }
+        }
+
+        headCalc.type = 'fused_earrings';
     }
 
     return { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc };

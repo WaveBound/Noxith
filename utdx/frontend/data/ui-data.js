@@ -4,6 +4,16 @@ const comingSoonData = [
 
 const patchNotesData = [
     {
+        version: "v6.5",
+        date: "Jun 04, 2026",
+        changes: [
+            { type: "Unit", text: "<b>New Units:</b> Added <b>Angel Born in Hell</b> and <b>Ultimate Fused Warrior</b>." },
+            { type: "Item", text: "<b>New Gear:</b> Added the <b>Fused Warrior Set</b> and <b>Fused Earrings</b> head piece." },
+            { type: "Fix", text: "<b>Card Sorting:</b> Updated build sorting to correctly prioritize <b>Boss DPS</b> and fixed several consistency issues." },
+            { type: "UI", text: "<b>Unit Cards:</b> Redesigned card UI for improved information density and better visual layout." }
+        ]
+    },
+    {
         version: "v6.4",
         date: "Jun 03, 2026",
         changes: [
@@ -391,7 +401,9 @@ const guideData = [
     { unit: "strongest_swordsman_hunter", img: "images/units/StrongestSwordsman.png", isCalculated: true },
     { unit: "pirate_king", img: "images/units/PirateKing.png", isCalculated: true },
     { unit: "marine_hero", img: "images/units/MarineHero.png", isCalculated: true },
-    { unit: "sharpshooter_king_trapper", img: "images/units/SharpshooterKingTrapper.png", isCalculated: true }
+    { unit: "sharpshooter_king_trapper", img: "images/units/SharpshooterKingTrapper.png", isCalculated: true },
+    { unit: "ultimate_fused_warrior", img: "images/units/UltimateFusedWarrior.png", isCalculated: true },
+    { unit: "angel_born_in_hell", img: "images/units/AngelBornInHell.png", isCalculated: true }
 ];
 const elementIcons = {
     "Water": "images/elements/Water.png",
