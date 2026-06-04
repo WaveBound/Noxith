@@ -170,18 +170,25 @@ window.resetCachesForBuffChange = (unitId, excludeIds = []) => {
         window.unitBuildsCache = {};
         window.cachedResults = {};
         window.hotbarFilteredBuilds = {};
+        window.unitActiveBuilds = {};
+        window.bestHydratedBuildCache = {};
         return;
     }
 
     const excl = new Set(excludeIds);
-    const clear = (cache) => {
+    const clear = (cache, prefixKeys = false) => {
         if (!cache) return;
-        if (unitId) delete cache[unitId];
+        if (unitId) {
+            if (prefixKeys) Object.keys(cache).forEach(k => { if (k === unitId || k.startsWith(`${unitId}:`)) delete cache[k]; });
+            else delete cache[unitId];
+        }
         else Object.keys(cache).forEach(k => { if (!excl.has(k)) delete cache[k]; });
     };
     clear(window.unitBuildsCache);
     clear(window.cachedResults);
     clear(window.hotbarFilteredBuilds);
+    clear(window.unitActiveBuilds);
+    clear(window.bestHydratedBuildCache, true);
 };
 
 window.triggerGlobalBuffUpdate = (unitId) => {

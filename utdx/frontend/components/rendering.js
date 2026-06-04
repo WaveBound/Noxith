@@ -1,6 +1,7 @@
 // Ensure Global Caches and State are initialized
 window.unitBuildsCache = window.unitBuildsCache || {};
 window.unitActiveBuilds = window.unitActiveBuilds || {};
+window.bestHydratedBuildCache = window.bestHydratedBuildCache || {};
 
 // Bulletproof database key resolution helper to handle Fused Warrior and other ID mismatches
 window.getRelicDbEntry = function (db, unitId, activeType) {
@@ -540,10 +541,19 @@ function getBuildSortScore(build) {
     );
 }
 
-function getBestHydratedBuild(builds, unitId, isHotbar) {
-    const hydrated = (builds || []).map(b => hydrateBuildEntry(b, unitId, isHotbar)).filter(Boolean);
+function getBestHydratedBuild(builds, unitId, isHotbar, candidateLimit = 128) {
+    const candidates = [...(builds || [])]
+        .sort((a, b) => getBuildSortScore(b) - getBuildSortScore(a))
+        .slice(0, candidateLimit);
+    const ids = candidates.map(b => b?.id || `${b?.t || b?.traitName || ''}:${b?.s || b?.setName || ''}:${b?.h || b?.headUsed || ''}:${b?.b || b?.mainStats?.body || ''}:${b?.l || b?.mainStats?.legs || ''}`).join('|');
+    const cacheKey = `${unitId}:${isHotbar ? 1 : 0}:${ids}`;
+    if (window.bestHydratedBuildCache?.[cacheKey]) return window.bestHydratedBuildCache[cacheKey];
+
+    const hydrated = candidates.map(b => hydrateBuildEntry(b, unitId, isHotbar)).filter(Boolean);
     if (!hydrated.length) return null;
-    return hydrated.reduce((best, cur) => getBuildSortScore(cur) > getBuildSortScore(best) ? cur : best, hydrated[0]);
+    const best = hydrated.reduce((best, cur) => getBuildSortScore(cur) > getBuildSortScore(best) ? cur : best, hydrated[0]);
+    window.bestHydratedBuildCache[cacheKey] = best;
+    return best;
 }
 
 // Rendering HTML Rows & Cards
@@ -1101,6 +1111,9 @@ processUnitCache = function (unit, specificCfg = null, specificType = null) {
 }
 
 // Score & Ranking Engines
+// --- GLOBAL SCORING CACHE ---
+window.LIVE_SCORE_CACHE = window.LIVE_SCORE_CACHE || {};
+
 window.getQuickScore = (unit) => {
     let dbKey = unit.id;
     if (unit.ability) {
@@ -1156,7 +1169,16 @@ window.getLiveScore = (unit) => {
             ? (active.range || 0) 
             : getBuildSortScore(active);
     }
-    return window.getQuickScore ? window.getQuickScore(unit) : 0;
+    
+    // Memoize the quick score lookup to prevent running heavy reconstructMathData
+    // multiple times per unit during array sorting operations
+    if (window.LIVE_SCORE_CACHE[unitId] !== undefined) {
+        return window.LIVE_SCORE_CACHE[unitId];
+    }
+
+    const score = window.getQuickScore ? window.getQuickScore(unit) : 0;
+    window.LIVE_SCORE_CACHE[unitId] = score;
+    return score;
 };
 
 window.resortUnitCards = function () {
@@ -1448,18 +1470,6 @@ function renderCurrentPage() {
     }, { rootMargin: '200px' });
 
     container.querySelectorAll('.lazy-build-load').forEach(c => window.buildLoadObserver.observe(c));
-
-    const hasGlobalSearch = !!(document.getElementById('globalSearch')?.value || document.getElementById('sidebarSearch')?.value || '').trim();
-    if (!hasGlobalSearch && !window.__resortingAfterRender) {
-        window.__resortingAfterRender = true;
-        requestAnimationFrame(() => {
-            try {
-                window.resortUnitCardsInPlace?.();
-            } finally {
-                window.__resortingAfterRender = false;
-            }
-        });
-    }
 }
 
 window.goToPage = function (page) {
@@ -1478,49 +1488,68 @@ function renderDatabase() {
     renderQueueIndex = 0;
     if (!window.STATIC_BUILD_DB) window.cachedResults = {};
     window.unitBuildsCache = {};
+    window.unitActiveBuilds = {};
+    window.bestHydratedBuildCache = {};
     globalFilterUnits(document.getElementById('globalSearch')?.value || '');
 }
 
+// --- DEBOUNCED GLOBAL SEARCH PIPELINE ---
+let globalFilterTimeout = null;
+
 window.globalFilterUnits = (term) => {
+    if (globalFilterTimeout) clearTimeout(globalFilterTimeout);
+    
+    // 120ms debounce window keeps search inputs fluid while typing
+    globalFilterTimeout = setTimeout(() => {
+        _executeGlobalFilter(term);
+    }, 120);
+};
+
+// Optimized single-pass filtering and sorting execution
+function _executeGlobalFilter(term) {
     const searchTerm = (term || '').trim().toLowerCase();
     const clearBtn = document.getElementById('globalSearchClear');
     if (clearBtn) clearBtn.style.display = searchTerm ? 'flex' : 'none';
 
     const assignedInventoryUnitIds = new Set(Object.keys(window.inventoryUnitTraits || {}));
-    let filtered = inventoryMode
+    const unitElement = document.getElementById('unitElementSort')?.value || 'none';
+
+    // 1. Filter base list by inventory assignments if in inventory mode
+    const baseList = inventoryMode
         ? unitDatabase.filter(unit => assignedInventoryUnitIds.has(unit.id))
         : unitDatabase;
 
-    // Force pre-calculating all active builds across all units so they are completely fresh and accurate before sorting!
-    window.paginatedSortedUnits = filtered.map(unit => ({ unit, maxScore: 0 }));
-    
-    // Refresh builds only if the database is loaded
-    const db = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
-    if (db) {
-        window.refreshAllActiveBuilds();
-    }
-
-    const allSorted = filtered.map(unit => ({ unit, maxScore: getLiveScore(unit) }))
-        .sort((a, b) => b.maxScore - a.maxScore);
+    // 2. Map and sort baseline list *once* to establish absolute database ranks
+    const allSorted = baseList.map(unit => ({ 
+        unit, 
+        maxScore: window.getLiveScore(unit) 
+    })).sort((a, b) => b.maxScore - a.maxScore);
 
     window.unitAbsoluteRanks = {};
-    allSorted.forEach((entry, i) => { window.unitAbsoluteRanks[entry.unit.id] = i + 1; });
+    allSorted.forEach((entry, i) => { 
+        window.unitAbsoluteRanks[entry.unit.id] = i + 1; 
+    });
 
-    const unitElement = document.getElementById('unitElementSort')?.value || 'none';
+    // 3. Filter down the already-sorted list (eliminates the need for a second sort)
+    let filtered = allSorted;
+
     if (unitElement !== 'none') {
-        filtered = filtered.filter(unit => {
-            const el = unit.stats?.element;
+        filtered = filtered.filter(entry => {
+            const el = entry.unit.stats?.element;
             return el === unitElement;
         });
     }
 
     if (searchTerm) {
-        filtered = filtered.filter(unit => {
+        filtered = filtered.filter(entry => {
+            const unit = entry.unit;
             const placement = (unit.placementType || 'Ground').toLowerCase();
             let matches = [unit.name, unit.role, unit.id, placement, unit.stats?.element || ''].some(v => v.toLowerCase().includes(searchTerm));
+            
             if (!matches && (searchTerm === 'ground' || searchTerm === 'hybrid' || searchTerm === 'hill')) {
                 if (placement === 'hybrid') matches = true;
             }
+            
             if (!matches) {
                 matches = [unit.meta?.short, unit.meta?.long].some(v => v?.toLowerCase().includes(searchTerm));
                 if (!matches && typeof unitSpecificTraits !== 'undefined' && unitSpecificTraits[unit.id]) {
@@ -1543,11 +1572,12 @@ window.globalFilterUnits = (term) => {
         });
     }
 
-    paginatedSortedUnits = filtered.map(unit => ({ unit, maxScore: getLiveScore(unit) }))
-        .sort((a, b) => b.maxScore - a.maxScore);
+    paginatedSortedUnits = filtered;
 
+    // Initialize level indices for elements on the new page
     paginatedSortedUnits.forEach(entry => {
-        const u = entry.unit, mode = window.unitModesState?.[u.id] || 0;
+        const u = entry.unit;
+        const mode = window.unitModesState?.[u.id] || 0;
         const upgrades = u.modes?.[mode]?.upgrades || u.upgrades;
         if (window.unitELevels[u.id] === undefined && upgrades) {
             window.unitELevels[u.id] = upgrades.length - 1;
@@ -1556,7 +1586,7 @@ window.globalFilterUnits = (term) => {
 
     currentPage = 1;
     renderCurrentPage();
-};
+}
 
 window.clearGlobalSearch = () => {
     ['globalSearch', 'sidebarSearch'].forEach(id => {
