@@ -104,7 +104,7 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             background: #16161d !important; color: #c084fc; font-size: 0.65rem; font-weight: 900; 
             padding: 4px 10px; margin: 10px 0 5px; border-radius: 4px; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.03); }
         
-.fs-comparison-grid {
+        .fs-comparison-grid {
             display: grid !important;
             grid-template-columns: 1.8fr 1fr !important;
             gap: 12px !important;
@@ -187,17 +187,17 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2) !important;
         }
 
-.fs-item-lg {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #121217 !important; /* Keeps the target panel lighter */
-    border: 1px solid rgba(255, 255, 255, 0.04) !important;
-    border-radius: 8px;
-    padding: 3px 8px;
-    min-width: 0;
-    transition: background 0.2s;
-}
+        .fs-item-lg {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #121217 !important; /* Keeps the target panel lighter */
+            border: 1px solid rgba(255, 255, 255, 0.04) !important;
+            border-radius: 8px;
+            padding: 3px 8px;
+            min-width: 0;
+            transition: background 0.2s;
+        }
         .fs-item-lg.is-maxed {
             border-color: rgba(74, 222, 128, 0.2) !important;
             background: rgba(74, 222, 128, 0.02) !important;
@@ -250,7 +250,7 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             text-align: center !important;
             margin-bottom: 4px !important;
         }
-.br-col .stat-line {
+        .br-col .stat-line {
             display: flex !important;
             justify-content: flex-start !important; /* Align everything cleanly to the left */
             align-items: center !important;
@@ -558,7 +558,7 @@ function getBestHydratedBuild(builds, unitId, isHotbar, candidateLimit = 128) {
 
 // Rendering HTML Rows & Cards
 function generateBuildRowHTML(r, i, unitConfig = {}) {
-    const { totalCost = 50000, placement = 1, sortMode = 'dps', unitId = '', traitBenchmarks = {}, globalRank } = unitConfig;
+    const { totalCost = 50000, placement = 1, sortMode = 'dps', unitId = '', traitBenchmarks = {} } = unitConfig;
     const currentLevel = window.unitELevels[unitId] || 0;
     const nextLevel = currentLevel + 1;
     const unitObj = window.getUnitById(unitId);
@@ -633,7 +633,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
         <div class="build-row ${rankClass} ${sortMode === 'efficiency' ? 'is-efficiency-sort' : ''}">
             <div class="br-header" style="align-items: center; padding-top: 6px; padding-bottom: 2px;">
                 <div class="br-header-info" style="margin-top: 0; align-items: center; gap: 4px;">
-                    <span class="br-rank" style="font-size: 0.7em; width: auto;">#${globalRank || (i + 1)}</span>
+                    <span class="br-rank" style="font-size: 0.7em; width: auto;">#${i + 1}</span>
                     <div class="br-set-info-text" style="display: flex; align-items: center;" onclick="window.viewBuildRelicDatabase('${r.id}', '${unitId}')" title="Click to view map locations in Relic Database">
                         <span class="br-set" style="font-size: 0.75em; padding: 1px 3px; letter-spacing: -0.2px;">${r.setName.toLowerCase().includes('set') ? r.setName : r.setName + ' Set'}</span>
                         ${headHeaderHtml}
@@ -923,7 +923,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         globalSorted.forEach((r, idx) => globalRankMap.set(r.id, idx + 1));
 
         // 3. Apply UI filters (Set, Head, Combo, Search)
-        const hydrated = allHydrated.filter(r => {
+        const filtered = allHydrated.filter(r => {
             if (!r) return false;
             if (prioSelect !== 'all' && r.prio !== prioSelect) return false;
             if (setSelect !== 'all' && r.setName !== setSelect) return false;
@@ -938,30 +938,39 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             return searchText.includes(searchInput) || (isGlobalFallback && searchText.includes(''));
         });
 
-        if (hydrated.length === 0) return '<div class="msg-empty">No matches found.</div>';
+        if (filtered.length === 0) return '<div class="msg-empty">No matches found.</div>';
 
-        // 4. Group by Combo and enforce Top 3 Unique Gear sets per combo
+        // 4. Group by Combo and enforce Top 3 unique gear/trait setups per combo strictly
         const comboGroups = {};
-        hydrated.forEach(r => {
-            const key = r.mainStats.body + "_" + r.mainStats.legs;
-            if (!comboGroups[key]) comboGroups[key] = [];
-            comboGroups[key].push(r);
+        filtered.forEach(r => {
+            const bodyType = r.mainStats?.body || 'dmg';
+            const legsType = r.mainStats?.legs || 'dmg';
+            const comboKey = `${bodyType}_${legsType}`;
+            
+            if (!comboGroups[comboKey]) {
+                comboGroups[comboKey] = [];
+            }
+            comboGroups[comboKey].push(r);
         });
 
         let candidates = [];
-        for (const k in comboGroups) {
-            const comboList = comboGroups[k];
-            // Sort each combo group to find its internal top 3 unique builds
+        for (const comboKey in comboGroups) {
+            const comboList = comboGroups[comboKey];
+            // Sort each combo group individually to determine the absolute strongest choices
             const sortedCombo = sortBuilds(comboList);
 
             const seenGearTrait = new Set();
             let count = 0;
             for (const b of sortedCombo) {
-                const gearHash = b.setName + (b.headUsed || 'none') + b.traitName;
+                // Generate unique key per gear set + head + trait setup to block clones/duplicates
+                const gearHash = `${b.setName}|${b.headUsed || 'none'}|${b.traitName}`;
                 if (!seenGearTrait.has(gearHash)) {
                     candidates.push(b);
                     seenGearTrait.add(gearHash);
-                    if (++count >= 3) break;
+                    count++;
+                    if (count >= 3) {
+                        break; // Strictly limit to a maximum of 3 unique setups per combination
+                    }
                 }
             }
         }
@@ -974,7 +983,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             if (!window.hotbarFilteredBuilds) window.hotbarFilteredBuilds = {};
             const selectedTrait = window.CALCULATION_MODE === 'loadout' && window.unitTraits?.[unitId];
             window.hotbarFilteredBuilds[unitId] = selectedTrait
-                ? (hydrated.find(b => b.traitName?.toLowerCase() === selectedTrait.toLowerCase()) || slice[0])
+                ? (filtered.find(b => b.traitName?.toLowerCase() === selectedTrait.toLowerCase()) || slice[0])
                 : slice[0];
             
             // Sync with unitActiveBuilds registry
@@ -1042,7 +1051,7 @@ processUnitCache = function (unit, specificCfg = null, specificType = null) {
 
     const CONFIGS = [{ head: true, subs: !window.disableSubStats }];
 
-    const performCalcSet = (mode, useAbility, targetCache) => {
+    const performCalSet = (mode, useAbility, targetCache) => {
         let dbKey = unit.id + (useAbility && unit.ability ? '_abil' : '');
         const useInventory = (inventoryMode === true);
 
@@ -1106,8 +1115,8 @@ processUnitCache = function (unit, specificCfg = null, specificType = null) {
         }
     };
 
-    if (!specificType || specificType === 'base') performCalcSet('fixed', false, window.unitBuildsCache[unit.id].base.fixed);
-    if (unit.ability && (!specificType || specificType === 'abil')) performCalcSet('fixed', true, window.unitBuildsCache[unit.id].abil.fixed);
+    if (!specificType || specificType === 'base') performCalSet('fixed', false, window.unitBuildsCache[unit.id].base.fixed);
+    if (unit.ability && (!specificType || specificType === 'abil')) performCalSet('fixed', true, window.unitBuildsCache[unit.id].abil.fixed);
 }
 
 // Score & Ranking Engines
@@ -1115,6 +1124,13 @@ processUnitCache = function (unit, specificCfg = null, specificType = null) {
 window.LIVE_SCORE_CACHE = window.LIVE_SCORE_CACHE || {};
 
 window.getQuickScore = (unit) => {
+    const unitId = unit.id;
+
+    // Pre-initialize system level if it exists and is undefined to ensure correct sorting on initial page load
+    if (unit.systemLevel && window.unitSystemLevels[unitId] === undefined) {
+        window.unitSystemLevels[unitId] = unit.systemLevel.default !== undefined ? unit.systemLevel.default : (unit.systemLevel.max || 100);
+    }
+
     let dbKey = unit.id;
     if (unit.ability) {
         const ab = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
@@ -1163,6 +1179,12 @@ window.getQuickScore = (unit) => {
 
 window.getLiveScore = (unit) => {
     const unitId = unit.id;
+
+    // Pre-initialize system level if it exists and is undefined to ensure correct sorting on initial page load
+    if (unit.systemLevel && window.unitSystemLevels[unitId] === undefined) {
+        window.unitSystemLevels[unitId] = unit.systemLevel.default !== undefined ? unit.systemLevel.default : (unit.systemLevel.max || 100);
+    }
+
     const active = window.unitActiveBuilds?.[unitId];
     if (active) {
         return window.isUnit(unitId, 'law') 
@@ -1243,8 +1265,10 @@ function renderUnitCard(unit, absoluteIndex) {
     let initialModeIndicatorHtml = '';
     if (Array.isArray(unit.modes)) {
         const currentMode = unit.modes[activeMode];
-        if (currentMode && unit.modesLabel?.toLowerCase() !== 'summons' && unit.id !== 'the_strongest_in_history') {
-            initialModeIndicatorHtml = `<div class="mode-indicator-badge" style="display: flex; align-items: center; color: #c084fc; font-size: 0.65rem; font-weight: 800; border: 1px solid rgba(192, 132, 252, 0.4); background: rgba(192, 132, 252, 0.06); padding: 2px 6px; border-radius: 4px; white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis;" title="${currentMode.name}">⚙ ${currentMode.name.toUpperCase()}</div>`;
+        const isSummon = unit.modesLabel?.toLowerCase() === 'summons' || unit.id === 'the_strongest_in_history';
+        if (currentMode && !isSummon) {
+            const modeHtml = `<div class="mode-indicator-badge" style="display: flex; align-items: center; color: #c084fc; font-size: 0.65rem; font-weight: 800; border: 1px solid rgba(192, 132, 252, 0.4); background: rgba(192, 132, 252, 0.06); padding: 2px 6px; border-radius: 4px; white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis;" title="${currentMode.name}">⚙ ${currentMode.name.toUpperCase()}</div>`;
+            initialModeIndicatorHtml = modeHtml;
         }
     }
 
@@ -1316,17 +1340,20 @@ function renderUnitCard(unit, absoluteIndex) {
                 </div>
             </div>
         </div>
-${upgradesArr && upgradesArr.length > 1 ? `<div class="upgrade-toolbar">
+        ${upgradesArr && upgradesArr.length > 1 ? `<div class="upgrade-toolbar">
             ${upgradesArr.map((u, idx) => {
-        const isActive = (window.unitELevels[unit.id] || 0) === idx;
-        const isUnlocked = (window.unitELevels[unit.id] || 0) >= idx;
-        return `<div class="e-pill ${isActive ? 'active' : ''} ${isUnlocked && (window.unitELevels[unit.id] || 0) > 0 ? 'e-unlocked' : ''} ${idx === upgradesArr.length - 1 ? 'is-special' : 'is-stat'}" 
-                             onclick="selectELevel('${unit.id}', ${idx})" data-level="${idx}" title="Upgrade ${idx}">${idx}</div>`;
-    }).join('')}
+                const isActive = (window.unitELevels[unit.id] || 0) === idx;
+                const isUnlocked = (window.unitELevels[unit.id] || 0) >= idx;
+                return `<div class="e-pill ${isActive ? 'active' : ''} ${isUnlocked && (window.unitELevels[unit.id] || 0) > 0 ? 'e-unlocked' : ''} ${idx === upgradesArr.length - 1 ? 'is-special' : 'is-stat'}" 
+                                     onclick="selectELevel('${unit.id}', ${idx})" data-level="${idx}" title="Upgrade ${idx}">${idx}</div>`;
+            }).join('')}
         </div>` : ''}
         ${unit.systemLevel && window.CALCULATION_MODE !== 'loadout' ? (() => {
             const cfg = unit.systemLevel;
-            if (cfg.restrictModes && !cfg.restrictModes.includes(activeMode)) return '';
+            if (cfg.restrictModes) {
+                const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
+                if (!cfg.restrictModes.includes(activeMode)) return '';
+            }
             const currentSysLvl = window.unitSystemLevels[unit.id] ?? (cfg.default || cfg.max || 100);
             if (window.unitSystemLevels[unit.id] === undefined) window.unitSystemLevels[unit.id] = currentSysLvl;
 
@@ -1698,52 +1725,6 @@ function openTraitBestList(unitId) {
     html += `</tbody></table>`;
     showUniversalModal({ title: `<span class="text-gold">TRAIT LEADERBOARD</span>`, content: html, size: 'modal-lg' });
 }
-
-window.applyUnitTrait = function (unitId, traitName) {
-    window.unitTraits = window.unitTraits || {};
-    window.unitTraits[unitId] = traitName;
-
-    // Clear caches for this unit specifically to force recalculation with new trait
-    if (typeof window.resetCachesForBuffChange === 'function') window.resetCachesForBuffChange(unitId);
-
-    delete window.hotbarFilteredBuilds?.[unitId];
-    if (window.LIVE_SCORE_CACHE) {
-        Object.keys(window.LIVE_SCORE_CACHE).forEach(k => {
-            if (k.startsWith(unitId)) delete window.LIVE_SCORE_CACHE[k];
-        });
-    }
-
-    // Update unit active builds cache immediately for the selected trait
-    const unit = window.getUnitById(unitId);
-    if (unit && typeof window.refreshActiveBuild === 'function') {
-        window.refreshActiveBuild(unit);
-    }
-
-    // Update the unit card display directly to show the new trait choice
-    if (typeof updateBuildListDisplay === 'function') updateBuildListDisplay(unitId, true);
-
-    window.precalculateAllLoadoutBuilds?.();
-    window.recalculateHotbarTeam?.();
-    window.updateHotbarUI?.();
-
-    // If in potential mode, re-sort the database view as the unit's score has likely changed
-    if (window.CALCULATION_MODE !== 'loadout') {
-        if (typeof window.resortUnitCardsInPlace === 'function') {
-            window.resortUnitCardsInPlace();
-        }
-    }
-
-    openTraitBestList(unitId);
-    if (typeof showToast === 'function') {
-        const u = window.getUnitById(unitId);
-        showToast(`Successfully selected ${traitName} trait for ${u ? u.name : unitId}!`);
-    }
-};
-
-window.precalculateAllLoadoutBuilds = function () {
-    window.refreshAllActiveBuilds();
-};
-
 
 window.viewBuildRelicDatabase = function (buildId, unitId) {
     let build = window.cachedResults[buildId];

@@ -219,11 +219,6 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                     pCrit += 65;
                 }
             }
-            if (p.name === "Does that hurt?") {
-                pDmg += 30;
-            }
-
-
 
             if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || isKsDynamic || isAkDynamic || isUgDynamic || isMhDynamic || isAbhDynamic) {
                 passivePcent += pDmg;
