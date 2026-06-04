@@ -379,7 +379,7 @@ function calculateBuildEfficiency(build, unitCost, unitMaxPlacement, unitId) {
 
 function getHeadBadgeHtml(headUsed) {
     if (!headUsed || headUsed === 'none') return '';
-
+    
     const h = HEAD_CONFIG[headUsed] || { name: 'Unknown', cls: 'custom' };
     const label = "Elemental";
     const val = "30%";
@@ -457,7 +457,7 @@ function hydrateBuildEntry(r, unitId, isHotbar) {
                 res.detailedBuffs = fullMath.detailedBuffs;
                 res.critData = fullMath.critData;
                 if (!res.subStats) res.subStats = {};
-                res.subStats.finalCf = fullMath.critData ? fullMath.critData.rate : 0;
+                res.subStats.finalCf = fullMath.critData ? fullMath.critData.rawRate : 0;
                 res.subStats.finalCm = fullMath.critData ? fullMath.critData.cdmg : 0;
             }
             res.sortDps = Math.max(res.dps || 0, res.bossDps || 0);
@@ -637,6 +637,28 @@ window.refreshActiveBuild = function (unit) {
 
     if (matches.length > 0) {
         topBuild = matches[0];
+    } else if (selectedTrait) {
+        // FALLBACK: If the selected trait is not in the precompiled builds list,
+        // dynamically generate/calculate the build for this trait on the fly!
+        const singleTraitObj = getTraitFast(selectedTrait);
+        if (singleTraitObj) {
+            const dynamicList = window.calculateUnitBuilds(
+                unit,
+                null,
+                getFilteredBuilds(),
+                getValidSubCandidates(),
+                selectedHead ? [selectedHead] : HEADS_LIST,
+                !window.disableSubStats,
+                [singleTraitObj],
+                activeType === 'abil',
+                activeMode,
+                isHotbar,
+                true // Ignore inventory limits
+            );
+            if (dynamicList && dynamicList.length > 0) {
+                topBuild = dynamicList[0];
+            }
+        }
     }
 
     const hydrated = hydrateBuildEntry(topBuild, unitId, isHotbar);
@@ -652,13 +674,30 @@ window.refreshActiveBuild = function (unit) {
 
 window.refreshAllActiveBuilds = function () {
     window.unitActiveBuilds = window.unitActiveBuilds || {};
-    const list = window.paginatedSortedUnits?.length > 0
-        ? window.paginatedSortedUnits.map(e => e.unit)
+    
+    // 1. Gather all units from the database pagination
+    const list = window.paginatedSortedUnits?.length > 0 
+        ? window.paginatedSortedUnits.map(e => e.unit) 
         : (unitDatabase || []);
-
+    
+    const processedIds = new Set();
     list.forEach(unit => {
         window.refreshActiveBuild(unit);
+        processedIds.add(unit.id);
     });
+
+    // 2. Also ensure all units currently in the Hotbar are fully refreshed!
+    if (window.hotbarState?.slots) {
+        window.hotbarState.slots.forEach(slot => {
+            if (slot && !processedIds.has(slot.id)) {
+                const fullUnit = window.getUnitById(slot.id);
+                if (fullUnit) {
+                    window.refreshActiveBuild(fullUnit);
+                    processedIds.add(slot.id);
+                }
+            }
+        });
+    }
 };
 
 // Update Build List display for a card
@@ -852,7 +891,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             window.hotbarFilteredBuilds[unitId] = selectedTrait
                 ? (hydrated.find(b => b.traitName?.toLowerCase() === selectedTrait.toLowerCase()) || slice[0])
                 : slice[0];
-
+            
             // Sync with unitActiveBuilds registry
             if (!window.unitActiveBuilds) window.unitActiveBuilds = {};
             window.unitActiveBuilds[unitId] = window.hotbarFilteredBuilds[unitId];
@@ -1000,7 +1039,7 @@ window.getQuickScore = (unit) => {
         const activeModeIdx = window.unitModesState?.[unit.id] || 0;
         const currentHead = window.unitHeads?.[unit.id] || 'none';
         const currentTrait = window.unitTraits?.[unit.id];
-
+        
         let matchedBuild = list[0];
         if (currentTrait || currentHead !== 'none') {
             const found = list.find(b => {
@@ -1013,8 +1052,8 @@ window.getQuickScore = (unit) => {
             if (found) matchedBuild = found;
         }
 
-        return window.isUnit(unit.id, 'law')
-            ? (matchedBuild.range || 0)
+        return window.isUnit(unit.id, 'law') 
+            ? (matchedBuild.range || 0) 
             : Math.max(matchedBuild.dps || matchedBuild.d || 0, matchedBuild.bossDps || matchedBuild.bd || matchedBuild.bossTotal || 0);
     }
 
@@ -1033,8 +1072,8 @@ window.getLiveScore = (unit) => {
     const unitId = unit.id;
     const active = window.unitActiveBuilds?.[unitId];
     if (active) {
-        return window.isUnit(unitId, 'law')
-            ? (active.range || 0)
+        return window.isUnit(unitId, 'law') 
+            ? (active.range || 0) 
             : (active.sortDps || Math.max(active.dps || 0, active.bossDps || 0));
     }
     return window.getQuickScore ? window.getQuickScore(unit) : 0;
@@ -1051,7 +1090,7 @@ window.resortUnitCardsInPlace = function () {
     if (!paginatedSortedUnits || paginatedSortedUnits.length === 0) return;
     window.refreshAllActiveBuilds();
     paginatedSortedUnits.sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
-
+    
     // Re-assign absolute ranks
     window.unitAbsoluteRanks = {};
     paginatedSortedUnits.forEach((entry, i) => {
@@ -1362,7 +1401,7 @@ window.globalFilterUnits = (term) => {
 
     // Force pre-calculating all active builds across all units so they are completely fresh and accurate before sorting!
     window.paginatedSortedUnits = filtered.map(unit => ({ unit, maxScore: 0 }));
-
+    
     // Refresh builds only if the database is loaded
     const db = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
     if (db) {
