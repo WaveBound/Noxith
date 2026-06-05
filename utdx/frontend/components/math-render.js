@@ -238,7 +238,7 @@ function renderActiveBuffsSection(data) {
             if (data.activeGlobalBuffs[buff.id]) {
                 buffs.push({
                     name: buff.name,
-                    desc: buff.renderLabel,
+                    desc: buff.renderLabel || buff.desc || '',
                     color: buff.color
                 });
             }

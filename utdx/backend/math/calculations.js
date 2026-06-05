@@ -358,7 +358,7 @@ function calculateDPS(uStats, relicStats, context) {
         fusedMult = 1.3;
     }
 
-    let finalDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult * fusedMult;
+    let finalDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
     let finalDmg = finalDmgNormal;
     let finalDmgBoss = finalDmgNormal;
 
@@ -553,7 +553,7 @@ function calculateDPS(uStats, relicStats, context) {
     let tripleThreatFuaDmgNormal = finalDmgNormal;
     if (window.isUnit(uStats.id, 'triple_threat')) {
         const fuaAdditiveTotal = additiveTotal - 25;
-        tripleThreatFuaDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * Math.max(0, 1 + fuaAdditiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult * fusedMult;
+        tripleThreatFuaDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * Math.max(0, 1 + fuaAdditiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
 
         const fuaAvgHit = tripleThreatFuaDmgNormal * avgCritMult;
         const fuaAvgHitBoss = tripleThreatFuaDmgNormal * avgCritMultBoss;

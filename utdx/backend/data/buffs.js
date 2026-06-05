@@ -373,7 +373,7 @@ window.calcGlobalBuffs = function (uStats, context, headPiece) {
                     if (buffStats.spa) buffStats.spa *= 1.1;
                 }
 
-                if (buffStats && Object.keys(buffStats).length > 0) {
+                if (buffStats && Object.values(buffStats).some(v => v !== 0)) {
                     activeGlobalBuffs[buff.id] = buffStats;
                     const s = buffStats;
                     globalDmg += s.dmg || s.damage || 0;

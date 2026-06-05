@@ -85,7 +85,7 @@
             { label: 'Rubber Control', val: '1.5x DoT | Knockback 10 studs | +30% Dmg Taken', color: '#f43f5e', isTeam: true }
         ] : [],
         'ultimate_fused_warrior': () => [
-            { label: 'Does it Hurt?', val: 'Enemies take 1.3x Dmg', color: '#f43f5e' }
+            { label: 'Does that hurt?', val: '+30% Dmg Taken (Consecutive Hits)', color: '#f43f5e' }
         ],
         'underworld_god': () => [{ label: 'Primordial Power', val: '30% Slow (3s) | +20% DoT/Affliction', color: '#60a5fa' }],
         'water_god': () => {
@@ -302,19 +302,19 @@
             const cdmgStr = subs.finalCm != null ? Math.round(subs.finalCm) + '%' : '—';
 
             const tags = unit.tags || [], element = String(unit.element || unit.stats?.element || unit.meta?.element || '').toLowerCase();
-            const ksBonus = getLeaderBonus(leader, 'king_sailor', 'kingSailor', tags, element, (t, e) => {
+            const ksBonus = getLeaderBonus(unit.id, leader, 'king_sailor', 'kingSailor', tags, element, (t, e) => {
                 if (t.includes('Magi')) return 'MAGI: +50% DMG / +15% SPA';
                 if (t.includes('Uncontrollable Power')) return 'UNCONTROLLABLE: +30% DMG / +10% SPA';
                 if (e === 'water') return 'WATER: +20% DMG / +10% SPA';
             });
 
-            const ttBonus = getLeaderBonus(leader, 'triple_threat', 'triple_threat', tags, element, (t, e) => {
+            const ttBonus = getLeaderBonus(unit.id, leader, 'triple_threat', 'triple_threat', tags, element, (t, e) => {
                 if (t.includes('Piece')) return 'UNRIVALED: +50% DMG (Piece)';
                 if (t.includes('Sword')) return 'UNRIVALED: +25% DMG (Sword)';
                 if (e === 'wind') return 'UNRIVALED: +20% DMG / +5% CRIT (Wind)';
             });
 
-            const abhBonus = getLeaderBonus(leader, 'angel_born_in_hell', 'unrivaledMark', tags, element, (t, e) => {
+            const abhBonus = getLeaderBonus(unit.id, leader, 'angel_born_in_hell', 'unrivaledMark', tags, element, (t, e) => {
                 if (t.some(tag => ['fused', 'fusion'].includes(tag.toLowerCase()))) return 'UNRIVALED: +50% DMG / +50% CDMG (Fusion)';
                 if (t.includes('Super Warrior')) return 'UNRIVALED: +30% DMG / -10% CD (Super Warrior)';
                 if (e === 'light') return 'UNRIVALED: +20% DMG / +5% CRIT (Light)';
@@ -806,16 +806,16 @@
     function showFusionImages(armorIds) {
         if (!armorIds || !armorIds.length) return;
         const bestBuilds = {
-            [callWin('getUnitId', 'unparalleled_armor')]: { dmg: '251.2k', spa: '5.39s', range: '75.2', Math: '77.5%', cdmg: '189%', dot: '0' },
-            [callWin('getUnitId', 'majestic_armor')]: { dmg: '132.4k', spa: '7.12s', range: '52.5', Math: '95%', cdmg: '284%', dot: '0' },
-            [callWin('getUnitId', 'sjw')]: { dmg: '312.5k', spa: '3.82s', range: '82.4', Math: '85%', cdmg: '215%', dot: '0' }
+            [callWin('getUnitId', 'unparalleled_armor')]: { dmg: '251.2k', spa: '5.39s', range: '75.2', crit: '77.5%', cdmg: '189%', dot: '0' },
+            [callWin('getUnitId', 'majestic_armor')]: { dmg: '132.4k', spa: '7.12s', range: '52.5', crit: '95%', cdmg: '284%', dot: '0' },
+            [callWin('getUnitId', 'sjw')]: { dmg: '312.5k', spa: '3.82s', range: '82.4', crit: '85%', cdmg: '215%', dot: '0' }
         };
 
         let contentHtml = '';
         armorIds.forEach(id => {
             const u = typeof unitDatabase !== 'undefined' && unitDatabase.find(x => x.id === id);
             if (u) {
-                const b = bestBuilds[id] || { dmg: '0', spa: '0', range: '0', Math: '0%', cdmg: '0%', dot: '0' };
+                const b = bestBuilds[id] || { dmg: '0', spa: '0', range: '0', crit: '0%', cdmg: '0%', dot: '0' };
                 const isFused = hotbarState.activeFusionIds.includes(id);
                 contentHtml += `
                     <div class="fusion-card-overlay" onclick="event.stopPropagation();">
@@ -836,7 +836,7 @@
                                 </div>
                             </div>
                             <div class="fs-sub-row">
-                                <div class="fs-item-sm"><span class="fs-label">Crit %</span><span class="fs-val val-crit">${b.Math}</span></div>
+                                <div class="fs-item-sm"><span class="fs-label">Crit %</span><span class="fs-val val-crit">${b.crit}</span></div>
                                 <div class="fs-item-sm"><span class="fs-label">CDmg</span><span class="fs-val val-cdmg">${b.cdmg}</span></div>
                                 <div class="fs-item-sm"><span class="fs-label">DoT Dmg</span><span class="fs-val val-dot">${b.dot}</span></div>
                             </div>
