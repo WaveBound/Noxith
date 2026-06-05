@@ -40,7 +40,7 @@ unitDatabase.push({
             fuaAnimation: 2.75,  // Follow-up lock set to 2.75s
             label: "Disposal"
         },
-        bossDmg: 50,              // Moved to passive
+        bossDmg: 0,              // Moved to passive
         support: ""
     },
 
@@ -61,7 +61,7 @@ unitDatabase.push({
             desc: "<br>On placement:<br>• Deals 50% more dmg to hyperarmor enemies<br>• Inflicts slow against bosses and also Deals 50% more dmg to them.<br>• Starts inflicting burn dealing 50% of damage over 4 ticks and stunning enemies for 3 seconds with every attack.",
             dot: 50,
             dotDuration: 4,
-            bossDmg: 0, // 1.5x Multiplier
+            passiveBossDmg: 50, // 1.5x Multiplier
             hyperArmor: 50,
         },
         {

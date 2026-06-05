@@ -29,7 +29,7 @@ window.getUnitUncappedCrit = function(slotUnit, slotIndex) {
                 const targets = hState.fernTargets || [];
                 const isFernPresent = hState.slots.some(s => s && window.isUnit(s.id, 'prodigy_mage'));
                 if (isFernPresent) {
-                    if (targets.includes(slotIndex)) {
+                    if (isFernSelf || targets.includes(slotIndex)) {
                         crit += 45;
                     }
                 }
@@ -186,11 +186,20 @@ function calculateDPS(uStats, relicStats, context) {
         finalRange *= (1 + headCalc.range / 100);
     }
 
-    // Nursefather boss damage is innate only; ignore trait-based boss multipliers (Duelist)
-    // and strictly apply her passive/innate boss damage.
-    const nursefatherBossDmg = (uStats.bossDmg || 0) + (passiveBossDmgFromPassives || 0);
+    // Nursefather boss damage: stack trait-based boss multipliers (Duelist)
+    // with her passive/innate boss damage.
     if (window.isUnit(uStats.id, 'nursefather_thumb')) {
-        bossMult = 1.0 + (nursefatherBossDmg / 100);
+        let pBoss = passiveBossDmgFromPassives || 0;
+        // Fallback: Manually scan passives if the aggregator missed the key
+        if (pBoss === 0 && uStats.passives) {
+            uStats.passives.forEach(p => {
+                if (p.bossDmg) pBoss += p.bossDmg;
+                else if (p.passiveBossDmg) pBoss += p.passiveBossDmg;
+                else if (p.boss) pBoss += p.boss;
+            });
+        }
+        const nursefatherBossDmg = (uStats.bossDmg || 0) + pBoss;
+        bossMult = (bossMult - 1 + nursefatherBossDmg / 100) + 1;
     } else {
         // For all other units, apply relic set bossDmg and head accessory bossDmg into bossMult
         const relicBossDmg = (sBonus.bossDmg || 0) + (headCalc.bossDmg || 0) + (uStats.bossDmg || 0) + (passiveBossDmgFromPassives || 0);

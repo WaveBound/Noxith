@@ -1637,8 +1637,18 @@ function openTraitBestList(unitId) {
     const unit = window.getUnitById(unitId);
     if (!unit) return;
 
-    const builds = window.unitBuildsCache[unitId]?.[window.activeAbilityIds?.has(unitId) && unit.ability ? 'abil' : 'base']?.fixed?.[0] || [];
-    if (builds.length === 0) {
+    const isLoadout = (window.CALCULATION_MODE === 'loadout');
+    const activeType = (window.activeAbilityIds?.has(unitId) && unit.ability) ? 'abil' : 'base';
+    
+    let builds = window.unitBuildsCache[unitId]?.[activeType]?.fixed?.[0] || [];
+    
+    // Fallback: If cache is empty, pull from the correct static database
+    if (!builds || builds.length === 0) {
+        const db = isLoadout ? (window.HOTBAR_STATIC_BUILD_DB || window.STATIC_BUILD_DB) : window.STATIC_BUILD_DB;
+        builds = window.getRelicDbEntry(db, unitId, activeType) || [];
+    }
+
+    if (!builds || builds.length === 0) {
         showUniversalModal({ title: 'TRAIT LEADERBOARD', content: '<div class="msg-empty">No builds calculated. Please wait for calculation to finish.</div>', size: 'modal-sm' });
         return;
     }
@@ -1651,7 +1661,7 @@ function openTraitBestList(unitId) {
         if (!existing || val > curVal) bestByTrait.set(b.traitName, b);
     });
 
-    const sortedTraits = Array.from(bestByTrait.values()).map(b => hydrateBuildEntry(b, unitId))
+    const sortedTraits = Array.from(bestByTrait.values()).map(b => hydrateBuildEntry(b, unitId, isLoadout))
         .sort((a, b) => {
             return getBuildSortScore(b) - getBuildSortScore(a); // Accurately sort leaderboard using both base and Boss DPS
         });

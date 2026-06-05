@@ -1035,7 +1035,7 @@
                 }
 
                 const activeTrait = window.unitTraits?.[u.id] || 'DEFAULT';
-                const traitBtn = `<div class="stats-trait-btn interactive" title="Active Trait: ${activeTrait}. Click to change!" onclick="event.stopPropagation(); if (typeof openTraitBestList === 'function') openTraitBestList('${u.id}');">TRAIT</div>`;
+                const traitBtn = `<div class="stats-trait-btn interactive" title="Active Trait: ${activeTrait}. Click to change!" onclick="event.stopPropagation(); window.openTraitBestList('${u.id}');">TRAIT</div>`;
                 if (u.id === 'miku') {
                     statsOverlay.innerHTML = traitBtn;
                 } else {
