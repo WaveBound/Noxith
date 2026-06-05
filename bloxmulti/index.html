@@ -409,7 +409,6 @@
     .preview-frame {
       width: 100%;
       aspect-ratio: 950 / 650;
-      /* Increased height slightly as requested */
       background: rgba(10, 9, 20, 0.82);
       border: 1px solid var(--border-hi);
       border-radius: 16px;
@@ -778,9 +777,7 @@
     .widget-preview-frame {
       width: 100%;
       max-width: 600px;
-      /* Limits excessive stretching */
       aspect-ratio: 5 / 3.5;
-      /* Adjusted to make the frame taller */
       background: rgba(10, 9, 20, 0.8);
       border: 1px solid var(--border-hi);
       border-radius: 16px;
@@ -1542,7 +1539,7 @@
     <div class="container" style="display: flex; flex-direction: column; align-items: center;">
       <div class="hero-badge animate">
         <div class="hero-badge-dot"></div>
-        v1.1.4 - Roblox Launch Fixes, Logs Widget
+        v1.1.5 - Monthly Plan Price Reduced, Lifetime Plan Added
       </div>
 
       <h1 class="hero-title animate" style="transition-delay:0.1s">
@@ -1788,7 +1785,7 @@
             Keeps online cookies completely isolated.</div>
         </div>
 
-        <!-- NEW Core Feature: Ghost Process Terminator -->
+        <!-- Core Feature: Ghost Process Terminator -->
         <div class="feat-card">
           <div class="feat-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -1989,7 +1986,7 @@
 
       <div class="premium-layout">
         <div class="premium-features-list">
-          <!-- UPDATED Premium Feature: Folders, Groups & Window Layout Coordinator -->
+          <!-- Premium Feature: Folders, Groups & Window Layout Coordinator -->
           <div class="premium-feat animate" style="transition-delay:0s">
             <div class="premium-feat-left">
               <div class="premium-feat-icon">
@@ -2106,13 +2103,34 @@
         <!-- Pricing Card -->
         <div class="premium-card animate">
           <div class="premium-card-label">BloxMulti Premium</div>
-          <div class="premium-card-price">
-            <span class="price-currency">$</span>
-            <span class="price-amount">5</span>
-            <span class="price-period">/ month</span>
+
+          <!-- Compact Multi-Plan Box Matching App Aesthetics -->
+          <div class="premium-price-box"
+            style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; padding: 18px; background: rgba(157, 111, 255, 0.05); border: 1px solid rgba(157, 111, 255, 0.15); border-radius: 12px;">
+            <!-- Monthly Row -->
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 14px; font-weight: 500; color: var(--muted);">Monthly Access</span>
+              <div style="display: flex; align-items: baseline; gap: 3px;">
+                <span
+                  style="font-size: 28px; font-weight: 800; color: var(--accent-light); font-family: var(--font-body); line-height: 1;">$3</span>
+                <span style="font-size: 13px; color: var(--muted); font-weight: 500;">/ mo</span>
+              </div>
+            </div>
+            <div style="height: 1px; background: rgba(157, 111, 255, 0.12);"></div>
+            <!-- Lifetime Row -->
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 14px; font-weight: 500; color: var(--text);">Lifetime License</span>
+              <div style="display: flex; align-items: baseline; gap: 3px;">
+                <span
+                  style="font-size: 28px; font-weight: 800; color: var(--accent-light); font-family: var(--font-body); line-height: 1;">$15</span>
+                <span style="font-size: 13px; color: var(--muted); font-weight: 500;">one-time</span>
+              </div>
+            </div>
           </div>
-          <div class="premium-card-sub">Cancel anytime. Subscription remains active until the end of your billing cycle.
-          </div>
+
+          <div class="premium-card-sub"
+            style="margin-bottom: 20px; font-size: 12.5px; line-height: 1.5; color: var(--muted);">Choose your plan
+            inside the desktop application upgrade menu. All plans unlock complete features immediately.</div>
           <div class="premium-card-divider"></div>
           <div class="premium-card-perks">
             <div class="premium-perk">
@@ -2166,9 +2184,9 @@
               <path
                 d="M967.68 368.64l-153.6-204.8c-3.9424-5.2736-9.7792-8.8064-16.2816-9.8816l-307.2-51.2c-2.7648-0.4608-5.632-0.4608-8.3968 0l-307.2 51.2c-6.5024 1.0752-12.3392 4.608-16.2816 9.8816l-153.6 204.8c-7.3216 9.7792-6.7072 23.3984 1.4336 32.4608l460.8 512c4.864 5.376 11.776 8.4992 19.0464 8.4992s14.1824-3.072 19.0464-8.4992l460.8-512c8.192-9.1136 8.8064-22.6816 1.4336-32.4608z" />
             </svg>
-            Get Premium - $5 / mo
+            See Upgrade Plans
           </a>
-          <div class="premium-card-note">Upgrade from inside the desktop app after logging in. All sales are final.
+          <div class="premium-card-note">Upgrade directly from inside the desktop app after logging in.
           </div>
         </div>
       </div>
@@ -2194,7 +2212,7 @@
             </svg>
           </div>
           Windows 10 / 11
-          <div class="dl-version">v1.1.4</div>
+          <div class="dl-version">v1.1.5</div>
         </div>
 
         <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-download-primary">
@@ -2286,7 +2304,7 @@
       "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Recent Launches Widget (Widget-RecentLaunches.png)</text></svg>",
       "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Launch Logs Widget (Widget-LaunchLogs.png)</text></svg>",
       "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Online Friends Widget (Widget-OnlineFriends.png)</text></svg>",
-      "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%232af598%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Running Instances Monitor (Live-Monitor.png)</text></svg>"
+      "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%232af598%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%232af598%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Running Instances Monitor (Live-Monitor.png)</text></svg>"
     ];
 
     function switchWidgetTab(index) {
