@@ -158,11 +158,17 @@ const PASSIVES = {
 
 const TAG_PERKS = {
     // === RAID / SECRET TAG PERKS ===
-    reaper_set: [ // (Shadow Reaper / Reaper Set)
-        { tag: "Peroxide", bonus: { dmg: 0, spa: 10, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, armorPen: 10, hyperArmor: 15 } },
-        { tag: "Reaper", bonus: { dmg: -5, spa: 12.5, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, elementalAll: 30 } },
-        { tag: "Rage", bonus: { dmg: 0, spa: 8.5, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, elementalAll: 15, buffPotency: 10 } },
-        { tag: "Hollow", bonus: { dmg: 0, spa: 0, range: 0, cRate: 20, cDmg: 12.5, dot: 0, bossDmg: 0, trueDmg: 0, hyperArmor: 5 } },
+    reaper_set: [
+        { tag: "Peroxide", bonus: { dmg: 10, buffPotency: 5, cDmg: 8.5 } },
+        { tag: "Reaper", bonus: { hyperArmor: 20, armorPen: 12.5, range: 15 } },
+        { tag: "Rage", bonus: { cDmg: 25, cRate: 10, range: 10 } },
+        { tag: "Hollow", bonus: { dmg: 12.5, spa: 7.5, range: 15 } },
+    ],
+    shadow_reaper: [
+        { tag: "Peroxide", bonus: { armorPen: 10, hyperArmor: 15, spa: 10 } },
+        { tag: "Reaper", bonus: { elementalAll: 30, spa: 12.5, dmg: -5 } },
+        { tag: "Rage", bonus: { elementalAll: 15, spa: 8.5, buffPotency: 10 } },
+        { tag: "Hollow", bonus: { cRate: 20, cDmg: 12.5, hyperArmor: 5 } },
     ],
     rebellious: [
         { tag: "Ninjaverse", bonus: { dmg: 0, spa: 0, range: 0, cRate: 15, cDmg: 20, dot: 0, bossDmg: 0, trueDmg: 0, elementalAll: 20 } },

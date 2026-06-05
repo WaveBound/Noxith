@@ -341,7 +341,7 @@ const HEAD_CONFIG = {
     warlord_hat: { name: 'Warlord Hat', search: 'Warlord', cls: 'custom' },
     mochi_scarf: { name: 'Mochi Scarf', search: 'Mochi', cls: 'custom' },
     flaming_donut: { name: 'Flaming Donut', search: 'Flaming Donut', cls: 'custom' },
-    fused_earrings: { name: 'Earings', search: 'Earings', cls: 'custom' }
+    fused_earrings: { name: 'Fused Earrings', search: 'Earrings', cls: 'custom' }
 };
 
 const COMBO_TITLES = {
@@ -1013,6 +1013,15 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     if (buildData) {
         container.innerHTML = renderListInternal(buildData, renderLimit);
+    } else if (unitObj) {
+        // Safe calculation fallback when uncompiled or running custom inventory calculations
+        processUnitCache(unitObj, 0, activeType);
+        const finalData = window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0];
+        if (finalData) {
+            container.innerHTML = renderListInternal(finalData, renderLimit);
+        } else {
+            container.innerHTML = `<div class="msg-loading"><div class="loading-spinner"></div><span>Calculating...</span></div>`;
+        }
     } else {
         container.innerHTML = `<div class="msg-loading"><div class="loading-spinner"></div><span>Calculating...</span></div>`;
     }
@@ -1360,7 +1369,7 @@ function renderUnitCard(unit, absoluteIndex) {
             if (cfg.controlType === 'slider') {
                 return `<div class="system-level-bar" style="display:flex; align-items:center; gap:12px; padding:6px 15px; background:rgba(99,102,241,0.06); border-bottom:1px solid var(--card-border);">
                     <span style="font-size:0.65rem; font-weight:700; color:#a5b4fc; text-transform:uppercase; letter-spacing:0.5px; min-width: 55px;">${cfg.label || 'System Level'}</span>
-                    <input id="system-level-${unit.id}" type="range" min="${cfg.min || 1}" max="${cfg.max || 100}" value="${currentSysLvl}"
+                    <input type="range" min="${cfg.min || 1}" max="${cfg.max || 100}" value="${currentSysLvl}"
                         style="flex:1; height:4px; background:rgba(99,102,241,0.2); border-radius:2px; cursor:pointer; accent-color:#818cf8; outline:none;"
                         oninput="document.getElementById('sys-lvl-val-${unit.id}').innerText = this.value; setSystemLevel('${unit.id}', this.value)">
                     <span id="sys-lvl-val-${unit.id}" style="font-size:0.8rem; font-weight:700; color:#e0e7ff; background:rgba(99,102,241,0.3); padding:1px 6px; border-radius:4px; min-width:18px; text-align:center;">${currentSysLvl}</span>
@@ -1369,7 +1378,7 @@ function renderUnitCard(unit, absoluteIndex) {
             } else {
                 return `<div class="system-level-bar" style="display:flex; align-items:center; gap:8px; padding:4px 15px; background:rgba(99,102,241,0.06); border-bottom:1px solid var(--card-border);">
                     <span style="font-size:0.65rem; font-weight:700; color:#a5b4fc; text-transform:uppercase; letter-spacing:0.5px;">${cfg.label || 'System Level'}</span>
-                    <input id="system-level-${unit.id}" type="number" min="${cfg.min || 1}" max="${cfg.max || 100}" value="${currentSysLvl}"
+                    <input type="number" min="${cfg.min || 1}" max="${cfg.max || 100}" value="${currentSysLvl}"
                         style="width:45px; padding:1px 4px; background:rgba(0,0,0,0.4); border:1px solid rgba(99,102,241,0.3); border-radius:4px; color:#e0e7ff; font-size:0.8rem; font-weight:700; text-align:center;"
                         onchange="setSystemLevel('${unit.id}', this.value)" onkeyup="if(event.key==='Enter') setSystemLevel('${unit.id}', this.value)">
                     <span style="font-size:0.65rem; color:rgba(165,180,252,0.4); margin-left: auto;">MAX LV. ${cfg.max || 100}</span>
@@ -1644,7 +1653,7 @@ function openTraitBestList(unitId) {
 
     const sortedTraits = Array.from(bestByTrait.values()).map(b => hydrateBuildEntry(b, unitId))
         .sort((a, b) => {
-            return (b.dps || 0) - (a.dps || 0);
+            return getBuildSortScore(b) - getBuildSortScore(a); // Accurately sort leaderboard using both base and Boss DPS
         });
 
     let tagsHtml = '';
@@ -1686,9 +1695,9 @@ function openTraitBestList(unitId) {
     const mapStat = s => ({ cf: 'Crit', cm: 'CDmg', spa: 'SPA', range: 'Rng', dot: 'DoT' }[s] || 'Dmg');
 
     sortedTraits.forEach((b, idx) => {
-        const isBossHigher = false;
-        const val = format(b.dps || 0);
-        const label = 'DPS';
+        const isBossHigher = b.bossDps > (b.dps || 0);
+        const val = format(isBossHigher ? b.bossDps : (b.dps || 0));
+        const label = isBossHigher ? 'BOSS' : 'DPS';
         const tObj = getTraitByName(b.traitName, unitId);
         const setupText = `<b class="text-white">${b.setName}</b> <span class="text-dim text-xs">(${mapStat(b.mainStats.body)}/${mapStat(b.mainStats.legs)})</span>${b.headUsed && b.headUsed !== 'none' ? ` + ${HEAD_CONFIG[b.headUsed]?.name || 'Head'}` : ''}`;
 

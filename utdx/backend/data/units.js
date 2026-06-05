@@ -149,7 +149,8 @@ const UNIT_FILES = [
     'marine_hero.js',
     'sharpshooter_king_trapper.js',
     'ultimate_fused_warrior.js',
-    'angel_born_in_hell.js'
+    'angel_born_in_hell.js',
+    'nursefather_thumb.js'
 ];
 
 // Resolves after every unit script has loaded (or errored).

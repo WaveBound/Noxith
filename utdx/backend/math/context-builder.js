@@ -26,7 +26,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     if (unit.customSummons) effectiveStats.customSummons = unit.customSummons;
     if (unit.summonStats) effectiveStats.summonStats = unit.summonStats;
     if (unit.passives) effectiveStats.passives = unit.passives;
-    if (unit.stats && unit.stats.customFollowUp) effectiveStats.customFollowUp = unit.stats.customFollowUp;
+    if (unit.stats && unit.stats.customFollowUp) effectiveStats.customFollowUp = { ...unit.stats.customFollowUp };
 
     // Resolve Placement (limited by Trait)
     let actualPlacement = unit.placement;
@@ -88,6 +88,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
                 if (upgrade.trueDmg) effectiveStats.trueDmg = (effectiveStats.trueDmg || 0) + upgrade.trueDmg;
                 if (upgrade.extraPlacement) effectiveStats.extraPlacement = (effectiveStats.extraPlacement || 0) + upgrade.extraPlacement;
                 if (upgrade.followUp) effectiveStats.followUp = upgrade.followUp;
+                if (upgrade.fuaDmgMult) effectiveStats.customFollowUp.dmgMult = upgrade.fuaDmgMult;
                 return;
             }
 

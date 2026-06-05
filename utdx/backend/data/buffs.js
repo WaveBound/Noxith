@@ -3,12 +3,26 @@
 // ============================================================================
 
 window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
-    let passivePcent = (uStats.buffDmg || 0);
+    let passivePcent = (uStats.buffDmg || 0); // Base passive damage
+
+    // Fused Earrings Passive (moved here for better integration with passivePcent)
+    if (headPiece === 'fused_earrings') {
+        const isSynchroNamed = uStats && uStats.name && uStats.name.toLowerCase().includes('syncro');
+        const canFuse = uStats && ['nutaru_beast', 'ancient_shinob', 'sasuke_great_war'].includes(uStats.id);
+        const isFusedUnit = uStats && ['unparalleled_armor', 'majestic_armor', 'sjw'].includes(uStats.id);
+
+        if (isSynchroNamed || canFuse) {
+            passivePcent += 50; // Non-synchro form gain 50% dmg
+        } else if (isFusedUnit) {
+            passivePcent += 15; // Synchro form gain 15% dmg
+        }
+    }
     let passiveSpaPcent = 0;
     let passiveRangePcent = 0;
     let trueDmgFromPassives = 0;
     let passiveCritFromPassives = 0;
     let passiveCdmgFromPassives = 0;
+    let passiveBossDmgFromPassives = 0;
     let passiveDotFromPassives = 0;
     let passiveBreakdown = [];
 
@@ -40,6 +54,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
             let pCrit = p.passiveCrit || 0;
             let pCdmg = p.passiveCdmg || 0;
             let pDot = p.dot || 0;
+            let pBoss = p.bossDmg || 0;
             if (p.name === "Brutal Slashes") {
                 pDot = (upgradeLevel >= 6) ? 120 : 100;
             }
@@ -214,16 +229,17 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                 }
             }
 
-            if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || isKsDynamic || isAkDynamic || isUgDynamic || isMhDynamic || isAbhDynamic) {
+            if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || pBoss !== 0 || isKsDynamic || isAkDynamic || isUgDynamic || isMhDynamic || isAbhDynamic) {
                 passivePcent += pDmg;
                 passiveSpaPcent += pSpa;
                 passiveRangePcent += pRange;
                 trueDmgFromPassives += pTrue;
                 passiveCritFromPassives += pCrit;
                 passiveCdmgFromPassives += pCdmg;
+                passiveBossDmgFromPassives += pBoss;
                 passiveDotFromPassives += pDot;
                 if (p.dotDuration && !uStats.dotDuration) uStats.dotDuration = p.dotDuration;
-                passiveBreakdown.push({ name: p.name, dmg: pDmg, spa: pSpa, range: pRange, trueDmg: pTrue, crit: pCrit, cdmg: pCdmg, dot: pDot });
+                passiveBreakdown.push({ name: p.name, dmg: pDmg, spa: pSpa, range: pRange, trueDmg: pTrue, crit: pCrit, cdmg: pCdmg, dot: pDot, bossDmg: pBoss });
             }
         });
     }
@@ -276,7 +292,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
         }
     }
 
-    return { passivePcent, passiveSpaPcent, passiveRangePcent, trueDmgFromPassives, passiveCritFromPassives, passiveCdmgFromPassives, passiveDotFromPassives, passiveBreakdown };
+    return { passivePcent, passiveSpaPcent, passiveRangePcent, trueDmgFromPassives, passiveCritFromPassives, passiveCdmgFromPassives, passiveBossDmgFromPassives, passiveDotFromPassives, passiveBreakdown };
 };
 
 window.calcGlobalBuffs = function (uStats, context, headPiece) {

@@ -3,7 +3,14 @@
 // ============================================================================
 
 function initApp() {
-    // 0. Ensure ability tracking Set is declared safely before populating
+    // 0. Force-clear all client-side caches to purge any stale/broken calculations
+    window.unitBuildsCache = {};
+    window.cachedResults = {};
+    window.unitActiveBuilds = {};
+    window.bestHydratedBuildCache = {};
+    window.LIVE_SCORE_CACHE = {};
+
+    // Ensure ability tracking Set is declared safely before populating
     window.activeAbilityIds = window.activeAbilityIds || new Set();
 
     ['phantom_captain', 'megumin', 'ancient_shinob', 'triple_threat', 'marine_hero'].forEach(file => {

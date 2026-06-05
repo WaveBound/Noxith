@@ -29,6 +29,7 @@ unitDatabase.push({
             eLevelReq: 99,       // No etherealization upgrade for this
             eLevelChance: 20,    // Same chance at all levels
             dmgMult: 3.5,        // +250% bonus (350% total)
+            dotPct: 0,           // Explicitly no DoT for Quake Warlord's FUA
             fuaAnimation: 0,     // No extra animation delay
             label: "The Strongest Man"
         }

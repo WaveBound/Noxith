@@ -131,12 +131,15 @@ window.getTraitByName = window.getTraitFast;
 
 const getSetFast = (name) => {
     if (!name) return null;
+    const cleanName = name.replace(/\s*set\b/gi, '').replace('_set', '').trim().toLowerCase();
+    
     if (_setCacheMap.size === 0) {
         SETS.forEach(s => {
-            _setCacheMap.set(s.name, s);
-            _setCacheMap.set(s.id, s);
+            _setCacheMap.set(s.name.toLowerCase(), s);
+            _setCacheMap.set(s.id.toLowerCase(), s);
+            _setCacheMap.set(s.name.replace(/\s*set\b/gi, '').replace('_set', '').trim().toLowerCase(), s);
         });
     }
-    return _setCacheMap.get(name);
+    return _setCacheMap.get(cleanName);
 };
 window.getSetFast = getSetFast;

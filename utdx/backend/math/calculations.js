@@ -105,6 +105,7 @@ function calculateDPS(uStats, relicStats, context) {
         trueDmgFromPassives,
         passiveCritFromPassives,
         passiveCdmgFromPassives,
+        passiveBossDmgFromPassives,
         passiveDotFromPassives,
         passiveBreakdown
     } = window.calcPassives(uStats, context, headPiece, upgradeLevel);
@@ -113,28 +114,36 @@ function calculateDPS(uStats, relicStats, context) {
     if (eternalDmgBuff > 0) passivePcent += eternalDmgBuff;
 
     let { sBonus, tagBuffs, setPerkDmg, baseR_Dmg, baseR_Spa, baseR_Cm, baseR_Cf, baseR_Dot, baseR_Range } = window.calcRelicStats(relicStats, uStats, headPiece, context, traitObj, starMult, statConfig);
-    let { globalDmg, globalSpa, globalRange, globalCrit, globalCdmg, activeGlobalBuffs } = window.calcGlobalBuffs(uStats, context, headPiece);
 
-    // Apply Junior Ninja 1.1x Multiplier to Passives & Tags BEFORE values are consumed by totals
-    if (headPiece === 'junior') {
-        if (tagBuffs.dmg) {
-            const extraTagDmg = tagBuffs.dmg * 0.1;
-            tagBuffs.dmg += extraTagDmg;
-            sBonus.dmg = (sBonus.dmg || 0) + extraTagDmg;
-        }
-        if (tagBuffs.spa) {
-            const extraTagSpa = tagBuffs.spa * 0.1;
-            tagBuffs.spa += extraTagSpa;
-            sBonus.spa = (sBonus.spa || 0) + extraTagSpa;
+    // Extract Head Accessory Base Stats (SPA, Range, Crit) early for math integration
+    const headSetIdMap = {
+        sun_god: 'sun_god', ninja: 'ninja', reaper_necklace: 'reaper_set', shadow_reaper_necklace: 'shadow_reaper',
+        junior: 'ninja', biju_head: 'biju_set', rebellious_head: 'rebellious', reanimated_head: 'reanimated_ninja',
+        super_roku: 'super_roku', bio_android: 'bio_android', great_mage: 'great_mage', berserk_shinigami: 'berserk_shinigami',
+        hokage: 'hokage', sorcerer_hunter_spirit: 'sorcerer_hunter', strongest_sorcerer_glasses: 'strongest_sorcerer',
+        monarch_cape: 'monarch', monarch_head: 'monarch', monarch: 'monarch', warlord_hat: 'warlord', fused_earrings: 'fused_set'
+    };
+    const mappedHeadSetId = headSetIdMap[headPiece];
+    let headSpaBase = 0, headRangeBase = 0, headCfBase = 0, headCmBase = 0;
+    if (mappedHeadSetId) {
+        const headSetObj = (typeof SETS !== 'undefined') ? SETS.find(s => s.id === mappedHeadSetId) : null;
+        if (headSetObj && headSetObj.accessory) {
+            const acc = headSetObj.accessory;
+            headSpaBase = acc.spa || 0;
+            headRangeBase = acc.range || 0;
+            headCfBase = acc.cRate || 0;
+            headCmBase = acc.cDmg || 0;
         }
     }
 
+    let { globalDmg, globalSpa, globalRange, globalCrit, globalCdmg, activeGlobalBuffs } = window.calcGlobalBuffs(uStats, context, headPiece);
+
     const tags = uStats.tags || [];
 
-    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (window.isUnit(uStats.id, 'king_sailor') ? 10 : 0);
+    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + headRangeBase + (window.isUnit(uStats.id, 'king_sailor') ? 10 : 0);
     let finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
 
-    let setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa;
+    let setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa + headSpaBase;
     let warlordSpa = 0;
 
     if (headPiece === 'warlord_hat') {
@@ -177,10 +186,17 @@ function calculateDPS(uStats, relicStats, context) {
         finalRange *= (1 + headCalc.range / 100);
     }
 
-    // Apply relic set bossDmg and head accessory bossDmg into bossMult (computed early from traits only)
-    const relicBossDmg = (sBonus.bossDmg || 0) + (headCalc.bossDmg || 0);
-    if (relicBossDmg > 0) {
-        bossMult = (bossMult - 1 + relicBossDmg / 100) + 1;
+    // Nursefather boss damage is innate only; ignore trait-based boss multipliers (Duelist)
+    // and strictly apply her passive/innate boss damage.
+    const nursefatherBossDmg = (uStats.bossDmg || 0) + (passiveBossDmgFromPassives || 0);
+    if (window.isUnit(uStats.id, 'nursefather_thumb')) {
+        bossMult = 1.0 + (nursefatherBossDmg / 100);
+    } else {
+        // For all other units, apply relic set bossDmg and head accessory bossDmg into bossMult
+        const relicBossDmg = (sBonus.bossDmg || 0) + (headCalc.bossDmg || 0) + (uStats.bossDmg || 0) + (passiveBossDmgFromPassives || 0);
+        if (relicBossDmg > 0) {
+            bossMult = (bossMult - 1 + relicBossDmg / 100) + 1;
+        }
     }
 
     let headDmgPassiveMod = headDmgPassive;
@@ -233,7 +249,7 @@ function calculateDPS(uStats, relicStats, context) {
     // --- WARLORD DYNAMIC SET BONUS ---
     let warlordData = null;
     if (relicStats.set === 'warlord') {
-        let estCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.crit || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
+        let estCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.cf || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
         if (window.isUnit(uStats.id, 'pirate_king')) {
             estCritRate = 40;
         }
@@ -281,19 +297,19 @@ function calculateDPS(uStats, relicStats, context) {
     const detailedBuffs = {
         setBase: (sBonus.dmg || 0) - (tagBuffs.dmg || 0) - (relicStats.set === 'great_mage' ? 18 : 0) - (relicStats.set === 'monarch' ? setPerkDmg : 0),
         setPerk: setPerkDmg,
-        accessoryPerk: headDmgPassiveMod,
+        accessoryBase: headDmgBase, // Base stats from accessory itself (e.g., S. Reaper +2.5% Dmg)
+        accessoryPerk: headDmgPassiveMod, // Passive-based perks from accessory (e.g., Sun God's Blessing)
         tagBonus: (tagBuffs.dmg || 0) + headDmgTag,
         unitPassive: passivePcent,
         abilityBuff: abilityDmg,
-        accessoryBase: headDmgBase,
         globalBuffs: globalDmg,
         passiveBreakdown: passiveBreakdown
     };
 
-    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cm || 0) + passiveCdmgFromPassives;
+    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + headCmBase + (headCalc.cm || 0) + passiveCdmgFromPassives;
     
     // Calculate raw, uncapped crit rate first
-    let rawCritRate = uStats.crit + traitCritRate + globalCrit + (headCalc.cf || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives;
+    let rawCritRate = uStats.crit + traitCritRate + globalCrit + headCfBase + (headCalc.cf || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives;
     if (window.isUnit(uStats.id, 'kirito') || window.isUnit(uStats.id, 'the_strongest_of_today')) {
         rawCritRate = Math.min(rawCritRate, uStats.crit);
     }
@@ -351,12 +367,6 @@ function calculateDPS(uStats, relicStats, context) {
         }
     }
 
-    // Apply "Does it Hurt?" 1.3x multiplier to final damage for Ultimate Fused Warrior
-    let fusedMult = 1.0;
-    if (isFusedWarrior) {
-        fusedMult = 1.3;
-    }
-
     let finalDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
     let finalDmg = finalDmgNormal;
     let finalDmgBoss = finalDmgNormal;
@@ -381,6 +391,10 @@ function calculateDPS(uStats, relicStats, context) {
     let avgHitNormal = finalDmgNormal * avgCritMult;
 
     // --- SPECIAL ATTACK RATE LOGIC ---
+    let hitDpsTotal = 0;
+    let bossHitDpsTotal = 0;
+    let normalHitDpsTotal = 0;
+
     let attackMultiplier = 1;
     let extraAttacksData = null;
     let usedSpa = finalSpa;
@@ -390,15 +404,17 @@ function calculateDPS(uStats, relicStats, context) {
         usedSpa = ar.usedSpa;
         attackMultiplier = ar.attackMultiplier;
         extraAttacksData = ar.extraAttacksData;
+        hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
+        bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
+        normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
     } else if (isFusedWarrior) {
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
         const followUp2Chance = (eLevel >= 2) ? 0.70 : 0.50;
-        
-        // Attack: 1x, Guaranteed Follow-up: 1x, 50%/70% chance second Follow-up: 1x
-        // Average multiplier: 1 + 1 + chance = 2.5x (or 2.7x at E2+)
         attackMultiplier = 1 + 1 + followUp2Chance;
         usedSpa = finalSpa;
-        
+        hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
+        bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
+        normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
         extraAttacksData = {
             req: "Guaranteed Follow-ups",
             hits: `1 + 1 + ${(followUp2Chance * 100).toFixed(0)}% chance`,
@@ -409,35 +425,23 @@ function calculateDPS(uStats, relicStats, context) {
             usedSpa: usedSpa
         };
     } else if (window.isUnit(uStats.id, 'strongest_swordsman_hunter')) {
-        // --- DUAL-STATE EVALUATION FOR STRONGEST SWORDSMAN ---
-        // Stance 1 & 3 (6 attacks): Base damage, Base crit rate
-        // Stance 2 (3 attacks): +60% Damage (+40% if E0-E5), +20% Crit Rate (+15% if E0-E5)
         const stance2DmgBonus = (upgradeLevel >= 6) ? 60 : 40;
         const stance2CritBonus = (upgradeLevel >= 6) ? 20 : 15;
-
-        // Unbuffed state hits
         const unbuffedDmg = finalDmgNormal;
         const unbuffedCrit = finalCritRate;
         const unbuffedCritMult = 1 + (finalCdmgStat / 100) * (unbuffedCrit / 100);
         const unbuffedAvgHit = unbuffedDmg * unbuffedCritMult;
-
-        // Buffed state hits (Stance 2)
-        const buffedDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + (additiveTotal + stance2DmgBonus) / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult * fusedMult;
+        const buffedDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + (additiveTotal + stance2DmgBonus) / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
         const buffedCrit = Math.min(finalCritRate + stance2CritBonus, 100);
         const buffedCritMult = 1 + (finalCdmgStat / 100) * (buffedCrit / 100);
         const buffedAvgHit = buffedDmg * buffedCritMult;
-
-        // Overall cycle math: 6 unbuffed attacks + 3 buffed attacks
         const totalCycleDmg = (6 * unbuffedAvgHit) + (3 * buffedAvgHit);
-
-        // Equivalent multipliers to align with core game engine's single-value output
-        avgHit = totalCycleDmg / 9; // Weighted hit average
+        avgHit = totalCycleDmg / 9;
         avgHitBoss = avgHit * bossMult;
-        avgHitNormal = avgHit;
-
-        // Output effective attack multiplier (1.5x attacks * weighted stance damage ratio)
         attackMultiplier = (totalCycleDmg / (6 * unbuffedAvgHit));
-
+        hitDpsTotal = ((avgHit / finalSpa) * placement * 1.5); // 9 hits per 6 cycle time
+        bossHitDpsTotal = hitDpsTotal * bossMult;
+        normalHitDpsTotal = hitDpsTotal;
         extraAttacksData = {
             req: "Sword Stances",
             hits: `9 Attacks / Cycle (1.5x rate)`,
@@ -452,88 +456,125 @@ function calculateDPS(uStats, relicStats, context) {
             unbuffedCrit: unbuffedCrit,
             buffedCrit: buffedCrit
         };
-    } else if (window.isUnit(uStats.id, 'water_god') && uStats.followUp) {
-        usedSpa = Math.max(finalSpa, effectiveSpaCap * 2);
-        attackMultiplier = 2;
-        extraAttacksData = {
-            req: "Per-attack Follow-up",
-            hits: `2 hits / cycle (cap: ${effectiveSpaCap}s × 2 = ${effectiveSpaCap * 2}s min)`,
-            extra: 1,
-            attacksNeeded: 1,
-            mult: attackMultiplier,
-            label: `Water God Follow-up (${effectiveSpaCap}s window)`
-        };
-    } else if (window.isUnit(uStats.id, 'king_sailor')) {
-        const tickCount = 1;
-        const tickDmg = 0.20;
-        attackMultiplier = 1;
-        extraAttacksData = {
-            req: "Baal's Lightning",
-            hits: `1 + ${tickCount} Tick`,
-            extra: tickCount * tickDmg,
-            attacksNeeded: 1,
-            mult: 1.20,
-            label: "Chain Lightning",
-            tickDmgVal: finalDmg * tickDmg,
-            avgTick: (finalDmg * tickDmg),
-            totalChain: (finalDmg * tickDmg * tickCount)
-        };
-    } else if (uStats.customFollowUp) {
-        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
-        let chance = uStats.customFollowUp.chance;
-        if (eLevel >= uStats.customFollowUp.eLevelReq) chance = uStats.customFollowUp.eLevelChance;
-
-        const atkAnim = uStats.spaCap || 0.1;
-        const fuaAnim = uStats.customFollowUp.fuaAnimation || 0;
-
-        const timeIfFua = Math.max(finalSpa, atkAnim + fuaAnim);
-        const timeIfNoFua = Math.max(finalSpa, atkAnim);
-        usedSpa = (chance / 100) * timeIfFua + (1 - (chance / 100)) * timeIfNoFua;
-
-        const avgExtraHits = (chance / 100) * uStats.customFollowUp.dmgMult;
-        attackMultiplier = 1 + avgExtraHits;
-        extraAttacksData = {
-            req: `Follow-Up (${chance}%)`,
-            hits: `1 + ${uStats.customFollowUp.dmgMult}x`,
-            extra: avgExtraHits,
-            attacksNeeded: 1,
-            mult: attackMultiplier,
-            label: "Shadow Emerge",
-            usedSpa: usedSpa
-        };
-    } else if (window.isUnit(uStats.id, 'alpha_devil')) {
-        const swordCount = 2;
-        const swordDmgPct = 0.10;
-        const swordTicks = 10;
-        const swordCooldown = 20;
-
-        const avgSwordDps = (swordCount * swordTicks * swordDmgPct * avgHit) / swordCooldown;
-
-        attackMultiplier = 1 + (avgSwordDps * usedSpa / avgHit);
-        extraAttacksData = {
-            req: "Phantom Swords (On Crit)",
-            hits: `${swordCount} Swords / 20s`,
-            extra: avgSwordDps * usedSpa / avgHit,
-            attacksNeeded: 1,
-            mult: attackMultiplier,
-            label: "Show me your motivation",
-            swordDps: avgSwordDps
-        };
-    } else if (uStats.followUp) {
-        attackMultiplier = 1 + (uStats.followUp / 100);
-        extraAttacksData = { req: "N/A", hits: attackMultiplier, extra: uStats.followUp / 100, attacksNeeded: 1, mult: attackMultiplier, label: "Chain Lightning" };
-    } else if (uStats.reqCrits && uStats.hitCount) {
-        const critsPerAttack = uStats.hitCount * (finalCritRate / 100);
-        if (critsPerAttack > 0) {
-            const attacksToTrigger = uStats.reqCrits / critsPerAttack;
-            attackMultiplier = 1 + (uStats.extraAttacks / attacksToTrigger);
-            extraAttacksData = { req: uStats.reqCrits, hits: uStats.hitCount, extra: uStats.extraAttacks, attacksNeeded: attacksToTrigger, mult: attackMultiplier };
+    } else {
+        // Default logic for all other units
+        if (window.isUnit(uStats.id, 'water_god') && uStats.followUp) {
+            usedSpa = Math.max(finalSpa, effectiveSpaCap * 2);
+            attackMultiplier = 2;
+            extraAttacksData = {
+                req: "Per-attack Follow-up",
+                hits: `2 hits / cycle (cap: ${effectiveSpaCap}s × 2 = ${effectiveSpaCap * 2}s min)`,
+                extra: 1,
+                attacksNeeded: 1,
+                mult: attackMultiplier,
+                label: `Water God Follow-up (${effectiveSpaCap}s window)`
+            };
+        } else if (window.isUnit(uStats.id, 'king_sailor')) {
+            const tickCount = 1;
+            const tickDmg = 0.20;
+            attackMultiplier = 1.20;
+            extraAttacksData = {
+                req: "Baal's Lightning",
+                hits: `1 + ${tickCount} Tick`,
+                extra: tickCount * tickDmg,
+                attacksNeeded: 1,
+                mult: 1.20,
+                label: "Chain Lightning",
+                tickDmgVal: finalDmg * tickDmg,
+                avgTick: (finalDmg * tickDmg),
+                totalChain: (finalDmg * tickDmg * tickCount)
+            };
+        } else if (window.isUnit(uStats.id, 'alpha_devil')) {
+            const swordCount = 2;
+            const swordDmgPct = 0.10;
+            const swordTicks = 10;
+            const swordCooldown = 20;
+            const avgSwordDps = (swordCount * swordTicks * swordDmgPct * avgHit) / swordCooldown;
+            attackMultiplier = 1 + (avgSwordDps * usedSpa / avgHit);
+            extraAttacksData = {
+                req: "Phantom Swords (On Crit)",
+                hits: `${swordCount} Swords / 20s`,
+                extra: avgSwordDps * usedSpa / avgHit,
+                attacksNeeded: 1,
+                mult: attackMultiplier,
+                label: "Show me your motivation",
+                swordDps: avgSwordDps
+            };
+        } else if (uStats.followUp) {
+            attackMultiplier = 1 + (uStats.followUp / 100);
+            extraAttacksData = { req: "N/A", hits: attackMultiplier, extra: uStats.followUp / 100, attacksNeeded: 1, mult: attackMultiplier, label: "Chain Lightning" };
+        } else if (uStats.reqCrits && uStats.hitCount) {
+            const critsPerAttack = uStats.hitCount * (finalCritRate / 100);
+            if (critsPerAttack > 0) {
+                const attacksToTrigger = uStats.reqCrits / critsPerAttack;
+                attackMultiplier = 1 + (uStats.extraAttacks / attacksToTrigger);
+                extraAttacksData = { req: uStats.reqCrits, hits: uStats.hitCount, extra: uStats.extraAttacks, attacksNeeded: attacksToTrigger, mult: attackMultiplier };
+            }
         }
+        
+        hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
+        bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
+        normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
     }
 
-    let hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
-    let bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
-    let normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
+    if (uStats.customFollowUp) {
+        const cooldown = uStats.customFollowUp.cooldown;
+        const fuaDmgMult = uStats.customFollowUp.dmgMult || 1.0;
+        const fuaAnim = uStats.customFollowUp.fuaAnimation || 0;
+        const fuaDotPct = uStats.customFollowUp.dotPct || 75;
+
+        if (cooldown) {
+            // Account for time lost to FUA animation within the cooldown window (Timeline standard: 60s)
+            const timeFrame = 60;
+            const fuaCount = timeFrame / cooldown;
+            const lockedTime = fuaCount * fuaAnim;
+            const availableTime = Math.max(0, timeFrame - lockedTime);
+            const normalHits = Math.round(availableTime / finalSpa); // Rounded to closest number per request
+            
+            const totalHitsDealt = normalHits + (fuaCount * fuaDmgMult);
+            const windowMultiplier = totalHitsDealt / Math.max(1, normalHits);
+            
+            hitDpsTotal = (totalHitsDealt * avgHit / timeFrame) * placement;
+            bossHitDpsTotal = (totalHitsDealt * avgHitBoss / timeFrame) * placement;
+            
+            // Update Used SPA for UI display to reflect the average speed including FUA delay
+            const normalHitsPerCycle = (cooldown - fuaAnim) / finalSpa;
+            usedSpa = cooldown / (normalHitsPerCycle + 1);
+            
+            extraAttacksData = {
+                req: `Fixed CD: ${cooldown}s`,
+                hits: `${fuaDmgMult}x Dmg FUA`,
+                extra: 0,
+                attacksNeeded: 1,
+                mult: windowMultiplier,
+                label: uStats.customFollowUp.label || "Follow-Up",
+                usedSpa: usedSpa
+            };
+        } else {
+            const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+            let chance = uStats.customFollowUp.chance;
+            if (eLevel >= uStats.customFollowUp.eLevelReq) chance = uStats.customFollowUp.eLevelChance;
+
+            const atkAnim = effectiveSpaCap;
+            const timeIfFua = Math.max(finalSpa, atkAnim + fuaAnim);
+            const timeIfNoFua = Math.max(finalSpa, atkAnim);
+            usedSpa = (chance / 100) * timeIfFua + (1 - (chance / 100)) * timeIfNoFua;
+            attackMultiplier = 1 + (chance / 100) * fuaDmgMult;
+
+            hitDpsTotal = (avgHit / usedSpa) * placement * attackMultiplier;
+            bossHitDpsTotal = (avgHitBoss / usedSpa) * placement * attackMultiplier;
+
+            extraAttacksData = {
+                req: `Follow-Up (${chance}%)`,
+                hits: `1 + ${fuaDmgMult}x`,
+                extra: (chance / 100) * fuaDmgMult,
+                attacksNeeded: 1,
+                mult: attackMultiplier,
+                label: uStats.customFollowUp.label || "Follow-Up",
+                usedSpa: usedSpa
+            };
+        }
+    }
 
     if (isFusedWarrior && isAbility) {
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
@@ -704,15 +745,24 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     if (uStats.customFollowUp) {
-        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
-        let chance = uStats.customFollowUp.chance;
-        if (eLevel >= uStats.customFollowUp.eLevelReq) chance = uStats.customFollowUp.eLevelChance;
+        const cooldown = uStats.customFollowUp.cooldown;
+        const fuaDmgMult = uStats.customFollowUp.dmgMult || 1.0;
+        const fuaDotPct = uStats.customFollowUp.dotPct || 0;
 
-        let dotPct = uStats.customFollowUp.dotPct || 0;
-        let followUpDotDmg = finalDmg * (dotPct / 100);
-        let followUpDotDmgBoss = finalDmgBoss * (dotPct / 100);
-        let followUpDotDpsPerCycle = (followUpDotDmg * (chance / 100)) / usedSpa;
-        let followUpDotDpsPerCycleBoss = (followUpDotDmgBoss * (chance / 100)) / usedSpa;
+        let followUpDotDpsPerCycle, followUpDotDpsPerCycleBoss, followUpDotDmg, chance = 100;
+
+        if (cooldown) {
+            // DoT is 75% of FUA damage (which is 1.2x base)
+            followUpDotDmg = finalDmg * fuaDmgMult * (fuaDotPct / 100);
+            followUpDotDpsPerCycle = followUpDotDmg / cooldown;
+            followUpDotDpsPerCycleBoss = (finalDmgBoss * fuaDmgMult * (fuaDotPct / 100)) / cooldown;
+        } else {
+            const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+            chance = (eLevel >= uStats.customFollowUp.eLevelReq) ? uStats.customFollowUp.eLevelChance : uStats.customFollowUp.chance;
+            followUpDotDmg = finalDmg * fuaDmgMult * (fuaDotPct / 100);
+            followUpDotDpsPerCycle = (followUpDotDmg * (chance / 100)) / usedSpa;
+            followUpDotDpsPerCycleBoss = (finalDmgBoss * fuaDmgMult * (fuaDotPct / 100) * (chance / 100)) / usedSpa;
+        }
 
         finalDotDps += followUpDotDpsPerCycle * placement;
         finalBossDotDps += followUpDotDpsPerCycleBoss * placement;
@@ -722,7 +772,7 @@ function calculateDPS(uStats, relicStats, context) {
             dotBreakdown.fuaDotTotalDmg = followUpDotDmg;
             dotBreakdown.fuaDotDuration = uStats.customFollowUp.dotDuration;
             dotBreakdown.fuaChance = chance;
-            dotBreakdown.fuaLabel = "Shadow Emerge (FUA)";
+            dotBreakdown.fuaLabel = (uStats.customFollowUp.label || "Follow-Up") + " DoT";
         }
     }
 
@@ -783,6 +833,7 @@ function calculateDPS(uStats, relicStats, context) {
         summonData,
         detailedBuffs: detailedBuffs,
         spa: usedSpa,
+        finalSpa: finalSpa, // Expose final un-averaged shooting SPA for Speed Calculation panel
         spaCap: effectiveSpaCap,
         range: finalRange,
         passiveRange: (uStats.passiveRange || 0) + eternalRangeBuff,

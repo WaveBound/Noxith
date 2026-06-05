@@ -403,7 +403,8 @@ const guideData = [
     { unit: "marine_hero", img: "images/units/MarineHero.png", isCalculated: true },
     { unit: "sharpshooter_king_trapper", img: "images/units/SharpshooterKingTrapper.png", isCalculated: true },
     { unit: "ultimate_fused_warrior", img: "images/units/UltimateFusedWarrior.png", isCalculated: true },
-    { unit: "angel_born_in_hell", img: "images/units/AngelBornInHell.png", isCalculated: true }
+    { unit: "angel_born_in_hell", img: "images/units/AngelBornInHell.png", isCalculated: true },
+    { unit: "nursefather_thumb", img: "images/units/NursefatherThumb.png", isCalculated: true }
 ];
 const elementIcons = {
     "Water": "images/elements/Water.png",

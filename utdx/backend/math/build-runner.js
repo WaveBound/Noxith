@@ -341,7 +341,7 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
     }
 
     // Set Entry
-    const setEntry = getSetFast(liteData.setName) || SETS[2];
+    const setEntry = getSetFast(liteData.setName) || { id: 'none', name: 'None', bonus: {} };
     let totalStats = { set: setEntry.id, dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0 };
 
     const mapStatKey = (k) => {

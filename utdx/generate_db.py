@@ -859,6 +859,7 @@ class GeneratorApp:
                         content = re.sub(r'\bexport\s+const\b', 'const', content)
                         content = re.sub(r'\bexport\s+function\b', 'function', content)
                         content = re.sub(r'\bexport\s+default\b', '', content)
+                        content = re.sub(r'\bexport\s*\{[^}]*\}\s*;?', '', content)
                         combined_js_parts.append(content + "\n")
 
             # Expose library constants to global/window once all are defined to avoid TDZ errors
@@ -883,7 +884,7 @@ if (typeof window !== 'undefined') {
 
             combined_js_parts.append(GENERATOR_SCRIPT)
             combined_js = "".join(combined_js_parts)
-            temp_runner = os.path.join(self.temp_dir, "db_runner.js")
+            temp_runner = os.path.join(self.temp_dir, "db_runner.cjs")
             with open(temp_runner, "w", encoding="utf-8") as f: f.write(combined_js)
 
             # --- DYNAMIC COMBO GENERATION ---
@@ -922,7 +923,10 @@ if (typeof window !== 'undefined') {
                 combinations = []
                 for c in all_combos:
                     fpath = os.path.join(db_dir, get_name(c))
-                    if not os.path.exists(fpath):
+                    # If specific units are selected, we MUST run the combo to merge them into the file
+                    if selected_units:
+                        combinations.append(c)
+                    elif not os.path.exists(fpath):
                         combinations.append(c)
                     else:
                         try:
@@ -1011,6 +1015,7 @@ if (typeof window !== 'undefined') {
                         content = re.sub(r'\bexport\s+const\b', 'const', content)
                         content = re.sub(r'\bexport\s+function\b', 'function', content)
                         content = re.sub(r'\bexport\s+default\b', '', content)
+                        content = re.sub(r'\bexport\s*\{[^}]*\}\s*;?', '', content)
                         combined_js_parts.append(content + "\n")
 
             # Expose library constants to global/window once all are defined to avoid TDZ errors
@@ -1035,7 +1040,7 @@ if (typeof window !== 'undefined') {
 
             combined_js_parts.append(GENERATOR_SCRIPT)
             combined_js = "".join(combined_js_parts)
-            temp_runner = os.path.join(self.temp_dir, "db_runner.js")
+            temp_runner = os.path.join(self.temp_dir, "db_runner.cjs")
             with open(temp_runner, "w", encoding="utf-8") as f: f.write(combined_js)
 
             # --- DYNAMIC COMBO GENERATION ---
@@ -1074,7 +1079,9 @@ if (typeof window !== 'undefined') {
                 combinations = []
                 for c in all_combos:
                     fpath = os.path.join(db_dir, get_name(c))
-                    if not os.path.exists(fpath):
+                    if selected_units:
+                        combinations.append(c)
+                    elif not os.path.exists(fpath):
                         combinations.append(c)
                     else:
                         try:
@@ -1109,7 +1116,8 @@ if (typeof window !== 'undefined') {
 
             def read_err():
                 for line in self.process.stderr:
-                    err_msg = line.strip().replace("'", "\\'")
+                    err_msg = line.strip()
+                    self.window.evaluate_js(f"updateStatus({json.dumps('Node Error: ' + err_msg)})")
                     print(f"Node Error: {err_msg}")
             threading.Thread(target=read_err, daemon=True).start()
 
@@ -1122,12 +1130,12 @@ if (typeof window !== 'undefined') {
                         msg_type = parts[1]
                         if msg_type == "PROGRESS":
                             pct = float(parts[2])
-                            msg = parts[3].replace("'", "\\'") if len(parts) > 3 else ""
-                            self.window.evaluate_js(f"updateProgress({pct}, '{msg}')")
+                            msg = parts[3] if len(parts) > 3 else ""
+                            self.window.evaluate_js(f"updateProgress({pct}, {json.dumps(msg)})")
                         elif msg_type == "LOG":
                             out_name = parts[2]
-                            msg = parts[3].replace("'", "\\'") if len(parts) > 3 else ""
-                            self.window.evaluate_js(f"updateStatus('[{out_name}] {msg}')")
+                            msg = parts[3] if len(parts) > 3 else ""
+                            self.window.evaluate_js(f"updateStatus({json.dumps('[' + out_name + '] ' + msg)})")
                         elif msg_type == "ALL_DONE":
                             self.window.evaluate_js(f"updateProgress(100.0, 'Finalizing saving process...')")
                             break
@@ -1136,8 +1144,7 @@ if (typeof window !== 'undefined') {
             if self.is_running: self.window.evaluate_js(f"onComplete({time.time() - overall_start})")
         except Exception as e:
             if self.is_running: 
-                safe_err = str(e).replace("'", "\\'")
-                self.window.evaluate_js(f"alert('Error: {safe_err}')")
+                self.window.evaluate_js(f"alert({json.dumps('Error: ' + str(e))})")
         finally:
             self.is_running = False
             self.process = None
