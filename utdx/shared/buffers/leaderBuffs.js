@@ -1,7 +1,7 @@
 // ─── LEADER BUFFS ──────────────────────────────────────────
 // Buffs provided dynamically when a unit with a specific leader passive is placed in the First Slot.
 
-export const LEADER_BUFFS = {
+const LEADER_BUFFS = {
     unrivaled_mark: {
         id: "unrivaled_mark",
         name: "Unrivaled Mark",
@@ -72,3 +72,10 @@ export const LEADER_BUFFS = {
         ]
     }
 };
+
+// Bind to window for non-module compatibility
+if (typeof window !== 'undefined') {
+    window.LEADER_BUFFS = LEADER_BUFFS;
+}
+
+export { LEADER_BUFFS };

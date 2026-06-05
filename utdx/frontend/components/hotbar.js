@@ -84,6 +84,9 @@
             { label: 'Rubber Control', val: '+30% Dmg Taken', color: '#f43f5e', skipTeam: true },
             { label: 'Rubber Control', val: '1.5x DoT | Knockback 10 studs | +30% Dmg Taken', color: '#f43f5e', isTeam: true }
         ] : [],
+        'ultimate_fused_warrior': () => [
+            { label: 'Does it Hurt?', val: 'Enemies take 1.3x Dmg', color: '#f43f5e' }
+        ],
         'underworld_god': () => [{ label: 'Primordial Power', val: '30% Slow (3s) | +20% DoT/Affliction', color: '#60a5fa' }],
         'water_god': () => {
             const fx = [
@@ -193,7 +196,7 @@
             } else if (isUnit(leader.id, 'king_sailor') && window.GLOBAL_BUFF_DATA?.kingSailor) {
                 activeBuffs.push({ name: "Unrivaled Mark", color: window.GLOBAL_BUFF_DATA.kingSailor.color, renderLabel: "Mark Synergy: Magi (+15% SPA +50% Dmg), Uncontrollable (+10% SPA +30% Dmg), Water (+10% SPA +20% Dmg)" });
             } else if (isUnit(leader.id, 'angel_born_in_hell')) {
-                activeBuffs.push({ name: "Unrivaled Mark", color: '#a7f3d0', renderLabel: "Mark Synergy: Fused (+50% Dmg +50% Crit Dmg), Super Warrior (+30% Dmg -10% CD), Light (+20% Dmg +5% Crit)" });
+                activeBuffs.push({ name: "Unrivaled Mark", color: '#a7f3d0', renderLabel: "Mark Synergy: Fusion (+50% Dmg +50% Crit Dmg), Super Warrior (+30% Dmg -10% CD), Light (+20% Dmg +5% Crit)" });
             }
         }
 
@@ -312,12 +315,101 @@
             });
 
             const abhBonus = getLeaderBonus(leader, 'angel_born_in_hell', 'unrivaledMark', tags, element, (t, e) => {
-                if (t.includes('Fused')) return 'UNRIVALED: +50% DMG / +50% CDMG (Fused)';
+                if (t.some(tag => ['fused', 'fusion'].includes(tag.toLowerCase()))) return 'UNRIVALED: +50% DMG / +50% CDMG (Fusion)';
                 if (t.includes('Super Warrior')) return 'UNRIVALED: +30% DMG / -10% CD (Super Warrior)';
                 if (e === 'light') return 'UNRIVALED: +20% DMG / +5% CRIT (Light)';
             });
 
             const isLoadout = window.CALCULATION_MODE === 'loadout';
+
+            // --- Pre-evaluate active passives to keep template strings completely unnested ---
+            const jinooInLoadout = isLoadout ? hotbarState.slots.some(s => s && (isUnit(s.id, 'jinoo_shadow_monarch') || isUnit(s.id, 'sjw'))) : true;
+            let passiveHtml = '';
+            let activePassives = unit.passives;
+            if (unit.modes && Array.isArray(unit.modes)) {
+                const activeModeIdx = window.unitModesState?.[unit.id] ?? 0;
+                if (unit.modes[activeModeIdx]?.passives) activePassives = unit.modes[activeModeIdx].passives;
+            }
+            if (activePassives?.length) {
+                passiveHtml = activePassives.map(p => {
+                    if (p.name === "Unrivaled Mark") {
+                        if (isUnit(unit.id, 'king_sailor') || isUnit(unit.id, 'triple_threat')) return null;
+                    }
+                    if (p.name === "Monarch's Devotion" && isLoadout && !jinooInLoadout) return null;
+
+                    const pb = build.detailedBuffs?.passiveBreakdown?.find(item => item.name === p.name);
+                    const parts = [];
+                    const dmgVal = pb ? pb.dmg : (p.passiveDmg || 0);
+                    const spaVal = pb ? pb.spa : (p.passiveSpa || 0);
+                    const critVal = pb ? pb.crit : (p.passiveCrit || 0);
+                    const cdmgVal = pb ? pb.cdmg : (p.passiveCdmg || 0);
+                    const trueVal = pb ? pb.trueDmg || 0 : p.trueDmg || 0;
+                    const dotVal = pb ? pb.dot || 0 : p.dot || 0;
+                    const rangeVal = pb ? pb.range || 0 : p.passiveRange || 0;
+
+                    if (dmgVal !== 0 || (pb && p.name === "Manipulator of Fate")) parts.push(`+${dmgVal}% DMG`);
+                    if (spaVal !== 0 || (pb && p.name === "Manipulator of Fate")) parts.push(`-${spaVal}% SPA`);
+                    if (critVal !== 0) parts.push(`+${critVal}% CRIT`);
+                    if (cdmgVal !== 0) parts.push(`+${cdmgVal}% CDMG`);
+                    if (trueVal !== 0) parts.push(`+${trueVal}% TRUE`);
+                    if (dotVal !== 0) parts.push(`+${dotVal}% DOT`);
+                    if (rangeVal !== 0) parts.push(`+${rangeVal}% RANGE`);
+
+                    const badgeClass = p.name === "Monarch's Devotion" && isLoadout && jinooInLoadout ? 'ts-passive-badge ts-team-badge' : 'ts-passive-badge';
+                    const statsSection = parts.length ? `<span class="ts-passive-stats">${parts.join(' / ')}</span>` : '';
+                    const descSection = p.desc ? `<span class="ts-passive-desc">${p.desc.length > 250 ? p.desc.slice(0, 250).trim() + '…' : p.desc}</span>` : '';
+                    return `
+                        <div class="ts-passive-row">
+                            <div class="${badgeClass}">${p.name === "Monarch's Devotion" && isLoadout && jinooInLoadout ? 'TEAM' : 'PASSIVE'}</div>
+                            <div class="ts-passive-main">
+                                <span class="ts-passive-name">${p.name}</span>
+                                ${statsSection}
+                                ${descSection}
+                            </div>
+                        </div>
+                    `;
+                }).filter(Boolean).join('');
+            }
+
+            let monarchTeamBuff = '';
+            if (isLoadout && hotbarState.slots.some(s => s && isUnit(s.id, 'ant_king_savage')) && jinooInLoadout && !isUnit(unit.id, 'ant_king_savage')) {
+                monarchTeamBuff = `
+                    <div class="ts-passive-row">
+                        <div class="ts-passive-badge ts-team-badge">TEAM</div>
+                        <div class="ts-passive-main">
+                            <span class="ts-passive-name">Monarch's Devotion</span>
+                            <span class="ts-passive-stats">+10% DMG</span>
+                            <span class="ts-passive-desc">Ant King (Savage) buffs all other units in range by +10% Damage.</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            let passivesBlock = '';
+            if (passiveHtml || monarchTeamBuff) {
+                passivesBlock = `
+                    <div class="ts-section-group">
+                        <div class="ts-breakdown-title">PASSIVE ABILITIES</div>
+                        <div class="ts-passives-container">${passiveHtml}${monarchTeamBuff}</div>
+                    </div>
+                `;
+            }
+
+            let synergyBadge = '';
+            if (isLoadout && build.baseStats?.requiresDot) {
+                const req = build.baseStats.requiresDot;
+                const isMet = build.dotData && !build.dotData.inactive;
+                synergyBadge = `<div class="ts-synergy-badge ${isMet ? 'active' : 'missing'}"><i class="fas ${isMet ? 'fa-link' : 'fa-link-slash'}"></i> ${isMet ? 'SYNCED' : 'REQUIRED'}: ${req.toUpperCase()}</div>`;
+            }
+
+            let modeBadge = '';
+            if (unit.modes && Array.isArray(unit.modes)) {
+                const activeMode = window.unitModesState?.[unit.id] ?? 0;
+                const currentMode = unit.modes[activeMode];
+                if (currentMode && unit.modesLabel?.toLowerCase() !== 'summons') {
+                    modeBadge = `<div class="ts-unit-mode" style="margin-top: 4px; font-size: 0.75rem; color: #c084fc; font-weight: 800; background: rgba(192, 132, 252, 0.1); border: 1px solid rgba(192, 132, 252, 0.3); padding: 2px 6px; border-radius: 4px; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; display: inline-block;" title="${currentMode.name}">⚙ MODE: ${currentMode.name.toUpperCase()}</div>`;
+                }
+            }
 
             html += `
                 <div class="ts-unit-card">
@@ -326,21 +418,8 @@
                         <div class="ts-unit-info">
                             <div style="display: flex; align-items: center; flex-wrap: wrap;"><span class="ts-unit-name">${unit.name}</span></div>
                             <div class="ts-unit-trait">${traitName}</div>
-                            ${(() => {
-                    if (unit.modes && Array.isArray(unit.modes)) {
-                        const activeMode = window.unitModesState?.[unit.id] ?? 0;
-                        const currentMode = unit.modes[activeMode];
-                        if (currentMode && unit.modesLabel?.toLowerCase() !== 'summons') {
-                            return `<div class="ts-unit-mode" style="margin-top: 4px; font-size: 0.75rem; color: #c084fc; font-weight: 800; background: rgba(192, 132, 252, 0.1); border: 1px solid rgba(192, 132, 252, 0.3); padding: 2px 6px; border-radius: 4px; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; display: inline-block;" title="${currentMode.name}">⚙ MODE: ${currentMode.name.toUpperCase()}</div>`;
-                        }
-                    }
-                    return '';
-                })()}
-                            ${isLoadout && build.baseStats?.requiresDot ? (() => {
-                    const req = build.baseStats.requiresDot;
-                    const isMet = build.dotData && !build.dotData.inactive;
-                    return `<div class="ts-synergy-badge ${isMet ? 'active' : 'missing'}"><i class="fas ${isMet ? 'fa-link' : 'fa-link-slash'}"></i> ${isMet ? 'SYNCED' : 'REQUIRED'}: ${req.toUpperCase()}</div>`;
-                })() : ''}
+                            ${modeBadge}
+                            ${synergyBadge}
                         </div>
                         <div class="ts-header-right">
                             <div class="ts-dps-box">
@@ -374,78 +453,7 @@
                                 <div class="ts-subs-row"><div class="ts-piece-badge">LEGS</div><div class="ts-subs-list">${formatSubs(subs.legs || [])}</div></div>
                             </div>
                         </div>
-                        ${(() => {
-                    const jinooInLoadout = isLoadout ? hotbarState.slots.some(s => s && (isUnit(s.id, 'jinoo_shadow_monarch') || isUnit(s.id, 'sjw'))) : true;
-                    let passiveHtml = '';
-                    let activePassives = unit.passives;
-                    if (unit.modes && Array.isArray(unit.modes)) {
-                        const activeModeIdx = window.unitModesState?.[unit.id] ?? 0;
-                        if (unit.modes[activeModeIdx]?.passives) activePassives = unit.modes[activeModeIdx].passives;
-                    }
-                    if (activePassives?.length) {
-                        passiveHtml = activePassives.map(p => {
-                            if (p.name === "Unrivaled Mark") {
-                                if (isUnit(unit.id, 'king_sailor')) {
-                                    return null; // King Sailor doesn't get his own mark bonus
-                                } else if (isUnit(unit.id, 'triple_threat')) {
-                                    return null; // Triple Threat doesn't get his own mark bonus
-                                }
-                            }
-                            if (p.name === "Monarch's Devotion" && isLoadout && !jinooInLoadout) return null;
-
-                            const pb = build.detailedBuffs?.passiveBreakdown?.find(item => item.name === p.name);
-                            const parts = [];
-                            const dmgVal = pb ? pb.dmg : (p.passiveDmg || 0);
-                            const spaVal = pb ? pb.spa : (p.passiveSpa || 0);
-                            const critVal = pb ? pb.crit : (p.passiveCrit || 0);
-                            const cdmgVal = pb ? pb.cdmg : (p.passiveCdmg || 0);
-                            const trueVal = pb ? pb.trueDmg || 0 : p.trueDmg || 0;
-                            const dotVal = pb ? pb.dot || 0 : p.dot || 0;
-                            const rangeVal = pb ? pb.range || 0 : p.passiveRange || 0;
-
-                            if (dmgVal !== 0 || (pb && p.name === "Manipulator of Fate")) parts.push(`+${dmgVal}% DMG`);
-                            if (spaVal !== 0 || (pb && p.name === "Manipulator of Fate")) parts.push(`-${spaVal}% SPA`);
-                            if (critVal !== 0) parts.push(`+${critVal}% CRIT`);
-                            if (cdmgVal !== 0) parts.push(`+${cdmgVal}% CDMG`);
-                            if (trueVal !== 0) parts.push(`+${trueVal}% TRUE`);
-                            if (dotVal !== 0) parts.push(`+${dotVal}% DOT`);
-                            if (rangeVal !== 0) parts.push(`+${rangeVal}% RANGE`);
-
-                            const badgeClass = p.name === "Monarch's Devotion" && isLoadout && jinooInLoadout ? 'ts-passive-badge ts-team-badge' : 'ts-passive-badge';
-                            return `
-                                        <div class="ts-passive-row">
-                                            <div class="${badgeClass}">${p.name === "Monarch's Devotion" && isLoadout && jinooInLoadout ? 'TEAM' : 'PASSIVE'}</div>
-                                            <div class="ts-passive-main">
-                                                <span class="ts-passive-name">${p.name}</span>
-                                                ${parts.length ? `<span class="ts-passive-stats">${parts.join(' / ')}</span>` : ''}
-                                                ${p.desc ? `<span class="ts-passive-desc">${p.desc.length > 250 ? p.desc.slice(0, 250).trim() + '…' : p.desc}</span>` : ''}
-                                            </div>
-                                        </div>
-                                    `;
-                        }).filter(Boolean).join('');
-                    }
-
-                    let monarchTeamBuff = '';
-                    if (isLoadout && hotbarState.slots.some(s => s && isUnit(s.id, 'ant_king_savage')) && jinooInLoadout && !isUnit(unit.id, 'ant_king_savage')) {
-                        monarchTeamBuff = `
-                                    <div class="ts-passive-row">
-                                        <div class="ts-passive-badge ts-team-badge">TEAM</div>
-                                        <div class="ts-passive-main">
-                                            <span class="ts-passive-name">Monarch's Devotion</span>
-                                            <span class="ts-passive-stats">+10% DMG</span>
-                                            <span class="ts-passive-desc">Ant King (Savage) buffs all other units in range by +10% Damage.</span>
-                                        </div>
-                                    </div>
-                                `;
-                    }
-
-                    return (passiveHtml || monarchTeamBuff) ? `
-                                <div class="ts-section-group">
-                                    <div class="ts-breakdown-title">PASSIVE ABILITIES</div>
-                                    <div class="ts-passives-container">${passiveHtml}${monarchTeamBuff}</div>
-                                </div>
-                            ` : '';
-                })()}
+                        ${passivesBlock}
                     </div>
                     <div class="ts-lower-row" style="margin-top: auto;">
                         ${ksBonus ? `<div class="ts-bonus-pill" style="margin-bottom: 8px; display: inline-block;"><span class="ks-text">${ksBonus}</span></div>` : ''}
@@ -474,7 +482,8 @@
 
         const maxSlowVal = Math.max(...slows.map(s => parseInt(s.val.match(/(\d+)%/)?.[1] || 0)), 0);
         slows.forEach(s => {
-            const matchVal = parseInt(s.val.match(/(\d+)%/)?.[1] || 0);
+            const match = s.val.match(/(\d+)%/);
+            const matchVal = match ? parseInt(match[1]) : 0;
             uniqueTeamEffects.push({ ...s, isMaxEffect: matchVal === maxSlowVal && maxSlowVal > 0 });
         });
 
@@ -587,7 +596,7 @@
                     <div class="hotbar-stat-group dps-group" title="Total Team DPS">
                         <div class="stat-label">TOTAL DPS</div>
                         <div class="stat-value-box dps-value-box">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                             <span id="totalTeamDps">0</span>
                         </div>
                     </div>
@@ -708,7 +717,7 @@
             components.forEach(name => {
                 const compId = callWin('getUnitId', name);
                 if (!hotbarState.slots.some(s => s && s.id === compId)) {
-                    const compUnit = typeof unitDatabase !== 'undefined' && unitDatabase.find(x => x.id === compId);
+                    const compUnit = typeof unitDatabase !== 'undefined' ? unitDatabase.find(x => x.id === compId) : null;
                     if (compUnit) {
                         _executeAddUnit(compUnit, true);
                         addedCount++;
@@ -862,7 +871,8 @@
             'miku': ['miku'], 'enlightenedgod': ['enlightenedGod'], 'ancient_mage': ['ancientMage'],
             'king_sailor': ['kingSailor', 'unrivaledMark'], 'prodigy_mage': ['mageHill', 'mageGround'],
             'triple_threat': ['unrivaledMark'],
-            'unparalleled_armor': ['bijuu']
+            'unparalleled_armor': ['bijuu'],
+            'angel_born_in_hell': ['unrivaledMark']
         };
 
         const idsToCheck = [...hotbarUnitIds, ...(hotbarState.fusionMode ? activeFusions.map(f => f.id) : [])];

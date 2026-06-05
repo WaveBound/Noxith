@@ -187,21 +187,15 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                 pDmg = 0;
                 let totalAlliedCrit = 0;
                 const hotbarSlots = window.hotbarState?.slots || [];
-                hotbarSlots.forEach(s => {
+                hotbarSlots.forEach((s, slotIdx) => {
                     if (!s) return;
                     if (s.id === uStats.id || (window.isUnit && window.isUnit(s.id, uStats.id))) return;
                     
-                    const build = window.hotbarFilteredBuilds?.[s.id];
-                    if (build) {
-                        const rate = build.subStats?.finalCf !== undefined 
-                            ? build.subStats.finalCf 
-                            : (build.critData?.rate !== undefined ? build.critData.rate : 0);
-                        totalAlliedCrit += rate;
-                    } else {
-                        const sUnit = window.getUnitById ? window.getUnitById(s.id) : null;
-                        if (sUnit) {
-                            totalAlliedCrit += (sUnit.stats?.crit !== undefined ? sUnit.stats.crit : (sUnit.crit || 0));
-                        }
+                    const sUnit = window.getUnitById ? window.getUnitById(s.id) : null;
+                    if (sUnit) {
+                        // Correctly multiply each unit's uncapped crit rate by its placement count
+                        const sPlacement = (s.placement !== undefined) ? s.placement : (sUnit.placement || 1);
+                        totalAlliedCrit += window.getUnitUncappedCrit(sUnit, slotIdx) * sPlacement;
                     }
                 });
                 const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
@@ -294,7 +288,7 @@ window.calcGlobalBuffs = function (uStats, context, headPiece) {
             let isActive = false;
             const overrideKey = buff.id + 'Buff';
 
-            if (buff.hideButton || (buff.id === 'ksailor' && window.isUnit && window.isUnit(uStats.id, 'king_sailor'))) {
+            if (buff.hideButton || (buff.id === 'ksailor' && window.isUnit && window.isUnit(uStats.id, 'king_sailor')) || buff.id === 'unrivaledMark') {
                 isActive = true; // Always evaluate hideButton buffs and King Sailor's own buff
             } else if (context[overrideKey] !== undefined) {
                 isActive = context[overrideKey];
@@ -305,20 +299,88 @@ window.calcGlobalBuffs = function (uStats, context, headPiece) {
             }
 
             if (isActive) {
-                const buffStats = buff.math(uStats, context);
+                let buffStats = buff.math(uStats, context);
+
+                // Check for Angel Born in Hell's Unrivaled Mark manually to complement missing external definitions
+                const unrivaledMarkActive = context.unrivaledMark || window.unrivaledMark || (window.hotbarState?.buffState?.unrivaledMark);
+                const isPotential = window.CALCULATION_MODE === 'potential';
+                const leader = window.hotbarState?.slots?.[0];
+                
+                // Identify who is leading the team (Potential mode assumes self-leadership for testing)
+                const leadingId = isPotential ? uStats.id : (leader ? leader.id : null);
+                
+                if (buff.id === 'unrivaledMark' && leadingId) {
+                    const uTags = uStats.tags || [];
+                    const uElement = String(uStats.element || uStats.stats?.element || '').toLowerCase();
+                    const isAbh = window.isUnit(leadingId, 'angel_born_in_hell');
+                    const isTt = window.isUnit(leadingId, 'triple_threat');
+                    const isKs = window.isUnit(leadingId, 'king_sailor');
+
+                    // Only trigger if forced toggle is on OR if this specific leader is in Slot 1
+                    if (!unrivaledMarkActive && !isPotential && !(leader && leadingId === leader.id)) return;
+
+                    let appliedDmg = 0;
+                    let appliedSpa = 0;
+                    let appliedCdmg = 0;
+                    let appliedCrit = 0;
+                    let appliedRange = 0;
+
+                    if (isAbh) {
+                        if (uTags.includes('Fused') || uTags.includes('Fusion')) {
+                            appliedDmg = 50;
+                            appliedCdmg = 50;
+                        } else if (uTags.includes('Super Warrior')) {
+                            appliedDmg = 30;
+                            appliedSpa = 10;
+                        } else if (uElement === 'light') {
+                            appliedDmg = 20;
+                            appliedCrit = 5;
+                        }
+                    } else if (isTt) {
+                        if (uTags.includes('Piece')) {
+                            appliedDmg = 50;
+                        } else if (uTags.includes('Sword')) {
+                            appliedDmg = 25;
+                            appliedRange = 10;
+                        } else if (uElement === 'wind') {
+                            appliedDmg = 20;
+                            appliedCrit = 5;
+                        }
+                    } else if (isKs) {
+                        if (uTags.includes('Magi')) {
+                            appliedDmg = 50;
+                            appliedSpa = 15;
+                        } else if (uTags.includes('Uncontrollable Power')) {
+                            appliedDmg = 30;
+                            appliedSpa = 10;
+                        } else if (uElement === 'water') {
+                            appliedDmg = 20;
+                            appliedSpa = 10;
+                        }
+                    }
+
+                    buffStats = {
+                        dmg: appliedDmg,
+                        spa: appliedSpa,
+                        cdmg: appliedCdmg,
+                        crit: appliedCrit,
+                        range: appliedRange
+                    };
+                }
 
                 if (headPiece === 'junior' && ['miku', 'enlightenedgod', 'ksailor', 'bijuu', 'magehill'].includes(buff.id)) {
-                    if (buffStats.dmg) buffStats.dmg *= 1.1;
+                    if (buffStats.dmg || buffStats.damage) { let k = buffStats.dmg ? 'dmg' : 'damage'; buffStats[k] *= 1.1; }
                     if (buffStats.spa) buffStats.spa *= 1.1;
                 }
 
                 if (buffStats && Object.keys(buffStats).length > 0) {
                     activeGlobalBuffs[buff.id] = buffStats;
-                    if (buffStats.dmg) globalDmg += buffStats.dmg;
-                    if (buffStats.spa) globalSpa += buffStats.spa;
-                    if (buffStats.range) globalRange += buffStats.range;
-                    if (buffStats.crit) globalCrit += buffStats.crit;
-                    if (buffStats.cdmg) globalCdmg += buffStats.cdmg;
+                    const s = buffStats;
+                    globalDmg += s.dmg || s.damage || 0;
+                    globalSpa += s.spa || 0;
+                    globalRange += s.range || s.rangeBonus || 0;
+                    globalCrit += s.crit || s.critRate || s.cRate || 0;
+                    globalCdmg += s.cdmg || s.critDmg || s.cDmg || 0;
                 }
             }
         });

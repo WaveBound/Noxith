@@ -73,7 +73,6 @@ function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsT
         relevantBuilds.forEach(build => {
             let relevantHeads = headsToProcess.map(h => h === 'rebellious_head' ? 'bloodline_head' : h);
             if (!isDotPossible) relevantHeads = relevantHeads.filter(h => h !== 'ninja');
-            // Bloodline head works for everyone now
 
             relevantHeads.forEach(headMode => {
                 const runOpt = (dmgP, spaP, rangeP, optType) => {
@@ -156,7 +155,6 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
     }
 
     // Add 'None' options
-    // Only add 'None' if we aren't forcing a specific relic in that slot
     if (!forcedRelic || forcedRelic.slot !== 'Head') heads.push({ id: 'none', slot: 'Head', setKey: 'none', stars: 1, mainStat: 'none', subs: {} });
     if ((!forcedRelic || forcedRelic.slot !== 'Body') && (bodies.length === 0 || !forcedRelic)) bodies.push({ id: 'none-b', slot: 'Body', setKey: 'none', stars: 1, mainStat: null, subs: {} });
     if ((!forcedRelic || forcedRelic.slot !== 'Legs') && (legs.length === 0 || !forcedRelic)) legs.push({ id: 'none-l', slot: 'Legs', setKey: 'none', stars: 1, mainStat: null, subs: {} });
@@ -231,7 +229,6 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
                         let res = calculateDPS(effectiveStats, totalStats, context);
 
                         // OPTIMIZATION: Only keep the best for this Trait + Priority + Set combination
-                        // This prevents results from exploding into tens of thousands of entries
                         const bestKey = `${trait.id}-${prio.id}-${activeSetKey}-${head.setKey}`;
                         const currentBest = bestMap.get(bestKey);
 
@@ -301,13 +298,12 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
     const unit = unitDatabase.find(u => u.id === unitId);
     if (!unit) return null;
 
-    // 1. Identify Context from ID Tags (Support both Static ID and Live Toggle)
+    // 1. Identify Context from ID Tags
     const isAbility = liteData.id.includes('ABILITY') || (typeof activeAbilityIds !== 'undefined' && activeAbilityIds.has(unitId));
     const isBuggedMode = liteData.id.includes('-b-');
     const isFixedMode = liteData.id.includes('-f-');
     const isNoSubsMode = liteData.id.includes('-NOSUBS') || (typeof disableSubStats !== 'undefined' && disableSubStats) || (typeof window !== 'undefined' && window.disableSubStats);
 
-    // Determine Logic State based on ID (Override global state for reconstruction)
     const previousDotState = statConfig.applyRelicDot;
     const previousCritState = statConfig.applyRelicCrit;
 
@@ -317,13 +313,11 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
     const isSpaPrio = liteData.prio === 'spa';
     const isRangePrio = liteData.prio === 'range';
 
-    // Use a large value to allow buildCalculationContext to cap at the correct maxPts for the E-level
     let dmgPts = isSpaPrio || isRangePrio ? 0 : 999;
     let spaPts = isSpaPrio ? 999 : 0;
     let rangePts = isRangePrio ? 999 : 0;
 
     // Use Unified Context Builder
-    // NOTE: passing traitName here, helper will resolve it
     const { effectiveStats, context } = buildCalculationContext(unit, liteData.traitName, {
         isAbility,
         dmgPoints: dmgPts,
@@ -336,14 +330,12 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
 
     if (ctxOverrides) Object.assign(context, ctxOverrides);
 
-    // Auto-sync hotbar buff toggles into context for hotbar units
+    // FIX: Auto-sync hotbar buff toggles into context for hotbar units (Sync both true and false states)
     if (context.isHotbar && window.hotbarState && window.hotbarState.buffState) {
         Object.entries(window.hotbarState.buffState).forEach(([key, val]) => {
-            if (val === true) {
-                const buffConfig = (window.GLOBAL_BUFF_DATA || {})[key];
-                if (buffConfig && buffConfig.stateKey) {
-                    context[buffConfig.stateKey] = true;
-                }
+            const buffConfig = (window.GLOBAL_BUFF_DATA || {})[key];
+            if (buffConfig && buffConfig.stateKey) {
+                context[buffConfig.stateKey] = val;
             }
         });
     }
@@ -379,7 +371,6 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
     }
 
     // 2. FILL MISSING BASE STATS (Auto-fill for Static DB)
-    // Only needed if we didn't have explicit substats in the liteData (older db format or static fallback)
     const addBaseFills = (slot, mainStatType) => {
         const existingTypes = new Set();
         if (liteData.subStats && liteData.subStats[slot] && Array.isArray(liteData.subStats[slot])) {
@@ -412,7 +403,6 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
     effectiveStats.context = context;
     const result = calculateDPS(effectiveStats, totalStats, context);
 
-    // Re-attach identity info for the UI
     result.setName = liteData.setName;
     result.traitName = liteData.traitName;
 

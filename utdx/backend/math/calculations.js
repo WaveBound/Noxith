@@ -4,6 +4,86 @@
 // All other logic: lookups.js, context-builder.js, build-runner.js
 // ============================================================================
 
+// --- REAL-TIME ALLY CRIT RESOLVER (Bypasses rendering latency/dependencies) ---
+window.getUnitUncappedCrit = function(slotUnit, slotIndex) {
+    if (!slotUnit) return 0;
+    
+    const build = window.hotbarFilteredBuilds?.[slotUnit.id] || window.unitActiveBuilds?.[slotUnit.id];
+    let crit = 0;
+    
+    if (build && build.critData) {
+        // Read uncapped raw rate to allow values over 100% for conversion
+        crit = build.critData.rawRate || build.critData.rate || 0;
+    } else {
+        crit = slotUnit.stats?.crit || slotUnit.crit || 0;
+    }
+    
+    const hState = window.hotbarState;
+    if (hState && hState.buffState) {
+        // 1. Fern (Ground) Buff
+        if (hState.buffState.mageGround) {
+            const uType = (slotUnit.placementType || 'Ground').toLowerCase();
+            const isMatching = (uType === 'ground' || uType === 'hybrid');
+            const isFernSelf = window.isUnit(slotUnit.id, 'prodigy_mage');
+            if (isMatching || isFernSelf) {
+                const targets = hState.fernTargets || [];
+                const isFernPresent = hState.slots.some(s => s && window.isUnit(s.id, 'prodigy_mage'));
+                if (isFernPresent) {
+                    // FIX: Fern only receives her own buff if she is explicitly selected as a target
+                    if (targets.includes(slotIndex)) {
+                        crit += 45;
+                    }
+                }
+            }
+        }
+        
+        // 2. Ancient Mage Buff
+        if (hState.buffState.ancientMage) {
+            if (!window.isUnit(slotUnit.id, 'ancient_mage')) {
+                crit += 20;
+            }
+        }
+        
+        // 3. King Sailor Buff
+        if (hState.buffState.kingSailor || hState.buffState.ksailor) {
+            if (!window.isUnit(slotUnit.id, 'king_sailor')) {
+                crit += 10;
+            }
+        }
+        
+        // 4. Leader Buff (Unrivaled Mark)
+        const isPotential = window.CALCULATION_MODE === 'potential';
+        const leader = hState.slots[0];
+        const unrivaledMarkActive = hState.buffState?.unrivaledMark || window.unrivaledMark;
+        
+        if (isPotential) {
+            const element = String(slotUnit.element || slotUnit.stats?.element || '').toLowerCase();
+            const isSelfAbh = window.isUnit(slotUnit.id, 'angel_born_in_hell');
+            const isSelfTt = window.isUnit(slotUnit.id, 'triple_threat');
+            
+            // In Potential Mode, leaders automatically receive their own unrivaled mark crit buff by default
+            if (unrivaledMarkActive || isSelfTt) {
+                if (element === 'wind') crit += 5;
+            }
+            if (unrivaledMarkActive || isSelfAbh) {
+                if (element === 'light') {
+                    crit += 5;
+                }
+            }
+        } else if (leader) {
+            const element = String(slotUnit.element || slotUnit.stats?.element || '').toLowerCase();
+            if (window.isUnit(leader.id, 'triple_threat') && element === 'wind') {
+                crit += 5;
+            }
+            if (window.isUnit(leader.id, 'angel_born_in_hell') && element === 'light') {
+                crit += 5;
+            }
+        }
+    }
+    
+    return crit;
+};
+
 // ==========================================================
 // CORE CALCULATION PIPELINE
 // ==========================================================
@@ -135,7 +215,7 @@ function calculateDPS(uStats, relicStats, context) {
                 const sMode = (window.unitModesState && window.unitModesState[sUnit.id]) || 0;
                 if (sUnit.modes && sUnit.modes[sMode]) {
                     const m = sUnit.modes[sMode];
-                    if (m.dotType === requiresDot && (m.dot > 0 || (m.customFollowUp && m.customFollowUp.dotType === requiresDot))) return true;
+                    if (m.dotType === uStats.requiresDot && (m.dot > 0 || (m.customFollowUp && m.customFollowUp.dotType === uStats.requiresDot))) return true;
                 }
                 return false;
             });
@@ -230,22 +310,20 @@ function calculateDPS(uStats, relicStats, context) {
         finalCritRate = 50;
         rawCritRate = 50;
 
-        // Converts crit rate of other hotbar units into a dmg bonus, accounting for placements
+        // Converts crit rate of other hotbar units into a dmg bonus, accounting for placements and allowing over 100%
         let otherCritRateSum = 0;
         if (typeof window !== 'undefined' && window.hotbarState?.slots) {
-            window.hotbarState.slots.forEach(slot => {
+            window.hotbarState.slots.forEach((slot, slotIdx) => {
                 if (!slot) return;
                 const baseId = slot.id.split('-')[0];
                 if (baseId === 'angel_born_in_hell') return;
                 
-                const uDb = window.unitDatabase || [];
-                const matchedUnit = uDb.find(u => u.id === baseId);
+                const sUnit = window.getUnitById ? window.getUnitById(slot.id) : null;
+                if (!sUnit) return;
                 
-                // Pull active uncapped crit rate (finalCf) from the builds registry to support external buffs
-                const activeBuildOfAlly = window.unitActiveBuilds?.[baseId];
-                const critRate = activeBuildOfAlly ? (activeBuildOfAlly.subStats?.finalCf || 0) : (matchedUnit?.stats?.crit || 0);
-                
-                const placementVal = matchedUnit?.placement || 1;
+                // Use the real-time uncapped helper to resolve Fern (Ground) and other active buffs
+                const critRate = window.getUnitUncappedCrit(sUnit, slotIdx);
+                const placementVal = sUnit.placement || 1;
                 otherCritRateSum += (critRate * placementVal);
             });
         }
@@ -274,7 +352,13 @@ function calculateDPS(uStats, relicStats, context) {
         }
     }
 
-    let finalDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
+    // Apply "Does it Hurt?" 1.3x multiplier to final damage for Ultimate Fused Warrior
+    let fusedMult = 1.0;
+    if (isFusedWarrior) {
+        fusedMult = 1.3;
+    }
+
+    let finalDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult * fusedMult;
     let finalDmg = finalDmgNormal;
     let finalDmgBoss = finalDmgNormal;
 
@@ -339,7 +423,7 @@ function calculateDPS(uStats, relicStats, context) {
         const unbuffedAvgHit = unbuffedDmg * unbuffedCritMult;
 
         // Buffed state hits (Stance 2)
-        const buffedDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + (additiveTotal + stance2DmgBonus) / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
+        const buffedDmg = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + (additiveTotal + stance2DmgBonus) / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult * fusedMult;
         const buffedCrit = Math.min(finalCritRate + stance2CritBonus, 100);
         const buffedCritMult = 1 + (finalCdmgStat / 100) * (buffedCrit / 100);
         const buffedAvgHit = buffedDmg * buffedCritMult;
@@ -347,7 +431,7 @@ function calculateDPS(uStats, relicStats, context) {
         // Overall cycle math: 6 unbuffed attacks + 3 buffed attacks
         const totalCycleDmg = (6 * unbuffedAvgHit) + (3 * buffedAvgHit);
 
-        // Effective multipliers to align with core game engine's single-value output
+        // Equivalent multipliers to align with core game engine's single-value output
         avgHit = totalCycleDmg / 9; // Weighted hit average
         avgHitBoss = avgHit * bossMult;
         avgHitNormal = avgHit;
@@ -469,7 +553,7 @@ function calculateDPS(uStats, relicStats, context) {
     let tripleThreatFuaDmgNormal = finalDmgNormal;
     if (window.isUnit(uStats.id, 'triple_threat')) {
         const fuaAdditiveTotal = additiveTotal - 25;
-        tripleThreatFuaDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * Math.max(0, 1 + fuaAdditiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
+        tripleThreatFuaDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * Math.max(0, 1 + fuaAdditiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult * fusedMult;
 
         const fuaAvgHit = tripleThreatFuaDmgNormal * avgCritMult;
         const fuaAvgHitBoss = tripleThreatFuaDmgNormal * avgCritMultBoss;
@@ -579,9 +663,6 @@ function calculateDPS(uStats, relicStats, context) {
         const critChance = finalCritRate / 100;
         const critChanceBoss = finalCritRateBoss / 100;
         
-        // 5 ticks over 5 seconds means 1 tick per second. DPS = (Total DoT Dmg / 5) * 5 (since duration is 5s, total dmg is 5 ticks * tick_dmg, tick_dmg = total_dmg / 5, so DPS = tick_dmg = total_dmg / 5).
-        // Wait, standard DoT DPS formula: (Total DoT Damage / duration) * ticks_per_second.
-        // Let's calculate: tick_dmg = ionizedDotDmg / 5. DPS = tick_dmg * 1 = ionizedDotDmg / 5.
         const baseDotDps = (ionizedDotDmg / 5) * critChance;
         const baseDotDpsBoss = (ionizedDotDmgBoss / 5) * critChanceBoss;
         

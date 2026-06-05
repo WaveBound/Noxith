@@ -2,12 +2,166 @@
 // UI-HELPERS.JS - UI Interaction, Global State & Toggle Functions
 // ============================================================================
 
-// --- LOCAL UTILITIES & HELPERS ---
-const getEl = id => document.getElementById(id);
-const qAll = sel => document.querySelectorAll(sel);
-const callIfFn = (name, ...args) => typeof window[name] === 'function' && window[name](...args);
+// --- GLOBAL BUFF DATA (Single Source of Truth & Evaluation Methods) ---
+window.GLOBAL_BUFF_DATA = {
+    miku: {
+        id: 'miku',
+        name: 'Miku',
+        stateKey: 'mikuActive',
+        color: '#38bdf8',
+        desc: 'Apply Miku\'s +100% Damage Buff',
+        tagLabel: 'Miku',
+        math: (uStats, context) => ({ dmg: 100 })
+    },
+    enlightenedGod: {
+        id: 'enlightenedgod',
+        name: 'Enlightened God',
+        stateKey: 'enlightenedGodActive',
+        color: '#fbbf24',
+        desc: 'Apply Enlightened God\'s +20% Damage & +20% SPA Buff',
+        tagLabel: 'Enlightened God',
+        math: (uStats, context) => ({ dmg: 20, spa: 20 })
+    },
+    bijuu: {
+        id: 'bijuu',
+        name: 'Bijuu Link',
+        stateKey: 'bijuuActive',
+        color: '#f87171',
+        desc: 'Apply Bijuu Link\'s +25% Damage, +25% Range, & +15% SPA Buff',
+        tagLabel: 'Bijuu Link',
+        math: (uStats, context) => ({ dmg: 25, range: 25, spa: 15 })
+    },
+    ancientMage: {
+        id: 'ancientmage',
+        name: 'Ancient Mage',
+        stateKey: 'ancientMageActive',
+        color: '#a78bfa',
+        desc: 'Apply Ancient Mage\'s +20% Crit Rate & +20% Crit Dmg Buff',
+        tagLabel: 'Ancient Mage',
+        math: (uStats, context) => {
+            if (window.isUnit && window.isUnit(uStats.id, 'ancient_mage')) return {};
+            return { crit: 20, cdmg: 20 };
+        }
+    },
+    kingSailor: {
+        id: 'ksailor',
+        name: 'King Sailor',
+        stateKey: 'kingSailorActive',
+        color: '#60a5fa',
+        desc: 'Apply King Sailor\'s +10% Crit Rate & +25% Crit Dmg Buff',
+        tagLabel: 'King Sailor',
+        math: (uStats, context) => {
+            if (window.isUnit && window.isUnit(uStats.id, 'king_sailor')) return {};
+            return { crit: 10, cdmg: 25 };
+        }
+    },
+    mageHill: {
+        id: 'magehill',
+        name: 'Fern (Hill)',
+        stateKey: 'mageHillActive',
+        color: '#34d399',
+        desc: 'Apply Fern (Hill)\'s +30% SPA Buff to Hill/Hybrid units',
+        tagLabel: 'Fern (Hill)',
+        excludes: 'mageGround',
+        math: (uStats, context) => {
+            const pType = (uStats.placementType || uStats.placement || 'Ground').toLowerCase();
+            const isMatching = (pType === 'hill' || pType === 'hybrid');
+            const isFernSelf = window.isUnit && window.isUnit(uStats.id, 'prodigy_mage');
+            if (isMatching || isFernSelf) {
+                if (window.CALCULATION_MODE === 'loadout' && window.hotbarState) {
+                    const slots = window.hotbarState.slots || [];
+                    const slotIdx = slots.findIndex(s => s && s.id === uStats.id);
+                    const isFernPresent = slots.some(s => s && window.isUnit && window.isUnit(s.id, 'prodigy_mage'));
+                    if (isFernPresent && !isFernSelf) {
+                        const targets = window.hotbarState.fernTargets || [];
+                        if (!targets.includes(slotIdx)) return {};
+                    }
+                }
+                return { spa: 30 };
+            }
+            return {};
+        }
+    },
+    mageGround: {
+        id: 'mageground',
+        name: 'Fern (Ground)',
+        stateKey: 'mageGroundActive',
+        color: '#60a5fa',
+        desc: 'Apply Fern (Ground)\'s +45% Crit Rate Buff to Ground/Hybrid units',
+        tagLabel: 'Fern (Ground)',
+        excludes: 'mageHill',
+        math: (uStats, context) => {
+            const pType = (uStats.placementType || uStats.placement || 'Ground').toLowerCase();
+            const isMatching = (pType === 'ground' || pType === 'hybrid');
+            const isFernSelf = window.isUnit && window.isUnit(uStats.id, 'prodigy_mage');
+            if (isMatching || isFernSelf) {
+                if (window.CALCULATION_MODE === 'loadout' && window.hotbarState) {
+                    const slots = window.hotbarState.slots || [];
+                    const slotIdx = slots.findIndex(s => s && s.id === uStats.id);
+                    const isFernPresent = slots.some(s => s && window.isUnit && window.isUnit(s.id, 'prodigy_mage'));
+                    if (isFernPresent && !isFernSelf) {
+                        const targets = window.hotbarState.fernTargets || [];
+                        if (!targets.includes(slotIdx)) return {};
+                    }
+                }
+                return { crit: 45 };
+            }
+            return {};
+        }
+    },
+    unrivaledMark: {
+        id: 'unrivaledMark',
+        name: 'Unrivaled Mark',
+        stateKey: 'unrivaledMarkActive',
+        color: '#10b981',
+        desc: 'Apply Unrivaled Mark Leader Buff from Triple Threat / King Sailor / Angel Born in Hell',
+        tagLabel: 'Unrivaled Mark',
+        hideButton: true,
+        math: (uStats, context) => {
+            const isPotential = window.CALCULATION_MODE === 'potential';
+            const unrivaledMarkActive = context.unrivaledMark || window.unrivaledMark || (window.hotbarState?.buffState?.unrivaledMark);
+            const leader = window.hotbarState?.slots?.[0];
+            
+            let activeLeaderId = null;
+            if (isPotential) {
+                if (window.isUnit && window.isUnit(uStats.id, 'king_sailor')) {
+                    activeLeaderId = 'king_sailor';
+                } else if (window.isUnit && window.isUnit(uStats.id, 'angel_born_in_hell')) {
+                    activeLeaderId = 'angel_born_in_hell';
+                } else {
+                    activeLeaderId = 'triple_threat';
+                }
+            } else if (leader) {
+                activeLeaderId = leader.id;
+            }
 
-// --- 1. DUAL BUFF CONTEXT SYSTEM ---
+            if (!activeLeaderId || !unrivaledMarkActive) return {};
+
+            const tags = uStats.tags || [];
+            const rawElement = uStats.element || uStats.stats?.element || "";
+            const element = String(rawElement).toLowerCase();
+
+            if (window.isUnit && window.isUnit(activeLeaderId, 'triple_threat')) {
+                if (tags.includes('Piece')) return { dmg: 50, costReduction: 7.5 };
+                if (tags.includes('Sword')) return { dmg: 25, range: 10 };
+                if (element === 'wind') return { dmg: 20, crit: 5 };
+            }
+            if (window.isUnit && window.isUnit(activeLeaderId, 'king_sailor')) {
+                if (tags.includes('Magi')) return { dmg: 50, spa: 15 };
+                if (tags.includes('Uncontrollable Power')) return { dmg: 30, spa: 10 };
+                if (element === 'water') return { dmg: 20, spa: 10 };
+            }
+            if (window.isUnit && window.isUnit(activeLeaderId, 'angel_born_in_hell')) {
+                if (tags.includes('Fused') || tags.includes('Fusion')) return { dmg: 50, cdmg: 50 };
+                if (tags.includes('Super Warrior')) return { dmg: 30, spa: 10 };
+                if (element === 'light') return { dmg: 20, crit: 5 };
+            }
+            return {};
+        }
+    }
+};
+
+// --- DUAL BUFF CONTEXT SYSTEM ---
 window.GLOBAL_BUFF_STATE = {};
 window.HOTBAR_BUFF_STATE = {};
 window.CALCULATION_MODE = 'potential';
@@ -67,7 +221,6 @@ window.handleGlobalModeSort = function (value) {
         else el.innerText = labelText;
     });
 
-    // Fully clear caches to force getLiveScore to recalculate with new mode hints for all units
     if (typeof window.resetCachesForBuffChange === 'function') {
         window.resetCachesForBuffChange();
     }
@@ -277,7 +430,6 @@ window.setSystemLevel = function (unitId, value) {
     const input = document.querySelector(`#system-level-${unitId}`);
     if (input && parseInt(input.value) !== lvl) input.value = lvl;
 
-    // Bust sorting cache for this unit so calculations update
     if (window.LIVE_SCORE_CACHE) {
         Object.keys(window.LIVE_SCORE_CACHE).forEach(k => {
             if (k.startsWith(unitId)) delete window.LIVE_SCORE_CACHE[k];
@@ -288,12 +440,10 @@ window.setSystemLevel = function (unitId, value) {
         window.unitBuildsCache[unitId] = { base: { fixed: [null] }, abil: { fixed: [null] } };
     }
 
-    // Refresh dynamic active build parameters for the unit in the global registry
     if (typeof window.refreshActiveBuild === 'function' && unit) {
         window.refreshActiveBuild(unit);
     }
 
-    // Update the card display to reflect changes, keeping card in place
     setTimeout(() => {
         callIfFn('updateBuildListDisplay', unitId, true);
         callIfFn('updateHotbarUI');
@@ -335,12 +485,10 @@ window.selectELevel = function (unitId, level) {
         }
     }
 
-    // Refresh dynamic active build parameters for the unit in the global registry
     if (typeof window.refreshActiveBuild === 'function' && unit) {
         window.refreshActiveBuild(unit);
     }
 
-    // Update the card display to reflect changes, keeping card in place
     callIfFn('updateBuildListDisplay', unitId, true);
 };
 
@@ -633,3 +781,8 @@ window.showToast = (msg) => {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 };
+
+// --- HELPER COMPATIBILITY BINDINGS ---
+const callIfFn = (name, ...args) => typeof window[name] === 'function' && window[name](...args);
+const getEl = id => document.getElementById(id);
+const qAll = sel => document.querySelectorAll(sel);

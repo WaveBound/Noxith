@@ -2,7 +2,7 @@
 // These are globally toggleable buffs applied to units.
 // spa is stored as a positive number internally to represent cooldown reduction in %
 
-export const GLOBAL_UNIT_BUFFS = {
+const GLOBAL_UNIT_BUFFS = {
     miku: {
         id: "miku",
         name: "Miku",
@@ -41,3 +41,10 @@ export const GLOBAL_UNIT_BUFFS = {
         restriction: "Ground"
     }
 };
+
+// Bind to window for non-module compatibility
+if (typeof window !== 'undefined') {
+    window.GLOBAL_UNIT_BUFFS = GLOBAL_UNIT_BUFFS;
+}
+
+export { GLOBAL_UNIT_BUFFS };

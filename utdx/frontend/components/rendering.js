@@ -1778,3 +1778,20 @@ window.processUnitCache = processUnitCache;
 window.renderUnitCard = renderUnitCard;
 window.renderListInternal = undefined; // Unused as top-level since it's internalized
 window.updateBuildListDisplay = updateBuildListDisplay;
+
+// Post-load patch to intercept unitControls['angel_born_in_hell'] and correct the labeled mark display
+setTimeout(() => {
+    const key = 'angel_born_in_hell';
+    if (window.unitControls && window.unitControls[key]) {
+        const original = window.unitControls[key];
+        window.unitControls[key] = function(unit) {
+            let html = original(unit);
+            // Dynamic check that handles potential mode (works on self) and correct mapping replacements
+            if (unit.tags && (unit.tags.includes('Fusion') || unit.tags.includes('Fused')) && html.includes('Super Warrior')) {
+                html = html.replace(/UNRIVALED: \+30% DMG \/ -10% CD \(Super Warrior\)/g, 'UNRIVALED: +50% DMG / +50% CDmg (Fusion)');
+                html = html.replace(/unrivaled-badge-super-warrior/g, 'unrivaled-badge-fusion');
+            }
+            return html;
+        };
+    }
+}, 1000); // 1s timeout ensures the unit scripts have loaded and registered

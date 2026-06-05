@@ -1337,9 +1337,11 @@ function updateHotbarUI() {
         'miku': ['miku'],
         'enlightenedgod': ['enlightenedGod'],
         'ancient_mage': ['ancientMage'],
-        'king_sailor': ['kingSailor'],
+        'king_sailor': ['kingSailor', 'unrivaledMark'],
         'prodigy_mage': ['mageHill', 'mageGround'],
-        'unparalleled_armor': ['bijuu']
+        'unparalleled_armor': ['bijuu'],
+        'triple_threat': ['unrivaledMark'],
+        'angel_born_in_hell': ['unrivaledMark']
     };
 
     const idsToCheck = [...unitIdsInHotbar];
