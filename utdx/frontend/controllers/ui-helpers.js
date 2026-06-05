@@ -72,7 +72,7 @@ window.GLOBAL_BUFF_DATA = {
                     const slots = window.hotbarState.slots || [];
                     const slotIdx = slots.findIndex(s => s && s.id === uStats.id);
                     const isFernPresent = slots.some(s => s && window.isUnit && window.isUnit(s.id, 'prodigy_mage'));
-                    if (isFernPresent && !isFernSelf) {
+                    if (isFernPresent) {
                         const targets = window.hotbarState.fernTargets || [];
                         if (!targets.includes(slotIdx)) return {};
                     }
@@ -99,7 +99,7 @@ window.GLOBAL_BUFF_DATA = {
                     const slots = window.hotbarState.slots || [];
                     const slotIdx = slots.findIndex(s => s && s.id === uStats.id);
                     const isFernPresent = slots.some(s => s && window.isUnit && window.isUnit(s.id, 'prodigy_mage'));
-                    if (isFernPresent && !isFernSelf) {
+                    if (isFernPresent) {
                         const targets = window.hotbarState.fernTargets || [];
                         if (!targets.includes(slotIdx)) return {};
                     }

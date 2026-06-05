@@ -49,12 +49,25 @@
         callWin('applyBuffContext', hotbarState.buffState);
 
         const hidden = $('#hotbarHiddenRender');
-        const ids = [...hotbarState.slots.filter(Boolean).map(u => u.id), ...hotbarState.activeFusionIds];
+        const uniqueIds = [...new Set([...hotbarState.slots.filter(Boolean).map(u => u.id), ...hotbarState.activeFusionIds])];
 
-        [...new Set(ids)].forEach(id => {
+        // Two-Pass Update: Process dependency-based units last so they see updated ally stats (e.g. ABH Ally Crit)
+        const dependencyUnits = ['angel_born_in_hell', 'king_sailor', 'underworld_god', 'marine_hero'];
+        const sortedIds = [
+            ...uniqueIds.filter(id => !dependencyUnits.some(d => isUnit(id, d))),
+            ...uniqueIds.filter(id => dependencyUnits.some(d => isUnit(id, d)))
+        ];
+
+        // Clear dependency-linked caches for all team members before starting update pass
+        // This ensures ABH doesn't read stale builds for allies during his own recalculation.
+        sortedIds.forEach(id => {
+            if (window.hotbarFilteredBuilds) delete window.hotbarFilteredBuilds[id];
+            if (window.unitActiveBuilds) delete window.unitActiveBuilds[id];
+        });
+
+        sortedIds.forEach(id => {
             const u = callWin('getUnitById', id);
             if (!u || u.tags?.includes('Assistant')) return;
-
             if (!$(`#card-${id}`) && hidden && typeof renderUnitCard === 'function') {
                 hidden.appendChild(renderUnitCard(u, 0));
             }
@@ -85,7 +98,7 @@
             { label: 'Rubber Control', val: '1.5x DoT | Knockback 10 studs | +30% Dmg Taken', color: '#f43f5e', isTeam: true }
         ] : [],
         'ultimate_fused_warrior': () => [
-            { label: 'Does that hurt?', val: '+30% Dmg Taken (Consecutive Hits)', color: '#f43f5e' }
+            { label: 'Does it Hurt?', val: 'Enemies take 1.3x Dmg', color: '#f43f5e' }
         ],
         'underworld_god': () => [{ label: 'Primordial Power', val: '30% Slow (3s) | +20% DoT/Affliction', color: '#60a5fa' }],
         'water_god': () => {
@@ -302,19 +315,19 @@
             const cdmgStr = subs.finalCm != null ? Math.round(subs.finalCm) + '%' : '—';
 
             const tags = unit.tags || [], element = String(unit.element || unit.stats?.element || unit.meta?.element || '').toLowerCase();
-            const ksBonus = getLeaderBonus(unit.id, leader, 'king_sailor', 'kingSailor', tags, element, (t, e) => {
+            const ksBonus = getLeaderBonus(leader, 'king_sailor', 'kingSailor', tags, element, (t, e) => {
                 if (t.includes('Magi')) return 'MAGI: +50% DMG / +15% SPA';
                 if (t.includes('Uncontrollable Power')) return 'UNCONTROLLABLE: +30% DMG / +10% SPA';
                 if (e === 'water') return 'WATER: +20% DMG / +10% SPA';
             });
 
-            const ttBonus = getLeaderBonus(unit.id, leader, 'triple_threat', 'triple_threat', tags, element, (t, e) => {
+            const ttBonus = getLeaderBonus(leader, 'triple_threat', 'triple_threat', tags, element, (t, e) => {
                 if (t.includes('Piece')) return 'UNRIVALED: +50% DMG (Piece)';
                 if (t.includes('Sword')) return 'UNRIVALED: +25% DMG (Sword)';
                 if (e === 'wind') return 'UNRIVALED: +20% DMG / +5% CRIT (Wind)';
             });
 
-            const abhBonus = getLeaderBonus(unit.id, leader, 'angel_born_in_hell', 'unrivaledMark', tags, element, (t, e) => {
+            const abhBonus = getLeaderBonus(leader, 'angel_born_in_hell', 'unrivaledMark', tags, element, (t, e) => {
                 if (t.some(tag => ['fused', 'fusion'].includes(tag.toLowerCase()))) return 'UNRIVALED: +50% DMG / +50% CDMG (Fusion)';
                 if (t.includes('Super Warrior')) return 'UNRIVALED: +30% DMG / -10% CD (Super Warrior)';
                 if (e === 'light') return 'UNRIVALED: +20% DMG / +5% CRIT (Light)';
@@ -323,78 +336,53 @@
             const isLoadout = window.CALCULATION_MODE === 'loadout';
 
             // --- Pre-evaluate active passives to keep template strings completely unnested ---
-            const jinooInLoadout = isLoadout ? hotbarState.slots.some(s => s && (isUnit(s.id, 'jinoo_shadow_monarch') || isUnit(s.id, 'sjw'))) : true;
-            let passiveHtml = '';
-            let activePassives = unit.passives;
-            if (unit.modes && Array.isArray(unit.modes)) {
+            let passivesBlock = '';
+            if (build.detailedBuffs?.passiveBreakdown) {
+                const nativePassives = new Map((unit.passives || []).map(p => [p.name, p]));
                 const activeModeIdx = window.unitModesState?.[unit.id] ?? 0;
-                if (unit.modes[activeModeIdx]?.passives) activePassives = unit.modes[activeModeIdx].passives;
-            }
-            if (activePassives?.length) {
-                passiveHtml = activePassives.map(p => {
-                    if (p.name === "Unrivaled Mark") {
-                        if (isUnit(unit.id, 'king_sailor') || isUnit(unit.id, 'triple_threat')) return null;
-                    }
-                    if (p.name === "Monarch's Devotion" && isLoadout && !jinooInLoadout) return null;
+                if (unit.modes?.[activeModeIdx]?.passives) {
+                    unit.modes[activeModeIdx].passives.forEach(p => nativePassives.set(p.name, p));
+                }
 
-                    const pb = build.detailedBuffs?.passiveBreakdown?.find(item => item.name === p.name);
+                const renderedPassives = build.detailedBuffs.passiveBreakdown.map(pb => {
+                    if (pb.name === "Unit Base (Passive)") return null;
+                    const native = nativePassives.get(pb.name);
+                    const isTeamBuff = !native;
+                    if (pb.name === "Unrivaled Mark" && isUnit(unit.id, 'angel_born_in_hell')) return null;
+
                     const parts = [];
-                    const dmgVal = pb ? pb.dmg : (p.passiveDmg || 0);
-                    const spaVal = pb ? pb.spa : (p.passiveSpa || 0);
-                    const critVal = pb ? pb.crit : (p.passiveCrit || 0);
-                    const cdmgVal = pb ? pb.cdmg : (p.passiveCdmg || 0);
-                    const trueVal = pb ? pb.trueDmg || 0 : p.trueDmg || 0;
-                    const dotVal = pb ? pb.dot || 0 : p.dot || 0;
-                    const rangeVal = pb ? pb.range || 0 : p.passiveRange || 0;
+                    const d = pb.dmg || pb.damage || 0;
+                    const s = pb.spa || 0;
+                    const c = pb.crit || pb.cRate || pb.critRate || 0;
+                    const cm = pb.cdmg || pb.cDmg || pb.critDmg || 0;
+                    const r = pb.range || pb.passiveRange || 0;
 
-                    if (dmgVal !== 0 || (pb && p.name === "Manipulator of Fate")) parts.push(`+${dmgVal}% DMG`);
-                    if (spaVal !== 0 || (pb && p.name === "Manipulator of Fate")) parts.push(`-${spaVal}% SPA`);
-                    if (critVal !== 0) parts.push(`+${critVal}% CRIT`);
-                    if (cdmgVal !== 0) parts.push(`+${cdmgVal}% CDMG`);
-                    if (trueVal !== 0) parts.push(`+${trueVal}% TRUE`);
-                    if (dotVal !== 0) parts.push(`+${dotVal}% DOT`);
-                    if (rangeVal !== 0) parts.push(`+${rangeVal}% RANGE`);
+                    if (d !== 0) parts.push(`+${d}% DMG`);
+                    if (s !== 0) parts.push(`-${s}% SPA`);
+                    if (c !== 0) parts.push(`+${c}% CRIT`);
+                    if (cm !== 0) parts.push(`+${cm}% CDMG`);
+                    if (r !== 0) parts.push(`+${r}% RNG`);
 
-                    const badgeClass = p.name === "Monarch's Devotion" && isLoadout && jinooInLoadout ? 'ts-passive-badge ts-team-badge' : 'ts-passive-badge';
-                    const statsSection = parts.length ? `<span class="ts-passive-stats">${parts.join(' / ')}</span>` : '';
-                    const descSection = p.desc ? `<span class="ts-passive-desc">${p.desc.length > 250 ? p.desc.slice(0, 250).trim() + '…' : p.desc}</span>` : '';
+                    let desc = native ? native.desc : '';
+                    if (pb.name.includes('Holy Aura')) desc = "ABH Buff: +30/50% Damage for units with Follow-Up attacks.";
+                    if (pb.name.includes('Shadow Legion')) desc = "Jinwoo Buff: Massive Damage/Utility for Leveling tagged units.";
+                    if (pb.name.includes("Monarch's Devotion") && isTeamBuff) desc = "Ant King (Savage) buffs all other units in range by +10% Damage.";
+
                     return `
                         <div class="ts-passive-row">
-                            <div class="${badgeClass}">${p.name === "Monarch's Devotion" && isLoadout && jinooInLoadout ? 'TEAM' : 'PASSIVE'}</div>
+                            <div class="ts-passive-badge ${isTeamBuff ? 'ts-team-badge' : ''}">${isTeamBuff ? 'TEAM' : 'PASSIVE'}</div>
                             <div class="ts-passive-main">
-                                <span class="ts-passive-name">${p.name}</span>
-                                ${statsSection}
-                                ${descSection}
+                                <span class="ts-passive-name">${pb.name.replace(' (ABH Buff)', '')}</span>
+                                ${parts.length ? `<span class="ts-passive-stats">${parts.join(' / ')}</span>` : ''}
+                                ${desc ? `<span class="ts-passive-desc">${desc.length > 200 ? desc.slice(0, 200) + '...' : desc}</span>` : ''}
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 }).filter(Boolean).join('');
-            }
 
-            let monarchTeamBuff = '';
-            if (isLoadout && hotbarState.slots.some(s => s && isUnit(s.id, 'ant_king_savage')) && jinooInLoadout && !isUnit(unit.id, 'ant_king_savage')) {
-                monarchTeamBuff = `
-                    <div class="ts-passive-row">
-                        <div class="ts-passive-badge ts-team-badge">TEAM</div>
-                        <div class="ts-passive-main">
-                            <span class="ts-passive-name">Monarch's Devotion</span>
-                            <span class="ts-passive-stats">+10% DMG</span>
-                            <span class="ts-passive-desc">Ant King (Savage) buffs all other units in range by +10% Damage.</span>
-                        </div>
-                    </div>
-                `;
+                if (renderedPassives) {
+                    passivesBlock = `<div class="ts-section-group"><div class="ts-breakdown-title">PASSIVE ABILITIES & SYNERGY</div><div class="ts-passives-container">${renderedPassives}</div></div>`;
+                }
             }
-
-            let passivesBlock = '';
-            if (passiveHtml || monarchTeamBuff) {
-                passivesBlock = `
-                    <div class="ts-section-group">
-                        <div class="ts-breakdown-title">PASSIVE ABILITIES</div>
-                        <div class="ts-passives-container">${passiveHtml}${monarchTeamBuff}</div>
-                    </div>
-                `;
-            }
-
             let synergyBadge = '';
             if (isLoadout && build.baseStats?.requiresDot) {
                 const req = build.baseStats.requiresDot;
@@ -815,7 +803,7 @@
         armorIds.forEach(id => {
             const u = typeof unitDatabase !== 'undefined' && unitDatabase.find(x => x.id === id);
             if (u) {
-                const b = bestBuilds[id] || { dmg: '0', spa: '0', range: '0', crit: '0%', cdmg: '0%', dot: '0' };
+                const b = bestBuilds[id] || { dmg: '0', spa: '0', range: '0', Math: '0%', cdmg: '0%', dot: '0' };
                 const isFused = hotbarState.activeFusionIds.includes(id);
                 contentHtml += `
                     <div class="fusion-card-overlay" onclick="event.stopPropagation();">
@@ -1089,7 +1077,7 @@
         `;
 
         hotbarState.slots.forEach((s, i) => {
-            if (!s || i === idx) return;
+        if (!s) return;
             const isTargeted = hotbarState.fernTargets.includes(i);
             html += `
                 <div class="fern-menu-item" onclick="toggleFernTarget(${i}); openFernTargetMenu();" style="background: #1e293b; border: 2px solid ${isTargeted ? '#8b5cf6' : 'rgba(255,255,255,0.05)'}; border-radius: 12px; padding: 10px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; ${isTargeted ? 'box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);' : ''}">

@@ -29,7 +29,6 @@ window.getUnitUncappedCrit = function(slotUnit, slotIndex) {
                 const targets = hState.fernTargets || [];
                 const isFernPresent = hState.slots.some(s => s && window.isUnit(s.id, 'prodigy_mage'));
                 if (isFernPresent) {
-                    // FIX: Fern only receives her own buff if she is explicitly selected as a target
                     if (targets.includes(slotIndex)) {
                         crit += 45;
                     }
