@@ -3,7 +3,7 @@ unitDatabase.push({
     id: "nursefather_thumb",
     name: "Nursefather (Thumb)",
     img: "images/units/NursefatherThumb.png",
-    level: 100,
+    level: 70,
     placement: 3,
     placementType: "Ground",
     role: "DPS",
