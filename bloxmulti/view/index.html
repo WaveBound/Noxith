@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloxMulti - Remote Screen View</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #050102;
+            color: #f8f2f3;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        video {
+            max-width: 95%;
+            max-height: 80vh;
+            border: 2px solid #d41b2c;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(212, 27, 44, 0.3);
+            background: #000;
+        }
+
+        #status {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #8c7a7d;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="status">Connecting to remote instance...</div>
+    <video id="remoteVideo" autoplay playsinline controls></video>
+
+    <script>
+        const API_BASE = "https://<your-worker-subdomain>.workers.dev"; // Replace with your Worker URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get("code") || window.location.pathname.split("/").pop();
+
+        const statusEl = document.getElementById("status");
+        const remoteVideo = document.getElementById("remoteVideo");
+
+        let peerConnection;
+        const config = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+
+        async function initViewer() {
+            if (!code) {
+                statusEl.textContent = "Error: Invalid session code.";
+                return;
+            }
+
+            peerConnection = new RTCPeerConnection(config);
+
+            // Handle incoming track
+            peerConnection.ontrack = (event) => {
+                statusEl.textContent = "Live stream active.";
+                if (remoteVideo.srcObject !== event.streams[0]) {
+                    remoteVideo.srcObject = event.streams[0];
+                }
+            };
+
+            // Send local ICE candidates to Host via Worker
+            peerConnection.onicecandidate = async (event) => {
+                if (event.candidate) {
+                    await fetch(`${API_BASE}/api/session/candidate`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ code, role: "viewer", candidate: event.candidate })
+                    });
+                }
+            };
+
+            try {
+                // 1. Fetch SDP Offer from Host
+                const offerRes = await fetch(`${API_BASE}/api/session/offer?code=${code}`);
+                if (!offerRes.ok) throw new Error("Session offer not available yet.");
+                const { sdp } = await offerRes.json();
+
+                await peerConnection.setRemoteDescription(new RTCSessionDescription({ type: "offer", sdp }));
+
+                // 2. Create SDP Answer
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+
+                // 3. Submit Answer to Worker
+                await fetch(`${API_BASE}/api/session/answer`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code, sdp: answer.sdp })
+                });
+
+                statusEl.textContent = "Establishing secure connection...";
+
+                // 4. Poll Host ICE candidates
+                const candidateInterval = setInterval(async () => {
+                    const res = await fetch(`${API_BASE}/api/session/candidates?code=${code}&role=viewer`);
+                    if (res.ok) {
+                        const candidates = await res.json();
+                        for (const c of candidates) {
+                            try {
+                                await peerConnection.addIceCandidate(new RTCIceCandidate(c));
+                            } catch (e) { /* ignore duplicate or stale candidates */ }
+                        }
+                    }
+                }, 2000);
+
+            } catch (err) {
+                statusEl.textContent = err.message;
+                setTimeout(initViewer, 3000); // Retry if connection is still setting up
+            }
+        }
+
+        window.onload = initViewer;
+    </script>
+</body>
+
+</html>
