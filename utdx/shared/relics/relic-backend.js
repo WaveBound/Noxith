@@ -342,10 +342,13 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
                 headCalc.type = 'biju';
             }
         } else {
-            const passRes = window.applyPassiveBonus(passiveId, unitStatsSim);
+            const passRes = window.applyPassiveBonus(passiveId, unitStatsSim, uStats);
             const eff = passRes.effectiveStats;
             if (eff.dmg !== unitStatsSim.dmg) {
                 headDmgPassive = ((eff.dmg / unitStatsSim.dmg) - 1) * 100;
+            }
+            if (eff.range !== unitStatsSim.range) {
+                headCalc.range = (headCalc.range || 0) + (((eff.range / unitStatsSim.range) - 1) * 100);
             }
             if (eff.trueDmg) {
                 headCalc.trueDmg = eff.trueDmg;

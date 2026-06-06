@@ -32,12 +32,13 @@ unitDatabase.push({
         passiveDmg: 0,
         customFollowUp: {
             chance: 100,
-            cooldown: 10,        // Triggers every 10s independent of SPA
+            cooldown: 10,        // Base cooldown (10s)
+            nextAttack: true,    // Triggers on the next attack AFTER cooldown expires
             dmgMult: 1.2,        // 120% damage
             dotPct: 75,          // 75% DoT damage
             dotDuration: 4,
             dotType: "Burn",
-            fuaAnimation: 2.75,  // Follow-up lock set to 2.75s
+            fuaAnimation: 2.75,  // Adds +2.75s to host SPA during FUA hits
             label: "Disposal"
         },
         bossDmg: 0,              // Moved to passive
@@ -80,7 +81,7 @@ unitDatabase.push({
     // ETHEREALIZATION (E1-E6 upgrade descriptions)
     etherealization: [
         { desc: "+10 Stat Points (E1)" },
-        { desc: "Instead of follow up 20s, Follw up every 10s", },
+        { desc: "Follow up 'Disposal' cooldown set to 10s (E2)", cooldown: 10 },
         { desc: "+10 Stat Points (E3)" },
         { desc: "The Apprentice dies after 2 attacks (E4)" },
         { desc: "+10 Stat Points (E5)" },

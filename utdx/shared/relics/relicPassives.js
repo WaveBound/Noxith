@@ -148,7 +148,10 @@ const PASSIVES = {
     fused_earrings_acc: {
         name: "Fused Earrings",
         desc: "If unit can synchro clash/fuse, in non synchro form gain 50% dmg, in synchro form gain 25% range and 15% dmg buff.",
-        trigger: "passive"
+        trigger: "passive",
+        clashDmgBuff: 50,
+        syncroDmgBuff: 15,
+        syncroRangeBuff: 25
     },
 };
 
@@ -212,11 +215,40 @@ function calcCritPassiveUptime(critRate, spa, duration, cooldown) {
     };
 }
 
-function applyPassiveBonus(passiveId, unitStats) {
+function applyPassiveBonus(passiveId, unitStats, originalUnit = null) {
     const passive = PASSIVES[passiveId];
     if (!passive) return { effectiveStats: unitStats, uptimeInfo: null };
 
     let effectiveStats = { ...unitStats };
+
+    if (passiveId === "fused_earrings_acc") {
+        const u = originalUnit || {};
+        const unitId = u.id || "";
+        const unitIdLower = unitId.toLowerCase();
+
+        // Detect Synchro/Fused forms via ID naming conventions (e.g. revolutionary_chief_syncro, majestic_armor, ultimate_fused_warrior)
+        const isSyncro = unitIdLower.includes('syncro') || unitIdLower.includes('armor') || unitIdLower.includes('fused');
+        
+        // Detect Clash capability via specific IDs or checking ability/passive names for the "Clash" keyword
+        const ability = Array.isArray(u.ability) ? u.ability[0] : u.ability;
+        const hasClash = unitIdLower === 'pirate_king' || unitIdLower === 'quake_warlord' || unitIdLower === 'marine_hero' ||
+                        (ability && (ability.abilityName || "").includes("Clash")) || 
+                        (u.passives && u.passives.some(p => (p.name || "").includes("Clash")));
+
+        if (isSyncro) {
+            effectiveStats.dmg = Math.floor(effectiveStats.dmg * (1 + (passive.syncroDmgBuff || 15) / 100));
+            effectiveStats.range = Math.floor(effectiveStats.range * (1 + (passive.syncroRangeBuff || 25) / 100));
+        } else if (hasClash) {
+            effectiveStats.dmg = Math.floor(effectiveStats.dmg * (1 + (passive.clashDmgBuff || 50) / 100));
+        }
+        return { 
+            effectiveStats, 
+            uptimeInfo: { 
+                note: isSyncro ? `Syncro Form (+${passive.syncroDmgBuff}% DMG, +${passive.syncroRangeBuff}% RNG)` : 
+                      (hasClash ? `Clash Potential (+${passive.clashDmgBuff}% DMG)` : "No specialized bonus applied") 
+            } 
+        };
+    }
 
     if (passive.trigger === "passive") {
         if (passive.disableCrit) {

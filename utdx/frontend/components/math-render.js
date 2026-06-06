@@ -417,6 +417,10 @@ function renderActiveBuffsSection(data) {
 
     if (data.extraAttacks) buffs.push({ name: data.extraAttacks.label || "Attack Rate", desc: `${data.extraAttacks.hits}: Final x${data.extraAttacks.mult.toFixed(3)} DPS Mult`, color: "#60a5fa" });
 
+    if (data.headBuffs && data.headBuffs.note) {
+        buffs.push({ name: "Accessory Passive", desc: data.headBuffs.note, color: "#f472b6" });
+    }
+
     const unit = typeof getUnitById === 'function' ? getUnitById(data.baseStats?.id) : null;
     if (unit && unit.passives) {
         unit.passives.forEach(p => {
@@ -567,6 +571,15 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
                     ${(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg) !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="line-height: 1.4;">↳ Set Base Bonus<br>&nbsp;&nbsp;&nbsp;&nbsp;(${relicSetName} Set)</td><td class="mt-cell-formula" style="vertical-align: top; padding-top: 4px;">${fmt.pct(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.detailedBuffs?.accessoryBase || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="line-height: 1.4;">↳ Accessory Base<br>&nbsp;&nbsp;&nbsp;&nbsp;(${cleanHeadDisplayName})</td><td class="mt-cell-formula" style="vertical-align: top; padding-top: 4px;">${fmt.pct(data.detailedBuffs.accessoryBase)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(() => {
+                        const val = data.detailedBuffs?.accessoryPerk || 0;
+                        if (val === 0) return '';
+                        const note = data.headBuffs?.note || "";
+                        let label = `↳ Accessory Passive Perk`;
+                        if (note.includes('Clash')) label = `↳ Clash Potential Bonus`;
+                        else if (note.includes('Syncro')) label = `↳ Synchro Form Bonus`;
+                        return `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="line-height: 1.4;">${label}<br>&nbsp;&nbsp;&nbsp;&nbsp;(${cleanHeadDisplayName})</td><td class="mt-cell-formula" style="vertical-align: top; padding-top: 4px;">${fmt.pct(val)}</td><td class="mt-cell-val"></td></tr>`;
+                    })()}
+                    ${(() => {
                         const val = (data.detailedBuffs ? data.detailedBuffs.tagBonus : tagDmg);
                         if (val === 0) return '';
                         const relevantTags = [];
@@ -629,7 +642,15 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
                     ${eternalDmg > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-accent-start opacity-70">↳ Eternal Stacks (Wave 12+)</td><td class="mt-cell-formula text-accent-start">${fmt.pct(eternalDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.abilityBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-custom opacity-70">↳ Ability Buffs</td><td class="mt-cell-formula text-custom">${fmt.pct(data.abilityBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
 
-                    ${(data.detailedBuffs?.accessoryPerk || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Accessory Passive Perks</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.accessoryPerk)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(() => {
+                        const val = data.detailedBuffs?.accessoryPerk || 0;
+                        if (val === 0) return '';
+                        const note = data.headBuffs?.note || "";
+                        let label = `↳ Accessory Passive Perk`;
+                        if (note.includes('Clash')) label = `↳ Clash Potential Bonus`;
+                        else if (note.includes('Syncro')) label = `↳ Synchro Form Bonus`;
+                        return `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="line-height: 1.4;">${label}<br>&nbsp;&nbsp;&nbsp;&nbsp;(${cleanHeadDisplayName})</td><td class="mt-cell-formula" style="vertical-align: top; padding-top: 4px;">${fmt.pct(val)}</td><td class="mt-cell-val"></td></tr>`;
+                    })()}
                     ${globalDmgBreakdownHtml}
 
                     ${data.conditionalData ? `
@@ -782,9 +803,6 @@ function renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa, cl
                     ${globalSpaBreakdownHtml}
 
                     <tr><td class="mt-cell-label">Cap Check (${data.spaCap}s)</td><td class="mt-cell-formula">MAX</td><td class="mt-cell-val calc-result">${fmt.fix(data.finalSpa, 3)}s</td></tr>
-                    ${(data.spa !== data.finalSpa) ? `
-                    <tr><td class="mt-cell-label mt-pt-sm text-accent-start">Effective SPA (with FUA)</td><td class="mt-cell-formula mt-pt-sm"></td><td class="mt-cell-val calc-result mt-pt-sm text-accent-start">${fmt.fix(data.spa, 3)}s</td></tr>
-                    ` : ''}
                 </table>
             </div>`;
 }
@@ -1009,39 +1027,33 @@ function renderAttackRateSection(data) {
         const cooldown = f.cooldown;
         
         if (cooldown) {
-            const timeFrame = 60;
-            const fuaCount = timeFrame / cooldown;
-            const lockedTime = fuaCount * (f.fuaAnimation || 0);
-            const availableTime = Math.max(0, timeFrame - lockedTime);
-            const normalHits = Math.floor(availableTime / (data.rawFinalSpa || data.spa));
-            
-            return `
-                <div class="dd-section" style="border-left: 3px solid #4ade80;">
-                    <div class="dd-title mt-text-green"><span>5. Attack Rate Multiplier (60s Timeline)</span> <button class="calc-info-btn" onclick="openInfoPopup('attack_rate')">?</button></div>
-                    <table class="calc-table">
-                        <tr><td class="mt-cell-label">Evaluation Window</td><td class="mt-cell-formula"></td><td class="mt-cell-val">60.0s</td></tr>
-                        <tr class="mt-border-top"><td class="mt-cell-label text-custom" style="font-weight:700;">Follow-Up Activations</td><td class="mt-cell-formula">60s / ${cooldown}s CD</td><td class="mt-cell-val text-custom" style="font-weight:700;">${fuaCount} Attacks (x${f.dmgMult})</td></tr>
-                        <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Animation Lockout Time</td><td class="mt-cell-formula">${fuaCount} × ${f.fuaAnimation}s Lock</td><td class="mt-cell-val opacity-70">-${lockedTime}s</td></tr>
-                        <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Remaining Time Window</td><td class="mt-cell-formula">60s - ${lockedTime}s</td><td class="mt-cell-val opacity-70">${availableTime}s</td></tr>
-                        <tr><td class="mt-cell-label text-accent-start">Normal Attacks (Rounded Down)</td><td class="mt-cell-formula">${availableTime}s / ${fmt.fix(data.rawFinalSpa || data.spa, 3)}s SPA</td><td class="mt-cell-val text-accent-start">${normalHits}</td></tr>
-                        <tr><td class="mt-cell-label opacity-70">↳ Equivalent Hit Units (FUAs)</td><td class="mt-cell-formula">${fuaCount} × ${f.dmgMult}x</td><td class="mt-cell-val opacity-70">+${fuaCount * f.dmgMult}</td></tr>
-                        <tr class="mt-border-top">
-                            <td class="mt-cell-label text-white">Total Damage Output (Hits)</td>
-                            <td class="mt-cell-formula">${normalHits} Norm + ${fuaCount * f.dmgMult} FUA</td>
-                            <td class="mt-cell-val text-white font-bold">${fmt.fix(normalHits + (fuaCount * f.dmgMult), 1)}</td>
-                        </tr>
-                        <tr>
-                            <td class="mt-cell-label text-accent-end">Average SPA (Speed)</td>
-                            <td class="mt-cell-formula">CD / (Hits_per_cycle + 1)</td>
-                            <td class="mt-cell-val text-accent-end">${fmt.fix(ea.usedSpa, 3)}s</td>
-                        </tr>
-                        <tr class="mt-border-top">
-                            <td class="mt-cell-label mt-pt-sm text-white" style="font-weight: 900;">Final Attack Mult</td>
-                            <td class="mt-cell-formula mt-pt-sm">Total Hits / Normal Hits</td>
-                            <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size: 1.15rem; color: #4ade80;">x${fmt.fix(ea.mult, 3)}</td>
-                        </tr>
-                    </table>
-                </div>`;
+            if (f.nextAttack) {
+                const { hitsInCycle, cycleDuration, totalDmgInCycle, hitsMult } = ea;
+                const speedPenalty = (hitsInCycle * data.finalSpa) / cycleDuration;
+
+                return `
+                    <div class="dd-section" style="border-left: 3px solid #4ade80;">
+                        <div class="dd-title mt-text-green"><span>5. Attack Cycle Snapping (Threshold: ${cooldown}s)</span> <button class="calc-info-btn" onclick="openInfoPopup('attack_rate')">?</button></div>
+                        <table class="calc-table">
+                            <tr><td class="mt-cell-label">Interval (SPA)</td><td class="mt-cell-formula"></td><td class="mt-cell-val">${fmt.fix(data.finalSpa, 3)}s</td></tr>
+                            <tr><td class="mt-cell-label text-custom">Hits per Proc</td><td class="mt-cell-formula">Ceil(${cooldown}s / SPA)</td><td class="mt-cell-val text-custom">${hitsInCycle} Hits</td></tr>
+                            <tr><td class="mt-cell-label opacity-70 mt-pl-md">↳ Hits Multiplier</td><td class="mt-cell-formula">(${hitsInCycle} + ${f.dmgMult}) / ${hitsInCycle}</td><td class="mt-cell-val opacity-70">x${hitsMult.toFixed(2)}</td></tr>
+                            <tr class="mt-border-top">
+                                <td class="mt-cell-label">Total Cycle Duration</td>
+                                <td class="mt-cell-formula">(${hitsInCycle} × SPA) + ${f.fuaAnimation}s Lock</td>
+                                <td class="mt-cell-val text-white font-bold">${fmt.fix(cycleDuration, 2)}s</td>
+                            </tr>
+                            <tr><td class="mt-cell-label opacity-70 mt-pl-md">↳ Lock Speed Penalty</td><td class="mt-cell-formula">(${hitsInCycle} × SPA) / Duration</td><td class="mt-cell-val opacity-70">x${speedPenalty.toFixed(3)}</td></tr>
+                            <tr class="mt-border-top">
+                                <td class="mt-cell-label mt-pt-sm text-white" style="font-weight: 900;">Final Attack Mult</td>
+                                <td class="mt-cell-formula mt-pt-sm">Hits Mult × Speed Penalty</td>
+                                <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size: 1.15rem; color: #4ade80;">x${fmt.fix(ea.mult, 3)}</td>
+                            </tr>
+                        </table>
+                        <div class="text-xs mt-2 opacity-50" style="font-style: italic; padding-left: 5px;">Wait ${cooldown}s → Trigger extra attack on the next available hit.</div>
+                    </div>`;
+            }
+            // Account for time lost to FUA animation... (Existing Standard CD logic)
         } else {
             return `
                 <div class="dd-section" style="border-left: 3px solid #4ade80;">
@@ -1184,10 +1196,6 @@ function renderAttackRateSection(data) {
             <table class="calc-table">
                 <tr><td class="mt-cell-label">Primary Target Hits</td><td class="mt-cell-formula"></td><td class="mt-cell-val">1.0</td></tr>
                 ${extraHits > 0 ? `<tr><td class="mt-cell-label">${data.baseStats?.customFollowUp ? 'Follow-Up Multiplier' : 'Extra Hits (Equiv)'}</td><td class="mt-cell-formula">+</td><td class="mt-cell-val">${fmt.fix(extraHits, 2)}</td></tr>` : ''}
-                ${data.extraAttacks && data.extraAttacks.usedSpa ? `
-                <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Animation Adj. SPA</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-start">${fmt.fix(data.extraAttacks.usedSpa, 3)}s</td></tr>
-                ` : ''}
-                
                 ${detailRows}
 
                 <tr class="mt-border-top">

@@ -493,32 +493,52 @@ function calculateDPS(uStats, relicStats, context) {
         const fuaDotPct = uStats.customFollowUp.dotPct || 75;
 
         if (cooldown) {
-            // Account for time lost to FUA animation within the cooldown window (Timeline standard: 60s)
-            const timeFrame = 60;
-            const fuaCount = timeFrame / cooldown;
-            const lockedTime = fuaCount * fuaAnim;
-            const availableTime = Math.max(0, timeFrame - lockedTime);
-            const normalHits = Math.round(availableTime / finalSpa); // Rounded to closest number per request
-            
-            const totalHitsDealt = normalHits + (fuaCount * fuaDmgMult);
-            const windowMultiplier = totalHitsDealt / Math.max(1, normalHits);
-            
-            hitDpsTotal = (totalHitsDealt * avgHit / timeFrame) * placement;
-            bossHitDpsTotal = (totalHitsDealt * avgHitBoss / timeFrame) * placement;
-            
-            // Update Used SPA for UI display to reflect the average speed including FUA delay
-            const normalHitsPerCycle = (cooldown - fuaAnim) / finalSpa;
-            usedSpa = cooldown / (normalHitsPerCycle + 1);
-            
-            extraAttacksData = {
-                req: `Fixed CD: ${cooldown}s`,
-                hits: `${fuaDmgMult}x Dmg FUA`,
-                extra: 0,
-                attacksNeeded: 1,
-                mult: windowMultiplier,
-                label: uStats.customFollowUp.label || "Follow-Up",
-                usedSpa: usedSpa
-            };
+            if (uStats.customFollowUp.nextAttack) {
+                // SNAP LOGIC: FUA triggers on the next attack AFTER cooldown expires.
+                // Check if a single hit (including lock) already crosses the threshold (e.g. 8s SPA + 2.75 lock = 10.75 >= 10).
+                const hitsInCycle = (finalSpa + fuaAnim >= cooldown) ? 1 : Math.max(1, Math.ceil(cooldown / finalSpa));
+                
+                // Duration is the total time for the hits plus the animation lockout on the final hit.
+                const cycleDuration = (hitsInCycle * finalSpa) + fuaAnim;
+                
+                // Total damage is the normal hits (1.0 each) plus the extra FUA hit damage.
+                const totalDmgInCycle = hitsInCycle + fuaDmgMult;
+                
+                hitDpsTotal = ((totalDmgInCycle * avgHitNormal) / cycleDuration) * placement;
+                bossHitDpsTotal = (totalDmgInCycle * avgHitBoss / cycleDuration) * placement;
+                normalHitDpsTotal = ((totalDmgInCycle * avgHitNormal) / cycleDuration) * placement;
+                
+                attackMultiplier = (totalDmgInCycle / cycleDuration) * finalSpa;
+                usedSpa = finalSpa;
+
+                extraAttacksData = {
+                    req: `Cycle: ${hitsInCycle} Hits (${cycleDuration.toFixed(2)}s)`,
+                    hits: `${hitsInCycle} Base + ${fuaDmgMult}x FUA`,
+                    extra: 0, mult: attackMultiplier,
+                    label: uStats.customFollowUp.label || "Follow-Up",
+                    usedSpa: finalSpa,
+                    hitsInCycle, totalDmgInCycle, cycleDuration,
+                    hitsMult: totalDmgInCycle / hitsInCycle
+                };
+            } else {
+                // Standard Timeline Logic
+                const timeFrame = 60;
+                const fuaCount = timeFrame / cooldown;
+                const lockedTime = fuaCount * fuaAnim;
+                const availableTime = Math.max(0, timeFrame - lockedTime);
+                const normalHits = Math.round(availableTime / finalSpa);
+                const totalHitsDealt = normalHits + (fuaCount * fuaDmgMult);
+                const windowMultiplier = totalHitsDealt / Math.max(1, normalHits);
+                hitDpsTotal = (totalHitsDealt * avgHit / timeFrame) * placement;
+                bossHitDpsTotal = (totalHitsDealt * avgHitBoss / timeFrame) * placement;
+                const normalHitsPerCycle = (cooldown - fuaAnim) / finalSpa;
+                usedSpa = cooldown / (normalHitsPerCycle + 1);
+                extraAttacksData = {
+                    req: `Fixed CD: ${cooldown}s`, hits: `${fuaDmgMult}x Dmg FUA`,
+                    extra: 0, mult: windowMultiplier,
+                    label: uStats.customFollowUp.label || "Follow-Up", usedSpa: usedSpa
+                };
+            }
         } else {
             const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
             let chance = uStats.customFollowUp.chance;
@@ -717,14 +737,22 @@ function calculateDPS(uStats, relicStats, context) {
         const cooldown = uStats.customFollowUp.cooldown;
         const fuaDmgMult = uStats.customFollowUp.dmgMult || 1.0;
         const fuaDotPct = uStats.customFollowUp.dotPct || 0;
+        const fuaAnim = uStats.customFollowUp.fuaAnimation || 0;
 
         let followUpDotDpsPerCycle, followUpDotDpsPerCycleBoss, followUpDotDmg, chance = 100;
 
         if (cooldown) {
+            let cycleTimeForDot = cooldown;
+            const fuaAnim = uStats.customFollowUp.fuaAnimation || 0;
+            if (uStats.customFollowUp.nextAttack) {
+                const hitsInCycle = (finalSpa + fuaAnim >= cooldown) ? 1 : Math.max(1, Math.ceil(cooldown / finalSpa));
+                cycleTimeForDot = (hitsInCycle * finalSpa) + fuaAnim;
+            }
+
             // DoT is 75% of FUA damage (which is 1.2x base)
             followUpDotDmg = finalDmg * fuaDmgMult * (fuaDotPct / 100);
-            followUpDotDpsPerCycle = followUpDotDmg / cooldown;
-            followUpDotDpsPerCycleBoss = (finalDmgBoss * fuaDmgMult * (fuaDotPct / 100)) / cooldown;
+            followUpDotDpsPerCycle = followUpDotDmg / cycleTimeForDot;
+            followUpDotDpsPerCycleBoss = (finalDmgBoss * fuaDmgMult * (fuaDotPct / 100)) / cycleTimeForDot;
         } else {
             const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
             chance = (eLevel >= uStats.customFollowUp.eLevelReq) ? uStats.customFollowUp.eLevelChance : uStats.customFollowUp.chance;
