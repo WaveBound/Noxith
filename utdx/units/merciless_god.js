@@ -17,6 +17,7 @@ unitDatabase.push({
     },
 
     totalCost: 115000,
+    defaultMode: 4, // Ensure starting on 2-0-5 (index 4)
 
     // BASE STATS
     stats: {
@@ -37,84 +38,6 @@ unitDatabase.push({
 
     // MODES
     modes: [
-        {       
-            name: "2-0-5",
-            desc: "Focus: Extreme Burst & Crowd Control. Features 'Unstable Divinity' cycle and permanent marking mechanics.",
-            img: "images/units/MercilessGod/2-0-5.png",
-            upgrades: [{ dmg: 12000, spa: 10, range: 61, cost: 116000, spaCap: 5 }],
-            stats: { 
-                dot: 30, dotDuration: 6, dotType: "Bleed",
-                support: "Stun, Mark", stunDuration: 2,
-                passiveDmg: 123.33, // Avg Unstable (133.33) + Max Mark (100)
-                passiveSpa: 11,     // Avg Unstable speedup (2/3 of 30%)
-                passiveRange: 11,   // Avg Unstable range increase (2/3 of 30%)
-                hyperArmor: 66.67   // Avg Unstable hyper armor dmg
-            },
-            passives: [
-                { 
-                    name: "Unstable Divinity", 
-                    desc: "<br>Every 30 seconds:<br>• Enter 'Unstable State' for 60 seconds<br><br>During 'Unstable State':<br>• +100% Hyper Armor Damage<br>• +200% Damage<br>• -30% SPA<br>• +30% Range<br>• Gain Stun Immunity<br><br>When 'Unstable State' ends:<br>• +40% SPA for 20 seconds<br>• -40% Range for 20 seconds<br>• -45% Damage for 20 seconds"
-                },
-                { 
-                    name: "Godly Rage", 
-                    desc: "<br>Every attack applies Stun for 2 seconds." 
-                },
-                { 
-                    name: "Corrupted Manifestation", 
-                    desc: "<br>• Every Attack marks enemies permanently.<br>• For every marked enemy in range: +20% Damage (Cap: +100%).<br>• On death: Deal 30% Damage to surrounding enemies and mark unmarked targets hit." 
-                },
-                { 
-                    name: "Infinite God Domain", 
-                    desc: "<br>Ability (One-time): One-time use global attack.<br>• Apply 30s Stun to all enemies on map.<br>• Enemies take +20% Damage until death.<br>• Deal 10% Damage per second for 30s." 
-                },
-                { 
-                    name: "Divine Replication", 
-                    desc: "<br>Unique: Only one Merciless God with the Top Path (5-x-x) can be active at a time." 
-                },
-                { 
-                    name: "Godly Energy", 
-                    desc: "<br>On Attack: Apply Bleed for 30% Damage over 6 ticks." 
-                }
-            ]
-        }, 
-        {
-            name: "0-2-5",
-            desc: "Focus: Global Utility & DoT Scaling. Features 'Unstable Divinity' cycles and Godly Earring support for allies.",
-            img: "images/units/MercilessGod/0-2-5.png",
-            upgrades: [{ dmg: 12000, spa: 10, range: 61, cost: 117000, spaCap: 5 }],
-            stats: { 
-                support: "Stun, Mark", stunDuration: 2,
-                passiveDmg: 123.33, // Avg Unstable (133.33) + Max Mark (100)
-                passiveSpa: 11,     // Avg Unstable speedup (2/3 of 30%)
-                passiveRange: 11,   // Avg Unstable range increase (2/3 of 30%)
-                hyperArmor: 66.67,   // Avg Unstable hyper armor dmg
-            },
-            passives: [
-                { 
-                    name: "Unstable Divinity", 
-                    desc: "<br>Every 30 seconds:<br>• Enter 'Unstable State' for 60 seconds<br><br>During 'Unstable State':<br>• +100% Hyper Armor Damage<br>• +200% Damage<br>• -30% SPA<br>• +30% Range<br>• Gain Stun Immunity<br><br>When 'Unstable State' ends:<br>• +40% SPA for 20 seconds<br>• -40% Range for 20 seconds<br>• -45% Damage for 20 seconds"
-                },
-                { 
-                    name: "Godly Rage", 
-                    desc: "<br>Every attack applies Stun for 2 seconds." 
-                },
-                { 
-                    name: "Corrupted Manifestation", 
-                    desc: "<br>• Every Attack marks enemies permanently.<br>• For every marked enemy in range: +20% Damage (Cap: +100%).<br>• On death: Deal 30% Damage to surrounding enemies and mark unmarked targets hit." 
-                },
-                { 
-                    name: "Infinite God Domain", 
-                    desc: "<br>Ability (One-time): One-time use global attack.<br>• Apply 30s Stun to all enemies on map.<br>• Enemies take +20% Damage until death.<br>• Deal 10% Damage per second for 30s." 
-                },
-                { 
-                    name: "Godly Earrings", 
-                    desc: "<br>• This unit gains +30% DoT Damage.<br>• Allies in range gain +50% DoT Damage.", dot: 30 },
-                { 
-                    name: "God's Eye", 
-                    desc: "<br>When no enemies are in range, increase Range by +10,000%." 
-                }
-            ]
-        },
         {
             name: "5-2-0",
             desc: "Focus: Absolute Damage & Clone Army. Uses 'Divine Replication' to scale massive damage from a single placement.",
@@ -272,6 +195,84 @@ unitDatabase.push({
                 { 
                     name: "Godly Rage", 
                     desc: "<br>Every attack applies Stun for 2 seconds." 
+                }
+            ]
+        },
+         {       
+            name: "2-0-5",
+            desc: "Focus: Extreme Burst & Crowd Control. Features 'Unstable Divinity' cycle and permanent marking mechanics.",
+            img: "images/units/MercilessGod/2-0-5.png",
+            upgrades: [{ dmg: 12000, spa: 10, range: 61, cost: 116000, spaCap: 5 }],
+            stats: { 
+                dot: 30, dotDuration: 6, dotType: "Bleed",
+                support: "Stun, Mark", stunDuration: 2,
+                passiveDmg: 123.33, // Avg Unstable (133.33) + Max Mark (100)
+                passiveSpa: 11,     // Avg Unstable speedup (2/3 of 30%)
+                passiveRange: 11,   // Avg Unstable range increase (2/3 of 30%)
+                hyperArmor: 66.67   // Avg Unstable hyper armor dmg
+            },
+            passives: [
+                { 
+                    name: "Unstable Divinity", 
+                    desc: "<br>Every 30 seconds:<br>• Enter 'Unstable State' for 60 seconds<br><br>During 'Unstable State':<br>• +100% Hyper Armor Damage<br>• +200% Damage<br>• -30% SPA<br>• +30% Range<br>• Gain Stun Immunity<br><br>When 'Unstable State' ends:<br>• +40% SPA for 20 seconds<br>• -40% Range for 20 seconds<br>• -45% Damage for 20 seconds"
+                },
+                { 
+                    name: "Godly Rage", 
+                    desc: "<br>Every attack applies Stun for 2 seconds." 
+                },
+                { 
+                    name: "Corrupted Manifestation", 
+                    desc: "<br>• Every Attack marks enemies permanently.<br>• For every marked enemy in range: +20% Damage (Cap: +100%).<br>• On death: Deal 30% Damage to surrounding enemies and mark unmarked targets hit." 
+                },
+                { 
+                    name: "Infinite God Domain", 
+                    desc: "<br>Ability (One-time): One-time use global attack.<br>• Apply 30s Stun to all enemies on map.<br>• Enemies take +20% Damage until death.<br>• Deal 10% Damage per second for 30s." 
+                },
+                { 
+                    name: "Divine Replication", 
+                    desc: "<br>Unique: Only one Merciless God with the Top Path (5-x-x) can be active at a time." 
+                },
+                { 
+                    name: "Godly Energy", 
+                    desc: "<br>On Attack: Apply Bleed for 30% Damage over 6 ticks." 
+                }
+            ]
+        }, 
+        {
+            name: "0-2-5",
+            desc: "Focus: Global Utility & DoT Scaling. Features 'Unstable Divinity' cycles and Godly Earring support for allies.",
+            img: "images/units/MercilessGod/0-2-5.png",
+            upgrades: [{ dmg: 12000, spa: 10, range: 61, cost: 117000, spaCap: 5 }],
+            stats: { 
+                support: "Stun, Mark", stunDuration: 2,
+                passiveDmg: 123.33, // Avg Unstable (133.33) + Max Mark (100)
+                passiveSpa: 11,     // Avg Unstable speedup (2/3 of 30%)
+                passiveRange: 11,   // Avg Unstable range increase (2/3 of 30%)
+                hyperArmor: 66.67,   // Avg Unstable hyper armor dmg
+            },
+            passives: [
+                { 
+                    name: "Unstable Divinity", 
+                    desc: "<br>Every 30 seconds:<br>• Enter 'Unstable State' for 60 seconds<br><br>During 'Unstable State':<br>• +100% Hyper Armor Damage<br>• +200% Damage<br>• -30% SPA<br>• +30% Range<br>• Gain Stun Immunity<br><br>When 'Unstable State' ends:<br>• +40% SPA for 20 seconds<br>• -40% Range for 20 seconds<br>• -45% Damage for 20 seconds"
+                },
+                { 
+                    name: "Godly Rage", 
+                    desc: "<br>Every attack applies Stun for 2 seconds." 
+                },
+                { 
+                    name: "Corrupted Manifestation", 
+                    desc: "<br>• Every Attack marks enemies permanently.<br>• For every marked enemy in range: +20% Damage (Cap: +100%).<br>• On death: Deal 30% Damage to surrounding enemies and mark unmarked targets hit." 
+                },
+                { 
+                    name: "Infinite God Domain", 
+                    desc: "<br>Ability (One-time): One-time use global attack.<br>• Apply 30s Stun to all enemies on map.<br>• Enemies take +20% Damage until death.<br>• Deal 10% Damage per second for 30s." 
+                },
+                { 
+                    name: "Godly Earrings", 
+                    desc: "<br>• This unit gains +30% DoT Damage.<br>• Allies in range gain +50% DoT Damage.", dot: 30 },
+                { 
+                    name: "God's Eye", 
+                    desc: "<br>When no enemies are in range, increase Range by +10,000%." 
                 }
             ]
         }

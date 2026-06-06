@@ -29,7 +29,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     if (unit.stats && unit.stats.customFollowUp) effectiveStats.customFollowUp = { ...unit.stats.customFollowUp };
 
     const state = (forcedModeIdx !== undefined) ? forcedModeIdx : (window.unitModesState && window.unitModesState[unit.id]);
-    const activeMode = (state !== undefined) ? (Array.isArray(state) ? state[0] : state) : 0;
+    const activeMode = (state !== undefined) ? (Array.isArray(state) ? state[0] : state) : (unit.defaultMode ?? 0);
     const modeObj = (unit.modes && unit.modes[activeMode]) ? unit.modes[activeMode] : null;
 
     // Apply mode-specific stat overrides (like spaCap)

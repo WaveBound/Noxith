@@ -15,7 +15,7 @@ function initApp() {
 
     ['phantom_captain', 'megumin', 'ancient_shinob', 'triple_threat', 'marine_hero'].forEach(file => {
         const dynamicId = window.getUnitId?.(file);
-        if (dynamicId) activeAbilityIds.add(dynamicId);
+        if (dynamicId) window.activeAbilityIds.add(dynamicId);
     });
 
     // 1. Initialize Hotbar

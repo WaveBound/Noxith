@@ -332,6 +332,7 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
     let extractedModeIdx = ctxOverrides.forcedModeIdx ?? ctxOverrides.activeModeIdx;
     if (isFixedMode) extractedModeIdx = parseInt(liteData.id.split('-f-')[1]) || 0;
     else if (isBuggedMode) extractedModeIdx = parseInt(liteData.id.split('-b-')[1]) || 0;
+    if (extractedModeIdx === undefined) extractedModeIdx = unit.defaultMode ?? 0;
 
     // For multi-mode units, if the reconstruction is requested for a specific UI mode, prioritize that over the saved build's mode tag
     if (unit.modes && ctxOverrides.activeModeIdx !== undefined) extractedModeIdx = ctxOverrides.activeModeIdx;

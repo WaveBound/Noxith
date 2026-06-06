@@ -2,12 +2,21 @@
 window.unitBuildsCache = window.unitBuildsCache || {};
 window.unitActiveBuilds = window.unitActiveBuilds || {};
 window.bestHydratedBuildCache = window.bestHydratedBuildCache || {};
+window.visibleUnitIds = window.visibleUnitIds || new Set();
+window.LIVE_SCORE_CACHE = window.LIVE_SCORE_CACHE || {};
+window.activeAbilityIds = window.activeAbilityIds || new Set();
+window.unitELevels = window.unitELevels || {};
+window.unitSystemLevels = window.unitSystemLevels || {};
+window.unitTraits = window.unitTraits || {};
+window.unitHeads = window.unitHeads || {};
+window.unitModesState = window.unitModesState || {};
+window.inventoryMode = window.inventoryMode || false;
 
 // Bulletproof database key resolution helper to handle Fused Warrior and other ID mismatches
 window.getRelicDbEntry = function (db, unitId, activeType) {
     if (!db) return null;
     
-    const state = window.unitModesState?.[unitId] || 0;
+    const state = window.unitModesState[unitId] ?? (window.getUnitById?.(unitId)?.defaultMode ?? 0);
     const modeIdx = Array.isArray(state) ? state[0] : state;
     const modeKey = 'fixed';
     const suffix = activeType === 'abil' ? '_abil' : '';
@@ -21,7 +30,7 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
         
         // Optimized multi-mode handling: Only force thread-blocking dynamic calc in Inventory Mode
         // Otherwise fallback to mode 0 from DB to maintain UI fluidness while calculating active form stats in background
-        if (inventoryMode && window.getUnitById(unitId)?.modes) return null; 
+        if (window.inventoryMode && window.getUnitById?.(unitId)?.modes) return null; 
         
         return entry[modeKey][0] || null;
     }
@@ -76,7 +85,7 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
         const keys = ['merciless_god', 'merciless_god_syncro'];
         for (const k of keys) {
             const altEntry = db[k + suffix] || db[k];
-            if (altEntry && altEntry[modeKey]) return altEntry[modeKey][modeIdx] || null;
+            if (altEntry && altEntry[modeKey]) return altEntry[modeKey][modeIdx] || altEntry[modeKey][0] || null;
         }
     }
     
@@ -336,13 +345,6 @@ window.getUnitsPerPage = () => {
     return Math.max(1, columns) * 2; // Always returns exactly 2 rows worth of units
 };
 
-window.cachedResults = window.cachedResults || {};
-window.unitELevels = window.unitELevels || {};
-window.unitSystemLevels = window.unitSystemLevels || {};
-window.unitTraits = window.unitTraits || {};
-window.unitHeads = window.unitHeads || {};
-window.unitModesState = window.unitModesState || {};
-
 // Constants & Configurations
 const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings'];
 
@@ -499,8 +501,14 @@ function getSynergyBadgeHtml(unit, activeMode) {
         : `<div class="placement-badge synergy-dot-badge" style="color: #71717a; border-color: rgba(113, 113, 122, 0.3); background: rgba(0,0,0,0.2); font-weight: 700; opacity: 0.6;">⛓ REQUIRED: ${requiresDot.toUpperCase()}</div>`;
 }
 
-function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = 0) {
+function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
     if (!r) return null;
+
+    if (activeModeIdx === undefined) {
+        const state = window.unitModesState[unitId] ?? (window.getUnitById?.(unitId)?.defaultMode ?? 0);
+        activeModeIdx = Array.isArray(state) ? state[0] : state;
+    }
+
     const res = (r.id && r.mainStats && r.setName) ? { ...r } : {
         id: r.id || `${unitId}-static-${Math.random().toString(36).substr(2, 9)}`,
         traitName: (typeof r.t === 'number' ? (traitsList[r.t]?.name) : (r.traitName || r.t)) || 'Unknown Trait',
@@ -567,15 +575,20 @@ function getBuildSortScore(build) {
     );
 }
 
-function getBestHydratedBuild(builds, unitId, isHotbar, candidateLimit = 128) {
+function getBestHydratedBuild(builds, unitId, isHotbar, activeModeIdx = undefined, candidateLimit = 128) {
+    if (activeModeIdx === undefined) {
+        const state = window.unitModesState[unitId] ?? (window.getUnitById?.(unitId)?.defaultMode ?? 0);
+        activeModeIdx = Array.isArray(state) ? state[0] : state;
+    }
+
     const candidates = [...(builds || [])]
         .sort((a, b) => getBuildSortScore(b) - getBuildSortScore(a))
         .slice(0, candidateLimit);
     const ids = candidates.map(b => b?.id || `${b?.t || b?.traitName || ''}:${b?.s || b?.setName || ''}:${b?.h || b?.headUsed || ''}:${b?.b || b?.mainStats?.body || ''}:${b?.l || b?.mainStats?.legs || ''}`).join('|');
-    const cacheKey = `${unitId}:${isHotbar ? 1 : 0}:${ids}`;
+    const cacheKey = `${unitId}:${isHotbar ? 1 : 0}:${activeModeIdx}:${ids}`;
     if (window.bestHydratedBuildCache?.[cacheKey]) return window.bestHydratedBuildCache[cacheKey];
 
-    const hydrated = candidates.map(b => hydrateBuildEntry(b, unitId, isHotbar)).filter(Boolean);
+    const hydrated = candidates.map(b => hydrateBuildEntry(b, unitId, isHotbar, activeModeIdx)).filter(Boolean);
     if (!hydrated.length) return null;
     const best = hydrated.reduce((best, cur) => getBuildSortScore(cur) > getBuildSortScore(best) ? cur : best, hydrated[0]);
     window.bestHydratedBuildCache[cacheKey] = best;
@@ -724,7 +737,7 @@ window.refreshActiveBuild = function (unit) {
     const activeMode = 'fixed';
     
     // FIX: Normalize array state inside refreshActiveBuild to correctly fetch numeric state indexes
-    const state = window.unitModesState?.[unitId] || 0;
+    const state = window.unitModesState[unitId] ?? (unit.defaultMode ?? 0);
     const activeModeIdx = Array.isArray(state) ? state[0] : state;
 
     // Pre-initialize unit system levels if undefined to prevent Joyful Captain default-to-100 bug
@@ -853,7 +866,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const isHotbar = card.parentElement?.id === 'hotbarHiddenRender' || !!card.closest('.team-summary-container') || isInHotbarState;
 
     // FIX: Normalize array state inside updateBuildListDisplay to base integer
-    const state = window.unitModesState?.[unitId] || 0;
+    const state = window.unitModesState[unitId] ?? (unitObj.defaultMode ?? 0);
     const activeModeIdx = Array.isArray(state) ? state[0] : state;
     
     const systemLevelBar = card.querySelector('.system-level-bar');
@@ -1115,7 +1128,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     }
 }
 
-processUnitCache = function (unit, specificCfg = null, specificType = null) {
+function processUnitCache(unit, specificCfg = null, specificType = null) {
     if (!window.unitBuildsCache[unit.id]) {
         window.unitBuildsCache[unit.id] = { base: { fixed: [null] }, abil: { fixed: [null] } };
     }
@@ -1216,11 +1229,15 @@ window.getQuickScore = (unit) => {
 
     const activeDb = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
     const list = window.getRelicDbEntry(activeDb, unit.id, unit.ability && window.activeAbilityIds?.has(unit.id) ? 'abil' : 'base');
+
+    const state = window.unitModesState[unit.id] ?? (unit.defaultMode ?? 0);
+    const activeMode = Array.isArray(state) ? state[0] : state;
+
     if (list?.length > 0) {
         const currentHead = window.unitHeads?.[unit.id] || 'none';
         const currentTrait = window.unitTraits?.[unit.id];
         
-        let matchedBuild = getBestHydratedBuild(list, unit.id) || list[0];
+        let matchedBuild = getBestHydratedBuild(list, unit.id, false, activeMode) || list[0];
         if (currentTrait || currentHead !== 'none') {
             const matchingBuilds = list.filter(b => {
                 const tName = (typeof b.t === 'number' ? traitsList[b.t]?.name : b.traitName || b.t) || '';
@@ -1230,20 +1247,16 @@ window.getQuickScore = (unit) => {
                 return true;
             });
             if (matchingBuilds.length) {
-                matchedBuild = getBestHydratedBuild(matchingBuilds, unit.id) || matchingBuilds[0];
+                matchedBuild = getBestHydratedBuild(matchingBuilds, unit.id, false, activeMode) || matchingBuilds[0];
             }
         }
 
-        const hydratedMatch = matchedBuild?.sortDps !== undefined ? matchedBuild : hydrateBuildEntry(matchedBuild, unit.id);
+        const hydratedMatch = matchedBuild?.sortDps !== undefined ? matchedBuild : hydrateBuildEntry(matchedBuild, unit.id, false, activeMode);
         return window.isUnit(unit.id, 'law') 
             ? (hydratedMatch?.range || matchedBuild.range || 0) 
             : getBuildSortScore(hydratedMatch || matchedBuild);
     }
 
-    // FIX: Normalize array state inside getQuickScore
-    const state = window.unitModesState?.[unit.id] || 0;
-    const activeMode = Array.isArray(state) ? state[0] : state;
-    
     const { upgradesArr } = getUnitCostAndPlacement(unit, activeMode);
     let d = unit.stats?.dmg, s = unit.stats?.spa;
     if ((!d || !s) && upgradesArr) {
@@ -1315,7 +1328,7 @@ window.resortUnitCardsInPlace = function () {
 
 function renderUnitCard(unit, absoluteIndex) {
     // FIX: Normalize array state inside renderUnitCard
-    const state = window.unitModesState?.[unit.id] || 0;
+    const state = window.unitModesState[unit.id] ?? (unit.defaultMode ?? 0);
     const activeMode = Array.isArray(state) ? state[0] : state;
     const { upgradesArr = null } = getUnitCostAndPlacement(unit, activeMode);
 
@@ -1478,7 +1491,7 @@ function renderUnitCard(unit, absoluteIndex) {
 
     return createBaseUnitCard(unit, {
         id: 'card-' + unit.id,
-        additionalClasses: (activeAbilityIds.has(unit.id) ? ' use-ability' : '') + ' lazy-build-load',
+        additionalClasses: (window.activeAbilityIds.has(unit.id) ? ' use-ability' : '') + ' lazy-build-load',
         bannerContent: `<div class="banner-badges">
             <div class="placement-badge">Max Place: ${dynamicPlacement}</div>
             <div class="placement-badge is-${(unit.placementType || 'Ground').toLowerCase()}">${unit.placementType || 'Ground'}</div>
@@ -1596,6 +1609,7 @@ function renderDatabase() {
     window.unitBuildsCache = {};
     window.unitActiveBuilds = {};
     window.bestHydratedBuildCache = {};
+    window.LIVE_SCORE_CACHE = {};
     globalFilterUnits(document.getElementById('globalSearch')?.value || '');
 }
 
@@ -1621,7 +1635,7 @@ function _executeGlobalFilter(term) {
     const unitElement = document.getElementById('unitElementSort')?.value || 'none';
 
     // 1. Filter base list by inventory assignments if in inventory mode
-    const baseList = inventoryMode
+    const baseList = window.inventoryMode
         ? unitDatabase.filter(unit => assignedInventoryUnitIds.has(unit.id))
         : unitDatabase;
 
@@ -1684,7 +1698,7 @@ function _executeGlobalFilter(term) {
     paginatedSortedUnits.forEach(entry => {
         const u = entry.unit;
         // FIX: Normalize array state when initializing level indices
-        const state = window.unitModesState?.[u.id] || 0;
+        const state = window.unitModesState[u.id] ?? (u.defaultMode ?? 0);
         const mode = Array.isArray(state) ? state[0] : state;
         const upgrades = u.modes?.[mode]?.upgrades || u.upgrades;
         if (window.unitELevels[u.id] === undefined && upgrades) {
