@@ -2,7 +2,7 @@ unitDatabase.push({
     // IDENTITY
     id: "nursefather_thumb",
     name: "Nursefather (Thumb)",
-    img: "images/units/NursefatherThumb.png",
+    img: "images/units/nursefather_thumb.png",
     level: 70,
     placement: 3,
     placementType: "Ground",
