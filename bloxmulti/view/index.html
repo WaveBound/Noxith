@@ -39,7 +39,7 @@
 
 <body>
     <div id="status">Connecting to remote instance...</div>
-    <video id="remoteVideo" autoplay playsinline controls></video>
+    <video id="remoteVideo" autoplay playsinline muted controls></video>
 
     <script>
         const API_BASE = "https://bloxmulti-session-connect.wavebound.workers.dev/"; // Replace with your Worker URL
@@ -59,12 +59,24 @@
             }
 
             peerConnection = new RTCPeerConnection(config);
+            const processedCandidates = new Set();
+
+            // Display connection status changes directly on-screen
+            peerConnection.oniceconnectionstatechange = () => {
+                const state = peerConnection.iceConnectionState;
+                statusEl.textContent = `Connection status: ${state.toUpperCase()}`;
+                if (state === "failed") {
+                    statusEl.textContent = "Connection failed. Retrying...";
+                    setTimeout(initViewer, 4000);
+                }
+            };
 
             // Handle incoming track
             peerConnection.ontrack = (event) => {
-                statusEl.textContent = "Live stream active.";
+                statusEl.textContent = "Stream connected. Decoding video...";
                 if (remoteVideo.srcObject !== event.streams[0]) {
                     remoteVideo.srcObject = event.streams[0];
+                    statusEl.textContent = "Live stream active.";
                 }
             };
 
@@ -108,6 +120,11 @@
                     if (res.ok) {
                         const candidates = await res.json();
                         for (const c of candidates) {
+                            // Prevent re-processing duplicate ICE candidates
+                            const key = c.candidate;
+                            if (processedCandidates.has(key)) continue;
+                            processedCandidates.add(key);
+
                             try {
                                 await peerConnection.addIceCandidate(new RTCIceCandidate(c));
                             } catch (e) { /* ignore duplicate or stale candidates */ }
