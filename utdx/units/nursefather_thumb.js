@@ -2,7 +2,7 @@ unitDatabase.push({
     // IDENTITY
     id: "nursefather_thumb",
     name: "Nursefather (Thumb)",
-    img: "images/units/nursefather_thumb.png",
+    img: "images/units/NursefatherThumb.png",
     level: 70,
     placement: 3,
     placementType: "Ground",
@@ -80,7 +80,7 @@ unitDatabase.push({
     // ETHEREALIZATION (E1-E6 upgrade descriptions)
     etherealization: [
         { desc: "+10 Stat Points (E1)" },
-        { desc: "Instead of follow up 20s, Follow up every 10s", },
+        { desc: "Instead of follow up 20s, Follw up every 10s", },
         { desc: "+10 Stat Points (E3)" },
         { desc: "The Apprentice dies after 2 attacks (E4)" },
         { desc: "+10 Stat Points (E5)" },

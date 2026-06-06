@@ -12,11 +12,11 @@ window.getUnitUncappedCrit = function(slotUnit, slotIndex) {
     let crit = 0;
     
     if (build && build.critData) {
-        // Read uncapped raw rate to allow values over 100% for conversion
-        crit = build.critData.rawRate || build.critData.rate || 0;
-    } else {
-        crit = slotUnit.stats?.crit || slotUnit.crit || 0;
+        // Read uncapped raw rate which ALREADY includes global buffs (Fern, Ancient Mage, etc.)
+        return build.critData.rawRate || build.critData.rate || 0;
     }
+    
+    crit = slotUnit.stats?.crit || slotUnit.crit || 0;
     
     const hState = window.hotbarState;
     if (hState && hState.buffState) {
@@ -330,13 +330,12 @@ function calculateDPS(uStats, relicStats, context) {
     let finalCritRate = Math.min(rawCritRate, 100);
 
     if (window.isUnit(uStats.id, 'angel_born_in_hell')) {
-        // Angel Born in Hell has a fixed 50% Crit Rate (bugged behavior)
+        // Angel Born in Hell has a fixed 50% Crit Rate
         finalCritRate = 50;
         rawCritRate = 50;
+        // Crit rate → dmg conversion is handled by "Warrior that destroys Evil" passive in passive-backend
     }
 
-    let avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
-    let avgCritMultBoss = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100))); // Match base crit mult
     let finalDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
     let finalDmg = finalDmgNormal;
     let finalDmgBoss = finalDmgNormal;
@@ -344,7 +343,6 @@ function calculateDPS(uStats, relicStats, context) {
     let finalCritRateBoss = finalCritRate;
     if (window.isUnit(uStats.id, 'marine_hero')) {
         finalCritRateBoss = Math.min(finalCritRateBoss + 100, 100);
-        avgCritMultBoss = (1 + ((finalCdmgStat / 100) * (finalCritRateBoss / 100)));
     }
     let finalCdmgStatBoss = finalCdmgStat;
 
@@ -353,10 +351,10 @@ function calculateDPS(uStats, relicStats, context) {
         finalCritRate = 0;
         finalCritRateBoss = 0;
         rawCritRate = 0;
-        avgCritMult = 1.0;
-        avgCritMultBoss = 1.0;
     }
 
+    let avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
+    let avgCritMultBoss = (1 + ((finalCdmgStatBoss / 100) * (finalCritRateBoss / 100)));
     let avgHit = finalDmg * avgCritMult;
     let avgHitBoss = finalDmgBoss * avgCritMultBoss;
     let avgHitNormal = finalDmgNormal * avgCritMult;
@@ -790,11 +788,6 @@ function calculateDPS(uStats, relicStats, context) {
     const elemFinalSummonDps = finalSummonDps * elemMult;
     const elemBossHitDps = finalBossHitDps * elemMult;
     const elemBossDotDps = finalBossDotDps * elemMult;
-
-    // Sanitization: Ensure no legacy "Purified Energy" is double-applied or present in the passive breakdown
-    if (detailedBuffs && detailedBuffs.passiveBreakdown) {
-        detailedBuffs.passiveBreakdown = detailedBuffs.passiveBreakdown.filter(p => p && p.name !== "Purified Energy (Allied Crit Rate to Dmg)" && p.name !== "Purified Energy");
-    }
 
     return {
         total: (elemFinalHitDps + elemFinalDotDps + elemFinalSummonDps),
