@@ -141,6 +141,8 @@ function getActiveTagAndSourceForStat(statType, data) {
         let cleanSource = item.key;
         if (cleanSource.includes('shadow_reaper')) cleanSource = 'shadow_reaper';
         else if (cleanSource.includes('reaper')) cleanSource = 'reaper_set';
+        else if (cleanSource.includes('fused_earring')) cleanSource = 'fused_earrings_acc';
+        else if (cleanSource === 'fused' || cleanSource === 'fused_set') cleanSource = 'fused_set';
         
         const perkCfg = tagPerksMap[cleanSource];
         if (perkCfg && perkCfg[statType]) {
@@ -166,7 +168,7 @@ function getActiveTagAndSourceForStat(statType, data) {
 }
 
 function renderOverviewSection(data) {
-    const isNutaru = window.isUnit?.(data.baseStats.id, 'nutaru_beast');
+    const isNutaru = window.isUnit?.(data.baseStats?.id, 'nutaru_beast');
     return `
         <div class="math-section" style="border: 1px solid rgba(251, 191, 36, 0.2); border-left: 4px solid #fbbf24; padding: 8px 12px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, rgba(255,255,255,0) 100%);">
             <div class="math-header" style="font-size: 0.5rem; margin-bottom: 10px; letter-spacing: 1px; opacity: 0.6; font-weight: 900; color: #fbbf24;">SNAPSHOT OVERVIEW</div>
@@ -274,7 +276,7 @@ function renderSourceTotalsSection(data) {
 
     if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
         Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
-            if (data.activeGlobalBuffs[buff.id] !== undefined) {
+            if (data.activeGlobalBuffs[buff.id]) {
                 const bData = data.activeGlobalBuffs[buff.id];
                 if (bData) {
                     if (bData.dmg > 0) {
@@ -375,7 +377,9 @@ function renderSourceTotalsSection(data) {
                 if (Math.abs(rem) > 0.01) html += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Unit Passive</span><span class="text-white">${fmt.pct(rem)}</span></div>`;
                 return html;
             } else {
-                return unitInnateDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Unit Passive</span><span class="text-white">${fmt.pct(unitInnateDmg)}</span></div>` : '';
+                const eternalSub = (data.traitObj && data.traitObj.isEternal) ? (Math.min(data.wave || 12, 12) * 5) : 0;
+                const val = (data.detailedBuffs ? data.detailedBuffs.unitPassive : passiveDmg) - eternalSub;
+                return val > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>Unit Passive</span><span class="text-white">${fmt.pct(val)}</span></div>` : '';
             }
         })()}
                     `) + `
@@ -422,8 +426,12 @@ function renderActiveBuffsSection(data) {
     }
 
     const unit = typeof getUnitById === 'function' ? getUnitById(data.baseStats?.id) : null;
-    if (unit && unit.passives) {
-        unit.passives.forEach(p => {
+    
+    // FIX: Retrieve dynamic applied passives context (including mode-specific passives) instead of just static base unit passives
+    const activePassives = data.baseStats?.passives || (unit ? unit.passives : null);
+    
+    if (activePassives && Array.isArray(activePassives)) {
+        activePassives.forEach(p => {
             let stats = [];
             const pb = (data.detailedBuffs && data.detailedBuffs.passiveBreakdown)
                 ? data.detailedBuffs.passiveBreakdown.find(item => item.name === p.name)
@@ -435,7 +443,13 @@ function renderActiveBuffsSection(data) {
                 if (pb.range) stats.push(`+${pb.range}% Rng`);
                 if (pb.crit) stats.push(`+${pb.crit}% Crit`);
                 if (pb.cdmg) stats.push(`+${pb.cdmg}% CDmg`);
-                if (pb.dot) stats.push(`+${pb.dot}% DoT`);
+                
+                // FIX: Dynamically check the active DoT type (such as Bleed or Burn) and append it to the passive DoT indicator
+                if (pb.dot) {
+                    const dotType = p.dotType || data.baseStats?.dotType || data.baseStats?.stats?.dotType;
+                    const dotSuffix = dotType ? ` (${dotType})` : '';
+                    stats.push(`+${pb.dot}% DoT${dotSuffix}`);
+                }
                 if (pb.bossDmg) stats.push(`+${pb.bossDmg}% Boss Dmg`);
             }
 
@@ -484,7 +498,7 @@ function renderQuickBreakdownSection(data, avgHitPerUnit, dotColorClass) {
             ? `Stances Weighted Average × ${data.placement}`
             : (data.baseStats?.id === 'triple_threat'
                 ? `(${fmt.num(avgHitPerUnit / data.spa)} Base + ${fmt.num((data.hit / data.placement) - (avgHitPerUnit / data.spa))} FUA) × ${data.placement}`
-                : `(${fmt.num(avgHitPerUnit)} avg ÷ ${fmt.fix(data.spa, 2)}s) × ${data.placement}`)
+                : `(${fmt.num(avgHitPerUnit)} avg ÷ ${fmt.fix(data.usedSpa || data.spa, 2)}s) × ${data.placement}`)
         }
                     </div>
                 </div>
@@ -528,10 +542,6 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
                 <span class="opacity-70">Avg Attacks to Crit:</span>
                 <span class="mt-font-mono mt-text-right text-white">${fmt.fix(w.attacksToCrit, 2)}</span>
             </div>
-            <div class="mt-flex-between text-xs text-white mb-1">
-                <span class="opacity-70">Time to Crit:</span>
-                <span class="mt-font-mono mt-text-right text-white">${fmt.fix(w.timeToTrigger, 2)}s</span>
-            </div>
             <div class="mt-flex-between text-xs text-white mb-3">
                 <span class="opacity-70">Buff Uptime:</span>
                 <span class="mt-font-mono mt-text-right mt-text-green">${fmt.fix(w.uptime * 100, 1)}%</span>
@@ -542,13 +552,6 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
             </div>
         </td></tr>`;
     }
-
-    const relicSet = data.setName ? data.setName.replace(' Set', '') : (data.relicStats?.set ? data.relicStats.set.replace('_set', '').replace('_', ' ') : '');
-    const setLabel = relicSet && relicSet !== 'Mixed' ? `↳ Set Bonus<br>&nbsp;&nbsp;&nbsp;&nbsp;(${relicSet} Set)` : '↳ Set Bonus';
-    
-    const activeTags = [...new Set(data.totalSetStats?.activeTags || [])].join(' / ');
-    const headTags = [...new Set(data.headBuffs?.activeTags || [])].join(' / ');
-    const tagLabel = activeTags ? `↳ Tag Bonus (${activeTags})` : '↳ Tag Bonus';
 
     return `
             <div class="dd-section">
@@ -568,8 +571,8 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
                         <td class="mt-cell-formula mt-pt-md mt-text-gold mt-text-bold">${fmt.pct(data.totalAdditivePct)}</td>
                         <td class="mt-cell-val calc-highlight mt-pt-md">${fmt.num(preConditionalDmg)}</td>
                     </tr>
-                    ${(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg) !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="line-height: 1.4;">↳ Set Base Bonus<br>&nbsp;&nbsp;&nbsp;&nbsp;(${relicSetName} Set)</td><td class="mt-cell-formula" style="vertical-align: top; padding-top: 4px;">${fmt.pct(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${(data.detailedBuffs?.accessoryBase || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="line-height: 1.4;">↳ Accessory Base<br>&nbsp;&nbsp;&nbsp;&nbsp;(${cleanHeadDisplayName})</td><td class="mt-cell-formula" style="vertical-align: top; padding-top: 4px;">${fmt.pct(data.detailedBuffs.accessoryBase)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg) !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base Bonus <span style="font-size: 0.65rem; color: #a78bfa; font-weight: 500;">(${relicSetName} Set)</span></td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.detailedBuffs?.accessoryBase || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Accessory Base <span style="font-size: 0.65rem; color: #a78bfa; font-weight: 500;">(${cleanHeadDisplayName})</span></td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.accessoryBase)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(() => {
                         const val = data.detailedBuffs?.accessoryPerk || 0;
                         if (val === 0) return '';
@@ -577,19 +580,30 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
                         let label = `↳ Accessory Passive Perk`;
                         if (note.includes('Clash')) label = `↳ Clash Potential Bonus`;
                         else if (note.includes('Syncro')) label = `↳ Synchro Form Bonus`;
-                        return `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="line-height: 1.4;">${label}<br>&nbsp;&nbsp;&nbsp;&nbsp;(${cleanHeadDisplayName})</td><td class="mt-cell-formula" style="vertical-align: top; padding-top: 4px;">${fmt.pct(val)}</td><td class="mt-cell-val"></td></tr>`;
+                        
+                        const head = data.relicStats ? data.relicStats.head : '';
+                        if (head === 'monarch' || head === 'monarch_cape' || head === 'monarch_head') {
+                            const summons = data.baseStats?.id === 'gluttonous_warlord' ? 6 : (data.summonStats ? Math.min(6, data.summonStats.maxCount) : 6);
+                            label = `↳ Accessory Perk (Monarch: +10% × ${summons} Summons)`;
+                        }
+                        return `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label} <span style="font-size: 0.65rem; color: #a78bfa; font-weight: 500;">(${cleanHeadDisplayName})</span></td><td class="mt-cell-formula" style="vertical-align: middle;">${fmt.pct(val)}</td><td class="mt-cell-val"></td></tr>`;
                     })()}
                     ${(() => {
                         const val = (data.detailedBuffs ? data.detailedBuffs.tagBonus : tagDmg);
                         if (val === 0) return '';
                         const relevantTags = [];
                         const check = (id) => {
-                            if (window.TAG_PERKS?.[id]) {
-                                window.TAG_PERKS[id].forEach(p => { if (unitTags.includes(p.tag) && p.bonus.dmg) relevantTags.push(p.tag); });
+                            if (!id || typeof id !== 'string') return;
+                            let targetId = id;
+                            if (targetId.includes('fused_earring')) targetId = 'fused_earrings_acc';
+                            else if (targetId.includes('fused')) targetId = 'fused_set';
+
+                            if (window.TAG_PERKS?.[targetId]) {
+                                window.TAG_PERKS[targetId].forEach(p => { if (unitTags.includes(p.tag) && p.bonus.dmg) relevantTags.push(p.tag); });
                             }
                         };
                         const activeSetId = data.relicStats?.set;
-                        const activeAccId = (data.headBuffs?.type || data.relicStats?.head)?.replace('_necklace', '').replace('_hat', '') || '';
+                        const activeAccId = data.headBuffs?.type || data.relicStats?.head || '';
                         check(activeSetId);
                         check(activeAccId);
                         const uniqueTags = [...new Set(relevantTags)];
@@ -608,15 +622,6 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
                     label = `↳ Set Perks (Warlord)`;
                 }
                 html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label}</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.setPerk)}</td><td class="mt-cell-val"></td></tr>`;
-            }
-            if (data.detailedBuffs.accessoryPerk && data.detailedBuffs.accessoryPerk !== 0) {
-                let label = '↳ Accessory Perks';
-                const head = data.relicStats ? data.relicStats.head : '';
-                if (head === 'monarch' || head === 'monarch_cape' || head === 'monarch_head') {
-                    const summons = data.baseStats?.id === 'gluttonous_warlord' ? 6 : (data.summonStats ? Math.min(6, data.summonStats.maxCount) : 6);
-                    label = `↳ Accessory Perks (Monarch Cape: +10% × ${summons} Summons)`;
-                }
-                html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label}</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.accessoryPerk)}</td><td class="mt-cell-val"></td></tr>`;
             }
             return html;
         })()}
@@ -642,15 +647,6 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
                     ${eternalDmg > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-accent-start opacity-70">↳ Eternal Stacks (Wave 12+)</td><td class="mt-cell-formula text-accent-start">${fmt.pct(eternalDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.abilityBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-custom opacity-70">↳ Ability Buffs</td><td class="mt-cell-formula text-custom">${fmt.pct(data.abilityBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
 
-                    ${(() => {
-                        const val = data.detailedBuffs?.accessoryPerk || 0;
-                        if (val === 0) return '';
-                        const note = data.headBuffs?.note || "";
-                        let label = `↳ Accessory Passive Perk`;
-                        if (note.includes('Clash')) label = `↳ Clash Potential Bonus`;
-                        else if (note.includes('Syncro')) label = `↳ Synchro Form Bonus`;
-                        return `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="line-height: 1.4;">${label}<br>&nbsp;&nbsp;&nbsp;&nbsp;(${cleanHeadDisplayName})</td><td class="mt-cell-formula" style="vertical-align: top; padding-top: 4px;">${fmt.pct(val)}</td><td class="mt-cell-val"></td></tr>`;
-                    })()}
                     ${globalDmgBreakdownHtml}
 
                     ${data.conditionalData ? `
@@ -669,10 +665,13 @@ function getTagPerkRowsHtml(statType, data) {
 
     checkSet.forEach(item => {
         if (!item.id) return;
-        let rawId = item.id.replace('_necklace', '').replace('_hat', '').replace('_set', '');
-        let setId = rawId;
-        if (rawId.includes('shadow_reaper')) setId = 'shadow_reaper';
-        else if (rawId.includes('reaper')) setId = 'reaper_set';
+        let setId = item.id;
+        // Normalize IDs to match TAG_PERKS keys
+        if (setId.includes('fused_earring')) setId = 'fused_earrings_acc';
+        else if (setId.includes('fused')) setId = 'fused_set';
+        else if (setId.includes('shadow_reaper')) setId = 'shadow_reaper';
+        else if (setId.includes('reaper')) setId = 'reaper_set';
+        else setId = setId.replace('_necklace', '').replace('_hat', '').replace('_set', '');
 
         if (window.TAG_PERKS?.[setId]) {
             window.TAG_PERKS[setId].forEach(perk => {
@@ -680,7 +679,12 @@ function getTagPerkRowsHtml(statType, data) {
                     const bonusKey = statType === 'cf' ? 'cRate' : 'cDmg';
                     const val = perk.bonus[bonusKey];
                     if (val) {
-                        const source = (setId === 'warlord') ? 'Warlord Set' : (setId === 'shadow_reaper' ? 'S. Reaper' : (setId === 'reaper_set' ? 'Reaper' : setId.toUpperCase()));
+                        const source = (setId === 'warlord') ? 'Warlord Set' : 
+                                     (setId === 'shadow_reaper') ? 'S. Reaper' : 
+                                     (setId === 'reaper_set') ? 'Reaper Set' : 
+                                     (setId === 'fused_set') ? 'Fused Warrior Set' : 
+                                     (setId === 'fused_earrings_acc') ? 'Fused Earrings' : setId.replace('_', ' ').toUpperCase();
+                                     
                         html += `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs" style="line-height: 1.3;">↳ Tag Bonus<br>&nbsp;&nbsp;&nbsp;&nbsp;(${perk.tag} : ${source})</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs" style="vertical-align: top; padding-top: 2px;">+${fmt.fix(val, 1)}%</td></tr>`;
                     }
                 }
@@ -753,7 +757,7 @@ function renderCritSection(data, setTagCfTotal, setTagCmTotal, cleanHeadDisplayN
                     <tr>
                         <td class="mt-cell-label text-right pr-2 mt-pt-md">Avg Damage Per Hit</td>
                         <td class="mt-cell-formula mt-pt-md"></td>
-                        <td class="mt-cell-val calc-result text-right mt-pt-md">${fmt.num(data.dmgVal * (data.critData?.avgMult || 1))}</td>
+                        <td class="mt-cell-val calc-result text-right mt-pt-md">${fmt.num((data.dmgVal || 0) * (data.critData?.avgMult || 1))}</td>
                     </tr>
                 </table>
             </div>`;
@@ -761,6 +765,8 @@ function renderCritSection(data, setTagCfTotal, setTagCmTotal, cleanHeadDisplayN
 
 function renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa, cleanHeadDisplayName) {
     const headSpaVal = data.headBuffs?.spa || 0;
+    const upgradeBaseSpa = data.baseStats?.spa || (data.lvStats?.spa / data.lvStats?.spaMult) || 1;
+    const spaAfterPoints = upgradeBaseSpa * (data.lvStats?.spaMult || 1);
     let globalSpaBreakdownHtml = '';
     if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
         Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
@@ -775,15 +781,15 @@ function renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa, cl
             <div class="dd-section">
                 <div class="dd-title mt-text-custom"><span>3. SPA (Speed) Calculation</span> <button class="calc-info-btn" onclick="openInfoPopup('spa_calc')">?</button></div>
                 <table class="calc-table">
-                    <tr><td class="mt-cell-label">Base SPA (Lv 1)</td><td class="mt-cell-formula"></td><td class="mt-cell-val">${data.baseStats?.spa || 0}s</td></tr>
-                    <tr><td class="mt-cell-label">Stat Point Scaling</td><td class="mt-cell-formula">x${fmt.fix(data.lvStats?.spaMult, 3)}</td><td class="mt-cell-val">${fmt.fix((data.baseStats?.spa || 0) * (data.lvStats?.spaMult || 1), 3)}s</td></tr>
+                    <tr><td class="mt-cell-label">Base SPA (Upgrade)</td><td class="mt-cell-formula"></td><td class="mt-cell-val">${fmt.fix(upgradeBaseSpa, 2)}s</td></tr>
+                    <tr><td class="mt-cell-label">Stat Point Scaling</td><td class="mt-cell-formula">x${fmt.fix(data.lvStats?.spaMult, 3)}</td><td class="mt-cell-val">${fmt.fix(spaAfterPoints, 3)}s</td></tr>
                     ${data.isSSS ? `<tr><td class="mt-cell-label">SSS Rank (-8%)</td><td class="mt-cell-formula"><span class="op">×</span>0.92</td><td class="mt-cell-val">${fmt.fix(data.lvStats?.spa, 3)}s</td></tr>` : ''}
                     ${traitRowsSpa}
                     
                     <tr><td class="mt-cell-label mt-pt-md">Relic Multiplier</td><td class="mt-cell-formula mt-pt-md">-${fmt.fix(data.relicBuffs?.spa, 1)}%</td><td class="mt-cell-val mt-pt-md">${fmt.fix(data.spaAfterRelic, 3)}s</td></tr>
                     <tr><td class="mt-cell-label mt-pt-md">Set Bonus + Passive + Abilities <button class="calc-info-btn" onclick="openInfoPopup('tag_logic')">?</button></td><td class="mt-cell-formula mt-pt-md">${data.setAndPassiveSpa >= 0 ? '-' : '+'}${Math.abs(fmt.fix(data.setAndPassiveSpa, 1))}%</td><td class="mt-cell-val mt-pt-md">${fmt.fix(data.rawFinalSpa, 3)}s</td></tr>
                     <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base</td><td class="mt-cell-formula">-${fmt.fix(baseSetSpa, 1)}%</td><td class="mt-cell-val"></td></tr>
-                    ${headSpaVal > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Accessory Base<br>&nbsp;&nbsp;&nbsp;&nbsp;(${cleanHeadDisplayName})</td><td class="mt-cell-formula">-${fmt.fix(headSpaVal, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${headSpaVal > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Accessory Base <span style="font-size: 0.65rem; color: #a78bfa; font-weight: 500;">(${cleanHeadDisplayName})</span></td><td class="mt-cell-formula">-${fmt.fix(headSpaVal, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.headBuffs && data.headBuffs.warlordSpa > 0) ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Warlord Hat Accessory</td><td class="mt-cell-formula">-${fmt.fix(data.headBuffs.warlordSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${tagSpa !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonuses</td><td class="mt-cell-formula">${tagSpa > 0 ? '-' : '+'}${Math.abs(fmt.fix(tagSpa, 1))}%</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(() => {
@@ -836,15 +842,13 @@ function renderDotSection(data, headDotRow) {
     const headDot = data.headBuffs?.dot || 0;
     const relicDot = data.relicBuffs?.dot || 0;
 
+    const passiveDot = data.dotData?.passiveBonus || 0;
     const gearBonus = relicDot + setDot + headDot;
-    const traitMultiplier = 1 + (traitDot / 100);
-    const gearMultiplier = 1 + (gearBonus / 100);
-    
-    let combinedMultiplier = traitMultiplier * gearMultiplier;
-    if (data.baseStats?.id === 'ant_king_savage' || (window.isUnit && window.isUnit(data.baseStats?.id, 'ant_king_savage'))) {
-        combinedMultiplier = combinedMultiplier * combinedMultiplier;
-    }
+    const showSeparatePassiveRow = passiveDot > 0 && !(data.detailedBuffs?.passiveBreakdown?.some(p => p.dot === passiveDot));
+    const additiveBonus = traitDot + gearBonus + (showSeparatePassiveRow ? passiveDot : 0);
+    const bugMult = (data.baseStats?.id === 'ant_king_savage' || (window.isUnit && window.isUnit(data.baseStats?.id, 'ant_king_savage'))) ? 2 : 1;
 
+    const combinedMultiplier = (1 + ((traitDot + gearBonus + passiveDot) * bugMult) / 100) * (db?.globalDotMult || 1.0);
     const finalTickPct = (db?.base || 0) * combinedMultiplier;
 
     if (data.headBuffs && data.headBuffs.type === 'ninja') {
@@ -937,15 +941,22 @@ function renderDotSection(data, headDotRow) {
             ${(() => {
                 if (data.detailedBuffs && data.detailedBuffs.passiveBreakdown) {
                     let html = '';
+                    const seen = new Set();
                     data.detailedBuffs.passiveBreakdown.forEach(p => {
-                        if (p.dot > 0) html += `<tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ ${p.name}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">+${fmt.num(p.dot)}%</td></tr>`;
+                        if (p.dot > 0 && !seen.has(p.name)) {
+                            html += `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">↳ ${p.name}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">+${fmt.num(p.dot)}%</td></tr>`;
+                            seen.add(p.name);
+                        }
                     });
                     return html;
                 }
                 return '';
             })()}
-            <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-custom">1. Trait Multiplier (${data.traitObj?.name || 'None'})</td><td class="mt-cell-formula mt-text-bold text-custom"><span class="op">×</span>${fmt.fix(traitMultiplier, 2)}</td><td class="mt-cell-val text-custom text-bold">${fmt.pct(traitDot)}</td></tr>
-            <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-accent-end">2. Gear Multiplier (Relics/Set/Head)</td><td class="mt-cell-formula mt-text-bold text-accent-end"><span class="op">×</span>${fmt.fix(gearMultiplier, 2)}</td><td class="mt-cell-val text-accent-end text-bold">${fmt.pct(gearBonus)}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-custom">1. Trait Multiplier (${data.traitObj?.name || 'None'})</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-custom text-bold">${fmt.pct(traitDot)}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-accent-end">2. Gear Multiplier (Relics/Set/Head)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-end text-bold">${fmt.pct(gearBonus)}</td></tr>
+            ${(passiveDot > 0 && !(data.detailedBuffs?.passiveBreakdown?.some(p => p.dot === passiveDot))) ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-white">3. Passive Bonus (Unit/Mode)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-white text-bold">${fmt.pct(passiveDot)}</td></tr>` : ''}
+            ${bugMult > 1 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs" style="color:#f87171 !important;">↳ Bugged Double Scaling (Ant King)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs" style="color:#f87171 !important;">×2.0 Buffs</td></tr>` : ''}
+            <tr class="mt-border-top"><td class="mt-cell-label mt-pl-sm mt-pt-sm text-bold text-gray">↳ Combined DoT Multiplier</td><td class="mt-cell-formula mt-pt-sm text-bold"><span class="op">×</span>${fmt.fix(combinedMultiplier, 3)}</td><td class="mt-cell-val"></td></tr>
             ${relicDot > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">• Relic Stats (Main+Sub)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-dim">${fmt.pct(relicDot)}</td></tr>` : ''}
             ${setDot > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">• Set Bonus</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-dim">${fmt.pct(setDot)}</td></tr>` : ''}
             ${headDot > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">• Head Passive</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-dim">${fmt.pct(headDot)}</td></tr>` : ''}
@@ -1027,7 +1038,8 @@ function renderAttackRateSection(data) {
         const cooldown = f.cooldown;
         
         if (cooldown) {
-            if (f.nextAttack) {
+            if (f.nextAttack && ea) {
+                if (!ea.hitsInCycle) return '';
                 const { hitsInCycle, cycleDuration, totalDmgInCycle, hitsMult } = ea;
                 const speedPenalty = (hitsInCycle * data.finalSpa) / cycleDuration;
 
@@ -1047,18 +1059,26 @@ function renderAttackRateSection(data) {
                             <tr class="mt-border-top">
                                 <td class="mt-cell-label mt-pt-sm text-white" style="font-weight: 900;">Final Attack Mult</td>
                                 <td class="mt-cell-formula mt-pt-sm">Hits Mult × Speed Penalty</td>
-                                <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size: 1.15rem; color: #4ade80;">x${fmt.fix(ea.mult, 3)}</td>
+                                <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size: 1.15rem; color: #4ade80;">x${fmt.fix(ea?.mult, 3)}</td>
                             </tr>
                         </table>
                         <div class="text-xs mt-2 opacity-50" style="font-style: italic; padding-left: 5px;">Wait ${cooldown}s → Trigger extra attack on the next available hit.</div>
                     </div>`;
             }
-            // Account for time lost to FUA animation... (Existing Standard CD logic)
+            return ea ? `
+                <div class="dd-section" style="border-left: 3px solid #4ade80;">
+                    <div class="dd-title mt-text-green"><span>5. Follow-Up Cooldown Logic</span></div>
+                    <table class="calc-table">
+                        <tr><td class="mt-cell-label">Cooldown</td><td class="mt-cell-formula"></td><td class="mt-cell-val">${cooldown}s</td></tr>
+                        <tr><td class="mt-cell-label">Final Attack Mult</td><td class="mt-cell-formula"></td><td class="mt-cell-val calc-highlight">x${fmt.fix(ea.mult, 3)}</td></tr>
+                    </table>
+                </div>` : '';
         } else {
             return `
                 <div class="dd-section" style="border-left: 3px solid #4ade80;">
                     <div class="dd-title mt-text-green"><span>5. Attack Rate Multiplier (On-Attack)</span> <button class="calc-info-btn" onclick="openInfoPopup('attack_rate')">?</button></div>
                     <table class="calc-table">
+                        ${!ea ? '<tr><td colspan="3" class="mt-cell-label opacity-50">Follow-up data unavailable for this mode.</td></tr>' : `
                         <tr><td class="mt-cell-label">Primary Target Hits</td><td class="mt-cell-formula"></td><td class="mt-cell-val">1.0</td></tr>
                         <tr><td class="mt-cell-label text-custom">Follow-Up Chance</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-custom">${ea.req}</td></tr>
                         <tr><td class="mt-cell-label text-accent-start">Follow-Up Multiplier</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-start">+${fmt.fix(ea.extra, 2)}</td></tr>
@@ -1066,9 +1086,10 @@ function renderAttackRateSection(data) {
                         <tr class="mt-border-top">
                             <td class="mt-cell-label mt-pt-sm text-white" style="font-weight: 900;">Final Attack Mult</td>
                             <td class="mt-cell-formula mt-pt-sm">1 + (Chance × Mult)</td>
-                            <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size: 1.15rem; color: #4ade80;">x${fmt.fix(ea.mult, 3)}</td>
+                            <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size: 1.15rem; color: #4ade80;">x${fmt.fix(data.extraAttacks ? data.extraAttacks.mult : 1, 3)}</td>
                         </tr>
-                    </table>
+                        `}
+                   </table>
                 </div>`;
         }
     }
@@ -1107,7 +1128,7 @@ function renderAttackRateSection(data) {
 
     if (data.baseStats?.id === 'triple_threat') {
         const baseDmgNoAdditive = data.dmgVal / (1 + data.totalAdditivePct / 100);
-        const fuaHitNormal = baseDmgNoAdditive * Math.max(0, 1 + (data.totalAdditivePct - 25) / 100);
+        const fuaHitNormal = baseDmgNoAdditive * Math.max(0, 1 + ((data.totalAdditivePct || 0) - 25) / 100);
         const fuaDmg = fuaHitNormal * (data.critData?.avgMult || 1);
 
         const singleFuaDps = fuaDmg / 15;
@@ -1217,7 +1238,7 @@ function renderFinalSection(data) {
     let tripleThreatFollowUpHtml = '';
     if (isTripleThreat) {
         const baseDmgNoAdditive = data.dmgVal / (1 + data.totalAdditivePct / 100);
-        const fuaHitNormal = baseDmgNoAdditive * Math.max(0, 1 + (data.totalAdditivePct - 25) / 100);
+        const fuaHitNormal = baseDmgNoAdditive * Math.max(0, 1 + ((data.totalAdditivePct || 0) - 25) / 100);
         const fuaDmg = fuaHitNormal * (data.critData?.avgMult || 1);
 
         const singleBaseHitDps = (data.dmgVal * (data.critData?.avgMult || 1)) / data.spa;
@@ -1238,7 +1259,7 @@ function renderFinalSection(data) {
                     <tr><td class="mt-cell-label">${hitLabel}</td><td class="mt-cell-formula">${hitFormula}</td><td class="mt-cell-val calc-highlight">${fmt.num(data.hit)}</td></tr>
                     ${tripleThreatFollowUpHtml}
                     ${data.trueDmgPct > 0 ? `
-                        <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Normal Damage (${Math.max(0, 100 - data.trueDmgPct).toFixed(0)}%)</td><td class="mt-cell-formula"></td><td class="mt-cell-val opacity-70">${fmt.num(data.normalDmgVal)}</td></tr>
+                        <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Normal Damage (${Math.max(0, 100 - (data.trueDmgPct || 0)).toFixed(0)}%)</td><td class="mt-cell-formula"></td><td class="mt-cell-val opacity-70">${fmt.num(data.normalDmgVal)}</td></tr>
                         <tr><td class="mt-cell-label mt-pl-md text-accent-start">↳ True Damage (${data.trueDmgPct.toFixed(0)}%)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-start">${fmt.num(data.trueDmgVal)}</td></tr>
                     ` : ''}
                     ${data.dot > 0 ? `<tr><td class="mt-cell-label">DoT DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-end">${fmt.num(data.dot)}</td></tr>` : ''}
@@ -1315,35 +1336,34 @@ function renderSummonSection(data) {
             return '';
         }
 
-        let summonsHtml = data.summonData.summons.map(s => `
+        let summonsHtml = (data.summonData.summons || []).map(s => {
+            const descHtml = s.desc ? (
+                Array.isArray(s.desc) 
+                    ? s.desc.map(line => `<div class="summon-desc-line" style="font-size: 0.65rem; color: #94a3b8; margin-top: 2px; line-height: 1.35;">${line}</div>`).join('') 
+                    : `<div class="summon-desc-line" style="font-size: 0.65rem; color: #94a3b8; margin-top: 2px; line-height: 1.35;">${s.desc}</div>`
+            ) : '';
+            return `
                 <tr class="summon-header-row">
-                    <td class="mt-cell-label mt-text-bold" style="color: ${s.color}; font-size: 0.85rem;">
-                        ${s.name}
+                    <td class="mt-cell-label mt-text-bold" style="color: ${s.color}; font-size: 0.82rem; padding-top: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        ${s.name} ${s.count ? `(x${fmt.fix(s.count, 2)})` : ''}
                     </td>
-                    <td class="mt-cell-val" style="vertical-align: bottom;">
-                        <button class="summon-info-btn" onclick="toggleSummonDesc(this)">VIEW INFO</button>
-                    </td>
+                    <td class="mt-cell-val"></td>
                 </tr>
-                <tr class="summon-desc-row hidden">
-                    <td colspan="2" class="mt-cell-label" style="padding: 12px 15px; background: rgba(0,0,0,0.25); border-radius: 8px; margin: 5px 0;">
-                        ${s.desc && s.desc.length > 0 ? `
-                            <div class="summon-desc-grid">
-                                ${s.desc.map(item => `
-                                    <div class="summon-desc-tag">
-                                        <span class="tag-bullet">•</span> ${item.replace('•', '').trim()}
-                                    </div>
-                                `).join('')}
-                            </div>
-                        ` : '<div class="text-dim">No additional description available.</div>'}
-                    </td>
-                </tr>
+                <tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ Host Reference Hit</td><td class="mt-cell-val opacity-70">${fmt.num((data.dmgVal || 0) * (data.critData?.avgMult || 1 || 1))}</td></tr>
                 <tr><td class="mt-cell-label mt-pl-sm">Base Hit Damage</td><td class="mt-cell-val">${fmt.num(s.hitDmg)}</td></tr>
                 ${s.avgMult && s.avgMult !== 1 ? `<tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ Avg Multiplier (Cycle)</td><td class="mt-cell-val opacity-70">x${fmt.fix(s.avgMult, 3)}</td></tr>` : ''}
                 ${s.avgMult && s.avgMult !== 1 ? `<tr><td class="mt-cell-label mt-pl-sm text-accent-start">Avg Cycle Damage</td><td class="mt-cell-val text-accent-start">${fmt.num(s.avgDmg)}</td></tr>` : ''}
                 <tr><td class="mt-cell-label mt-pl-sm">Attack Speed (SPA)</td><td class="mt-cell-val">${fmt.fix(s.spa, 2)}s</td></tr>
+                <tr><td class="mt-cell-label mt-pl-sm opacity-50">↳ Hit DPS</td><td class="mt-cell-val opacity-50">${fmt.num((s.avgDmg || s.hitDmg || 0) * s.count / s.spa)}</td></tr>
+                ${s.dotDps > 0 ? `
+                    <tr><td class="mt-cell-label mt-pl-sm text-accent-end">↳ DoT Damage (Non-Stacking)</td><td class="mt-cell-val text-accent-end">${fmt.num(s.dotDps * s.spa)}</td></tr>
+                    <tr><td class="mt-cell-label mt-pl-sm text-accent-end" style="font-weight: 700; padding-left: 20px;">↳ Summon DoT DPS</td><td class="mt-cell-val text-accent-end" style="font-weight: 700;">${fmt.num(s.dotDps)}</td></tr>
+                ` : ''}
+                ${descHtml ? `<tr><td colspan="2" style="padding: 6px 10px; background: rgba(255,255,255,0.02); border-radius: 6px; margin-top: 4px; border: 1px solid rgba(255,255,255,0.03);">${descHtml}</td></tr>` : ''}
                 <tr class="mt-border-top"><td class="mt-cell-label mt-pl-sm text-gold">Final Summon DPS</td><td class="mt-cell-val text-gold text-bold">${fmt.num(s.dps)}</td></tr>
                 <tr><td colspan="2" style="height: 12px;"></td></tr>
-        `).join('');
+            `;
+        }).join('');
 
         return `
         <div class="dd-section" style="border-left: 3px solid #60a5fa;">
@@ -1385,10 +1405,10 @@ function renderSummonSection(data) {
     <div class="dd-section">
         <div class="dd-title text-accent-start"><span>${isNutaru ? 'Clones' : 'Summon Logic (Planes)'}</span></div>
         <table class="calc-table">
-            <tr><td class="mt-cell-label">${isNutaru ? 'Single Clone Dmg' : 'Plane Base Damage'}</td><td class="mt-cell-val">${isNutaru ? fmt.num(data.dmgVal * 0.75) : fmt.num(data.dmgVal * 0.5)}</td></tr>
+            <tr><td class="mt-cell-label">${isNutaru ? 'Single Clone Dmg' : 'Plane Base Damage'}</td><td class="mt-cell-val">${isNutaru ? fmt.num((data.dmgVal || 0) * 0.75) : fmt.num((data.dmgVal || 0) * (data.baseStats?.summonStats?.dmgPct / 100 || 0.5))}</td></tr>
             <tr><td class="mt-cell-label">${isNutaru ? 'Summon Rate' : 'Host SPA (Spawn Rate)'}</td><td class="mt-cell-val">${fmt.fix((data.summonData?.hostSpa || 0) * (isNutaru ? 8 : 1), 2)}s</td></tr>
             
-            <tr><td class="mt-cell-label mt-pt-md text-white">Active ${isNutaru ? 'Clones' : 'Planes'}</td><td class="mt-cell-val mt-pt-md text-gold text-bold">${fmt.fix(data.summonData?.count, 1)} / ${data.summonData?.max || 1}</td></tr>
+            <tr><td class="mt-cell-label mt-pt-md">Active ${isNutaru ? 'Clones' : 'Planes'}</td><td class="mt-cell-val mt-pt-md text-gold text-bold">${fmt.fix(data.summonData?.count, 1)} / ${data.summonData?.max || 1}</td></tr>
             <tr><td class="mt-cell-label calc-sub">Avg Duration</td><td class="mt-cell-val calc-sub">${data.summonData?.avgDuration || 0}s</td></tr>
 
             <tr><td class="mt-cell-label mt-pt-md">Avg ${isNutaru ? 'Clone' : 'Plane'} DPS (Individual)</td><td class="mt-cell-val mt-pt-md">${fmt.num(data.summonData?.avgPlaneDps)}</td></tr>
@@ -1401,10 +1421,47 @@ function renderSummonSection(data) {
     </div>`;
 }
 
+function renderRangeSection(data) {
+    const baseRange = data.baseStats?.range || 0;
+    const traitRange = data.traitBuffs?.range || 0;
+    const relicRange = data.relicBuffs?.range || 0;
+    const setRange = data.totalSetStats?.range || 0;
+    const passiveRange = (data.passiveRange || 0);
+    
+    let globalRangeHtml = '';
+    if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
+        Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
+            const bData = data.activeGlobalBuffs[buff.id];
+            if (bData && bData.range) {
+                globalRangeHtml += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:${buff.color};">↳ ${buff.name}</td><td class="mt-cell-formula" style="color:${buff.color};">+${fmt.fix(bData.range, 1)}%</td><td class="mt-cell-val"></td></tr>`;
+            }
+        });
+    }
+
+    return `
+        <div class="dd-section">
+            <div class="dd-title mt-text-range"><span>4. Range Calculation</span></div>
+            <table class="calc-table">
+                <tr><td class="mt-cell-label">Base Range</td><td class="mt-cell-formula"></td><td class="mt-cell-val">${fmt.fix(baseRange, 1)}</td></tr>
+                ${data.rangePoints > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Stat Points (${data.rangePoints} pts)</td><td class="mt-cell-formula">×${fmt.fix(data.lvStats?.rangeMult, 3)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                ${data.isSSS ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ SSS Rank Bonus</td><td class="mt-cell-formula">×1.2</td><td class="mt-cell-val"></td></tr>` : ''}
+                ${traitRange !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Trait (${data.traitObj?.name})</td><td class="mt-cell-formula">+${fmt.fix(traitRange, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
+                <tr><td class="mt-cell-label mt-pt-md">Relic Multiplier</td><td class="mt-cell-formula mt-pt-md">+${fmt.fix(relicRange, 1)}%</td><td class="mt-cell-val mt-pt-md"></td></tr>
+                <tr><td class="mt-cell-label mt-pt-md">Additive Buff Bucket</td><td class="mt-cell-formula mt-pt-md">+${fmt.fix(setRange + passiveRange, 1)}%</td><td class="mt-cell-val mt-pt-md"></td></tr>
+                ${setRange !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Bonus</td><td class="mt-cell-formula">+${fmt.fix(setRange, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
+                ${passiveRange !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passives</td><td class="mt-cell-formula">+${fmt.fix(passiveRange, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
+                ${globalRangeHtml}
+                <tr class="mt-border-top"><td class="mt-cell-label mt-pt-sm text-white">Final Range</td><td class="mt-cell-formula"></td><td class="mt-cell-val mt-pt-sm calc-highlight" style="color: #60a5fa;">${fmt.fix(data.range, 1)}</td></tr>
+            </table>
+        </div>`;
+}
+
 // ============================================================================
 // MAIN ENTRY POINT FOR DPS BREAKDOWN (Resolves broken modal issues)
 // ============================================================================
 window.renderMathContent = function (data, isSplit = false) {
+    if (!data) return '<div class="msg-empty">Error: Math data unavailable for this build.</div>';
+
     const lvStats = data.lvStats || { dmg: 0, spa: 1, range: 0, dmgMult: 1, spaMult: 1, rangeMult: 1 };
     const baseStats = data.baseStats || {};
     const traitObj = data.traitObj || {};
@@ -1412,7 +1469,7 @@ window.renderMathContent = function (data, isSplit = false) {
     const totalSetStats = data.totalSetStats || {};
     const tagBuffs = data.tagBuffs || {};
     const headBuffs = data.headBuffs || {};
-    const critData = data.critData || {};
+    const critData = data.critData || { rate: 0, cdmg: 150, avgMult: 1 };
 
     // CONSOLIDATED HEAD DISPLAY LOGIC
     const MAP_HEAD_NAMES = {
@@ -1423,14 +1480,13 @@ window.renderMathContent = function (data, isSplit = false) {
         'monarch_head': 'Monarch Head', 'monarch': 'Monarch Cape', 'warlord_hat': 'Warlord Hat',
         'mochi_scarf': 'Mochi Scarf', 'flaming_donut': 'Flaming Donut', 'fused_earrings': 'Fused Earrings'
     };
-    const headType = (data.headBuffs && data.headBuffs.type) || (data.relicStats && data.relicStats.head) || 'none';
-    const headDisplayName = MAP_HEAD_NAMES[headType] ?? (headType === 'none' ? 'None' : headType);
-    const cleanHeadDisplayName = headDisplayName.replace(' Head', '').replace(' Necklace', '');
+    const headType = (data.headBuffs?.type || data.relicStats?.head || 'none');
+    const headDisplayName = String(MAP_HEAD_NAMES[headType] ?? (headType === 'none' || !headType ? 'None' : (String(headType).replace(/_/g, ' ').toUpperCase())));
+    const cleanHeadDisplayName = headDisplayName.replace(' Head', '').replace(' Necklace', '').replace(' undefined', '').trim();
     const relicSetName = data.setName ? data.setName.replace(' Set', '') : (data.relicStats?.set ? data.relicStats.set.replace('_set', '').replace('_', ' ').toUpperCase() : 'None');
 
-    const avgHitPerUnit = data.dmgVal * (critData.avgMult || 1);
     const dotColorClass = data.dot > 0 ? 'text-accent-end' : '';
-
+    const avgHitPerUnit = (data.dmgVal || 0) * (critData.avgMult || 1);
     const levelMult = lvStats.dmgMult || 1;
     const statPointsHtml = data.dmgPoints > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Stat Points (${data.dmgPoints} pts)</td><td class="mt-cell-formula">×${fmt.fix(levelMult, 3)}</td><td class="mt-cell-val"></td></tr>` : '';
     
@@ -1443,20 +1499,22 @@ window.renderMathContent = function (data, isSplit = false) {
 
     const preConditionalDmg = dmgAfterRelic * (1 + (data.totalAdditivePct || 0) / 100);
     const baseSetDmg = data.detailedBuffs ? data.detailedBuffs.setBase : Math.max(0, (totalSetStats.dmg || 0) - (tagBuffs.dmg || 0));
-    const tagDmg = data.detailedBuffs ? data.detailedBuffs.tagBonus : (tagBuffs.dmg || 0);
-    const passiveDmg = data.detailedBuffs ? data.detailedBuffs.unitPassive : ((data.passiveBuff || 0) - (headBuffs.headBase || 0) - (headBuffs.passiveDmg || 0) - (headBuffs.tagDmg || 0) - (data.abilityBuff || 0) - (data.eternalBuff || 0));
+    const tagDmg = (data.detailedBuffs ? data.detailedBuffs.tagBonus : (tagBuffs.dmg || 0)) || 0;
+    const passiveDmg = data.detailedBuffs ? data.detailedBuffs.unitPassive : ((data.passiveBuff || 0) - (headBuffs.headBase || 0) - (headBuffs.passiveDmg || 0) - (headBuffs.tagDmg || 0) - (data.abilityBuff || 0) - (data.eternalBuff || 0)) || 0;
     const eternalDmg = data.eternalBuff || 0;
 
     const setTagCfTotal = (totalSetStats.cf || 0) + (tagBuffs.cf || 0);
     const setTagCmTotal = (totalSetStats.cm || 0) + (tagBuffs.cm || 0);
 
+    // Map missing variables from the data object to prevent ReferenceErrors
+    const tagSpa = data.tagBuffs?.spa || 0;
+    const baseSetSpa = Math.max(0, (data.totalSetStats?.spa || 0) - tagSpa);
+    const passiveSpa = data.passiveSpaBuff || 0;
+
     let traitRowsSpa = '';
     if (traitObj.spa > 0) {
         traitRowsSpa += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Trait (${traitObj.name})</td><td class="mt-cell-formula">-${traitObj.spa}%</td><td class="mt-cell-val"></td></tr>`;
     }
-    const tagSpa = tagBuffs.spa || 0;
-    const baseSetSpa = Math.max(0, (totalSetStats.spa || 0) - tagSpa);
-    const passiveSpa = data.passiveSpaBuff || 0;
 
     let headDotRow = '';
     if (headBuffs.dot > 0) {

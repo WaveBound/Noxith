@@ -237,11 +237,13 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         dotCritMult = avgCritMult;
         dotCritMultBoss = avgCritMultBoss || avgCritMult;
     }
-
-    const traitMultiplier = 1 + (traitDotBonus / 100);
-    const gearMultiplier = 1 + (gearDotBonus / 100);
-    const passiveMultiplier = 1 + (passiveDotBuff / 100);
-    let combinedMultiplier = traitMultiplier * gearMultiplier * passiveMultiplier * globalDotMult;
+   // FIX: Scaled DoT now uses an additive bucket (Trait + Gear + Passive) instead of multiplication
+    let additiveBonus = (traitDotBonus || 0) + (gearDotBonus || 0) + (passiveDotBuff || 0);
+    // Ant King Savage bug: Dot buffs are calculated twice
+    if (uStats.id && (uStats.id === 'ant_king_savage' || (window.isUnit && window.isUnit(uStats.id, 'ant_king_savage')))) {
+        additiveBonus *= 2;
+    }
+    let combinedMultiplier = (1 + (additiveBonus / 100)) * (globalDotMult || 1);
 
     let dotBreakdown = {
         nativeDps: 0,
@@ -250,8 +252,11 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         base: uStats.dot,
         traitBonus: traitDotBonus,
         gearBonus: gearDotBonus,
-        traitMult: traitMultiplier,
-        gearMult: gearMultiplier,
+        traitMult: 1 + (traitDotBonus / 100),
+        gearMult: 1 + (gearDotBonus / 100),
+        globalDotMult: globalDotMult,
+        passiveMult: (passiveDotBuff / 100),
+        passiveBonus: passiveDotBuff,
         critMult: dotCritMult,
         nativeInterval: 0,
         nativeTotalDmg: 0,
@@ -338,4 +343,3 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
 
     return { dotDpsTotal, bossDotDpsTotal, dotBreakdown };
 }
-

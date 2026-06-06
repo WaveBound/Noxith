@@ -1,18 +1,13 @@
+// ============================================================================
 // MODALS.JS - Unified Modal Manager (Encapsulated)
 // ============================================================================
 
 (() => {
-    // --- LOCAL HELPERS (Scoped locally to prevent global identifier collisions) ---
+    // --- LOCAL HELPERS ---
     const getEl = id => document.getElementById(id);
     const qSel = s => document.querySelector(s);
     const qAll = s => document.querySelectorAll(s);
     const hasVisibleModals = () => qAll('.modal-overlay.is-visible').length > 0;
-
-    let unitMap = null;
-    const getUnitById = (id) => {
-        if (!unitMap) window.refreshUnitMap();
-        return unitMap.get(id);
-    };
 
     // --- GENERIC MODAL CONTROLLER ---
 
@@ -123,7 +118,12 @@
 
         // FALLBACK: If cache was cleared (due to global toggle), attempt to re-generate
         if (!data) {
-            const unit = getUnitById(id.split('-')[0]);
+            const unitIdPart = id.split('-')[0];
+            let unit = window.getUnitById(unitIdPart);
+            
+            // Robust alias resolution for technical unit IDs (Syncro variants)
+            if (!unit && unitIdPart.includes('merciless_god')) unit = window.getUnitById('merciless_god');
+            
             if (unit) {
                 window.processUnitCache?.(unit);
                 data = window.cachedResults?.[id];
@@ -198,7 +198,7 @@
      * Shows Trait Guide
      */
     window.openTraitGuide = (unitId) => {
-        const unit = getUnitById(unitId);
+        const unit = window.getUnitById(unitId);
         if (!unit || !unit.meta) return;
 
         const getTraitName = (id) => id ? (traitsList.find(x => x.id === id || x.name === id)?.name || id) : '-';
@@ -236,12 +236,8 @@
         });
     };
 
-    window.refreshUnitMap = () => {
-        unitMap = new Map(unitDatabase.map(u => [u.id, u]));
-    };
-
     window.openUnitInfo = (unitId) => {
-        const unit = getUnitById(unitId);
+        const unit = window.getUnitById(unitId);
         if (!unit) return;
 
         const s = unit.stats;
@@ -396,7 +392,7 @@
     window.unitModesState = window.unitModesState || {};
 
     window.updateOverlaySlider = (unitId, activeModeIdx) => {
-        const unit = getUnitById(unitId);
+        const unit = window.getUnitById(unitId);
         if (!unit) return;
         const overlay = getEl('modesOverlay');
         if (!overlay) return;
@@ -440,7 +436,7 @@
     };
 
     window.openUnitModes = (unitId) => {
-        const unit = getUnitById(unitId);
+        const unit = window.getUnitById(unitId);
         if (!unit || !unit.modes) return;
 
         const overlay = getEl('modesOverlay');
@@ -460,7 +456,9 @@
 
         const state = window.unitModesState[unitId];
         const isMulti = !!unit.allowMultipleModes;
-        const activeModes = isMulti ? (Array.isArray(state) ? state : []) : (state !== undefined ? [state] : [0]);
+        
+        // FIX: Safely unpack array mode states to prevent nested [[0]] array mismatches on single-select mode overlays
+        const activeModes = isMulti ? (Array.isArray(state) ? state : []) : (state !== undefined ? (Array.isArray(state) ? state : [state]) : [0]);
 
         grid.innerHTML = unit.modes.map((mode, idx) => `
             <div class="mode-card-large ${activeModes.includes(idx) ? 'active' : ''}" 
@@ -485,7 +483,7 @@
     };
 
     window.selectUnitMode = (unitId, modeIdx) => {
-        const unit = getUnitById(unitId);
+        const unit = window.getUnitById(unitId);
         if (!unit) return;
 
         const isMulti = !!unit.allowMultipleModes;
@@ -513,17 +511,15 @@
             window.unitModesState[unitId] = modeIdx;
         }
 
-        // Bust sorting and build caches for this unit dynamically
+        // Bust sorting and live score caches for this unit dynamically to ensure rank updates correctly
         if (window.LIVE_SCORE_CACHE) {
-            Object.keys(window.LIVE_SCORE_CACHE).forEach(k => {
-                if (k.startsWith(unitId)) delete window.LIVE_SCORE_CACHE[k];
-            });
+            delete window.LIVE_SCORE_CACHE[unitId];
         }
 
         if (window.unitBuildsCache?.[unitId]) delete window.unitBuildsCache[unitId];
 
         // Refresh dynamic active build parameters for the unit in the global registry
-        if (typeof window.refreshActiveBuild === 'function') {
+        if (typeof window.refreshActiveBuild === 'function' && unit) {
             window.refreshActiveBuild(unit);
         }
 
@@ -573,7 +569,7 @@
             dmgVal = currentBuild.dmgVal || currentBuild.dmg || 0;
             dpsVal = currentBuild.dps || 0;
         } else {
-            const list = window.STATIC_BUILD_DB?.[unit.id]?.['fixed']?.[0]?.[0];
+            const list = window.STATIC_BUILD_DB?.[unit.id]?.['fixed']?.[0];
             if (list) {
                 dmgVal = list.dmgVal || list.dmg || 0;
                 dpsVal = list.dps || 0;

@@ -33,8 +33,14 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
     if (uStats.passiveCdmg) passiveCdmgFromPassives += uStats.passiveCdmg;
 
     if (uStats.passiveDmg || uStats.passiveSpa || uStats.passiveRange || uStats.passiveCrit || uStats.passiveCdmg) {
+        let basePassiveName = "Unit Base (Passive)";
+        // Attribution: Merciless God mode stats represent the Unstable Divinity cycle
+        if (uStats.id === 'merciless_god' && (uStats.passiveDmg === 233.33 || uStats.passiveSpa === 20)) {
+            basePassiveName = "Unstable Divinity (Cycle Avg)";
+        }
+
         passiveBreakdown.push({
-            name: "Unit Base (Passive)",
+            name: basePassiveName,
             dmg: uStats.passiveDmg || 0,
             spa: uStats.passiveSpa || 0,
             range: uStats.passiveRange || 0,
@@ -57,6 +63,17 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
             let pBoss = p.bossDmg || 0;
             if (p.name === "Brutal Slashes") {
                 pDot = (upgradeLevel >= 6) ? 120 : 100;
+            }
+
+            if (p.name === "Divine Replication") {
+                const unitBase = typeof window.getUnitById === 'function' ? window.getUnitById(uStats.id) : null;
+                const unitBaseMax = unitBase ? unitBase.placement : 3;
+                
+                // If a Trait like Ruler restricts the unit, the "Available Placements" pool shrinks.
+                // Unused = (Available Placements per Trait) - (Final Build Limit).
+                const availablePool = context.traitObj?.limitPlace || unitBaseMax;
+                const unused = Math.max(0, availablePool - context.placement);
+                pDmg += unused * 100;
             }
 
             if (window.isUnit && window.isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother") {

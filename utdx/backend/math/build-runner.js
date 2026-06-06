@@ -49,7 +49,7 @@ function createResultEntry({ id, buildName, traitName, res, prio, mainStats, sub
 }
 
 function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsToProcess, includeSubs, specificTraitsOnly = null, isAbilityContext = false, mode = 'fixed', isHotbar = false, ignoreInventory = false) {
-    if (!ignoreInventory && inventoryMode && relicInventory && relicInventory.length > 0) return calculateInventoryBuilds(unit, null, specificTraitsOnly, isAbilityContext, mode, headsToProcess, includeSubs, null, isHotbar);
+    if (!ignoreInventory && window.inventoryMode && relicInventory && relicInventory.length > 0) return calculateInventoryBuilds(unit, null, specificTraitsOnly, isAbilityContext, mode, headsToProcess, includeSubs, null, isHotbar);
     window.cachedResults = window.cachedResults || {};
     let activeTraits = [];
     if (specificTraitsOnly && Array.isArray(specificTraitsOnly)) activeTraits = specificTraitsOnly;
@@ -306,12 +306,16 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
 function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverrides = {}) {
     if (!liteData || !liteData.id) throw new Error("Invalid data for reconstruction");
 
-    const unitId = liteData.id.split('-')[0];
-    const unit = unitDatabase.find(u => u.id === unitId);
+    const unitIdPart = liteData.id.split('-')[0];
+    let unit = unitDatabase.find(u => u.id === unitIdPart);
+    
+    // Robust alias resolution for Merciless God and other Syncro units
+    if (!unit && unitIdPart.includes('merciless_god')) unit = unitDatabase.find(u => u.id === 'merciless_god');
+
     if (!unit) return null;
 
     // 1. Identify Context from ID Tags
-    const isAbility = liteData.id.includes('ABILITY') || (typeof activeAbilityIds !== 'undefined' && activeAbilityIds.has(unitId));
+    const isAbility = liteData.id.includes('ABILITY') || (typeof activeAbilityIds !== 'undefined' && activeAbilityIds.has(unitIdPart));
     const isBuggedMode = liteData.id.includes('-b-');
     const isFixedMode = liteData.id.includes('-f-');
     const isNoSubsMode = liteData.id.includes('-NOSUBS') || (typeof disableSubStats !== 'undefined' && disableSubStats) || (typeof window !== 'undefined' && window.disableSubStats);
@@ -325,6 +329,13 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
     const isSpaPrio = liteData.prio === 'spa';
     const isRangePrio = liteData.prio === 'range';
 
+    let extractedModeIdx = ctxOverrides.forcedModeIdx ?? ctxOverrides.activeModeIdx;
+    if (isFixedMode) extractedModeIdx = parseInt(liteData.id.split('-f-')[1]) || 0;
+    else if (isBuggedMode) extractedModeIdx = parseInt(liteData.id.split('-b-')[1]) || 0;
+
+    // For multi-mode units, if the reconstruction is requested for a specific UI mode, prioritize that over the saved build's mode tag
+    if (unit.modes && ctxOverrides.activeModeIdx !== undefined) extractedModeIdx = ctxOverrides.activeModeIdx;
+
     let dmgPts = isSpaPrio || isRangePrio ? 0 : 999;
     let spaPts = isSpaPrio ? 999 : 0;
     let rangePts = isRangePrio ? 999 : 0;
@@ -337,7 +348,8 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
         rangePoints: rangePts,
         headPiece: liteData.headUsed || (liteData.subStats && liteData.subStats.selectedHead) || 'none',
         upgradeLevel: forcedUpgradeLevel,
-        starMult: liteData.stars || 1
+        starMult: liteData.stars || 1,
+        forcedModeIdx: extractedModeIdx
     });
 
     if (ctxOverrides) Object.assign(context, ctxOverrides);

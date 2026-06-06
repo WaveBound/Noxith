@@ -15,7 +15,8 @@ window.calcCustomSummons = function(uStats, upLevel, eLevel, finalDmg, hostFinal
 
     const state = (typeof window !== 'undefined' && window.unitModesState) ? window.unitModesState[uStats.id] : undefined;
     const isMulti = !!uStats.allowMultipleModes;
-    const activeModes = Array.isArray(state) ? state : (state !== undefined ? [state] : (isMulti ? [] : [0]));
+    const defaultMode = uStats.defaultMode !== undefined ? uStats.defaultMode : 0;
+    const activeModes = Array.isArray(state) ? state : (state !== undefined ? [state] : (isMulti ? [] : [defaultMode]));
 
     uStats.customSummons.forEach((s, sIdx) => {
         if (upLevel >= s.reqUp) {
@@ -59,7 +60,17 @@ window.calcCustomSummons = function(uStats, upLevel, eLevel, finalDmg, hostFinal
                     effectiveSpa = Math.max(5.0, effectiveSpa);
                 }
             }
+            
+            // Calculate summon direct hit DPS
             let sDps = (sAvgDmg / effectiveSpa) * (s.count || 1);
+            
+            // Calculate summon DoT DPS if defined (e.g. Clones Bleed DoT)
+            let sDotDps = 0;
+            if (s.dotPct && s.dotDuration) {
+                // REQUIREMENT: DoT DPS = (Hit Damage * DoT %) / SPA. Duration is not a multiplier.
+                sDotDps = (sHitDmg * (s.dotPct / 100) / effectiveSpa);
+                sDps += sDotDps;
+            }
 
             if (!s.excludeFromDps) {
                 summonDpsTotal += sDps;
@@ -71,6 +82,7 @@ window.calcCustomSummons = function(uStats, upLevel, eLevel, finalDmg, hostFinal
                 avgMult: sAvgMult,
                 spa: effectiveSpa,
                 dps: sDps,
+                dotDps: sDotDps, // Export DoT DPS for rendering
                 count: s.count || 1,
                 isNoCrit: !!s.noCrit,
                 desc: s.desc,

@@ -13,7 +13,7 @@
  * @param {Object} options - Config options { isAbility, mode, points... }
  */
 function buildCalculationContext(unit, traitIdent, options = {}) {
-    const { isAbility = false, mode = 'fixed', dmgPoints = 99, spaPoints = 0, rangePoints = 0, wave = 25, isBoss = false, headPiece = 'none', starMult = 1, headStarMult = 1, rankData = null, upgradeLevel: forcedLevel, isHotbar = false } = options;
+    const { isAbility = false, mode = 'fixed', dmgPoints = 99, spaPoints = 0, rangePoints = 0, wave = 25, isBoss = false, headPiece = 'none', starMult = 1, headStarMult = 1, rankData = null, upgradeLevel: forcedLevel, isHotbar = false, forcedModeIdx = undefined } = options;
     let traitObj = null;
 
     if (typeof traitIdent === 'object') traitObj = traitIdent;
@@ -28,26 +28,29 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     if (unit.passives) effectiveStats.passives = unit.passives;
     if (unit.stats && unit.stats.customFollowUp) effectiveStats.customFollowUp = { ...unit.stats.customFollowUp };
 
-    // Resolve Placement (limited by Trait)
-    let actualPlacement = unit.placement;
-    if (traitObj.limitPlace) actualPlacement = Math.min(unit.placement, traitObj.limitPlace);
-
-    // Synergy: Water God + Underworld God (Placement -1)
-    if (isUnit(unit.id, 'water_god')) {
-        const hbStats = getCachedHotbarStats();
-        if (hbStats.ugPresent) {
-            actualPlacement = Math.max(1, actualPlacement - 1);
-        }
-    }
-
-    const state = (window.unitModesState && window.unitModesState[unit.id]);
-    const activeMode = unit.allowMultipleModes ? 0 : ((state !== undefined) ? state : 0);
+    const state = (forcedModeIdx !== undefined) ? forcedModeIdx : (window.unitModesState && window.unitModesState[unit.id]);
+    const activeMode = (state !== undefined) ? (Array.isArray(state) ? state[0] : state) : (unit.defaultMode ?? 0);
     const modeObj = (unit.modes && unit.modes[activeMode]) ? unit.modes[activeMode] : null;
 
     // Apply mode-specific stat overrides (like spaCap)
     if (modeObj && modeObj.stats) {
         for (let key in modeObj.stats) {
             effectiveStats[key] = modeObj.stats[key];
+        }
+    }
+    if (modeObj && modeObj.passives) effectiveStats.passives = [...effectiveStats.passives, ...modeObj.passives];
+    if (modeObj && modeObj.customSummons) effectiveStats.customSummons = modeObj.customSummons;
+    if (modeObj && modeObj.customFollowUp) effectiveStats.customFollowUp = { ...modeObj.customFollowUp };
+
+    // Resolve Placement (calculated after mode overrides to respect mode-specific limits)
+    let actualPlacement = modeObj?.placement || modeObj?.limitPlace || unit.placement || 1;
+    if (traitObj.limitPlace) actualPlacement = Math.min(actualPlacement, traitObj.limitPlace);
+
+    // Synergy: Water God + Underworld God (Placement -1)
+    if (isUnit(unit.id, 'water_god')) {
+        const hbStats = getCachedHotbarStats();
+        if (hbStats.ugPresent) {
+            actualPlacement = Math.max(1, actualPlacement - 1);
         }
     }
 
@@ -59,8 +62,9 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
         ? window.unitELevels[unit.id]
         : (upgradesArr ? upgradesArr.length - 1 : 0));
 
-    if (upgradesArr && upgradesArr[upgradeLevel]) {
-        const upStats = upgradesArr[upgradeLevel];
+    if (upgradesArr) {
+        const targetLevel = Math.min(upgradeLevel, upgradesArr.length - 1);
+        const upStats = upgradesArr[targetLevel];
         if (upStats.dmg) effectiveStats.dmg = upStats.dmg;
         if (upStats.spa) effectiveStats.spa = upStats.spa;
         if (upStats.range) effectiveStats.range = upStats.range;
@@ -88,7 +92,13 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
                 if (upgrade.trueDmg) effectiveStats.trueDmg = (effectiveStats.trueDmg || 0) + upgrade.trueDmg;
                 if (upgrade.extraPlacement) effectiveStats.extraPlacement = (effectiveStats.extraPlacement || 0) + upgrade.extraPlacement;
                 if (upgrade.followUp) effectiveStats.followUp = upgrade.followUp;
-                if (upgrade.fuaDmgMult) effectiveStats.customFollowUp.dmgMult = upgrade.fuaDmgMult;
+                if (upgrade.fuaDmgMult || upgrade.cooldown || upgrade.dotPct || upgrade.dotDuration) {
+                    effectiveStats.customFollowUp = { ...(effectiveStats.customFollowUp || {}) };
+                    if (upgrade.fuaDmgMult) effectiveStats.customFollowUp.dmgMult = upgrade.fuaDmgMult;
+                    if (upgrade.cooldown) effectiveStats.customFollowUp.cooldown = upgrade.cooldown;
+                    if (upgrade.dotPct) effectiveStats.customFollowUp.dotPct = upgrade.dotPct;
+                    if (upgrade.dotDuration) effectiveStats.customFollowUp.dotDuration = upgrade.dotDuration;
+                }
                 return;
             }
 
@@ -247,7 +257,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     }
 
     let suffix = isAbility ? '-ABILITY' : '-BASE';
-    const modeTag = (mode === 'bugged') ? '-b-' : '-f-';
+    const modeTag = (mode === 'bugged') ? `-b-${activeMode}` : `-f-${activeMode}`;
 
     const context = { mode, dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: false, headPiece, starMult, headStarMult: options.headStarMult || starMult, rankData, isAbility, maxPts, upgradeLevel, isHotbar };
     return { effectiveStats, traitObj, context, isKiritoVR: false, suffix, modeTag };

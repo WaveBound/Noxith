@@ -11,8 +11,8 @@ unitDatabase.push({
 
     // META (Build Guide tab)
     meta: {
-        short: "Ruler/Duelist",
-        long: "Duelist",
+        short: "Ruler/Sacred",
+        long: "Sacred/Duelist",
         note: "Fire DPS focused on high sustained damage."
     },
 

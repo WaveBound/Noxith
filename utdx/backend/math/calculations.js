@@ -90,7 +90,7 @@ window.getUnitUncappedCrit = function(slotUnit, slotIndex) {
 function calculateDPS(uStats, relicStats, context) {
     const { dmgPoints, spaPoints, rangePoints, wave, isBoss, traitObj, placement, isSSS, headPiece, isVirtualRealm, starMult, isAbility, upgradeLevel, defenderElement } = context;
 
-    let lvStats = getLevelStats(uStats.dmg, uStats.spa, uStats.range || 0, dmgPoints, spaPoints, rangePoints);
+    let lvStats = getLevelStats(uStats.dmg || 0, uStats.spa || 1, uStats.range || 0, dmgPoints, spaPoints, rangePoints);
     let rDmg = 0, rSpa = 0, rRange = 0;
     if (context.rankData) { rDmg = context.rankData.dmg || 0; rSpa = context.rankData.spa || 0; rRange = context.rankData.range || 0; }
     else if (isSSS) { rDmg = 20; rSpa = 8; rRange = 20; }
@@ -210,9 +210,9 @@ function calculateDPS(uStats, relicStats, context) {
 
     let headDmgPassiveMod = headDmgPassive;
     if (headPiece === 'biju_head' && window.isUnit(uStats.id, 'triple_threat')) {
-        const buffedAtks = Math.floor(10 / finalSpa);
-        const totalAtks = buffedAtks + 1;
-        const uptime = totalAtks > 0 ? (buffedAtks / totalAtks) : 0;
+        const bgAtks = Math.floor(10 / finalSpa);
+        const totalAtks = bgAtks + 1;
+        const uptime = totalAtks > 0 ? (bgAtks / totalAtks) : 0;
         headDmgPassiveMod = headDmgPassive * uptime;
 
         if (headCalc) {
@@ -260,7 +260,7 @@ function calculateDPS(uStats, relicStats, context) {
     if (relicStats.set === 'warlord') {
         let estCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.cf || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
         if (window.isUnit(uStats.id, 'pirate_king')) {
-            estCritRate = 40;
+            textCritRate = 40;
         }
         if (headPiece === 'sorcerer_hunter_spirit') {
             estCritRate = 0;
@@ -490,53 +490,74 @@ function calculateDPS(uStats, relicStats, context) {
         const cooldown = uStats.customFollowUp.cooldown;
         const fuaDmgMult = uStats.customFollowUp.dmgMult || 1.0;
         const fuaAnim = uStats.customFollowUp.fuaAnimation || 0;
-        const fuaDotPct = uStats.customFollowUp.dotPct || 75;
+        const fuaDotPct = uStats.customFollowUp.dotPct || 0;
 
         if (cooldown) {
             if (uStats.customFollowUp.nextAttack) {
-                // SNAP LOGIC: FUA triggers on the next attack AFTER cooldown expires.
-                // Check if a single hit (including lock) already crosses the threshold (e.g. 8s SPA + 2.75 lock = 10.75 >= 10).
-                const hitsInCycle = (finalSpa + fuaAnim >= cooldown) ? 1 : Math.max(1, Math.ceil(cooldown / finalSpa));
+                // Rule: FUA triggers on the next attack AFTER cooldown expires.
+                // Effective duration of a FUA hit is SPA + fuaAnim.
+                const fuaHitDuration = finalSpa + fuaAnim;
                 
-                // Duration is the total time for the hits plus the animation lockout on the final hit.
+                // Smallest N such that N * SPA >= cooldown. 
+                // If the FUA hit duration itself exceeds cooldown, every hit is a FUA (N=1).
+                const hitsInCycle = (fuaHitDuration >= cooldown) ? 1 : Math.max(1, Math.ceil(cooldown / finalSpa));
+                
+                // Cycle duration accounts for the animation lock added to the FUA hit itself.
                 const cycleDuration = (hitsInCycle * finalSpa) + fuaAnim;
                 
-                // Total damage is the normal hits (1.0 each) plus the extra FUA hit damage.
+                // Calculate DPS multiplier
+                // One cycle has hitsInCycle normal hits (1.0 each) plus one extra Disposal FUA (dmgMult)
                 const totalDmgInCycle = hitsInCycle + fuaDmgMult;
                 
-                hitDpsTotal = ((totalDmgInCycle * avgHitNormal) / cycleDuration) * placement;
+                // DPS = (Total Damage / Cycle Duration) * placement
+                hitDpsTotal = ((totalDmgInCycle * avgHit) / cycleDuration) * placement;
                 bossHitDpsTotal = (totalDmgInCycle * avgHitBoss / cycleDuration) * placement;
-                normalHitDpsTotal = ((totalDmgInCycle * avgHitNormal) / cycleDuration) * placement;
+                normalHitDpsTotal = (totalDmgInCycle * avgHitNormal / cycleDuration) * placement;
                 
+                // Multiplier relative to standard shooting (avgHit / finalSpa)
                 attackMultiplier = (totalDmgInCycle / cycleDuration) * finalSpa;
+                
+                // FIX: Keep card SPA matching Section 3 breakdown (finalSpa) instead of the averaged speed
                 usedSpa = finalSpa;
 
                 extraAttacksData = {
                     req: `Cycle: ${hitsInCycle} Hits (${cycleDuration.toFixed(2)}s)`,
                     hits: `${hitsInCycle} Base + ${fuaDmgMult}x FUA`,
-                    extra: 0, mult: attackMultiplier,
+                    extra: 0,
+                    attacksNeeded: 1,
+                    mult: attackMultiplier,
                     label: uStats.customFollowUp.label || "Follow-Up",
-                    usedSpa: finalSpa,
-                    hitsInCycle, totalDmgInCycle, cycleDuration,
-                    hitsMult: totalDmgInCycle / hitsInCycle
+                    usedSpa: cycleDuration / totalDmgInCycle,
+                    hitsInCycle,
+                    totalDmgInCycle,
+                    hitsMult: totalDmgInCycle / hitsInCycle,
+                    cycleDuration
                 };
             } else {
-                // Standard Timeline Logic
+                // Account for time lost to FUA animation within the cooldown window (Timeline standard: 60s)
                 const timeFrame = 60;
                 const fuaCount = timeFrame / cooldown;
                 const lockedTime = fuaCount * fuaAnim;
                 const availableTime = Math.max(0, timeFrame - lockedTime);
-                const normalHits = Math.round(availableTime / finalSpa);
+                const normalHits = Math.round(availableTime / finalSpa); // Rounded to closest number per request
+                
                 const totalHitsDealt = normalHits + (fuaCount * fuaDmgMult);
                 const windowMultiplier = totalHitsDealt / Math.max(1, normalHits);
+                
                 hitDpsTotal = (totalHitsDealt * avgHit / timeFrame) * placement;
                 bossHitDpsTotal = (totalHitsDealt * avgHitBoss / timeFrame) * placement;
-                const normalHitsPerCycle = (cooldown - fuaAnim) / finalSpa;
-                usedSpa = cooldown / (normalHitsPerCycle + 1);
+                
+                // FIX: Keep card SPA matching Section 3 breakdown (finalSpa) instead of the averaged speed
+                usedSpa = finalSpa;
+                
                 extraAttacksData = {
-                    req: `Fixed CD: ${cooldown}s`, hits: `${fuaDmgMult}x Dmg FUA`,
-                    extra: 0, mult: windowMultiplier,
-                    label: uStats.customFollowUp.label || "Follow-Up", usedSpa: usedSpa
+                    req: `Fixed CD: ${cooldown}s`,
+                    hits: `${fuaDmgMult}x Dmg FUA`,
+                    extra: 0,
+                    attacksNeeded: 1,
+                    mult: windowMultiplier,
+                    label: uStats.customFollowUp.label || "Follow-Up",
+                    usedSpa: timeFrame / totalHitsDealt
                 };
             }
         } else {
@@ -547,11 +568,13 @@ function calculateDPS(uStats, relicStats, context) {
             const atkAnim = effectiveSpaCap;
             const timeIfFua = Math.max(finalSpa, atkAnim + fuaAnim);
             const timeIfNoFua = Math.max(finalSpa, atkAnim);
-            usedSpa = (chance / 100) * timeIfFua + (1 - (chance / 100)) * timeIfNoFua;
+            const computedSpa = (chance / 100) * timeIfFua + (1 - (chance / 100)) * timeIfNoFua;
             attackMultiplier = 1 + (chance / 100) * fuaDmgMult;
 
-            hitDpsTotal = (avgHit / usedSpa) * placement * attackMultiplier;
-            bossHitDpsTotal = (avgHitBoss / usedSpa) * placement * attackMultiplier;
+            // FIX: Keep card SPA matching Section 3 breakdown (finalSpa) instead of the averaged speed
+            usedSpa = finalSpa;
+            hitDpsTotal = (avgHit / computedSpa) * placement * attackMultiplier;
+            bossHitDpsTotal = (avgHitBoss / computedSpa) * placement * attackMultiplier;
 
             extraAttacksData = {
                 req: `Follow-Up (${chance}%)`,
@@ -560,7 +583,7 @@ function calculateDPS(uStats, relicStats, context) {
                 attacksNeeded: 1,
                 mult: attackMultiplier,
                 label: uStats.customFollowUp.label || "Follow-Up",
-                usedSpa: usedSpa
+                usedSpa: computedSpa
             };
         }
     }
@@ -627,28 +650,19 @@ function calculateDPS(uStats, relicStats, context) {
 
     const gearDotBonus = baseR_Dot + headDotBuff + (sBonus.dot || 0);
 
-    // Separate base DoT percentage from passive/ability buffs
-    const passiveDots = (uStats.passives || []).map(p => p.dot || 0);
+    // Identify the "Source" DoT percentage.
+    // If not in base stats, look for the primary DoT value in passives.
     let baseDotVal = uStats.dot || 0;
-    let passiveDotBuff = 0;
+    let passiveDotBuff = passiveDotFromPassives;
 
-    if (baseDotVal > 0) {
-        passiveDotBuff = passiveDots.reduce((a, b) => a + b, 0);
-    } else if (passiveDots.length > 0) {
-        const maxDot = Math.max(...passiveDots, 0);
-        let foundBase = false;
-        baseDotVal = maxDot;
-        passiveDotBuff = passiveDots.reduce((a, b) => {
-            if (b === maxDot && !foundBase) {
-                foundBase = true;
-                return a;
-            }
-            return a + b;
-        }, 0);
-    }
-
-    if (uStats.dotBuff) {
-        passiveDotBuff += uStats.dotBuff;
+    if (baseDotVal === 0 && uStats.passives) {
+        const dotSrc = uStats.passives.find(p => p.dot > 0 || p.name === "Brutal Slashes" || p.name === "Fiery Legacy");
+        if (dotSrc) {
+            const srcVal = dotSrc.dot || (dotSrc.name === "Brutal Slashes" ? (upgradeLevel >= 6 ? 120 : 100) : 0);
+            baseDotVal = srcVal;
+            // Subtract from aggregated buffs to treat this specific passive as the base source
+            passiveDotBuff = Math.max(0, passiveDotBuff - srcVal);
+        }
     }
 
     let globalDotMult = 1.0;
@@ -737,22 +751,14 @@ function calculateDPS(uStats, relicStats, context) {
         const cooldown = uStats.customFollowUp.cooldown;
         const fuaDmgMult = uStats.customFollowUp.dmgMult || 1.0;
         const fuaDotPct = uStats.customFollowUp.dotPct || 0;
-        const fuaAnim = uStats.customFollowUp.fuaAnimation || 0;
 
         let followUpDotDpsPerCycle, followUpDotDpsPerCycleBoss, followUpDotDmg, chance = 100;
 
         if (cooldown) {
-            let cycleTimeForDot = cooldown;
-            const fuaAnim = uStats.customFollowUp.fuaAnimation || 0;
-            if (uStats.customFollowUp.nextAttack) {
-                const hitsInCycle = (finalSpa + fuaAnim >= cooldown) ? 1 : Math.max(1, Math.ceil(cooldown / finalSpa));
-                cycleTimeForDot = (hitsInCycle * finalSpa) + fuaAnim;
-            }
-
             // DoT is 75% of FUA damage (which is 1.2x base)
             followUpDotDmg = finalDmg * fuaDmgMult * (fuaDotPct / 100);
-            followUpDotDpsPerCycle = followUpDotDmg / cycleTimeForDot;
-            followUpDotDpsPerCycleBoss = (finalDmgBoss * fuaDmgMult * (fuaDotPct / 100)) / cycleTimeForDot;
+            followUpDotDpsPerCycle = followUpDotDmg / cooldown;
+            followUpDotDpsPerCycleBoss = (finalDmgBoss * fuaDmgMult * (fuaDotPct / 100)) / cooldown;
         } else {
             const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
             chance = (eLevel >= uStats.customFollowUp.eLevelReq) ? uStats.customFollowUp.eLevelChance : uStats.customFollowUp.chance;
@@ -829,8 +835,9 @@ function calculateDPS(uStats, relicStats, context) {
         summon: elemFinalSummonDps,
         summonData,
         detailedBuffs: detailedBuffs,
-        spa: usedSpa,
-        finalSpa: finalSpa, // Expose final un-averaged shooting SPA for Speed Calculation panel
+        spa: finalSpa, // UI now shows the actual shooting interval (respects animation cap)
+        usedSpa: usedSpa, // Internal averaged SPA for math transparency
+        finalSpa: finalSpa, 
         spaCap: effectiveSpaCap,
         range: finalRange,
         passiveRange: (uStats.passiveRange || 0) + eternalRangeBuff,

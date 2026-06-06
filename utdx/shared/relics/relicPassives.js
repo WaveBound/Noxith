@@ -225,15 +225,13 @@ function applyPassiveBonus(passiveId, unitStats, originalUnit = null) {
         const u = originalUnit || {};
         const unitId = u.id || "";
         const unitIdLower = unitId.toLowerCase();
+        const unitNameLower = (u.name || "").toLowerCase();
 
-        // Detect Synchro/Fused forms via ID naming conventions (e.g. revolutionary_chief_syncro, majestic_armor, ultimate_fused_warrior)
-        const isSyncro = unitIdLower.includes('syncro') || unitIdLower.includes('armor') || unitIdLower.includes('fused');
+        // Detect Synchro forms via Display Name as requested (must contain "(Syncro)")
+        const isSyncro = unitNameLower.includes('(syncro)');
         
-        // Detect Clash capability via specific IDs or checking ability/passive names for the "Clash" keyword
-        const ability = Array.isArray(u.ability) ? u.ability[0] : u.ability;
-        const hasClash = unitIdLower === 'pirate_king' || unitIdLower === 'quake_warlord' || unitIdLower === 'marine_hero' ||
-                        (ability && (ability.abilityName || "").includes("Clash")) || 
-                        (u.passives && u.passives.some(p => (p.name || "").includes("Clash")));
+        // Detect Clash capability explicitly for the requested units (Pirate King and Quake Warlord)
+        const hasClash = unitIdLower === 'pirate_king' || unitIdLower === 'quake_warlord';
 
         if (isSyncro) {
             effectiveStats.dmg = Math.floor(effectiveStats.dmg * (1 + (passive.syncroDmgBuff || 15) / 100));

@@ -2231,3 +2231,32 @@
 .unit-joyful_captain .mode-card-desc {
     font-size: 0.8rem;
 }
+
+/* --- MERCILESS GOD SPECIFIC OVERRIDES (6 MODES) --- */
+.unit-merciless_god {
+    gap: 15px !important;
+}
+
+.unit-merciless_god .mode-card-large {
+    margin: 0 !important;
+}
+
+.unit-merciless_god .mode-img-container-large {
+    width: 220px;
+    height: 320px;
+}
+
+.unit-merciless_god .mode-card-info {
+    width: 200px;
+    padding: 15px;
+    bottom: 20px;
+}
+
+.unit-merciless_god .mode-card-name {
+    font-size: 0.95rem;
+    margin-bottom: 5px;
+}
+
+.unit-merciless_god .mode-card-desc {
+    font-size: 0.8rem;
+}

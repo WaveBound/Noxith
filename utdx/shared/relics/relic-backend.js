@@ -353,6 +353,9 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
             if (eff.trueDmg) {
                 headCalc.trueDmg = eff.trueDmg;
             }
+            if (eff.critRate === 0 && unitStatsSim.critRate > 0) {
+                headCalc.noCrits = true;
+            }
             if (eff.dot) {
                 headDotBuff += eff.dot;
             }
@@ -374,7 +377,7 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
     if (headPiece === 'junior') {
         headDmgBase = 0; headCalc.type = 'junior'; headCalc.multiplier = 1.1;
     } else if (headPiece === 'sorcerer_hunter_spirit') {
-        headDmgBase = 60; headCalc.type = 'sorcerer_hunter';
+        headCalc.type = 'sorcerer_hunter';
         headCalc.noCrits = true;
     } else if (headPiece === 'strongest_sorcerer_glasses') {
         const canTimestop = uStats && window.isUnit && window.isUnit(uStats.id, 'the_strongest_of_today');

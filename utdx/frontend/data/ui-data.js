@@ -4,6 +4,15 @@ const comingSoonData = [
 
 const patchNotesData = [
     {
+        version: "v6.6",
+        date: "Jun 06, 2026",
+        changes: [
+            { type: "Unit", text: "<b>New Unit:</b> Added <b>Merciless God</b>. A high-cost Hybrid utility unit with 6 adaptable battle modes." },
+            { type: "Fix", text: "<b>Follow-Up Attacks:</b> Fixed an issue where the animation lock was not being added to the end of the snapping cycle for Nursefather." },
+            { type: "UI", text: "<b>DPS Breakdown:</b> Redesigned the Attack Cycle section to clearly show Damage Multipliers and Speed Penalties." }
+        ]
+    },
+    {
         version: "v6.5",
         date: "Jun 04, 2026",
         changes: [
@@ -404,7 +413,8 @@ const guideData = [
     { unit: "sharpshooter_king_trapper", img: "images/units/SharpshooterKingTrapper.png", isCalculated: true },
     { unit: "ultimate_fused_warrior", img: "images/units/UltimateFusedWarrior.png", isCalculated: true },
     { unit: "angel_born_in_hell", img: "images/units/AngelBornInHell.png", isCalculated: true },
-    { unit: "nursefather_thumb", img: "images/units/nursefather_thumb.png", isCalculated: true }
+    { unit: "nursefather_thumb", img: "images/units/nursefather_thumb.png", isCalculated: true },
+    { unit: "merciless_god", img: "images/units/MercilessGod.png", isCalculated: true }
 ];
 const elementIcons = {
     "Water": "images/elements/Water.png",
