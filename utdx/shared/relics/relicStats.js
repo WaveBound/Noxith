@@ -65,7 +65,7 @@ export function generateRelic(pieceType, rarity, setId) {
         const j = Math.floor(Math.random() * (i + 1));
         [availableSubStats[i], availableSubStats[j]] = [availableSubStats[j], availableSubStats[i]];
     }
-    
+
     // Mythic/Secret get 5 sub stats
     const chosenSubStats = availableSubStats.slice(0, 5).map(statKey => ({
         stat: statKey,

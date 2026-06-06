@@ -15,26 +15,26 @@ window.inventoryMode = window.inventoryMode || false;
 // Bulletproof database key resolution helper to handle Fused Warrior and other ID mismatches
 window.getRelicDbEntry = function (db, unitId, activeType) {
     if (!db) return null;
-    
+
     const state = window.unitModesState[unitId] ?? (window.getUnitById?.(unitId)?.defaultMode ?? 0);
     const modeIdx = Array.isArray(state) ? state[0] : state;
     const modeKey = 'fixed';
     const suffix = activeType === 'abil' ? '_abil' : '';
     const dbKey = unitId + suffix;
-    
+
     // 1. Direct match
     let entry = db[dbKey] || db[unitId];
     if (entry && entry[modeKey]) {
         const match = entry[modeKey][modeIdx];
         if (match) return match;
-        
+
         // Optimized multi-mode handling: Only force thread-blocking dynamic calc in Inventory Mode
         // Otherwise fallback to mode 0 from DB to maintain UI fluidness while calculating active form stats in background
-        if (window.inventoryMode && window.getUnitById?.(unitId)?.modes) return null; 
-        
+        if (window.inventoryMode && window.getUnitById?.(unitId)?.modes) return null;
+
         return entry[modeKey][0] || null;
     }
-    
+
     // 2. Fallbacks for Fused Warrior mismatch variations
     if (unitId.includes('fused') || unitId.includes('warrior')) {
         const keys = ['ultimate_fused_warrior', 'fused_warrior', 'ultimate_fused', 'fused_warrior_set', 'fused', 'fused_set'];
@@ -88,7 +88,7 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             if (altEntry && altEntry[modeKey]) return altEntry[modeKey][modeIdx] || altEntry[modeKey][0] || null;
         }
     }
-    
+
     return null;
 };
 
@@ -463,7 +463,7 @@ function calculateBuildEfficiency(build, unitCost, unitMaxPlacement, unitId) {
 
 function getHeadBadgeHtml(headUsed) {
     if (!headUsed || headUsed === 'none') return '';
-    
+
     const h = HEAD_CONFIG[headUsed] || { name: 'Unknown', cls: 'custom' };
     const label = "Elemental";
     const val = "30%";
@@ -552,6 +552,7 @@ function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
                 res.placement = fullMath.placement;
                 res.detailedBuffs = fullMath.detailedBuffs;
                 res.critData = fullMath.critData;
+                res.appliedDebuffs = fullMath.appliedDebuffs;
                 if (!res.subStats) res.subStats = {};
                 res.subStats.finalCf = fullMath.critData ? fullMath.critData.rawRate : 0;
                 res.subStats.finalCm = fullMath.critData ? fullMath.critData.cdmg : 0;
@@ -735,7 +736,7 @@ window.refreshActiveBuild = function (unit) {
 
     const activeType = (window.activeAbilityIds?.has(unitId) && unit.ability) ? 'abil' : 'base';
     const activeMode = 'fixed';
-    
+
     // FIX: Normalize array state inside refreshActiveBuild to correctly fetch numeric state indexes
     const state = window.unitModesState[unitId] ?? (unit.defaultMode ?? 0);
     const activeModeIdx = Array.isArray(state) ? state[0] : state;
@@ -829,12 +830,12 @@ window.refreshActiveBuild = function (unit) {
 
 window.refreshAllActiveBuilds = function () {
     window.unitActiveBuilds = window.unitActiveBuilds || {};
-    
+
     // 1. Gather all units from the database pagination
-    const list = window.paginatedSortedUnits?.length > 0 
-        ? window.paginatedSortedUnits.map(e => e.unit) 
+    const list = window.paginatedSortedUnits?.length > 0
+        ? window.paginatedSortedUnits.map(e => e.unit)
         : (unitDatabase || []);
-    
+
     const processedIds = new Set();
     list.forEach(unit => {
         window.refreshActiveBuild(unit);
@@ -868,7 +869,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     // FIX: Normalize array state inside updateBuildListDisplay to base integer
     const state = window.unitModesState[unitId] ?? (unitObj.defaultMode ?? 0);
     const activeModeIdx = Array.isArray(state) ? state[0] : state;
-    
+
     const systemLevelBar = card.querySelector('.system-level-bar');
     if (systemLevelBar && unitObj?.systemLevel) {
         const visible = !unitObj.systemLevel.restrictModes || unitObj.systemLevel.restrictModes.includes(activeModeIdx);
@@ -1023,7 +1024,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             const bodyType = r.mainStats?.body || 'dmg';
             const legsType = r.mainStats?.legs || 'dmg';
             const comboKey = `${bodyType}_${legsType}`;
-            
+
             if (!comboGroups[comboKey]) {
                 comboGroups[comboKey] = [];
             }
@@ -1062,7 +1063,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             window.hotbarFilteredBuilds[unitId] = selectedTrait
                 ? (filtered.find(b => b.traitName?.toLowerCase() === selectedTrait.toLowerCase()) || slice[0])
                 : slice[0];
-            
+
             // Sync with unitActiveBuilds registry
             if (!window.unitActiveBuilds) window.unitActiveBuilds = {};
             window.unitActiveBuilds[unitId] = window.hotbarFilteredBuilds[unitId];
@@ -1236,7 +1237,7 @@ window.getQuickScore = (unit) => {
     if (list?.length > 0) {
         const currentHead = window.unitHeads?.[unit.id] || 'none';
         const currentTrait = window.unitTraits?.[unit.id];
-        
+
         let matchedBuild = getBestHydratedBuild(list, unit.id, false, activeMode) || list[0];
         if (currentTrait || currentHead !== 'none') {
             const matchingBuilds = list.filter(b => {
@@ -1252,8 +1253,8 @@ window.getQuickScore = (unit) => {
         }
 
         const hydratedMatch = matchedBuild?.sortDps !== undefined ? matchedBuild : hydrateBuildEntry(matchedBuild, unit.id, false, activeMode);
-        return window.isUnit(unit.id, 'law') 
-            ? (hydratedMatch?.range || matchedBuild.range || 0) 
+        return window.isUnit(unit.id, 'law')
+            ? (hydratedMatch?.range || matchedBuild.range || 0)
             : getBuildSortScore(hydratedMatch || matchedBuild);
     }
 
@@ -1277,11 +1278,11 @@ window.getLiveScore = (unit) => {
 
     const active = window.unitActiveBuilds?.[unitId];
     if (active) {
-        return window.isUnit(unitId, 'law') 
-            ? (active.range || 0) 
+        return window.isUnit(unitId, 'law')
+            ? (active.range || 0)
             : getBuildSortScore(active);
     }
-    
+
     // Memoize the quick score lookup to prevent running heavy reconstructMathData
     // multiple times per unit during array sorting operations
     if (window.LIVE_SCORE_CACHE[unitId] !== undefined) {
@@ -1304,7 +1305,7 @@ window.resortUnitCardsInPlace = function () {
     if (!paginatedSortedUnits || paginatedSortedUnits.length === 0) return;
     window.refreshAllActiveBuilds();
     paginatedSortedUnits.sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
-    
+
     // Re-assign absolute ranks
     window.unitAbsoluteRanks = {};
     paginatedSortedUnits.forEach((entry, i) => {
@@ -1434,11 +1435,11 @@ function renderUnitCard(unit, absoluteIndex) {
         </div>
         ${upgradesArr && upgradesArr.length > 1 ? `<div class="upgrade-toolbar">
             ${upgradesArr.map((u, idx) => {
-                const isActive = (window.unitELevels[unit.id] || 0) === idx;
-                const isUnlocked = (window.unitELevels[unit.id] || 0) >= idx;
-                return `<div class="e-pill ${isActive ? 'active' : ''} ${isUnlocked && (window.unitELevels[unit.id] || 0) > 0 ? 'e-unlocked' : ''} ${idx === upgradesArr.length - 1 ? 'is-special' : 'is-stat'}" 
+        const isActive = (window.unitELevels[unit.id] || 0) === idx;
+        const isUnlocked = (window.unitELevels[unit.id] || 0) >= idx;
+        return `<div class="e-pill ${isActive ? 'active' : ''} ${isUnlocked && (window.unitELevels[unit.id] || 0) > 0 ? 'e-unlocked' : ''} ${idx === upgradesArr.length - 1 ? 'is-special' : 'is-stat'}" 
                                      onclick="selectELevel('${unit.id}', ${idx})" data-level="${idx}" title="Upgrade ${idx}">${idx}</div>`;
-            }).join('')}
+    }).join('')}
         </div>` : ''}
         ${unit.systemLevel && window.CALCULATION_MODE !== 'loadout' ? (() => {
             const cfg = unit.systemLevel;
@@ -1618,7 +1619,7 @@ let globalFilterTimeout = null;
 
 window.globalFilterUnits = (term) => {
     if (globalFilterTimeout) clearTimeout(globalFilterTimeout);
-    
+
     // 120ms debounce window keeps search inputs fluid while typing
     globalFilterTimeout = setTimeout(() => {
         _executeGlobalFilter(term);
@@ -1640,14 +1641,14 @@ function _executeGlobalFilter(term) {
         : unitDatabase;
 
     // 2. Map and sort baseline list *once* to establish absolute database ranks
-    const allSorted = baseList.map(unit => ({ 
-        unit, 
-        maxScore: window.getLiveScore(unit) 
+    const allSorted = baseList.map(unit => ({
+        unit,
+        maxScore: window.getLiveScore(unit)
     })).sort((a, b) => b.maxScore - a.maxScore);
 
     window.unitAbsoluteRanks = {};
-    allSorted.forEach((entry, i) => { 
-        window.unitAbsoluteRanks[entry.unit.id] = i + 1; 
+    allSorted.forEach((entry, i) => {
+        window.unitAbsoluteRanks[entry.unit.id] = i + 1;
     });
 
     // 3. Filter down the already-sorted list (eliminates the need for a second sort)
@@ -1665,11 +1666,11 @@ function _executeGlobalFilter(term) {
             const unit = entry.unit;
             const placement = (unit.placementType || 'Ground').toLowerCase();
             let matches = [unit.name, unit.role, unit.id, placement, unit.stats?.element || ''].some(v => v.toLowerCase().includes(searchTerm));
-            
+
             if (!matches && (searchTerm === 'ground' || searchTerm === 'hybrid' || searchTerm === 'hill')) {
                 if (placement === 'hybrid') matches = true;
             }
-            
+
             if (!matches) {
                 matches = [unit.meta?.short, unit.meta?.long].some(v => v?.toLowerCase().includes(searchTerm));
                 if (!matches && typeof unitSpecificTraits !== 'undefined' && unitSpecificTraits[unit.id]) {
@@ -1725,9 +1726,9 @@ function openTraitBestList(unitId) {
 
     const isLoadout = (window.CALCULATION_MODE === 'loadout');
     const activeType = (window.activeAbilityIds?.has(unitId) && unit.ability) ? 'abil' : 'base';
-    
+
     let builds = window.unitBuildsCache[unitId]?.[activeType]?.fixed?.[0] || [];
-    
+
     // Fallback: If cache is empty, pull from the correct static database
     if (!builds || builds.length === 0) {
         const db = isLoadout ? (window.HOTBAR_STATIC_BUILD_DB || window.STATIC_BUILD_DB) : window.STATIC_BUILD_DB;
@@ -1896,7 +1897,7 @@ setTimeout(() => {
     const key = 'angel_born_in_hell';
     if (window.unitControls && window.unitControls[key]) {
         const original = window.unitControls[key];
-        window.unitControls[key] = function(unit) {
+        window.unitControls[key] = function (unit) {
             let html = original(unit);
             // Dynamic check that handles potential mode (works on self) and correct mapping replacements
             if (unit.tags && (unit.tags.includes('Fusion') || unit.tags.includes('Fused')) && html.includes('Super Warrior')) {

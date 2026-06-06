@@ -12,7 +12,7 @@ function getActiveTagAndSourceForStat(statType, data) {
     const unitTags = data.baseStats?.tags || [];
     const rawElement = data.baseStats?.element || data.baseStats?.stats?.element || "";
     const element = String(rawElement).toLowerCase();
-    
+
     // 1. CHECK DYNAMIC LEADER BUFFS (Unrivaled Mark)
     const unrivaledMarkActive = data.activeGlobalBuffs?.unrivaledMark || (window.hotbarState?.buffState?.unrivaledMark);
     const isPotential = window.CALCULATION_MODE === 'potential';
@@ -125,13 +125,13 @@ function getActiveTagAndSourceForStat(statType, data) {
             });
         });
     }
-    
+
     const activeSet = data.relicStats?.set;
     const activeHead = data.headBuffs?.type || data.relicStats?.head;
-    
+
     let matchingTags = [];
     let sourceNames = [];
-    
+
     [
         { key: activeSet, isSet: true },
         { key: activeHead, isSet: false }
@@ -143,7 +143,7 @@ function getActiveTagAndSourceForStat(statType, data) {
         else if (cleanSource.includes('reaper')) cleanSource = 'reaper_set';
         else if (cleanSource.includes('fused_earring')) cleanSource = 'fused_earrings_acc';
         else if (cleanSource === 'fused' || cleanSource === 'fused_set') cleanSource = 'fused_set';
-        
+
         const perkCfg = tagPerksMap[cleanSource];
         if (perkCfg && perkCfg[statType]) {
             perkCfg[statType].forEach(t => {
@@ -154,7 +154,7 @@ function getActiveTagAndSourceForStat(statType, data) {
             });
         }
     });
-    
+
     if (matchingTags.length > 0) {
         const tagStr = [...new Set(matchingTags)].join(' / ');
         const sourceStr = [...new Set(sourceNames)].join(' / ');
@@ -426,10 +426,10 @@ function renderActiveBuffsSection(data) {
     }
 
     const unit = typeof getUnitById === 'function' ? getUnitById(data.baseStats?.id) : null;
-    
+
     // FIX: Retrieve dynamic applied passives context (including mode-specific passives) instead of just static base unit passives
     const activePassives = data.baseStats?.passives || (unit ? unit.passives : null);
-    
+
     if (activePassives && Array.isArray(activePassives)) {
         activePassives.forEach(p => {
             let stats = [];
@@ -443,7 +443,7 @@ function renderActiveBuffsSection(data) {
                 if (pb.range) stats.push(`+${pb.range}% Rng`);
                 if (pb.crit) stats.push(`+${pb.crit}% Crit`);
                 if (pb.cdmg) stats.push(`+${pb.cdmg}% CDmg`);
-                
+
                 // FIX: Dynamically check the active DoT type (such as Bleed or Burn) and append it to the passive DoT indicator
                 if (pb.dot) {
                     const dotType = p.dotType || data.baseStats?.dotType || data.baseStats?.stats?.dotType;
@@ -574,42 +574,42 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
                     ${(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg) !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base Bonus <span style="font-size: 0.65rem; color: #a78bfa; font-weight: 500;">(${relicSetName} Set)</span></td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(data.detailedBuffs?.accessoryBase || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Accessory Base <span style="font-size: 0.65rem; color: #a78bfa; font-weight: 500;">(${cleanHeadDisplayName})</span></td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.accessoryBase)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(() => {
-                        const val = data.detailedBuffs?.accessoryPerk || 0;
-                        if (val === 0) return '';
-                        const note = data.headBuffs?.note || "";
-                        let label = `↳ Accessory Passive Perk`;
-                        if (note.includes('Clash')) label = `↳ Clash Potential Bonus`;
-                        else if (note.includes('Syncro')) label = `↳ Synchro Form Bonus`;
-                        
-                        const head = data.relicStats ? data.relicStats.head : '';
-                        if (head === 'monarch' || head === 'monarch_cape' || head === 'monarch_head') {
-                            const summons = data.baseStats?.id === 'gluttonous_warlord' ? 6 : (data.summonStats ? Math.min(6, data.summonStats.maxCount) : 6);
-                            label = `↳ Accessory Perk (Monarch: +10% × ${summons} Summons)`;
-                        }
-                        return `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label} <span style="font-size: 0.65rem; color: #a78bfa; font-weight: 500;">(${cleanHeadDisplayName})</span></td><td class="mt-cell-formula" style="vertical-align: middle;">${fmt.pct(val)}</td><td class="mt-cell-val"></td></tr>`;
-                    })()}
-                    ${(() => {
-                        const val = (data.detailedBuffs ? data.detailedBuffs.tagBonus : tagDmg);
-                        if (val === 0) return '';
-                        const relevantTags = [];
-                        const check = (id) => {
-                            if (!id || typeof id !== 'string') return;
-                            let targetId = id;
-                            if (targetId.includes('fused_earring')) targetId = 'fused_earrings_acc';
-                            else if (targetId.includes('fused')) targetId = 'fused_set';
+            const val = data.detailedBuffs?.accessoryPerk || 0;
+            if (val === 0) return '';
+            const note = data.headBuffs?.note || "";
+            let label = `↳ Accessory Passive Perk`;
+            if (note.includes('Clash')) label = `↳ Clash Potential Bonus`;
+            else if (note.includes('Syncro')) label = `↳ Synchro Form Bonus`;
 
-                            if (window.TAG_PERKS?.[targetId]) {
-                                window.TAG_PERKS[targetId].forEach(p => { if (unitTags.includes(p.tag) && p.bonus.dmg) relevantTags.push(p.tag); });
-                            }
-                        };
-                        const activeSetId = data.relicStats?.set;
-                        const activeAccId = data.headBuffs?.type || data.relicStats?.head || '';
-                        check(activeSetId);
-                        check(activeAccId);
-                        const uniqueTags = [...new Set(relevantTags)];
-                        const label = uniqueTags.length ? `↳ Tag Bonus (${uniqueTags.join(' / ')})` : '↳ Tag Bonus';
-                        return `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label}</td><td class="mt-cell-formula">${fmt.pct(val)}</td><td class="mt-cell-val"></td></tr>`;
-                    })()}
+            const head = data.relicStats ? data.relicStats.head : '';
+            if (head === 'monarch' || head === 'monarch_cape' || head === 'monarch_head') {
+                const summons = data.baseStats?.id === 'gluttonous_warlord' ? 6 : (data.summonStats ? Math.min(6, data.summonStats.maxCount) : 6);
+                label = `↳ Accessory Perk (Monarch: +10% × ${summons} Summons)`;
+            }
+            return `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label} <span style="font-size: 0.65rem; color: #a78bfa; font-weight: 500;">(${cleanHeadDisplayName})</span></td><td class="mt-cell-formula" style="vertical-align: middle;">${fmt.pct(val)}</td><td class="mt-cell-val"></td></tr>`;
+        })()}
+                    ${(() => {
+            const val = (data.detailedBuffs ? data.detailedBuffs.tagBonus : tagDmg);
+            if (val === 0) return '';
+            const relevantTags = [];
+            const check = (id) => {
+                if (!id || typeof id !== 'string') return;
+                let targetId = id;
+                if (targetId.includes('fused_earring')) targetId = 'fused_earrings_acc';
+                else if (targetId.includes('fused')) targetId = 'fused_set';
+
+                if (window.TAG_PERKS?.[targetId]) {
+                    window.TAG_PERKS[targetId].forEach(p => { if (unitTags.includes(p.tag) && p.bonus.dmg) relevantTags.push(p.tag); });
+                }
+            };
+            const activeSetId = data.relicStats?.set;
+            const activeAccId = data.headBuffs?.type || data.relicStats?.head || '';
+            check(activeSetId);
+            check(activeAccId);
+            const uniqueTags = [...new Set(relevantTags)];
+            const label = uniqueTags.length ? `↳ Tag Bonus (${uniqueTags.join(' / ')})` : '↳ Tag Bonus';
+            return `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label}</td><td class="mt-cell-formula">${fmt.pct(val)}</td><td class="mt-cell-val"></td></tr>`;
+        })()}
                     ${(() => {
             if (!data.detailedBuffs) return '';
             let html = '';
@@ -679,12 +679,12 @@ function getTagPerkRowsHtml(statType, data) {
                     const bonusKey = statType === 'cf' ? 'cRate' : 'cDmg';
                     const val = perk.bonus[bonusKey];
                     if (val) {
-                        const source = (setId === 'warlord') ? 'Warlord Set' : 
-                                     (setId === 'shadow_reaper') ? 'S. Reaper' : 
-                                     (setId === 'reaper_set') ? 'Reaper Set' : 
-                                     (setId === 'fused_set') ? 'Fused Warrior Set' : 
-                                     (setId === 'fused_earrings_acc') ? 'Fused Earrings' : setId.replace('_', ' ').toUpperCase();
-                                     
+                        const source = (setId === 'warlord') ? 'Warlord Set' :
+                            (setId === 'shadow_reaper') ? 'S. Reaper' :
+                                (setId === 'reaper_set') ? 'Reaper Set' :
+                                    (setId === 'fused_set') ? 'Fused Warrior Set' :
+                                        (setId === 'fused_earrings_acc') ? 'Fused Earrings' : setId.replace('_', ' ').toUpperCase();
+
                         html += `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs" style="line-height: 1.3;">↳ Tag Bonus<br>&nbsp;&nbsp;&nbsp;&nbsp;(${perk.tag} : ${source})</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs" style="vertical-align: top; padding-top: 2px;">+${fmt.fix(val, 1)}%</td></tr>`;
                     }
                 }
@@ -1036,7 +1036,7 @@ function renderAttackRateSection(data) {
         const f = data.baseStats.customFollowUp;
         const ea = data.extraAttacks;
         const cooldown = f.cooldown;
-        
+
         if (cooldown) {
             if (f.nextAttack && ea) {
                 if (!ea.hitsInCycle) return '';
@@ -1099,7 +1099,7 @@ function renderAttackRateSection(data) {
         const ea = data.extraAttacks;
         const eLevel = data.upgradeLevel !== undefined ? data.upgradeLevel : 6;
         const fua2Chance = (eLevel >= 2) ? 70 : 50;
-        
+
         return `
             <div class="dd-section" style="border-left: 3px solid #4ade80;">
                 <div class="dd-title mt-text-green"><span>5. Fused Godly Might Multiplier</span> <button class="calc-info-btn" onclick="openInfoPopup('attack_rate')">?</button></div>
@@ -1252,6 +1252,18 @@ function renderFinalSection(data) {
         `;
     }
 
+    let debuffsHtml = '';
+    if (data.appliedDebuffs && data.appliedDebuffs.length > 0) {
+        data.appliedDebuffs.forEach(d => {
+            debuffsHtml += `
+                <tr>
+                    <td class="mt-cell-label mt-pl-sm text-accent-start">↳ Multiplier: ${d.label}</td>
+                    <td class="mt-cell-formula">Applied</td>
+                    <td class="mt-cell-val text-accent-start">×${d.val.toFixed(2)}</td>
+                </tr>`;
+        });
+    }
+
     return `
             <div class="dd-section border-l-gold">
                 <div class="dd-title text-gold">Final Synthesis</div>
@@ -1264,6 +1276,7 @@ function renderFinalSection(data) {
                     ` : ''}
                     ${data.dot > 0 ? `<tr><td class="mt-cell-label">DoT DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-end">${fmt.num(data.dot)}</td></tr>` : ''}
                     ${data.summon > 0 ? `<tr><td class="mt-cell-label">${isNutaru ? 'Clone' : (data.summonData?.isCustom ? 'Custom Summon' : 'Plane')} DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-start">${fmt.num(data.summon)}</td></tr>` : ''}
+                    ${debuffsHtml}
                     <tr>
                         <td class="mt-cell-label text-white mt-pt-md" style="font-size: 1.1rem; font-weight: 800;">TOTAL DPS</td>
                         <td class="mt-cell-formula"></td>
@@ -1338,8 +1351,8 @@ function renderSummonSection(data) {
 
         let summonsHtml = (data.summonData.summons || []).map(s => {
             const descHtml = s.desc ? (
-                Array.isArray(s.desc) 
-                    ? s.desc.map(line => `<div class="summon-desc-line" style="font-size: 0.65rem; color: #94a3b8; margin-top: 2px; line-height: 1.35;">${line}</div>`).join('') 
+                Array.isArray(s.desc)
+                    ? s.desc.map(line => `<div class="summon-desc-line" style="font-size: 0.65rem; color: #94a3b8; margin-top: 2px; line-height: 1.35;">${line}</div>`).join('')
                     : `<div class="summon-desc-line" style="font-size: 0.65rem; color: #94a3b8; margin-top: 2px; line-height: 1.35;">${s.desc}</div>`
             ) : '';
             return `
@@ -1427,7 +1440,7 @@ function renderRangeSection(data) {
     const relicRange = data.relicBuffs?.range || 0;
     const setRange = data.totalSetStats?.range || 0;
     const passiveRange = (data.passiveRange || 0);
-    
+
     let globalRangeHtml = '';
     if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
         Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
@@ -1489,7 +1502,7 @@ window.renderMathContent = function (data, isSplit = false) {
     const avgHitPerUnit = (data.dmgVal || 0) * (critData.avgMult || 1);
     const levelMult = lvStats.dmgMult || 1;
     const statPointsHtml = data.dmgPoints > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Stat Points (${data.dmgPoints} pts)</td><td class="mt-cell-formula">×${fmt.fix(levelMult, 3)}</td><td class="mt-cell-val"></td></tr>` : '';
-    
+
     let traitRowsDmg = '';
     if (traitObj.dmg > 0) {
         traitRowsDmg += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Trait (${traitObj.name})</td><td class="mt-cell-formula">+${traitObj.dmg}%</td><td class="mt-cell-val"></td></tr>`;

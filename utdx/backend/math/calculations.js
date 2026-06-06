@@ -5,19 +5,19 @@
 // ============================================================================
 
 // --- REAL-TIME ALLY CRIT RESOLVER (Bypasses rendering latency/dependencies) ---
-window.getUnitUncappedCrit = function(slotUnit, slotIndex) {
+window.getUnitUncappedCrit = function (slotUnit, slotIndex) {
     if (!slotUnit) return 0;
-    
+
     const build = window.hotbarFilteredBuilds?.[slotUnit.id] || window.unitActiveBuilds?.[slotUnit.id];
     let crit = 0;
-    
+
     if (build && build.critData) {
         // Read uncapped raw rate which ALREADY includes global buffs (Fern, Ancient Mage, etc.)
         return build.critData.rawRate || build.critData.rate || 0;
     }
-    
+
     crit = slotUnit.stats?.crit || slotUnit.crit || 0;
-    
+
     const hState = window.hotbarState;
     if (hState && hState.buffState) {
         // 1. Fern (Ground) Buff
@@ -35,31 +35,31 @@ window.getUnitUncappedCrit = function(slotUnit, slotIndex) {
                 }
             }
         }
-        
+
         // 2. Ancient Mage Buff
         if (hState.buffState.ancientMage) {
             if (!window.isUnit(slotUnit.id, 'ancient_mage')) {
                 crit += 20;
             }
         }
-        
+
         // 3. King Sailor Buff
         if (hState.buffState.kingSailor || hState.buffState.ksailor) {
             if (!window.isUnit(slotUnit.id, 'king_sailor')) {
                 crit += 10;
             }
         }
-        
+
         // 4. Leader Buff (Unrivaled Mark)
         const isPotential = window.CALCULATION_MODE === 'potential';
         const leader = hState.slots[0];
         const unrivaledMarkActive = hState.buffState?.unrivaledMark || window.unrivaledMark;
-        
+
         if (isPotential) {
             const element = String(slotUnit.element || slotUnit.stats?.element || '').toLowerCase();
             const isSelfAbh = window.isUnit(slotUnit.id, 'angel_born_in_hell');
             const isSelfTt = window.isUnit(slotUnit.id, 'triple_threat');
-            
+
             // In Potential Mode, leaders automatically receive their own unrivaled mark crit buff by default
             if (unrivaledMarkActive || isSelfTt) {
                 if (element === 'wind') crit += 5;
@@ -79,7 +79,7 @@ window.getUnitUncappedCrit = function(slotUnit, slotIndex) {
             }
         }
     }
-    
+
     return crit;
 };
 
@@ -124,15 +124,12 @@ function calculateDPS(uStats, relicStats, context) {
         monarch_cape: 'monarch', monarch_head: 'monarch', monarch: 'monarch', warlord_hat: 'warlord', fused_earrings: 'fused_set'
     };
     const mappedHeadSetId = headSetIdMap[headPiece];
-    let headSpaBase = 0, headRangeBase = 0, headCfBase = 0, headCmBase = 0;
+    let headSpaBase = 0;
     if (mappedHeadSetId) {
         const headSetObj = (typeof SETS !== 'undefined') ? SETS.find(s => s.id === mappedHeadSetId) : null;
         if (headSetObj && headSetObj.accessory) {
             const acc = headSetObj.accessory;
             headSpaBase = acc.spa || 0;
-            headRangeBase = acc.range || 0;
-            headCfBase = acc.cRate || 0;
-            headCmBase = acc.cDmg || 0;
         }
     }
 
@@ -140,7 +137,7 @@ function calculateDPS(uStats, relicStats, context) {
 
     const tags = uStats.tags || [];
 
-    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + headRangeBase + (window.isUnit(uStats.id, 'king_sailor') ? 10 : 0);
+    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (window.isUnit(uStats.id, 'king_sailor') ? 10 : 0);
     let finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
 
     let setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa + headSpaBase;
@@ -315,10 +312,10 @@ function calculateDPS(uStats, relicStats, context) {
         passiveBreakdown: passiveBreakdown
     };
 
-    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + headCmBase + (headCalc.cm || 0) + passiveCdmgFromPassives;
-    
+    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cm || 0) + passiveCdmgFromPassives;
+
     // Calculate raw, uncapped crit rate first
-    let rawCritRate = uStats.crit + traitCritRate + globalCrit + headCfBase + (headCalc.cf || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives;
+    let rawCritRate = uStats.crit + traitCritRate + globalCrit + (headCalc.cf || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives;
     if (window.isUnit(uStats.id, 'kirito') || window.isUnit(uStats.id, 'the_strongest_of_today')) {
         rawCritRate = Math.min(rawCritRate, uStats.crit);
     }
@@ -480,7 +477,7 @@ function calculateDPS(uStats, relicStats, context) {
                 extraAttacksData = { req: uStats.reqCrits, hits: uStats.hitCount, extra: uStats.extraAttacks, attacksNeeded: attacksToTrigger, mult: attackMultiplier };
             }
         }
-        
+
         hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
         bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
         normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
@@ -497,26 +494,26 @@ function calculateDPS(uStats, relicStats, context) {
                 // Rule: FUA triggers on the next attack AFTER cooldown expires.
                 // Effective duration of a FUA hit is SPA + fuaAnim.
                 const fuaHitDuration = finalSpa + fuaAnim;
-                
+
                 // Smallest N such that N * SPA >= cooldown. 
                 // If the FUA hit duration itself exceeds cooldown, every hit is a FUA (N=1).
                 const hitsInCycle = (fuaHitDuration >= cooldown) ? 1 : Math.max(1, Math.ceil(cooldown / finalSpa));
-                
+
                 // Cycle duration accounts for the animation lock added to the FUA hit itself.
                 const cycleDuration = (hitsInCycle * finalSpa) + fuaAnim;
-                
+
                 // Calculate DPS multiplier
                 // One cycle has hitsInCycle normal hits (1.0 each) plus one extra Disposal FUA (dmgMult)
                 const totalDmgInCycle = hitsInCycle + fuaDmgMult;
-                
+
                 // DPS = (Total Damage / Cycle Duration) * placement
                 hitDpsTotal = ((totalDmgInCycle * avgHit) / cycleDuration) * placement;
                 bossHitDpsTotal = (totalDmgInCycle * avgHitBoss / cycleDuration) * placement;
                 normalHitDpsTotal = (totalDmgInCycle * avgHitNormal / cycleDuration) * placement;
-                
+
                 // Multiplier relative to standard shooting (avgHit / finalSpa)
                 attackMultiplier = (totalDmgInCycle / cycleDuration) * finalSpa;
-                
+
                 // FIX: Keep card SPA matching Section 3 breakdown (finalSpa) instead of the averaged speed
                 usedSpa = finalSpa;
 
@@ -540,16 +537,16 @@ function calculateDPS(uStats, relicStats, context) {
                 const lockedTime = fuaCount * fuaAnim;
                 const availableTime = Math.max(0, timeFrame - lockedTime);
                 const normalHits = Math.round(availableTime / finalSpa); // Rounded to closest number per request
-                
+
                 const totalHitsDealt = normalHits + (fuaCount * fuaDmgMult);
                 const windowMultiplier = totalHitsDealt / Math.max(1, normalHits);
-                
+
                 hitDpsTotal = (totalHitsDealt * avgHit / timeFrame) * placement;
                 bossHitDpsTotal = (totalHitsDealt * avgHitBoss / timeFrame) * placement;
-                
+
                 // FIX: Keep card SPA matching Section 3 breakdown (finalSpa) instead of the averaged speed
                 usedSpa = finalSpa;
-                
+
                 extraAttacksData = {
                     req: `Fixed CD: ${cooldown}s`,
                     hits: `${fuaDmgMult}x Dmg FUA`,
@@ -591,13 +588,13 @@ function calculateDPS(uStats, relicStats, context) {
     if (isFusedWarrior && isAbility) {
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
         const abilityDmgPct = (eLevel >= 6) ? 0.30 : 0.20;
-        
+
         const abilityAvgHit = finalDmg * abilityDmgPct * avgCritMult;
         const abilityAvgHitBoss = finalDmgBoss * abilityDmgPct * avgCritMultBoss;
-        
+
         const abilityDps = (abilityAvgHit / 1.0) * placement;
         const abilityDpsBoss = (abilityAvgHitBoss / 1.0) * placement;
-        
+
         hitDpsTotal += abilityDps;
         bossHitDpsTotal += abilityDpsBoss;
     }
@@ -696,25 +693,25 @@ function calculateDPS(uStats, relicStats, context) {
         const traitMultiplier = 1 + (traitDotBuff / 100);
         const gearMultiplier = 1 + (gearDotBonus / 100);
         const dotPct = 70 * traitMultiplier * gearMultiplier;
-        
+
         // Ionized DoT is 70% of the unit's damage over 5 seconds (5 ticks)
         const ionizedDotDmg = finalDmg * (dotPct / 100);
         const ionizedDotDmgBoss = finalDmgBoss * (dotPct / 100);
-        
+
         // Triggers only when a crit is landed: multiply average DoT DPS by the critical rate (0.0 to 1.0)
         // Since DoT does not crit, base damage is ionizedDotDmg, and we apply it based on finalCritRate chance.
         const critChance = finalCritRate / 100;
         const critChanceBoss = finalCritRateBoss / 100;
-        
+
         const baseDotDps = (ionizedDotDmg / 5) * critChance;
         const baseDotDpsBoss = (ionizedDotDmgBoss / 5) * critChanceBoss;
-        
+
         const fuaDotDps = baseDotDps * placement;
         const fuaDotDpsBoss = baseDotDpsBoss * placement;
-        
+
         finalDotDps += fuaDotDps;
         finalBossDotDps += fuaDotDpsBoss;
-        
+
         if (dotBreakdown) {
             dotBreakdown.fuaDotDps = fuaDotDps / placement;
             dotBreakdown.fuaDotTotalDmg = ionizedDotDmg;
@@ -816,12 +813,43 @@ function calculateDPS(uStats, relicStats, context) {
         elemMult = 1.1;
     }
 
-    // Apply elemental multiplier to all damage channels
-    const elemFinalHitDps = finalHitDps * elemMult;
-    const elemFinalDotDps = finalDotDps * elemMult;
-    const elemFinalSummonDps = finalSummonDps * elemMult;
-    const elemBossHitDps = finalBossHitDps * elemMult;
-    const elemBossDotDps = finalBossDotDps * elemMult;
+    // --- CUSTOM DEBUFF MULTIPLIERS ---
+    let finalDebuffMult = 1.0;
+    let appliedDebuffs = [];
+
+    if (window.isUnit) {
+        // 1. Ultimate Fused Warrior
+        if (window.isUnit(uStats.id, 'ultimate_fused_warrior') || window.isUnit(uStats.id, 'fused_warrior')) {
+            finalDebuffMult *= 1.3;
+            appliedDebuffs.push({ label: 'Does it hurt?', val: 1.3 });
+        }
+        // 2. Ancient Mage (Innate + Utility Mode check)
+        if (window.isUnit(uStats.id, 'ancient_mage')) {
+            finalDebuffMult *= 1.2;
+            appliedDebuffs.push({ label: 'Millennia Old Experience', val: 1.2 });
+
+            const amState = (typeof window !== 'undefined' && window.unitModesState && window.unitModesState['ancient_mage']);
+            const amModeIdx = Array.isArray(amState) ? amState[0] : (amState !== undefined ? amState : 0);
+            const amUnit = typeof window.getUnitById === 'function' ? window.getUnitById('ancient_mage') : null;
+            const amModeName = amUnit && amUnit.modes && amUnit.modes[amModeIdx] ? amUnit.modes[amModeIdx].name.toLowerCase() : '';
+            if (amModeName.includes('utility')) {
+                finalDebuffMult *= 1.2;
+                appliedDebuffs.push({ label: 'Utility Mode Debuff', val: 1.2 });
+            }
+        }
+        // 3. Gojo (The Strongest of Today)
+        if (window.isUnit(uStats.id, 'the_strongest_of_today')) {
+            finalDebuffMult *= 1.25;
+            appliedDebuffs.push({ label: 'Limitless Sorcerer', val: 1.25 });
+        }
+    }
+
+    // Apply elemental and debuff multipliers to all damage channels
+    const elemFinalHitDps = finalHitDps * elemMult * finalDebuffMult;
+    const elemFinalDotDps = finalDotDps * elemMult * finalDebuffMult;
+    const elemFinalSummonDps = finalSummonDps * elemMult * finalDebuffMult;
+    const elemBossHitDps = finalBossHitDps * elemMult * finalDebuffMult;
+    const elemBossDotDps = finalBossDotDps * elemMult * finalDebuffMult;
 
     return {
         total: (elemFinalHitDps + elemFinalDotDps + elemFinalSummonDps),
@@ -829,15 +857,15 @@ function calculateDPS(uStats, relicStats, context) {
         hit: elemFinalHitDps,
         baseHitDps: hitDpsTotal,
         trueDmgPct,
-        trueDmgVal,
-        normalDmgVal: normalDmgVal + chainLightningDps,
+        trueDmgVal: trueDmgVal * elemMult * finalDebuffMult,
+        normalDmgVal: (normalDmgVal + chainLightningDps) * elemMult * finalDebuffMult,
         dot: elemFinalDotDps,
         summon: elemFinalSummonDps,
         summonData,
         detailedBuffs: detailedBuffs,
         spa: finalSpa, // UI now shows the actual shooting interval (respects animation cap)
         usedSpa: usedSpa, // Internal averaged SPA for math transparency
-        finalSpa: finalSpa, 
+        finalSpa: finalSpa,
         spaCap: effectiveSpaCap,
         range: finalRange,
         passiveRange: (uStats.passiveRange || 0) + eternalRangeBuff,
@@ -882,6 +910,7 @@ function calculateDPS(uStats, relicStats, context) {
             attackerRarity,
             elementalDmgBuff,
             multiplier: elemMult
-        }
+        },
+        appliedDebuffs
     };
 }
