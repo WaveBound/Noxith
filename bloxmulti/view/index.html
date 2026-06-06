@@ -35,6 +35,8 @@
             color: #8c7a7d;
         }
     </style>
+    <!-- Include PeerJS Client library -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 </head>
 
 <body>
@@ -42,100 +44,58 @@
     <video id="remoteVideo" autoplay playsinline muted controls></video>
 
     <script>
-        const API_BASE = "https://bloxmulti-session-connect.wavebound.workers.dev/"; // Replace with your Worker URL
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get("code") || window.location.pathname.split("/").pop();
 
         const statusEl = document.getElementById("status");
         const remoteVideo = document.getElementById("remoteVideo");
 
-        let peerConnection;
-        const config = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+        let peer = null;
 
-        async function initViewer() {
+        function initViewer() {
             if (!code) {
                 statusEl.textContent = "Error: Invalid session code.";
                 return;
             }
 
-            peerConnection = new RTCPeerConnection(config);
-            const processedCandidates = new Set();
-
-            // Display connection status changes directly on-screen
-            peerConnection.oniceconnectionstatechange = () => {
-                const state = peerConnection.iceConnectionState;
-                statusEl.textContent = `Connection status: ${state.toUpperCase()}`;
-                if (state === "failed") {
-                    statusEl.textContent = "Connection failed. Retrying...";
-                    setTimeout(initViewer, 4000);
+            // Create a randomized viewer peer ID
+            peer = new Peer({
+                debug: 1,
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        // Public OpenRelay Project credentials to bypass strict home routers/firewalls
+                        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
+                        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' }
+                    ]
                 }
-            };
+            });
 
-            // Handle incoming track
-            peerConnection.ontrack = (event) => {
-                statusEl.textContent = "Stream connected. Decoding video...";
-                if (remoteVideo.srcObject !== event.streams[0]) {
-                    remoteVideo.srcObject = event.streams[0];
-                    statusEl.textContent = "Live stream active.";
-                }
-            };
+            peer.on('open', (id) => {
+                statusEl.textContent = "Connecting to Host signaling...";
 
-            const safeBase = API_BASE.replace(/\/+$/, "");
+                // Initiate call with no local stream (one-way receiver stream)
+                const call = peer.call(`bm-${code}`, new MediaStream());
 
-            // Send local ICE candidates to Host via Worker
-            peerConnection.onicecandidate = async (event) => {
-                if (event.candidate) {
-                    await fetch(`${safeBase}/api/session/candidate`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ code, role: "viewer", candidate: event.candidate })
-                    });
-                }
-            };
-
-            try {
-                // 1. Fetch SDP Offer from Host
-                const offerRes = await fetch(`${safeBase}/api/session/offer?code=${code}`);
-                if (!offerRes.ok) throw new Error("Session offer not available yet.");
-                const { sdp } = await offerRes.json();
-
-                await peerConnection.setRemoteDescription(new RTCSessionDescription({ type: "offer", sdp }));
-
-                // 2. Create SDP Answer
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-
-                // 3. Submit Answer to Worker
-                await fetch(`${safeBase}/api/session/answer`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ code, sdp: answer.sdp })
+                call.on('stream', (remoteStream) => {
+                    statusEl.textContent = "Connected. Displaying stream...";
+                    if (remoteVideo.srcObject !== remoteStream) {
+                        remoteVideo.srcObject = remoteStream;
+                        statusEl.textContent = "Live Stream Active.";
+                    }
                 });
 
-                statusEl.textContent = "Establishing secure connection...";
+                call.on('close', () => {
+                    statusEl.textContent = "Stream ended by host.";
+                    remoteVideo.srcObject = null;
+                });
+            });
 
-                // 4. Poll Host ICE candidates
-                const candidateInterval = setInterval(async () => {
-                    const res = await fetch(`${safeBase}/api/session/candidates?code=${code}&role=viewer`);
-                    if (res.ok) {
-                        const candidates = await res.json();
-                        for (const c of candidates) {
-                            // Prevent re-processing duplicate ICE candidates
-                            const key = c.candidate;
-                            if (processedCandidates.has(key)) continue;
-                            processedCandidates.add(key);
-
-                            try {
-                                await peerConnection.addIceCandidate(new RTCIceCandidate(c));
-                            } catch (e) { /* ignore duplicate or stale candidates */ }
-                        }
-                    }
-                }, 2000);
-
-            } catch (err) {
-                statusEl.textContent = err.message;
-                setTimeout(initViewer, 3000); // Retry if connection is still setting up
-            }
+            peer.on('error', (err) => {
+                console.error("PeerJS Viewer Error:", err);
+                statusEl.textContent = `Connection error: ${err.type || err.message}. Reconnecting...`;
+                setTimeout(initViewer, 5000); // Auto-reconnect on failure
+            });
         }
 
         window.onload = initViewer;
