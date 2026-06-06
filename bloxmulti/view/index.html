@@ -4,44 +4,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BloxMulti - Remote Screen View</title>
+    <title>BloxMulti — Remote Screen View</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap"
+        rel="stylesheet" />
+
     <style>
-        body {
+        :root {
+            --bg: #06050d;
+            --surface: #0f0e1c;
+            --surface-2: #14132a;
+            --accent: #9d6fff;
+            --accent-glow: rgba(157, 111, 255, 0.35);
+            --accent-light: #c4a0ff;
+            --text: #edeafa;
+            --muted: #6a607e;
+            --border: #1c1a30;
+            --border-hi: #2a2642;
+            --font-body: 'Inter', sans-serif;
+            --font-display: 'Syne', sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            background: #050102;
-            color: #f8f2f3;
-            font-family: sans-serif;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Website Background System ── */
+        .global-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 80% 60% at 75% 10%, rgba(100, 40, 220, 0.45) 0%, transparent 65%),
+                radial-gradient(ellipse 50% 40% at 15% 55%, rgba(50, 200, 255, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 85% 85%, rgba(200, 50, 255, 0.10) 0%, transparent 55%),
+                linear-gradient(160deg, #07051a 0%, #0d0820 40%, #120a28 70%, #08050f 100%);
+        }
+
+        .global-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(120deg,
+                    transparent 0px, transparent 40px,
+                    rgba(157, 111, 255, 0.015) 40px, rgba(157, 111, 255, 0.015) 41px);
+        }
+
+        /* ── Nav Bar ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 40px;
+            background: rgba(6, 5, 13, 0.75);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .nav-logo {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.5px;
+            text-decoration: none;
+        }
+
+        .nav-right-tag {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: var(--accent-light);
+            background: rgba(157, 111, 255, 0.12);
+            border: 1px solid rgba(157, 111, 255, 0.25);
+            border-radius: 99px;
+            padding: 4px 12px;
+        }
+
+        /* ── Main Container ── */
+        main {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            padding: 100px 24px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        #status {
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--muted);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Video glowing frame from your site's mockup ── */
+        .preview-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 950px;
+            aspect-ratio: 950 / 600;
+        }
+
+        .preview-glow {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            height: 85%;
+            background: radial-gradient(ellipse, rgba(157, 111, 255, 0.3) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+            filter: blur(40px);
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 9, 20, 0.82);
+            border: 1px solid var(--border-hi);
+            border-radius: 16px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(157, 111, 255, 0.08);
             overflow: hidden;
         }
 
         video {
-            max-width: 95%;
-            max-height: 80vh;
-            border: 2px solid #d41b2c;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(212, 27, 44, 0.3);
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
             background: #000;
         }
 
-        #status {
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #8c7a7d;
+        @media (max-width: 768px) {
+            nav {
+                padding: 12px 20px;
+            }
+
+            #status {
+                font-size: 12px;
+            }
         }
     </style>
-    <!-- Include PeerJS Client library -->
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 </head>
 
 <body>
-    <div id="status">Connecting to remote instance...</div>
-    <video id="remoteVideo" autoplay playsinline muted controls></video>
+
+    <div class="global-bg"></div>
+
+    <nav>
+        <a href="#" class="nav-logo">BloxMulti</a>
+        <div class="nav-right-tag">Remote Viewer</div>
+    </nav>
+
+    <main>
+        <div id="status">Connecting to signaling network...</div>
+
+        <div class="preview-wrap">
+            <div class="preview-glow"></div>
+            <div class="preview-frame">
+                <video id="remoteVideo" autoplay playsinline muted controls></video>
+            </div>
+        </div>
+    </main>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -54,17 +209,15 @@
 
         function initViewer() {
             if (!code) {
-                statusEl.textContent = "Error: Invalid session code.";
+                statusEl.textContent = "Error: Invalid or missing session code.";
                 return;
             }
 
-            // Create a randomized viewer peer ID
             peer = new Peer({
                 debug: 1,
                 config: {
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
-                        // Public OpenRelay Project credentials to bypass strict home routers/firewalls
                         { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
                         { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' }
                     ]
@@ -72,29 +225,45 @@
             });
 
             peer.on('open', (id) => {
-                statusEl.textContent = "Connecting to Host signaling...";
+                statusEl.textContent = "Establishing handshake with Host app...";
 
-                // Initiate call with no local stream (one-way receiver stream)
-                const call = peer.call(`bm-${code}`, new MediaStream());
+                // 1. Open a secure Data Connection to the Host
+                const conn = peer.connect(`bm-${code}`);
+
+                conn.on('open', () => {
+                    statusEl.textContent = "Handshake verified. Awaiting media stream...";
+                });
+
+                conn.on('close', () => {
+                    statusEl.textContent = "Signaling channel closed.";
+                });
+            });
+
+            // 2. Listen for incoming video call initiated by the Host
+            peer.on('call', (call) => {
+                statusEl.textContent = "Negotiating secure media stream...";
+
+                // Answer the call with an empty local argument (receive-only WebRTC mode) [1]
+                call.answer();
 
                 call.on('stream', (remoteStream) => {
-                    statusEl.textContent = "Connected. Displaying stream...";
+                    statusEl.textContent = "Connected.";
                     if (remoteVideo.srcObject !== remoteStream) {
                         remoteVideo.srcObject = remoteStream;
-                        statusEl.textContent = "Live Stream Active.";
+                        statusEl.textContent = "Live Stream Active";
                     }
                 });
 
                 call.on('close', () => {
-                    statusEl.textContent = "Stream ended by host.";
+                    statusEl.textContent = "Stream ended by Host application.";
                     remoteVideo.srcObject = null;
                 });
             });
 
             peer.on('error', (err) => {
                 console.error("PeerJS Viewer Error:", err);
-                statusEl.textContent = `Connection error: ${err.type || err.message}. Reconnecting...`;
-                setTimeout(initViewer, 5000); // Auto-reconnect on failure
+                statusEl.textContent = `Connection error: ${err.type || err.message}. Retrying...`;
+                setTimeout(initViewer, 5000);
             });
         }
 
