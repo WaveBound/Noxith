@@ -1539,7 +1539,7 @@
     <div class="container" style="display: flex; flex-direction: column; align-items: center;">
       <div class="hero-badge animate">
         <div class="hero-badge-dot"></div>
-        v1.1.6 - Added names to saved private servers and much more!
+        v1.1.7 - Added Peer To Peer Screen Share. View Your Screen From Anywhere (premium)
       </div>
 
       <h1 class="hero-title animate" style="transition-delay:0.1s">
@@ -1572,13 +1572,35 @@
         </a>
       </div>
 
+      <!-- Join Stream Card -->
+      <div class="animate" style="transition-delay:0.35s; margin-top: 24px; width: 100%; max-width: 460px;">
+        <div
+          style="background: rgba(10, 9, 20, 0.4); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
+          <div style="color: var(--accent); display: flex; align-items: center; flex-shrink: 0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg>
+          </div>
+          <input type="text" id="streamCodeInput" placeholder="Enter Stream Code (e.g. AB12CD)" maxlength="6"
+            style="background: transparent; border: none; outline: none; color: var(--text); font-family: var(--font-body); font-size: 14px; font-weight: 500; flex: 1; width: 100%; text-transform: uppercase;"
+            onkeydown="if(event.key==='Enter') joinStream()" />
+          <button onclick="joinStream()"
+            style="background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; box-shadow: 0 4px 12px var(--accent-glow);">
+            Join Stream
+          </button>
+        </div>
+      </div>
+
       <div class="hero-meta animate" style="transition-delay:0.4s">
         <div class="hero-meta-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
             stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12" />
           </svg>
-          Fast &amp; Light (~1.2 MB)
+          Fast &amp; Light (~1.3 MB)
         </div>
         <div class="hero-meta-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -2098,99 +2120,127 @@
                 onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22100%22 style=%22background:%2314132a%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%236a607e%22 font-family=%22sans-serif%22 font-size=%2211%22 text-anchor=%22middle%22>Custom designer</text></svg>';" />
             </div>
           </div>
-        </div>
 
-        <!-- Pricing Card -->
-        <div class="premium-card animate">
-          <div class="premium-card-label">BloxMulti Premium</div>
-
-          <!-- Compact Multi-Plan Box Matching App Aesthetics -->
-          <div class="premium-price-box"
-            style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; padding: 18px; background: rgba(157, 111, 255, 0.05); border: 1px solid rgba(157, 111, 255, 0.15); border-radius: 12px;">
-            <!-- Monthly Row -->
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-              <span style="font-size: 14px; font-weight: 500; color: var(--muted);">Monthly Access</span>
-              <div style="display: flex; align-items: baseline; gap: 3px;">
-                <span
-                  style="font-size: 28px; font-weight: 800; color: var(--accent-light); font-family: var(--font-body); line-height: 1;">$3</span>
-                <span style="font-size: 13px; color: var(--muted); font-weight: 500;">/ mo</span>
+          <!-- Remote Screen Streaming (Premium Feature) -->
+          <div class="premium-feat animate" style="transition-delay:0.5s">
+            <div class="premium-feat-left">
+              <div class="premium-feat-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                  <line x1="8" y1="21" x2="16" y2="21" />
+                  <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
               </div>
-            </div>
-            <div style="height: 1px; background: rgba(157, 111, 255, 0.12);"></div>
-            <!-- Lifetime Row -->
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-              <span style="font-size: 14px; font-weight: 500; color: var(--text);">Lifetime License</span>
-              <div style="display: flex; align-items: baseline; gap: 3px;">
-                <span
-                  style="font-size: 28px; font-weight: 800; color: var(--accent-light); font-family: var(--font-body); line-height: 1;">$15</span>
-                <span style="font-size: 13px; color: var(--muted); font-weight: 500;">one-time</span>
+              <div class="premium-feat-body">
+                <div class="premium-feat-title">Remote Screen Streaming</div>
+                <div class="premium-feat-desc">Stream your desktop screen, specific application windows, or active games
+                  to secondary screens like mobile devices, tablets, or laptops. High-performance WebRTC peer-to-peer
+                  connections deliver low-latency video without routing your data through external servers.</div>
               </div>
             </div>
           </div>
 
-          <div class="premium-card-sub"
-            style="margin-bottom: 20px; font-size: 12.5px; line-height: 1.5; color: var(--muted);">Choose your plan
-            inside the desktop application upgrade menu. All plans unlock complete features immediately.</div>
-          <div class="premium-card-divider"></div>
-          <div class="premium-card-perks">
-            <div class="premium-perk">
-              <div class="premium-perk-check">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+          <!-- Pricing Card -->
+          <div class="premium-card animate">
+            <div class="premium-card-label">BloxMulti Premium</div>
+
+            <!-- Compact Multi-Plan Box Matching App Aesthetics -->
+            <div class="premium-price-box"
+              style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; padding: 18px; background: rgba(157, 111, 255, 0.05); border: 1px solid rgba(157, 111, 255, 0.15); border-radius: 12px;">
+              <!-- Monthly Row -->
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 14px; font-weight: 500; color: var(--muted);">Monthly Access</span>
+                <div style="display: flex; align-items: baseline; gap: 3px;">
+                  <span
+                    style="font-size: 28px; font-weight: 800; color: var(--accent-light); font-family: var(--font-body); line-height: 1;">$3</span>
+                  <span style="font-size: 13px; color: var(--muted); font-weight: 500;">/ mo</span>
+                </div>
               </div>
-              Folders, Groups &amp; Window Spawn Coordinators
-            </div>
-            <div class="premium-perk">
-              <div class="premium-perk-check">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+              <div style="height: 1px; background: rgba(157, 111, 255, 0.12);"></div>
+              <!-- Lifetime Row -->
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 14px; font-weight: 500; color: var(--text);">Lifetime License</span>
+                <div style="display: flex; align-items: baseline; gap: 3px;">
+                  <span
+                    style="font-size: 28px; font-weight: 800; color: var(--accent-light); font-family: var(--font-body); line-height: 1;">$15</span>
+                  <span style="font-size: 13px; color: var(--muted); font-weight: 500;">one-time</span>
+                </div>
               </div>
-              Per-Account FPS Cap
             </div>
-            <div class="premium-perk">
-              <div class="premium-perk-check">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+
+            <div class="premium-card-sub"
+              style="margin-bottom: 20px; font-size: 12.5px; line-height: 1.5; color: var(--muted);">Choose your plan
+              inside the desktop application upgrade menu. All plans unlock complete features immediately.</div>
+            <div class="premium-card-divider"></div>
+            <div class="premium-card-perks">
+              <div class="premium-perk">
+                <div class="premium-perk-check">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                Remote Screen Streaming
               </div>
-              Window Title Renaming
-            </div>
-            <div class="premium-perk">
-              <div class="premium-perk-check">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+              <div class="premium-perk">
+                <div class="premium-perk-check">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                Folders, Groups &amp; Window Spawn Coordinators
               </div>
-              Interactive Resource Monitor
-            </div>
-            <div class="premium-perk">
-              <div class="premium-perk-check">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+              <div class="premium-perk">
+                <div class="premium-perk-check">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                Per-Account FPS Cap
               </div>
-              Theme Palette Creator
+              <div class="premium-perk">
+                <div class="premium-perk-check">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                Window Title Renaming
+              </div>
+              <div class="premium-perk">
+                <div class="premium-perk-check">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                Interactive Resource Monitor
+              </div>
+              <div class="premium-perk">
+                <div class="premium-perk-check">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                Theme Palette Creator
+              </div>
             </div>
-          </div>
-          <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-premium">
-            <svg width="14" height="14" viewBox="0 0 1024 1024" fill="currentColor">
-              <path
-                d="M967.68 368.64l-153.6-204.8c-3.9424-5.2736-9.7792-8.8064-16.2816-9.8816l-307.2-51.2c-2.7648-0.4608-5.632-0.4608-8.3968 0l-307.2 51.2c-6.5024 1.0752-12.3392 4.608-16.2816 9.8816l-153.6 204.8c-7.3216 9.7792-6.7072 23.3984 1.4336 32.4608l460.8 512c4.864 5.376 11.776 8.4992 19.0464 8.4992s14.1824-3.072 19.0464-8.4992l460.8-512c8.192-9.1136 8.8064-22.6816 1.4336-32.4608z" />
-            </svg>
-            See Upgrade Plans
-          </a>
-          <div class="premium-card-note">Upgrade directly from inside the desktop app after logging in.
+            <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-premium">
+              <svg width="14" height="14" viewBox="0 0 1024 1024" fill="currentColor">
+                <path
+                  d="M967.68 368.64l-153.6-204.8c-3.9424-5.2736-9.7792-8.8064-16.2816-9.8816l-307.2-51.2c-2.7648-0.4608-5.632-0.4608-8.3968 0l-307.2 51.2c-6.5024 1.0752-12.3392 4.608-16.2816 9.8816l-153.6 204.8c-7.3216 9.7792-6.7072 23.3984 1.4336 32.4608l460.8 512c4.864 5.376 11.776 8.4992 19.0464 8.4992s14.1824-3.072 19.0464-8.4992l460.8-512c8.192-9.1136 8.8064-22.6816 1.4336-32.4608z" />
+              </svg>
+              See Upgrade Plans
+            </a>
+            <div class="premium-card-note">Upgrade directly from inside the desktop app after logging in.
+            </div>
           </div>
         </div>
       </div>
-    </div>
   </section>
 
   <!-- Download Section -->
@@ -2212,7 +2262,7 @@
             </svg>
           </div>
           Windows 10 / 11
-          <div class="dl-version">v1.1.6</div>
+          <div class="dl-version">v1.1.7</div>
         </div>
 
         <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-download-primary">
@@ -2346,6 +2396,21 @@
         });
       }, 1000);
     });
+
+    function joinStream() {
+      const input = document.getElementById("streamCodeInput");
+      const code = input ? input.value.trim().toUpperCase() : "";
+      if (!code) {
+        alert("Please enter a valid 6-character stream code.");
+        return;
+      }
+      if (code.length !== 6) {
+        alert("Stream codes must be exactly 6 characters.");
+        return;
+      }
+      // Redirects securely to the designated Remote Viewer subdirectory passing the stream code query parameter
+      window.location.href = `./view/?code=${code}`;
+    }
 
     // Fetch active download count securely
     fetch("https://bloxmulti-downloads.wavebound.workers.dev/count", { cache: "no-store" })
