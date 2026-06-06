@@ -7,7 +7,7 @@ window.bestHydratedBuildCache = window.bestHydratedBuildCache || {};
 window.getRelicDbEntry = function (db, unitId, activeType) {
     if (!db) return null;
     
-    const state = window.unitModesState?.[unitId] ?? (window.getUnitById?.(unitId)?.defaultMode ?? 0);
+    const state = window.unitModesState?.[unitId] || 0;
     const modeIdx = Array.isArray(state) ? state[0] : state;
     const modeKey = 'fixed';
     const suffix = activeType === 'abil' ? '_abil' : '';
@@ -724,7 +724,7 @@ window.refreshActiveBuild = function (unit) {
     const activeMode = 'fixed';
     
     // FIX: Normalize array state inside refreshActiveBuild to correctly fetch numeric state indexes
-    const state = window.unitModesState?.[unitId] ?? (unit.defaultMode ?? 0);
+    const state = window.unitModesState?.[unitId] || 0;
     const activeModeIdx = Array.isArray(state) ? state[0] : state;
 
     // Pre-initialize unit system levels if undefined to prevent Joyful Captain default-to-100 bug
@@ -853,7 +853,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const isHotbar = card.parentElement?.id === 'hotbarHiddenRender' || !!card.closest('.team-summary-container') || isInHotbarState;
 
     // FIX: Normalize array state inside updateBuildListDisplay to base integer
-    const state = window.unitModesState?.[unitId] ?? (unitObj.defaultMode ?? 0);
+    const state = window.unitModesState?.[unitId] || 0;
     const activeModeIdx = Array.isArray(state) ? state[0] : state;
     
     const systemLevelBar = card.querySelector('.system-level-bar');
@@ -1241,7 +1241,7 @@ window.getQuickScore = (unit) => {
     }
 
     // FIX: Normalize array state inside getQuickScore
-    const state = window.unitModesState?.[unit.id] ?? (unit.defaultMode ?? 0);
+    const state = window.unitModesState?.[unit.id] || 0;
     const activeMode = Array.isArray(state) ? state[0] : state;
     
     const { upgradesArr } = getUnitCostAndPlacement(unit, activeMode);
@@ -1315,7 +1315,7 @@ window.resortUnitCardsInPlace = function () {
 
 function renderUnitCard(unit, absoluteIndex) {
     // FIX: Normalize array state inside renderUnitCard
-    const state = window.unitModesState?.[unit.id] ?? (unit.defaultMode ?? 0);
+    const state = window.unitModesState?.[unit.id] || 0;
     const activeMode = Array.isArray(state) ? state[0] : state;
     const { upgradesArr = null } = getUnitCostAndPlacement(unit, activeMode);
 
@@ -1684,7 +1684,7 @@ function _executeGlobalFilter(term) {
     paginatedSortedUnits.forEach(entry => {
         const u = entry.unit;
         // FIX: Normalize array state when initializing level indices
-        const state = window.unitModesState?.[u.id] ?? (u.defaultMode ?? 0);
+        const state = window.unitModesState?.[u.id] || 0;
         const mode = Array.isArray(state) ? state[0] : state;
         const upgrades = u.modes?.[mode]?.upgrades || u.upgrades;
         if (window.unitELevels[u.id] === undefined && upgrades) {
