@@ -1006,7 +1006,8 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     let buildData = null;
     const db = (isHotbar && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
-    if (db) {
+    // Ensure we skip the pre-compiled database when Inventory Mode is active to force local calculation
+    if (db && !inventoryMode) {
         const dbKey = unitId + (activeType === 'abil' ? '_abil' : '');
         buildData = db[dbKey]?.[activeMode]?.[0] || db[unitId]?.[activeMode]?.[0];
     }

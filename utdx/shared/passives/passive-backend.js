@@ -10,7 +10,6 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
     let passiveCritFromPassives = 0;
     let passiveCdmgFromPassives = 0;
     let passiveDotFromPassives = 0;
-    let passiveBossDmgFromPassives = 0;
     let passiveBreakdown = [];
 
     if (uStats.passiveDmg) passivePcent += uStats.passiveDmg;
@@ -41,7 +40,6 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
             let pCrit = p.passiveCrit || 0;
             let pCdmg = p.passiveCdmg || 0;
             let pDot = p.dot || 0;
-            let pBoss = p.passiveBossDmg || p.bossDmg || 0;
             if (p.name === "Brutal Slashes") {
                 pDot = (upgradeLevel >= 6) ? 120 : 100;
             }
@@ -183,26 +181,49 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
             const isAkDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'ant_king_savage') && p.name === "Monarch's Devotion");
             const isUgDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother");
             const isMhDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'marine_hero') && p.name === "Hero of the Marines");
-            const isAbhDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'angel_born_in_hell') && p.name === "Warrior that destroys Evil");
+            const isAbhDynamic = (window.isUnit && window.isUnit(uStats.id, 'angel_born_in_hell') && p.name === "Warrior that destroys Evil");
 
             if (isAbhDynamic) {
                 pDmg = 0;
                 let totalAlliedCrit = 0;
-                const hotbarSlots = window.hotbarState?.slots || [];
-                hotbarSlots.forEach((s, slotIdx) => {
-                    if (!s) return;
-                    if (s.id === uStats.id || (window.isUnit && window.isUnit(s.id, uStats.id))) return;
-                    
-                    const sUnit = window.getUnitById ? window.getUnitById(s.id) : null;
-                    if (sUnit) {
-                        // Correctly multiply each unit's uncapped crit rate by its placement count
-                        const sPlacement = (s.placement !== undefined) ? s.placement : (sUnit.placement || 1);
-                        totalAlliedCrit += window.getUnitUncappedCrit(sUnit, slotIdx) * sPlacement;
+                let myPlacement = (uStats.placement !== undefined) ? uStats.placement : 1;
+                
+                if (myPlacement > 1) {
+                    let myCrit = uStats.stats?.crit || uStats.crit || 0;
+                    if (context.traitObj && context.traitObj.critRate) myCrit += context.traitObj.critRate;
+                    if (uStats.passives) {
+                        uStats.passives.forEach(pa => {
+                            if (pa.name === "Lightspeed Reflexes") myCrit += 50;
+                        });
                     }
-                });
-                const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
-                const mult = (eLevel >= 4) ? 1.0 : 0.5;
-                pDmg = totalAlliedCrit * mult;
+                    totalAlliedCrit += myCrit * (myPlacement - 1);
+                }
+
+                if (window.CALCULATION_MODE === 'loadout') {
+                    const isInHotbar = window.hotbarState?.slots?.some(s => s && (s.id === uStats.id || (window.isUnit && window.isUnit(s.id, uStats.id))));
+                    if (isInHotbar) {
+                        const hotbarSlots = window.hotbarState?.slots || [];
+                        hotbarSlots.forEach((s, slotIdx) => {
+                            if (!s) return;
+                            if (s.id === uStats.id || (window.isUnit && window.isUnit(s.id, uStats.id))) return;
+                            
+                            const sUnit = window.getUnitById ? window.getUnitById(s.id) : null;
+                            if (sUnit) {
+                                // Correctly multiply each unit's uncapped crit rate by its placement count
+                                const sPlacement = (s.placement !== undefined) ? s.placement : (sUnit.placement || 1);
+                                totalAlliedCrit += window.getUnitUncappedCrit(sUnit, slotIdx) * sPlacement;
+                            }
+                        });
+                    } else {
+                        totalAlliedCrit = 0;
+                    }
+                }
+
+                if (totalAlliedCrit > 0) {
+                    const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+                    const mult = (eLevel >= 4) ? 1.0 : 0.5;
+                    pDmg = totalAlliedCrit * mult;
+                }
             }
 
             if (p.name === "Pirate Hunter") {
@@ -216,7 +237,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                 }
             }
 
-            if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || pBoss !== 0 || isKsDynamic || isAkDynamic || isUgDynamic || isMhDynamic || isAbhDynamic) {
+            if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || isKsDynamic || isAkDynamic || isUgDynamic || isMhDynamic || isAbhDynamic) {
                 passivePcent += pDmg;
                 passiveSpaPcent += pSpa;
                 passiveRangePcent += pRange;
@@ -224,7 +245,6 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                 passiveCritFromPassives += pCrit;
                 passiveCdmgFromPassives += pCdmg;
                 passiveDotFromPassives += pDot;
-                passiveBossDmgFromPassives += pBoss;
                 if (p.dotDuration && !uStats.dotDuration) uStats.dotDuration = p.dotDuration;
                 passiveBreakdown.push({ name: p.name, dmg: pDmg, spa: pSpa, range: pRange, trueDmg: pTrue, crit: pCrit, cdmg: pCdmg, dot: pDot });
             }
@@ -279,7 +299,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
         }
     }
 
-    return { passivePcent, passiveSpaPcent, passiveRangePcent, trueDmgFromPassives, passiveCritFromPassives, passiveCdmgFromPassives, passiveDotFromPassives, passiveBossDmgFromPassives, passiveBreakdown };
+    return { passivePcent, passiveSpaPcent, passiveRangePcent, trueDmgFromPassives, passiveCritFromPassives, passiveCdmgFromPassives, passiveDotFromPassives, passiveBreakdown };
 };
 
 window.calcGlobalBuffs = function (uStats, context, headPiece) {
