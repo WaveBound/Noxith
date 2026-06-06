@@ -258,7 +258,7 @@ function renderSourceTotalsSection(data) {
     const traitCrit = data.traitObj?.critRate || 0;
 
     const eternalDmg = data.eternalBuff || 0;
-    const unitInnateDmg = data.detailedBuffs ? data.detailedBuffs.unitPassive : ((data.passiveBuff || 0) - (data.headBuffs?.dmg || 0) - (data.abilityBuff || 0) - eternalDmg);
+    const unitInnateDmg = data.detailedBuffs ? (data.detailedBuffs.unitPassive - eternalDmg) : ((data.passiveBuff || 0) - (data.headBuffs?.dmg || 0) - (data.abilityBuff || 0) - eternalDmg);
     const abilityDmg = data.abilityBuff || 0;
     const accessoryBaseDmg = data.detailedBuffs ? data.detailedBuffs.accessoryBase : 0;
 
@@ -618,8 +618,9 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
                 const rem = (data.detailedBuffs.unitPassive || 0) - namedDmg - eternalSub;
                 if (Math.abs(rem) > 0.01) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive (Base)</td><td class="mt-cell-formula">${rem > 0 ? '+' : ''}${fmt.fix(rem, 1)}%</td><td class="mt-cell-val"></td></tr>`;
             } else {
-                if (Math.abs(data.detailedBuffs ? data.detailedBuffs.unitPassive : passiveDmg) > 0.01) {
-                    const val = data.detailedBuffs ? data.detailedBuffs.unitPassive : passiveDmg;
+                const eternalSub = (data.traitObj && data.traitObj.isEternal) ? (Math.min(data.wave || 12, 12) * 5) : 0;
+                const val = (data.detailedBuffs ? data.detailedBuffs.unitPassive : passiveDmg) - eternalSub;
+                if (Math.abs(val) > 0.01) {
                     html = `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${val > 0 ? '+' : ''}${fmt.fix(val, 1)}%</td><td class="mt-cell-val"></td></tr>`;
                 }
             }

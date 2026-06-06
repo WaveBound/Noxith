@@ -529,12 +529,6 @@ function hydrateBuildEntry(r, unitId, isHotbar) {
     res.bossDps = res.bossDps || res.bd || res.bossTotal || 0;
     res.dps = res.dps || res.d || 0;
     res.sortDps = Math.max(res.dps || 0, res.bossDps || 0);
-
-    // Sanitize precalculated static databases that contain "Purified Energy" to prevent duplicates on initial render
-    if (res.detailedBuffs && res.detailedBuffs.passiveBreakdown) {
-        res.detailedBuffs.passiveBreakdown = res.detailedBuffs.passiveBreakdown.filter(p => p && p.name !== "Purified Energy (Allied Crit Rate to Dmg)" && p.name !== "Purified Energy");
-    }
-
     return res;
 }
 
@@ -573,9 +567,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
 
     const benchmarkDps = traitBenchmarks[r.traitName] || traitBenchmarks['peak'] || 0;
 
-    if (nextLevel > maxLevel) {
-        // unit is maxed
-    } else {
+    if (nextLevel <= maxLevel) {
         try {
             const nextMath = reconstructMathData(r, nextLevel);
             if (nextMath) {
@@ -1013,12 +1005,10 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     if (!container) return;
 
     let buildData = null;
-    if (!inventoryMode) {
-        const db = (isHotbar && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
-        if (db) {
-            const dbKey = unitId + (activeType === 'abil' ? '_abil' : '');
-            buildData = db[dbKey]?.[activeMode]?.[0] || db[unitId]?.[activeMode]?.[0];
-        }
+    const db = (isHotbar && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
+    if (db) {
+        const dbKey = unitId + (activeType === 'abil' ? '_abil' : '');
+        buildData = db[dbKey]?.[activeMode]?.[0] || db[unitId]?.[activeMode]?.[0];
     }
 
     if (buildData) {
@@ -1288,7 +1278,7 @@ function renderUnitCard(unit, absoluteIndex) {
         if (currentMode && !isSummon) {
             const modeHtml = `<div class="mode-indicator-badge" style="display: flex; align-items: center; color: #c084fc; font-size: 0.65rem; font-weight: 800; border: 1px solid rgba(192, 132, 252, 0.4); background: rgba(192, 132, 252, 0.06); padding: 2px 6px; border-radius: 4px; white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis;" title="${currentMode.name}">⚙ ${currentMode.name.toUpperCase()}</div>`;
             initialModeIndicatorHtml = modeHtml;
-        } else existingModeBadge?.remove();
+        }
     }
 
     let dynamicPlacement = unit.placement || 1;

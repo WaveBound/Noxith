@@ -472,7 +472,7 @@ window.toggleInventoryMode = (checkbox) => {
 
 window.toggleNoSubStats = (checkbox) => {
     const isChecked = checkbox.checked;
-    window.disableSubStats = isChecked;
+    disableSubStats = isChecked;
     window.disableSubStats = isChecked;
 
     const ids = ['globalNoSubStats', 'sidebarNoSubStats', 'guideNoSubStats'];

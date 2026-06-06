@@ -71,29 +71,30 @@ function initInventory() {
 }
 
 function saveInventory() {
-    try { localStorage.setItem(RELIC_STORAGE_KEY, JSON.stringify(window.relicInventory)); } catch (e) { console.error(e); }
+    try { localStorage.setItem(RELIC_STORAGE_KEY, JSON.stringify(relicInventory)); } catch (e) { console.error(e); }
 }
 
 function saveInventoryAssignments() {
-    try { localStorage.setItem(INVENTORY_ASSIGNMENTS_STORAGE_KEY, JSON.stringify(window.inventoryUnitTraits || {})); } catch (e) { console.error(e); }
+    try { localStorage.setItem(INVENTORY_ASSIGNMENTS_STORAGE_KEY, JSON.stringify(inventoryUnitTraits || {})); } catch (e) { console.error(e); }
 }
 
 function loadInventoryAssignments() {
     try {
         const stored = localStorage.getItem(INVENTORY_ASSIGNMENTS_STORAGE_KEY);
-        window.inventoryUnitTraits = stored ? JSON.parse(stored) : {};
+        inventoryUnitTraits = stored ? JSON.parse(stored) : {};
     } catch (e) {
-        window.inventoryUnitTraits = {};
+        inventoryUnitTraits = {};
     }
+    window.inventoryUnitTraits = inventoryUnitTraits;
 }
 
 function getInventoryAssignedTrait(unitId) {
-    return (window.inventoryUnitTraits && window.inventoryUnitTraits[unitId]) || null;
+    return (inventoryUnitTraits && inventoryUnitTraits[unitId]) || null;
 }
 window.getInventoryAssignedTrait = getInventoryAssignedTrait;
 
 function hasInventoryAssignments() {
-    return !!(window.inventoryUnitTraits && Object.keys(window.inventoryUnitTraits).length > 0);
+    return !!(inventoryUnitTraits && Object.keys(inventoryUnitTraits).length > 0);
 }
 window.hasInventoryAssignments = hasInventoryAssignments;
 
@@ -194,16 +195,18 @@ window.addInventoryAssignment = function () {
     if (unitIds.length === 0 || !traitId) return;
 
     unitIds.forEach(unitId => {
-        window.inventoryUnitTraits[unitId] = traitId;
+        inventoryUnitTraits[unitId] = traitId;
     });
+    window.inventoryUnitTraits = inventoryUnitTraits;
     saveInventoryAssignments();
     renderInventoryAssignments();
     refreshInventoryAssignmentCalculations();
 };
 
 window.removeInventoryAssignment = function (unitId) {
-    if (!window.inventoryUnitTraits || !window.inventoryUnitTraits[unitId]) return;
-    delete window.inventoryUnitTraits[unitId];
+    if (!inventoryUnitTraits || !inventoryUnitTraits[unitId]) return;
+    delete inventoryUnitTraits[unitId];
+    window.inventoryUnitTraits = inventoryUnitTraits;
     saveInventoryAssignments();
     renderInventoryAssignments();
     refreshInventoryAssignmentCalculations();
@@ -212,10 +215,10 @@ window.removeInventoryAssignment = function (unitId) {
 function loadInventory() {
     try {
         const stored = localStorage.getItem(RELIC_STORAGE_KEY);
-        window.relicInventory = (stored ? JSON.parse(stored) : []) || [];
+        relicInventory = stored ? JSON.parse(stored) : [];
 
         // Migration for old head pieces
-        window.relicInventory.forEach(r => {
+        relicInventory.forEach(r => {
             if (r.slot === 'Head') {
                 if (r.setKey === 'biju_set') r.setKey = 'biju_head';
                 if (r.setKey === 'reanimated_ninja') r.setKey = 'reanimated_head';
@@ -226,16 +229,16 @@ function loadInventory() {
             }
         });
     } catch (e) {
-        window.relicInventory = [];
+        relicInventory = [];
     }
 }
 
 function updateInventoryToggleState() {
-    const isEmpty = (!window.relicInventory || window.relicInventory.length === 0);
+    const isEmpty = (!relicInventory || relicInventory.length === 0);
     const toggleIds = ['globalInventoryMode', 'guideInventoryMode'];
 
-    if (isEmpty && window.inventoryMode) {
-        window.inventoryMode = false;
+    if (isEmpty && typeof inventoryMode !== 'undefined' && inventoryMode) {
+        inventoryMode = false;
         if (typeof resetAndRender === 'function') resetAndRender();
     }
 
@@ -251,9 +254,9 @@ function updateInventoryToggleState() {
         } else {
             input.disabled = false; label.classList.remove('disabled');
             label.title = "Calculate using ONLY relics from your Inventory";
-            if (window.inventoryMode !== undefined) {
-                input.checked = window.inventoryMode;
-                label.classList.toggle('is-checked', window.inventoryMode);
+            if (typeof inventoryMode !== 'undefined') {
+                input.checked = inventoryMode;
+                label.classList.toggle('is-checked', inventoryMode);
             }
         }
     });

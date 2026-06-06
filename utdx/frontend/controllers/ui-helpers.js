@@ -74,7 +74,7 @@ window.GLOBAL_BUFF_DATA = {
                     const isFernPresent = slots.some(s => s && window.isUnit && window.isUnit(s.id, 'prodigy_mage'));
                     if (isFernPresent) {
                         const targets = window.hotbarState.fernTargets || [];
-                        if (!targets.includes(slotIdx)) return {};
+                        if (!targets.includes(slotIdx) && !(isFernSelf && targets.length > 0)) return {};
                     }
                 }
                 return { spa: 30 };
@@ -101,7 +101,7 @@ window.GLOBAL_BUFF_DATA = {
                     const isFernPresent = slots.some(s => s && window.isUnit && window.isUnit(s.id, 'prodigy_mage'));
                     if (isFernPresent) {
                         const targets = window.hotbarState.fernTargets || [];
-                        if (!targets.includes(slotIdx)) return {};
+                        if (!targets.includes(slotIdx) && !(isFernSelf && targets.length > 0)) return {};
                     }
                 }
                 return { crit: 45 };
