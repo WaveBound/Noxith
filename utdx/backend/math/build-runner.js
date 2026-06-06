@@ -122,20 +122,32 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
 
     // 1. Determine Traits List
     let activeTraits = [];
-    const assignedTraitId = (typeof window.getInventoryAssignedTrait === 'function') ? window.getInventoryAssignedTrait(unit.id) : ((window.inventoryUnitTraits || {})[unit.id] || null);
-    if (assignedTraitId) {
-        const specificTraits = unitSpecificTraits[unit.id] || [];
-        const allTraits = [...traitsList, ...customTraits, ...specificTraits];
-        const assignedTrait = allTraits.find(t => t.id === assignedTraitId || t.name === assignedTraitId);
-        if (!assignedTrait || assignedTrait.id === 'none') return [];
-        activeTraits = [assignedTrait];
-    } else if (!forcedRelic) {
-        return [];
-    } else if (specificTraitsOnly && Array.isArray(specificTraitsOnly)) {
+    
+    // First, check if a specific trait was requested by the caller (like Loadout fallback or Custom calc)
+    if (specificTraitsOnly && Array.isArray(specificTraitsOnly) && specificTraitsOnly.length > 0) {
         activeTraits = specificTraitsOnly;
-    } else {
-        const specificTraits = unitSpecificTraits[unit.id] || [];
-        activeTraits = [...traitsList, ...customTraits, ...specificTraits];
+    } 
+    else {
+        // If not explicitly requested, determine what trait to use
+        let assignedTraitId = null;
+        if (window.CALCULATION_MODE === 'loadout' && window.unitTraits && window.unitTraits[unit.id]) {
+            assignedTraitId = window.unitTraits[unit.id];
+        } else {
+            assignedTraitId = (typeof window.getInventoryAssignedTrait === 'function') ? window.getInventoryAssignedTrait(unit.id) : ((window.inventoryUnitTraits || {})[unit.id] || null);
+        }
+
+        if (assignedTraitId) {
+            const specificTraits = unitSpecificTraits[unit.id] || [];
+            const allTraits = [...traitsList, ...customTraits, ...specificTraits];
+            const assignedTrait = allTraits.find(t => t.id === assignedTraitId || t.name === assignedTraitId);
+            if (assignedTrait && assignedTrait.id !== 'none') {
+                activeTraits = [assignedTrait];
+            }
+        }
+    }
+
+    if (activeTraits.length === 0 && !forcedRelic) {
+        return [];
     }
 
     let unitResults = [];
