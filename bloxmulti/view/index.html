@@ -42,7 +42,7 @@
     <video id="remoteVideo" autoplay playsinline controls></video>
 
     <script>
-        const API_BASE = "https://<your-worker-subdomain>.workers.dev"; // Replace with your Worker URL
+        const API_BASE = "https://bloxmulti-session-connect.wavebound.workers.dev/"; // Replace with your Worker URL
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get("code") || window.location.pathname.split("/").pop();
 
@@ -68,10 +68,12 @@
                 }
             };
 
+            const safeBase = API_BASE.replace(/\/+$/, "");
+
             // Send local ICE candidates to Host via Worker
             peerConnection.onicecandidate = async (event) => {
                 if (event.candidate) {
-                    await fetch(`${API_BASE}/api/session/candidate`, {
+                    await fetch(`${safeBase}/api/session/candidate`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ code, role: "viewer", candidate: event.candidate })
@@ -81,7 +83,7 @@
 
             try {
                 // 1. Fetch SDP Offer from Host
-                const offerRes = await fetch(`${API_BASE}/api/session/offer?code=${code}`);
+                const offerRes = await fetch(`${safeBase}/api/session/offer?code=${code}`);
                 if (!offerRes.ok) throw new Error("Session offer not available yet.");
                 const { sdp } = await offerRes.json();
 
@@ -92,7 +94,7 @@
                 await peerConnection.setLocalDescription(answer);
 
                 // 3. Submit Answer to Worker
-                await fetch(`${API_BASE}/api/session/answer`, {
+                await fetch(`${safeBase}/api/session/answer`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ code, sdp: answer.sdp })
@@ -102,7 +104,7 @@
 
                 // 4. Poll Host ICE candidates
                 const candidateInterval = setInterval(async () => {
-                    const res = await fetch(`${API_BASE}/api/session/candidates?code=${code}&role=viewer`);
+                    const res = await fetch(`${safeBase}/api/session/candidates?code=${code}&role=viewer`);
                     if (res.ok) {
                         const candidates = await res.json();
                         for (const c of candidates) {
