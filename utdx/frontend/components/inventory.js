@@ -5,6 +5,9 @@
 const RELIC_STORAGE_KEY = 'uto_relic_inventory_v1';
 const INVENTORY_ASSIGNMENTS_STORAGE_KEY = 'uto_inventory_unit_traits_v1';
 
+window.relicInventory = window.relicInventory || [];
+window.inventoryUnitTraits = window.inventoryUnitTraits || {};
+
 const RELIC_COLORS = {
     'ninja': 'linear-gradient(135deg, #1e1b4b, #020617)',
     'sun_god': 'linear-gradient(135deg, #1e1b4b, #020617)',
@@ -71,29 +74,30 @@ function initInventory() {
 }
 
 function saveInventory() {
-    try { localStorage.setItem(RELIC_STORAGE_KEY, JSON.stringify(window.relicInventory)); } catch (e) { console.error(e); }
+    try { localStorage.setItem(RELIC_STORAGE_KEY, JSON.stringify(relicInventory)); } catch (e) { console.error(e); }
 }
 
 function saveInventoryAssignments() {
-    try { localStorage.setItem(INVENTORY_ASSIGNMENTS_STORAGE_KEY, JSON.stringify(window.inventoryUnitTraits || {})); } catch (e) { console.error(e); }
+    try { localStorage.setItem(INVENTORY_ASSIGNMENTS_STORAGE_KEY, JSON.stringify(inventoryUnitTraits || {})); } catch (e) { console.error(e); }
 }
 
 function loadInventoryAssignments() {
     try {
         const stored = localStorage.getItem(INVENTORY_ASSIGNMENTS_STORAGE_KEY);
-        window.inventoryUnitTraits = stored ? JSON.parse(stored) : {};
+        inventoryUnitTraits = stored ? JSON.parse(stored) : {};
     } catch (e) {
-        window.inventoryUnitTraits = {};
+        inventoryUnitTraits = {};
     }
+    window.inventoryUnitTraits = inventoryUnitTraits;
 }
 
 function getInventoryAssignedTrait(unitId) {
-    return (window.inventoryUnitTraits && window.inventoryUnitTraits[unitId]) || null;
+    return (inventoryUnitTraits && inventoryUnitTraits[unitId]) || null;
 }
 window.getInventoryAssignedTrait = getInventoryAssignedTrait;
 
 function hasInventoryAssignments() {
-    return !!(window.inventoryUnitTraits && Object.keys(window.inventoryUnitTraits).length > 0);
+    return !!(inventoryUnitTraits && Object.keys(inventoryUnitTraits).length > 0);
 }
 window.hasInventoryAssignments = hasInventoryAssignments;
 
@@ -251,9 +255,9 @@ function updateInventoryToggleState() {
         } else {
             input.disabled = false; label.classList.remove('disabled');
             label.title = "Calculate using ONLY relics from your Inventory";
-            if (window.inventoryMode !== undefined) {
-                input.checked = window.inventoryMode;
-                label.classList.toggle('is-checked', window.inventoryMode);
+            if (typeof inventoryMode !== 'undefined') {
+                input.checked = inventoryMode;
+                label.classList.toggle('is-checked', inventoryMode);
             }
         }
     });
@@ -432,7 +436,7 @@ function addRelic() {
         subs: subs
     };
 
-    relicInventory.push(newRelic);
+    window.relicInventory.push(newRelic);
     saveInventory();
     renderInventory();
     updateInventoryToggleState();
@@ -443,7 +447,7 @@ function addRelic() {
 
 function deleteRelic(id) {
     if (confirm('Delete this relic?')) {
-        relicInventory = relicInventory.filter(r => r.id !== id);
+        window.relicInventory = (window.relicInventory || []).filter(r => r.id !== id);
         saveInventory();
         renderInventory();
         updateInventoryToggleState();

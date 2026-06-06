@@ -333,49 +333,10 @@ function calculateDPS(uStats, relicStats, context) {
         // Angel Born in Hell has a fixed 50% Crit Rate (bugged behavior)
         finalCritRate = 50;
         rawCritRate = 50;
-
-        // Converts crit rate of other hotbar units into a dmg bonus, accounting for placements and allowing over 100%
-        let otherCritRateSum = 0;
-        if (typeof window !== 'undefined' && window.hotbarState?.slots) {
-            window.hotbarState.slots.forEach((slot, slotIdx) => {
-                if (!slot) return;
-                const baseId = slot.id.split('-')[0];
-                if (baseId === 'angel_born_in_hell') return;
-                
-                const sUnit = window.getUnitById ? window.getUnitById(slot.id) : null;
-                if (!sUnit) return;
-                
-                // Use the real-time uncapped helper to resolve Fern (Ground) and other active buffs
-                const critRate = window.getUnitUncappedCrit(sUnit, slotIdx);
-                const placementVal = sUnit.placement || 1;
-                otherCritRateSum += (critRate * placementVal);
-            });
-        }
-
-        // Include other placements of himself if placement > 1 (they each have a fixed 50% crit rate)
-        if (placement > 1) {
-            otherCritRateSum += (placement - 1) * 50;
-        }
-
-        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
-        const conversionMultiplier = (eLevel >= 4) ? 1.0 : 0.5;
-        const critRateToDmgBonus = otherCritRateSum * conversionMultiplier;
-
-        if (critRateToDmgBonus > 0) {
-            additiveTotal += critRateToDmgBonus;
-            detailedBuffs.unitPassive = (detailedBuffs.unitPassive || 0) + critRateToDmgBonus;
-            passiveBreakdown.push({
-                name: `Purified Energy (Allied Crit Rate to Dmg)`,
-                dmg: critRateToDmgBonus,
-                spa: 0,
-                range: 0,
-                trueDmg: 0,
-                crit: 0,
-                cdmg: 0
-            });
-        }
     }
 
+    let avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
+    let avgCritMultBoss = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100))); // Match base crit mult
     let finalDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
     let finalDmg = finalDmgNormal;
     let finalDmgBoss = finalDmgNormal;
@@ -383,6 +344,7 @@ function calculateDPS(uStats, relicStats, context) {
     let finalCritRateBoss = finalCritRate;
     if (window.isUnit(uStats.id, 'marine_hero')) {
         finalCritRateBoss = Math.min(finalCritRateBoss + 100, 100);
+        avgCritMultBoss = (1 + ((finalCdmgStat / 100) * (finalCritRateBoss / 100)));
     }
     let finalCdmgStatBoss = finalCdmgStat;
 
@@ -391,10 +353,10 @@ function calculateDPS(uStats, relicStats, context) {
         finalCritRate = 0;
         finalCritRateBoss = 0;
         rawCritRate = 0;
+        avgCritMult = 1.0;
+        avgCritMultBoss = 1.0;
     }
 
-    let avgCritMult = (1 + ((finalCdmgStat / 100) * (finalCritRate / 100)));
-    let avgCritMultBoss = (1 + ((finalCdmgStatBoss / 100) * (finalCritRateBoss / 100)));
     let avgHit = finalDmg * avgCritMult;
     let avgHitBoss = finalDmgBoss * avgCritMultBoss;
     let avgHitNormal = finalDmgNormal * avgCritMult;
@@ -828,6 +790,11 @@ function calculateDPS(uStats, relicStats, context) {
     const elemFinalSummonDps = finalSummonDps * elemMult;
     const elemBossHitDps = finalBossHitDps * elemMult;
     const elemBossDotDps = finalBossDotDps * elemMult;
+
+    // Sanitization: Ensure no legacy "Purified Energy" is double-applied or present in the passive breakdown
+    if (detailedBuffs && detailedBuffs.passiveBreakdown) {
+        detailedBuffs.passiveBreakdown = detailedBuffs.passiveBreakdown.filter(p => p && p.name !== "Purified Energy (Allied Crit Rate to Dmg)" && p.name !== "Purified Energy");
+    }
 
     return {
         total: (elemFinalHitDps + elemFinalDotDps + elemFinalSummonDps),

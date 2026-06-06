@@ -123,19 +123,25 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
     // 1. Determine Traits List
     let activeTraits = [];
     const assignedTraitId = (typeof window.getInventoryAssignedTrait === 'function') ? window.getInventoryAssignedTrait(unit.id) : ((window.inventoryUnitTraits || {})[unit.id] || null);
-    if (assignedTraitId) {
+    const selectedTraitId = (window.unitTraits && window.unitTraits[unit.id]) || null;
+    const finalTraitId = assignedTraitId || selectedTraitId;
+
+    if (finalTraitId) {
         const specificTraits = unitSpecificTraits[unit.id] || [];
         const allTraits = [...traitsList, ...customTraits, ...specificTraits];
-        const assignedTrait = allTraits.find(t => t.id === assignedTraitId || t.name === assignedTraitId);
-        if (!assignedTrait || assignedTrait.id === 'none') return [];
-        activeTraits = [assignedTrait];
-    } else if (!forcedRelic) {
-        return [];
-    } else if (specificTraitsOnly && Array.isArray(specificTraitsOnly)) {
-        activeTraits = specificTraitsOnly;
-    } else {
-        const specificTraits = unitSpecificTraits[unit.id] || [];
-        activeTraits = [...traitsList, ...customTraits, ...specificTraits];
+        const assignedTrait = allTraits.find(t => t.id === finalTraitId || t.name === finalTraitId);
+        if (assignedTrait && assignedTrait.id !== 'none') {
+            activeTraits = [assignedTrait];
+        }
+    }
+
+    if (activeTraits.length === 0) {
+        if (specificTraitsOnly && Array.isArray(specificTraitsOnly)) {
+            activeTraits = specificTraitsOnly;
+        } else {
+            const specificTraits = unitSpecificTraits[unit.id] || [];
+            activeTraits = [...traitsList, ...customTraits, ...specificTraits];
+        }
     }
 
     let unitResults = [];
@@ -401,7 +407,7 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
 
     // Run Calc
     effectiveStats.context = context;
-    const result = calculateDPS(effectiveStats, totalStats, context);
+    const result = resultVal = calculateDPS(effectiveStats, totalStats, context);
 
     result.setName = liteData.setName;
     result.traitName = liteData.traitName;
@@ -477,4 +483,4 @@ window.getBenchmarkDps = function(unitId, traitName, starMult, isAbility) {
     if (!window.benchmarkDpsCache) window.benchmarkDpsCache = {};
     window.benchmarkDpsCache[cacheKey] = maxScore;
     return maxScore;
-};
+};w
