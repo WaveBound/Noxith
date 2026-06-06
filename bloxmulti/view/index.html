@@ -337,6 +337,7 @@
         const liveBadge = document.getElementById("liveBadge");
 
         let peer = null;
+        let isStreaming = false; // Tracks if the live video feed is active
 
         function initViewer() {
             if (!code) {
@@ -362,10 +363,14 @@
                 const conn = peer.connect(`bm-${code}`);
 
                 conn.on('open', () => {
-                    statusEl.textContent = "AWAITING STREAM FEED...";
+                    // Prevent slower data channel opening event from overwriting active stream status
+                    if (!isStreaming) {
+                        statusEl.textContent = "AWAITING STREAM FEED...";
+                    }
                 });
 
                 conn.on('close', () => {
+                    isStreaming = false;
                     statusEl.textContent = "STREAM OFFLINE";
                     liveBadge.classList.remove('visible');
                 });
@@ -373,13 +378,16 @@
 
             // 2. Receive connection and display track
             peer.on('call', (call) => {
-                statusEl.textContent = "CONNECTING STREAM PIPELINE...";
+                if (!isStreaming) {
+                    statusEl.textContent = "CONNECTING STREAM PIPELINE...";
+                }
 
                 // Answer without stream (Receive-Only mode) [1]
                 call.answer();
 
                 call.on('stream', (remoteStream) => {
-                    statusEl.textContent = "ACTIVE";
+                    isStreaming = true;
+                    statusEl.textContent = "LIVE FEED CONNECTED";
                     if (remoteVideo.srcObject !== remoteStream) {
                         remoteVideo.srcObject = remoteStream;
                         liveBadge.classList.add('visible');
@@ -387,6 +395,7 @@
                 });
 
                 call.on('close', () => {
+                    isStreaming = false;
                     statusEl.textContent = "STREAM OFFLINE";
                     remoteVideo.srcObject = null;
                     liveBadge.classList.remove('visible');
