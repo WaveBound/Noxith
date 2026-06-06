@@ -26,6 +26,8 @@
             --border-hi: #2a2642;
             --font-body: 'Inter', sans-serif;
             --font-display: 'Syne', sans-serif;
+            --red: #ff3a5c;
+            --green: #2af598;
         }
 
         *,
@@ -47,7 +49,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ── Website Background System ── */
+        /* ── Background Grid System ── */
         .global-bg {
             position: fixed;
             inset: 0;
@@ -114,25 +116,35 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 100px 24px 40px;
+            padding: 90px 24px 30px;
             position: relative;
             z-index: 1;
         }
 
         #status {
-            margin-bottom: 24px;
-            font-size: 14px;
-            font-weight: 500;
+            margin-bottom: 16px;
+            font-size: 13px;
+            font-weight: 600;
             color: var(--muted);
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 20px;
         }
 
-        /* ── Video glowing frame from your site's mockup ── */
+        /* ── Larger Video glowing frame ── */
         .preview-wrap {
             position: relative;
             width: 100%;
-            max-width: 950px;
-            aspect-ratio: 950 / 600;
+            max-width: 1100px;
+            /* Expanded limit */
+            height: calc(82vh - 100px);
+            /* Maximizes spatial usage vertically */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .preview-glow {
@@ -140,9 +152,9 @@
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
-            width: 85%;
-            height: 85%;
-            background: radial-gradient(ellipse, rgba(157, 111, 255, 0.3) 0%, transparent 70%);
+            width: 90%;
+            height: 90%;
+            background: radial-gradient(ellipse, rgba(157, 111, 255, 0.25) 0%, transparent 70%);
             pointer-events: none;
             z-index: -1;
             filter: blur(40px);
@@ -156,13 +168,112 @@
             border-radius: 16px;
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(157, 111, 255, 0.08);
             overflow: hidden;
+            position: relative;
         }
 
         video {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            background: #000;
+            background: #020105;
+        }
+
+        /* ── Custom Stream Overlays ── */
+        .stream-hud {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        /* Pulsing Live Badge */
+        .live-badge {
+            align-self: flex-start;
+            background: rgba(42, 245, 152, 0.12);
+            border: 1px solid rgba(42, 245, 152, 0.3);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--green);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .live-badge.visible {
+            opacity: 1;
+        }
+
+        .live-pulse-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--green);
+            border-radius: 50%;
+            animation: pulse-dot 1.5s infinite alternate;
+        }
+
+        @keyframes pulse-dot {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1.25);
+                opacity: 1;
+                box-shadow: 0 0 8px var(--green);
+            }
+        }
+
+        /* Integrated Custom Controls Row */
+        .stream-controls {
+            pointer-events: auto;
+            align-self: flex-end;
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            justify-content: flex-end;
+        }
+
+        .custom-control-btn {
+            background: rgba(10, 9, 20, 0.85);
+            border: 1px solid var(--border-hi);
+            color: var(--text);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .custom-control-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 12px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+
+        .custom-control-btn svg {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         @media (max-width: 768px) {
@@ -170,8 +281,12 @@
                 padding: 12px 20px;
             }
 
-            #status {
-                font-size: 12px;
+            .preview-wrap {
+                height: 60vh;
+            }
+
+            .stream-hud {
+                padding: 12px;
             }
         }
     </style>
@@ -188,12 +303,31 @@
     </nav>
 
     <main>
-        <div id="status">Connecting to signaling network...</div>
+        <div id="status">INITIALIZING SECURE LINK...</div>
 
         <div class="preview-wrap">
             <div class="preview-glow"></div>
             <div class="preview-frame">
-                <video id="remoteVideo" autoplay playsinline muted controls></video>
+                <!-- Removed standard browser 'controls' attribute for complete custom integration -->
+                <video id="remoteVideo" autoplay playsinline muted></video>
+
+                <!-- Custom HUD Overlay -->
+                <div class="stream-hud">
+                    <div class="live-badge" id="liveBadge">
+                        <div class="live-pulse-dot"></div>
+                        Live Feed
+                    </div>
+
+                    <div class="stream-controls">
+                        <button class="custom-control-btn" onclick="toggleFullscreen()" title="Fullscreen">
+                            <svg width="14" height="14" viewBox="0 0 24 24">
+                                <path
+                                    d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                            </svg>
+                            Fullscreen
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -204,12 +338,13 @@
 
         const statusEl = document.getElementById("status");
         const remoteVideo = document.getElementById("remoteVideo");
+        const liveBadge = document.getElementById("liveBadge");
 
         let peer = null;
 
         function initViewer() {
             if (!code) {
-                statusEl.textContent = "Error: Invalid or missing session code.";
+                statusEl.textContent = "ERROR: INVALID OR MISSING SESSION CODE.";
                 return;
             }
 
@@ -225,46 +360,60 @@
             });
 
             peer.on('open', (id) => {
-                statusEl.textContent = "Establishing handshake with Host app...";
+                statusEl.textContent = "SYNCHRONIZING HANDSHAKE LINK...";
 
-                // 1. Open a secure Data Connection to the Host
+                // 1. Establish handshaking session with the Host
                 const conn = peer.connect(`bm-${code}`);
 
                 conn.on('open', () => {
-                    statusEl.textContent = "Handshake verified. Awaiting media stream...";
+                    statusEl.textContent = "AWAITING STREAM FEED...";
                 });
 
                 conn.on('close', () => {
-                    statusEl.textContent = "Signaling channel closed.";
+                    statusEl.textContent = "STREAM OFFLINE";
+                    liveBadge.classList.remove('visible');
                 });
             });
 
-            // 2. Listen for incoming video call initiated by the Host
+            // 2. Receive connection and display track
             peer.on('call', (call) => {
-                statusEl.textContent = "Negotiating secure media stream...";
+                statusEl.textContent = "CONNECTING STREAM PIPELINE...";
 
-                // Answer the call with an empty local argument (receive-only WebRTC mode) [1]
+                // Answer without stream (Receive-Only mode) [1]
                 call.answer();
 
                 call.on('stream', (remoteStream) => {
-                    statusEl.textContent = "Connected.";
+                    statusEl.textContent = "ACTIVE";
                     if (remoteVideo.srcObject !== remoteStream) {
                         remoteVideo.srcObject = remoteStream;
-                        statusEl.textContent = "Live Stream Active";
+                        liveBadge.classList.add('visible');
                     }
                 });
 
                 call.on('close', () => {
-                    statusEl.textContent = "Stream ended by Host application.";
+                    statusEl.textContent = "STREAM OFFLINE";
                     remoteVideo.srcObject = null;
+                    liveBadge.classList.remove('visible');
                 });
             });
 
             peer.on('error', (err) => {
                 console.error("PeerJS Viewer Error:", err);
-                statusEl.textContent = `Connection error: ${err.type || err.message}. Retrying...`;
+                statusEl.textContent = `CONNECTION ERROR. RETRYING...`;
+                liveBadge.classList.remove('visible');
                 setTimeout(initViewer, 5000);
             });
+        }
+
+        function toggleFullscreen() {
+            const container = document.querySelector('.preview-frame');
+            if (!document.fullscreenElement) {
+                container.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
         }
 
         window.onload = initViewer;
