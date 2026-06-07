@@ -39,7 +39,9 @@ unitDatabase.push({
 
     // PASSIVES (displayed in unit info panel)
     passives: [
-        { name: "Limitless Sorcerer", desc: "When an enemy enters Range: Apply 20% [40% on E2] Slow for 5s and Take +25% Damage while in this unit's Range." },
+        { name: "Limitless Sorcerer", desc: "When an enemy enters Range:<br>• Apply 20% [40% on Etherealization 2] Slow for 5s<br>• Take +25% Damage while in this unit's Range" },
+        { name: "Cursed Pinball", desc: "When a non-hyperarmor enemy enters half this unit's Range:<br>• Pull them to the closest point on the Path to this unit<br>• Instantly deal a Crit Attack<br>When a non-hyperarmor enemy leaves Range:<br>• Pull them to the closest point on the Path to this unit<br>• Apply 50% Slow for 5s" },
+        { name: "Show-off", desc: "• This unit has a fixed Crit Rate of 50% that cannot be increased.<br>When landing a Crit:<br>• Inflict Timestop for 4s to all Ground Enemies in Range" },
         { name: "Six Eyes", desc: "This unit is immune to Debuff effects. When a Debuff is attempted on this unit: Nullify the effect and the next attack applies Stun for 2s. Every 600 kills: Reset every Active Ability Cooldown." }
     ],
 
@@ -47,19 +49,17 @@ unitDatabase.push({
     ability: [
         {
             finalMult: 3,
-            abilityName: "TS Enemy",
+            abilityName: "Infinite Purple",
             noToggle: false,
             cooldown: 0,
-            desc: `Active Ability: When toggled, this unit deals 3x Damage to all enemies.`
+            desc: `Active Ability unlocked on the final Upgrade<br>• Deal 300% Damage to all Enemies on the Map`
         },
         {
             buffDmg: 0,
             abilityName: "Domain Expansion",
             noToggle: false,
             cooldown: 360,
-            desc: `Active Ability unlocked on the final Upgrade: Inflict Timestop for 30s to all Enemies in Range.
-            <br>Enemies with Timestop take 150% Damage instead.
-            <br>Gain +1% Damage per Kill until the Ability ends.`
+            desc: `Active Ability unlocked on the final Upgrade<br>• Inflict Timestop for 30s to all Enemies in Range<br>• Enemies with Timestop take 150% Damage instead<br>• Gain +1% Damage per Kill until the Ability ends<br>• Cooldown: 360s`
         }
     ],
 

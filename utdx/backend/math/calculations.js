@@ -314,7 +314,7 @@ function calculateDPS(uStats, relicStats, context) {
 
     // Calculate raw, uncapped crit rate first
     let rawCritRate = uStats.crit + traitCritRate + globalCrit + (headCalc.cf || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives;
-    if (window.isUnit(uStats.id, 'kirito') || window.isUnit(uStats.id, 'the_strongest_of_today')) {
+    if (window.isUnit(uStats.id, 'kirito')) {
         rawCritRate = Math.min(rawCritRate, uStats.crit);
     }
     if (window.isUnit(uStats.id, 'pirate_king')) {
@@ -334,8 +334,8 @@ function calculateDPS(uStats, relicStats, context) {
 
     let finalCritRate = Math.min(rawCritRate, 100);
 
-    if (window.isUnit(uStats.id, 'angel_born_in_hell')) {
-        // Angel Born in Hell has a fixed 50% Crit Rate
+    if (window.isUnit(uStats.id, 'angel_born_in_hell') || window.isUnit(uStats.id, 'the_strongest_of_today') || window.isUnit(uStats.id, 'strongest_of_today')) {
+        // Angel Born in Hell and Strongest of Today have a fixed 50% Crit Rate
         finalCritRate = 50;
         rawCritRate = 50;
         // Crit rate → dmg conversion is handled by "Warrior that destroys Evil" passive in passive-backend
@@ -825,32 +825,7 @@ function calculateDPS(uStats, relicStats, context) {
     let finalDebuffMult = 1.0;
     let appliedDebuffs = [];
 
-    if (window.isUnit) {
-        // 1. Ultimate Fused Warrior
-        if (window.isUnit(uStats.id, 'ultimate_fused_warrior') || window.isUnit(uStats.id, 'fused_warrior')) {
-            finalDebuffMult *= 1.3;
-            appliedDebuffs.push({ label: 'Does it hurt?', val: 1.3 });
-        }
-        // 2. Ancient Mage (Innate + Utility Mode check)
-        if (window.isUnit(uStats.id, 'ancient_mage')) {
-            finalDebuffMult *= 1.2;
-            appliedDebuffs.push({ label: 'Millennia Old Experience', val: 1.2 });
-
-            const amState = (typeof window !== 'undefined' && window.unitModesState && window.unitModesState['ancient_mage']);
-            const amModeIdx = Array.isArray(amState) ? amState[0] : (amState !== undefined ? amState : 0);
-            const amUnit = typeof window.getUnitById === 'function' ? window.getUnitById('ancient_mage') : null;
-            const amModeName = amUnit && amUnit.modes && amUnit.modes[amModeIdx] ? amUnit.modes[amModeIdx].name.toLowerCase() : '';
-            if (amModeName.includes('utility')) {
-                finalDebuffMult *= 1.2;
-                appliedDebuffs.push({ label: 'Utility Mode Debuff', val: 1.2 });
-            }
-        }
-        // 3. Gojo (The Strongest of Today)
-        if (window.isUnit(uStats.id, 'the_strongest_of_today')) {
-            finalDebuffMult *= 1.25;
-            appliedDebuffs.push({ label: 'Limitless Sorcerer', val: 1.25 });
-        }
-    }
+    // Custom debuff multipliers removed
 
     // Apply elemental and debuff multipliers to all damage channels
     const elemFinalHitDps = finalHitDps * elemMult * finalDebuffMult;
