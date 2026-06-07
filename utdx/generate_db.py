@@ -433,7 +433,7 @@ if (isMainThread) {
 
                 view.setUint8(offset, encodeStr(r.traitName));
                 view.setUint8(offset + 1, encodeStr(r.setName));
-                view.setFloat32(offset + 2, r.dps || 0, true); 
+                view.setFloat32(offset + 2, Math.max(r.dps || 0, r.bossDps || 0), true); 
                 view.setUint16(offset + 6, Math.round((r.spa || 1) * 1000), true);
                 view.setUint16(offset + 8, Math.round((r.range || 0) * 10), true);
                 view.setUint16(offset + 10, meta, true);

@@ -412,7 +412,7 @@ function renderActiveBuffsSection(data) {
     }
 
     if (data.traitObj?.isEternal) buffs.push({ name: "Eternal Stacks", desc: "Applied: +5% Dmg & +2.5% Rng / Wave (Max 12)", color: "#c084fc" });
-    if (data.traitObj?.hasRadiation) buffs.push({ name: "Radiation", desc: "Fission Trait: Enemies take +20% Damage", color: "#f87171" });
+    if (data.traitObj?.hasRadiation) buffs.push({ name: "Radiation", desc: "Fission Trait: Radiation Status Active", color: "#f87171" });
 
     if (data.conditionalData) buffs.push({ name: data.conditionalData.name, desc: `Target condition met: x${data.conditionalData.mult.toFixed(2)} Dmg`, color: "#fb923c" });
 

@@ -126,6 +126,7 @@
             const isToggled = window.activeAbilityIds?.has(u.id);
             return [
                 { label: 'Limitless', val: '40% Slow (5s)', color: '#60a5fa' },
+                { label: 'Infinity', val: '1.25x Dmg Taken', color: '#38bdf8' },
                 { label: 'On Crit', val: 'Timestops enemies for 4s', color: '#a78bfa' },
                 { label: 'Domain Expansion', val: 'Timestops map for 30s', color: '#c084fc' },
                 {
@@ -157,6 +158,9 @@
         },
         'alpha_devil': (u, m) => m === 'katana' ? [{ label: 'Katana Mode', val: 'Stuns enemies for 3s', color: '#fcd34d' }] : [],
         'devil_hunter': (u, m) => m === 'demoncycle' ? [{ label: 'Demoncycle Mode', val: 'Stuns +2s per DoT applied to enemy', color: '#f87171' }] : [],
+        'ultimate_fused_warrior': () => [
+            { label: 'Godly Might', val: '1.3x Dmg Taken', color: '#f472b6' }
+        ],
         'merciless_god': (u, m, modes) => {
             const fx = [];
             // Check if current mode has Godly Earrings passive
@@ -301,7 +305,7 @@
             if (stats.slowPct) htmlArr.push({ label: 'Slow', val: `${stats.slowPct}% (${stats.slowDuration || 0}s)`, color: '#60a5fa' });
             if (stats.stunDuration) htmlArr.push({ label: 'Stun', val: `${stats.stunDuration}s`, color: '#fbbf24' });
             if (stats.timestopDuration) htmlArr.push({ label: 'Timestop', val: `${stats.timestopDuration}s`, color: '#a78bfa' });
-            if (stats.hasRadiation) htmlArr.push({ label: 'Radiation', val: `+${stats.radiationPct || 20}% Dmg Taken (${stats.radiationDuration || 6}s)`, color: '#f87171' });
+            if (stats.hasRadiation) htmlArr.push({ label: 'Radiation', val: `Status Applied (${stats.radiationDuration || 6}s)`, color: '#f87171' });
 
             let activeModeName = null, activeModes = [];
             if (unit.modes && Array.isArray(unit.modes)) {
@@ -489,7 +493,7 @@
             const valText = e.val.toLowerCase();
             const labelText = e.label.toLowerCase();
             let effectMult = 1.0;
-            if (valText.includes('dmg taken') || labelText.includes('dmg taken') || labelText.includes('radiation')) {
+            if ((valText.includes('dmg taken') || labelText.includes('dmg taken')) && !labelText.includes('radiation')) {
                 const matches = [...e.val.matchAll(/(\d+)%/g)].map(m => parseInt(m[1]));
                 if (matches.length) effectMult = 1 + Math.max(...matches) / 100;
             }

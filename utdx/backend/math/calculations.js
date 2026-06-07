@@ -820,15 +820,6 @@ function calculateDPS(uStats, relicStats, context) {
     let maxDebuffMult = 1.0;
     let maxDebuffLabel = "";
 
-    if (traitObj.hasRadiation || uStats.hasRadiation) {
-        let radPct = traitObj.radiationPct || uStats.radiationPct || 20;
-        let radMult = 1 + (radPct / 100);
-        if (radMult > maxDebuffMult) {
-            maxDebuffMult = radMult;
-            maxDebuffLabel = `Radiation (${radPct}%)`;
-        }
-    }
-
     finalDebuffMult = maxDebuffMult;
     if (maxDebuffMult > 1.0) {
         appliedDebuffs.push({ label: maxDebuffLabel, val: maxDebuffMult });

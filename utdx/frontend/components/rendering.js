@@ -1252,7 +1252,11 @@ window.getQuickScore = (unit) => {
             }
         }
 
-        const hydratedMatch = matchedBuild?.sortDps !== undefined ? matchedBuild : hydrateBuildEntry(matchedBuild, unit.id, false, activeMode);
+        const isLoadout = (window.CALCULATION_MODE === 'loadout');
+        const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unit.id || s.id.split('-')[0] === unit.id.split('-')[0]));
+        const isHotbar = isLoadout && isInHotbarState;
+
+        const hydratedMatch = matchedBuild?.sortDps !== undefined ? matchedBuild : hydrateBuildEntry(matchedBuild, unit.id, isHotbar, activeMode);
         return window.isUnit(unit.id, 'law')
             ? (hydratedMatch?.range || matchedBuild.range || 0)
             : getBuildSortScore(hydratedMatch || matchedBuild);
