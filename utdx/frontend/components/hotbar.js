@@ -97,9 +97,6 @@
             { label: 'Rubber Control', val: '+30% Dmg Taken', color: '#f43f5e', skipTeam: true },
             { label: 'Rubber Control', val: '1.5x DoT | Knockback 10 studs | +30% Dmg Taken', color: '#f43f5e', isTeam: true }
         ] : [],
-        'ultimate_fused_warrior': () => [
-            { label: 'Does it Hurt?', val: 'Enemies take 1.3x Dmg', color: '#f43f5e' }
-        ],
         'underworld_god': () => [{ label: 'Primordial Power', val: '30% Slow (3s) | +20% DoT/Affliction', color: '#60a5fa' }],
         'water_god': () => {
             const fx = [
@@ -128,7 +125,7 @@
         'the_strongest_of_today': (u) => {
             const isToggled = window.activeAbilityIds?.has(u.id);
             return [
-                { label: 'Limitless', val: '40% Slow (5s) | +25% Dmg Taken in Range', color: '#60a5fa' },
+                { label: 'Limitless', val: '40% Slow (5s)', color: '#60a5fa' },
                 { label: 'On Crit', val: 'Timestops enemies for 4s', color: '#a78bfa' },
                 { label: 'Domain Expansion', val: 'Timestops map for 30s', color: '#c084fc' },
                 {
@@ -160,8 +157,20 @@
         },
         'alpha_devil': (u, m) => m === 'katana' ? [{ label: 'Katana Mode', val: 'Stuns enemies for 3s', color: '#fcd34d' }] : [],
         'devil_hunter': (u, m) => m === 'demoncycle' ? [{ label: 'Demoncycle Mode', val: 'Stuns +2s per DoT applied to enemy', color: '#f87171' }] : [],
+        'merciless_god': (u, m, modes) => {
+            const fx = [];
+            // Check if current mode has Godly Earrings passive
+            if (u.modes && Array.isArray(u.modes)) {
+                const modeIdx = modes[0] || 0;
+                const modeData = u.modes[modeIdx];
+                if (modeData && modeData.passives && modeData.passives.some(p => p.name === 'Godly Earrings')) {
+                    fx.push({ label: 'Godly Earrings', val: 'Allies gain +50% DoT Dmg', color: '#f472b6' });
+                }
+            }
+            return fx;
+        },
         'ancient_mage': (u, m) => m === 'utility' ? [
-            { label: 'Utility Stun', val: 'Stun (2s) | +20% Dmg Taken', color: '#a78bfa' },
+            { label: 'Utility Stun', val: 'Stun (2s)', color: '#a78bfa' },
             { label: 'Utility Slow', val: '75% Slow for 5s', color: '#38bdf8' }
         ] : [],
         'mimicry_sorcerer': (u, m) => m === 'infinity sorcerer' ? [{ label: 'Infinity Mode', val: '+15% Dmg Taken | 30% Slow (5s) | Stun (3s)', color: '#818cf8' }] : [],
@@ -479,10 +488,16 @@
         uniqueTeamEffects.forEach(e => {
             const valText = e.val.toLowerCase();
             const labelText = e.label.toLowerCase();
+            let effectMult = 1.0;
             if (valText.includes('dmg taken') || labelText.includes('dmg taken') || labelText.includes('radiation')) {
                 const matches = [...e.val.matchAll(/(\d+)%/g)].map(m => parseInt(m[1]));
-                if (matches.length) totalDmgMulti *= (1 + Math.max(...matches) / 100);
+                if (matches.length) effectMult = 1 + Math.max(...matches) / 100;
             }
+            // Also detect "Nx Dmg" patterns like "1.3x Dmg"
+            const xMatch = e.val.match(/([\d.]+)x\s*Dmg/i);
+            if (xMatch) effectMult = Math.max(effectMult, parseFloat(xMatch[1]));
+            // Non-stacking: only use the highest single debuff multiplier
+            if (effectMult > totalDmgMulti) totalDmgMulti = effectMult;
         });
 
         const teamEffectsHtml = uniqueTeamEffects.length ? `

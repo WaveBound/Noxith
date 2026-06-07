@@ -39,7 +39,7 @@ unitDatabase.push({
 
     // PASSIVES (displayed in unit info panel)
     passives: [
-        { name: "Limitless Sorcerer", desc: "When an enemy enters Range:<br>• Apply 20% [40% on Etherealization 2] Slow for 5s<br>• Take +25% Damage while in this unit's Range" },
+        { name: "Limitless Sorcerer", desc: "When an enemy enters Range:<br>• Apply 20% [40% on Etherealization 2] Slow for 5s" },
         { name: "Cursed Pinball", desc: "When a non-hyperarmor enemy enters half this unit's Range:<br>• Pull them to the closest point on the Path to this unit<br>• Instantly deal a Crit Attack<br>When a non-hyperarmor enemy leaves Range:<br>• Pull them to the closest point on the Path to this unit<br>• Apply 50% Slow for 5s" },
         { name: "Show-off", desc: "• This unit has a fixed Crit Rate of 50% that cannot be increased.<br>When landing a Crit:<br>• Inflict Timestop for 4s to all Ground Enemies in Range" },
         { name: "Six Eyes", desc: "This unit is immune to Debuff effects. When a Debuff is attempted on this unit: Nullify the effect and the next attack applies Stun for 2s. Every 600 kills: Reset every Active Ability Cooldown." }

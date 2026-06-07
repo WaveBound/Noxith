@@ -34,7 +34,7 @@ unitDatabase.push({
         { dmg: 6650, spa: 7, range: 45, cost: 22500 }  // Up 5
     ],
     passives: [
-        { name: "Millennia Old Experience", dot: 60, dotDuration: 10, desc: "Every attack: Enemies take +20% Damage (Debuff) and Wind Shear (60% Dmg over 10 ticks). Specialist Mode swaps Wind Shear for Burn and increases DoT effectiveness." },
+        { name: "Millennia Old Experience", dot: 60, dotDuration: 10, desc: "Every attack: Apply Wind Shear (60% Dmg over 10 ticks). Specialist Mode swaps Wind Shear for Burn and increases DoT effectiveness." },
         { name: "The Last Great Mage", desc: "Gains Stun Immunity while not attacking (Always active at E4)." }
     ],
     modes: [
@@ -52,7 +52,7 @@ unitDatabase.push({
             name: "Utility",
             img: "images/units/AncientMage/Utility.png",
             level: 70,
-            desc: "Control focus: Attacks apply Stun (2s) and Heavy Slow (75%). If already stunned: enemies take +20% extra damage.",
+            desc: "Control focus: Attacks apply Stun (2s) and Heavy Slow (75%).",
             dmg: 6650, spa: 7, range: 45, spaCap: 2,
             crit: 0, cdmg: 150, dot: 0, dotDuration: 0,
             passiveDmg: 0, passiveSpa: 0, bossDmg: 0,

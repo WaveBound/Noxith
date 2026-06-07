@@ -46,7 +46,7 @@ unitDatabase.push({
     passives: [
         {
             name: "Does that hurt?",
-            desc: "<br>For every consecutive hit on the same enemy:<br>• +10% Damage from all sources (Cap: 30%)<br><br>On Crit:<br>• Apply Ionized for 70% Damage over 5 ticks"
+            desc: "<br>On Crit:<br>• Apply Ionized for 70% Damage over 5 ticks"
         },
         {
             name: "Final Energy Wave",

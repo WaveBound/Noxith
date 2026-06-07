@@ -678,6 +678,24 @@ function calculateDPS(uStats, relicStats, context) {
         globalDotMult *= 1.5;
     }
 
+    // Check for Godly Earrings buff (Allies gain +50% DoT)
+    if (typeof window !== 'undefined' && window.CALCULATION_MODE === 'loadout' && window.hotbarState && window.hotbarState.units) {
+        if (window.hotbarState.units.includes('merciless_god') && uStats.id !== 'merciless_god') {
+            const mgState = window.unitModesState ? window.unitModesState['merciless_god'] : undefined;
+            const mgIdx = Array.isArray(mgState) ? mgState[0] : (mgState !== undefined ? mgState : 4);
+            const mgUnit = typeof window.getUnitById === 'function' ? window.getUnitById('merciless_god') : null;
+            if (mgUnit && mgUnit.modes && mgUnit.modes[mgIdx]) {
+                const passives = mgUnit.modes[mgIdx].passives || [];
+                if (passives.some(p => p.name === 'Godly Earrings')) {
+                    globalDotMult *= 1.5;
+                    if (detailedBuffs) {
+                        detailedBuffs.globalBuffs = (detailedBuffs.globalBuffs || 0) + 50;
+                    }
+                }
+            }
+        }
+    }
+
     const { dotDpsTotal, bossDotDpsTotal, dotBreakdown } = _calcDoTDPS(
         { ...uStats, dot: baseDotVal, isBoss: context.isBoss },
         traitObj,
@@ -821,11 +839,25 @@ function calculateDPS(uStats, relicStats, context) {
         elemMult = 1.1;
     }
 
-    // --- CUSTOM DEBUFF MULTIPLIERS ---
+    // --- CUSTOM DEBUFF MULTIPLIERS (NON-STACKING) ---
     let finalDebuffMult = 1.0;
     let appliedDebuffs = [];
+    let maxDebuffMult = 1.0;
+    let maxDebuffLabel = "";
 
-    // Custom debuff multipliers removed
+    if (traitObj.hasRadiation || uStats.hasRadiation) {
+        let radPct = traitObj.radiationPct || uStats.radiationPct || 20;
+        let radMult = 1 + (radPct / 100);
+        if (radMult > maxDebuffMult) {
+            maxDebuffMult = radMult;
+            maxDebuffLabel = `Radiation (${radPct}%)`;
+        }
+    }
+
+    finalDebuffMult = maxDebuffMult;
+    if (maxDebuffMult > 1.0) {
+        appliedDebuffs.push({ label: maxDebuffLabel, val: maxDebuffMult });
+    }
 
     // Apply elemental and debuff multipliers to all damage channels
     const elemFinalHitDps = finalHitDps * elemMult * finalDebuffMult;
