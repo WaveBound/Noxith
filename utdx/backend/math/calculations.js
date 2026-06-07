@@ -385,7 +385,17 @@ function calculateDPS(uStats, relicStats, context) {
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
         const followUp2Chance = (eLevel >= 2) ? 0.70 : 0.50;
         attackMultiplier = 1 + 1 + followUp2Chance;
-        usedSpa = finalSpa;
+
+        // Calculate usedSpa considering FUA animation penalty
+        const fuaAnim = (uStats.customFollowUp && uStats.customFollowUp.fuaAnimation) ? uStats.customFollowUp.fuaAnimation : 0;
+        const atkAnim = effectiveSpaCap;
+        
+        // Total sequence time: Base hit animation (atkAnim) + FUA animations.
+        // Sequence is Base + FUA1 (Guaranteed) + FUA2 (Chance).
+        const timeWith1Fua = Math.max(finalSpa, atkAnim + fuaAnim);
+        const timeWith2Fua = Math.max(finalSpa, atkAnim + 2 * fuaAnim);
+        usedSpa = (1 - followUp2Chance) * timeWith1Fua + (followUp2Chance) * timeWith2Fua;
+
         hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
         bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
         normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
@@ -491,7 +501,7 @@ function calculateDPS(uStats, relicStats, context) {
         normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
     }
 
-    if (uStats.customFollowUp) {
+    if (uStats.customFollowUp && !isFusedWarrior) {
         const cooldown = uStats.customFollowUp.cooldown;
         const fuaDmgMult = uStats.customFollowUp.dmgMult || 1.0;
         const fuaAnim = uStats.customFollowUp.fuaAnimation || 0;
@@ -718,32 +728,32 @@ function calculateDPS(uStats, relicStats, context) {
     if (isFusedWarrior) {
         const traitMultiplier = 1 + (traitDotBuff / 100);
         const gearMultiplier = 1 + (gearDotBonus / 100);
-        const dotPct = 70 * traitMultiplier * gearMultiplier;
+        const baseDotPct = (uStats.customFollowUp && uStats.customFollowUp.dotPct) ? uStats.customFollowUp.dotPct : 70;
+        const dotPct = baseDotPct * traitMultiplier * gearMultiplier;
 
         // Ionized DoT is 70% of the unit's damage over 5 seconds (5 ticks)
         const ionizedDotDmg = finalDmg * (dotPct / 100);
         const ionizedDotDmgBoss = finalDmgBoss * (dotPct / 100);
 
-        // Triggers only when a crit is landed: multiply average DoT DPS by the critical rate (0.0 to 1.0)
-        // Since DoT does not crit, base damage is ionizedDotDmg, and we apply it based on finalCritRate chance.
+        // Triggers on Crit (Base Hit) AND on every Follow-up hit.
+        // Application factor = critChance + (attackMultiplier - 1)
         const critChance = finalCritRate / 100;
         const critChanceBoss = finalCritRateBoss / 100;
 
-        const baseDotDps = (ionizedDotDmg / 5) * critChance;
-        const baseDotDpsBoss = (ionizedDotDmgBoss / 5) * critChanceBoss;
+        const appFactor = critChance + (attackMultiplier - 1);
+        const appFactorBoss = critChanceBoss + (attackMultiplier - 1);
 
-        const fuaDotDps = baseDotDps * placement;
-        const fuaDotDpsBoss = baseDotDpsBoss * placement;
+        const totalDotDps = (ionizedDotDmg / 5) * appFactor * placement;
+        const totalDotDpsBoss = (ionizedDotDmgBoss / 5) * appFactorBoss * placement;
 
-        finalDotDps += fuaDotDps;
-        finalBossDotDps += fuaDotDpsBoss;
+        finalDotDps += totalDotDps;
+        finalBossDotDps += totalDotDpsBoss;
 
         if (dotBreakdown) {
-            dotBreakdown.fuaDotDps = fuaDotDps / placement;
+            dotBreakdown.fuaDotDps = totalDotDps / placement;
             dotBreakdown.fuaDotTotalDmg = ionizedDotDmg;
-            dotBreakdown.fuaDotDuration = 5;
-            dotBreakdown.fuaChance = finalCritRate; // Display the crit chance as the apply chance
-            dotBreakdown.fuaLabel = "Ionized DoT (On Crit)";
+            dotBreakdown.fuaDotDuration = (uStats.customFollowUp && uStats.customFollowUp.dotDuration) ? uStats.customFollowUp.dotDuration : 5;
+            dotBreakdown.fuaLabel = "Ionized DoT (Crit + FUA)";
         }
     }
 
@@ -770,7 +780,7 @@ function calculateDPS(uStats, relicStats, context) {
         }
     }
 
-    if (uStats.customFollowUp) {
+    if (uStats.customFollowUp && !isFusedWarrior) {
         const cooldown = uStats.customFollowUp.cooldown;
         const fuaDmgMult = uStats.customFollowUp.dmgMult || 1.0;
         const fuaDotPct = uStats.customFollowUp.dotPct || 0;

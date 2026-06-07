@@ -28,7 +28,14 @@ unitDatabase.push({
         passiveDmg: 0,
         element: "Wind",
         dotDuration: 0,
-        support: ""
+        support: "",
+        customFollowUp: {
+            dotPct: 70,
+            dotDuration: 5,
+            dotType: "Ionized",
+            fuaAnimation: 4.5,
+            label: "Fused Godly Might"
+        }
     },
 
     // UPGRADES (dmg, spa, range, cost per level)
