@@ -241,7 +241,6 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                             
                             const sUnit = window.getUnitById ? window.getUnitById(s.id) : null;
                             if (sUnit) {
-                                // Correctly multiply each unit's uncapped crit rate by its placement count
                                 const sPlacement = (s.placement !== undefined) ? s.placement : (sUnit.placement || 1);
                                 totalAlliedCrit += window.getUnitUncappedCrit(sUnit, slotIdx) * sPlacement;
                             }
@@ -308,7 +307,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
         const hbStats = typeof window.getCachedHotbarStats === 'function' ? window.getCachedHotbarStats() : {};
         if (hbStats.akPresent && hbStats.jinooPresent) {
             passivePcent += 10;
-            passiveBreakdown.push({ name: "Monarch's Devotion", dmg: 10, spa: 0, range: 0, trueDmg: 0, crit: 0, cdmg: 0, dot: 0 });
+            passiveBreakdown.push({ name: "Monarch's Devotion", dmg: 10, spa: 0, range: 0, trueDmg: 0, font: 0, cdmg: 0, dot: 0 });
         }
     }
 
@@ -345,7 +344,7 @@ window.calcGlobalBuffs = function (uStats, context, headPiece) {
             const overrideKey = buff.id + 'Buff';
 
             if (buff.hideButton || (buff.id === 'ksailor' && window.isUnit && window.isUnit(uStats.id, 'king_sailor')) || buff.id === 'unrivaledMark') {
-                isActive = true; // Always evaluate hideButton buffs and King Sailor's own buff
+                isActive = true;
             } else if (context[overrideKey] !== undefined) {
                 isActive = context[overrideKey];
             } else if (context[buff.stateKey] !== undefined) {
@@ -357,12 +356,9 @@ window.calcGlobalBuffs = function (uStats, context, headPiece) {
             if (isActive) {
                 let buffStats = buff.math(uStats, context);
 
-                // Check for Angel Born in Hell's Unrivaled Mark manually to complement missing external definitions
                 const unrivaledMarkActive = context.unrivaledMark || window.unrivaledMark || (window.hotbarState?.buffState?.unrivaledMark);
                 const isPotential = window.CALCULATION_MODE === 'potential';
                 const leader = window.hotbarState?.slots?.[0];
-                
-                // Identify who is leading the team (Potential mode assumes self-leadership for testing)
                 const leadingId = isPotential ? uStats.id : (leader ? leader.id : null);
                 
                 if (buff.id === 'unrivaledMark' && leadingId) {
@@ -372,7 +368,6 @@ window.calcGlobalBuffs = function (uStats, context, headPiece) {
                     const isTt = window.isUnit(leadingId, 'triple_threat');
                     const isKs = window.isUnit(leadingId, 'king_sailor');
 
-                    // Only trigger if forced toggle is on OR if this specific leader is in Slot 1
                     if (!unrivaledMarkActive && !isPotential && !(leader && leadingId === leader.id)) return;
 
                     let appliedDmg = 0;

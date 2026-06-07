@@ -176,6 +176,8 @@ const TAG_PERKS = {
     rebellious: [
         { tag: "Ninjaverse", bonus: { dmg: 0, spa: 0, range: 0, cRate: 15, cDmg: 20, dot: 0, bossDmg: 0, trueDmg: 0, elementalAll: 20 } },
         { tag: "Sage", bonus: { dmg: 0, spa: 0, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, elementalAll: 15, hyperArmor: 20 } },
+    ],
+    rebellious_acc: [
         { tag: "Bloodline", bonus: { dmg: 15, spa: 0, range: 20, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, elementalAll: 15 } },
     ],
     warlord: [

@@ -30,14 +30,8 @@ const checkIsBetter = (res, currentBest, optimizeFor) => {
 };
 
 // --- CC DETECTION UTILITY ---
-// Strict whitelist of units whose primary role includes Crowd Control.
-// Used to restrict Rebellious head piece to CC-capable units only.
-// Units with summon-based CC (e.g. Sukuna's Ten Umbra stun) are NOT included.
-
-
 window.unitHasCC = function(uStats) {
     if (!uStats) return false;
-    // Check for dynamic support tags in the unit definition or tags array
     let s = "";
     if (uStats.support) s += uStats.support.toLowerCase() + ",";
     if (uStats.tags && Array.isArray(uStats.tags)) s += uStats.tags.join(',').toLowerCase();
@@ -59,7 +53,6 @@ window.unitHasStatusEffect = function(uStats) {
     if (window.unitHasCC(uStats)) return true;
     if (window.unitHasTimeSnail(uStats)) return true;
     
-    // Check native DoT stats
     if (uStats.stats && (uStats.stats.dot > 0 || uStats.stats.bossDot > 0)) return true;
     if (uStats.dot > 0 || uStats.bossDot > 0) return true;
     if (uStats.customSummons && uStats.customSummons.some(s => s.dotPct > 0)) return true;
@@ -83,11 +76,6 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
     let headOptions = (mode === 'auto')
         ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut']
         : (mode && mode !== 'none' ? [mode] : ['none']);
-
-    // Filter bloodline_head for non-CC units - REMOVED restriction
-    // if (!window.unitHasCC(stats)) {
-    //     headOptions = headOptions.filter(h => h !== 'rebellious_head');
-    // }
 
     let globalBestRes = { total: -1, range: -1 };
     let globalBestAssignments = {};
@@ -115,19 +103,16 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
         if (pWeight > 0) { pVal = PERFECT_SUBS[pStat] * pWeight; b[pStat] = (b[pStat] || 0) + pVal; }
         if (sWeight > 0) { sVal = PERFECT_SUBS[sStat] * sWeight; b[sStat] = (b[sStat] || 0) + sVal; }
 
-        // SMART FILLER: Prune stats that provide zero benefit (like overcap crit)
         let activeFillers = [...validCandidates];
         if (activeFillers.includes('cf') || activeFillers.includes('cm')) {
-const checkRes = calculateDPS(stats, b, context);
+            const checkRes = calculateDPS(stats, b, context);
             if (checkRes.critData) {
-                const cappedRate = checkRes.critData.rate;
-                // If DPS crit chance is already capped (>=100), prune CF.
-                // If crit chance is 0, prune CM.
-                if (cappedRate >= 100 || cappedRate === 0) {
+                const currentRaw = checkRes.critData.rawRate; 
+                if (currentRaw >= 99.9 || checkRes.critData.rate === 0) {
                     activeFillers = activeFillers.filter(
                         c =>
-                            (c === 'cf' && cappedRate < 100) ||
-                            (c === 'cm' && cappedRate > 0) ||
+                            (c === 'cf' && currentRaw < 100) ||
+                            (c === 'cm' && checkRes.critData.rate > 0) ||
                             (c !== 'cf' && c !== 'cm')
                     );
                 }
@@ -161,28 +146,22 @@ const checkRes = calculateDPS(stats, b, context);
             return;
         }
 
-        // PROACTIVE CRIT OPTIMIZATION: 
-        // If unit is already crit-capped from non-substat sources (Trait, Passives, Global Buffs, Set Bonus),
-        // we prune 'cf' from sub-stat candidates to force the optimizer into SPA/CM/Dmg.
         let activeCandidates = candidates;
         
         if (headType === 'sorcerer_hunter_spirit') {
             activeCandidates = activeCandidates.filter(c => c !== 'cf' && c !== 'cm');
         } else {
-            // PROACTIVE OPTIMIZATION: Prune stats that provide zero benefit for this unit
             let baseBuild = { dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0, set: build.set || build.setName };
             if (build.bodyType) baseBuild[build.bodyType] = (MAIN_STAT_VALS.body[build.bodyType] || 0);
             if (build.legType) baseBuild[build.legType] = (MAIN_STAT_VALS.legs[build.legType] || 0);
 
             const baseRes = calculateDPS(stats, baseBuild, { ...stats.context, headPiece: headType });
             
-            // Test if adding crit rate actually changes DPS (handles cap and unit overrides like PK/Gojo)
             const testResCf = calculateDPS(stats, { ...baseBuild, cf: (baseBuild.cf || 0) + 5 }, { ...stats.context, headPiece: headType });
             if (testResCf.total <= baseRes.total && testResCf.bossTotal <= baseRes.bossTotal) {
                 activeCandidates = activeCandidates.filter(c => c !== 'cf');
             }
             
-            // Test if adding crit damage actually changes DPS (handles units with 0% crit chance)
             if (baseRes.critData && baseRes.critData.rate <= 0) {
                 activeCandidates = activeCandidates.filter(c => c !== 'cm');
             }
@@ -235,8 +214,6 @@ const checkRes = calculateDPS(stats, b, context);
     return { res: globalBestRes, desc: "", assignments: globalBestAssignments };
 };
 
-// Relic math migrated to shared/relics/relic-backend.js
-
 function _calcSummonDPS(uStats, finalDmg, finalSpa, placement) {
     if (!uStats.summonStats) return { summonDpsTotal: 0, summonData: null };
     const s = uStats.summonStats;
@@ -268,7 +245,6 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
     let dotCritMult = isVirtualRealm ? avgCritMult : 1;
     let dotCritMultBoss = isVirtualRealm ? (avgCritMultBoss || avgCritMult) : 1;
 
-    // DoT can Crit logic
     let dotCanCrit = false;
     if (uStats.passives && uStats.passives.some(p => p.canCrit === true)) dotCanCrit = true;
     if (uStats.modes && typeof window !== 'undefined' && window.unitModesState) {
@@ -283,9 +259,7 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         dotCritMult = avgCritMult;
         dotCritMultBoss = avgCritMultBoss || avgCritMult;
     }
-   // FIX: Scaled DoT now uses an additive bucket (Trait + Gear + Passive) instead of multiplication
     let additiveBonus = (traitDotBonus || 0) + (gearDotBonus || 0) + (passiveDotBuff || 0);
-    // Ant King Savage bug: Dot buffs are calculated twice
     if (uStats.id && (uStats.id === 'ant_king_savage' || (window.isUnit && window.isUnit(uStats.id, 'ant_king_savage')))) {
         additiveBonus *= 2;
     }
@@ -343,11 +317,9 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
 
     const canStack = (traitObj.allowDotStack || traitObj.allowPlacementStack);
     if (uStats.dot > 0 || uStats.bossDot > 0) {
-        // Normal Dot
         let normalTickPct = uStats.dot * combinedMultiplier;
         let normalTotalDmg = finalDmg * (normalTickPct / 100) * dotCritMult;
         
-        // Boss Dot (Defaults to normal dot if bossDot is not specified)
         let bossBasePct = uStats.bossDot || uStats.dot;
         let bossTickPct = bossBasePct * combinedMultiplier;
         const actualFinalDmgBoss = finalDmgBoss !== undefined ? finalDmgBoss : finalDmg;
@@ -389,3 +361,10 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
 
     return { dotDpsTotal, bossDotDpsTotal, dotBreakdown };
 }
+
+// Bind to window for global access across file scopes
+window.getLevelStats = getLevelStats;
+window.checkIsBetter = checkIsBetter;
+window.getBestSubConfig = getBestSubConfig;
+window._calcSummonDPS = _calcSummonDPS;
+window._calcDoTDPS = _calcDoTDPS;

@@ -96,7 +96,7 @@ window._calcSetAndTagBonuses = function(relicStats, uStats, headPiece, context =
     
     if (mappedHeadSetId && mappedHeadSetId !== activeSetId) {
         // Exclude accessories that handle their own specific perks in _calcHeadDynamicBuffs to prevent double-dipping
-        if (headPiece !== 'fused_earrings' && headPiece !== 'monarch' && headPiece !== 'monarch_cape' && headPiece !== 'monarch_head') {
+        if (headPiece !== 'fused_earrings' && headPiece !== 'monarch' && headPiece !== 'monarch_cape' && headPiece !== 'monarch_head' && headPiece !== 'rebellious' && headPiece !== 'rebellious_head' && headPiece !== 'bloodline_head') {
             setsToCheck.push(mappedHeadSetId);
         }
     }
@@ -242,7 +242,7 @@ window._calcSetAndTagBonuses = function(relicStats, uStats, headPiece, context =
 };
 
 window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats, relicStats = {}, context = {}) {
-    let headDmgBase = 0, headDmgPassive = 0, headDmgTag = 0, headDotBuff = 0;
+    let headDmgBase = 0, headDmgPassive = 0, headDmgTag = 0, headDotBuff = 0, headCfTag = 0, headCmTag = 0;
     let headCalc = { type: headPiece, uptime: 1, trigger: 0, duration: 0, attacks: 0, cf: 0, cm: 0, elementalAll: 0, hyperArmor: 0, activeTags: [] };
     
     // Map of headPiece ID to Set ID
@@ -469,10 +469,35 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
                     headCalc.cm += b.cDmg || 0;
                     headDotBuff += b.dot || 0;
                     headCalc.activeTags.push(perk.tag);
+                    headCfTag += b.cRate || 0;
+                    headCmTag += b.cDmg || 0;
                 }
             });
         }
         headCalc.type = 'monarch';
+    }
+
+    // Rebellious Head Piece specialized tag perks (Bloodline)
+    if (mappedSetId === 'rebellious') {
+        const rebAccPerks = (typeof TAG_PERKS !== 'undefined') ? TAG_PERKS.rebellious_acc : null;
+        if (rebAccPerks) {
+            rebAccPerks.forEach(perk => {
+                if (tags.includes(perk.tag)) {
+                    const b = perk.bonus || {};
+                    headDmgTag += b.dmg || 0;
+                    headCalc.cf += b.cRate || 0;
+                    headCalc.cm += b.cDmg || 0;
+                    headDotBuff += b.dot || 0;
+                    if (b.range) headCalc.range = (headCalc.range || 0) + b.range;
+                    headCalc.elementalAll = (headCalc.elementalAll || 0) + (b.elementalAll || 0);
+                    headCalc.activeTags.push(perk.tag);
+                    headCfTag += b.cRate || 0;
+                    headCmTag += b.cDmg || 0;
+                }
+            });
+        }
+        
+        if (headCalc.type === 'none') headCalc.type = 'rebellious';
     }
 
     // Fused Earrings accessory tag perks

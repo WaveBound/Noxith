@@ -19,6 +19,16 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     if (typeof traitIdent === 'object') traitObj = traitIdent;
     else traitObj = getTraitFast(traitIdent) || getTraitFast('ruler');
 
+    // SYNC TEAM BUFFS: Ensure optimizer is aware of active hotbar buffs (Bulma, Miku, etc.)
+    if (isHotbar && typeof window !== 'undefined' && window.hotbarState && window.hotbarState.buffState) {
+        Object.entries(window.hotbarState.buffState).forEach(([key, val]) => {
+            const buffConfig = (window.GLOBAL_BUFF_DATA || {})[key];
+            if (buffConfig && buffConfig.stateKey) {
+                options[buffConfig.stateKey] = val;
+            }
+        });
+    }
+
     let effectiveStats = { ...unit.stats };
     effectiveStats.id = unit.id;
     effectiveStats.placementType = unit.placementType;
@@ -259,7 +269,20 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     let suffix = isAbility ? '-ABILITY' : '-BASE';
     const modeTag = (mode === 'bugged') ? `-b-${activeMode}` : `-f-${activeMode}`;
 
-    const context = { mode, dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: false, headPiece, starMult, headStarMult: options.headStarMult || starMult, rankData, isAbility, maxPts, upgradeLevel, isHotbar };
+    const context = { 
+        mode, dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, 
+        wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: false, 
+        headPiece, starMult, headStarMult: options.headStarMult || starMult, rankData, isAbility, 
+        maxPts, upgradeLevel, isHotbar 
+    };
+
+    // Inject synced buff flags into context so calculateDPS identifies them
+    if (typeof window !== 'undefined' && window.GLOBAL_BUFF_DATA) {
+        Object.values(window.GLOBAL_BUFF_DATA).forEach(cfg => {
+            if (options[cfg.stateKey] !== undefined) context[cfg.stateKey] = options[cfg.stateKey];
+        });
+    }
+
     return { effectiveStats, traitObj, context, isKiritoVR: false, suffix, modeTag };
 }
 
