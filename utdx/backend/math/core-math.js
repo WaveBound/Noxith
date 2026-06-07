@@ -93,14 +93,14 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
     let globalBestAssignments = {};
     let globalBestHead = 'none';
 
-    const applyContextualStats = (b, pieceName, mainStat, pStat, sStat, ratio) => {
+    const applyContextualStats = (b, pieceName, mainStat, pStat, sStat, ratio, validCandidates, stats, context) => {
         let pWeight = ratio.p;
         let sWeight = ratio.s;
 
         if (pStat === mainStat) { sWeight = Math.min(6, sWeight + pWeight); pWeight = 0; }
         else if (sStat === mainStat) { pWeight = Math.min(6, pWeight + sWeight); sWeight = 0; }
         if (pStat === mainStat && sStat === mainStat) {
-            const fallback = candidates.find(c => c !== mainStat);
+            const fallback = validCandidates.find(c => c !== mainStat);
             if (fallback) {
                 pStat = fallback;
                 pWeight = 6;
@@ -115,7 +115,26 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
         if (pWeight > 0) { pVal = PERFECT_SUBS[pStat] * pWeight; b[pStat] = (b[pStat] || 0) + pVal; }
         if (sWeight > 0) { sVal = PERFECT_SUBS[sStat] * sWeight; b[sStat] = (b[sStat] || 0) + sVal; }
 
-        candidates.forEach(cand => {
+        // SMART FILLER: Prune stats that provide zero benefit (like overcap crit)
+        let activeFillers = [...validCandidates];
+        if (activeFillers.includes('cf') || activeFillers.includes('cm')) {
+const checkRes = calculateDPS(stats, b, context);
+            if (checkRes.critData) {
+                const cappedRate = checkRes.critData.rate;
+                // If DPS crit chance is already capped (>=100), prune CF.
+                // If crit chance is 0, prune CM.
+                if (cappedRate >= 100 || cappedRate === 0) {
+                    activeFillers = activeFillers.filter(
+                        c =>
+                            (c === 'cf' && cappedRate < 100) ||
+                            (c === 'cm' && cappedRate > 0) ||
+                            (c !== 'cf' && c !== 'cm')
+                    );
+                }
+            }
+        }
+
+        activeFillers.forEach(cand => {
             if (cand === mainStat || (cand === pStat && pWeight > 0) || (cand === sStat && sWeight > 0)) return;
             b[cand] = (b[cand] || 0) + PERFECT_SUBS[cand];
         });
@@ -142,14 +161,40 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
             return;
         }
 
-        // If this head disables crits, remove crit subs from candidates
-        const activeCandidates = (headType === 'sorcerer_hunter_spirit')
-            ? candidates.filter(c => c !== 'cf' && c !== 'cm')
-            : candidates;
+        // PROACTIVE CRIT OPTIMIZATION: 
+        // If unit is already crit-capped from non-substat sources (Trait, Passives, Global Buffs, Set Bonus),
+        // we prune 'cf' from sub-stat candidates to force the optimizer into SPA/CM/Dmg.
+        let activeCandidates = candidates;
+        
+        if (headType === 'sorcerer_hunter_spirit') {
+            activeCandidates = activeCandidates.filter(c => c !== 'cf' && c !== 'cm');
+        } else {
+            // PROACTIVE OPTIMIZATION: Prune stats that provide zero benefit for this unit
+            let baseBuild = { dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0, set: build.set || build.setName };
+            if (build.bodyType) baseBuild[build.bodyType] = (MAIN_STAT_VALS.body[build.bodyType] || 0);
+            if (build.legType) baseBuild[build.legType] = (MAIN_STAT_VALS.legs[build.legType] || 0);
+
+            const baseRes = calculateDPS(stats, baseBuild, { ...stats.context, headPiece: headType });
+            
+            // Test if adding crit rate actually changes DPS (handles cap and unit overrides like PK/Gojo)
+            const testResCf = calculateDPS(stats, { ...baseBuild, cf: (baseBuild.cf || 0) + 5 }, { ...stats.context, headPiece: headType });
+            if (testResCf.total <= baseRes.total && testResCf.bossTotal <= baseRes.bossTotal) {
+                activeCandidates = activeCandidates.filter(c => c !== 'cf');
+            }
+            
+            // Test if adding crit damage actually changes DPS (handles units with 0% crit chance)
+            if (baseRes.critData && baseRes.critData.rate <= 0) {
+                activeCandidates = activeCandidates.filter(c => c !== 'cm');
+            }
+        }
 
         let strategies = [];
         activeCandidates.forEach(c => strategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
-        const pairs = [['dmg', 'cf'], ['dmg', 'spa'], ['dmg', 'range'], ['dmg', 'cm'], ['cf', 'cm'], ['spa', 'range'], ['dot', 'dmg'], ['dot', 'spa'], ['dot', 'cf']];
+        const pairs = [
+            ['dmg', 'cf'], ['dmg', 'spa'], ['dmg', 'range'], ['dmg', 'cm'], 
+            ['cf', 'cm'], ['spa', 'range'], ['spa', 'cf'], ['spa', 'cm'],
+            ['dot', 'dmg'], ['dot', 'spa'], ['dot', 'cf'], ['dot', 'cm']
+        ];
         const ratios = [{ p: 4, s: 3 }, { p: 3, s: 4 }, { p: 5, s: 2 }, { p: 2, s: 5 }];
 
         pairs.forEach(pair => {
@@ -160,17 +205,18 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
 
         strategies.forEach(strat => {
             let testBuild = { dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0 };
+            if (build.set || build.setName) testBuild.set = build.set || build.setName;
             if (build.bodyType) testBuild[build.bodyType] = (testBuild[build.bodyType] || 0) + (MAIN_STAT_VALS.body[build.bodyType] || 0);
             if (build.legType) testBuild[build.legType] = (testBuild[build.legType] || 0) + (MAIN_STAT_VALS.legs[build.legType] || 0);
 
             let currentAssignments = {};
             if (actualIncludeHead) {
-                const res = applyContextualStats(testBuild, 'head', null, strat.p, strat.s, strat.ratio);
+                const res = applyContextualStats(testBuild, 'head', null, strat.p, strat.s, strat.ratio, activeCandidates, stats, stats.context);
                 currentAssignments.head = formatAssignment(res);
             }
-            const resBody = applyContextualStats(testBuild, 'body', build.bodyType, strat.p, strat.s, strat.ratio);
+            const resBody = applyContextualStats(testBuild, 'body', build.bodyType, strat.p, strat.s, strat.ratio, activeCandidates, stats, stats.context);
             currentAssignments.body = formatAssignment(resBody);
-            const resLegs = applyContextualStats(testBuild, 'legs', build.legType, strat.p, strat.s, strat.ratio);
+            const resLegs = applyContextualStats(testBuild, 'legs', build.legType, strat.p, strat.s, strat.ratio, activeCandidates, stats, stats.context);
             currentAssignments.legs = formatAssignment(resLegs);
 
             let res = calculateDPS(stats, testBuild, stats.context);

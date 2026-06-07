@@ -257,7 +257,7 @@ function calculateDPS(uStats, relicStats, context) {
     if (relicStats.set === 'warlord') {
         let estCritRate = Math.min(uStats.crit + traitCritRate + globalCrit + (headCalc.cf || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives, 100);
         if (window.isUnit(uStats.id, 'pirate_king')) {
-            textCritRate = 40;
+            estCritRate = 40;
         }
         if (headPiece === 'sorcerer_hunter_spirit') {
             estCritRate = 0;
@@ -322,15 +322,7 @@ function calculateDPS(uStats, relicStats, context) {
     }
     if (headPiece === 'sorcerer_hunter_spirit') rawCritRate = 0;
 
-    // --- OVERCAP CRIT RATE OPTIMIZATION ---
-    // Automatically convert wasted crit rate from relic substats into crit damage.
-    // 1 cf roll = 7.5%, 1 cm roll = 18%. Exchange ratio = 18/7.5 = 2.4
-    let overcapCritRate = Math.max(0, rawCritRate - 100);
-    let cfFromSubs = (headCalc.cf || 0) + baseR_Cf; 
-    let convertibleCf = Math.min(overcapCritRate, cfFromSubs);
-    let convertedCm = convertibleCf * 2.4;
-
-    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cm || 0) + passiveCdmgFromPassives + convertedCm;
+    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cm || 0) + passiveCdmgFromPassives;
 
     let finalCritRate = Math.min(rawCritRate, 100);
 
