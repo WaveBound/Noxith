@@ -1275,19 +1275,24 @@ function renderFinalSection(data) {
                         <tr><td class="mt-cell-label mt-pl-md text-accent-start">↳ True Damage (${data.trueDmgPct.toFixed(0)}%)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-start">${fmt.num(data.trueDmgVal)}</td></tr>
                     ` : ''}
                     ${data.dot > 0 ? `<tr><td class="mt-cell-label">DoT DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-end">${fmt.num(data.dot)}</td></tr>` : ''}
-                    ${data.summon > 0 ? `<tr><td class="mt-cell-label">${isNutaru ? 'Clone' : (data.summonData?.isCustom ? 'Custom Summon' : 'Plane')} DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-start">${fmt.num(data.summon)}</td></tr>` : ''}
                     ${debuffsHtml}
+                    ${(data.bossTotal && data.bossTotal > data.total) ? `
+                    <tr>
+                        <td class="mt-cell-label text-accent-start mt-pt-sm" style="font-size: 0.95rem; font-weight: 700;">↳ Boss Multiplier</td>
+                        <td class="mt-cell-formula mt-pt-sm"><span class="op">×</span></td>
+                        <td class="mt-cell-val text-accent-start mt-pt-sm" style="font-size: 1.1rem; font-weight: 800;">${fmt.fix(data.bossMult, 2)}</td>
+                    </tr>
+                    <tr>
+                        <td class="mt-cell-label mt-pt-sm" style="font-size: 1.0rem; font-weight: 700;">= Boss DPS</td>
+                        <td class="mt-cell-formula mt-pt-sm"></td>
+                        <td class="mt-cell-val mt-pt-sm" style="font-size: 1.1rem; font-weight: 800;">${fmt.num(data.bossTotal - (data.summon || 0))}</td>
+                    </tr>` : ''}
+                    ${data.summon > 0 ? `<tr><td class="mt-cell-label">${isNutaru ? 'Clone' : (data.summonData?.isCustom ? 'Custom Summon' : 'Plane')} DPS</td><td class="mt-cell-formula">+</td><td class="mt-cell-val text-accent-start">${fmt.num(data.summon)}</td></tr>` : ''}
                     <tr>
                         <td class="mt-cell-label text-white mt-pt-md" style="font-size: 1.1rem; font-weight: 800;">TOTAL DPS</td>
                         <td class="mt-cell-formula"></td>
-                        <td class="mt-cell-val mt-text-gold mt-pt-md" style="font-size: 1.2rem;">${fmt.num(data.total)}</td>
+                        <td class="mt-cell-val mt-text-gold mt-pt-md" style="font-size: 1.2rem;">${fmt.num(data.bossTotal && data.bossTotal > data.total ? data.bossTotal : data.total)}</td>
                     </tr>
-                    ${(data.bossTotal && data.bossTotal > data.total) ? `
-                    <tr>
-                        <td class="mt-cell-label text-accent-start mt-pt-sm" style="font-size: 0.95rem; font-weight: 700;">↳ Boss Target DPS</td>
-                        <td class="mt-cell-formula mt-pt-sm"><span class="op">×</span>${fmt.fix(data.bossTotal / data.total, 2)}</td>
-                        <td class="mt-cell-val text-accent-start mt-pt-sm" style="font-size: 1.1rem; font-weight: 800;">${fmt.num(data.bossTotal)}</td>
-                    </tr>` : ''}
                 </table>
             </div>`;
 }

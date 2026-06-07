@@ -312,8 +312,6 @@ function calculateDPS(uStats, relicStats, context) {
         passiveBreakdown: passiveBreakdown
     };
 
-    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cm || 0) + passiveCdmgFromPassives;
-
     // Calculate raw, uncapped crit rate first
     let rawCritRate = uStats.crit + traitCritRate + globalCrit + (headCalc.cf || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives;
     if (window.isUnit(uStats.id, 'kirito') || window.isUnit(uStats.id, 'the_strongest_of_today')) {
@@ -323,6 +321,16 @@ function calculateDPS(uStats, relicStats, context) {
         rawCritRate = 40;
     }
     if (headPiece === 'sorcerer_hunter_spirit') rawCritRate = 0;
+
+    // --- OVERCAP CRIT RATE OPTIMIZATION ---
+    // Automatically convert wasted crit rate from relic substats into crit damage.
+    // 1 cf roll = 7.5%, 1 cm roll = 18%. Exchange ratio = 18/7.5 = 2.4
+    let overcapCritRate = Math.max(0, rawCritRate - 100);
+    let cfFromSubs = (headCalc.cf || 0) + baseR_Cf; 
+    let convertibleCf = Math.min(overcapCritRate, cfFromSubs);
+    let convertedCm = convertibleCf * 2.4;
+
+    const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cm || 0) + passiveCdmgFromPassives + convertedCm;
 
     let finalCritRate = Math.min(rawCritRate, 100);
 
@@ -853,7 +861,14 @@ function calculateDPS(uStats, relicStats, context) {
 
     return {
         total: (elemFinalHitDps + elemFinalDotDps + elemFinalSummonDps),
-        bossTotal: (elemBossHitDps + elemBossDotDps + elemFinalSummonDps) * bossMult,
+        // Boss multiplier should NOT scale custom summons (e.g., Merciless God Divine Clones).
+        // Only the unit's own boss channels (hit + dot) are affected.
+        // Boss multiplier should only apply to the unit's own boss hit+dot channels.
+        // Target DPS displays for bosses should exclude summon DPS.
+        // Boss target DPS = (Hit DPS + DoT DPS) * Boss Multiplier + Summon DPS
+        // Boss Mult only affects the unit's hit+dot channels (not summons).
+        bossTotal: (elemBossHitDps + elemBossDotDps) * bossMult + elemFinalSummonDps,
+        bossMult: bossMult,
         hit: elemFinalHitDps,
         baseHitDps: hitDpsTotal,
         trueDmgPct,

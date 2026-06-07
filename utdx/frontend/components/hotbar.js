@@ -311,7 +311,7 @@
 
             const spaStr = build.spa ? fix2Val(build.spa) + 's' : '—';
             const rangeStr = build.range ? fix1Val(build.range) : '—';
-            const critStr = subs.finalCf != null ? fix1Val(subs.finalCf) + '%' : '—';
+            const critStr = subs.finalCf != null ? fix1Val(Math.min(subs.finalCf, 100)) + '%' : '—';
             const cdmgStr = subs.finalCm != null ? Math.round(subs.finalCm) + '%' : '—';
 
             const tags = unit.tags || [], element = String(unit.element || unit.stats?.element || unit.meta?.element || '').toLowerCase();

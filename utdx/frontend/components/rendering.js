@@ -719,7 +719,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
                     </div>
                 </div>
                 <div class="fs-sub-row">
-                    <div class="fs-item-sm"><span class="fs-label">Crit %</span><span class="fs-val val-crit">${fix1(s.finalCf || 0)}%</span></div>
+                    <div class="fs-item-sm"><span class="fs-label">Crit %</span><span class="fs-val val-crit">${fix1(Math.min(s.finalCf || 0, 100))}%</span></div>
                     <div class="fs-item-sm"><span class="fs-label">CDmg</span><span class="fs-val val-cdmg">${(s.finalCm || 0).toFixed(0)}%</span></div>
                     <div class="fs-item-sm"><span class="fs-label">DoT Dmg</span><span class="fs-val val-dot">${format(r.dotTotal || 0)}</span></div>
                 </div>
