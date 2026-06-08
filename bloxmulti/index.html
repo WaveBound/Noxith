@@ -1539,7 +1539,7 @@
     <div class="container" style="display: flex; flex-direction: column; align-items: center;">
       <div class="hero-badge animate">
         <div class="hero-badge-dot"></div>
-        v1.1.8 - Bug Fix
+        v1.1.9 - Remote View Improvements
       </div>
 
       <h1 class="hero-title animate" style="transition-delay:0.1s">
@@ -1584,7 +1584,7 @@
               <line x1="12" y1="17" x2="12" y2="21" />
             </svg>
           </div>
-          <input type="text" id="streamCodeInput" placeholder="Enter Stream Code (e.g. AB12CD)" maxlength="6"
+          <input type="text" id="streamCodeInput" placeholder="Enter Stream Code (e.g. AB12CD)"
             style="background: transparent; border: none; outline: none; color: var(--text); font-family: var(--font-body); font-size: 14px; font-weight: 500; flex: 1; width: 100%; text-transform: uppercase;"
             onkeydown="if(event.key==='Enter') joinStream()" />
           <button onclick="joinStream()"
@@ -2262,7 +2262,7 @@
             </svg>
           </div>
           Windows 10 / 11
-          <div class="dl-version">v1.1.8</div>
+          <div class="dl-version">v1.1.9</div>
         </div>
 
         <a href="https://bloxmulti-downloads.wavebound.workers.dev" class="btn-download-primary">
@@ -2401,11 +2401,11 @@
       const input = document.getElementById("streamCodeInput");
       const code = input ? input.value.trim().toUpperCase() : "";
       if (!code) {
-        alert("Please enter a valid 6-character stream code.");
+        alert("Please enter a stream code.");
         return;
       }
-      if (code.length !== 6) {
-        alert("Stream codes must be exactly 6 characters.");
+      if (code.length < 6) {
+        alert("Stream codes must be at least 6 characters.");
         return;
       }
       // Redirects securely to the designated Remote Viewer subdirectory passing the stream code query parameter
