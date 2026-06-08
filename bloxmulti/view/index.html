@@ -285,6 +285,11 @@
                 padding: 12px;
             }
         }
+
+        #monitorSelect option {
+            background: #0d0c1e;
+            color: var(--text);
+        }
     </style>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 </head>
@@ -315,6 +320,19 @@
                     </div>
 
                     <div class="stream-controls">
+                        <!-- Monitor Dropdown Selector -->
+                        <div id="monitorSelectorContainer" style="display: none; position: relative;">
+                            <select id="monitorSelect" onchange="onMonitorChange(this.value)" class="custom-control-btn"
+                                style="appearance: none; -webkit-appearance: none; padding-right: 28px;">
+                                <option value="">Swap Monitor...</option>
+                            </select>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; opacity: 0.7;">
+                                <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                        </div>
+
                         <button class="custom-control-btn" onclick="toggleFullscreen()" title="Fullscreen">
                             <svg width="14" height="14" viewBox="0 0 24 24">
                                 <path
@@ -338,6 +356,7 @@
 
         let peer = null;
         let isStreaming = false; // Tracks if the live video feed is active
+        let activeDataConnection = null; // Store the active handshake data connection
 
         function initViewer() {
             if (!code) {
@@ -361,6 +380,7 @@
 
                 // 1. Establish handshaking session with the Host
                 const conn = peer.connect(`bm-${code}`);
+                activeDataConnection = conn;
 
                 conn.on('open', () => {
                     // Prevent slower data channel opening event from overwriting active stream status
@@ -369,10 +389,19 @@
                     }
                 });
 
+                // Listen for monitor list updates from the host
+                conn.on('data', (data) => {
+                    if (data && data.type === 'monitors' && Array.isArray(data.list)) {
+                        updateMonitorDropdown(data.list);
+                    }
+                });
+
                 conn.on('close', () => {
                     isStreaming = false;
                     statusEl.textContent = "STREAM OFFLINE";
                     liveBadge.classList.remove('visible');
+                    activeDataConnection = null;
+                    document.getElementById("monitorSelectorContainer").style.display = "none";
                 });
             });
 
@@ -399,6 +428,7 @@
                     statusEl.textContent = "STREAM OFFLINE";
                     remoteVideo.srcObject = null;
                     liveBadge.classList.remove('visible');
+                    document.getElementById("monitorSelectorContainer").style.display = "none";
                 });
             });
 
@@ -408,6 +438,35 @@
                 liveBadge.classList.remove('visible');
                 setTimeout(initViewer, 5000);
             });
+        }
+
+        function updateMonitorDropdown(list) {
+            const container = document.getElementById("monitorSelectorContainer");
+            const select = document.getElementById("monitorSelect");
+            if (!select || !container) return;
+
+            // Clear previous options except the placeholder
+            select.innerHTML = '<option value="">Swap Monitor...</option>';
+
+            // Only show the dropdown if more than 1 monitor exists
+            if (list.length > 1) {
+                list.forEach(m => {
+                    const opt = document.createElement("option");
+                    opt.value = m.name;
+                    opt.textContent = m.friendlyName || m.name;
+                    select.appendChild(opt);
+                });
+                container.style.display = "block";
+            } else {
+                container.style.display = "none";
+            }
+        }
+
+        function onMonitorChange(val) {
+            if (val && activeDataConnection && activeDataConnection.open) {
+                // Send the selected monitor name back to the host
+                activeDataConnection.send({ type: 'requestSwap', monitorName: val });
+            }
         }
 
         function toggleFullscreen() {
