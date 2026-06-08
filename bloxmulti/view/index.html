@@ -82,7 +82,6 @@
             align-items: center;
             justify-content: space-between;
             padding: 16px 40px;
-            /* Solidified the background color slightly to keep it premium without needing blurs */
             background: rgba(6, 5, 13, 0.94);
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
@@ -138,16 +137,13 @@
             position: relative;
             width: 100%;
             max-width: 1100px;
-            /* Expanded limit */
             height: calc(82vh - 100px);
-            /* Maximizes spatial usage vertically */
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .preview-glow {
-            /* Removed the real-time CSS blur filter to prevent rendering lag */
             display: none;
         }
 
@@ -157,20 +153,16 @@
             background: rgba(10, 9, 20, 0.82);
             border: 1px solid var(--border-hi);
             border-radius: 16px;
-            /* Combines standard shadows with a highly optimized outer purple glow shadow */
             box-shadow:
                 0 30px 60px rgba(0, 0, 0, 0.5),
                 0 0 0 1px rgba(157, 111, 255, 0.08),
                 0 0 50px rgba(157, 111, 255, 0.15);
-            /* High-performance glow */
             overflow: hidden;
             position: relative;
         }
 
-        /* index view.html styles */
         video {
             position: absolute;
-            /* <-- Ensure this is absolute */
             width: 100%;
             height: 100%;
             object-fit: contain;
@@ -288,11 +280,6 @@
                 padding: 12px;
             }
         }
-
-        #monitorSelect option {
-            background: #0d0c1e;
-            color: var(--text);
-        }
     </style>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 </head>
@@ -312,7 +299,6 @@
         <div class="preview-wrap">
             <div class="preview-glow"></div>
             <div class="preview-frame">
-                <!-- Removed standard browser 'controls' attribute for complete custom integration -->
                 <video id="remoteVideo" autoplay playsinline muted></video>
 
                 <!-- Custom HUD Overlay -->
@@ -323,19 +309,6 @@
                     </div>
 
                     <div class="stream-controls">
-                        <!-- Monitor Dropdown Selector -->
-                        <div id="monitorSelectorContainer" style="display: none; position: relative;">
-                            <select id="monitorSelect" onchange="onMonitorChange(this.value)" class="custom-control-btn"
-                                style="appearance: none; -webkit-appearance: none; padding-right: 28px;">
-                                <option value="">Swap Monitor...</option>
-                            </select>
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
-                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; opacity: 0.7;">
-                                <polyline points="6 9 12 15 18 9" />
-                            </svg>
-                        </div>
-
                         <button class="custom-control-btn" onclick="toggleFullscreen()" title="Fullscreen">
                             <svg width="14" height="14" viewBox="0 0 24 24">
                                 <path
@@ -358,9 +331,9 @@
         const liveBadge = document.getElementById("liveBadge");
 
         let peer = null;
-        let monitors = []; // Will store monitor coordinate geometry data
         let isStreaming = false; // Tracks if the live video feed is active
         let activeDataConnection = null; // Store the active handshake data connection
+        let mainStream = null;
 
         function initViewer() {
             if (!code) {
@@ -382,22 +355,13 @@
             peer.on('open', (id) => {
                 statusEl.textContent = "SYNCHRONIZING HANDSHAKE LINK...";
 
-                // 1. Establish handshaking session with the Host
+                // Establish handshaking session with the Host
                 const conn = peer.connect(`bm-${code}`);
                 activeDataConnection = conn;
 
                 conn.on('open', () => {
-                    // Prevent slower data channel opening event from overwriting active stream status
                     if (!isStreaming) {
                         statusEl.textContent = "AWAITING STREAM FEED...";
-                    }
-                });
-
-                // Listen for monitor list updates from the host
-                conn.on('data', (data) => {
-                    if (data && data.type === 'monitors' && Array.isArray(data.list)) {
-                        monitors = data.list; // Store list locally for cropping calculations
-                        updateMonitorDropdown(data.list);
                     }
                 });
 
@@ -406,11 +370,10 @@
                     statusEl.textContent = "STREAM OFFLINE";
                     liveBadge.classList.remove('visible');
                     activeDataConnection = null;
-                    document.getElementById("monitorSelectorContainer").style.display = "none";
                 });
             });
 
-            // 2. Receive connection and display track
+            // Receive connection and display track
             peer.on('call', (call) => {
                 if (!isStreaming) {
                     statusEl.textContent = "CONNECTING STREAM PIPELINE...";
@@ -422,17 +385,6 @@
                 call.on('stream', (remoteStream) => {
                     if (call.peer === `bm-${code}`) {
                         mainStream = remoteStream;
-                        if (!helperCall) {
-                            remoteVideo.srcObject = remoteStream;
-                            isStreaming = true;
-                            statusEl.textContent = "LIVE FEED CONNECTED";
-                            liveBadge.classList.add('visible');
-                        }
-                    } else if (call.peer.includes('-monitor-')) {
-                        if (helperCall) {
-                            helperCall.close();
-                        }
-                        helperCall = call;
                         remoteVideo.srcObject = remoteStream;
                         isStreaming = true;
                         statusEl.textContent = "LIVE FEED CONNECTED";
@@ -463,38 +415,6 @@
                 liveBadge.classList.remove('visible');
                 setTimeout(initViewer, 5000);
             });
-        }
-
-        function updateMonitorDropdown(list) {
-            const container = document.getElementById("monitorSelectorContainer");
-            const select = document.getElementById("monitorSelect");
-            if (!select || !container) return;
-
-            // Clear previous options except the placeholder
-            select.innerHTML = '<option value="">Swap Monitor...</option>';
-
-            // Only show the dropdown if more than 1 monitor exists
-            if (list.length > 1) {
-                list.forEach((m, idx) => {
-                    const opt = document.createElement("option");
-                    opt.value = idx + 1; // 1-based index (e.g. 1 for Screen 1, 2 for Screen 2)
-                    opt.textContent = m.friendlyName || m.name;
-                    select.appendChild(opt);
-                });
-                container.style.display = "block";
-            } else {
-                container.style.display = "none";
-            }
-        }
-
-        let mainStream = null;
-        let helperCall = null;
-
-        function onMonitorChange(val) {
-            if (activeDataConnection && activeDataConnection.open) {
-                // Request the host to display the screen-sharing prompt and swap active tracks
-                activeDataConnection.send({ type: 'requestSwap' });
-            }
         }
 
         function toggleFullscreen() {
