@@ -68,7 +68,7 @@ unitDatabase.push({
             ],
             passives: [
                 { name: "Super Pink Beam", desc: "<br>Ability (90s CD): Release global Line AOE for 200% Damage. Divine Clones deal 200% Damage during this attack." },
-                { name: "Godly Earrings", desc: "<br>• This unit gains +30% DoT Damage.<br>• Allies in range gain +50% DoT Damage.", dot: 30 },
+                { name: "Godly Earrings", desc: "<br>• This unit gains +30% DoT Damage.<br>• Allies in range gain +50% DoT Damage.", dotBuff: 30 },
                 { name: "Scythe of Sorrow", desc: "<br>• Attacks apply Ionized (70%/7 ticks).<br>• Every 5th Attack: Summon 2 Clones for 25s (Bypasses Cap).<br>• Clones deal 1.5x Multiplier to Ionized enemies." },
                 { name: "Divine Replication", desc: "<br>• Limited to 1 Placement.<br>• Gain +100% Damage for every unused placement (+200% Total).<br>• Every 10s: Summon a Clone (45s duration, Max 4)." },
                 { name: "Godly Energy", desc: "<br>Attacks apply Bleed for 30% Damage over 6 ticks." }
@@ -107,6 +107,11 @@ unitDatabase.push({
                 { 
                     name: "Divine Sentence", 
                     desc: "<br>Instantly kill non-boss enemies under 40% HP (20% for Bosses)." 
+                },
+                { 
+                    name: "Godly Earrings", 
+                    desc: "<br>• This unit gains +30% DoT Damage.<br>• Allies in range gain +50% DoT Damage.", 
+                    dotBuff: 30 
                 },
                 { 
                     name: "Super Pink Beam", 
@@ -151,7 +156,7 @@ unitDatabase.push({
                 },
                 { 
                     name: "Godly Earrings", 
-                    desc: "<br>• This unit gains +30% DoT Damage.<br>• Allies in range gain +50% DoT Damage.", dot: 30 },
+                    desc: "<br>• This unit gains +30% DoT Damage.<br>• Allies in range gain +50% DoT Damage.", dotBuff: 30 },
                 { 
                     name: "Divine Replication", 
                     desc: "<br>Unique: Only one Merciless God with the Top Path (5-x-x) can be active at a time." 
@@ -187,7 +192,7 @@ unitDatabase.push({
                 },
                 { 
                     name: "Godly Earrings", 
-                    desc: "<br>• This unit gains +30% DoT Damage.<br>• Allies in range gain +50% DoT Damage.", dot: 30 },
+                    desc: "<br>• This unit gains +30% DoT Damage.<br>• Allies in range gain +50% DoT Damage.", dotBuff: 30 },
                 { 
                     name: "Godly Energy", 
                     desc: "<br>Attacks apply Bleed for 30% Damage over 6 ticks." 
@@ -205,6 +210,7 @@ unitDatabase.push({
             upgrades: [{ dmg: 12000, spa: 10, range: 61, cost: 116000, spaCap: 5 }],
             stats: { 
                 dot: 30, dotDuration: 6, dotType: "Bleed",
+                dotBuff: 30,
                 support: "Stun, Mark", stunDuration: 2,
                 passiveDmg: 123.33, // Avg Unstable (133.33) + Max Mark (100)
                 passiveSpa: 11,     // Avg Unstable speedup (2/3 of 30%)
@@ -219,6 +225,11 @@ unitDatabase.push({
                 { 
                     name: "Godly Rage", 
                     desc: "<br>Every attack applies Stun for 2 seconds." 
+                },
+                { 
+                    name: "Godly Earrings", 
+                    desc: "<br>• This unit gains +30% DoT Damage.<br>• Allies in range gain +50% DoT Damage.", 
+                    dotBuff: 30 
                 },
                 { 
                     name: "Corrupted Manifestation", 
@@ -244,6 +255,7 @@ unitDatabase.push({
             img: "images/units/MercilessGod/0-2-5.png",
             upgrades: [{ dmg: 12000, spa: 10, range: 61, cost: 117000, spaCap: 5 }],
             stats: { 
+                dotBuff: 30,
                 support: "Stun, Mark", stunDuration: 2,
                 passiveDmg: 123.33, // Avg Unstable (133.33) + Max Mark (100)
                 passiveSpa: 11,     // Avg Unstable speedup (2/3 of 30%)
@@ -269,7 +281,7 @@ unitDatabase.push({
                 },
                 { 
                     name: "Godly Earrings", 
-                    desc: "<br>• This unit gains +30% DoT Damage.<br>• Allies in range gain +50% DoT Damage.", dot: 30 },
+                    desc: "<br>• This unit gains +30% DoT Damage.<br>• Allies in range gain +50% DoT Damage.", dotBuff: 30 },
                 { 
                     name: "God's Eye", 
                     desc: "<br>When no enemies are in range, increase Range by +10,000%." 
