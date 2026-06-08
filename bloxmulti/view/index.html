@@ -320,19 +320,6 @@
                     </div>
 
                     <div class="stream-controls">
-                        <!-- Monitor Dropdown Selector -->
-                        <div id="monitorSelectorContainer" style="display: none; position: relative;">
-                            <select id="monitorSelect" onchange="onMonitorChange(this.value)" class="custom-control-btn"
-                                style="appearance: none; -webkit-appearance: none; padding-right: 28px;">
-                                <option value="">Swap Monitor...</option>
-                            </select>
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
-                                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; opacity: 0.7;">
-                                <polyline points="6 9 12 15 18 9" />
-                            </svg>
-                        </div>
-
                         <button class="custom-control-btn" onclick="toggleFullscreen()" title="Fullscreen">
                             <svg width="14" height="14" viewBox="0 0 24 24">
                                 <path
@@ -383,16 +370,8 @@
                 activeDataConnection = conn;
 
                 conn.on('open', () => {
-                    // Prevent slower data channel opening event from overwriting active stream status
                     if (!isStreaming) {
                         statusEl.textContent = "AWAITING STREAM FEED...";
-                    }
-                });
-
-                // Listen for monitor list updates from the host
-                conn.on('data', (data) => {
-                    if (data && data.type === 'monitors' && Array.isArray(data.list)) {
-                        updateMonitorDropdown(data.list);
                     }
                 });
 
@@ -401,7 +380,6 @@
                     statusEl.textContent = "STREAM OFFLINE";
                     liveBadge.classList.remove('visible');
                     activeDataConnection = null;
-                    document.getElementById("monitorSelectorContainer").style.display = "none";
                 });
             });
 
@@ -411,44 +389,20 @@
                     statusEl.textContent = "CONNECTING STREAM PIPELINE...";
                 }
 
-                // Answer without stream (Receive-Only mode)
                 call.answer();
 
                 call.on('stream', (remoteStream) => {
-                    if (call.peer === `bm-${code}`) {
-                        mainStream = remoteStream;
-                        if (!helperCall) {
-                            remoteVideo.srcObject = remoteStream;
-                            isStreaming = true;
-                            statusEl.textContent = "LIVE FEED CONNECTED";
-                            liveBadge.classList.add('visible');
-                        }
-                    } else if (call.peer.includes('-monitor-')) {
-                        if (helperCall) {
-                            helperCall.close();
-                        }
-                        helperCall = call;
-                        remoteVideo.srcObject = remoteStream;
-                        isStreaming = true;
-                        statusEl.textContent = "LIVE FEED CONNECTED";
-                        liveBadge.classList.add('visible');
-                    }
+                    remoteVideo.srcObject = remoteStream;
+                    isStreaming = true;
+                    statusEl.textContent = "LIVE FEED CONNECTED";
+                    liveBadge.classList.add('visible');
                 });
 
                 call.on('close', () => {
-                    if (call.peer === `bm-${code}`) {
-                        mainStream = null;
-                    }
-                    if (remoteVideo.srcObject === call.localStream || remoteVideo.srcObject === call.remoteStream || remoteVideo.srcObject === mainStream) {
-                        if (mainStream) {
-                            remoteVideo.srcObject = mainStream;
-                        } else {
-                            isStreaming = false;
-                            statusEl.textContent = "STREAM OFFLINE";
-                            remoteVideo.srcObject = null;
-                            liveBadge.classList.remove('visible');
-                        }
-                    }
+                    isStreaming = false;
+                    statusEl.textContent = "STREAM OFFLINE";
+                    remoteVideo.srcObject = null;
+                    liveBadge.classList.remove('visible');
                 });
             });
 
@@ -458,49 +412,6 @@
                 liveBadge.classList.remove('visible');
                 setTimeout(initViewer, 5000);
             });
-        }
-
-        function updateMonitorDropdown(list) {
-            const container = document.getElementById("monitorSelectorContainer");
-            const select = document.getElementById("monitorSelect");
-            if (!select || !container) return;
-
-            // Clear previous options except the placeholder
-            select.innerHTML = '<option value="">Swap Monitor...</option>';
-
-            // Only show the dropdown if more than 1 monitor exists
-            if (list.length > 1) {
-                list.forEach((m, idx) => {
-                    const opt = document.createElement("option");
-                    opt.value = idx + 1; // 1-based index (e.g. 1 for Screen 1, 2 for Screen 2)
-                    opt.textContent = m.friendlyName || m.name;
-                    select.appendChild(opt);
-                });
-                container.style.display = "block";
-            } else {
-                container.style.display = "none";
-            }
-        }
-
-        let mainStream = null;
-        let helperCall = null;
-
-        function onMonitorChange(val) {
-            if (activeDataConnection && activeDataConnection.open) {
-                if (val === "" || val === "1") {
-                    if (helperCall) {
-                        helperCall.close();
-                        helperCall = null;
-                    }
-                    if (mainStream) {
-                        remoteVideo.srcObject = mainStream;
-                        statusEl.textContent = "LIVE FEED CONNECTED";
-                    }
-                    activeDataConnection.send({ type: 'requestSwap', monitorIndex: 1 });
-                } else {
-                    activeDataConnection.send({ type: 'requestSwap', monitorIndex: parseInt(val) });
-                }
-            }
         }
 
         function toggleFullscreen() {
