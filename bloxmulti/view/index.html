@@ -411,24 +411,44 @@
                     statusEl.textContent = "CONNECTING STREAM PIPELINE...";
                 }
 
-                // Answer without stream (Receive-Only mode) [1]
+                // Answer without stream (Receive-Only mode)
                 call.answer();
 
                 call.on('stream', (remoteStream) => {
-                    isStreaming = true;
-                    statusEl.textContent = "LIVE FEED CONNECTED";
-                    if (remoteVideo.srcObject !== remoteStream) {
+                    if (call.peer === `bm-${code}`) {
+                        mainStream = remoteStream;
+                        if (!helperCall) {
+                            remoteVideo.srcObject = remoteStream;
+                            isStreaming = true;
+                            statusEl.textContent = "LIVE FEED CONNECTED";
+                            liveBadge.classList.add('visible');
+                        }
+                    } else if (call.peer.includes('-monitor-')) {
+                        if (helperCall) {
+                            helperCall.close();
+                        }
+                        helperCall = call;
                         remoteVideo.srcObject = remoteStream;
+                        isStreaming = true;
+                        statusEl.textContent = "LIVE FEED CONNECTED";
                         liveBadge.classList.add('visible');
                     }
                 });
 
                 call.on('close', () => {
-                    isStreaming = false;
-                    statusEl.textContent = "STREAM OFFLINE";
-                    remoteVideo.srcObject = null;
-                    liveBadge.classList.remove('visible');
-                    document.getElementById("monitorSelectorContainer").style.display = "none";
+                    if (call.peer === `bm-${code}`) {
+                        mainStream = null;
+                    }
+                    if (remoteVideo.srcObject === call.localStream || remoteVideo.srcObject === call.remoteStream || remoteVideo.srcObject === mainStream) {
+                        if (mainStream) {
+                            remoteVideo.srcObject = mainStream;
+                        } else {
+                            isStreaming = false;
+                            statusEl.textContent = "STREAM OFFLINE";
+                            remoteVideo.srcObject = null;
+                            liveBadge.classList.remove('visible');
+                        }
+                    }
                 });
             });
 
@@ -450,9 +470,9 @@
 
             // Only show the dropdown if more than 1 monitor exists
             if (list.length > 1) {
-                list.forEach(m => {
+                list.forEach((m, idx) => {
                     const opt = document.createElement("option");
-                    opt.value = m.name;
+                    opt.value = idx + 1; // 1-based index (e.g. 1 for Screen 1, 2 for Screen 2)
                     opt.textContent = m.friendlyName || m.name;
                     select.appendChild(opt);
                 });
@@ -462,10 +482,24 @@
             }
         }
 
+        let mainStream = null;
+        let helperCall = null;
+
         function onMonitorChange(val) {
-            if (val && activeDataConnection && activeDataConnection.open) {
-                // Send the selected monitor name back to the host
-                activeDataConnection.send({ type: 'requestSwap', monitorName: val });
+            if (activeDataConnection && activeDataConnection.open) {
+                if (val === "" || val === "1") {
+                    if (helperCall) {
+                        helperCall.close();
+                        helperCall = null;
+                    }
+                    if (mainStream) {
+                        remoteVideo.srcObject = mainStream;
+                        statusEl.textContent = "LIVE FEED CONNECTED";
+                    }
+                    activeDataConnection.send({ type: 'requestSwap', monitorIndex: 1 });
+                } else {
+                    activeDataConnection.send({ type: 'requestSwap', monitorIndex: parseInt(val) });
+                }
             }
         }
 
