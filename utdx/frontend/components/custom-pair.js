@@ -119,15 +119,15 @@ function confirmAddCustomPair() {
     const t2 = cpT2 === 'none' ? { id: 'none', name: 'None' } : (typeof window.getTraitFast === 'function' ? window.getTraitFast(cpT2) : traitsList.find(t => t.id === cpT2));
 
     if (t1 && t2) {
-        const combo = combineTraits(t1, t2);
+        const combo = window.combineTraits(t1, t2);
 
         if (cpUnitSelection.has('all')) {
             // Case 1: Add to Global Custom Traits
-            const allTraits = [...traitsList, ...customTraits];
+            const allTraits = [...traitsList, ...window.customTraits];
             const alreadyExists = allTraits.some(t => t.name === combo.name);
 
             if (!alreadyExists && combo.id !== 'none') {
-                customTraits.push(combo);
+                window.customTraits.push(combo);
                 alert(`Added global custom trait: ${combo.name}`);
             } else {
                 alert("Trait combination already exists globally!");
@@ -139,14 +139,14 @@ function confirmAddCustomPair() {
             let successCount = 0;
 
             cpUnitSelection.forEach(unitId => {
-                if (!unitSpecificTraits[unitId]) unitSpecificTraits[unitId] = [];
-                const unitList = unitSpecificTraits[unitId];
+                if (!window.unitSpecificTraits[unitId]) window.unitSpecificTraits[unitId] = [];
+                const unitList = window.unitSpecificTraits[unitId];
 
                 // Check duplicate per unit
                 const alreadyExists = unitList.some(t => t.name === combo.name);
 
                 if (!alreadyExists && combo.id !== 'none') {
-                    unitSpecificTraits[unitId].push(combo);
+                    window.unitSpecificTraits[unitId].push(combo);
                     successCount++;
                 }
             });
@@ -157,6 +157,11 @@ function confirmAddCustomPair() {
                 alert("Trait combination already exists for selected unit(s)!");
                 return;
             }
+        }
+
+        // Clear trait fast-lookup cache to force evaluation of the new combination
+        if (window._traitCacheMap && typeof window._traitCacheMap.clear === 'function') {
+            window._traitCacheMap.clear();
         }
 
         // Refresh UI

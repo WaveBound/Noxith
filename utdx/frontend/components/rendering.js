@@ -241,34 +241,26 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             align-items: center !important;
             width: 100% !important;
         }
-        .br-col.sub .sl-label {
-            display: none !important; /* Completely hides HEAD, BODY, LEGS in the sub-stat panel */
-        }
-        .mobile-stat-toggle {
-            display: none !important; /* Disables and hides the toggle switch */
-        }
 
         /* MAIN STATS & SUB STATS Card Enclosures */
         .br-grid {
             display: grid !important;
-            grid-template-columns: 1fr 1fr 0.6fr !important;
-            gap: 8px !important;
-            padding: 6px 10px !important;
+            grid-template-columns: 1fr 1fr !important; /* Main and Sub take exactly 50% / 50% each */
+            gap: 12px !important;
+            padding: 4px 10px !important;
         }
         .br-grid.no-subs {
-            grid-template-columns: 2fr 0.6fr !important;
+            grid-template-columns: 1fr !important;
         }
         .br-col.main, .br-col.sub {
             background: #0d0d12 !important;
             border: 1px solid rgba(255, 255, 255, 0.04) !important;
             border-radius: 10px !important;
-            padding: 10px 6px !important; /* Reduced horizontal padding */
+            padding: 6px 8px !important; /* Tightened container padding */
             display: flex !important;
             flex-direction: column !important;
-            gap: 6px !important;
+            gap: 4px !important; /* Tightened vertical gap between items */
             border-right: none !important;
-            padding-right: 6px !important;  /* Reduced horizontal padding */
-            padding-left: 6px !important;   /* Reduced horizontal padding */
         }
         .br-col-title {
             font-size: 0.65rem !important;
@@ -285,11 +277,11 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             align-items: center !important;
             background: rgba(255, 255, 255, 0.02) !important;
             border: 1px solid rgba(255, 255, 255, 0.04) !important;
-            border-radius: 8px !important;
-            padding: 4px 6px !important;
+            border-radius: 6px !important;
+            padding: 3px 6px !important; /* Tightened internal padding to make containers hug badges snugly */
             width: 100% !important;
             box-sizing: border-box !important;
-            gap: 8px !important; /* Consistent horizontal gap between label and badge */
+            gap: 6px !important;
         }
         .br-col.main .stat-line .sl-label {
             background: none !important;
@@ -298,9 +290,12 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             font-size: 0.65rem !important;
             font-weight: 800 !important;
             padding: 0 !important;
-            min-width: 30px !important;
+            min-width: 32px !important;
             display: inline-block !important;
             text-align: left !important;
+        }
+        .br-col.sub .sl-label {
+            display: none !important; /* Completely hides HEAD, BODY, LEGS in the sub-stat panel */
         }
 
         .br-set-info-text {
@@ -310,6 +305,12 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
         .br-set-info-text:hover {
             opacity: 0.8;
             text-decoration: underline;
+        }
+        .ut-toggle-area {
+            display: flex;
+            align-items: center;
+            gap: 4px; /* Reduced gap from 8px to 4px to maintain compact layout consistency */
+            margin-left: auto;
         }
         @media (max-width: 768px) {
             /* Stack main and sub stats vertically at full width on mobile screens */
@@ -393,7 +394,7 @@ const TOGGLE_OVERRIDES = {
 };
 
 const SVGS = {
-    dmg: `<svg viewBox="0 0 290.226 290.226" fill="currentColor"><path d="M63.951,243.575c-1.945-3.578-4.401-6.907-7.363-9.869c-3.106-3.102-6.626-5.633-10.4-7.63 c-4.51-2.387-0.945-7.5-0.945-7.5c4.616-7.023,8.825-14.079,12.305-20.226l-23.363-23.344H11.504c-4.362,0-7.898-3.539-7.898-7.902 c0-4.361,3.536-7.9,7.898-7.9h25.947c2.1,0,4.107,0.832,5.588,2.312l85.379,85.291c1.483,1.483,2.315,3.495,2.315,5.589v26.073 c0,4.365-3.537,7.897-7.9,7.897c-4.367,0-7.904-3.531-7.904-7.897v-22.798l-23.27-23.24c-6.281,3.707-13.582,8.252-20.816,13.25 C70.842,245.679,66.698,248.629,63.951,243.575z"/><path d="M26.61,237.102c-7.106,0-13.784,2.764-18.812,7.784c-5.019,5.015-7.782,11.686-7.782,18.778 c0,7.097,2.764,13.762,7.782,18.776c5.027,5.016,11.706,7.783,18.812,7.785c7.102,0,13.781-2.77,18.804-7.785 c5.023-5.015,7.79-11.682,7.79-18.776c0-7.093-2.768-13.764-7.79-18.778C40.392,239.866,33.712,237.102,26.61,237.102z"/><path d="M100.985,182.318c-3.502,3.499-9.232,3.499-12.734,0.001l-8.81-8.801c-3.502-3.498-3.502-9.223,0-12.721L229.832,10.564 c3.502-3.498,10.401-6.727,15.33-7.175l36.862-3.352c4.93-0.448,8.596,3.218,8.148,8.148l-3.346,36.791 c-0.448,4.93-3.68,11.825-7.182,15.324l-150.4,150.251c-3.502,3.498-9.232,3.498-12.734,0l-8.822-8.813 c-3.502-3.498-3.502-9.223,0-12.722L233.608,63.213c1.854-1.848,1.856-4.852,0.003-6.702c-1.848-1.853-4.853-1.853-6.709-0.002 L100.985,182.318z"/></svg>`,
+    dmg: `<svg viewBox="0 0 290.226 290.226" fill="currentColor"><path d="M63.951,243.575c-1.945-3.578-4.401-6.907-7.363-9.869c-3.106-3.102-6.626-5.633-10.4-7.63 c-4.51-2.387-0.945-7.5-0.945-7.5c4.616-7.023,8.825-14.079,12.305-20.226l-23.363-23.344H11.504c-4.362,0-7.898-3.539-7.898-7.902 c0-4.361,3.536-7.9,7.898-7.9h25.947c2.1,0,4.107,0.832,5.588,2.312l85.379,85.291c1.483,1.483,2.315,3.495,2.315,5.589v26.073 c0,4.365-3.537,7.897-7.9,7.897c-4.367,0-7.904-3.531-7.904-7.897v-22.798l-23.27-23.24c-6.281,3.707-13.582,8.252-20.816,13.25 C70.842,245.679,66.698,248.629,63.951,243.575z"/><path d="M26.61,237.102c-7.106,0-13.784,2.764-18.812,7.784c-5.019,5.015-7.782,11.686-7.782,18.778 c0,7.097,2.764,13.762,7.782,18.776c5.027,5.016,11.706,7.783,18.812,7.785c7.102,0,13.781-2.77,18.804-7.785 c5.023-5.015,7.79-11.682,7.79-18.776c0-7.093-2.768-13.764-7.79-18.778C40.392,239.866,33.712,237.102,26.61,237.102z"/><path d="M100.985,182.318c-3.502,3.499-9.232,3.499-12.734,0.001l-8.81-8.801c-3.502-3.498-3.502-9.223,0-12.721L229.832,10.564 c3.502-3.498,10.401-6.727,15.33-7.175l36.862-3.352c4.93-0.448,8.596,3.218,8.148,8.148l-3.346,36.791 c-0.448,4.93-3.68,11.825-7.182,15.324l-150.4,150.251c-3.502,3.498-9.232,3.498-12.734,0l-8.822-8.813 c-3.502-3.498-3.502-9.223,0-12.722L233.608,63.213c1.854-1.848,1.856-4.852,0.003-6.702c-1.848-1.848,1.856-4.852,0.003-6.702c-1.848-1.853-4.853-1.853-6.709-0.002 L100.985,182.318z"/></svg>`,
     spa: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2v6h.01L6 8.01 10 12l-4 4 .01.01H6V22h12v-5.99h-.01L18 16l-4-4 4-3.99-.01-.01H18V2H6zm10 14.5V20H8v-3.5l4-4 4 4zM12 11.5l-4-4V4h8v3.5l-4 4z"/></svg>`,
     range: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>`,
     custom: `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; color: #06b6d4;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>`,
@@ -467,7 +468,7 @@ function getHeadBadgeHtml(headUsed) {
     const h = HEAD_CONFIG[headUsed] || { name: 'Unknown', cls: 'custom' };
     const label = "Elemental";
     const val = "30%";
-    const color = "#f97316"; // Always orange
+    const color = "#f97316";
 
     return `<div class="stat-line"><span class="sl-label">HEAD</span>
                 <div class="badge-base" style="border-color: ${color}66;" title="${h.name}">
@@ -532,8 +533,6 @@ function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
         try {
             const fullMath = reconstructMathData(res, undefined, { isHotbar: isHotbar, activeModeIdx: activeModeIdx });
             if (fullMath) {
-                // PERFORMANCE: Store the full math breakdown so showMath can find it instantly.
-                // This prevents thread-blocking site freezes during processUnitCache fallbacks.
                 window.cachedResults[res.id] = fullMath;
                 fullMath.id = res.id;
 
@@ -688,7 +687,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
                     ${optimalityHtml}
                 </div>
             </div>
-            <div class="br-grid ${window.disableSubStats ? 'no-subs' : ''}" style="display: grid !important; grid-template-columns: ${window.disableSubStats ? '1fr' : '1fr 1fr'} !important; gap: 8px !important; width: 100% !important; box-sizing: border-box !important; padding: 4px 10px !important;">
+            <div class="br-grid ${window.disableSubStats ? 'no-subs' : ''}">
                 <div class="br-col main" style="flex: 1 !important; width: 100% !important; box-sizing: border-box !important;"><div class="br-col-title">MAIN STAT</div>${getHeadBadgeHtml(r.headUsed)}<div class="stat-line"><span class="sl-label">BODY</span> ${window.getBadgeHtml(r.mainStats.body, MAIN_STAT_VALS.body[r.mainStats.body])}</div><div class="stat-line"><span class="sl-label">LEGS</span> ${window.getBadgeHtml(r.mainStats.legs, MAIN_STAT_VALS.legs[r.mainStats.legs])}</div></div>
                 ${window.disableSubStats ? '' : `<div class="br-col sub" style="flex: 1 !important; width: 100% !important; box-sizing: border-box !important;"><div class="br-col-header"><div class="br-col-title">SUB STAT</div></div>${headRow}${bodyRow}${legsRow}</div>`}
             </div>
@@ -737,11 +736,9 @@ window.refreshActiveBuild = function (unit) {
     const activeType = (window.activeAbilityIds?.has(unitId) && unit.ability) ? 'abil' : 'base';
     const activeMode = 'fixed';
 
-    // FIX: Normalize array state inside refreshActiveBuild to correctly fetch numeric state indexes
-    const state = window.unitModesState[unitId] ?? (unit.defaultMode ?? 0);
+    const state = window.unitModesState[unitId] ?? (window.getUnitById?.(unitId)?.defaultMode ?? 0);
     const activeModeIdx = Array.isArray(state) ? state[0] : state;
 
-    // Pre-initialize unit system levels if undefined to prevent Joyful Captain default-to-100 bug
     if (unit.systemLevel && window.unitSystemLevels[unitId] === undefined) {
         window.unitSystemLevels[unitId] = unit.systemLevel.default !== undefined ? unit.systemLevel.default : (unit.systemLevel.max || 100);
     }
@@ -751,7 +748,6 @@ window.refreshActiveBuild = function (unit) {
     builds = window.getRelicDbEntry(db, unitId, activeType);
 
     if (!builds || builds.length === 0) {
-        // FALLBACK: Calculate dynamically if not in database (common for multi-mode units)
         if (typeof window.calculateUnitBuilds === 'function') {
             const selectedTraitId = window.unitTraits?.[unitId];
             const selectedTrait = selectedTraitId ? getTraitFast(selectedTraitId) : null;
@@ -771,7 +767,7 @@ window.refreshActiveBuild = function (unit) {
                 activeType === 'abil',
                 activeMode,
                 isHotbar,
-                true // Ignore inventory limits
+                true
             );
             if (dynamicList && dynamicList.length > 0) {
                 builds = dynamicList;
@@ -794,8 +790,6 @@ window.refreshActiveBuild = function (unit) {
     if (matches.length > 0) {
         topBuild = getBestHydratedBuild(matches, unitId, isHotbar) || matches[0];
     } else if (selectedTrait) {
-        // FALLBACK: If the selected trait is not in the precompiled builds list,
-        // dynamically generate/calculate the build for this trait on the fly!
         const singleTraitObj = getTraitFast(selectedTrait);
         if (singleTraitObj) {
             const dynamicList = window.calculateUnitBuilds(
@@ -809,7 +803,7 @@ window.refreshActiveBuild = function (unit) {
                 activeType === 'abil',
                 activeMode,
                 isHotbar,
-                true // Ignore inventory limits
+                true
             );
             if (dynamicList && dynamicList.length > 0) {
                 topBuild = dynamicList[0];
@@ -831,7 +825,6 @@ window.refreshActiveBuild = function (unit) {
 window.refreshAllActiveBuilds = function () {
     window.unitActiveBuilds = window.unitActiveBuilds || {};
 
-    // 1. Gather all units from the database pagination
     const list = window.paginatedSortedUnits?.length > 0
         ? window.paginatedSortedUnits.map(e => e.unit)
         : (unitDatabase || []);
@@ -842,7 +835,6 @@ window.refreshAllActiveBuilds = function () {
         processedIds.add(unit.id);
     });
 
-    // 2. Also ensure all units currently in the Hotbar are fully refreshed!
     if (window.hotbarState?.slots) {
         window.hotbarState.slots.forEach(slot => {
             if (slot && !processedIds.has(slot.id)) {
@@ -866,7 +858,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unitId || s.id.split('-')[0] === unitId.split('-')[0]));
     const isHotbar = card.parentElement?.id === 'hotbarHiddenRender' || !!card.closest('.team-summary-container') || isInHotbarState;
 
-    // FIX: Normalize array state inside updateBuildListDisplay to base integer
     const state = window.unitModesState[unitId] ?? (unitObj.defaultMode ?? 0);
     const activeModeIdx = Array.isArray(state) ? state[0] : state;
 
@@ -876,7 +867,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         systemLevelBar.style.setProperty('display', visible ? 'flex' : 'none', 'important');
     }
 
-    const activeType = (window.activeAbilityIds?.has(unitId) && unitObj?.ability) ? 'abil' : 'base';
+    const activeType = (window.activeAbilityIds?.has(unitObj.id) && unitObj?.ability) ? 'abil' : 'base';
     const activeMode = 'fixed';
 
     const { unitCost, unitPlace } = getUnitCostAndPlacement(unitObj, activeModeIdx);
@@ -903,7 +894,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 });
             }
 
-            // Benchmarking for Optimality must compare against the absolute peak potential across all forms.
             const PEAK_MODE_STATE = {
                 'the_strongest_in_history': [1, 2],
                 'joyful_captain': 2,
@@ -911,12 +901,9 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 'merciless_god': 5
             };
 
-            // FIX: Prevent thread-blocking benchmark calculation from running on every card render
-            // Benchmarks (100% Optimality targets) are now cached and only calculated once per session/type
             const needsDynamicBench = !traitBenchmarks['peak'] && inventoryMode && (forceSync || !traitBenchmarks['peak']);
 
             if (needsDynamicBench && unitObj) {
-                // Temporarily swap to peak mode state for benchmarking to get true 100% target
                 const savedState = window.unitModesState[unitId];
                 let dynamicResults;
                 try {
@@ -924,7 +911,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     if (peakMode !== undefined) {
                         window.unitModesState[unitId] = peakMode;
                     } else if (unitObj.modes && Array.isArray(unitObj.modes)) {
-                        window.unitModesState[unitId] = unitObj.modes.length - 1; // Fallback to final mode
+                        window.unitModesState[unitId] = unitObj.modes.length - 1;
                     }
 
                     dynamicResults = window.calculateUnitBuilds(
@@ -932,11 +919,11 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                         !window.disableSubStats, null, activeType === 'abil', activeMode, isHotbar, true
                     );
                 } finally {
-                    window.unitModesState[unitId] = savedState; // ALWAYS restore user's current form
+                    window.unitModesState[unitId] = savedState;
                 }
 
                 if (dynamicResults?.length > 0) {
-                    traitBenchmarks = {}; // Reset with dynamic values
+                    traitBenchmarks = {};
                     dynamicResults.forEach(res => {
                         if (!traitBenchmarks[res.traitName] || res.dps > traitBenchmarks[res.traitName]) {
                             traitBenchmarks[res.traitName] = res.dps;
@@ -967,7 +954,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const renderListInternal = (builds, limit) => {
         if (!builds || builds.length === 0) return '<div class="msg-empty">No valid builds found.</div>';
 
-        // Helper to sort a list using the current UI logic (respecting mode recommendations and sort choice)
         const sortBuilds = (list) => [...list].sort((a, b) => {
             if (window.GLOBAL_MODE_SORT !== 'none' && unitObj?.meta) {
                 const modeKey = window.GLOBAL_MODE_SORT === 'short' ? 'short' : 'long';
@@ -992,15 +978,12 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             return (b.sortDps || b.dps || 0) - (a.sortDps || a.dps || 0);
         });
 
-        // 1. Hydrate all builds for this unit to determine their global positions
         const allHydrated = builds.map(b => hydrateBuildEntry(b, unitId, isHotbar, activeModeIdx)).filter(Boolean);
 
-        // 2. Assign global ranks based on the full list (sorted by current preference)
         const globalSorted = sortBuilds(allHydrated);
         const globalRankMap = new Map();
         globalSorted.forEach((r, idx) => globalRankMap.set(r.id, idx + 1));
 
-        // 3. Apply UI filters (Set, Head, Combo, Search)
         const filtered = allHydrated.filter(r => {
             if (!r) return false;
             if (prioSelect !== 'all' && r.prio !== prioSelect) return false;
@@ -1018,7 +1001,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
         if (filtered.length === 0) return '<div class="msg-empty">No matches found.</div>';
 
-        // 4. Group by Combo and enforce Top 3 unique gear/trait setups per combo strictly
         const comboGroups = {};
         filtered.forEach(r => {
             const bodyType = r.mainStats?.body || 'dmg';
@@ -1034,26 +1016,23 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         let candidates = [];
         for (const comboKey in comboGroups) {
             const comboList = comboGroups[comboKey];
-            // Sort each combo group individually to determine the absolute strongest choices
             const sortedCombo = sortBuilds(comboList);
 
             const seenGearTrait = new Set();
             let count = 0;
             for (const b of sortedCombo) {
-                // Generate unique key per gear set + head + trait setup to block clones/duplicates
                 const gearHash = `${b.setName}|${b.headUsed || 'none'}|${b.traitName}`;
                 if (!seenGearTrait.has(gearHash)) {
                     candidates.push(b);
                     seenGearTrait.add(gearHash);
                     count++;
                     if (count >= 3) {
-                        break; // Strictly limit to a maximum of 3 unique setups per combination
+                        break;
                     }
                 }
             }
         }
 
-        // 5. Final global sort for the candidates from strongest to weakest across all combos
         candidates = sortBuilds(candidates);
 
         const slice = candidates.slice(0, limit);
@@ -1064,7 +1043,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 ? (filtered.find(b => b.traitName?.toLowerCase() === selectedTrait.toLowerCase()) || slice[0])
                 : slice[0];
 
-            // Sync with unitActiveBuilds registry
             if (!window.unitActiveBuilds) window.unitActiveBuilds = {};
             window.unitActiveBuilds[unitId] = window.hotbarFilteredBuilds[unitId];
         }
@@ -1084,7 +1062,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     let buildData = null;
     const db = (isHotbar && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
-    // Ensure we skip the pre-compiled database when Inventory Mode is active to force local calculation
     if (db && !inventoryMode) {
         buildData = window.getRelicDbEntry(db, unitId, activeType);
     }
@@ -1092,8 +1069,6 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     if (buildData) {
         container.innerHTML = renderListInternal(buildData, renderLimit);
     } else if (unitObj && !window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0]) {
-        // Safe calculation fallback when uncompiled or running custom inventory calculations
-        // Optimized: only run if the dynamic cache is also empty to prevent redundant heavy loops
         window.processUnitCache(unitObj, 0, activeType);
         const finalData = window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0];
         if (finalData) container.innerHTML = renderListInternal(finalData, renderLimit);
@@ -1208,14 +1183,12 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
 }
 
 // Score & Ranking Engines
-// --- GLOBAL SCORING CACHE ---
 window.LIVE_SCORE_CACHE = window.LIVE_SCORE_CACHE || {};
 
 window.getQuickScore = (unit) => {
     if (!unit) return 0;
     const unitId = unit.id;
 
-    // Pre-initialize system level if it exists and is undefined to ensure correct sorting on initial page load
     if (unit.systemLevel && window.unitSystemLevels[unitId] === undefined) {
         window.unitSystemLevels[unitId] = unit.systemLevel.default !== undefined ? unit.systemLevel.default : (unit.systemLevel.max || 100);
     }
@@ -1275,7 +1248,6 @@ window.getQuickScore = (unit) => {
 window.getLiveScore = (unit) => {
     const unitId = unit.id;
 
-    // Pre-initialize system level if it exists and is undefined to ensure correct sorting on initial page load
     if (unit.systemLevel && window.unitSystemLevels[unitId] === undefined) {
         window.unitSystemLevels[unitId] = unit.systemLevel.default !== undefined ? unit.systemLevel.default : (unit.systemLevel.max || 100);
     }
@@ -1287,8 +1259,6 @@ window.getLiveScore = (unit) => {
             : getBuildSortScore(active);
     }
 
-    // Memoize the quick score lookup to prevent running heavy reconstructMathData
-    // multiple times per unit during array sorting operations
     if (window.LIVE_SCORE_CACHE[unitId] !== undefined) {
         return window.LIVE_SCORE_CACHE[unitId];
     }
@@ -1310,7 +1280,6 @@ window.resortUnitCardsInPlace = function () {
     window.refreshAllActiveBuilds();
     paginatedSortedUnits.sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
 
-    // Re-assign absolute ranks
     window.unitAbsoluteRanks = {};
     paginatedSortedUnits.forEach((entry, i) => {
         window.unitAbsoluteRanks[entry.unit.id] = i + 1;
@@ -1322,7 +1291,6 @@ window.resortUnitCardsInPlace = function () {
         const card = document.getElementById('card-' + entry.unit.id);
         if (card) {
             container.appendChild(card);
-            // Dynamically update rank badge
             const rankBadge = card.querySelector('.placement-badge:nth-child(3)');
             if (rankBadge) {
                 rankBadge.innerText = `DPS Rank: #${window.unitAbsoluteRanks[entry.unit.id]}`;
@@ -1332,7 +1300,6 @@ window.resortUnitCardsInPlace = function () {
 };
 
 function renderUnitCard(unit, absoluteIndex) {
-    // FIX: Normalize array state inside renderUnitCard
     const state = window.unitModesState[unit.id] ?? (unit.defaultMode ?? 0);
     const activeMode = Array.isArray(state) ? state[0] : state;
     const { upgradesArr = null } = getUnitCostAndPlacement(unit, activeMode);
@@ -1384,7 +1351,7 @@ function renderUnitCard(unit, absoluteIndex) {
             <button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">${SVGS.traits} TRAITS</button>
             <button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">${SVGS.info} INFO</button>
         </div>
-        <div class="ut-toggle-area" style="gap: 8px;">${initialModeIndicatorHtml}${modesBtn}${abilityToggleHtml}</div>
+        <div class="ut-toggle-area">${initialModeIndicatorHtml}${modesBtn}${abilityToggleHtml}</div>
     </div>`;
 
     const defaultSort = isAnyUnit(unit.id, ['sjw', 'esdeath']) ? 'damage' : 'dps';
@@ -1394,7 +1361,9 @@ function renderUnitCard(unit, absoluteIndex) {
         mochi_pirate: { icon: '⚠️', text: '<strong>Notice:</strong> Mochi Pirate is bugged; he does not apply Time Snail currently / Crit Time snail enemies.', color: '#f87171', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.15)' },
         revolutionary_chief_syncro: { icon: '🔥', text: '<strong>Notice:</strong> DoT restarts duration if attacked again. DPS is calculated as 1 continuous tick per second.', color: '#60a5fa', bg: 'rgba(96, 165, 250, 0.08)', border: 'rgba(96, 165, 250, 0.15)' },
         ant_king_savage: { icon: '⚠️', text: '<strong>Notice:</strong> Ant King is bugged; any DoT%+ buffs applied to him are calculated twice.', color: '#f87171', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.15)' },
-        angel_born_in_hell: { icon: '⚠️', text: '<strong>Notice:</strong> Angel in Hell is bugged; he has a fixed 50% crit rate that cannot change, and crits work, though he is not meant to crit.', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' }
+        angel_born_in_hell: { icon: '⚠️', text: '<strong>Notice:</strong> Angel in Hell is bugged; he has a fixed 50% crit rate that cannot change, and crits work, though he is not meant to crit.', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' },
+        the_drink_super_rage: { icon: '⚠️', text: '<strong>Notice:</strong> The Drink is bugged; his boss damage multiplier is currently non-functional in-game and does nothing.', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' },
+        the_drink: { icon: '⚠️', text: '<strong>Notice:</strong> The Drink is bugged; his boss damage multiplier is currently non-functional in-game and does nothing.', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' }
     };
     const notice = notices[unit.id];
     const customNoticeHtml = notice ? `
@@ -1627,7 +1596,6 @@ let globalFilterTimeout = null;
 window.globalFilterUnits = (term) => {
     if (globalFilterTimeout) clearTimeout(globalFilterTimeout);
 
-    // 120ms debounce window keeps search inputs fluid while typing
     globalFilterTimeout = setTimeout(() => {
         _executeGlobalFilter(term);
     }, 120);
@@ -1642,12 +1610,10 @@ function _executeGlobalFilter(term) {
     const assignedInventoryUnitIds = new Set(Object.keys(window.inventoryUnitTraits || {}));
     const unitElement = document.getElementById('unitElementSort')?.value || 'none';
 
-    // 1. Filter base list by inventory assignments if in inventory mode
     const baseList = window.inventoryMode
         ? unitDatabase.filter(unit => assignedInventoryUnitIds.has(unit.id))
         : unitDatabase;
 
-    // 2. Map and sort baseline list *once* to establish absolute database ranks
     const allSorted = baseList.map(unit => ({
         unit,
         maxScore: window.getLiveScore(unit)
@@ -1658,7 +1624,6 @@ function _executeGlobalFilter(term) {
         window.unitAbsoluteRanks[entry.unit.id] = i + 1;
     });
 
-    // 3. Filter down the already-sorted list (eliminates the need for a second sort)
     let filtered = allSorted;
 
     if (unitElement !== 'none') {
@@ -1702,10 +1667,8 @@ function _executeGlobalFilter(term) {
 
     paginatedSortedUnits = filtered;
 
-    // Initialize level indices for elements on the new page
     paginatedSortedUnits.forEach(entry => {
         const u = entry.unit;
-        // FIX: Normalize array state when initializing level indices
         const state = window.unitModesState[u.id] ?? (u.defaultMode ?? 0);
         const mode = Array.isArray(state) ? state[0] : state;
         const upgrades = u.modes?.[mode]?.upgrades || u.upgrades;
@@ -1736,7 +1699,6 @@ function openTraitBestList(unitId) {
 
     let builds = window.unitBuildsCache[unitId]?.[activeType]?.fixed?.[0] || [];
 
-    // Fallback: If cache is empty, pull from the correct static database
     if (!builds || builds.length === 0) {
         const db = isLoadout ? (window.HOTBAR_STATIC_BUILD_DB || window.STATIC_BUILD_DB) : window.STATIC_BUILD_DB;
         builds = window.getRelicDbEntry(db, unitId, activeType) || [];
@@ -1757,7 +1719,7 @@ function openTraitBestList(unitId) {
 
     const sortedTraits = Array.from(bestByTrait.values()).map(b => hydrateBuildEntry(b, unitId, isLoadout))
         .sort((a, b) => {
-            return getBuildSortScore(b) - getBuildSortScore(a); // Accurately sort leaderboard using both base and Boss DPS
+            return getBuildSortScore(b) - getBuildSortScore(a);
         });
 
     let tagsHtml = '';
@@ -1852,7 +1814,6 @@ window.viewBuildRelicDatabase = function (buildId, unitId) {
     if (!build) return;
 
     let headSetId = build.headUsed || 'none';
-    // Map Accessory technical IDs to their parent Set IDs for location lookups
     const accessoryToSetMap = {
         'fused_earrings': 'fused_set',
         'warlord_hat': 'warlord'
@@ -1896,17 +1857,15 @@ window.viewBuildRelicDatabase = function (buildId, unitId) {
 // Global Exports
 window.processUnitCache = processUnitCache;
 window.renderUnitCard = renderUnitCard;
-window.renderListInternal = undefined; // Unused as top-level since it's internalized
+window.renderListInternal = undefined;
 window.updateBuildListDisplay = updateBuildListDisplay;
 
-// Post-load patch to intercept unitControls['angel_born_in_hell'] and correct the labeled mark display
 setTimeout(() => {
     const key = 'angel_born_in_hell';
     if (window.unitControls && window.unitControls[key]) {
         const original = window.unitControls[key];
         window.unitControls[key] = function (unit) {
             let html = original(unit);
-            // Dynamic check that handles potential mode (works on self) and correct mapping replacements
             if (unit.tags && (unit.tags.includes('Fusion') || unit.tags.includes('Fused')) && html.includes('Super Warrior')) {
                 html = html.replace(/UNRIVALED: \+30% DMG \/ -10% CD \(Super Warrior\)/g, 'UNRIVALED: +50% DMG / +50% CDmg (Fusion)');
                 html = html.replace(/unrivaled-badge-super-warrior/g, 'unrivaled-badge-fusion');
@@ -1914,4 +1873,4 @@ setTimeout(() => {
             return html;
         };
     }
-}, 1000); // 1s timeout ensures the unit scripts have loaded and registered
+}, 1000);

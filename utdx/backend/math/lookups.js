@@ -76,7 +76,10 @@ window.isAnyUnit = function(id, targets) {
 
 // Speed optimization: Fast lookup maps for static data
 const _traitCacheMap = new Map();
+window._traitCacheMap = _traitCacheMap;
+
 const _setCacheMap = new Map();
+window._setCacheMap = _setCacheMap;
 
 // UPDATED: Dynamically checks Custom Traits if not found in the base cache
 window.getTraitFast = (idOrName) => {
@@ -94,12 +97,12 @@ window.getTraitFast = (idOrName) => {
 
     // Fallback 1: Scan dynamically generated Custom Pairs
     if (!found) {
-        if (typeof customTraits !== 'undefined') {
-            found = customTraits.find(t => t.id === idOrName || t.name === idOrName);
+        if (typeof window.customTraits !== 'undefined') {
+            found = window.customTraits.find(t => t.id === idOrName || t.name === idOrName);
         }
-        if (!found && typeof unitSpecificTraits !== 'undefined') {
-            for (const key in unitSpecificTraits) {
-                const arr = unitSpecificTraits[key];
+        if (!found && typeof window.unitSpecificTraits !== 'undefined') {
+            for (const key in window.unitSpecificTraits) {
+                const arr = window.unitSpecificTraits[key];
                 if (arr) {
                     found = arr.find(t => t.id === idOrName || t.name === idOrName);
                     if (found) break;

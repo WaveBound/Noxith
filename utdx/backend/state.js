@@ -3,8 +3,12 @@ const ENABLE_HOTBAR = true;
 const ENABLE_LOADOUT_CLICKABLE = true;
 
 // Data & Cache
-var customTraits = [];
-var unitSpecificTraits = {};
+window.customTraits = window.customTraits || [];
+window.unitSpecificTraits = window.unitSpecificTraits || {};
+
+var customTraits = window.customTraits;
+var unitSpecificTraits = window.unitSpecificTraits;
+
 window.activeAbilityIds = new Set();
 var activeAbilityIds = window.activeAbilityIds;
 var cachedResults = {};
@@ -12,7 +16,6 @@ var unitBuildsCache = {};
 
 var inventoryMode = false;
 var disableSubStats = false;
-
 
 var currentCalcUnitId = null;
 
