@@ -381,7 +381,7 @@ function renderSourceTotalsSection(data) {
         })()}
                     `) + `
                     ${abilityDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Active Ability</span><span class="text-white">${fmt.pct(abilityDmg)}</span></div>` : ''}
-                    ${accessoryBaseDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Accessory Base</span><span class="text-white">${fmt.pct(accessoryBaseDmg)}</span></div>` : ''}
+                    ${accessoryBaseDmg > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 0.68rem; color: #999;"><span>Accessory Base</span><span class="text-white">${fmt.pct(abilityDmg)}</span></div>` : ''}
                     ${globalBuffsDmgHtml}
                     ${globalBuffsSpaHtml}
                     ${globalBuffsCritHtml}
@@ -842,7 +842,8 @@ function renderDotSection(data, headDotRow) {
     const bugMult = (data.baseStats?.id === 'ant_king_savage' || (window.isUnit && window.isUnit(data.baseStats?.id, 'ant_king_savage'))) ? 2 : 1;
 
     const combinedMultiplier = (1 + ((traitDot + gearBonus + passiveDot) * bugMult) / 100) * (db?.globalDotMult || 1.0);
-    const finalTickPct = (db?.base || 0) * combinedMultiplier;
+    const baseDotPctVal = db?.nativeDps > 0 ? (db?.base || 0) : (data.baseStats?.customFollowUp?.dotPct || 0);
+    const finalTickPct = baseDotPctVal * combinedMultiplier;
 
     if (data.headBuffs && data.headBuffs.type === 'ninja') {
         const uptimePct = (data.headBuffs.uptime || 0);
@@ -994,9 +995,30 @@ function renderDotSection(data, headDotRow) {
                 </td>
             </tr>` : ''}
             ` : (db?.fuaDotDps > 0 ? `
-            <tr><td class="mt-cell-label mt-pt-md mt-text-bold" style="color: #60a5fa">${db.fuaLabel || 'Follow-Up DoT'}</td><td class="mt-cell-formula mt-pt-md"></td><td class="mt-cell-val mt-pt-md mt-text-bold" style="color: #60a5fa">${fmt.num(db.fuaDotDps)}</td></tr>
-            <tr><td class="mt-cell-label mt-pl-sm text-dim text-xs">• Trigger Chance</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">${db.fuaChance}%</td></tr>
-            <tr><td class="mt-cell-label mt-pl-sm text-dim text-xs">• Damage Per Proc</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">${fmt.num(db.fuaDotTotalDmg)}</td></tr>
+            <tr><td class="mt-cell-label mt-pt-md mt-text-bold" style="color: #60a5fa">${db.fuaLabel || 'Follow-Up DoT'} Calculation</td><td class="mt-cell-formula mt-pt-md"></td><td class="mt-cell-val mt-pt-md mt-text-bold" style="color: #60a5fa"></td></tr>
+            <tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ Base Tick %</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">${fmt.num(baseDotPctVal)}%</td></tr>
+            <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-custom">1. Trait Multiplier (${data.traitObj?.name || 'None'})</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-custom text-bold">${fmt.pct(traitDot)}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-accent-end">2. Gear Multiplier (Relics/Set/Head)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-end text-bold">${fmt.pct(gearBonus)}</td></tr>
+            <tr class="mt-border-top"><td class="mt-cell-label mt-pl-sm mt-pt-sm text-bold text-gray">↳ Combined DoT Multiplier</td><td class="mt-cell-formula mt-pt-sm text-bold"><span class="op">×</span>${fmt.fix(combinedMultiplier, 3)}</td><td class="mt-cell-val"></td></tr>
+            ${relicDot > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">• Relic Stats (Main+Sub)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-dim">${fmt.pct(relicDot)}</td></tr>` : ''}
+            ${setDot > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">• Set Bonus</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-dim">${fmt.pct(setDot)}</td></tr>` : ''}
+            ${headDot > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">• Head Passive</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-dim">${fmt.pct(headDot)}</td></tr>` : ''}
+            ${(data.headBuffs && data.headBuffs.type === 'flaming_donut' && isSpadeAce) ? `
+            <tr><td class="mt-cell-label mt-pl-sm mt-text-bold" style="color: #fca5a5;">3. Flaming Donut Multiplier (Ace)</td><td class="mt-cell-formula mt-text-bold" style="color: #fca5a5;"><span class="op">×</span>1.50</td><td class="text-bold" style="color: #fca5a5;">1.5x Burn</td></tr>
+            ` : ''}
+            
+            <tr><td class="mt-cell-label mt-pt-md">Final Tick %</td><td class="mt-cell-formula">=</td><td class="mt-cell-val calc-highlight">${fmt.fix(finalTickPct, 2)}%</td></tr>
+            <tr><td class="mt-cell-label mt-pl-sm text-accent-end mt-pt-sm">↳ Total Damage Per Proc</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-end mt-pt-sm">${fmt.num(db.fuaDotTotalDmg)}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-md text-dim text-xs opacity-70">• DoT Duration</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">${db.fuaDotDuration} Ticks</td></tr>
+            <tr><td class="mt-cell-label mt-pl-md text-dim text-xs opacity-70">• Damage Per Tick</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">${fmt.num(db.fuaDotTotalDmg / db.fuaDotDuration)}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-md text-dim text-xs opacity-70">• Trigger Chance</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">${db.fuaChance != null ? db.fuaChance.toFixed(0) : 'N/A'}%</td></tr>
+            <tr><td class="mt-cell-label mt-pl-md text-dim text-xs opacity-70">• Avg Applications / Sec</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">${fmt.fix(db.dotApplicationRate, 2)}</td></tr>
+            
+            <tr>
+                <td class="mt-cell-label mt-pt-sm" style="color: #60a5fa; font-weight: 700;">Follow-Up DoT DPS</td>
+                <td class="mt-cell-formula mt-pt-sm"><span class="text-dim">(${fmt.num(db.fuaDotTotalDmg)} / ${fmt.fix(db.fuaDotTotalDmg / db.fuaDotDps, 2)}s Interval)</span></td>
+                <td class="mt-cell-val mt-pt-sm" style="color: #60a5fa; font-weight: 700;">${fmt.num(db.fuaDotDps)}</td>
+            </tr>
             ` : '')}
 
             ${db?.scarfBurnDps > 0 ? `
@@ -1123,6 +1145,8 @@ function renderAttackRateSection(data) {
         const fuaHitNormal = baseDmgNoAdditive * Math.max(0, 1 + ((data.totalAdditivePct || 0) - 25) / 100);
         const fuaDmg = fuaHitNormal * (data.critData?.avgMult || 1);
 
+        const singleBaseHitDps = (data.dmgVal * (data.critData?.avgMult || 1)) / data.spa;
+        const totalBaseHitDps = singleBaseHitDps * data.placement;
         const singleFuaDps = fuaDmg / 15;
         const totalFuaDps = singleFuaDps * data.placement;
 

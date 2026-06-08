@@ -384,12 +384,8 @@ function calculateDPS(uStats, relicStats, context) {
         const followUp2Chance = (eLevel >= 2) ? 0.70 : 0.50;
         attackMultiplier = 1 + 1 + followUp2Chance;
 
-        const fuaAnim = (uStats.customFollowUp && uStats.customFollowUp.fuaAnimation) ? uStats.customFollowUp.fuaAnimation : 0;
-        const atkAnim = effectiveSpaCap;
-        
-        const timeWith1Fua = Math.max(finalSpa, atkAnim + fuaAnim);
-        const timeWith2Fua = Math.max(finalSpa, atkAnim + 2 * fuaAnim);
-        usedSpa = (1 - followUp2Chance) * timeWith1Fua + (followUp2Chance) * timeWith2Fua;
+        // FIXED: Follow-up attacks do not slow down the natural attack cycle
+        usedSpa = finalSpa;
 
         hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
         bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
@@ -708,20 +704,41 @@ function calculateDPS(uStats, relicStats, context) {
         const critChance = finalCritRate / 100;
         const critChanceBoss = finalCritRateBoss / 100;
 
-        const appFactor = critChance + (attackMultiplier - 1);
-        const appFactorBoss = critChanceBoss + (attackMultiplier - 1);
+        const dotDuration = (uStats.customFollowUp && uStats.customFollowUp.dotDuration) ? uStats.customFollowUp.dotDuration : 5;
 
-        const totalDotDps = (ionizedDotDmg / 5) * appFactor * placement;
-        const totalDotDpsBoss = (ionizedDotDmgBoss / 5) * appFactorBoss * placement;
+        const totalDotPct = baseDotPct * traitMultiplier * gearMultiplier; // This is the total percentage over duration
+
+        const totalIonizedDotDmg = finalDmg * (totalDotPct / 100);
+        const totalIonizedDotDmgBoss = finalDmgBoss * (totalDotPct / 100);
+
+        const dotApplicationRate = (attackMultiplier * critChance) / usedSpa; // Applications per second
+        const dotApplicationRateBoss = (attackMultiplier * critChanceBoss) / usedSpa;
+
+        const canStack = !!(traitObj.allowDotStack || traitObj.allowPlacementStack);
+
+        // FIXED: Apply non-stacking interval capping and placement checks
+        const effectiveInterval = canStack ? (1 / dotApplicationRate) : Math.max(dotDuration, 1 / dotApplicationRate);
+        const effectiveIntervalBoss = canStack ? (1 / dotApplicationRateBoss) : Math.max(dotDuration, 1 / dotApplicationRateBoss);
+
+        // If canStack is false, the joint application rate of all placed units is dotApplicationRate * placement.
+        // So the effective interval for all units combined is Math.max(dotDuration, 1 / (dotApplicationRate * placement))
+        const jointInterval = canStack ? (1 / (dotApplicationRate * placement)) : Math.max(dotDuration, 1 / (dotApplicationRate * placement));
+        const jointIntervalBoss = canStack ? (1 / (dotApplicationRateBoss * placement)) : Math.max(dotDuration, 1 / (dotApplicationRateBoss * placement));
+
+        const totalDotDps = totalIonizedDotDmg / jointInterval;
+        const totalDotDpsBoss = totalIonizedDotDmgBoss / jointIntervalBoss;
 
         finalDotDps += totalDotDps;
         finalBossDotDps += totalDotDpsBoss;
 
         if (dotBreakdown) {
-            dotBreakdown.fuaDotDps = totalDotDps / placement;
-            dotBreakdown.fuaDotTotalDmg = ionizedDotDmg;
-            dotBreakdown.fuaDotDuration = (uStats.customFollowUp && uStats.customFollowUp.dotDuration) ? uStats.customFollowUp.dotDuration : 5;
+            dotBreakdown.fuaDotDps = totalIonizedDotDmg / effectiveInterval;
+            dotBreakdown.fuaDotTotalDmg = totalIonizedDotDmg; // Store total damage over duration
+            dotBreakdown.fuaDotDuration = dotDuration;
             dotBreakdown.fuaLabel = "Ionized DoT (Crit + FUA)";
+            dotBreakdown.fuaChance = finalCritRate;
+            dotBreakdown.fuaDotPct = totalDotPct; // This is the total percentage over duration
+            dotBreakdown.dotApplicationRate = dotApplicationRate; // Applications per second
         }
     }
 
@@ -751,6 +768,7 @@ function calculateDPS(uStats, relicStats, context) {
     if (uStats.customFollowUp && !isFusedWarrior) {
         const cooldown = uStats.customFollowUp.cooldown;
         const fuaDmgMult = uStats.customFollowUp.dmgMult || 1.0;
+        const fuaAnim = uStats.customFollowUp.fuaAnimation || 0;
         const fuaDotPct = uStats.customFollowUp.dotPct || 0;
 
         let followUpDotDpsPerCycle, followUpDotDpsPerCycleBoss, followUpDotDmg, chance = 100;
@@ -776,6 +794,7 @@ function calculateDPS(uStats, relicStats, context) {
             dotBreakdown.fuaDotDuration = uStats.customFollowUp.dotDuration;
             dotBreakdown.fuaChance = chance;
             dotBreakdown.fuaLabel = (uStats.customFollowUp.label || "Follow-Up") + " DoT";
+            dotBreakdown.fuaDotPct = fuaDotPct;
         }
     }
 
