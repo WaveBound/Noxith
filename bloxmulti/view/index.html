@@ -490,55 +490,10 @@
         let mainStream = null;
         let helperCall = null;
 
-        function applyMonitorCrop(monitorIndex) {
-            if (!monitors || monitors.length === 0) return;
-
-            // Reset positioning rules to display the full spanned desktop setup
-            if (monitorIndex === "" || monitorIndex === undefined) {
-                remoteVideo.style.width = "100%";
-                remoteVideo.style.height = "100%";
-                remoteVideo.style.left = "0%";
-                remoteVideo.style.top = "0%";
-                remoteVideo.style.objectFit = "contain";
-                return;
-            }
-
-            const selectedMonitor = monitors[monitorIndex - 1];
-            if (!selectedMonitor) return;
-
-            // Calculate global virtual bounds of your entire multimonitor setup combined
-            let totalMinX = 0, totalMinY = 0, totalMaxX = 0, totalMaxY = 0;
-            monitors.forEach(m => {
-                if (m.x < totalMinX) totalMinX = m.x;
-                if (m.y < totalMinY) totalMinY = m.y;
-                if (m.x + m.w > totalMaxX) totalMaxX = m.x + m.w;
-                if (m.y + m.h > totalMaxY) totalMaxY = m.y + m.h;
-            });
-
-            const totalW = totalMaxX - totalMinX;
-            const totalH = totalMaxY - totalMinY;
-
-            if (totalW === 0 || totalH === 0) return;
-
-            // Determine zoom percentages to shift the target window focus
-            const scaleX = totalW / selectedMonitor.w;
-            const scaleY = totalH / selectedMonitor.h;
-            const translateX = -((selectedMonitor.x - totalMinX) / totalW) * 100;
-            const translateY = -((selectedMonitor.y - totalMinY) / totalH) * 100;
-
-            // Apply transformations to crop and fit the layout
-            remoteVideo.style.objectFit = "fill";
-            remoteVideo.style.width = (scaleX * 100) + "%";
-            remoteVideo.style.height = (scaleY * 100) + "%";
-            remoteVideo.style.left = (translateX * scaleX) + "%";
-            remoteVideo.style.top = (translateY * scaleY) + "%";
-        }
-
         function onMonitorChange(val) {
-            if (val === "") {
-                applyMonitorCrop(); // Revert back to spanned desktop
-            } else {
-                applyMonitorCrop(parseInt(val)); // Isolate targeted display
+            if (activeDataConnection && activeDataConnection.open) {
+                // Request the host to display the screen-sharing prompt and swap active tracks
+                activeDataConnection.send({ type: 'requestSwap' });
             }
         }
 
