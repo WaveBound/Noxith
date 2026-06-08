@@ -392,7 +392,7 @@
                 // Listen for monitor list updates from the host
                 conn.on('data', (data) => {
                     if (data && data.type === 'monitors' && Array.isArray(data.list)) {
-                        updateMonitorDropdown(data.list, data.autoSelect);
+                        updateMonitorDropdown(data.list);
                     }
                 });
 
@@ -440,7 +440,7 @@
             });
         }
 
-        function updateMonitorDropdown(list, autoSelect) {
+        function updateMonitorDropdown(list) {
             const container = document.getElementById("monitorSelectorContainer");
             const select = document.getElementById("monitorSelect");
             if (!select || !container) return;
@@ -457,15 +457,6 @@
                     select.appendChild(opt);
                 });
                 container.style.display = "block";
-
-                if (autoSelect) {
-                    select.onchange = () => {
-                        alert("To swap monitors, please uncheck 'Auto-select Main Screen' in the host's BloxMulti settings and restart the stream.");
-                        select.value = "";
-                    };
-                } else {
-                    select.onchange = (e) => onMonitorChange(e.target.value);
-                }
             } else {
                 container.style.display = "none";
             }
