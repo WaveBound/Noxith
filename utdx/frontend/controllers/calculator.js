@@ -142,14 +142,22 @@ function openCalc(unitId) {
     const setSelect = document.getElementById('calcSet');
     if (setSelect.options.length === 0) SETS.forEach(s => setSelect.add(new Option(s.name, s.id)));
 
+    // Dynamic headpiece list population from HEADS_LIST to prevent desyncs
     const headSelect = document.getElementById('calcHead');
+    if (headSelect.options.length === 0) {
+        HEADS_LIST.forEach(h => {
+            const name = HEAD_CONFIG[h]?.name || (h === 'none' ? 'None' : h.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase()));
+            headSelect.add(new Option(name, h));
+        });
+    }
+
     const headStarsSelect = document.getElementById('calcHeadStars');
     const bodyStarsSelect = document.getElementById('calcBodyStars');
     const legsStarsSelect = document.getElementById('calcLegsStars');
 
     const updateHeadStarVisibility = () => {
         const headVal = headSelect.value;
-        const showStars = (headVal === 'reaper_necklace' || headVal === 'shadow_reaper_necklace' || headVal === 'warlord_hat' || headVal === 'monarch');
+        const showStars = (headVal === 'reaper_necklace' || headVal === 'shadow_reaper_necklace' || headVal === 'warlord_hat' || headVal === 'monarch' || headVal === 'fused_earrings');
         headStarsSelect.classList.toggle('hidden', !showStars);
         if (!showStars && headStarsSelect.value !== '1') {
             headStarsSelect.value = '1';
@@ -160,7 +168,7 @@ function openCalc(unitId) {
 
     const updateBodyStarVisibility = () => {
         const setVal = setSelect.value;
-        const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set' || setVal === 'warlord' || setVal === 'monarch');
+        const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set' || setVal === 'warlord' || setVal === 'monarch' || setVal === 'fused_set');
         bodyStarsSelect.classList.toggle('hidden', !showStars);
         if (!showStars && bodyStarsSelect.value !== '1') {
             bodyStarsSelect.value = '1';
@@ -172,7 +180,7 @@ function openCalc(unitId) {
 
     const updateLegsStarVisibility = () => {
         const setVal = setSelect.value;
-        const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set' || setVal === 'warlord' || setVal === 'monarch');
+        const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set' || setVal === 'warlord' || setVal === 'monarch' || setVal === 'fused_set');
         legsStarsSelect.classList.toggle('hidden', !showStars);
         if (!showStars && legsStarsSelect.value !== '1') {
             legsStarsSelect.value = '1';

@@ -12,7 +12,7 @@ unitDatabase.push({
     // META (Build Guide tab)
     meta: {
         short: "Ruler",
-        long: "Ruler",
+        long: "Duelust",
         note: "Powerful hybrid DPS that adapts to the battlefield via form switching."
     },
 
@@ -28,7 +28,7 @@ unitDatabase.push({
         customFollowUp: {
             chance: 20, // 100% / 5 attacks = 20% chance per attack
             dmgMult: 1.75, // 175% damage
-            fuaAnimation: 4, // Spa cap / animation 4
+            fuaAnimation: 6.5, // Spa cap / animation 4
             label: "Super Rage FUA (Every 5 Attacks)"
         }
     },

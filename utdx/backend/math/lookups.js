@@ -84,7 +84,7 @@ window._setCacheMap = _setCacheMap;
 // UPDATED: Dynamically checks Custom Traits if not found in the base cache
 window.getTraitFast = (idOrName) => {
     if (!idOrName) return null;
-    const lowerSearch = idOrName.toLowerCase();
+    const lowerSearch = idOrName.toLowerCase().trim();
 
     if (_traitCacheMap.size === 0) {
         traitsList.forEach(t => {
@@ -98,13 +98,13 @@ window.getTraitFast = (idOrName) => {
     // Fallback 1: Scan dynamically generated Custom Pairs
     if (!found) {
         if (typeof window.customTraits !== 'undefined') {
-            found = window.customTraits.find(t => t.id === idOrName || t.name === idOrName);
+            found = window.customTraits.find(t => t.id.toLowerCase() === lowerSearch || t.name.toLowerCase() === lowerSearch);
         }
         if (!found && typeof window.unitSpecificTraits !== 'undefined') {
             for (const key in window.unitSpecificTraits) {
                 const arr = window.unitSpecificTraits[key];
                 if (arr) {
-                    found = arr.find(t => t.id === idOrName || t.name === idOrName);
+                    found = arr.find(t => t.id.toLowerCase() === lowerSearch || t.name.toLowerCase() === lowerSearch);
                     if (found) break;
                 }
             }
@@ -113,14 +113,14 @@ window.getTraitFast = (idOrName) => {
 
     // Fallback 2: Try splitting by space/parentheses (e.g. "Ruler (Dmg/Spa)" -> "Ruler")
     if (!found) {
-        const baseName = idOrName.split(' ')[0].toLowerCase();
+        const baseName = lowerSearch.split(' ')[0];
         found = _traitCacheMap.get(baseName);
     }
 
-    // Cache the newly found Custom Trait for future fast lookups
+    // Cache the newly found Custom Trait for future fast lookups in lowercase
     if (found) {
-        _traitCacheMap.set(found.id, found);
-        _traitCacheMap.set(found.name, found);
+        _traitCacheMap.set(found.id.toLowerCase(), found);
+        _traitCacheMap.set(found.name.toLowerCase(), found);
     }
 
     return found;

@@ -12,7 +12,7 @@ unitDatabase.push({
     // META (Build Guide tab)
     meta: {
         short: "Ruler",
-        long: "Ruler/Astral",
+        long: "Ruler",
         note: "Powerful wind utility unit with high boss-slaying capacity."
     },
 
