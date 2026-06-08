@@ -548,14 +548,13 @@ function renderInventory() {
         if (lookupKey === 'warlord_hat') lookupKey = 'warlord';
         if (lookupKey === 'fused_earrings') lookupKey = 'fused_set';
 
+        const setObj = SETS.find(s => s.id === lookupKey) || SETS[0];
         let starCount = 0;
-        if (lookupKey === 'shadow_reaper' || lookupKey === 'reaper_set' || lookupKey === 'warlord' || lookupKey === 'monarch' || lookupKey === 'fused_set') {
+        if (setObj && setObj.rarity === 'Secret') {
             if (relic.stars >= 1.05) starCount = 3;
             else if (relic.stars >= 1.025) starCount = 2;
             else if (relic.stars >= 1) starCount = 1;
         }
-
-        const setObj = SETS.find(s => s.id === lookupKey) || SETS[0];
 
         const mainVal = calculateMainValue(relic);
         const mainBadge = getBadgeHtml(relic.mainStat, mainVal);

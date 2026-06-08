@@ -43,15 +43,15 @@ unitDatabase.push({
             dot: 150,
             dotDuration: 9,
             canCrit: true,
-            desc: "On Attack: Apply Burn for 150% Damage over 9 ticks. Burn from this unit can Crit."
+            desc: "<br>On Attack:<br>Apply Burn for 150% Damage over 9 ticks.<br>Burn from this unit can Crit."
         },
         {
             name: "Will of Fire",
-            desc: "When a Boss spawns: +15% Damage, -10% SPA, and +5% Range. When inflicting Burn to a Boss, the Burn lasts 2 ticks longer."
+            desc: "<br>When a Boss spawns:<br>+15% Damage, -10% SPA, and +5% Range.<br>When inflicting Burn to a Boss,<br>the Burn lasts 2 ticks longer."
         },
         {
             name: "Defying Flames",
-            desc: "When an enemy with Burn dies: Apply Critical Burn to nearby enemies. When attacking an enemy with Burn: Reset the duration of Burn."
+            desc: "<br>When an enemy with Burn dies:<br>Apply Critical Burn to nearby enemies.<br>When attacking an enemy with Burn:<br>Reset the duration of Burn."
         }
     ],
 

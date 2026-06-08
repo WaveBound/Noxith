@@ -151,7 +151,8 @@ const UNIT_FILES = [
     'ultimate_fused_warrior.js',
     'angel_born_in_hell.js',
     'nursefather_thumb.js',
-    'merciless_god.js'
+    'merciless_god.js',
+    'the_drink_super_rage.js'
 ];
 
 // Resolves after every unit script has loaded (or errored).

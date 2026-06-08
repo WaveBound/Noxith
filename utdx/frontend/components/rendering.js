@@ -1364,7 +1364,10 @@ function renderUnitCard(unit, absoluteIndex) {
         const currentMode = unit.modes[activeMode];
         const isSummon = unit.modesLabel?.toLowerCase() === 'summons' || unit.id === 'the_strongest_in_history';
         if (currentMode && !isSummon) {
-            const modeHtml = `<div class="mode-indicator-badge" style="display: flex; align-items: center; color: #c084fc; font-size: 0.65rem; font-weight: 800; border: 1px solid rgba(192, 132, 252, 0.4); background: rgba(192, 132, 252, 0.06); padding: 2px 6px; border-radius: 4px; white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis;" title="${currentMode.name}">⚙ ${currentMode.name.toUpperCase()}</div>`;
+            const modeHtml = `<div class="mode-indicator-badge" style="display: flex; align-items: center; color: #c084fc; font-size: 0.65rem; font-weight: 800; border: 1px solid rgba(192, 132, 252, 0.4); background: rgba(192, 132, 252, 0.06); padding: 2px 6px; border-radius: 4px; white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis;" title="${currentMode.name}">
+                ${currentMode.img ? `<img src="${currentMode.img}" alt="${currentMode.name}" style="width: 16px; height: 16px; margin-right: 8px; object-fit: contain;">` : '⚙'}
+                ${currentMode.name.toUpperCase()}
+            </div>`;
             initialModeIndicatorHtml = modeHtml;
         }
     }
@@ -1381,7 +1384,7 @@ function renderUnitCard(unit, absoluteIndex) {
             <button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">${SVGS.traits} TRAITS</button>
             <button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">${SVGS.info} INFO</button>
         </div>
-        <div class="ut-toggle-area">${initialModeIndicatorHtml}${modesBtn}${abilityToggleHtml}</div>
+        <div class="ut-toggle-area" style="gap: 8px;">${initialModeIndicatorHtml}${modesBtn}${abilityToggleHtml}</div>
     </div>`;
 
     const defaultSort = isAnyUnit(unit.id, ['sjw', 'esdeath']) ? 'damage' : 'dps';
@@ -1416,11 +1419,11 @@ function renderUnitCard(unit, absoluteIndex) {
                     </select>
                     <select onchange="filterList(this)" data-filter="set" class="search-select">
                         <option value="all">Sets: All</option>
-                        ${['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Shinobi', 'Reanimated Ninja', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi', 'Fusion'].map(set => `<option value="${set}">Sets: ${set.replace(' Set', '').replace('Captain', '')}</option>`).join('')}
+                        ${(typeof SETS !== 'undefined' ? SETS : []).filter(s => s.id !== 'none').map(set => `<option value="${set.name}">Sets: ${set.name.replace(' Set', '').replace('Captain', '')}</option>`).join('')}
                     </select>
                     <select onchange="filterList(this)" data-filter="head" class="search-select">
                         <option value="all">Heads: All</option>
-                        ${HEADS_LIST.map(h => `<option value="${h}">Heads: ${HEAD_CONFIG[h]?.name || h.replace('_', ' ')}</option>`).join('')}
+                        ${HEADS_LIST.map(h => `<option value="${h}">Heads: ${HEAD_CONFIG[h]?.name || (h === 'none' ? 'None' : h.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase()))}</option>`).join('')}
                     </select>
                     <select onchange="filterList(this)" data-filter="combo" class="search-select">
                         <option value="all">Combos: All</option>

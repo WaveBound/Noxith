@@ -414,7 +414,8 @@ const guideData = [
     { unit: "ultimate_fused_warrior", img: "images/units/UltimateFusedWarrior.png", isCalculated: true },
     { unit: "angel_born_in_hell", img: "images/units/AngelBornInHell.png", isCalculated: true },
     { unit: "nursefather_thumb", img: "images/units/nursefather_thumb.png", isCalculated: true },
-    { unit: "merciless_god", img: "images/units/MercilessGod.png", isCalculated: true }
+    { unit: "merciless_god", img: "images/units/MercilessGod.png", isCalculated: true },
+    { unit: "the_drink_super_rage", img: "images/units/TheDrink.png", isCalculated: true }
 ];
 const elementIcons = {
     "Water": "images/elements/Water.png",
