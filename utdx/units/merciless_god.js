@@ -12,7 +12,7 @@ unitDatabase.push({
     // META (Build Guide tab)
     meta: {
         short: "Ruler",
-        long: "Ruler",
+        long: "Duelist/Astral",
         note: "Universal Utility: features 6 distinct modes specializing in different stat distributions. No charge-up time required."
     },
 
