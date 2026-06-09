@@ -229,11 +229,11 @@ function applyPassiveBonus(passiveId, unitStats, originalUnit = null) {
         const unitIdLower = unitId.toLowerCase();
         const unitNameLower = (u.name || "").toLowerCase();
 
-        // Detect Synchro forms via Display Name as requested (must contain "(Syncro)")
-        const isSyncro = unitNameLower.includes('(syncro)');
+        // Detect Synchro forms via Display Name or unit ID as requested (must contain "syncro" or be in the fused list)
+        const isSyncro = unitNameLower.includes('(syncro)') || ['unparalleled_armor', 'majestic_armor', 'sjw'].includes(unitIdLower);
         
-        // Detect Clash capability explicitly for the requested units (Pirate King and Quake Warlord)
-        const hasClash = unitIdLower === 'pirate_king' || unitIdLower === 'quake_warlord';
+        // Detect Clash/Fusion capability explicitly for the requested units (Nutaru, Sasuke, etc.)
+        const hasClash = ['nutaru_beast', 'ancient_shinob', 'sasuke_great_war'].includes(unitIdLower);
 
         if (isSyncro) {
             effectiveStats.dmg = Math.floor(effectiveStats.dmg * (1 + (passive.syncroDmgBuff || 15) / 100));

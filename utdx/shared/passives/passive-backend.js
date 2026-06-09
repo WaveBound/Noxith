@@ -5,18 +5,6 @@
 window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
     let passivePcent = (uStats.buffDmg || 0); // Base passive damage
 
-    // Fused Earrings Passive (moved here for better integration with passivePcent)
-    if (headPiece === 'fused_earrings') {
-        const isSynchroNamed = uStats && uStats.name && uStats.name.toLowerCase().includes('syncro');
-        const canFuse = uStats && ['nutaru_beast', 'ancient_shinob', 'sasuke_great_war'].includes(uStats.id);
-        const isFusedUnit = uStats && ['unparalleled_armor', 'majestic_armor', 'sjw'].includes(uStats.id);
-
-        if (isSynchroNamed || canFuse) {
-            passivePcent += 50; // Non-synchro form gain 50% dmg
-        } else if (isFusedUnit) {
-            passivePcent += 15; // Synchro form gain 15% dmg
-        }
-    }
     let passiveSpaPcent = 0;
     let passiveRangePcent = 0;
     let trueDmgFromPassives = 0;

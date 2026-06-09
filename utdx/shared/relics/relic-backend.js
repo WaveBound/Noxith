@@ -520,5 +520,5 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
         headCalc.type = 'fused_earrings';
     }
 
-    return { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc };
+    return { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc, headCfTag, headCmTag };
 };
