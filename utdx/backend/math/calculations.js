@@ -60,7 +60,9 @@ window.getUnitUncappedCrit = function (slotUnit, slotIndex) {
             const isSelfTt = window.isUnit(slotUnit.id, 'triple_threat');
 
             if (unrivaledMarkActive || isSelfTt) {
-                if (element === 'wind') crit += 5;
+                if (element === 'wind') {
+                    crit += 5;
+                }
             }
             if (unrivaledMarkActive || isSelfAbh) {
                 if (element === 'light') {
@@ -196,6 +198,9 @@ function calculateDPS(uStats, relicStats, context) {
         finalRange *= (1 + headCalc.range / 100);
     }
 
+    // Compile absolute Boss Damage Multiplier to prevent double-counting bugs
+    let extraBossDmg = (sBonus.bossDmg || 0) + (headCalc.bossDmg || 0) + (passiveBossDmgFromPassives || 0);
+
     if (window.isUnit(uStats.id, 'nursefather_thumb')) {
         let pBoss = passiveBossDmgFromPassives || 0;
         if (pBoss === 0 && uStats.passives) {
@@ -205,14 +210,10 @@ function calculateDPS(uStats, relicStats, context) {
                 else if (p.boss) pBoss += p.boss;
             });
         }
-        const nursefatherBossDmg = (uStats.bossDmg || 0) + pBoss;
-        bossMult = (bossMult - 1 + nursefatherBossDmg / 100) + 1;
-    } else {
-        const relicBossDmg = (sBonus.bossDmg || 0) + (headCalc.bossDmg || 0) + (uStats.bossDmg || 0) + (passiveBossDmgFromPassives || 0);
-        if (relicBossDmg > 0) {
-            bossMult = (bossMult - 1 + relicBossDmg / 100) + 1;
-        }
+        extraBossDmg = pBoss;
     }
+
+    bossMult = 1 + ((traitObj?.bossDmg || 0) + (uStats.bossDmg || 0) + extraBossDmg) / 100;
 
     let headDmgPassiveMod = headDmgPassive;
     if (headPiece === 'biju_head' && window.isUnit(uStats.id, 'triple_threat')) {
@@ -853,14 +854,9 @@ function calculateDPS(uStats, relicStats, context) {
     const rawTotal = (elemFinalHitDps + elemFinalDotDps + elemFinalSummonDps);
     const rawBossTotal = ((elemBossHitDps + elemBossDotDps) * bossMult + elemFinalSummonDps);
 
-    // STRICT CAPPING CRIT PENALTY: Highly scales down overall DPS score if built with wasted crit rate (>100%)
-    const wastedCrit = Math.max(0, rawCritRate - 100);
-    const wastePenalty = wastedCrit > 0 ? (rawTotal * 0.1 * wastedCrit) : 0;
-    const wastePenaltyBoss = wastedCrit > 0 ? (rawBossTotal * 0.1 * wastedCrit) : 0;
-
     return {
-        total: rawTotal - wastePenalty,
-        bossTotal: rawBossTotal - wastePenaltyBoss,
+        total: rawTotal,
+        bossTotal: rawBossTotal,
         bossMult: bossMult,
         hit: elemFinalHitDps,
         baseHitDps: hitDpsTotal,

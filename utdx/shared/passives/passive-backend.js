@@ -1,370 +1,429 @@
-// combineTraits moved to shared/traits/trait-backend.js
+// ============================================================================
+// PASSIVE-BACKEND.JS - Centralized Math for Passives and Global Buffs
+// ============================================================================
 
-function getLevelStats(baseDmg, baseSpa, baseRange, dmgPoints, spaPoints, rangePoints) {
-    const dmgMult = Math.pow(1.0045125, dmgPoints);
-    const spaMult = Math.pow(0.9954875, spaPoints);
-    const rangeMult = Math.pow(1.0045125, rangePoints || 0);
+window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
+    let passivePcent = (uStats.buffDmg || 0); // Base passive damage
 
-    return {
-        dmg: baseDmg * dmgMult,
-        spa: baseSpa * spaMult,
-        range: baseRange * rangeMult,
-        dmgMult,
-        spaMult,
-        rangeMult
-    };
-}
+    let passiveSpaPcent = 0;
+    let passiveRangePcent = 0;
+    let trueDmgFromPassives = 0;
+    let passiveCritFromPassives = 0;
+    let passiveCdmgFromPassives = 0;
+    let passiveBossDmgFromPassives = 0;
+    let passiveDotFromPassives = 0;
+    let passiveBreakdown = [];
 
-const checkIsBetter = (res, currentBest, optimizeFor) => {
-    if (optimizeFor === 'range') {
-        if (res.range > currentBest.range) return true;
-        if (res.range === currentBest.range && res.total > currentBest.total) return true;
-        return false;
+    if (uStats.passiveDmg) passivePcent += uStats.passiveDmg;
+    if (uStats.passiveSpa) passiveSpaPcent += uStats.passiveSpa;
+    if (uStats.passiveRange) passiveRangePcent += uStats.passiveRange;
+    if (uStats.passiveCrit) passiveCritFromPassives += uStats.passiveCrit;
+    if (uStats.passiveCdmg) passiveCdmgFromPassives += uStats.passiveCdmg;
+
+    if (uStats.passiveDmg || uStats.passiveSpa || uStats.passiveRange || uStats.passiveCrit || uStats.passiveCdmg) {
+        let basePassiveName = "Unit Base (Passive)";
+        // Attribution: Merciless God mode stats represent the Unstable Divinity cycle
+        if (uStats.id === 'merciless_god' && (uStats.passiveDmg === 233.33 || uStats.passiveSpa === 20)) {
+            basePassiveName = "Unstable Divinity (Cycle Avg)";
+        }
+
+        passiveBreakdown.push({
+            name: basePassiveName,
+            dmg: uStats.passiveDmg || 0,
+            spa: uStats.passiveSpa || 0,
+            range: uStats.passiveRange || 0,
+            crit: uStats.passiveCrit || 0,
+            cdmg: uStats.passiveCdmg || 0,
+            trueDmg: 0,
+            dot: 0 // DoT Buff is handled as a separate additive bucket row in the breakdown
+        });
     }
-    if (optimizeFor === 'raw_dmg' || optimizeFor === 'damage') {
-        if (res.dmgVal > currentBest.dmgVal) return true;
-        if (res.dmgVal === currentBest.dmgVal && res.total > currentBest.total) return true;
-        return false;
+
+    if (uStats.passives && Array.isArray(uStats.passives)) {
+        uStats.passives.forEach(p => {
+            let pDmg = p.passiveDmg || 0;
+            let pSpa = p.passiveSpa || 0;
+            let pRange = p.passiveRange || 0;
+            let pTrue = p.trueDmg || 0;
+            let pCrit = p.passiveCrit || 0;
+            let pCdmg = p.passiveCdmg || 0;
+            let pDot = p.dot || 0;
+            let pBoss = p.bossDmg || p.passiveBossDmg || p.boss || 0;
+            if (p.name === "Brutal Slashes") {
+                pDot = (upgradeLevel >= 6) ? 120 : 100;
+            }
+
+            if (p.name === "Divine Replication") {
+                const unitBase = typeof window.getUnitById === 'function' ? window.getUnitById(uStats.id) : null;
+                const unitBaseMax = unitBase ? unitBase.placement : 3;
+                
+                // If a Trait like Ruler restricts the unit, the "Available Placements" pool shrinks.
+                // Unused = (Available Placements per Trait) - (Final Build Limit).
+                const availablePool = context.traitObj?.limitPlace || unitBaseMax;
+                const unused = Math.max(0, availablePool - context.placement);
+                pDmg += unused * 100;
+            }
+
+            if (window.isUnit && window.isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother") {
+                const isLoadout = (window.CALCULATION_MODE === 'loadout');
+                const useHotbar = isLoadout || (context && context.isHotbar);
+                const hbStats = useHotbar && typeof window.getCachedHotbarStats === 'function' ? window.getCachedHotbarStats() : { divinityCount: 0 };
+                let divinityCount = hbStats.divinityCount || 0;
+                if (uStats.tags && uStats.tags.includes('Divinity')) {
+                    let selfCount = uStats.placement || 1;
+                    if (window.isUnit && window.isUnit(uStats.id, 'water_god')) selfCount = Math.max(0, selfCount - 1);
+                    divinityCount = Math.max(0, divinityCount - selfCount);
+                }
+
+                const maxBuff = (upgradeLevel >= 2) ? 90 : 60;
+                pDmg = Math.min(maxBuff, divinityCount * 15);
+            }
+
+            if (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'king_sailor')) {
+                if (p.name === "Manipulator of Fate") {
+                    pDmg = 0;
+                    pSpa = 0;
+
+                    const ksTags = uStats.tags || ["Magi", "King", "Hero", "Uncontrollable Power"];
+                    let matchPlacements = 0;
+                    let mismatchPlacements = 0;
+
+                    const hotbarSlots = window.hotbarState?.slots || [];
+                    hotbarSlots.forEach((s) => {
+                        if (!s) return;
+                        if (s.id === uStats.id || (window.isUnit && window.isUnit(s.id, uStats.id))) return;
+
+                        const sUnit = window.getUnitById ? window.getUnitById(s.id) : null;
+                        let sPlacement = (sUnit ? sUnit.placement : s.placement) || 1;
+
+                        const isAssistant = (sUnit?.tags && sUnit.tags.includes('Assistant')) ||
+                            (s.tags && s.tags.includes('Assistant')) ||
+                            (window.isUnit && window.isUnit(s.id, 'speedwagon'));
+
+                        if (isAssistant) {
+                            sPlacement = 1;
+                        } else {
+                            const sTraitId = (window.unitTraits && window.unitTraits[s.id]);
+                            if (sTraitId) {
+                                const sTrait = typeof window.getTraitFast === 'function' ? window.getTraitFast(sTraitId) : null;
+                                if (sTrait && sTrait.limitPlace !== undefined) {
+                                    sPlacement = Math.min(sPlacement, sTrait.limitPlace);
+                                }
+                            }
+                        }
+
+                        const sTags = (sUnit ? sUnit.tags : s.tags) || [];
+                        const hasMatch = ksTags.some(tag => sTags.includes(tag));
+
+                        if (hasMatch) {
+                            matchPlacements += sPlacement;
+                        } else {
+                            mismatchPlacements += sPlacement;
+                        }
+
+                        if (window.isUnit && window.isUnit(s.id, 'phantom_captain') && sUnit?.summonStats?.maxCount) {
+                            mismatchPlacements += sUnit.summonStats.maxCount;
+                        }
+                    });
+
+                    pDmg = Math.min(50, matchPlacements * 10);
+                    pSpa = Math.min(25, mismatchPlacements * 5);
+                }
+            }
+
+            if (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'ant_king_savage')) {
+                if (p.name === "Monarch's Devotion") {
+                    const hotbar = window.hotbarState;
+                    const jinooPresent = hotbar && hotbar.slots && hotbar.slots.some(s => s && window.isUnit && (window.isUnit(s.id, 'jinoo_shadow_monarch') || window.isUnit(s.id, 'sjw')));
+                    if (jinooPresent) {
+                        pDmg = 20;
+                        pRange = 10;
+                    } else {
+                        pDmg = 0;
+                        pRange = 0;
+                    }
+                }
+            }
+
+            if (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'marine_hero')) {
+                if (p.name === "Hero of the Marines") {
+                    let warlordPlacements = 0;
+                    const hotbarSlots = window.hotbarState?.slots || [];
+                    hotbarSlots.forEach((s) => {
+                        if (!s) return;
+                        if (s.id === uStats.id || (window.isUnit && window.isUnit(s.id, uStats.id))) return;
+
+                        const sUnit = window.getUnitById ? window.getUnitById(s.id) : null;
+                        const sTags = (sUnit ? sUnit.tags : s.tags) || [];
+                        
+                        if (sTags.includes('Warlord')) {
+                            let sPlacement = (sUnit ? sUnit.placement : s.placement) || 1;
+                            const sTraitId = (window.unitTraits && window.unitTraits[s.id]);
+                            if (sTraitId) {
+                                const sTrait = typeof window.getTraitFast === 'function' ? window.getTraitFast(sTraitId) : null;
+                                if (sTrait && sTrait.limitPlace !== undefined) {
+                                    sPlacement = Math.min(sPlacement, sTrait.limitPlace);
+                                }
+                            }
+                            warlordPlacements += sPlacement;
+                        }
+                    });
+
+                    const dmgPerWarlord = 25;
+                    const maxCap = (upgradeLevel >= 2) ? 150 : 100;
+                    pDmg = Math.min(maxCap, warlordPlacements * dmgPerWarlord);
+                }
+            }
+
+            if (p.name === "Unrivaled Mark") {
+                const isPotential = window.CALCULATION_MODE === 'potential';
+                if (!isPotential) {
+                    const hotbar = window.hotbarState;
+                    if (hotbar && hotbar.slots) {
+                        const slotIdx = hotbar.slots.findIndex(s => s && (s.id.split('-')[0] === uStats.id.split('-')[0]));
+                        if (slotIdx !== 0) return;
+                    }
+                }
+            }
+
+            if (p.buffedByJunior && headPiece === 'junior') {
+                pDmg *= 1.1;
+                pSpa *= 1.1;
+                pTrue *= 1.1;
+                pCrit *= 1.1;
+                if (!p.juniorIgnoreCdmg) {
+                    pCdmg *= 1.1;
+                }
+                pDot *= 1.1;
+            }
+
+            const isKsDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'king_sailor') && (p.name === "Manipulator of Fate" || p.name === "Unrivaled Mark"));
+            const isAkDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'ant_king_savage') && p.name === "Monarch's Devotion");
+            const isUgDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'underworld_god') && p.name === "As The Eldest Brother");
+            const isMhDynamic = (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'marine_hero') && p.name === "Hero of the Marines");
+            const isAbhDynamic = (window.isUnit && window.isUnit(uStats.id, 'angel_born_in_hell') && p.name === "Warrior that destroys Evil");
+
+            if (isAbhDynamic) {
+                pDmg = 0;
+                let totalAlliedCrit = 0;
+                let myPlacement = (uStats.placement !== undefined) ? uStats.placement : 1;
+                
+                if (myPlacement > 1) {
+                    let myCrit = uStats.stats?.crit || uStats.crit || 0;
+                    if (context.traitObj && context.traitObj.critRate) myCrit += context.traitObj.critRate;
+                    if (uStats.passives) {
+                        uStats.passives.forEach(pa => {
+                            if (pa.name === "Lightspeed Reflexes") myCrit += 50;
+                        });
+                    }
+                    totalAlliedCrit += myCrit * (myPlacement - 1);
+                }
+
+                if (window.CALCULATION_MODE === 'loadout') {
+                    const isInHotbar = window.hotbarState?.slots?.some(s => s && (s.id === uStats.id || (window.isUnit && window.isUnit(s.id, uStats.id))));
+                    if (isInHotbar) {
+                        const hotbarSlots = window.hotbarState?.slots || [];
+                        hotbarSlots.forEach((s, slotIdx) => {
+                            if (!s) return;
+                            if (s.id === uStats.id || (window.isUnit && window.isUnit(s.id, uStats.id))) return;
+                            
+                            const sUnit = window.getUnitById ? window.getUnitById(s.id) : null;
+                            if (sUnit) {
+                                const sPlacement = (s.placement !== undefined) ? s.placement : (sUnit.placement || 1);
+                                totalAlliedCrit += window.getUnitUncappedCrit(sUnit, slotIdx) * sPlacement;
+                            }
+                        });
+                    } else {
+                        totalAlliedCrit = 0;
+                    }
+                }
+
+                if (totalAlliedCrit > 0) {
+                    const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+                    const mult = (eLevel >= 4) ? 1.0 : 0.5;
+                    pDmg = totalAlliedCrit * mult;
+                }
+            }
+
+            if (p.name === "Pirate Hunter") {
+                if (context.isBoss || context.isAbility) {
+                    let bossDmgBuff = (upgradeLevel >= 4) ? 65 : 50;
+                    if (headPiece === 'junior') {
+                        bossDmgBuff *= 1.1;
+                    }
+                    pDmg += bossDmgBuff;
+                    pCrit += 65;
+                }
+            }
+
+            if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || pBoss !== 0 || isKsDynamic || isAkDynamic || isUgDynamic || isMhDynamic || isAbhDynamic) {
+                passivePcent += pDmg;
+                passiveSpaPcent += pSpa;
+                passiveRangePcent += pRange;
+                trueDmgFromPassives += pTrue;
+                passiveCritFromPassives += pCrit;
+                passiveCdmgFromPassives += pCdmg;
+                passiveBossDmgFromPassives += pBoss;
+                passiveDotFromPassives += pDot;
+                if (p.dotDuration && !uStats.dotDuration) uStats.dotDuration = p.dotDuration;
+                passiveBreakdown.push({ name: p.name, dmg: pDmg, spa: pSpa, range: pRange, trueDmg: pTrue, crit: pCrit, cdmg: pCdmg, dot: pDot, bossDmg: pBoss });
+            }
+        });
     }
-    return res.total > currentBest.total;
-};
 
-// --- CC DETECTION UTILITY ---
-window.unitHasCC = function(uStats) {
-    if (!uStats) return false;
-    let s = "";
-    if (uStats.support) s += uStats.support.toLowerCase() + ",";
-    if (uStats.tags && Array.isArray(uStats.tags)) s += uStats.tags.join(',').toLowerCase();
-    
-    return s.includes('slow') || s.includes('stun') || s.includes('confuse') || s.includes('timestop');
-};
+    if (window.CALCULATION_MODE === 'loadout' && window.isUnit && !window.isUnit(uStats.id, 'jinoo_shadow_monarch') && !window.isUnit(uStats.id, 'sjw')) {
+        const hbStats = typeof window.getCachedHotbarStats === 'function' ? window.getCachedHotbarStats() : {};
+        if (hbStats.jinooPresent) {
+            if (uStats.tags && uStats.tags.includes('Leveling')) {
+                const jinooSlot = window.hotbarState?.slots.find(s => s && (window.isUnit(s.id, 'jinoo_shadow_monarch') || window.isUnit(s.id, 'sjw')));
+                const jinooELevel = (jinooSlot && window.unitELevels && window.unitELevels[jinooSlot.id] !== undefined) ? window.unitELevels[jinooSlot.id] : 0;
 
-window.unitHasTimeSnail = function(uStats) {
-    if (!uStats) return false;
-    return window.isUnit && (
-        window.isUnit(uStats.id, 'water_god') ||
-        window.isUnit(uStats.id, 'underworld_god') ||
-        window.isUnit(uStats.id, 'crow_shinobi')
-    );
-};
+                let buffDmg = 20;
+                if (jinooELevel >= 4) buffDmg = 30;
 
-window.unitHasStatusEffect = function(uStats) {
-    if (!uStats) return false;
-    if (window.unitHasCC(uStats)) return true;
-    if (window.unitHasTimeSnail(uStats)) return true;
-    
-    if (uStats.stats && (uStats.stats.dot > 0 || uStats.stats.bossDot > 0)) return true;
-    if (uStats.dot > 0 || uStats.bossDot > 0) return true;
-    if (uStats.customSummons && uStats.customSummons.some(s => s.dotPct > 0)) return true;
-    if (uStats.customFollowUp && uStats.customFollowUp.dotPct > 0) return true;
-    if (uStats.modes && Array.isArray(uStats.modes)) {
-        if (uStats.modes.some(m => m && (m.dot > 0 || (m.customFollowUp && m.customFollowUp.dotPct > 0)))) return true;
+                if (window.isUnit(uStats.id, 'shadow_knight')) {
+                    buffDmg = (jinooELevel >= 4) ? 50 : 40;
+                }
+
+                passivePcent += buffDmg;
+                passiveBreakdown.push({ name: "Shadow Legion Support", dmg: buffDmg, spa: 0, range: 0, trueDmg: 0, crit: 0, cdmg: 0, dot: 0 });
+            }
+        }
     }
-    
-    let s = "";
-    if (uStats.support) s += uStats.support.toLowerCase() + ",";
-    if (uStats.tags && Array.isArray(uStats.tags)) s += uStats.tags.join(',').toLowerCase();
-    
-    return s.includes('freeze') || s.includes('burn') || s.includes('bleed') || s.includes('poison') || s.includes('electrified') || s.includes('slow') || s.includes('stun');
+
+    if (window.CALCULATION_MODE === 'loadout' && context && context.isHotbar && window.isUnit && !window.isUnit(uStats.id, 'ant_king_savage')) {
+        const hbStats = typeof window.getCachedHotbarStats === 'function' ? window.getCachedHotbarStats() : {};
+        if (hbStats.akPresent && hbStats.jinooPresent) {
+            passivePcent += 10;
+            passiveBreakdown.push({ name: "Monarch's Devotion", dmg: 10, spa: 0, range: 0, trueDmg: 0, font: 0, cdmg: 0, dot: 0 });
+        }
+    }
+
+    if (window.CALCULATION_MODE === 'loadout' && context && context.isHotbar && window.isUnit && window.isUnit(uStats.id, 'ace')) {
+        const hasQuakeWarlord = window.hotbarState?.slots.some(s => s && window.isUnit(s.id, 'quake_warlord'));
+        if (hasQuakeWarlord) {
+            passivePcent += 40;
+            passiveBreakdown.push({ name: "My Sons", dmg: 40, spa: 0, range: 0, trueDmg: 0, crit: 0, cdmg: 0, dot: 0 });
+        }
+    }
+
+    if (window.CALCULATION_MODE === 'loadout' && context && context.isHotbar && window.isUnit && !window.isUnit(uStats.id, 'angel_born_in_hell')) {
+        const hasABH = window.hotbarState?.slots.some(s => s && window.isUnit(s.id, 'angel_born_in_hell'));
+        const doesFUA = uStats.id === 'ultimate_fused_warrior' || uStats.id === 'strongest_swordsman_hunter' || uStats.id === 'water_god' || uStats.id === 'triple_threat';
+        if (hasABH && doesFUA) {
+            const abhSlot = window.hotbarState.slots.find(s => s && window.isUnit(s.id, 'angel_born_in_hell'));
+            const abhELevel = abhSlot ? (window.unitELevels?.[abhSlot.id] ?? 6) : 6;
+            const holyAuraDmg = (abhELevel >= 2) ? 50 : 30;
+            passivePcent += holyAuraDmg;
+            passiveBreakdown.push({ name: "Holy Aura (ABH Buff)", dmg: holyAuraDmg, spa: 0, range: 0, trueDmg: 0, crit: 0, cdmg: 0, dot: 0 });
+        }
+    }
+
+    return { passivePcent, passiveSpaPcent, passiveRangePcent, trueDmgFromPassives, passiveCritFromPassives, passiveCdmgFromPassives, passiveBossDmgFromPassives, passiveDotFromPassives, passiveBreakdown };
 };
 
-const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optimizeFor = 'dps') => {
-    let mode = headMode;
-    if (mode === true) mode = 'auto';
-    if (mode === false) mode = 'none';
+window.calcGlobalBuffs = function (uStats, context, headPiece) {
+    let globalDmg = 0, globalSpa = 0, globalRange = 0, globalCrit = 0, globalCdmg = 0;
+    let activeGlobalBuffs = {};
 
-    let headOptions = (mode === 'auto')
-        ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut']
-        : (mode && mode !== 'none' ? [mode] : ['none']);
+    if (typeof window !== 'undefined' && window.GLOBAL_BUFF_DATA) {
+        Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
+            let isActive = false;
+            const overrideKey = buff.id + 'Buff';
 
-    let globalBestRes = { total: -1, range: -1 };
-    let globalBestAssignments = {};
-    let globalBestHead = 'none';
-
-    const applyContextualStats = (b, pieceName, mainStat, pStat, sStat, ratio, validCandidates, stats, context) => {
-        let pWeight = ratio.p;
-        let sWeight = ratio.s;
-
-        if (pStat === mainStat) { sWeight = Math.min(6, sWeight + pWeight); pWeight = 0; }
-        else if (sStat === mainStat) { pWeight = Math.min(6, pWeight + sWeight); sWeight = 0; }
-        if (pStat === mainStat && sStat === mainStat) {
-            const fallback = validCandidates.find(c => c !== mainStat);
-            if (fallback) {
-                pStat = fallback;
-                pWeight = 6;
-                sWeight = 0;
+            if (buff.hideButton || (buff.id === 'ksailor' && window.isUnit && window.isUnit(uStats.id, 'king_sailor')) || buff.id === 'unrivaledMark') {
+                isActive = true;
+            } else if (context[overrideKey] !== undefined) {
+                isActive = context[overrideKey];
+            } else if (context[buff.stateKey] !== undefined) {
+                isActive = context[buff.stateKey];
             } else {
-                pWeight = 0;
-                sWeight = 0;
+                isActive = window[buff.stateKey];
             }
-        }
 
-        let pVal = 0, sVal = 0;
-        if (pWeight > 0) { pVal = PERFECT_SUBS[pStat] * pWeight; b[pStat] = (b[pStat] || 0) + pVal; }
-        if (sWeight > 0) { sVal = PERFECT_SUBS[sStat] * sWeight; b[sStat] = (b[sStat] || 0) + sVal; }
+            if (isActive) {
+                let buffStats = buff.math(uStats, context);
 
-        let activeFillers = [...validCandidates];
-        if (activeFillers.includes('cf') || activeFillers.includes('cm')) {
-            const checkRes = calculateDPS(stats, b, context);
-            if (checkRes.critData) {
-                const currentRaw = checkRes.critData.rawRate; 
-                if (currentRaw >= 99.9 || checkRes.critData.rate === 0) {
-                    activeFillers = activeFillers.filter(
-                        c =>
-                            (c === 'cf' && currentRaw < 100) ||
-                            (c === 'cm' && checkRes.critData.rate > 0) ||
-                            (c !== 'cf' && c !== 'cm')
-                    );
+                const unrivaledMarkActive = context.unrivaledMark || window.unrivaledMark || (window.hotbarState?.buffState?.unrivaledMark);
+                const isPotential = window.CALCULATION_MODE === 'potential';
+                const leader = window.hotbarState?.slots?.[0];
+                const leadingId = isPotential ? uStats.id : (leader ? leader.id : null);
+                
+                if (buff.id === 'unrivaledMark' && leadingId) {
+                    const uTags = uStats.tags || [];
+                    const uElement = String(uStats.element || uStats.stats?.element || '').toLowerCase();
+                    const isAbh = window.isUnit(leadingId, 'angel_born_in_hell');
+                    const isTt = window.isUnit(leadingId, 'triple_threat');
+                    const isKs = window.isUnit(leadingId, 'king_sailor');
+
+                    if (!unrivaledMarkActive && !isPotential && !(leader && leadingId === leader.id)) return;
+
+                    let appliedDmg = 0;
+                    let appliedSpa = 0;
+                    let appliedCdmg = 0;
+                    let appliedCrit = 0;
+                    let appliedRange = 0;
+
+                    if (isAbh) {
+                        if (uTags.includes('Fused') || uTags.includes('Fusion')) {
+                            appliedDmg = 50;
+                            appliedCdmg = 50;
+                        } else if (uTags.includes('Super Warrior')) {
+                            appliedDmg = 30;
+                            appliedSpa = 10;
+                        } else if (uElement === 'light') {
+                            appliedDmg = 20;
+                            appliedCrit = 5;
+                        }
+                    } else if (isTt) {
+                        if (uTags.includes('Piece')) {
+                            appliedDmg = 50;
+                        } else if (uTags.includes('Sword')) {
+                            appliedDmg = 25;
+                            appliedRange = 10;
+                        } else if (uElement === 'wind') {
+                            appliedDmg = 20;
+                            appliedCrit = 5;
+                        }
+                    } else if (isKs) {
+                        if (uTags.includes('Magi')) {
+                            appliedDmg = 50;
+                            appliedSpa = 15;
+                        } else if (uTags.includes('Uncontrollable Power')) {
+                            appliedDmg = 30;
+                            appliedSpa = 10;
+                        } else if (uElement === 'water') {
+                            appliedDmg = 20;
+                            appliedSpa = 10;
+                        }
+                    }
+
+                    buffStats = {
+                        dmg: appliedDmg,
+                        spa: appliedSpa,
+                        cdmg: appliedCdmg,
+                        crit: appliedCrit,
+                        range: appliedRange
+                    };
+                }
+
+                if (headPiece === 'junior' && ['miku', 'enlightenedgod', 'ksailor', 'bijuu', 'magehill'].includes(buff.id)) {
+                    if (buffStats.dmg || buffStats.damage) { let k = buffStats.dmg ? 'dmg' : 'damage'; buffStats[k] *= 1.1; }
+                    if (buffStats.spa) buffStats.spa *= 1.1;
+                }
+
+                if (buffStats && Object.values(buffStats).some(v => v !== 0)) {
+                    activeGlobalBuffs[buff.id] = buffStats;
+                    const s = buffStats;
+                    globalDmg += s.dmg || s.damage || 0;
+                    globalSpa += s.spa || 0;
+                    globalRange += s.range || s.rangeBonus || 0;
+                    globalCrit += s.crit || s.critRate || s.cRate || 0;
+                    globalCdmg += s.cdmg || s.critDmg || s.cDmg || 0;
                 }
             }
-        }
-
-        activeFillers.forEach(cand => {
-            if (cand === mainStat || (cand === pStat && pWeight > 0) || (cand === sStat && sWeight > 0)) return;
-            b[cand] = (b[cand] || 0) + PERFECT_SUBS[cand];
         });
-        return { pStat, pVal, sStat, sVal };
-    };
+    }
 
-    const formatAssignment = (res) => {
-        let arr = [];
-        if (res.pVal > 0) arr.push({ type: res.pStat, val: res.pVal });
-        if (res.sVal > 0) arr.push({ type: res.sStat, val: res.sVal });
-        return arr;
-    };
-
-    headOptions.forEach(headType => {
-        const actualIncludeHead = (headType !== 'none');
-        stats.context.headPiece = headType;
-
-        if (!includeSubs) {
-            let res = calculateDPS(stats, build, stats.context);
-            res.totalStats = build;
-            if (checkIsBetter(res, globalBestRes, optimizeFor)) {
-                globalBestRes = res; globalBestAssignments = {}; globalBestHead = headType;
-            }
-            return;
-        }
-
-        let activeCandidates = candidates;
-        
-        if (headType === 'sorcerer_hunter_spirit') {
-            activeCandidates = activeCandidates.filter(c => c !== 'cf' && c !== 'cm');
-        } else {
-            let baseBuild = { dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0, set: build.set || build.setName };
-            if (build.bodyType) baseBuild[build.bodyType] = (MAIN_STAT_VALS.body[build.bodyType] || 0);
-            if (build.legType) baseBuild[build.legType] = (MAIN_STAT_VALS.legs[build.legType] || 0);
-
-            const baseRes = calculateDPS(stats, baseBuild, { ...stats.context, headPiece: headType });
-            
-            const testResCf = calculateDPS(stats, { ...baseBuild, cf: (baseBuild.cf || 0) + 5 }, { ...stats.context, headPiece: headType });
-            if (testResCf.total <= baseRes.total && testResCf.bossTotal <= baseRes.bossTotal) {
-                activeCandidates = activeCandidates.filter(c => c !== 'cf');
-            }
-            
-            if (baseRes.critData && baseRes.critData.rate <= 0) {
-                activeCandidates = activeCandidates.filter(c => c !== 'cm');
-            }
-        }
-
-        let strategies = [];
-        activeCandidates.forEach(c => strategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
-        const pairs = [
-            ['dmg', 'cf'], ['dmg', 'spa'], ['dmg', 'range'], ['dmg', 'cm'], 
-            ['cf', 'cm'], ['spa', 'range'], ['spa', 'cf'], ['spa', 'cm'],
-            ['dot', 'dmg'], ['dot', 'spa'], ['dot', 'cf'], ['dot', 'cm']
-        ];
-        const ratios = [{ p: 4, s: 3 }, { p: 3, s: 4 }, { p: 5, s: 2 }, { p: 2, s: 5 }];
-
-        pairs.forEach(pair => {
-            const [c1, c2] = pair;
-            if (!activeCandidates.includes(c1) || !activeCandidates.includes(c2)) return;
-            ratios.forEach(r => strategies.push({ p: c1, s: c2, ratio: r }));
-        });
-
-        strategies.forEach(strat => {
-            let testBuild = { dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0 };
-            if (build.set || build.setName) testBuild.set = build.set || build.setName;
-            if (build.bodyType) testBuild[build.bodyType] = (testBuild[build.bodyType] || 0) + (MAIN_STAT_VALS.body[build.bodyType] || 0);
-            if (build.legType) testBuild[build.legType] = (testBuild[build.legType] || 0) + (MAIN_STAT_VALS.legs[build.legType] || 0);
-
-            let currentAssignments = {};
-            if (actualIncludeHead) {
-                const res = applyContextualStats(testBuild, 'head', null, strat.p, strat.s, strat.ratio, activeCandidates, stats, stats.context);
-                currentAssignments.head = formatAssignment(res);
-            }
-            const resBody = applyContextualStats(testBuild, 'body', build.bodyType, strat.p, strat.s, strat.ratio, activeCandidates, stats, stats.context);
-            currentAssignments.body = formatAssignment(resBody);
-            const resLegs = applyContextualStats(testBuild, 'legs', build.legType, strat.p, strat.s, strat.ratio, activeCandidates, stats, stats.context);
-            currentAssignments.legs = formatAssignment(resLegs);
-
-            let res = calculateDPS(stats, testBuild, stats.context);
-            res.totalStats = testBuild;
-
-            if (checkIsBetter(res, globalBestRes, optimizeFor)) {
-                globalBestRes = res;
-                globalBestHead = headType;
-                globalBestAssignments = currentAssignments;
-                globalBestAssignments.selectedHead = headType;
-            }
-        });
-    });
-
-    globalBestAssignments.selectedHead = globalBestHead;
-    return { res: globalBestRes, desc: "", assignments: globalBestAssignments };
+    return { globalDmg, globalSpa, globalRange, globalCrit, globalCdmg, activeGlobalBuffs };
 };
-
-function _calcSummonDPS(uStats, finalDmg, finalSpa, placement) {
-    if (!uStats.summonStats) return { summonDpsTotal: 0, summonData: null };
-    const s = uStats.summonStats;
-    const planeBaseDmg = finalDmg * (s.dmgPct / 100);
-    const calcPlaneTypeDPS = (typeStats) => {
-        if (!typeStats) return 0;
-        const attacksPerLife = Math.floor(typeStats.duration / typeStats.spa) + 1;
-        let totalDamageOverLife = 0;
-        for (let i = 0; i < attacksPerLife; i++) {
-            const time = i * typeStats.spa;
-            let isBuffed = time < s.buffWindow;
-            let pMult = (1 + ((isBuffed ? s.buffCdmg : 150) / 100) * ((isBuffed ? s.buffCrit : 0) / 100));
-            totalDamageOverLife += planeBaseDmg * pMult;
-        }
-        return totalDamageOverLife / typeStats.duration;
-    };
-    const dpsA = calcPlaneTypeDPS(s.planeA);
-    const dpsB = calcPlaneTypeDPS(s.planeB);
-    const avgOnePlaneDps = (dpsA + dpsB) / 2;
-    const avgDuration = ((s.planeA?.duration || 0) + (s.planeB?.duration || 0)) / 2;
-    const attacksToSpawn = s.attacksToSpawn || 1;
-    const actualCount = Math.min(avgDuration / (finalSpa * attacksToSpawn), s.maxCount);
-    return { summonDpsTotal: (avgOnePlaneDps * actualCount) * placement, summonData: { count: actualCount, max: s.maxCount, avgPlaneDps: avgOnePlaneDps, hostSpa: finalSpa, avgDuration: avgDuration, dpsA: dpsA, dpsB: dpsB } };
-}
-
-function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult, finalDmgBoss = undefined, avgCritMultBoss = undefined, passiveDotBuff = 0, globalDotMult = 1) {
-    let dotDpsTotal = 0;
-    let bossDotDpsTotal = 0;
-    let dotCritMult = isVirtualRealm ? avgCritMult : 1;
-    let dotCritMultBoss = isVirtualRealm ? (avgCritMultBoss || avgCritMult) : 1;
-
-    let dotCanCrit = false;
-    if (uStats.passives && uStats.passives.some(p => p.canCrit === true)) dotCanCrit = true;
-    if (uStats.modes && typeof window !== 'undefined' && window.unitModesState) {
-        const state = window.unitModesState[uStats.id] !== undefined ? window.unitModesState[uStats.id] : 0;
-        const activeModes = Array.isArray(state) ? state : [state];
-        activeModes.forEach(idx => {
-            if (uStats.modes[idx] && uStats.modes[idx].canCrit === true) dotCanCrit = true;
-        });
-    }
-
-    if (dotCanCrit) {
-        dotCritMult = avgCritMult;
-        dotCritMultBoss = avgCritMultBoss || avgCritMult;
-    }
-    let additiveBonus = (traitDotBonus || 0) + (gearDotBonus || 0) + (passiveDotBuff || 0);
-    if (uStats.id && (uStats.id === 'ant_king_savage' || (window.isUnit && window.isUnit(uStats.id, 'ant_king_savage')))) {
-        additiveBonus *= 2;
-    }
-    let combinedMultiplier = (1 + (additiveBonus / 100)) * (globalDotMult || 1);
-
-    let dotBreakdown = {
-        nativeDps: 0,
-        bossNativeDps: 0,
-        radDps: 0,
-        base: uStats.dot,
-        traitBonus: traitDotBonus,
-        gearBonus: gearDotBonus,
-        traitMult: 1 + (traitDotBonus / 100),
-        gearMult: 1 + (gearDotBonus / 100),
-        globalDotMult: globalDotMult,
-        passiveMult: (passiveDotBuff / 100),
-        passiveBonus: passiveDotBuff,
-        critMult: dotCritMult,
-        nativeInterval: 0,
-        nativeTotalDmg: 0,
-        radInterval: 0,
-        radTotalDmg: 0,
-        isMultiHit: false
-    };
-    
-    if (uStats.requiresDot && window.CALCULATION_MODE === 'loadout') {
-        const hotbar = window.hotbarState;
-        let requirementMet = false;
-        if (hotbar && hotbar.slots) {
-            hotbar.slots.forEach(s => {
-                if (!s || requirementMet) return;
-                const sBaseId = s.id.split('-')[0];
-                const uBaseId = uStats.id.split('-')[0];
-                if (sBaseId === uBaseId) return;
-                const sUnit = window.getUnitById(s.id);
-                if (!sUnit) return;
-                if (sUnit.stats) {
-                    if (sUnit.stats.dotType === uStats.requiresDot && sUnit.stats.dot > 0) requirementMet = true;
-                    if (sUnit.stats.customFollowUp && sUnit.stats.customFollowUp.dotType === uStats.requiresDot) requirementMet = true;
-                }
-                const modeIdx = (window.unitModesState && window.unitModesState[sUnit.id]);
-                if (sUnit.modes && modeIdx !== undefined && sUnit.modes[modeIdx]) {
-                    const activeMode = sUnit.modes[modeIdx];
-                    if (activeMode.dotType === uStats.requiresDot && (activeMode.dot > 0)) requirementMet = true;
-                    if (activeMode.customFollowUp && activeMode.customFollowUp.dotType === uStats.requiresDot) requirementMet = true;
-                }
-            });
-        }
-        if (!requirementMet) {
-            dotBreakdown.inactive = true;
-            dotBreakdown.requirement = uStats.requiresDot;
-            return { dotDpsTotal: 0, bossDotDpsTotal: 0, dotBreakdown };
-        }
-    }
-
-    const canStack = (traitObj.allowDotStack || traitObj.allowPlacementStack);
-    if (uStats.dot > 0 || uStats.bossDot > 0) {
-        let normalTickPct = uStats.dot * combinedMultiplier;
-        let normalTotalDmg = finalDmg * (normalTickPct / 100) * dotCritMult;
-        
-        let bossBasePct = uStats.bossDot || uStats.dot;
-        let bossTickPct = bossBasePct * combinedMultiplier;
-        const actualFinalDmgBoss = finalDmgBoss !== undefined ? finalDmgBoss : finalDmg;
-        let bossTotalDmg = actualFinalDmgBoss * (bossTickPct / 100) * dotCritMultBoss;
-
-        const duration = uStats.dotDuration || 0;
-        let interval = canStack ? finalSpa : (duration > 0 ? Math.ceil(duration / finalSpa) * finalSpa : finalSpa);
-        const isChief = uStats.id === 'revolutionary_chief_syncro' || (window.isUnit && window.isUnit(uStats.id, 'revolutionary_chief_syncro'));
-        if (isChief) {
-            interval = 9.0;
-        }
-        
-        dotBreakdown.nativeTotalDmg = normalTotalDmg; 
-        dotBreakdown.nativeInterval = interval; 
-        dotBreakdown.nativeDps = normalTotalDmg / interval;
-        dotBreakdown.bossNativeDps = bossTotalDmg / interval;
-    }
-
-    if (traitObj.hasRadiation || uStats.hasRadiation) {
-        let baseRadPct = 0;
-        let baseRadInterval = 10;
-        if (traitObj.hasRadiation) {
-            baseRadPct += (traitObj.radiationPct || 20);
-        }
-        if (uStats.hasRadiation) {
-            baseRadPct += (uStats.radiationPct || 15);
-            if (uStats.radiationDuration) baseRadInterval = uStats.radiationDuration;
-        }
-
-        const radPct = baseRadPct * combinedMultiplier;
-        const totalRadDmg = finalDmg * (radPct / 100) * dotCritMult;
-        dotBreakdown.radTotalDmg = totalRadDmg;
-        dotBreakdown.radInterval = baseRadInterval; 
-        dotBreakdown.radDps = totalRadDmg / baseRadInterval;
-    }
-
-    dotDpsTotal = (dotBreakdown.nativeDps + dotBreakdown.radDps) * (canStack ? placement : 1);
-    bossDotDpsTotal = (dotBreakdown.bossNativeDps + dotBreakdown.radDps) * (canStack ? placement : 1);
-
-    return { dotDpsTotal, bossDotDpsTotal, dotBreakdown };
-}
-
-// Bind to window for global access across file scopes
-window.getLevelStats = getLevelStats;
-window.checkIsBetter = checkIsBetter;
-window.getBestSubConfig = getBestSubConfig;
-window._calcSummonDPS = _calcSummonDPS;
-window._calcDoTDPS = _calcDoTDPS;
