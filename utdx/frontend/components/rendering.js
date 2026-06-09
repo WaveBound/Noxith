@@ -1709,15 +1709,20 @@ function openTraitBestList(unitId) {
         return;
     }
 
+    // Hydrate all builds first to get accurate DPS values for the current context
+    const hydratedBuilds = builds.map(b => hydrateBuildEntry(b, unitId, isLoadout)).filter(Boolean);
+
     const bestByTrait = new Map();
-    builds.forEach(b => {
+    hydratedBuilds.forEach(b => {
         const existing = bestByTrait.get(b.traitName);
-        const curVal = (existing?.dps || existing?.d || 0);
-        const val = (b.dps || b.d || 0);
-        if (!existing || val > curVal) bestByTrait.set(b.traitName, b);
+        const currentScore = getBuildSortScore(b);
+        const existingScore = getBuildSortScore(existing);
+        if (!existing || currentScore > existingScore) {
+            bestByTrait.set(b.traitName, b);
+        }
     });
 
-    const sortedTraits = Array.from(bestByTrait.values()).map(b => hydrateBuildEntry(b, unitId, isLoadout))
+    const sortedTraits = Array.from(bestByTrait.values())
         .sort((a, b) => {
             return getBuildSortScore(b) - getBuildSortScore(a);
         });
