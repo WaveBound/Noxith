@@ -323,7 +323,7 @@ window.resetCachesForBuffChange = (unitId, excludeIds = []) => {
         window.unitBuildsCache = {};
         window.cachedResults = {};
         window.hotbarFilteredBuilds = {};
-        window.unitActiveBuilds = {};
+        window.unitActiveBuilds = {}; // <--- IT CLEARS unitActiveBuilds completely!
         window.bestHydratedBuildCache = {};
         return;
     }
@@ -365,12 +365,12 @@ window.triggerGlobalBuffUpdate = (unitId) => {
                 if (!hotbarIds.includes(unitId)) callIfFn('updateBuildListDisplay', unitId);
             } else {
                 const sorted = window.paginatedSortedUnits;
-                if (sorted?.length && window.CALCULATION_MODE !== 'loadout') {
+                if (sorted?.length) {
                     const getScoreFn = window.getLiveScore || window.getQuickScore;
                     sorted.forEach(e => e.maxScore = getScoreFn ? getScoreFn(e.unit) : 0);
                     sorted.sort((a, b) => b.maxScore - a.maxScore);
                     callIfFn('renderCurrentPage');
-                } else if (window.CALCULATION_MODE !== 'loadout') {
+                } else {
                     callIfFn('resortUnitCardsInPlace');
                 }
                 callIfFn('updateAllUnitsBuilds', hotbarIds);
@@ -565,6 +565,7 @@ window.updateAllUnitsBuilds = function (excludeIds = []) {
         }
         activeBuildUpdateFrame = null;
         window.isBuffUpdateRunning = false;
+        callIfFn('resortUnitCardsInPlace'); // <--- RE-SORT ACTIVE CARDS VISUALLY ON COMPLETION
         callIfFn('updateHotbarUI');
     };
     activeBuildUpdateFrame = requestAnimationFrame(processBatch);
