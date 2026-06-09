@@ -513,12 +513,7 @@ function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
     const res = (r.id && r.mainStats && r.setName) ? { ...r } : {
         id: r.id || `${unitId}-static-${Math.random().toString(36).substr(2, 9)}`,
         traitName: (typeof r.t === 'number' ? (traitsList[r.t]?.name) : (r.traitName || r.t)) || 'Unknown Trait',
-        setName: (typeof r.s === 'number' ? (SETS[r.s]?.name) : (r.setName || r.s)) || 'Unknown Set',
-        dps: r.d || r.dps || 0,
-        bossDps: r.bd || r.bossDps || r.bossTotal || 0,
-        dmgVal: r.dv || r.dmgVal || 0,
-        spa: r.sp || r.spa || 0,
-        range: r.ra || r.range || 0,
+        setName: (typeof r.s === 'number' ? (SETS[r.s]?.name) : (r.setName || r.s)) || 'Unknown Set', // Set name is needed for display
         prio: r.p || r.prio || 'dmg',
         headUsed: (typeof r.h === 'number' ? HEADS_LIST[r.h] : (r.headUsed || r.h)) || 'none',
         isCustom: !!(r.c || r.isCustom),
@@ -528,6 +523,12 @@ function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
             legs: typeof r.l === 'string' ? r.l : (r.l === 1 ? 'spa' : (r.l === 2 ? 'cf' : 'dmg'))
         }
     };
+    // Initialize calculated stats to 0, they will be filled by reconstructMathData
+    res.dps = 0;
+    res.bossDps = 0;
+    res.dmgVal = 0;
+    res.spa = 0;
+    res.range = 0;
 
     if (typeof reconstructMathData === 'function') {
         try {
@@ -551,6 +552,28 @@ function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
                 res.placement = fullMath.placement;
                 res.detailedBuffs = fullMath.detailedBuffs;
                 res.critData = fullMath.critData;
+                res.appliedDebuffs = fullMath.appliedDebuffs;
+
+                // --- Apply clamping and sanity checks after full math calculation ---
+                // 1. Clamp Crit Rate to 100%
+                if (res.critData && res.critData.rawRate > 100) {
+                    res.critData.rawRate = 100;
+                    // Re-calculate avgMult if rate was clamped
+                    res.critData.avgMult = 1 + (res.critData.rawRate / 100) * (res.critData.cdmg / 100);
+                }
+
+                // 2. Ensure SPA is not negative or excessively low (clamp to unit's cap or a minimum positive value)
+                const unit = window.getUnitById(unitId);
+                const unitSpaCap = fullMath.spaCap || unit?.stats?.spaCap || 0.1; // Use fullMath.spaCap if available, else unit.stats.spaCap, else 0.1
+                if (res.spa < unitSpaCap) {
+                    res.spa = unitSpaCap;
+                }
+
+                // 3. Ensure DPS values are not negative
+                if (res.dps < 0) res.dps = 0;
+                if (res.bossDps < 0) res.bossDps = 0;
+                if (res.dmgVal < 0) res.dmgVal = 0;
+
                 res.appliedDebuffs = fullMath.appliedDebuffs;
                 if (!res.subStats) res.subStats = {};
                 res.subStats.finalCf = fullMath.critData ? fullMath.critData.rawRate : 0;
