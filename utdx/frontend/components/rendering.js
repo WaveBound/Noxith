@@ -589,8 +589,9 @@ function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
     return res;
 }
 
-function getBuildSortScore(build) {
+function getBuildSortScore(build, sortMode = 'dps') {
     if (!build) return 0;
+    // Always seek the absolute highest shown value if displaying in UI to keep sorting intuitive, but respect specific requests
     return Math.max(
         build.sortDps || 0,
         build.dps || build.d || 0,
@@ -604,16 +605,31 @@ function getBestHydratedBuild(builds, unitId, isHotbar, activeModeIdx = undefine
         activeModeIdx = Array.isArray(state) ? state[0] : state;
     }
 
+    const globalSortMode = document.querySelector('.search-container select[data-filter="sort"]')?.value || 'dps';
+
+    // Prioritize high-tier baseline builds and endgame relic sets (Warlord, Monarch, Fused) to prevent truncation
     const candidates = [...(builds || [])]
-        .sort((a, b) => getBuildSortScore(b) - getBuildSortScore(a))
+        .sort((a, b) => {
+            const scoreB = getBuildSortScore(b, globalSortMode);
+            const scoreA = getBuildSortScore(a, globalSortMode);
+            if (scoreB !== scoreA) return scoreB - scoreA;
+
+            const setB = (b.setName || b.s || '').toString().toLowerCase();
+            const setA = (a.setName || a.s || '').toString().toLowerCase();
+            const isEndgameB = setB.includes('warlord') || setB.includes('monarch') || setB.includes('fused');
+            const isEndgameA = setA.includes('warlord') || setA.includes('monarch') || setA.includes('fused');
+            if (isEndgameB !== isEndgameA) return isEndgameB ? -1 : 1;
+            return 0;
+        })
         .slice(0, candidateLimit);
+        
     const ids = candidates.map(b => b?.id || `${b?.t || b?.traitName || ''}:${b?.s || b?.setName || ''}:${b?.h || b?.headUsed || ''}:${b?.b || b?.mainStats?.body || ''}:${b?.l || b?.mainStats?.legs || ''}`).join('|');
     const cacheKey = `${unitId}:${isHotbar ? 1 : 0}:${activeModeIdx}:${ids}`;
     if (window.bestHydratedBuildCache?.[cacheKey]) return window.bestHydratedBuildCache[cacheKey];
 
     const hydrated = candidates.map(b => hydrateBuildEntry(b, unitId, isHotbar, activeModeIdx)).filter(Boolean);
     if (!hydrated.length) return null;
-    const best = hydrated.reduce((best, cur) => getBuildSortScore(cur) > getBuildSortScore(best) ? cur : best, hydrated[0]);
+    const best = hydrated.reduce((best, cur) => getBuildSortScore(cur, globalSortMode) > getBuildSortScore(best, globalSortMode) ? cur : best, hydrated[0]);
     window.bestHydratedBuildCache[cacheKey] = best;
     return best;
 }
@@ -811,7 +827,7 @@ window.refreshActiveBuild = function (unit) {
     });
 
     if (matches.length > 0) {
-        topBuild = getBestHydratedBuild(matches, unitId, isHotbar) || matches[0];
+        topBuild = getBestHydratedBuild(matches, unitId, isHotbar, activeModeIdx) || matches[0];
     } else if (selectedTrait) {
         const singleTraitObj = getTraitFast(selectedTrait);
         if (singleTraitObj) {
@@ -1216,14 +1232,6 @@ window.getQuickScore = (unit) => {
         window.unitSystemLevels[unitId] = unit.systemLevel.default !== undefined ? unit.systemLevel.default : (unit.systemLevel.max || 100);
     }
 
-    let dbKey = unit.id;
-    if (unit.ability) {
-        const ab = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
-        if (ab.noToggle && !unit.allowMultipleModes && window.STATIC_BUILD_DB && window.STATIC_BUILD_DB[unit.id + "_abil"]) {
-            dbKey = unit.id + "_abil";
-        }
-    }
-
     const activeDb = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
     const list = window.getRelicDbEntry(activeDb, unit.id, unit.ability && window.activeAbilityIds?.has(unit.id) ? 'abil' : 'base');
 
@@ -1234,28 +1242,27 @@ window.getQuickScore = (unit) => {
         const currentHead = window.unitHeads?.[unit.id] || 'none';
         const currentTrait = window.unitTraits?.[unit.id];
 
-        let matchedBuild = getBestHydratedBuild(list, unit.id, false, activeMode) || list[0];
-        if (currentTrait || currentHead !== 'none') {
-            const matchingBuilds = list.filter(b => {
-                const tName = (typeof b.t === 'number' ? traitsList[b.t]?.name : b.traitName || b.t) || '';
-                const hName = (typeof b.h === 'number' ? HEADS_LIST[b.h] : b.headUsed || b.h) || 'none';
-                if (currentTrait && tName.toLowerCase() !== currentTrait.toLowerCase()) return false;
-                if (currentHead !== 'none' && hName !== currentHead) return false;
-                return true;
-            });
-            if (matchingBuilds.length) {
-                matchedBuild = getBestHydratedBuild(matchingBuilds, unit.id, false, activeMode) || matchingBuilds[0];
-            }
-        }
+        // Find primary matching baseline build structure fast to prevent hydration loops across hundreds of builds
+        let matchedBuild = list.find(b => {
+            const tName = (typeof b.t === 'number' ? traitsList[b.t]?.name : b.traitName || b.t) || '';
+            const hName = (typeof b.h === 'number' ? HEADS_LIST[b.h] : b.headUsed || b.h) || 'none';
+            if (currentTrait && tName.toLowerCase() !== currentTrait.toLowerCase()) return false;
+            if (currentHead && currentHead !== 'none' && hName !== currentHead) return false;
+            return true;
+        }) || list[0];
 
         const isLoadout = (window.CALCULATION_MODE === 'loadout');
         const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unit.id || s.id.split('-')[0] === unit.id.split('-')[0]));
         const isHotbar = isLoadout && isInHotbarState;
 
-        const hydratedMatch = matchedBuild?.sortDps !== undefined ? matchedBuild : hydrateBuildEntry(matchedBuild, unit.id, isHotbar, activeMode);
+        const hydratedMatch = hydrateBuildEntry(matchedBuild, unit.id, isHotbar, activeMode);
+        
+        // Pass local sort filter state down dynamically to keep ranks accurately aligned
+        const globalSortMode = document.querySelector('.search-container select[data-filter="sort"]')?.value || 'dps';
+
         return window.isUnit(unit.id, 'law')
             ? (hydratedMatch?.range || matchedBuild.range || 0)
-            : getBuildSortScore(hydratedMatch || matchedBuild);
+            : getBuildSortScore(hydratedMatch || matchedBuild, globalSortMode);
     }
 
     const { upgradesArr } = getUnitCostAndPlacement(unit, activeMode);
@@ -1276,10 +1283,12 @@ window.getLiveScore = (unit) => {
     }
 
     const active = window.unitActiveBuilds?.[unitId];
+    const globalSortMode = document.querySelector('.search-container select[data-filter="sort"]')?.value || 'dps';
+
     if (active) {
         return window.isUnit(unitId, 'law')
             ? (active.range || 0)
-            : getBuildSortScore(active);
+            : getBuildSortScore(active, globalSortMode);
     }
 
     if (window.LIVE_SCORE_CACHE[unitId] !== undefined) {
@@ -1293,14 +1302,12 @@ window.getLiveScore = (unit) => {
 
 window.resortUnitCards = function () {
     if (!paginatedSortedUnits || paginatedSortedUnits.length === 0) return;
-    window.refreshAllActiveBuilds();
     paginatedSortedUnits.sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
     renderCurrentPage();
 };
 
 window.resortUnitCardsInPlace = function () {
     if (!paginatedSortedUnits || paginatedSortedUnits.length === 0) return;
-    window.refreshAllActiveBuilds();
     paginatedSortedUnits.sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
 
     window.unitAbsoluteRanks = {};
@@ -1887,6 +1894,84 @@ window.processUnitCache = processUnitCache;
 window.renderUnitCard = renderUnitCard;
 window.renderListInternal = undefined;
 window.updateBuildListDisplay = updateBuildListDisplay;
+
+window.processUnitCache = function (unit, specificCfg = null, specificType = null) {
+    if (!window.unitBuildsCache[unit.id]) {
+        window.unitBuildsCache[unit.id] = { base: { fixed: [null] }, abil: { fixed: [null] } };
+    }
+
+    const CONFIGS = [{ head: true, subs: !window.disableSubStats }];
+
+    const performCalSet = (mode, useAbility, targetCache) => {
+        let dbKey = unit.id + (useAbility && unit.ability ? '_abil' : '');
+        const useInventory = (inventoryMode === true);
+
+        for (let i = 0; i < 1; i++) {
+            if (targetCache[i] !== null) continue;
+            const cfg = CONFIGS[i];
+            let calculatedResults = [];
+
+            if (!useInventory) {
+                const dbTable = window.STATIC_BUILD_DB?.[dbKey] || window.STATIC_BUILD_DB?.[unit.id];
+                const dbList = dbTable?.[mode] || dbTable?.[mode === 'fixed' ? 'f' : 'b'];
+                if (dbList && dbList[i]) {
+                    calculatedResults = dbList[i].map(r => ({ ...r }));
+                }
+
+                const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(b => !b.hideButton && !!window[b.stateKey]) || window.disableSubStats;
+                if (anyGlobal && calculatedResults.length > 0) {
+                    calculatedResults = calculatedResults.map(r => {
+                        const setName = r.setName || (typeof r.s === 'number' ? SETS[r.s]?.id : r.s) || window.getSetFast?.(r.setName)?.id;
+                        const traitId = r.traitName || r.trait || (typeof r.t === 'number' ? traitsList[r.t]?.id : r.t);
+                        if (!setName || !traitId) return r;
+
+                        const singleBuilds = window.getFilteredBuilds().filter(b => b.setName === setName);
+                        const singleTrait = traitsList.find(t => t.id === traitId || t.name === traitId);
+                        const optResList = window.calculateUnitBuilds(
+                            unit, null, singleBuilds, window.getValidSubCandidates(), HEADS_LIST,
+                            cfg.subs, singleTrait ? [singleTrait] : null, useAbility, mode
+                        );
+                        return optResList?.reduce((best, cur) => {
+                            const curScore = Math.max(cur.dps || 0, cur.bossDps || 0);
+                            const bestScore = Math.max(best.dps || 0, best.bossDps || 0);
+                            return curScore > bestScore ? cur : best;
+                        }, optResList[0]) || r;
+                    });
+                }
+            }
+
+            calculatedResults.forEach(r => { if (r.id) window.cachedResults[r.id] = r; });
+
+            const selectedTraitId = window.unitTraits?.[unit.id];
+            const selectedTrait = selectedTraitId ? getTraitFast(selectedTraitId) : null;
+            const traitsForCalc = selectedTrait ? [selectedTrait] : null;
+
+            const selectedHead = window.unitHeads?.[unit.id] || 'none';
+            const headsForCalc = selectedHead !== 'none' ? [selectedHead] : (cfg.head ? HEADS_LIST : ['none']);
+
+            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), headsForCalc, cfg.subs, traitsForCalc, useAbility, mode);
+            if (dynamicResults.length > 0) {
+                const seen = new Set(calculatedResults.map(r => r.id));
+                dynamicResults.forEach(r => {
+                    if (!seen.has(r.id)) {
+                        calculatedResults.push(r);
+                        seen.add(r.id);
+                    }
+                });
+            }
+
+            calculatedResults.sort((a, b) => {
+                const scoreA = Math.max(a.dps || a.d || 0, a.bossDps || a.bd || a.bossTotal || 0);
+                const scoreB = Math.max(b.dps || b.d || 0, b.bossDps || b.bd || b.bossTotal || 0);
+                return scoreB - scoreA;
+            });
+            targetCache[i] = calculatedResults;
+        }
+    };
+
+    if (!specificType || specificType === 'base') performCalSet('fixed', false, window.unitBuildsCache[unit.id].base.fixed);
+    if (unit.ability && (!specificType || specificType === 'abil')) performCalSet('fixed', true, window.unitBuildsCache[unit.id].abil.fixed);
+};
 
 setTimeout(() => {
     const key = 'angel_born_in_hell';
