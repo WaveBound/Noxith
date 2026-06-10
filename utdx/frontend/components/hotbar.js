@@ -77,7 +77,7 @@
 
         window.STATIC_BUILD_DB = savedDb;
         callWin('applyBuffContext', window.GLOBAL_BUFF_STATE || {});
-        if (window.CALCULATION_MODE !== 'loadout') callWin('resortUnitCardsInPlace');
+        if (window.CALCULATION_MODE !== 'loadout') callWin('resortUnitCards');
     };
 
     const getDetailedUnitStats = (unitId) => {

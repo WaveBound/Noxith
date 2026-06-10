@@ -1095,6 +1095,8 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
             if (!window.unitActiveBuilds) window.unitActiveBuilds = {};
             window.unitActiveBuilds[unitId] = window.hotbarFilteredBuilds[unitId];
+            
+            if (window.LIVE_SCORE_CACHE) delete window.LIVE_SCORE_CACHE[unitId];
         }
 
         return slice.map((r, i) => generateBuildRowHTML(r, i, {
@@ -1313,6 +1315,12 @@ window.getLiveScore = (unit) => {
 window.resortUnitCards = function () {
     if (!paginatedSortedUnits || paginatedSortedUnits.length === 0) return;
     paginatedSortedUnits.sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
+    
+    window.unitAbsoluteRanks = {};
+    paginatedSortedUnits.forEach((entry, i) => {
+        window.unitAbsoluteRanks[entry.unit.id] = i + 1;
+    });
+    
     renderCurrentPage();
 };
 
