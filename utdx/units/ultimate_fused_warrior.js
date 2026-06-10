@@ -42,11 +42,11 @@ unitDatabase.push({
     upgrades: [
         { dmg: 420, spa: 8, range: 25, cost: 2000 },       // Up 0 (Base) | Total Cost: 0 | Effortless Kick
         { dmg: 960, spa: 8, range: 27, cost: 5500 },    // Up 1        | Total Cost: 5,500
-        { dmg: 1600, spa: 8, range: 29, cost: 9500 },   // Up 2        | Total Cost: 15,000 | Energy Ball
+        { dmg: 1680, spa: 8, range: 29, cost: 9500 },   // Up 2        | Total Cost: 15,000 | Energy Ball
         { dmg: 2400, spa: 8, range: 32, cost: 13000 },  // Up 3        | Total Cost: 28,000
-        { dmg: 3800, spa: 8, range: 35, cost: 17000 },  // Up 4        | Total Cost: 45,000
+        { dmg: 3840, spa: 8, range: 35, cost: 17000 },  // Up 4        | Total Cost: 45,000
         { dmg: 6000, spa: 18, range: 35, cost: 25000 }, // Up 5        | Total Cost: 70,000 | Godly Punch
-        { dmg: 10000, spa: 18, range: 37, cost: 35000 } // Up 6        | Total Cost: 105,000 | Beam Sword
+        { dmg: 10800, spa: 18, range: 37, cost: 35000 } // Up 6        | Total Cost: 105,000 | Beam Sword
     ],
 
     // PASSIVES (displayed in unit info panel)
