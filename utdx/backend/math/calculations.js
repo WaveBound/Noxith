@@ -22,7 +22,7 @@ window.getUnitUncappedCrit = function (slotUnit, slotIndex) {
         if (hState.buffState.mageGround) {
             const uType = (slotUnit.placementType || 'Ground').toLowerCase();
             const isMatching = (uType === 'ground' || uType === 'hybrid');
-            const isFernSelf = window.isUnit(slotUnit.id, 'prodigy_mage');
+            const isFernSelf = window.isUnit && window.isUnit(slotUnit.id, 'prodigy_mage');
             if (isMatching || isFernSelf) {
                 const targets = hState.fernTargets || [];
                 const isFernPresent = hState.slots.some(s => s && window.isUnit(s.id, 'prodigy_mage'));

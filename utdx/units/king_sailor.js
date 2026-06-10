@@ -37,7 +37,7 @@ unitDatabase.push({
     ],
     etherealization: [
         "+10 Stat Points",
-        { desc: "\"Baal's Lightning\" Chains up to 7 enemies", passiveCrit: 20 },
+        { name: "Etherealization 2 (Crit)", desc: "E2: \"Baal's Lightning\" Chains up to 7 enemies", passiveCrit: 20 },
         "+10 Stat Points",
         "\"Baal's Lightning\" Damage increased to 20%",
         "+10 Stat Points",

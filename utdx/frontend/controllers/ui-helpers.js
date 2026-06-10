@@ -64,17 +64,28 @@ window.GLOBAL_BUFF_DATA = {
         tagLabel: 'Fern (Hill)',
         excludes: 'mageGround',
         math: (uStats, context) => {
-            const pType = (uStats.placementType || uStats.placement || 'Ground').toLowerCase();
+            if (!window.mageHillActive) return {}; // Global check for buff state
+            if (!uStats || !uStats.id) return {};
+
+            const pType = String(uStats.placementType || uStats.placement || 'Ground').toLowerCase();
             const isMatching = (pType === 'hill' || pType === 'hybrid');
-            const isFernSelf = window.isUnit && window.isUnit(uStats.id, 'prodigy_mage');
+            const unitId = String(uStats.id).split('-')[0];
+            const isFernSelf = unitId === 'prodigy_mage';
+
             if (isMatching || isFernSelf) {
                 if (window.CALCULATION_MODE === 'loadout' && window.hotbarState) {
-                    const slots = window.hotbarState.slots || [];
-                    const slotIdx = slots.findIndex(s => s && s.id === uStats.id);
-                    const isFernPresent = slots.some(s => s && window.isUnit && window.isUnit(s.id, 'prodigy_mage'));
+                    const slots = window.hotbarState.slots;
+                    if (!slots) return {}; // Defensive check: Ensure slots array exists
+
+                    const slotIdx = slots.findIndex(s => s && s.id && (s.id === uStats.id || s.id.split('-')[0] === unitId));
+
+                    const isFernPresent = slots.some(s => s && s.id && s.id.split('-')[0] === 'prodigy_mage');
                     if (isFernPresent) {
-                        const targets = window.hotbarState.fernTargets || [];
+                        const targets = window.hotbarState.fernTargets;
+                        if (!targets) return {}; // Defensive check: Ensure fernTargets array exists
                         if (!targets.includes(slotIdx) && !(isFernSelf && targets.length > 0)) return {};
+                    } else {
+                        return {};
                     }
                 }
                 return { spa: 30 };
@@ -91,17 +102,28 @@ window.GLOBAL_BUFF_DATA = {
         tagLabel: 'Fern (Ground)',
         excludes: 'mageHill',
         math: (uStats, context) => {
-            const pType = (uStats.placementType || uStats.placement || 'Ground').toLowerCase();
+            if (!window.mageGroundActive) return {}; // Global check for buff state
+            if (!uStats || !uStats.id) return {};
+
+            const pType = String(uStats.placementType || uStats.placement || 'Ground').toLowerCase();
             const isMatching = (pType === 'ground' || pType === 'hybrid');
-            const isFernSelf = window.isUnit && window.isUnit(uStats.id, 'prodigy_mage');
+            const unitId = String(uStats.id).split('-')[0];
+            const isFernSelf = unitId === 'prodigy_mage';
+
             if (isMatching || isFernSelf) {
                 if (window.CALCULATION_MODE === 'loadout' && window.hotbarState) {
-                    const slots = window.hotbarState.slots || [];
-                    const slotIdx = slots.findIndex(s => s && s.id === uStats.id);
-                    const isFernPresent = slots.some(s => s && window.isUnit && window.isUnit(s.id, 'prodigy_mage'));
+                    const slots = window.hotbarState.slots;
+                    if (!slots) return {}; // Defensive check: Ensure slots array exists
+
+                    const slotIdx = slots.findIndex(s => s && s.id && (s.id === uStats.id || s.id.split('-')[0] === unitId));
+
+                    const isFernPresent = slots.some(s => s && s.id && s.id.split('-')[0] === 'prodigy_mage');
                     if (isFernPresent) {
-                        const targets = window.hotbarState.fernTargets || [];
+                        const targets = window.hotbarState.fernTargets;
+                        if (!targets) return {}; // Defensive check: Ensure fernTargets array exists
                         if (!targets.includes(slotIdx) && !(isFernSelf && targets.length > 0)) return {};
+                    } else {
+                        return {};
                     }
                 }
                 return { crit: 45 };
