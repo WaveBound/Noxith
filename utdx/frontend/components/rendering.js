@@ -622,7 +622,7 @@ function getBestHydratedBuild(builds, unitId, isHotbar, activeModeIdx = undefine
             return 0;
         })
         .slice(0, candidateLimit);
-        
+
     const ids = candidates.map(b => b?.id || `${b?.t || b?.traitName || ''}:${b?.s || b?.setName || ''}:${b?.h || b?.headUsed || ''}:${b?.b || b?.mainStats?.body || ''}:${b?.l || b?.mainStats?.legs || ''}`).join('|');
     const cacheKey = `${unitId}:${isHotbar ? 1 : 0}:${activeModeIdx}:${ids}`;
     if (window.bestHydratedBuildCache?.[cacheKey]) return window.bestHydratedBuildCache[cacheKey];
@@ -1106,7 +1106,36 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     }
 
     if (buildData) {
-        container.innerHTML = renderListInternal(buildData, renderLimit);
+        let displayBuilds = [...buildData];
+        const customTraitsToCalc = [
+            ...(window.customTraits || []),
+            ...(window.unitSpecificTraits?.[unitId] || [])
+        ];
+        if (customTraitsToCalc.length > 0 && typeof window.calculateUnitBuilds === 'function') {
+            const customBuilds = window.calculateUnitBuilds(
+                unitObj,
+                null,
+                window.getFilteredBuilds?.() || null,
+                window.getValidSubCandidates?.() || ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'],
+                HEADS_LIST,
+                !window.disableSubStats,
+                customTraitsToCalc,
+                activeType === 'abil',
+                activeMode,
+                isHotbar,
+                true
+            );
+            if (customBuilds && customBuilds.length > 0) {
+                const seenIds = new Set(displayBuilds.map(b => b.id));
+                customBuilds.forEach(cb => {
+                    if (!seenIds.has(cb.id)) {
+                        displayBuilds.push(cb);
+                        seenIds.add(cb.id);
+                    }
+                });
+            }
+        }
+        container.innerHTML = renderListInternal(displayBuilds, renderLimit);
     } else if (unitObj && !window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0]) {
         window.processUnitCache(unitObj, 0, activeType);
         const finalData = window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0];
@@ -1221,81 +1250,51 @@ function processUnitCache(unit, specificCfg = null, specificType = null) {
     if (unit.ability && (!specificType || specificType === 'abil')) performCalSet('fixed', true, window.unitBuildsCache[unit.id].abil.fixed);
 }
 
-// Score & Ranking Engines
-window.LIVE_SCORE_CACHE = window.LIVE_SCORE_CACHE || {};
-
 window.getQuickScore = (unit) => {
     if (!unit) return 0;
-    const unitId = unit.id;
 
-    if (unit.systemLevel && window.unitSystemLevels[unitId] === undefined) {
-        window.unitSystemLevels[unitId] = unit.systemLevel.default !== undefined ? unit.systemLevel.default : (unit.systemLevel.max || 100);
+    // 1. Fast-Path Cache: If the active build has already been evaluated, return its score instantly
+    if (window.unitActiveBuilds && window.unitActiveBuilds[unit.id]) {
+        const cached = window.unitActiveBuilds[unit.id];
+        return Math.max(cached.dps || 0, cached.bossDps || 0);
     }
 
+    // 2. Delegate to the unified build resolution engine to find the context-appropriate top build
+    if (typeof window.refreshActiveBuild === 'function') {
+        const activeBuild = window.refreshActiveBuild(unit);
+        if (activeBuild) {
+            return Math.max(activeBuild.dps || 0, activeBuild.bossDps || 0);
+        }
+    }
+
+    // 3. Absolute Fallback: Baseline static DB list[0] parsing
     const activeDb = (window.CALCULATION_MODE === 'loadout' && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
     const list = window.getRelicDbEntry(activeDb, unit.id, unit.ability && window.activeAbilityIds?.has(unit.id) ? 'abil' : 'base');
 
-    const state = window.unitModesState[unit.id] ?? (unit.defaultMode ?? 0);
-    const activeMode = Array.isArray(state) ? state[0] : state;
-
-    if (list?.length > 0) {
-        const currentHead = window.unitHeads?.[unit.id] || 'none';
-        const currentTrait = window.unitTraits?.[unit.id];
-
-        // Find primary matching baseline build structure fast to prevent hydration loops across hundreds of builds
-        let matchedBuild = list.find(b => {
-            const tName = (typeof b.t === 'number' ? traitsList[b.t]?.name : b.traitName || b.t) || '';
-            const hName = (typeof b.h === 'number' ? HEADS_LIST[b.h] : b.headUsed || b.h) || 'none';
-            if (currentTrait && tName.toLowerCase() !== currentTrait.toLowerCase()) return false;
-            if (currentHead && currentHead !== 'none' && hName !== currentHead) return false;
-            return true;
-        }) || list[0];
-
+    if (list && list.length > 0) {
+        const topBuild = list[0];
         const isLoadout = (window.CALCULATION_MODE === 'loadout');
         const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unit.id || s.id.split('-')[0] === unit.id.split('-')[0]));
         const isHotbar = isLoadout && isInHotbarState;
 
-        const hydratedMatch = hydrateBuildEntry(matchedBuild, unit.id, isHotbar, activeMode);
-        
-        // Pass local sort filter state down dynamically to keep ranks accurately aligned
-        const globalSortMode = document.querySelector('.search-container select[data-filter="sort"]')?.value || 'dps';
+        const state = window.unitModesState[unit.id] ?? (unit.defaultMode ?? 0);
+        const activeMode = Array.isArray(state) ? state[0] : state;
 
-        return window.isUnit(unit.id, 'law')
-            ? (hydratedMatch?.range || matchedBuild.range || 0)
-            : getBuildSortScore(hydratedMatch || matchedBuild, globalSortMode);
+        const hydrated = hydrateBuildEntry(topBuild, unit.id, isHotbar, activeMode);
+        if (hydrated) {
+            return Math.max(hydrated.dps || 0, hydrated.bossDps || 0);
+        }
+        return Math.max(topBuild.dps || 0, topBuild.bossDps || topBuild.bd || topBuild.bossTotal || 0);
     }
-
-    const { upgradesArr } = getUnitCostAndPlacement(unit, activeMode);
-    let d = unit.stats?.dmg, s = unit.stats?.spa;
-    if ((!d || !s) && upgradesArr) {
-        const last = upgradesArr[upgradesArr.length - 1];
-        d = d || last?.dmg;
-        s = s || last?.spa;
-    }
-    return ((d || 0) / (s || 1)) * 35;
+    return 0;
 };
 
 window.getLiveScore = (unit) => {
     const unitId = unit.id;
-
-    if (unit.systemLevel && window.unitSystemLevels[unitId] === undefined) {
-        window.unitSystemLevels[unitId] = unit.systemLevel.default !== undefined ? unit.systemLevel.default : (unit.systemLevel.max || 100);
-    }
-
-    const active = window.unitActiveBuilds?.[unitId];
-    const globalSortMode = document.querySelector('.search-container select[data-filter="sort"]')?.value || 'dps';
-
-    if (active) {
-        return window.isUnit(unitId, 'law')
-            ? (active.range || 0)
-            : getBuildSortScore(active, globalSortMode);
-    }
-
     if (window.LIVE_SCORE_CACHE[unitId] !== undefined) {
         return window.LIVE_SCORE_CACHE[unitId];
     }
-
-    const score = window.getQuickScore ? window.getQuickScore(unit) : 0;
+    const score = window.getQuickScore(unit);
     window.LIVE_SCORE_CACHE[unitId] = score;
     return score;
 };

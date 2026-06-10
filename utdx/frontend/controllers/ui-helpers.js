@@ -121,7 +121,7 @@ window.GLOBAL_BUFF_DATA = {
             const isPotential = window.CALCULATION_MODE === 'potential';
             const unrivaledMarkActive = context.unrivaledMark || window.unrivaledMark || (window.hotbarState?.buffState?.unrivaledMark);
             const leader = window.hotbarState?.slots?.[0];
-            
+
             let activeLeaderId = null;
             if (isPotential) {
                 if (window.isUnit && window.isUnit(uStats.id, 'king_sailor')) {

@@ -2,6 +2,9 @@
 // CUSTOM-PAIR.JS - Custom Trait Combination Creator (Optimized & Safe)
 // ============================================================================
 
+window.customTraits = window.customTraits || [];
+window.unitSpecificTraits = window.unitSpecificTraits || {};
+
 let cpUnitSelection = new Set(['all']);
 let cpT1 = 'ruler';
 let cpT2 = 'none';
