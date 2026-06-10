@@ -545,6 +545,7 @@ function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
     res.dmgVal = 0;
     res.spa = 0;
     res.range = 0;
+    res.activeModeIdx = activeModeIdx;
 
     if (typeof reconstructMathData === 'function') {
         try {
@@ -791,8 +792,15 @@ window.refreshActiveBuild = function (unit) {
     const activeType = (window.activeAbilityIds?.has(unitId) && unit.ability) ? 'abil' : 'base';
     const activeMode = 'fixed';
 
-    const state = window.unitModesState[unitId] ?? (window.PEAK_MODE_STATE?.[unitId] ?? (window.getUnitById?.(unitId)?.defaultMode ?? 0));
-    const activeModeIdx = Array.isArray(state) ? state[0] : state;
+    let modesToEval = [];
+    if (window.unitModesState[unitId] !== undefined) {
+        const state = window.unitModesState[unitId];
+        modesToEval = [Array.isArray(state) ? state[0] : state];
+    } else if (unit.modes && Array.isArray(unit.modes)) {
+        modesToEval = unit.modes.map((_, i) => i);
+    } else {
+        modesToEval = [unit.defaultMode ?? 0];
+    }
 
     if (unit.systemLevel && window.unitSystemLevels[unitId] === undefined) {
         window.unitSystemLevels[unitId] = unit.systemLevel.default !== undefined ? unit.systemLevel.default : (unit.systemLevel.max || 100);
@@ -812,69 +820,64 @@ window.refreshActiveBuild = function (unit) {
             const headsForCalc = selectedHead !== 'none' ? [selectedHead] : HEADS_LIST;
 
             const dynamicList = window.calculateUnitBuilds(
-                unit,
-                null,
-                window.getFilteredBuilds?.() || null,
+                unit, null, window.getFilteredBuilds?.() || null,
                 window.getValidSubCandidates?.() || ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'],
-                headsForCalc,
-                !window.disableSubStats,
-                traitsForCalc,
-                activeType === 'abil',
-                activeMode,
-                isHotbar,
-                true
+                headsForCalc, !window.disableSubStats, traitsForCalc,
+                activeType === 'abil', activeMode, isHotbar, true
             );
-            if (dynamicList && dynamicList.length > 0) {
-                builds = dynamicList;
-            } else return null;
+            if (dynamicList && dynamicList.length > 0) builds = dynamicList;
+            else return null;
         } else return null;
     }
 
-    let topBuild = builds[0];
-    const selectedTrait = window.unitTraits?.[unitId];
-    const selectedHead = window.unitHeads?.[unitId];
+    let bestHydrated = null;
+    let bestScore = -1;
 
-    const matches = builds.filter(b => {
-        const tName = (typeof b.t === 'number' ? traitsList[b.t]?.name : b.traitName || b.t) || '';
-        const hName = (typeof b.h === 'number' ? HEADS_LIST[b.h] : b.headUsed || b.h) || 'none';
-        if (selectedTrait && tName.toLowerCase() !== selectedTrait.toLowerCase()) return false;
-        if (selectedHead && selectedHead !== 'none' && hName !== selectedHead) return false;
-        return true;
-    });
+    modesToEval.forEach(modeIdx => {
+        let topBuild = builds[0];
+        const selectedTrait = window.unitTraits?.[unitId];
+        const selectedHead = window.unitHeads?.[unitId];
 
-    if (matches.length > 0) {
-        topBuild = getBestHydratedBuild(matches, unitId, isHotbar, activeModeIdx) || matches[0];
-    } else if (selectedTrait) {
-        const singleTraitObj = getTraitFast(selectedTrait);
-        if (singleTraitObj) {
-            const dynamicList = window.calculateUnitBuilds(
-                unit,
-                null,
-                getFilteredBuilds(),
-                getValidSubCandidates(),
-                selectedHead ? [selectedHead] : HEADS_LIST,
-                !window.disableSubStats,
-                [singleTraitObj],
-                activeType === 'abil',
-                activeMode,
-                isHotbar,
-                true
-            );
-            if (dynamicList && dynamicList.length > 0) {
-                topBuild = dynamicList[0];
+        const matches = builds.filter(b => {
+            const tName = (typeof b.t === 'number' ? traitsList[b.t]?.name : b.traitName || b.t) || '';
+            const hName = (typeof b.h === 'number' ? HEADS_LIST[b.h] : b.headUsed || b.h) || 'none';
+            if (selectedTrait && tName.toLowerCase() !== selectedTrait.toLowerCase()) return false;
+            if (selectedHead && selectedHead !== 'none' && hName !== selectedHead) return false;
+            return true;
+        });
+
+        if (matches.length > 0) {
+            topBuild = getBestHydratedBuild(matches, unitId, isHotbar, modeIdx) || matches[0];
+        } else if (selectedTrait) {
+            const singleTraitObj = getTraitFast(selectedTrait);
+            if (singleTraitObj) {
+                const dynamicList = window.calculateUnitBuilds(
+                    unit, null, getFilteredBuilds(), getValidSubCandidates(),
+                    selectedHead ? [selectedHead] : HEADS_LIST, !window.disableSubStats,
+                    [singleTraitObj], activeType === 'abil', activeMode, isHotbar, true
+                );
+                if (dynamicList && dynamicList.length > 0) topBuild = dynamicList[0];
             }
         }
-    }
 
-    const hydrated = hydrateBuildEntry(topBuild, unitId, isHotbar, activeModeIdx);
-    if (hydrated) {
+        const hydrated = hydrateBuildEntry(topBuild, unitId, isHotbar, modeIdx);
+        if (hydrated) {
+            const score = Math.max(hydrated.dps || 0, hydrated.bossDps || 0);
+            if (score > bestScore) {
+                bestScore = score;
+                bestHydrated = hydrated;
+            }
+        }
+    });
+
+    if (bestHydrated) {
         if (!window.unitActiveBuilds) window.unitActiveBuilds = {};
-        window.unitActiveBuilds[unitId] = hydrated;
+        window.unitActiveBuilds[unitId] = bestHydrated;
 
         if (!window.hotbarFilteredBuilds) window.hotbarFilteredBuilds = {};
-        window.hotbarFilteredBuilds[unitId] = hydrated;
+        window.hotbarFilteredBuilds[unitId] = bestHydrated;
     }
-    return hydrated;
+    return bestHydrated;
 };
 
 window.refreshAllActiveBuilds = function () {
@@ -913,8 +916,16 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unitId || s.id.split('-')[0] === unitId.split('-')[0]));
     const isHotbar = card.parentElement?.id === 'hotbarHiddenRender' || !!card.closest('.team-summary-container') || isInHotbarState;
 
-    const state = window.unitModesState[unitId] ?? (window.PEAK_MODE_STATE?.[unitId] ?? (unitObj.defaultMode ?? 0));
-    const activeModeIdx = Array.isArray(state) ? state[0] : state;
+    let activeModeIdx = unitObj.defaultMode ?? 0;
+    if (window.unitModesState[unitId] !== undefined) {
+        const state = window.unitModesState[unitId];
+        activeModeIdx = Array.isArray(state) ? state[0] : state;
+    } else if (window.unitActiveBuilds?.[unitId]?.activeModeIdx !== undefined) {
+        activeModeIdx = window.unitActiveBuilds[unitId].activeModeIdx;
+    } else if (window.PEAK_MODE_STATE?.[unitId] !== undefined) {
+        const state = window.PEAK_MODE_STATE[unitId];
+        activeModeIdx = Array.isArray(state) ? state[0] : state;
+    }
 
     const systemLevelBar = card.querySelector('.system-level-bar');
     if (systemLevelBar && unitObj?.systemLevel) {
@@ -1289,8 +1300,16 @@ window.getQuickScore = (unit) => {
         const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unit.id || s.id.split('-')[0] === unit.id.split('-')[0]));
         const isHotbar = isLoadout && isInHotbarState;
 
-        const state = window.unitModesState[unit.id] ?? (window.PEAK_MODE_STATE?.[unit.id] ?? (unit.defaultMode ?? 0));
-        const activeMode = Array.isArray(state) ? state[0] : state;
+        let activeMode = unit.defaultMode ?? 0;
+        if (window.unitModesState[unit.id] !== undefined) {
+            const state = window.unitModesState[unit.id];
+            activeMode = Array.isArray(state) ? state[0] : state;
+        } else if (window.unitActiveBuilds?.[unit.id]?.activeModeIdx !== undefined) {
+            activeMode = window.unitActiveBuilds[unit.id].activeModeIdx;
+        } else if (window.PEAK_MODE_STATE?.[unit.id] !== undefined) {
+            const state = window.PEAK_MODE_STATE[unit.id];
+            activeMode = Array.isArray(state) ? state[0] : state;
+        }
 
         const hydrated = hydrateBuildEntry(topBuild, unit.id, isHotbar, activeMode);
         if (hydrated) {
@@ -1347,8 +1366,16 @@ window.resortUnitCardsInPlace = function () {
 };
 
 function renderUnitCard(unit, absoluteIndex) {
-    const state = window.unitModesState[unit.id] ?? (window.PEAK_MODE_STATE?.[unit.id] ?? (unit.defaultMode ?? 0));
-    const activeMode = Array.isArray(state) ? state[0] : state;
+    let activeMode = unit.defaultMode ?? 0;
+    if (window.unitModesState[unit.id] !== undefined) {
+        const state = window.unitModesState[unit.id];
+        activeMode = Array.isArray(state) ? state[0] : state;
+    } else if (window.unitActiveBuilds?.[unit.id]?.activeModeIdx !== undefined) {
+        activeMode = window.unitActiveBuilds[unit.id].activeModeIdx;
+    } else if (window.PEAK_MODE_STATE?.[unit.id] !== undefined) {
+        const state = window.PEAK_MODE_STATE[unit.id];
+        activeMode = Array.isArray(state) ? state[0] : state;
+    }
     const { upgradesArr = null } = getUnitCostAndPlacement(unit, activeMode);
 
     if (window.unitELevels[unit.id] === undefined && upgradesArr) {
@@ -1716,8 +1743,16 @@ function _executeGlobalFilter(term) {
 
     paginatedSortedUnits.forEach(entry => {
         const u = entry.unit;
-        const state = window.unitModesState[u.id] ?? (window.PEAK_MODE_STATE?.[u.id] ?? (u.defaultMode ?? 0));
-        const mode = Array.isArray(state) ? state[0] : state;
+        let mode = u.defaultMode ?? 0;
+        if (window.unitModesState[u.id] !== undefined) {
+            const state = window.unitModesState[u.id];
+            mode = Array.isArray(state) ? state[0] : state;
+        } else if (window.unitActiveBuilds?.[u.id]?.activeModeIdx !== undefined) {
+            mode = window.unitActiveBuilds[u.id].activeModeIdx;
+        } else if (window.PEAK_MODE_STATE?.[u.id] !== undefined) {
+            const state = window.PEAK_MODE_STATE[u.id];
+            mode = Array.isArray(state) ? state[0] : state;
+        }
         const upgrades = u.modes?.[mode]?.upgrades || u.upgrades;
         if (window.unitELevels[u.id] === undefined && upgrades) {
             window.unitELevels[u.id] = upgrades.length - 1;
