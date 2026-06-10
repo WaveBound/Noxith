@@ -32,6 +32,7 @@ unitDatabase.push({
 
     allowMultipleModes: false,
     noPoints: true,
+    defaultMode: 1,
 
     systemLevel: {
         label: "Charge",

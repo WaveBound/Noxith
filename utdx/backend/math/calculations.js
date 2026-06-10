@@ -25,7 +25,7 @@ window.getUnitUncappedCrit = function (slotUnit, slotIndex) {
             const isFernSelf = window.isUnit && window.isUnit(slotUnit.id, 'prodigy_mage');
             if (isMatching || isFernSelf) {
                 const targets = hState.fernTargets || [];
-                const isFernPresent = hState.slots.some(s => s && window.isUnit(s.id, 'prodigy_mage'));
+                const isFernPresent = hState.slots?.some(s => s && window.isUnit(s.id, 'prodigy_mage')) || false;
                 if (isFernPresent) {
                     if (isFernSelf || targets.includes(slotIndex)) {
                         crit += 45;
@@ -51,7 +51,7 @@ window.getUnitUncappedCrit = function (slotUnit, slotIndex) {
         }
 
         const isPotential = window.CALCULATION_MODE === 'potential';
-        const leader = hState.slots[0];
+        const leader = hState.slots ? hState.slots[0] : null;
         const unrivaledMarkActive = hState.buffState?.unrivaledMark || window.unrivaledMark;
 
         if (isPotential) {
@@ -185,7 +185,7 @@ function calculateDPS(uStats, relicStats, context) {
     let finalSpa = Math.max(rawFinalSpa, effectiveSpaCap);
 
     if (window.isUnit(uStats.id, 'joyful_captain')) {
-        const activeModeIdx = (typeof window !== 'undefined' && window.unitModesState && window.unitModesState['joyful_captain'] !== undefined) ? window.unitModesState['joyful_captain'] : 0;
+        const activeModeIdx = context?.activeModeIdx ?? ((typeof window !== 'undefined' && window.unitModesState && window.unitModesState['joyful_captain'] !== undefined) ? window.unitModesState['joyful_captain'] : 0);
         if (activeModeIdx === 0 || activeModeIdx === 1) {
             const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels['joyful_captain'] !== undefined) ? window.unitSystemLevels['joyful_captain'] : 10;
             finalSpa = Math.max(Number(sysLvl), effectiveSpaCap);

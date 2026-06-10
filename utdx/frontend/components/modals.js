@@ -458,7 +458,7 @@
         const isMulti = !!unit.allowMultipleModes;
         
         // FIX: Safely unpack array mode states to prevent nested [[0]] array mismatches on single-select mode overlays
-        const activeModes = isMulti ? (Array.isArray(state) ? state : []) : (state !== undefined ? (Array.isArray(state) ? state : [state]) : (isUnit(unitId, 'merciless_god') ? [] : [0]));
+        const activeModes = isMulti ? (Array.isArray(state) ? state : []) : (state !== undefined ? (Array.isArray(state) ? state : [state]) : (isUnit(unitId, 'merciless_god') ? [] : [unit.defaultMode ?? 0]));
 
         grid.innerHTML = unit.modes.map((mode, idx) => `
             <div class="mode-card-large ${activeModes.includes(idx) ? 'active' : ''}" 
@@ -535,6 +535,7 @@
             document.querySelectorAll('.mode-card-large').forEach((card, idx) => {
                 card.classList.toggle('active', activeModes.includes(idx));
             });
+            window.updateOverlaySlider(unitId, activeModes[0] || 0);
         }
 
         window.updateHotbarUI?.();

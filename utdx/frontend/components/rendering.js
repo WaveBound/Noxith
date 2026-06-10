@@ -7,6 +7,11 @@ window.LIVE_SCORE_CACHE = window.LIVE_SCORE_CACHE || {};
 window.activeAbilityIds = window.activeAbilityIds || new Set();
 window.unitELevels = window.unitELevels || {};
 window.unitSystemLevels = window.unitSystemLevels || {};
+window.PEAK_MODE_STATE = {
+    'the_strongest_in_history': [1, 2],
+    'jinoo_shadow_monarch': [0, 1, 2, 3, 4],
+    'merciless_god': 5
+};
 window.unitTraits = window.unitTraits || {};
 window.unitHeads = window.unitHeads || {};
 window.unitModesState = window.unitModesState || {};
@@ -786,7 +791,7 @@ window.refreshActiveBuild = function (unit) {
     const activeType = (window.activeAbilityIds?.has(unitId) && unit.ability) ? 'abil' : 'base';
     const activeMode = 'fixed';
 
-    const state = window.unitModesState[unitId] ?? (window.getUnitById?.(unitId)?.defaultMode ?? 0);
+    const state = window.unitModesState[unitId] ?? (window.PEAK_MODE_STATE?.[unitId] ?? (window.getUnitById?.(unitId)?.defaultMode ?? 0));
     const activeModeIdx = Array.isArray(state) ? state[0] : state;
 
     if (unit.systemLevel && window.unitSystemLevels[unitId] === undefined) {
@@ -908,7 +913,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unitId || s.id.split('-')[0] === unitId.split('-')[0]));
     const isHotbar = card.parentElement?.id === 'hotbarHiddenRender' || !!card.closest('.team-summary-container') || isInHotbarState;
 
-    const state = window.unitModesState[unitId] ?? (unitObj.defaultMode ?? 0);
+    const state = window.unitModesState[unitId] ?? (window.PEAK_MODE_STATE?.[unitId] ?? (unitObj.defaultMode ?? 0));
     const activeModeIdx = Array.isArray(state) ? state[0] : state;
 
     const systemLevelBar = card.querySelector('.system-level-bar');
@@ -944,13 +949,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 });
             }
 
-            const PEAK_MODE_STATE = {
-                'the_strongest_in_history': [1, 2],
-                'joyful_captain': 2,
-                'jinoo_shadow_monarch': [0, 1, 2, 3, 4],
-                'merciless_god': 5
-            };
-
+            const PEAK_MODE_STATE = window.PEAK_MODE_STATE || {};
             const needsDynamicBench = !traitBenchmarks['peak'] && inventoryMode && (forceSync || !traitBenchmarks['peak']);
 
             if (needsDynamicBench && unitObj) {
@@ -1290,7 +1289,7 @@ window.getQuickScore = (unit) => {
         const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unit.id || s.id.split('-')[0] === unit.id.split('-')[0]));
         const isHotbar = isLoadout && isInHotbarState;
 
-        const state = window.unitModesState[unit.id] ?? (unit.defaultMode ?? 0);
+        const state = window.unitModesState[unit.id] ?? (window.PEAK_MODE_STATE?.[unit.id] ?? (unit.defaultMode ?? 0));
         const activeMode = Array.isArray(state) ? state[0] : state;
 
         const hydrated = hydrateBuildEntry(topBuild, unit.id, isHotbar, activeMode);
@@ -1348,7 +1347,7 @@ window.resortUnitCardsInPlace = function () {
 };
 
 function renderUnitCard(unit, absoluteIndex) {
-    const state = window.unitModesState[unit.id] ?? (unit.defaultMode ?? 0);
+    const state = window.unitModesState[unit.id] ?? (window.PEAK_MODE_STATE?.[unit.id] ?? (unit.defaultMode ?? 0));
     const activeMode = Array.isArray(state) ? state[0] : state;
     const { upgradesArr = null } = getUnitCostAndPlacement(unit, activeMode);
 
@@ -1717,7 +1716,7 @@ function _executeGlobalFilter(term) {
 
     paginatedSortedUnits.forEach(entry => {
         const u = entry.unit;
-        const state = window.unitModesState[u.id] ?? (u.defaultMode ?? 0);
+        const state = window.unitModesState[u.id] ?? (window.PEAK_MODE_STATE?.[u.id] ?? (u.defaultMode ?? 0));
         const mode = Array.isArray(state) ? state[0] : state;
         const upgrades = u.modes?.[mode]?.upgrades || u.upgrades;
         if (window.unitELevels[u.id] === undefined && upgrades) {

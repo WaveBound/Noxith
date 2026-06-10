@@ -273,7 +273,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
         mode, dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, 
         wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: false, 
         headPiece, starMult, headStarMult: options.headStarMult || starMult, rankData, isAbility, 
-        maxPts, upgradeLevel, isHotbar 
+        maxPts, upgradeLevel, isHotbar, activeModeIdx: activeMode 
     };
 
     // Inject synced buff flags into context so calculateDPS identifies them
