@@ -32,7 +32,7 @@ window.GLOBAL_BUFF_DATA = {
         math: (uStats, context) => ({ dmg: 25, range: 25, spa: 15 })
     },
     ancientMage: {
-        id: 'ancientmage',
+        id: 'amage',
         name: 'Ancient Mage',
         stateKey: 'ancientMageActive',
         color: '#a78bfa',

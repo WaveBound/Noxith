@@ -193,14 +193,7 @@ if (isMainThread) {
                 ratios.forEach(r => strategies.push({ p: c1, s: c2, t: null, ratio: r }));
             });
 
-            // 2:2:2 Triplets
-            for (let i = 0; i < activeCands.length; i++) {
-                for (let j = i + 1; j < activeCands.length; j++) {
-                    for (let k = j + 1; k < activeCands.length; k++) {
-                        strategies.push({ p: activeCands[i], s: activeCands[j], t: activeCands[k], ratio: { p: 2, s: 2, t: 2 } });
-                    }
-                }
-            }
+            // Removed 2:2:2 Triplets to speed up generation
         }
 
         const applyContextualStats = (b, pieceName, mainStat, pStat, sStat, tStat, ratio, cands) => {
@@ -371,6 +364,11 @@ if (isMainThread) {
                     const t = unitTemplates[i]; context.headPiece = t.meta.headUsed;
                     let b = { ...t.stats };
                     
+                    // Calculate DPS ONCE before fillers to get baseline crit rate
+                    const preFillerRes = calculateDPS(effectiveStats, b, context);
+                    let baselineRaw = preFillerRes.critData ? preFillerRes.critData.rawRate : 0;
+                    let baselineRate = preFillerRes.critData ? preFillerRes.critData.rate : 0;
+
                     // Add fillers dynamically
                     ['head', 'body', 'legs'].forEach(piece => {
                         if (piece === 'head' && t.meta.headUsed === 'none') return;
@@ -383,24 +381,19 @@ if (isMainThread) {
                         }
                         
                         let activeFillers = [...t.meta.activeCands];
-                        if (activeFillers.includes('cf') || activeFillers.includes('cm')) {
-                            const checkRes = calculateDPS(effectiveStats, b, context);
-                            if (checkRes.critData) {
-                                const currentRaw = checkRes.critData.rawRate;
-                                if (currentRaw >= 99.9 || checkRes.critData.rate === 0) {
-                                    activeFillers = activeFillers.filter(
-                                        c =>
-                                            (c === 'cf' && currentRaw < 100) ||
-                                            (c === 'cm' && checkRes.critData.rate > 0) ||
-                                            (c !== 'cf' && c !== 'cm')
-                                    );
-                                }
-                            }
+                        if (baselineRaw >= 99.9 || baselineRate === 0) {
+                            activeFillers = activeFillers.filter(
+                                c =>
+                                    (c === 'cf' && baselineRaw < 100) ||
+                                    (c === 'cm' && baselineRate > 0) ||
+                                    (c !== 'cf' && c !== 'cm')
+                            );
                         }
                         
                         activeFillers.forEach(cand => {
                             if (cand === mainStat || (cand === pStat && pWeight > 0) || (cand === sStat && sWeight > 0)) return;
                             b[cand] = (b[cand] || 0) + PERFECT_SUBS[cand];
+                            if (cand === 'cf') baselineRaw += 2.5; // Track added CF to prevent overcapping on next pieces
                         });
                     });
 
@@ -427,6 +420,11 @@ if (isMainThread) {
                     const t = unitTemplates[i]; context.headPiece = t.meta.headUsed;
                     let b = { ...t.stats };
                     
+                    // Calculate DPS ONCE before fillers to get baseline crit rate
+                    const preFillerRes = calculateDPS(effectiveStats, b, context);
+                    let baselineRaw = preFillerRes.critData ? preFillerRes.critData.rawRate : 0;
+                    let baselineRate = preFillerRes.critData ? preFillerRes.critData.rate : 0;
+
                     ['head', 'body', 'legs'].forEach(piece => {
                         if (piece === 'head' && t.meta.headUsed === 'none') return;
                         let mainStat = piece === 'body' ? t.meta.bodyType : (piece === 'legs' ? t.meta.legType : null);
@@ -438,24 +436,19 @@ if (isMainThread) {
                         }
                         
                         let activeFillers = [...t.meta.activeCands];
-                        if (activeFillers.includes('cf') || activeFillers.includes('cm')) {
-                            const checkRes = calculateDPS(effectiveStats, b, context);
-                            if (checkRes.critData) {
-                                const currentRaw = checkRes.critData.rawRate;
-                                if (currentRaw >= 99.9 || checkRes.critData.rate === 0) {
-                                    activeFillers = activeFillers.filter(
-                                        c =>
-                                            (c === 'cf' && currentRaw < 100) ||
-                                            (c === 'cm' && checkRes.critData.rate > 0) ||
-                                            (c !== 'cf' && c !== 'cm')
-                                    );
-                                }
-                            }
+                        if (baselineRaw >= 99.9 || baselineRate === 0) {
+                            activeFillers = activeFillers.filter(
+                                c =>
+                                    (c === 'cf' && baselineRaw < 100) ||
+                                    (c === 'cm' && baselineRate > 0) ||
+                                    (c !== 'cf' && c !== 'cm')
+                            );
                         }
                         
                         activeFillers.forEach(cand => {
                             if (cand === mainStat || (cand === pStat && pWeight > 0) || (cand === sStat && sWeight > 0)) return;
                             b[cand] = (b[cand] || 0) + PERFECT_SUBS[cand];
+                            if (cand === 'cf') baselineRaw += 2.5; // Track added CF
                         });
                     });
 
