@@ -68,9 +68,11 @@ window.GLOBAL_BUFF_DATA = {
             if (!uStats || !uStats.id) return {};
 
             const pType = String(uStats.placementType || uStats.placement || 'Ground').toLowerCase();
-            const isMatching = (pType === 'hill' || pType === 'hybrid');
             const unitId = String(uStats.id).split('-')[0];
             const isFernSelf = unitId === 'prodigy_mage';
+            // merciless_god is Hybrid but should ONLY receive Fern Hill
+            const isMercilessGod = unitId === 'merciless_god';
+            const isMatching = (pType === 'hill' || pType === 'hybrid' || isMercilessGod);
 
             if (isMatching || isFernSelf) {
                 if (window.CALCULATION_MODE === 'loadout' && window.hotbarState) {
@@ -106,9 +108,11 @@ window.GLOBAL_BUFF_DATA = {
             if (!uStats || !uStats.id) return {};
 
             const pType = String(uStats.placementType || uStats.placement || 'Ground').toLowerCase();
-            const isMatching = (pType === 'ground' || pType === 'hybrid');
             const unitId = String(uStats.id).split('-')[0];
             const isFernSelf = unitId === 'prodigy_mage';
+            // merciless_god is Hybrid but should NOT receive Fern Ground — only Fern Hill
+            const isMercilessGod = unitId === 'merciless_god';
+            const isMatching = (pType === 'ground' || pType === 'hybrid') && !isMercilessGod;
 
             if (isMatching || isFernSelf) {
                 if (window.CALCULATION_MODE === 'loadout' && window.hotbarState) {

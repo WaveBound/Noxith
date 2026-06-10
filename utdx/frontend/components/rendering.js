@@ -89,6 +89,17 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
         }
     }
 
+    // 8. CRITICAL FALLBACK: If the buff-specific DB doesn't contain this unit,
+    // fall back to the base database instead of returning null (which triggers
+    // expensive dynamic calculateUnitBuilds and freezes the UI).
+    const baseDb = window.GLOBAL_STATIC_BUILD_DB_BASE;
+    if (baseDb && baseDb !== db) {
+        const baseEntry = baseDb[dbKey] || baseDb[unitId];
+        if (baseEntry && baseEntry[modeKey]) {
+            return baseEntry[modeKey][modeIdx] || baseEntry[modeKey][0] || null;
+        }
+    }
+
     return null;
 };
 

@@ -3,6 +3,10 @@
 // ============================================================================
 
 function initApp() {
+    // Capture the initially loaded base database
+    window.GLOBAL_STATIC_BUILD_DB_BASE = window.GLOBAL_STATIC_BUILD_DB_BASE || window.STATIC_BUILD_DB;
+    window.GLOBAL_STATIC_BUILD_DB = window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB;
+
     // 0. Force-clear all client-side caches to purge any stale/broken calculations
     window.unitBuildsCache = {};
     window.cachedResults = {};
