@@ -88,27 +88,36 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
     let globalBestAssignments = {};
     let globalBestHead = 'none';
 
-    const applyContextualStats = (b, pieceName, mainStat, pStat, sStat, ratio, validCandidates, stats, context) => {
-        let pWeight = ratio.p;
-        let sWeight = ratio.s;
+        const applyContextualStats = (b, pieceName, mainStat, pStat, sStat, tStat, ratio, validCandidates, stats, context) => {
+            let pWeight = ratio.p || 0;
+            let sWeight = ratio.s || 0;
+            let tWeight = ratio.t || 0;
 
-        if (pStat === mainStat) { sWeight = Math.min(6, sWeight + pWeight); pWeight = 0; }
-        else if (sStat === mainStat) { pWeight = Math.min(6, pWeight + sWeight); sWeight = 0; }
-        if (pStat === mainStat && sStat === mainStat) {
-            const fallback = validCandidates.find(c => c !== mainStat);
-            if (fallback) {
-                pStat = fallback;
-                pWeight = 6;
-                sWeight = 0;
-            } else {
+            if (pStat === mainStat) { 
+                let half = Math.floor(pWeight / 2);
+                sWeight = Math.min(6, sWeight + half);
+                tWeight = Math.min(6, tWeight + (pWeight - half));
                 pWeight = 0;
+            } else if (sStat === mainStat) {
+                let half = Math.floor(sWeight / 2);
+                pWeight = Math.min(6, pWeight + half);
+                tWeight = Math.min(6, tWeight + (sWeight - half));
                 sWeight = 0;
+            } else if (tStat === mainStat) {
+                let half = Math.floor(tWeight / 2);
+                pWeight = Math.min(6, pWeight + half);
+                sWeight = Math.min(6, sWeight + (tWeight - half));
+                tWeight = 0;
             }
-        }
 
-        let pVal = 0, sVal = 0;
-        if (pWeight > 0) { pVal = PERFECT_SUBS[pStat] * pWeight; b[pStat] = (b[pStat] || 0) + pVal; }
-        if (sWeight > 0) { sVal = PERFECT_SUBS[sStat] * sWeight; b[sStat] = (b[sStat] || 0) + sVal; }
+            if (pStat === mainStat) pWeight = 0;
+            if (sStat === mainStat) sWeight = 0;
+            if (tStat === mainStat) tWeight = 0;
+
+            let pVal = 0, sVal = 0, tVal = 0;
+            if (pWeight > 0) { pVal = PERFECT_SUBS[pStat] * pWeight; b[pStat] = (b[pStat] || 0) + pVal; }
+            if (sWeight > 0) { sVal = PERFECT_SUBS[sStat] * sWeight; b[sStat] = (b[sStat] || 0) + sVal; }
+            if (tWeight > 0 && tStat) { tVal = PERFECT_SUBS[tStat] * tWeight; b[tStat] = (b[tStat] || 0) + tVal; }
 
         let activeFillers = [...validCandidates];
         if (activeFillers.includes('cf') || activeFillers.includes('cm')) {
@@ -127,16 +136,17 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
         }
 
         activeFillers.forEach(cand => {
-            if (cand === mainStat || (cand === pStat && pWeight > 0) || (cand === sStat && sWeight > 0)) return;
+            if (cand === mainStat || (cand === pStat && pWeight > 0) || (cand === sStat && sWeight > 0) || (cand === tStat && tWeight > 0)) return;
             b[cand] = (b[cand] || 0) + PERFECT_SUBS[cand];
         });
-        return { pStat, pVal, sStat, sVal };
+        return { pStat, pVal, sStat, sVal, tStat, tVal };
     };
 
     const formatAssignment = (res) => {
         let arr = [];
         if (res.pVal > 0) arr.push({ type: res.pStat, val: res.pVal });
         if (res.sVal > 0) arr.push({ type: res.sStat, val: res.sVal });
+        if (res.tVal > 0) arr.push({ type: res.tStat, val: res.tVal });
         return arr;
     };
 
@@ -175,22 +185,41 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
         }
 
         let strategies = [];
-        activeCandidates.forEach(c => strategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
+        activeCandidates.forEach(c => strategies.push({ p: c, s: c, t: null, ratio: { p: 6, s: 0, t: 0 } }));
+        
         const pairs = [
-            ['dmg', 'cf'], ['dmg', 'spa'], ['dmg', 'range'], ['dmg', 'cm'], 
-            ['cf', 'cm'], ['spa', 'range'], ['spa', 'cf'], ['spa', 'cm'],
-            ['dot', 'dmg'], ['dot', 'spa'], ['dot', 'cf'], ['dot', 'cm']
+            ['dmg', 'cf'], ['cf', 'dmg'], 
+            ['dmg', 'spa'], ['spa', 'dmg'], 
+            ['dmg', 'range'], ['range', 'dmg'], 
+            ['dmg', 'cm'], ['cm', 'dmg'], 
+            ['cf', 'cm'], ['cm', 'cf'], 
+            ['spa', 'range'], ['range', 'spa'], 
+            ['spa', 'cf'], ['cf', 'spa'], 
+            ['spa', 'cm'], ['cm', 'spa'],
+            ['dot', 'dmg'], ['dmg', 'dot'], 
+            ['dot', 'spa'], ['spa', 'dot'], 
+            ['dot', 'cf'], ['cf', 'dot'], 
+            ['dot', 'cm'], ['cm', 'dot']
         ];
+        
         const ratios = [
-            { p: 6, s: 0 }, { p: 5, s: 1 }, { p: 4, s: 2 }, { p: 3, s: 3 }, 
-            { p: 2, s: 4 }, { p: 1, s: 5 }, { p: 0, s: 6 }
+            { p: 6, s: 0 }, { p: 5, s: 1 }, { p: 4, s: 2 }, { p: 3, s: 3 }
         ];
 
         pairs.forEach(pair => {
             const [c1, c2] = pair;
             if (!activeCandidates.includes(c1) || !activeCandidates.includes(c2)) return;
-            ratios.forEach(r => strategies.push({ p: c1, s: c2, ratio: r }));
+            ratios.forEach(r => strategies.push({ p: c1, s: c2, t: null, ratio: r }));
         });
+
+        // 2:2:2 Triplets
+        for (let i = 0; i < activeCandidates.length; i++) {
+            for (let j = i + 1; j < activeCandidates.length; j++) {
+                for (let k = j + 1; k < activeCandidates.length; k++) {
+                    strategies.push({ p: activeCandidates[i], s: activeCandidates[j], t: activeCandidates[k], ratio: { p: 2, s: 2, t: 2 } });
+                }
+            }
+        }
 
         strategies.forEach(strat => {
             let testBuild = { dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0 };
@@ -200,12 +229,12 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
 
             let currentAssignments = {};
             if (actualIncludeHead) {
-                const res = applyContextualStats(testBuild, 'head', null, strat.p, strat.s, strat.ratio, activeCandidates, stats, stats.context);
+                const res = applyContextualStats(testBuild, 'head', null, strat.p, strat.s, strat.t, strat.ratio, activeCandidates, stats, stats.context);
                 currentAssignments.head = formatAssignment(res);
             }
-            const resBody = applyContextualStats(testBuild, 'body', build.bodyType, strat.p, strat.s, strat.ratio, activeCandidates, stats, stats.context);
+            const resBody = applyContextualStats(testBuild, 'body', build.bodyType, strat.p, strat.s, strat.t, strat.ratio, activeCandidates, stats, stats.context);
             currentAssignments.body = formatAssignment(resBody);
-            const resLegs = applyContextualStats(testBuild, 'legs', build.legType, strat.p, strat.s, strat.ratio, activeCandidates, stats, stats.context);
+            const resLegs = applyContextualStats(testBuild, 'legs', build.legType, strat.p, strat.s, strat.t, strat.ratio, activeCandidates, stats, stats.context);
             currentAssignments.legs = formatAssignment(resLegs);
 
             let res = calculateDPS(stats, testBuild, stats.context);

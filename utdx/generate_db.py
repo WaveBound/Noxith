@@ -160,63 +160,87 @@ if (isMainThread) {
             
         // For S.H. Spirit head, remove crit subs since it disables crits
         const noCritCands = cands.filter(c => c !== 'cf' && c !== 'cm');
+        const activeCands = allowDot
+            ? ['dmg', 'spa', 'cm', 'cf', 'dot', 'range']
+            : ['dmg', 'spa', 'cm', 'cf', 'range'];
 
         let strategies = [];
         if (!includeSubs) {
-            strategies.push({ p: null, s: null, ratio: { p: 0, s: 0 } });
+            strategies.push({ p: null, s: null, t: null, ratio: { p: 0, s: 0, t: 0 } });
         } else {
-            cands.forEach(c => strategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
-            const pairs = [['dmg', 'cf'], ['dmg', 'spa'], ['dmg', 'cm'], ['cf', 'cm'], ['dot', 'dmg'], ['dot', 'spa'], ['dot', 'cf']];
-            const ratios = [{ p: 6, s: 0 }, { p: 5, s: 1 }, { p: 4, s: 2 }, { p: 3, s: 3 }, { p: 2, s: 4 }, { p: 1, s: 5 }, { p: 0, s: 6 }];
+            activeCands.forEach(c => strategies.push({ p: c, s: c, t: c, ratio: { p: 6, s: 0, t: 0 } }));
+            const pairs = [
+                ['dmg', 'cf'], ['cf', 'dmg'], 
+                ['dmg', 'spa'], ['spa', 'dmg'], 
+                ['dmg', 'range'], ['range', 'dmg'], 
+                ['dmg', 'cm'], ['cm', 'dmg'], 
+                ['cf', 'cm'], ['cm', 'cf'], 
+                ['spa', 'range'], ['range', 'spa'], 
+                ['spa', 'cf'], ['cf', 'spa'], 
+                ['spa', 'cm'], ['cm', 'spa'],
+                ['dot', 'dmg'], ['dmg', 'dot'], 
+                ['dot', 'spa'], ['spa', 'dot'], 
+                ['dot', 'cf'], ['cf', 'dot'], 
+                ['dot', 'cm'], ['cm', 'dot']
+            ];
+            const ratios = [
+                { p: 6, s: 0 }, { p: 5, s: 1 }, { p: 4, s: 2 }, { p: 3, s: 3 }
+            ];
+
             pairs.forEach(pair => {
                 const [c1, c2] = pair;
-                if (cands.includes(c1) && cands.includes(c2)) ratios.forEach(r => strategies.push({ p: c1, s: c2, ratio: r }));
+                if (!activeCands.includes(c1) || !activeCands.includes(c2)) return;
+                ratios.forEach(r => strategies.push({ p: c1, s: c2, t: null, ratio: r }));
             });
-        }
 
-        // Separate strategies for no-crit heads (S.H. Spirit)
-        let noCritStrategies = [];
-        if (includeSubs) {
-            noCritCands.forEach(c => noCritStrategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
-            const noCritPairs = [['dmg', 'spa'], ['dot', 'dmg'], ['dot', 'spa']];
-            const ratios = [{ p: 6, s: 0 }, { p: 5, s: 1 }, { p: 4, s: 2 }, { p: 3, s: 3 }, { p: 2, s: 4 }, { p: 1, s: 5 }, { p: 0, s: 6 }];
-            noCritPairs.forEach(pair => {
-                const [c1, c2] = pair;
-                if (noCritCands.includes(c1) && noCritCands.includes(c2)) ratios.forEach(r => noCritStrategies.push({ p: c1, s: c2, ratio: r }));
-            });
-        } else {
-            noCritStrategies.push({ p: null, s: null, ratio: { p: 0, s: 0 } });
-        }
-
-        const applyContextualStats = (b, pieceName, mainStat, pStat, sStat, ratio, cands) => {
-            if (!pStat) return { pStat: null, pVal: 0, sStat: null, sVal: 0 };
-            let pWeight = ratio.p; let sWeight = ratio.s; 
-            
-            if (pStat === mainStat) { sWeight = Math.min(6, sWeight + pWeight); pWeight = 0; } 
-            else if (sStat === mainStat) { pWeight = Math.min(6, pWeight + sWeight); sWeight = 0; }
-            if (pStat === mainStat && sStat === mainStat) {
-                const fallback = cands.find(c => c !== mainStat);
-                if (fallback) {
-                    pStat = fallback;
-                    pWeight = 6;
-                    sWeight = 0;
-                } else {
-                    pWeight = 0; sWeight = 0;
+            // 2:2:2 Triplets
+            for (let i = 0; i < activeCands.length; i++) {
+                for (let j = i + 1; j < activeCands.length; j++) {
+                    for (let k = j + 1; k < activeCands.length; k++) {
+                        strategies.push({ p: activeCands[i], s: activeCands[j], t: activeCands[k], ratio: { p: 2, s: 2, t: 2 } });
+                    }
                 }
             }
+        }
 
-            let pVal = 0, sVal = 0;
+        const applyContextualStats = (b, pieceName, mainStat, pStat, sStat, tStat, ratio, cands) => {
+            if (!pStat) return { pStat: null, pVal: 0, sStat: null, sVal: 0, tStat: null, tVal: 0 };
+            let pWeight = ratio.p || 0; let sWeight = ratio.s || 0; let tWeight = ratio.t || 0; 
+            
+            if (pStat === mainStat) { 
+                let half = Math.floor(pWeight / 2);
+                sWeight = Math.min(6, sWeight + half);
+                tWeight = Math.min(6, tWeight + (pWeight - half));
+                pWeight = 0;
+            } else if (sStat === mainStat) {
+                let half = Math.floor(sWeight / 2);
+                pWeight = Math.min(6, pWeight + half);
+                tWeight = Math.min(6, tWeight + (sWeight - half));
+                sWeight = 0;
+            } else if (tStat === mainStat) {
+                let half = Math.floor(tWeight / 2);
+                pWeight = Math.min(6, pWeight + half);
+                sWeight = Math.min(6, sWeight + (tWeight - half));
+                tWeight = 0;
+            }
+
+            if (pStat === mainStat) pWeight = 0;
+            if (sStat === mainStat) sWeight = 0;
+            if (tStat === mainStat) tWeight = 0;
+
+            let pVal = 0, sVal = 0, tVal = 0;
             if (pWeight > 0) { pVal = PERFECT_SUBS[pStat] * pWeight; b[pStat] = (b[pStat] || 0) + pVal; }
             if (sWeight > 0) { sVal = PERFECT_SUBS[sStat] * sWeight; b[sStat] = (b[sStat] || 0) + sVal; }
+            if (tWeight > 0 && tStat) { tVal = PERFECT_SUBS[tStat] * tWeight; b[tStat] = (b[tStat] || 0) + tVal; }
 
-            // Fillers will be added dynamically per-unit later to prevent crit overcapping
-            return { pStat, pVal, sStat, sVal };
+            return { pStat, pVal, sStat, sVal, tStat, tVal };
         };
 
         const formatAssignment = (res) => {
             let arr = [];
             if (res.pVal > 0) arr.push({ type: res.pStat, val: res.pVal });
             if (res.sVal > 0) arr.push({ type: res.sStat, val: res.sVal });
+            if (res.tVal > 0) arr.push({ type: res.tStat, val: res.tVal });
             return arr;
         };
 
@@ -241,16 +265,15 @@ if (isMainThread) {
             allowedHeads.forEach(headType => {
                 if(!allowDot && headType === 'ninja') return; 
 
-                const activeStrategies = (headType === 'sorcerer_hunter_spirit') ? noCritStrategies : strategies;
-                const activeCands = (headType === 'sorcerer_hunter_spirit') ? noCritCands : cands;
-
-                activeStrategies.forEach(strat => {
+                strategies.forEach(strat => {
                     let totalStats = { ...build };
                     let currentAssignments = {};
 
-                    if (headType !== 'none') currentAssignments.head = formatAssignment(applyContextualStats(totalStats, 'head', null, strat.p, strat.s, strat.ratio, activeCands));
-                    currentAssignments.body = formatAssignment(applyContextualStats(totalStats, 'body', build.bodyType, strat.p, strat.s, strat.ratio, activeCands));
-                    currentAssignments.legs = formatAssignment(applyContextualStats(totalStats, 'legs', build.legType, strat.p, strat.s, strat.ratio, activeCands));
+                    if (headType !== 'none') {
+                        currentAssignments.head = formatAssignment(applyContextualStats(totalStats, 'head', null, strat.p, strat.s, strat.t, strat.ratio, activeCands));
+                    }
+                    currentAssignments.body = formatAssignment(applyContextualStats(totalStats, 'body', build.bodyType, strat.p, strat.s, strat.t, strat.ratio, activeCands));
+                    currentAssignments.legs = formatAssignment(applyContextualStats(totalStats, 'legs', build.legType, strat.p, strat.s, strat.t, strat.ratio, activeCands));
                     currentAssignments.selectedHead = headType;
 
                     const splitIdx = build.name.indexOf('(');
