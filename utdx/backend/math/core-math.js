@@ -26,7 +26,14 @@ const checkIsBetter = (res, currentBest, optimizeFor) => {
         if (res.dmgVal === currentBest.dmgVal && res.total > currentBest.total) return true;
         return false;
     }
-    return res.total > currentBest.total;
+    if (res.total > currentBest.total) return true;
+    if (res.total === currentBest.total) {
+        // Tiebreaker: prefer lower rawRate to avoid wasting substats on overcapped crit
+        const resWasted = (res.critData && res.critData.rawRate > 100) ? res.critData.rawRate - 100 : 0;
+        const bestWasted = (currentBest.critData && currentBest.critData.rawRate > 100) ? currentBest.critData.rawRate - 100 : 0;
+        if (resWasted < bestWasted) return true;
+    }
+    return false;
 };
 
 // --- CC DETECTION UTILITY ---
@@ -174,7 +181,10 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
             ['cf', 'cm'], ['spa', 'range'], ['spa', 'cf'], ['spa', 'cm'],
             ['dot', 'dmg'], ['dot', 'spa'], ['dot', 'cf'], ['dot', 'cm']
         ];
-        const ratios = [{ p: 4, s: 3 }, { p: 3, s: 4 }, { p: 5, s: 2 }, { p: 2, s: 5 }];
+        const ratios = [
+            { p: 6, s: 0 }, { p: 5, s: 1 }, { p: 4, s: 2 }, { p: 3, s: 3 }, 
+            { p: 2, s: 4 }, { p: 1, s: 5 }, { p: 0, s: 6 }
+        ];
 
         pairs.forEach(pair => {
             const [c1, c2] = pair;

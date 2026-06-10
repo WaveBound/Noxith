@@ -892,7 +892,7 @@ function calculateDPS(uStats, relicStats, context) {
         dotData: dotBreakdown,
         critData: { 
             rate: finalCritRate, 
-            rawRate: Math.min(rawCritRate, 100), 
+            rawRate: rawCritRate, 
             cdmg: finalCdmgStat, 
             baseCdmg: uStats.cdmg, 
             relicCmPct: baseR_Cm, 

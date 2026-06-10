@@ -167,7 +167,7 @@ if (isMainThread) {
         } else {
             cands.forEach(c => strategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
             const pairs = [['dmg', 'cf'], ['dmg', 'spa'], ['dmg', 'cm'], ['cf', 'cm'], ['dot', 'dmg'], ['dot', 'spa'], ['dot', 'cf']];
-            const ratios = [{ p: 4, s: 3 }, { p: 3, s: 4 }, { p: 5, s: 2 }, { p: 2, s: 5 }];
+            const ratios = [{ p: 6, s: 0 }, { p: 5, s: 1 }, { p: 4, s: 2 }, { p: 3, s: 3 }, { p: 2, s: 4 }, { p: 1, s: 5 }, { p: 0, s: 6 }];
             pairs.forEach(pair => {
                 const [c1, c2] = pair;
                 if (cands.includes(c1) && cands.includes(c2)) ratios.forEach(r => strategies.push({ p: c1, s: c2, ratio: r }));
@@ -179,7 +179,7 @@ if (isMainThread) {
         if (includeSubs) {
             noCritCands.forEach(c => noCritStrategies.push({ p: c, s: c, ratio: { p: 6, s: 0 } }));
             const noCritPairs = [['dmg', 'spa'], ['dot', 'dmg'], ['dot', 'spa']];
-            const ratios = [{ p: 4, s: 3 }, { p: 3, s: 4 }, { p: 5, s: 2 }, { p: 2, s: 5 }];
+            const ratios = [{ p: 6, s: 0 }, { p: 5, s: 1 }, { p: 4, s: 2 }, { p: 3, s: 3 }, { p: 2, s: 4 }, { p: 1, s: 5 }, { p: 0, s: 6 }];
             noCritPairs.forEach(pair => {
                 const [c1, c2] = pair;
                 if (noCritCands.includes(c1) && noCritCands.includes(c2)) ratios.forEach(r => noCritStrategies.push({ p: c1, s: c2, ratio: r }));
@@ -209,10 +209,7 @@ if (isMainThread) {
             if (pWeight > 0) { pVal = PERFECT_SUBS[pStat] * pWeight; b[pStat] = (b[pStat] || 0) + pVal; }
             if (sWeight > 0) { sVal = PERFECT_SUBS[sStat] * sWeight; b[sStat] = (b[sStat] || 0) + sVal; }
 
-            cands.forEach(cand => {
-                if (cand === mainStat || (cand === pStat && pWeight > 0) || (cand === sStat && sWeight > 0)) return;
-                b[cand] = (b[cand] || 0) + PERFECT_SUBS[cand];
-            });
+            // Fillers will be added dynamically per-unit later to prevent crit overcapping
             return { pStat, pVal, sStat, sVal };
         };
 
@@ -268,6 +265,7 @@ if (isMainThread) {
                             buildName: build.name, setName: setNameStr,
                             bodyType: build.bodyType, legType: build.legType, 
                             headUsed: headType, assignments: currentAssignments,
+                            activeCands: activeCands,
                             key: cacheKeyStr 
                         } 
                     });
@@ -348,7 +346,42 @@ if (isMainThread) {
                 const bestDps = new Map(), bestRaw = new Map();
                 for (let i = 0; i < tmplLen; i++) {
                     const t = unitTemplates[i]; context.headPiece = t.meta.headUsed;
-                    const res = calculateDPS(effectiveStats, t.stats, context);
+                    let b = { ...t.stats };
+                    
+                    // Add fillers dynamically
+                    ['head', 'body', 'legs'].forEach(piece => {
+                        if (piece === 'head' && t.meta.headUsed === 'none') return;
+                        let mainStat = piece === 'body' ? t.meta.bodyType : (piece === 'legs' ? t.meta.legType : null);
+                        let pStat = null, sStat = null, pWeight = 0, sWeight = 0;
+                        let assignment = t.meta.assignments[piece];
+                        if (assignment && assignment.length > 0) {
+                            pStat = assignment[0].type; pWeight = assignment[0].val / PERFECT_SUBS[pStat];
+                            if (assignment.length > 1) { sStat = assignment[1].type; sWeight = assignment[1].val / PERFECT_SUBS[sStat]; }
+                        }
+                        
+                        let activeFillers = [...t.meta.activeCands];
+                        if (activeFillers.includes('cf') || activeFillers.includes('cm')) {
+                            const checkRes = calculateDPS(effectiveStats, b, context);
+                            if (checkRes.critData) {
+                                const currentRaw = checkRes.critData.rawRate;
+                                if (currentRaw >= 99.9 || checkRes.critData.rate === 0) {
+                                    activeFillers = activeFillers.filter(
+                                        c =>
+                                            (c === 'cf' && currentRaw < 100) ||
+                                            (c === 'cm' && checkRes.critData.rate > 0) ||
+                                            (c !== 'cf' && c !== 'cm')
+                                    );
+                                }
+                            }
+                        }
+                        
+                        activeFillers.forEach(cand => {
+                            if (cand === mainStat || (cand === pStat && pWeight > 0) || (cand === sStat && sWeight > 0)) return;
+                            b[cand] = (b[cand] || 0) + PERFECT_SUBS[cand];
+                        });
+                    });
+
+                    const res = calculateDPS(effectiveStats, b, context);
                     if (isNaN(res.total)) continue;
                     const currentScore = Math.max(res.total || 0, res.bossTotal || 0);
                     const key = t.meta.key;
@@ -369,7 +402,41 @@ if (isMainThread) {
                 const bestSpa = new Map();
                 for (let i = 0; i < tmplLen; i++) {
                     const t = unitTemplates[i]; context.headPiece = t.meta.headUsed;
-                    const res = calculateDPS(effectiveStats, t.stats, context);
+                    let b = { ...t.stats };
+                    
+                    ['head', 'body', 'legs'].forEach(piece => {
+                        if (piece === 'head' && t.meta.headUsed === 'none') return;
+                        let mainStat = piece === 'body' ? t.meta.bodyType : (piece === 'legs' ? t.meta.legType : null);
+                        let pStat = null, sStat = null, pWeight = 0, sWeight = 0;
+                        let assignment = t.meta.assignments[piece];
+                        if (assignment && assignment.length > 0) {
+                            pStat = assignment[0].type; pWeight = assignment[0].val / PERFECT_SUBS[pStat];
+                            if (assignment.length > 1) { sStat = assignment[1].type; sWeight = assignment[1].val / PERFECT_SUBS[sStat]; }
+                        }
+                        
+                        let activeFillers = [...t.meta.activeCands];
+                        if (activeFillers.includes('cf') || activeFillers.includes('cm')) {
+                            const checkRes = calculateDPS(effectiveStats, b, context);
+                            if (checkRes.critData) {
+                                const currentRaw = checkRes.critData.rawRate;
+                                if (currentRaw >= 99.9 || checkRes.critData.rate === 0) {
+                                    activeFillers = activeFillers.filter(
+                                        c =>
+                                            (c === 'cf' && currentRaw < 100) ||
+                                            (c === 'cm' && checkRes.critData.rate > 0) ||
+                                            (c !== 'cf' && c !== 'cm')
+                                    );
+                                }
+                            }
+                        }
+                        
+                        activeFillers.forEach(cand => {
+                            if (cand === mainStat || (cand === pStat && pWeight > 0) || (cand === sStat && sWeight > 0)) return;
+                            b[cand] = (b[cand] || 0) + PERFECT_SUBS[cand];
+                        });
+                    });
+
+                    const res = calculateDPS(effectiveStats, b, context);
                     if (isNaN(res.total)) continue;
                     const key = t.meta.key;
                     const c = bestSpa.get(key);

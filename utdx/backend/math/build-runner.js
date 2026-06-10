@@ -245,7 +245,7 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
                         const bestKey = `${trait.id}-${prio.id}-${activeSetKey}-${head.setKey}`;
                         const currentBest = bestMap.get(bestKey);
 
-                        if (!currentBest || res.total > currentBest.res.total) {
+                        if (!currentBest || window.checkIsBetter(res, currentBest.res, prio.id)) {
                             const entryId = `${unit.id}${suffix}-${trait.id}-INV-${head.id}_${body.id}_${leg.id}${modeTag}${cfgTag}-${prio.id}`;
 
                             // UI Formatting
