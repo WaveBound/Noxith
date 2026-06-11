@@ -59,7 +59,7 @@ if (isMainThread) {
     // ==========================================
     const jobFile = process.argv[2];
     const jobData = JSON.parse(fs.readFileSync(jobFile, 'utf-8'));
-    const { combinations, targetUnits, threads, outDir, selectedHeads, selectedSets } = jobData;
+    const { combinations, targetUnits, threads, outDir, selectedHeads, selectedSets, selectedRangeSubs } = jobData;
     const targetSet = new Set(targetUnits);
 
     // Calculate exact total units to process for accurate progress bar
@@ -84,7 +84,7 @@ if (isMainThread) {
     function dispatchJob(worker) {
         if (jobIndex < totalJobs) {
             const combo = combinations[jobIndex++];
-            worker.postMessage({ type: 'job', combo, targetUnits, outDir, selectedHeads, selectedSets });
+            worker.postMessage({ type: 'job', combo, targetUnits, outDir, selectedHeads, selectedSets, selectedRangeSubs });
         } else {
             worker.postMessage({ type: 'exit' });
         }
@@ -152,17 +152,17 @@ if (isMainThread) {
         return parts.length === 0 ? "db_base.js" : "db_" + parts.join("_") + ".js";
     }
 
-    function generateTemplates(includeSubs, allowedHeads, allowDot, allowedSets) {
+    function generateTemplates(includeSubs, allowedHeads, allowDot, allowedSets, includeRangeSubs = false) {
         const templates = [];
-        const cands = allowDot
+        const baseCands = allowDot
             ? ['dmg', 'spa', 'cm', 'cf', 'dot']
             : ['dmg', 'spa', 'cm', 'cf'];
-            
+             
         // For S.H. Spirit head, remove crit subs since it disables crits
-        const noCritCands = cands.filter(c => c !== 'cf' && c !== 'cm');
-        const activeCands = allowDot
-            ? ['dmg', 'spa', 'cm', 'cf', 'dot', 'range']
-            : ['dmg', 'spa', 'cm', 'cf', 'range'];
+        const noCritCands = baseCands.filter(c => c !== 'cf' && c !== 'cm');
+        const activeCands = includeRangeSubs
+            ? [...baseCands, 'range']
+            : [...baseCands];
 
         let strategies = [];
         if (!includeSubs) {
@@ -291,7 +291,7 @@ if (isMainThread) {
         return templates;
     }
 
-    function fastCalculateUnitBuilds(unit, cfg, traitsForCalc, isAbility, existingHeads, jobHeads, selectedSets) {
+    function fastCalculateUnitBuilds(unit, cfg, traitsForCalc, isAbility, existingHeads, jobHeads, selectedSets, includeRangeSubs = false) {
         const upgradeLevel = (unit.upgrades && unit.upgrades.length > 0) ? unit.upgrades.length - 1 : 0;
         const { effectiveStats, isKiritoVR, suffix } = buildCalculationContext(unit, 'ruler', { isAbility, upgradeLevel });
         const hasPassiveDoT = effectiveStats.passives && effectiveStats.passives.some(p => p.dot && p.dot > 0);
@@ -319,10 +319,10 @@ if (isMainThread) {
             const traitAddsDot = trait.dotBuff > 0 || trait.hasRadiation || trait.allowDotStack;
             const isDotPossible = hasNativeDoT || traitAddsDot;
             
-            const templatesKey = `${cfg.subs}-${isDotPossible}-${cfg.head}-${(selectedSets||[]).join(',')}-${allowedHeads.join(',')}`;
+            const templatesKey = `${cfg.subs}-${isDotPossible}-${cfg.head}-${(selectedSets||[]).join(',')}-${allowedHeads.join(',')}-${includeRangeSubs ? 'range' : 'noRange'}`;
             let templates = PRECALC_TEMPLATES[templatesKey];
             if(!templates) {
-                templates = generateTemplates(cfg.subs, allowedHeads, isDotPossible, selectedSets);
+                templates = generateTemplates(cfg.subs, allowedHeads, isDotPossible, selectedSets, includeRangeSubs);
                 PRECALC_TEMPLATES[templatesKey] = templates;
             }
             
@@ -623,7 +623,8 @@ if (isMainThread) {
     parentPort.on('message', (msg) => {
         if (msg.type === 'exit') process.exit(0);
         if (msg.type === 'job') {
-            const { combo, targetUnits, outDir, selectedHeads, selectedSets } = msg;
+            const { combo, targetUnits, outDir, selectedHeads, selectedSets, selectedRangeSubs } = msg;
+            const includeRangeSubs = !!selectedRangeSubs;
             const targetSet = new Set(targetUnits);
             const outName = getDbName(combo);
             const outPath = outDir + '/' + outName;
@@ -774,13 +775,13 @@ if (isMainThread) {
                     const isAbility = type === 'abil';
 
                     CONFIGS.forEach(cfg => {
-                        const traitGroups = fastCalculateUnitBuilds(u, cfg, traitsForCalc, isAbility, existingHeads, selectedHeads, selectedSets);
+                        const traitGroups = fastCalculateUnitBuilds(u, cfg, traitsForCalc, isAbility, existingHeads, selectedHeads, selectedSets, includeRangeSubs);
  
                         if (u.id === 'the_strongest_in_history' && cfg.subs) {
                             window.unitModesState['the_strongest_in_history'] = [1, 2];
                             const monarchTrait = traitsForCalc.find(t => t.name === 'Ruler' || t.name === 'Godly');
                             if (monarchTrait) {
-                                const mBuilds = fastCalculateUnitBuilds(u, { head: true, subs: true }, [monarchTrait], isAbility, existingHeads, selectedHeads, selectedSets);
+                                const mBuilds = fastCalculateUnitBuilds(u, { head: true, subs: true }, [monarchTrait], isAbility, existingHeads, selectedHeads, selectedSets, includeRangeSubs);
                                 if (mBuilds[monarchTrait.name]) {
                                     if (!traitGroups[monarchTrait.name]) traitGroups[monarchTrait.name] = [];
                                     traitGroups[monarchTrait.name].push(...mBuilds[monarchTrait.name]);
@@ -901,10 +902,10 @@ class GeneratorApp:
 
     def get_units(self): return self.units
 
-    def start_generation(self, selected_units, threads, mode='all', buffs=None, selected_heads=None, selected_sets=None):
+    def start_generation(self, selected_units, threads, mode='all', buffs=None, selected_heads=None, selected_sets=None, include_range_subs=False):
         if self.is_running: return "Already running"
         self.is_running = True
-        threading.Thread(target=self._run_logic, args=(selected_units, threads, mode, buffs, selected_heads, selected_sets), daemon=True).start()
+        threading.Thread(target=self._run_logic, args=(selected_units, threads, mode, buffs, selected_heads, selected_sets, include_range_subs), daemon=True).start()
         return "Started"
 
     def stop_generation(self):
@@ -920,7 +921,7 @@ class GeneratorApp:
             shutil.rmtree(self.temp_dir, ignore_errors=True)
             self.temp_dir = None
 
-    def run_headless(self, selected_units, threads, mode='all', buffs=None, selected_heads=None, selected_sets=None):
+    def run_headless(self, selected_units, threads, mode='all', buffs=None, selected_heads=None, selected_sets=None, include_range_subs=False):
         try:
             print("Preparing highly optimized build scripts...")
             
@@ -1038,7 +1039,8 @@ if (typeof window !== 'undefined') {
                 "threads": int(threads),
                 "outDir": db_dir,
                 "selectedHeads": selected_heads,
-                "selectedSets": selected_sets
+                "selectedSets": selected_sets,
+                "selectedRangeSubs": bool(include_range_subs)
             }
             job_file = os.path.join(self.temp_dir, "job.json")
             with open(job_file, "w", encoding="utf-8") as f: json.dump(job_data, f)
@@ -1076,7 +1078,7 @@ if (typeof window !== 'undefined') {
         finally:
             self.is_running = False
 
-    def _run_logic(self, selected_units, threads, mode='all', buffs=None, selected_heads=None, selected_sets=None):
+    def _run_logic(self, selected_units, threads, mode='all', buffs=None, selected_heads=None, selected_sets=None, include_range_subs=False):
         try:
             self.window.evaluate_js("updateStatus('Preparing highly optimized build scripts...')")
             
@@ -1189,7 +1191,8 @@ if (typeof window !== 'undefined') {
                 "threads": int(threads),
                 "outDir": db_dir,
                 "selectedHeads": selected_heads,
-                "selectedSets": selected_sets
+                "selectedSets": selected_sets,
+                "selectedRangeSubs": bool(include_range_subs)
             }
             job_file = os.path.join(self.temp_dir, "job.json")
             with open(job_file, "w", encoding="utf-8") as f: json.dump(job_data, f)
@@ -1291,8 +1294,12 @@ HTML = """
     </header>
     <div class="main-container">
         <div class="sidebar">
-            <div class="control-group">
-                <label>CPU Worker Threads</label>
+                <div class="control-group">
+                    <label>Search Units</label>
+                    <input type="text" id="unit-search" placeholder="Search by name or ID..." onkeyup="filterUnits()">
+                </div>
+                <div class="control-group">
+                    <label>CPU Worker Threads</label>
                 <input type="number" id="threads" value="8" min="1" max="64">
                 <small style="color: var(--text-dim); font-size: 0.7rem;">Matches your physical CPU cores for max speed</small>
             </div>
@@ -1358,6 +1365,13 @@ HTML = """
                     </div>
                 </div>
             </div>
+            <div class="control-group" style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                <label style="display: flex; gap: 8px; align-items: center; font-size: 0.85rem; color: var(--text);">
+                    <input type="checkbox" id="range-subs" style="width: auto;">
+                    Include Range substats
+                </label>
+                <small style="color: var(--text-dim); font-size: 0.7rem;">Off by default. When off, Range is excluded from substat splits and single-stat substats.</small>
+            </div>
             <div style="margin-top: auto; padding: 15px; background: rgba(56, 189, 248, 0.05); border-radius: 8px;">
                 <span style="font-size: 0.8rem; color: var(--accent);">Tip</span>
                 <p style="font-size: 0.75rem; color: var(--text-dim); margin: 5px 0;">If files exist, only selected units will be recalculated. Others will be merged rapidly.</p>
@@ -1387,13 +1401,32 @@ HTML = """
             renderGearSelection();
         });
         
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, char => {
+                if (char === '&') return String.fromCharCode(38) + 'amp;';
+                if (char === '<') return String.fromCharCode(60) + 'lt;';
+                if (char === '>') return String.fromCharCode(62) + 'gt;';
+                if (char === '"') return String.fromCharCode(34) + 'quot;';
+                return String.fromCharCode(39) + '#39;';
+            });
+        }
+
         function renderUnits() {
             document.getElementById('unit-grid').innerHTML = units.map(u => `
-                <div class="unit-card ${selected.has(u.id) ? 'selected' : ''}" onclick="toggleUnit('${u.id}')">
+                <div class="unit-card ${selected.has(u.id) ? 'selected' : ''}" onclick="toggleUnit('${u.id}')" data-unit-name="${escapeHtml(u.name)}" data-unit-id="${escapeHtml(u.id)}">
                     <div class="unit-img" style="background-image: url('${u.img}')"></div>
                     <span class="unit-name">${u.name}</span>
                 </div>
             `).join('');
+            filterUnits();
+        }
+
+        function filterUnits() {
+            const term = (document.getElementById('unit-search')?.value || '').trim().toLowerCase();
+            document.querySelectorAll('.unit-card').forEach(card => {
+                const haystack = `${card.dataset.unitName || ''} ${card.dataset.unitId || ''}`.toLowerCase();
+                card.style.display = !term || haystack.includes(term) ? 'flex' : 'none';
+            });
         }
         
         function renderGearSelection() {
@@ -1429,12 +1462,14 @@ HTML = """
                 buffs[b][t] = i.checked;
             });
 
+            const includeRangeSubs = document.getElementById('range-subs')?.checked || false;
+
             document.getElementById('overlay').style.display = 'flex';
             document.getElementById('progress-title').innerText = 'Generating Databases...';
             document.getElementById('progress-log').innerText = 'Starting Node.js workers...';
             document.getElementById('stop-gen-btn').style.display = 'block';
             
-            pywebview.api.start_generation(Array.from(selected), document.getElementById('threads').value, mode, buffs, finalHeads, finalSets);
+            pywebview.api.start_generation(Array.from(selected), document.getElementById('threads').value, mode, buffs, finalHeads, finalSets, includeRangeSubs);
         }
 
         function stopGeneration() {
