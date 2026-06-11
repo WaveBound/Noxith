@@ -1105,7 +1105,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
             if (!window.unitActiveBuilds) window.unitActiveBuilds = {};
             window.unitActiveBuilds[unitId] = window.hotbarFilteredBuilds[unitId];
-            
+
             if (window.LIVE_SCORE_CACHE) delete window.LIVE_SCORE_CACHE[unitId];
         }
 
@@ -1333,12 +1333,12 @@ window.getLiveScore = (unit) => {
 window.resortUnitCards = function () {
     if (!paginatedSortedUnits || paginatedSortedUnits.length === 0) return;
     paginatedSortedUnits.sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
-    
+
     window.unitAbsoluteRanks = {};
     paginatedSortedUnits.forEach((entry, i) => {
         window.unitAbsoluteRanks[entry.unit.id] = i + 1;
     });
-    
+
     renderCurrentPage();
 };
 
@@ -1664,6 +1664,75 @@ function renderDatabase() {
     globalFilterUnits(document.getElementById('globalSearch')?.value || '');
 }
 
+const ELEMENT_SEARCH_VALUES = ['water', 'fire', 'rose', 'wind', 'ice', 'light', 'dark'];
+const PLACEMENT_SEARCH_VALUES = ['ground', 'hybrid', 'hill'];
+
+function getUnitElement(unit) {
+    return String(unit?.element || unit?.stats?.element || unit?.meta?.element || '').trim();
+}
+
+function getUnitSearchText(unit) {
+    return [
+        unit?.name,
+        unit?.role,
+        unit?.id,
+        unit?._fileName,
+        unit?.placementType || 'Ground',
+        getUnitElement(unit)
+    ].filter(Boolean).join(' ').toLowerCase();
+}
+
+function getSearchTokens(term) {
+    return String(term || '')
+        .trim()
+        .toLowerCase()
+        .split(/\s+/)
+        .map(token => token.replace(/:$/, ''))
+        .filter(Boolean);
+}
+
+function getSearchElement(term) {
+    return getSearchTokens(term).find(token => ELEMENT_SEARCH_VALUES.includes(token));
+}
+
+function unitMatchesSearchTerm(unit, term) {
+    const tokens = getSearchTokens(term);
+    if (!tokens.length) return true;
+
+    const elementTokens = tokens.filter(token => ELEMENT_SEARCH_VALUES.includes(token));
+    const placementTokens = tokens.filter(token => PLACEMENT_SEARCH_VALUES.includes(token));
+    const genericTokens = tokens.filter(token =>
+        !ELEMENT_SEARCH_VALUES.includes(token) &&
+        !PLACEMENT_SEARCH_VALUES.includes(token) &&
+        token !== 'element' &&
+        token !== 'type'
+    );
+
+    if (!elementTokens.length && !placementTokens.length && !genericTokens.length) {
+        return false;
+    }
+
+    const unitElement = getUnitElement(unit).toLowerCase();
+    if (elementTokens.length && !elementTokens.every(token => unitElement.includes(token))) {
+        return false;
+    }
+
+    const placement = (unit.placementType || 'Ground').toLowerCase();
+    if (placementTokens.length) {
+        const matchesPlacement = placement === 'hybrid'
+            ? placementTokens.some(token => ['ground', 'hybrid', 'hill'].includes(token))
+            : placementTokens.includes(placement);
+        if (!matchesPlacement) return false;
+    }
+
+    const searchText = getUnitSearchText(unit);
+    if (genericTokens.length && !genericTokens.every(token => searchText.includes(token))) {
+        return false;
+    }
+
+    return true;
+}
+
 // --- DEBOUNCED GLOBAL SEARCH PIPELINE ---
 let globalFilterTimeout = null;
 
@@ -1682,7 +1751,7 @@ function _executeGlobalFilter(term) {
     if (clearBtn) clearBtn.style.display = searchTerm ? 'flex' : 'none';
 
     const assignedInventoryUnitIds = new Set(Object.keys(window.inventoryUnitTraits || {}));
-    const unitElement = document.getElementById('unitElementSort')?.value || 'none';
+    const selectedElement = getSearchElement(term) || document.getElementById('unitElementSort')?.value || 'none';
 
     const baseList = window.inventoryMode
         ? unitDatabase.filter(unit => assignedInventoryUnitIds.has(unit.id))
@@ -1700,22 +1769,14 @@ function _executeGlobalFilter(term) {
 
     let filtered = allSorted;
 
-    if (unitElement !== 'none') {
-        filtered = filtered.filter(entry => {
-            const el = entry.unit.stats?.element;
-            return el === unitElement;
-        });
+    if (selectedElement !== 'none') {
+        filtered = filtered.filter(entry => getUnitElement(entry.unit).toLowerCase() === selectedElement.toLowerCase());
     }
 
     if (searchTerm) {
         filtered = filtered.filter(entry => {
             const unit = entry.unit;
-            const placement = (unit.placementType || 'Ground').toLowerCase();
-            let matches = [unit.name, unit.role, unit.id, placement, unit.stats?.element || ''].some(v => v.toLowerCase().includes(searchTerm));
-
-            if (!matches && (searchTerm === 'ground' || searchTerm === 'hybrid' || searchTerm === 'hill')) {
-                if (placement === 'hybrid') matches = true;
-            }
+            let matches = unitMatchesSearchTerm(unit, searchTerm);
 
             if (!matches) {
                 matches = [unit.meta?.short, unit.meta?.long].some(v => v?.toLowerCase().includes(searchTerm));
