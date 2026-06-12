@@ -115,9 +115,9 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
     style.id = 'rendering-styles';
     style.innerHTML = `
         .search-input, .search-select, .sort-select, #unitElementSort, #globalModeSelect, .global-mode-select, select[onchange*="handleGlobalModeSort"], .search-container input, .search-container select {
-            background: rgba(13, 13, 18, 0.9) !important;
+            background: rgba(10, 10, 16, 0.9) !important;
             color: #f8fafc !important;
-            border: 1px solid rgba(139, 92, 246, 0.3) !important;
+            border: 1px solid rgba(139, 92, 246, 0.28) !important;
             border-radius: 4px;
             padding: 3px 6px;
             outline: none;
@@ -520,8 +520,8 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             align-items: center;
             gap: 8px;
             padding: 8px 12px;
-            background: rgba(15, 23, 42, 0.72);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(13, 13, 20, 0.82);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
         .ut-actions {
             display: flex;
@@ -529,21 +529,27 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             gap: 5px;
             min-width: 0;
             align-items: center;
+            transform: translateX(-5px);
         }
         .calc-btn {
             height: 24px !important;
-            padding: 0 8px !important;
+            padding: 0 7px !important;
             box-sizing: border-box !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            gap: 5px !important;
+            gap: 0 !important;
             text-align: center;
             line-height: 1 !important;
         }
         .calc-btn > svg {
-            flex: 0 0 auto;
+            flex: 0 0 13px !important;
             flex-shrink: 0;
+            width: 13px !important;
+            height: 13px !important;
+            margin-right: 2px !important;
+            transform: translate(-1px, -1px) !important;
+            vertical-align: middle !important;
         }
         .calc-btn .btn-label {
             flex: 0 1 auto;
@@ -553,6 +559,7 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             white-space: nowrap;
             text-align: center;
             line-height: 1 !important;
+            vertical-align: middle !important;
         }
         .ut-btn-compact {
             height: 24px !important;
@@ -563,11 +570,23 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             flex: 0 0 auto;
             box-sizing: border-box !important;
             min-width: 0;
+            background: transparent !important;
+            border-color: rgba(255, 255, 255, 0.23) !important;
+            border-width: 1px !important;
+            box-shadow: none !important;
+            color: inherit !important;
+        }
+        .ut-btn-compact:hover {
+            background: rgba(255, 255, 255, 0.04) !important;
+            border-color: rgba(255, 255, 255, 0.32) !important;
+            box-shadow: none !important;
         }
         .ut-btn-compact svg {
-            width: 11px !important;
-            height: 11px !important;
+            width: 13px !important;
+            height: 13px !important;
             flex-shrink: 0;
+            margin: -1px 2px -1px -1px !important;
+            vertical-align: middle !important;
         }
         .ut-toggle-area {
             display: flex;
@@ -579,8 +598,8 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
         }
         .search-container {
             padding: 6px 10px;
-            background: rgba(2, 6, 23, 0.35);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(13, 13, 20, 0.72);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
         .search-row {
             display: flex;
@@ -597,7 +616,7 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
         }
         .filter-tab-content .search-row {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 5px;
         }
         @media (max-width: 768px) {
@@ -1697,8 +1716,8 @@ function renderUnitCard(unit, absoluteIndex) {
 
     const topControls = `<div class="unit-toolbar">
         <div class="ut-actions">
-            <button class="calc-btn ut-btn-compact" onclick="openCalc('${unit.id}')">${SVGS.custom}<span class="btn-label">CUSTOM</span></button>
-            <button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">${SVGS.traits}<span class="btn-label">TRAITS</span></button>
+            <button class="calc-btn ut-btn-compact" onclick="openCalc('${unit.id}')"><span class="btn-label">CUSTOM</span></button>
+            <button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait"><span class="btn-label">TRAITS</span></button>
             <button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">${SVGS.info}<span class="btn-label">INFO</span></button>
         </div>
         <div class="ut-toggle-area">${initialModeIndicatorHtml}${modesBtn}${abilityToggleHtml}</div>
