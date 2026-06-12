@@ -1127,13 +1127,14 @@ window.refreshActiveBuild = function (unit) {
     modesToEval.forEach(modeIdx => {
         let topBuild = builds[0];
         const selectedTrait = window.unitTraits?.[unitId];
+        const selectedTraitLower = selectedTrait?.toLowerCase();
         const selectedHead = window.unitHeads?.[unitId];
 
         const matches = builds.filter(b => {
-            const tName = (typeof b.t === 'number' ? traitsList[b.t]?.name : b.traitName || b.t) || '';
-            const hName = (typeof b.h === 'number' ? HEADS_LIST[b.h] : b.headUsed || b.h) || 'none';
-            if (selectedTrait && tName.toLowerCase() !== selectedTrait.toLowerCase()) return false;
-            if (selectedHead && selectedHead !== 'none' && hName !== selectedHead) return false;
+            const tName = String(typeof b.t === 'number' ? traitsList[b.t]?.name : b.traitName || b.t) || '';
+            const hName = String(typeof b.h === 'number' ? HEADS_LIST[b.h] : b.headUsed || b.h) || 'none';
+            if (selectedTraitLower && tName.toLowerCase() !== selectedTraitLower) return false;
+            if (selectedHead && selectedHead !== 'none' && hName !== String(selectedHead)) return false;
             return true;
         });
 
@@ -1394,7 +1395,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         if (slice.length > 0) {
             if (!window.hotbarFilteredBuilds) window.hotbarFilteredBuilds = {};
             const selectedTrait = window.CALCULATION_MODE === 'loadout' && window.unitTraits?.[unitId];
-            const selectedTraitLower = selectedTrait?.toLowerCase();
+            const selectedTraitLower = typeof selectedTrait === 'string' ? selectedTrait.toLowerCase() : '';
 
             window.hotbarFilteredBuilds[unitId] = selectedTraitLower
                 ? (allHydrated.find(b => b.traitName?.toLowerCase() === selectedTraitLower)

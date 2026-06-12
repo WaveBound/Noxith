@@ -4,6 +4,15 @@ const comingSoonData = [
 
 const patchNotesData = [
     {
+        version: "v6.7",
+        date: "Jun 11, 2026",
+        changes: [
+            { type: "Unit", text: "<b>New Unit:</b> Added <b>The Drink Super Rage</b>." },
+            { type: "UI", text: "<b>Design Updates:</b> Applied UI design changes for improved layout and readability." },
+            { type: "Fix", text: "<b>Loadout Mode:</b> Fixed hotbar trait selection so selecting a trait now updates the unit’s active trait/build." }
+        ]
+    },
+    {
         version: "v6.6",
         date: "Jun 06, 2026",
         changes: [

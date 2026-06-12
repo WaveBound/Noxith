@@ -594,7 +594,8 @@
                     code = code.replace(/\bexport\s+const\b/g, 'const');
                     code = code.replace(/\bexport\s+function\b/g, 'function');
                     code = code.replace(/\bexport\s+default\b/g, '');
-                    
+                    code = code.replace(/\bexport\s*\{([^}]+)\}/g, (_, names) => names.split(',').map(part => `${part.trim()};`).join(''));
+    
                     const script = document.createElement('script');
                     script.text = code + `\nif (typeof window !== 'undefined') {
                         if (typeof ADVANTAGES !== 'undefined') window.ADVANTAGES = ADVANTAGES;
