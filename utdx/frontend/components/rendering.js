@@ -119,7 +119,7 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             color: #f8fafc !important;
             border: 1px solid rgba(139, 92, 246, 0.3) !important;
             border-radius: 4px;
-            padding: 4px 8px;
+            padding: 3px 6px;
             outline: none;
             color-scheme: dark;
             -webkit-appearance: none;
@@ -134,17 +134,209 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             background: #0f172a;
             color: #f8fafc;
         }
-        .filter-tab-content .search-ro      { gap: 8px; flex-wrap: wrap; }
+        .filter-tab-content .search-row { gap: 5px; flex-wrap: wrap; }
 
-        .unit-card { 
-            min-height: 575px !important; 
-            background: #0d0d12 !important; 
-            border: 1px solid rgba(139, 92, 246, 0.15) !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        .unit-card {
+            position: relative !important;
+            overflow: hidden !important;
+            min-height: 520px !important;
+            border-radius: 20px !important;
+            background:
+                linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(17, 24, 39, 0.98) 45%, rgba(2, 6, 23, 0.98)),
+                radial-gradient(circle at top right, rgba(168, 85, 247, 0.18), transparent 38%);
+            border: 1px solid rgba(148, 163, 184, 0.14) !important;
+            box-shadow: 0 22px 55px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
         }
-        .unit-card:hover { border-color: rgba(139, 92, 246, 0.4) !important; }
-        
-        .top-builds-list { max-height: 420px !important; }
+        .unit-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(135deg, rgba(139, 92, 246, 0.12), transparent 34%),
+                radial-gradient(circle at 82% 10%, rgba(56, 189, 248, 0.13), transparent 28%);
+        }
+        .unit-card > * { position: relative; z-index: 1; }
+        .unit-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(167, 139, 250, 0.55) !important;
+            box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55), 0 0 34px rgba(139, 92, 246, 0.16) !important;
+        }
+        .unit-shell {
+            display: flex;
+            flex-direction: column;
+            min-height: 520px;
+        }
+        .unit-banner {
+            position: relative;
+            padding: 8px 12px !important;
+            border-radius: 20px 20px 0 0;
+            background: linear-gradient(135deg, rgba(88, 28, 135, 0.42), rgba(15, 23, 42, 0.84) 62%, rgba(2, 6, 23, 0.95));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .unit-banner::after {
+            content: '';
+            position: absolute;
+            inset: auto -18% -55% -18%;
+            height: 76px;
+            background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.2), transparent 68%);
+            pointer-events: none;
+        }
+        .banner-badges {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-bottom: 0;
+            padding-left: 4px;
+        }
+        .unit-badge-stack {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-left: 4px;
+            transform: translateY(-5px);
+        }
+        .placement-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 7px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(248, 250, 252, 0.86);
+            font-size: 0.62rem !important;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+        .placement-badge.is-hybrid, .placement-badge.is-ground, .placement-badge.is-hill {
+            background: rgba(96, 165, 250, 0.12);
+            border-color: rgba(96, 165, 250, 0.24);
+            color: #bfdbfe;
+        }
+        .unit-hero {
+            position: static;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: minmax(92px, 0.55fr) 62px minmax(0, 2.45fr);
+            align-items: center;
+            gap: 8px;
+        }
+        .unit-badge-stack {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .unit-image-frame {
+            position: relative;
+            justify-self: center;
+            width: 62px;
+            height: 62px;
+            padding: 3px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.9), rgba(56, 189, 248, 0.48));
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.38);
+        }
+        .unit-img-wrapper,
+        .unit-image-frame > img,
+        .unit-image-frame .unit-img-wrapper {
+            width: 100%;
+            height: 100%;
+            display: block;
+            overflow: hidden;
+        }
+        .unit-img-wrapper {
+            position: relative;
+            border-radius: 13px;
+            background: rgba(2, 6, 23, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .unit-avatar,
+        .unit-img-wrapper > img {
+            width: 100% !important;
+            height: 100% !important;
+            display: block !important;
+            object-fit: cover !important;
+        }
+        .element-icon,
+        .unit-img-wrapper .element-icon {
+            position: absolute !important;
+            right: -5px !important;
+            bottom: -5px !important;
+            z-index: 2;
+            width: 26px !important;
+            height: 26px !important;
+            border-radius: 999px;
+            background: rgba(2, 6, 23, 0.94);
+            border: 2px solid rgba(255, 255, 255, 0.38);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.42);
+        }
+        .unit-title { min-width: 0; min-height: 72px; text-align: left; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 6px; padding: 25px 0 30px 0; position: relative; }
+        .unit-title-text { min-width: 0; margin-right: 0; }
+        .unit-title h2 {
+            margin: 0;
+            overflow-wrap: break-word;
+            font-size: 0.96rem !important;
+            line-height: 1.1;
+            color: #f8fafc;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+            letter-spacing: -0.02em;
+        }
+        .unit-title span {
+            display: block;
+            margin-top: 4px;
+            color: rgba(226, 232, 240, 0.72);
+            font-size: 0.72rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .unit-title small {
+            display: block;
+            margin-top: 2px;
+            color: rgba(148, 163, 184, 0.72);
+            font-size: 0.62rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .trait-guide-btn {
+            position: absolute !important;
+            top: auto !important;
+            right: 0 !important;
+            left: auto !important;
+            bottom: 18px !important;
+            z-index: 4;
+            width: max-content !important;
+            max-width: 115px !important;
+            height: 22px !important;
+            padding: 1px 5px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 4px !important;
+            box-sizing: border-box !important;
+            justify-self: auto;
+            flex-shrink: 0;
+            margin-right: 0;
+            border-radius: 999px;
+            border: 1px solid rgba(129, 140, 248, 0.35);
+            background: linear-gradient(135deg, rgba(129, 140, 248, 0.22), rgba(168, 85, 247, 0.16));
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+        }
+        .trait-guide-btn:hover {
+            border-color: rgba(167, 139, 250, 0.6) !important;
+            background: linear-gradient(135deg, rgba(129, 140, 248, 0.32), rgba(168, 85, 247, 0.24)) !important;
+        }
+
+        .top-builds-list { max-height: 360px !important; }
         .combo-section-header { 
             background: #16161d !important; color: #c084fc; font-size: 0.65rem; font-weight: 900; 
             padding: 4px 10px; margin: 10px 0 5px; border-radius: 4px; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.03); }
@@ -322,11 +514,91 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             opacity: 0.8;
             text-decoration: underline;
         }
+        .unit-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(15, 23, 42, 0.72);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .ut-actions {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 5px;
+            min-width: 0;
+            align-items: center;
+        }
+        .calc-btn {
+            height: 24px !important;
+            padding: 0 8px !important;
+            box-sizing: border-box !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 5px !important;
+            text-align: center;
+            line-height: 1 !important;
+        }
+        .calc-btn > svg {
+            flex: 0 0 auto;
+            flex-shrink: 0;
+        }
+        .calc-btn .btn-label {
+            flex: 0 1 auto;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: center;
+            line-height: 1 !important;
+        }
+        .ut-btn-compact {
+            height: 24px !important;
+            border-radius: 999px !important;
+            padding: 0 7px !important;
+            font-size: 0.58rem !important;
+            letter-spacing: 0.03em;
+            flex: 0 0 auto;
+            box-sizing: border-box !important;
+            min-width: 0;
+        }
+        .ut-btn-compact svg {
+            width: 11px !important;
+            height: 11px !important;
+            flex-shrink: 0;
+        }
         .ut-toggle-area {
             display: flex;
             align-items: center;
-            gap: 4px; /* Reduced gap from 8px to 4px to maintain compact layout consistency */
+            justify-content: flex-end;
+            gap: 6px; /* Reduced gap from 8px to 4px to maintain compact layout consistency */
             margin-left: auto;
+            flex-wrap: wrap;
+        }
+        .search-container {
+            padding: 6px 10px;
+            background: rgba(2, 6, 23, 0.35);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .search-row {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        .filter-tab-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 5px;
+            margin-top: 5px;
+            padding-top: 5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .filter-tab-content .search-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 5px;
         }
         @media (max-width: 768px) {
             /* Stack main and sub stats vertically at full width on mobile screens */
@@ -431,7 +703,7 @@ const createBaseUnitCard = (unit, options = {}) => {
     const card = document.createElement('div');
     card.className = `unit-card ${additionalClasses}`;
     if (id) card.id = id;
-    card.innerHTML = `<div class="unit-banner">${bannerContent}</div>${topControls}${getUnitControlsHtml(unit)}${bottomControls}${mainContent}`;
+    card.innerHTML = `<div class="unit-shell"><div class="unit-banner">${bannerContent}</div>${topControls}${getUnitControlsHtml(unit)}${bottomControls}${mainContent}</div>`;
     return card;
 };
 
@@ -1054,7 +1326,11 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             if (comboSelect !== 'all' && currentCombo !== comboSelect) return false;
 
             const hSearch = HEAD_CONFIG[r.headUsed]?.search || '';
-            const searchText = `${r.traitName} ${r.setName} ${r.prio} ${hSearch}`.toLowerCase();
+            const headName = HEAD_CONFIG[r.headUsed]?.name || '';
+            const combo = r.mainStats.body + '_' + r.mainStats.legs;
+            const comboText = COMBO_TITLES[combo] || combo;
+            const subStatsText = JSON.stringify(r.subStats || {});
+            const searchText = `${r.traitName} ${r.setName} ${r.prio} ${hSearch} ${headName} ${comboText} ${r.mainStats?.body || ''} ${r.mainStats?.legs || ''} ${r.spa || ''} ${r.range || ''} ${subStatsText}`.toLowerCase();
 
             return searchText.includes(searchInput) || (isGlobalFallback && searchText.includes(''));
         });
@@ -1398,7 +1674,7 @@ function renderUnitCard(unit, absoluteIndex) {
         ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>`
         : '<div></div>';
 
-    const modesBtn = Array.isArray(unit.modes) ? `<button class="calc-btn ut-btn-compact modes-btn" onclick="openUnitModes('${unit.id}')" title="Change Mode">${unit.modesLabel || 'Modes'}</button>` : '';
+    const modesBtn = Array.isArray(unit.modes) ? `<button class="calc-btn ut-btn-compact modes-btn" onclick="openUnitModes('${unit.id}')" title="Change Mode"><span class="btn-label">${unit.modesLabel || 'Modes'}</span></button>` : '';
 
     let initialModeIndicatorHtml = '';
     if (Array.isArray(unit.modes)) {
@@ -1421,9 +1697,9 @@ function renderUnitCard(unit, absoluteIndex) {
 
     const topControls = `<div class="unit-toolbar">
         <div class="ut-actions">
-            <button class="calc-btn ut-btn-compact" onclick="openCalc('${unit.id}')">${SVGS.custom} CUSTOM</button>
-            <button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">${SVGS.traits} TRAITS</button>
-            <button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">${SVGS.info} INFO</button>
+            <button class="calc-btn ut-btn-compact" onclick="openCalc('${unit.id}')">${SVGS.custom}<span class="btn-label">CUSTOM</span></button>
+            <button class="calc-btn ut-btn-compact" onclick="openTraitBestList('${unit.id}')" title="Best Build per Trait">${SVGS.traits}<span class="btn-label">TRAITS</span></button>
+            <button class="calc-btn ut-btn-compact" onclick="openUnitInfo('${unit.id}')">${SVGS.info}<span class="btn-label">INFO</span></button>
         </div>
         <div class="ut-toggle-area">${initialModeIndicatorHtml}${modesBtn}${abilityToggleHtml}</div>
     </div>`;
@@ -1543,12 +1819,17 @@ function renderUnitCard(unit, absoluteIndex) {
     return createBaseUnitCard(unit, {
         id: 'card-' + unit.id,
         additionalClasses: (window.activeAbilityIds.has(unit.id) ? ' use-ability' : '') + ' lazy-build-load',
-        bannerContent: `<div class="banner-badges">
-            <div class="placement-badge">Max Place: ${dynamicPlacement}</div>
-            <div class="placement-badge is-${(unit.placementType || 'Ground').toLowerCase()}">${unit.placementType || 'Ground'}</div>
-            <div class="placement-badge" style="color: #4ade80; border-color: rgba(74, 222, 128, 0.3);">DPS Rank: #${absoluteIndex}</div>
-            ${getSynergyBadgeHtml(unit, activeMode)}
-        </div>${getUnitImgHtml(unit, 'unit-avatar')}<div class="unit-title"><h2>${unit.name}</h2><span>${unit.role}</span></div>${traitBadgeHtml}`,
+        bannerContent: `<div class="unit-hero">
+            <div class="unit-badge-stack">
+                <div class="banner-badges">
+                    <div class="placement-badge">Max Place: ${dynamicPlacement}</div>
+                    <div class="placement-badge" style="color: #4ade80; border-color: rgba(74, 222, 128, 0.3);">DPS Rank: #${absoluteIndex}</div>
+                    ${getSynergyBadgeHtml(unit, activeMode)}
+                </div>
+            </div>
+            <div class="unit-image-frame">${getUnitImgHtml(unit, 'unit-avatar')}</div>
+            <div class="unit-title"><div class="unit-title-text"><h2>${unit.name}</h2><span>${unit.role}</span><small>${unit.placementType || 'Ground'}</small></div>${traitBadgeHtml}</div>
+        </div>`,
         topControls, bottomControls, mainContent
     });
 }
@@ -1671,14 +1952,41 @@ function getUnitElement(unit) {
     return String(unit?.element || unit?.stats?.element || unit?.meta?.element || '').trim();
 }
 
+function stripHtml(value) {
+    return String(value || '')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function flattenSearchValue(value) {
+    if (!value) return [];
+    if (Array.isArray(value)) return value.flatMap(flattenSearchValue);
+    if (typeof value === 'object') {
+        return Object.values(value).flatMap(flattenSearchValue);
+    }
+    return [stripHtml(value)];
+}
+
 function getUnitSearchText(unit) {
+    const abilityList = Array.isArray(unit?.ability) ? unit.ability : (unit?.ability ? [unit.ability] : []);
+    const passiveList = Array.isArray(unit?.passives) ? unit.passives : [];
+    const modeList = Array.isArray(unit?.modes) ? unit.modes : [];
+
     return [
-        unit?.name,
-        unit?.role,
-        unit?.id,
-        unit?._fileName,
-        unit?.placementType || 'Ground',
-        getUnitElement(unit)
+        ...flattenSearchValue(unit?.name),
+        ...flattenSearchValue(unit?.role),
+        ...flattenSearchValue(unit?.id),
+        ...flattenSearchValue(unit?._fileName),
+        ...flattenSearchValue(unit?.placementType || 'Ground'),
+        ...flattenSearchValue(getUnitElement(unit)),
+        ...flattenSearchValue(unit?.tags),
+        ...flattenSearchValue(unit?.meta?.short),
+        ...flattenSearchValue(unit?.meta?.long),
+        ...flattenSearchValue(abilityList.map(a => `${a?.abilityName || ''} ${a?.desc || ''} ${a?.name || ''}`)),
+        ...flattenSearchValue(passiveList.map(p => `${p?.name || ''} ${p?.desc || ''}`)),
+        ...flattenSearchValue(modeList.map(m => `${m?.name || ''} ${m?.desc || ''}`))
     ].filter(Boolean).join(' ').toLowerCase();
 }
 
@@ -1791,7 +2099,10 @@ function _executeGlobalFilter(term) {
                         matches = list.some(b => {
                             const traitName = typeof b.t === 'number' && typeof traitsList !== 'undefined' ? traitsList[b.t]?.name : b.traitName || b.trait || b.t || '';
                             const setName = typeof b.s === 'number' && typeof SETS !== 'undefined' ? SETS[b.s]?.name : b.setName || b.s || '';
-                            return `${traitName} ${setName} ${b.prio || ''}`.toLowerCase().includes(searchTerm);
+                            const combo = `${b.mainStats?.body || ''} ${b.mainStats?.legs || ''}`;
+                            const head = HEAD_CONFIG[b.headUsed]?.name || '';
+                            const buildSearch = `${traitName} ${setName} ${b.prio || ''} ${combo} ${head} ${b.spa || ''} ${b.range || ''} ${JSON.stringify(b.subStats || {})}`;
+                            return buildSearch.toLowerCase().includes(searchTerm);
                         });
                     }
                 }
