@@ -344,6 +344,13 @@ let buffUpdateTimer = null;
 window.resetCachesForBuffChange = (unitId, excludeIds = []) => {
     window.LIVE_SCORE_CACHE = {};
     window.modeBenchmarks = {};
+    window.customTraitBuildCache = {};
+    window.pendingCustomPairBuilds = window.pendingCustomPairBuilds || new Set();
+    window.forceCustomPairBuildRefresh = window.forceCustomPairBuildRefresh || new Set();
+    window.quickCustomPairBuildRefresh = window.quickCustomPairBuildRefresh || new Set();
+    window.pendingCustomPairBuilds.clear();
+    window.forceCustomPairBuildRefresh.clear();
+    window.quickCustomPairBuildRefresh.clear();
 
     if (!unitId && excludeIds.length === 0) {
         window.unitBuildsCache = {};

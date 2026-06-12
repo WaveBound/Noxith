@@ -1434,31 +1434,35 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             ...(window.customTraits || []),
             ...(window.unitSpecificTraits?.[unitId] || [])
         ];
-        if (customTraitsToCalc.length > 0 && typeof window.calculateUnitBuilds === 'function') {
-            const customBuilds = window.calculateUnitBuilds(
-                unitObj,
-                null,
-                window.getFilteredBuilds?.() || null,
-                window.getValidSubCandidates?.() || ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'],
-                HEADS_LIST,
-                !window.disableSubStats,
-                customTraitsToCalc,
-                activeType === 'abil',
-                activeMode,
-                isHotbar,
-                true
-            );
-            if (customBuilds && customBuilds.length > 0) {
-                const seenIds = new Set(displayBuilds.map(b => b.id));
-                customBuilds.forEach(cb => {
-                    if (!seenIds.has(cb.id)) {
-                        displayBuilds.push(cb);
-                        seenIds.add(cb.id);
-                    }
-                });
-            }
+        const forceCustomBuilds = window.forceCustomPairBuildRefresh?.has(unitId);
+        const quickCustomBuilds = window.quickCustomPairBuildRefresh?.has(unitId);
+        const hasPendingCustomBuilds = window.pendingCustomPairBuilds?.has(unitId);
+        const customBuilds = (!hasPendingCustomBuilds || forceCustomBuilds || quickCustomBuilds)
+            ? getCachedCustomTraitBuilds(unitObj, customTraitsToCalc, activeType, activeMode, isHotbar, quickCustomBuilds ? 'quick' : 0)
+            : [];
+
+        if (customBuilds && customBuilds.length > 0) {
+            const seenIds = new Set(displayBuilds.map(b => b.id));
+            customBuilds.forEach(cb => {
+                if (!seenIds.has(cb.id)) {
+                    displayBuilds.push(cb);
+                    seenIds.add(cb.id);
+                }
+            });
         }
+
         container.innerHTML = renderListInternal(displayBuilds, renderLimit);
+
+        if (hasPendingCustomBuilds && !forceCustomBuilds && !quickCustomBuilds && typeof window.renderCustomPairPendingBanner === 'function') {
+            window.renderCustomPairPendingBanner(unitId);
+        }
+
+        if (forceCustomBuilds && window.forceCustomPairBuildRefresh) {
+            window.forceCustomPairBuildRefresh.delete(unitId);
+        }
+        if (quickCustomBuilds && window.quickCustomPairBuildRefresh) {
+            window.quickCustomPairBuildRefresh.delete(unitId);
+        }
     } else if (unitObj && !window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0]) {
         window.processUnitCache(unitObj, 0, activeType);
         const finalData = window.unitBuildsCache[unitId]?.[activeType]?.[activeMode]?.[0];
@@ -1493,6 +1497,116 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             } else existingSynergyBadge?.remove();
         }
     }
+}
+
+function getCachedReconstructedCustomTraitBuilds(unit, customTraitsToCalc, activeType, activeMode, isHotbar) {
+    if (!unit || !customTraitsToCalc || customTraitsToCalc.length === 0 || typeof window.reconstructMathData !== 'function') {
+        return [];
+    }
+
+    window.customTraitBuildCache = window.customTraitBuildCache || {};
+    const dbVersion = isHotbar ? window.hotbarCurrentDb : window.globalCurrentDb;
+    const cachedBuilds = [];
+    const dbTable = window.STATIC_BUILD_DB?.[unit.id + (activeType === 'abil' && unit.ability ? '_abil' : '')] || window.STATIC_BUILD_DB?.[unit.id];
+    const dbList = dbTable?.[activeMode] || dbTable?.[activeMode === 'fixed' ? 'f' : 'b'];
+    const sourceBuilds = dbList?.[0] || (window.getFilteredBuilds?.() || []);
+    const seenTraitIds = new Set();
+
+    customTraitsToCalc.forEach(trait => {
+        if (!trait || trait.id === 'none') return;
+        const traitId = trait.id || trait.name;
+        if (!traitId || seenTraitIds.has(traitId)) return;
+        seenTraitIds.add(traitId);
+
+        const cacheKey = `${unit.id}|${activeType}|${activeMode}|${isHotbar ? 1 : 0}|${window.disableSubStats ? 1 : 0}|${dbVersion || 'db'}|quick-reconstruct|${traitId}`;
+        if (!window.customTraitBuildCache[cacheKey]) {
+            const rebuilt = [];
+            sourceBuilds.forEach(build => {
+                if (!build || !build.id || !build.setName) return;
+
+                const res = window.reconstructMathData(build, undefined, {
+                    traitOverride: trait,
+                    activeModeIdx: window.unitModesState?.[unit.id] || 0,
+                    isHotbar
+                });
+
+                if (!res || !isFinite(res.total)) return;
+
+                rebuilt.push({
+                    ...build,
+                    id: `${build.id}-custom-${traitId}`,
+                    traitName: trait.name,
+                    dps: res.total,
+                    bossDps: res.bossTotal,
+                    dmgVal: res.dmgVal,
+                    spa: res.spa,
+                    range: res.range,
+                    dot: res.dot || build.dot || 0,
+                    bossDot: res.bossTotal - (res.hit || 0) - (res.summon || 0),
+                    dotTotal: res.dotData ? (
+                        (res.dotData.nativeTotalDmg || 0) +
+                        (res.dotData.radTotalDmg || 0) +
+                        (res.dotData.fuaDotTotalDmg || 0) +
+                        (res.dotData.scarfBurnTotalDmg || 0)
+                    ) : 0,
+                    placement: res.placement || build.placement || build.p || 0,
+                    isCustom: true,
+                    quickCustom: true
+                });
+            });
+            window.customTraitBuildCache[cacheKey] = rebuilt;
+        }
+
+        cachedBuilds.push(...window.customTraitBuildCache[cacheKey]);
+    });
+
+    return cachedBuilds;
+}
+
+function getCachedCustomTraitBuilds(unit, customTraitsToCalc, activeType, activeMode, isHotbar, quickLimit = 0) {
+    if (!unit || !customTraitsToCalc || customTraitsToCalc.length === 0 || typeof window.calculateUnitBuilds !== 'function') {
+        return [];
+    }
+
+    if (quickLimit === 'quick') {
+        return getCachedReconstructedCustomTraitBuilds(unit, customTraitsToCalc, activeType, activeMode, isHotbar);
+    }
+
+    window.customTraitBuildCache = window.customTraitBuildCache || {};
+    const dbVersion = isHotbar ? window.hotbarCurrentDb : window.globalCurrentDb;
+    const cachedBuilds = [];
+    const seenTraitIds = new Set();
+
+    customTraitsToCalc.forEach(trait => {
+        if (!trait || trait.id === 'none') return;
+        const traitId = trait.id || trait.name;
+        if (!traitId || seenTraitIds.has(traitId)) return;
+        seenTraitIds.add(traitId);
+
+        const cacheKey = `${unit.id}|${activeType}|${activeMode}|${isHotbar ? 1 : 0}|${window.disableSubStats ? 1 : 0}|${dbVersion || 'db'}|${quickLimit || 'full'}|${traitId}`;
+        if (!window.customTraitBuildCache[cacheKey]) {
+            const filteredBuilds = window.getFilteredBuilds?.() || [];
+            const buildsForCalc = quickLimit && Array.isArray(filteredBuilds) ? filteredBuilds.slice(0, quickLimit) : filteredBuilds;
+
+            window.customTraitBuildCache[cacheKey] = window.calculateUnitBuilds(
+                unit,
+                null,
+                buildsForCalc,
+                window.getValidSubCandidates?.() || ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'],
+                HEADS_LIST,
+                !window.disableSubStats,
+                [trait],
+                activeType === 'abil',
+                activeMode,
+                isHotbar,
+                true
+            ) || [];
+        }
+
+        cachedBuilds.push(...window.customTraitBuildCache[cacheKey]);
+    });
+
+    return cachedBuilds;
 }
 
 function processUnitCache(unit, specificCfg = null, specificType = null) {

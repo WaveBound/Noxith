@@ -17,9 +17,9 @@ function createResultEntry({ id, buildName, traitName, res, prio, mainStats, sub
         dot: res.dot || 0,
         bossDot: res.bossTotal - res.hit - res.summon, // Approximation if needed
         dotTotal: res.dotData ? (
-            (res.dotData.nativeTotalDmg || 0) + 
-            (res.dotData.radTotalDmg || 0) + 
-            (res.dotData.fuaDotTotalDmg || 0) + 
+            (res.dotData.nativeTotalDmg || 0) +
+            (res.dotData.radTotalDmg || 0) +
+            (res.dotData.fuaDotTotalDmg || 0) +
             (res.dotData.scarfBurnTotalDmg || 0)
         ) : 0,
         prio: prio,
@@ -123,11 +123,11 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
 
     // 1. Determine Traits List
     let activeTraits = [];
-    
+
     // First, check if a specific trait was requested by the caller (like Loadout fallback or Custom calc)
     if (specificTraitsOnly && Array.isArray(specificTraitsOnly) && specificTraitsOnly.length > 0) {
         activeTraits = specificTraitsOnly;
-    } 
+    }
     else {
         // If not explicitly requested, determine what trait to use
         let assignedTraitId = null;
@@ -309,7 +309,7 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
 
     const unitIdPart = liteData.id.split('-')[0];
     let unit = unitDatabase.find(u => u.id === unitIdPart);
-    
+
     // Robust alias resolution for Merciless God and other Syncro units
     if (!unit && unitIdPart.includes('merciless_god')) unit = unitDatabase.find(u => u.id === 'merciless_god');
 
@@ -343,7 +343,8 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
     let rangePts = isRangePrio ? 999 : 0;
 
     // Use Unified Context Builder
-    const { effectiveStats, context } = buildCalculationContext(unit, liteData.traitName, {
+    const traitForContext = ctxOverrides.traitOverride || liteData.traitName;
+    const { effectiveStats, context } = buildCalculationContext(unit, traitForContext, {
         isAbility,
         dmgPoints: dmgPts,
         spaPoints: spaPts,
@@ -432,7 +433,7 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
     const result = calculateDPS(effectiveStats, totalStats, context);
 
     result.setName = liteData.setName;
-    result.traitName = liteData.traitName;
+    result.traitName = typeof traitForContext === 'string' ? traitForContext : traitForContext.name;
 
     // Restore Config
     statConfig.applyRelicDot = previousDotState;
@@ -446,19 +447,19 @@ window.calculateInventoryBuilds = calculateInventoryBuilds;
 window.reconstructMathData = reconstructMathData;
 window.createResultEntry = createResultEntry;
 
-window.getBenchmarkDps = function(unitId, traitName, starMult, isAbility) {
+window.getBenchmarkDps = function (unitId, traitName, starMult, isAbility) {
     const cacheKey = `${unitId}_${traitName}_${starMult}_${isAbility}`;
     if (window.benchmarkDpsCache && window.benchmarkDpsCache[cacheKey]) return window.benchmarkDpsCache[cacheKey];
-    
+
     const unit = typeof getUnitById === 'function' ? getUnitById(unitId) : unitDatabase.find(u => u.id === unitId);
     if (!unit) return 0;
 
     const trait = getTraitByName(traitName, unitId) || getTraitFast(traitName);
-    
+
     const { effectiveStats, context } = buildCalculationContext(unit, trait || traitName, {
         isAbility: isAbility
     });
-    
+
     let maxScore = 0;
     const candidates = ['dmg', 'spa', 'range', 'cm', 'cf', 'dot'].filter(c => {
         if (c === 'dot' && !statConfig.applyRelicDot) return false;
@@ -469,7 +470,7 @@ window.getBenchmarkDps = function(unitId, traitName, starMult, isAbility) {
     SETS.forEach(set => {
         candidates.forEach(masterStat => {
             let benchStats = { set: set.id, dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0 };
-            
+
             const getBestMain = (slotMains) => {
                 let bestMain = 'dmg';
                 let bestDps = 0;
@@ -480,22 +481,22 @@ window.getBenchmarkDps = function(unitId, traitName, starMult, isAbility) {
                 });
                 return bestMain;
             };
-            
+
             const bestBodyMain = getBestMain(MAIN_STAT_VALS.body);
             const bestLegMain = getBestMain(MAIN_STAT_VALS.legs);
-            
-            benchStats[bestBodyMain] = (benchStats[bestBodyMain]||0) + MAIN_STAT_VALS.body[bestBodyMain] * starMult;
-            benchStats[bestLegMain] = (benchStats[bestLegMain]||0) + MAIN_STAT_VALS.legs[bestLegMain] * starMult;
-            
-            benchStats[masterStat] = (benchStats[masterStat]||0) + MAX_SUB_STAT_VALUES[masterStat] * starMult;
-            
+
+            benchStats[bestBodyMain] = (benchStats[bestBodyMain] || 0) + MAIN_STAT_VALS.body[bestBodyMain] * starMult;
+            benchStats[bestLegMain] = (benchStats[bestLegMain] || 0) + MAIN_STAT_VALS.legs[bestLegMain] * starMult;
+
+            benchStats[masterStat] = (benchStats[masterStat] || 0) + MAX_SUB_STAT_VALUES[masterStat] * starMult;
+
             let fillers = candidates.filter(c => c !== masterStat && c !== bestBodyMain && c !== bestLegMain);
             let fillerDpsMap = fillers.map(fKey => {
                 let temp = { ...benchStats, [fKey]: PERFECT_SUBS[fKey] * starMult };
                 return { key: fKey, dps: calculateDPS(effectiveStats, temp, context).total };
             }).sort((a, b) => b.dps - a.dps);
 
-            fillerDpsMap.slice(0, 3).forEach(f => benchStats[f.key] = (benchStats[f.key]||0) + PERFECT_SUBS[f.key] * starMult);
+            fillerDpsMap.slice(0, 3).forEach(f => benchStats[f.key] = (benchStats[f.key] || 0) + PERFECT_SUBS[f.key] * starMult);
 
             let finalBenchRes = calculateDPS(effectiveStats, benchStats, context);
             if (finalBenchRes.total > maxScore) maxScore = finalBenchRes.total;
