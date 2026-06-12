@@ -1394,8 +1394,12 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         if (slice.length > 0) {
             if (!window.hotbarFilteredBuilds) window.hotbarFilteredBuilds = {};
             const selectedTrait = window.CALCULATION_MODE === 'loadout' && window.unitTraits?.[unitId];
-            window.hotbarFilteredBuilds[unitId] = selectedTrait
-                ? (filtered.find(b => b.traitName?.toLowerCase() === selectedTrait.toLowerCase()) || slice[0])
+            const selectedTraitLower = selectedTrait?.toLowerCase();
+
+            window.hotbarFilteredBuilds[unitId] = selectedTraitLower
+                ? (allHydrated.find(b => b.traitName?.toLowerCase() === selectedTraitLower)
+                    || filtered.find(b => b.traitName?.toLowerCase() === selectedTraitLower)
+                    || slice[0])
                 : slice[0];
 
             if (!window.unitActiveBuilds) window.unitActiveBuilds = {};
@@ -2162,6 +2166,71 @@ window.clearGlobalSearch = () => {
     globalFilterUnits('');
 };
 
+const escapeAttr = value => String(value ?? '')
+    .replace(/&/g, String.fromCharCode(38, 97, 109, 112, 59))
+    .replace(/"/g, String.fromCharCode(38, 113, 117, 111, 116, 59))
+    .replace(/'/g, String.fromCharCode(38, 35, 51, 57, 59));
+
+function resolveUnitTrait(unitId, traitIdent) {
+    if (!traitIdent || traitIdent === 'none') return null;
+
+    const unitSpecific = unitSpecificTraits?.[unitId] || [];
+    const allTraits = [...(traitsList || []), ...(customTraits || []), ...unitSpecific];
+    const directMatch = allTraits.find(t => t.id === traitIdent || t.name === traitIdent);
+    if (directMatch) return directMatch;
+
+    return (typeof getTraitByName === 'function' && getTraitByName(traitIdent, unitId))
+        || (typeof getTraitFast === 'function' && getTraitFast(traitIdent))
+        || (typeof getTraitById === 'function' && getTraitById(traitIdent, unitId));
+}
+
+window.applyUnitTrait = function (unitId, traitName) {
+    const unit = (typeof getUnitById === 'function') ? getUnitById(unitId) : null;
+    const trait = resolveUnitTrait(unitId, traitName);
+
+    if (!unit || !trait) {
+        callIfFn('showToast', 'Unable to apply trait: trait not found.');
+        return;
+    }
+
+    window.unitTraits = window.unitTraits || {};
+    window.unitTraits[unitId] = trait.name;
+
+    window.LIVE_SCORE_CACHE = {};
+    window.bestHydratedBuildCache = {};
+    window.cachedResults = {};
+    if (typeof window.resetCachesForBuffChange === 'function') {
+        window.resetCachesForBuffChange(unitId);
+    }
+
+    if (typeof window.refreshActiveBuild === 'function') {
+        window.refreshActiveBuild(unit);
+    }
+
+    if (typeof window.updateBuildListDisplay === 'function') {
+        window.updateBuildListDisplay(unitId, true);
+    }
+
+    if (window.CALCULATION_MODE === 'loadout') {
+        if (typeof window.recalculateHotbarTeam === 'function') {
+            window.recalculateHotbarTeam();
+        }
+        if (typeof window.updateHotbarUI === 'function') {
+            window.updateHotbarUI();
+        }
+    } else if (typeof window.resortUnitCards === 'function') {
+        window.resortUnitCards();
+    }
+
+    if (typeof window.renderGuides === 'function' && document.getElementById('guidesPage')?.classList.contains('active')) {
+        window.renderGuides();
+    }
+
+    if (document.getElementById('universalModal')?.classList.contains('is-visible')) {
+        window.openTraitBestList(unitId);
+    }
+};
+
 // Trait Leaderboards
 function openTraitBestList(unitId) {
     const unit = window.getUnitById(unitId);
@@ -2253,7 +2322,7 @@ function openTraitBestList(unitId) {
         const isActive = (window.unitTraits?.[unitId] === b.traitName) || (!window.unitTraits?.[unitId] && idx === 0);
         const actionBtn = isActive
             ? `<span style="color: #10b981; font-weight: bold; font-size: 0.75rem;">ACTIVE</span>`
-            : `<button class="calc-btn ut-btn-compact" onclick="window.applyUnitTrait('${unitId}', '${b.traitName}')" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #10b981; color: white; padding: 4px 10px; font-size: 0.75rem; font-weight: bold; border-radius: 4px; cursor: pointer;">SELECT</button>`;
+            : `<button class="calc-btn ut-btn-compact" onclick="window.applyUnitTrait('${escapeAttr(unitId)}', '${escapeAttr(b.traitName)}')" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #10b981; color: white; padding: 4px 10px; font-size: 0.75rem; font-weight: bold; border-radius: 4px; cursor: pointer;">SELECT</button>`;
 
         html += `<tr style="${idx === 0 ? 'background: rgba(251, 191, 36, 0.04);' : ''}">
             <td style="text-align: center; padding: 10px 5px;"><span style="${rankStyle}">#${idx + 1}</span></td>
@@ -2337,6 +2406,7 @@ window.processUnitCache = processUnitCache;
 window.renderUnitCard = renderUnitCard;
 window.renderListInternal = undefined;
 window.updateBuildListDisplay = updateBuildListDisplay;
+window.openTraitBestList = openTraitBestList;
 
 window.processUnitCache = function (unit, specificCfg = null, specificType = null) {
     if (!window.unitBuildsCache[unit.id]) {
