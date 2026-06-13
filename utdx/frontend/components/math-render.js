@@ -8,6 +8,72 @@ const fmt = {
     fix: (n, d = 2) => (n !== undefined && n !== null) ? parseFloat(n.toFixed(d)) : 0
 };
 
+function getAbhHotbarContributions(data) {
+    if (window.CALCULATION_MODE !== 'loadout') return [];
+    if (!window.isUnit?.(data.baseStats?.id, 'angel_born_in_hell')) return [];
+
+    const hotbarSlots = window.hotbarState?.slots || [];
+    const abhPresent = hotbarSlots.some(s => s && window.isUnit?.(s.id, 'angel_born_in_hell'));
+    if (!abhPresent) return [];
+
+    const contributions = [];
+    let totalCrit = 0;
+
+    hotbarSlots.forEach((slot, slotIdx) => {
+        if (!slot) return;
+        if (window.isUnit?.(slot.id, 'angel_born_in_hell')) return;
+
+        const unit = window.getUnitById?.(slot.id);
+        if (!unit) return;
+
+        const build = window.hotbarFilteredBuilds?.[unit.id] || window.unitActiveBuilds?.[unit.id];
+        const critRate = build?.critData?.rawRate ?? build?.critData?.rate ?? (typeof window.getUnitUncappedCrit === 'function' ? window.getUnitUncappedCrit(unit, slotIdx) : (unit.stats?.crit || unit.crit || 0));
+        const placement = slot.placement !== undefined ? slot.placement : (unit.placement || 1);
+        const critContribution = critRate * placement;
+        totalCrit += critContribution;
+        contributions.push({
+            unitId: unit.id,
+            unitName: unit.name || unit.id,
+            displayName: unit.name || unit.id,
+            slotIndex: slotIdx + 1,
+            critRate,
+            placement,
+            critContribution,
+            dmgContribution: 0,
+            percentOfPassive: 0
+        });
+    });
+
+    const eLevel = data.upgradeLevel !== undefined ? data.upgradeLevel : 6;
+    const mult = eLevel >= 4 ? 1.0 : 0.5;
+    contributions.forEach(c => {
+        c.dmgContribution = c.critContribution * mult;
+        c.percentOfPassive = totalCrit > 0 ? (c.critContribution / totalCrit) * 100 : 0;
+    });
+
+    return contributions;
+}
+
+function getAbhContributionRowsHtml(p, data, style = 'compact') {
+    const contributions = Array.isArray(p?.abhAllyCritContributions) && p.abhAllyCritContributions.length > 0
+        ? p.abhAllyCritContributions
+        : getAbhHotbarContributions(data || {});
+
+    if (contributions.length === 0) return '';
+
+    return contributions.map(c => {
+        const label = c.slotIndex ? `${c.displayName || c.unitName || 'Unit'} (#${c.slotIndex})` : (c.displayName || c.unitName || 'Self');
+        const critText = `${fmt.fix(c.critRate, 1)}% crit × ${c.placement || 0}`;
+        const dmgText = `${fmt.pct(c.dmgContribution || 0)} (${(c.percentOfPassive || 0).toFixed(1)}%)`;
+
+        if (style === 'table') {
+            return `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="padding-left: 48px;">↳ ${label}</td><td class="mt-cell-formula">Source crit: ${critText}</td><td class="mt-cell-val">${dmgText}</td></tr>`;
+        }
+
+        return `<div style="display:grid; grid-template-columns: 1fr auto; gap: 8px; font-size: 0.60rem; color: #999; margin-left: 8px; padding: 1px 0;"><span>↳ ${label} <span class="text-white">${dmgText}</span></span><span>${critText}</span></div>`;
+    }).join('');
+}
+
 function getActiveTagAndSourceForStat(statType, data) {
     const unitTags = data.baseStats?.tags || [];
     const rawElement = data.baseStats?.element || data.baseStats?.stats?.element || "";
@@ -18,6 +84,15 @@ function getActiveTagAndSourceForStat(statType, data) {
     const isPotential = window.CALCULATION_MODE === 'potential';
     const leader = window.hotbarState?.slots?.[0];
     const leadingId = isPotential ? data.baseStats?.id : (leader ? leader.id : null);
+    const normalizeUnitId = id => String(id || '').split('-')[0];
+    const hotbarUnitIds = new Set([
+        ...(window.hotbarState?.slots || []).filter(Boolean).map(slot => slot.id),
+        ...(typeof window.getActiveFusions === 'function' ? window.getActiveFusions().map(fusion => fusion.id) : [])
+    ].filter(Boolean).map(normalizeUnitId));
+
+    if (window.CALCULATION_MODE === 'loadout' && !hotbarUnitIds.has(normalizeUnitId(data.baseStats?.id))) {
+        return { label: '↳ Leader Buff', critLabel: '• Leader Buff', found: false };
+    }
 
     if (unrivaledMarkActive && leadingId) {
         const isAbh = window.isUnit(leadingId, 'angel_born_in_hell');
@@ -366,6 +441,7 @@ function renderSourceTotalsSection(data) {
                 let html = '';
                 data.detailedBuffs.passiveBreakdown.forEach(p => {
                     if (p.dmg > 0) html += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #999;"><span>${p.name}</span><span class="text-white">${fmt.pct(p.dmg)}</span></div>`;
+                    html += getAbhContributionRowsHtml(p, data, 'compact');
                     if (p.trueDmg > 0) html += `<div style="display:flex; justify-content:space-between; font-size: 0.65rem; color: #60a5fa;"><span>${p.name} (True)</span><span>+${p.trueDmg}%</span></div>`;
                 });
                 const namedDmg = data.detailedBuffs.passiveBreakdown.reduce((sum, p) => sum + (p.dmg || 0), 0);
@@ -603,6 +679,7 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
             if (data.detailedBuffs.passiveBreakdown && data.detailedBuffs.passiveBreakdown.length > 0) {
                 data.detailedBuffs.passiveBreakdown.forEach(p => {
                     if (p.dmg !== 0) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ ${p.name}</td><td class="mt-cell-formula">${p.dmg > 0 ? '+' : ''}${fmt.fix(p.dmg, 1)}%</td><td class="mt-cell-val"></td></tr>`;
+                    html += getAbhContributionRowsHtml(p, data, 'table');
                 });
                 const namedDmg = data.detailedBuffs.passiveBreakdown.reduce((sum, p) => sum + (p.dmg || 0), 0);
                 const eternalSub = (data.traitObj && data.traitObj.isEternal) ? (Math.min(data.wave || 12, 12) * 5) : 0;
@@ -631,7 +708,7 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
 function getTagPerkRowsHtml(statType, data) {
     const unitTags = data.baseStats?.tags || [];
     let html = '';
-    
+
     const uniqueSets = new Set();
     const checkSet = [];
 
@@ -642,7 +719,7 @@ function getTagPerkRowsHtml(statType, data) {
         else if (cleanSet.includes('reaper')) cleanSet = 'reaper_set';
         else if (cleanSet.includes('fused')) cleanSet = 'fused_set';
         else cleanSet = cleanSet.replace('_set', '');
-        
+
         uniqueSets.add(cleanSet);
         checkSet.push({ id: setKey, label: 'Set' });
     }

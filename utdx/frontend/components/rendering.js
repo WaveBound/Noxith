@@ -139,7 +139,7 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
         .unit-card {
             position: relative !important;
             overflow: hidden !important;
-            min-height: 520px !important;
+            min-height: 530px !important;
             border-radius: 20px !important;
             background:
                 linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(17, 24, 39, 0.98) 45%, rgba(2, 6, 23, 0.98)),
@@ -166,7 +166,7 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
         .unit-shell {
             display: flex;
             flex-direction: column;
-            min-height: 520px;
+            min-height: 530px;
         }
         .unit-banner {
             position: relative;
@@ -769,6 +769,29 @@ function calculateBuildEfficiency(build, unitCost, unitMaxPlacement, unitId) {
     return actualTotalCost === 0 ? 0 : (build.dps / actualTotalCost);
 }
 
+function getPreferredModeIdx(unitId, unitObj) {
+    const explicitState = window.unitModesState?.[unitId];
+    if (explicitState !== undefined) {
+        return Array.isArray(explicitState) ? explicitState[0] : explicitState;
+    }
+
+    const activeBuildMode = window.unitActiveBuilds?.[unitId]?.activeModeIdx;
+    if (activeBuildMode !== undefined) {
+        return activeBuildMode;
+    }
+
+    if (unitObj?.defaultMode !== undefined && unitObj?.defaultMode !== null) {
+        return unitObj.defaultMode;
+    }
+
+    const peakMode = window.PEAK_MODE_STATE?.[unitId];
+    if (peakMode !== undefined) {
+        return Array.isArray(peakMode) ? peakMode[0] : peakMode;
+    }
+
+    return 0;
+}
+
 function getHeadBadgeHtml(headUsed) {
     if (!headUsed || headUsed === 'none') return '';
 
@@ -1208,16 +1231,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unitId || s.id.split('-')[0] === unitId.split('-')[0]));
     const isHotbar = card.parentElement?.id === 'hotbarHiddenRender' || !!card.closest('.team-summary-container') || isInHotbarState;
 
-    let activeModeIdx = unitObj.defaultMode ?? 0;
-    if (window.unitModesState[unitId] !== undefined) {
-        const state = window.unitModesState[unitId];
-        activeModeIdx = Array.isArray(state) ? state[0] : state;
-    } else if (window.unitActiveBuilds?.[unitId]?.activeModeIdx !== undefined) {
-        activeModeIdx = window.unitActiveBuilds[unitId].activeModeIdx;
-    } else if (window.PEAK_MODE_STATE?.[unitId] !== undefined) {
-        const state = window.PEAK_MODE_STATE[unitId];
-        activeModeIdx = Array.isArray(state) ? state[0] : state;
-    }
+    let activeModeIdx = getPreferredModeIdx(unitId, unitObj);
 
     const systemLevelBar = card.querySelector('.system-level-bar');
     if (systemLevelBar && unitObj?.systemLevel) {
@@ -1714,16 +1728,7 @@ window.getQuickScore = (unit) => {
         const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unit.id || s.id.split('-')[0] === unit.id.split('-')[0]));
         const isHotbar = isLoadout && isInHotbarState;
 
-        let activeMode = unit.defaultMode ?? 0;
-        if (window.unitModesState[unit.id] !== undefined) {
-            const state = window.unitModesState[unit.id];
-            activeMode = Array.isArray(state) ? state[0] : state;
-        } else if (window.unitActiveBuilds?.[unit.id]?.activeModeIdx !== undefined) {
-            activeMode = window.unitActiveBuilds[unit.id].activeModeIdx;
-        } else if (window.PEAK_MODE_STATE?.[unit.id] !== undefined) {
-            const state = window.PEAK_MODE_STATE[unit.id];
-            activeMode = Array.isArray(state) ? state[0] : state;
-        }
+        let activeMode = getPreferredModeIdx(unit.id, unit);
 
         const hydrated = hydrateBuildEntry(topBuild, unit.id, isHotbar, activeMode);
         if (hydrated) {
@@ -1780,16 +1785,7 @@ window.resortUnitCardsInPlace = function () {
 };
 
 function renderUnitCard(unit, absoluteIndex) {
-    let activeMode = unit.defaultMode ?? 0;
-    if (window.unitModesState[unit.id] !== undefined) {
-        const state = window.unitModesState[unit.id];
-        activeMode = Array.isArray(state) ? state[0] : state;
-    } else if (window.unitActiveBuilds?.[unit.id]?.activeModeIdx !== undefined) {
-        activeMode = window.unitActiveBuilds[unit.id].activeModeIdx;
-    } else if (window.PEAK_MODE_STATE?.[unit.id] !== undefined) {
-        const state = window.PEAK_MODE_STATE[unit.id];
-        activeMode = Array.isArray(state) ? state[0] : state;
-    }
+    let activeMode = getPreferredModeIdx(unit.id, unit);
     const { upgradesArr = null } = getUnitCostAndPlacement(unit, activeMode);
 
     if (window.unitELevels[unit.id] === undefined && upgradesArr) {
@@ -2253,16 +2249,7 @@ function _executeGlobalFilter(term) {
 
     paginatedSortedUnits.forEach(entry => {
         const u = entry.unit;
-        let mode = u.defaultMode ?? 0;
-        if (window.unitModesState[u.id] !== undefined) {
-            const state = window.unitModesState[u.id];
-            mode = Array.isArray(state) ? state[0] : state;
-        } else if (window.unitActiveBuilds?.[u.id]?.activeModeIdx !== undefined) {
-            mode = window.unitActiveBuilds[u.id].activeModeIdx;
-        } else if (window.PEAK_MODE_STATE?.[u.id] !== undefined) {
-            const state = window.PEAK_MODE_STATE[u.id];
-            mode = Array.isArray(state) ? state[0] : state;
-        }
+        let mode = getPreferredModeIdx(u.id, u);
         const upgrades = u.modes?.[mode]?.upgrades || u.upgrades;
         if (window.unitELevels[u.id] === undefined && upgrades) {
             window.unitELevels[u.id] = upgrades.length - 1;

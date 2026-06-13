@@ -56,7 +56,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
             if (p.name === "Divine Replication") {
                 const unitBase = typeof window.getUnitById === 'function' ? window.getUnitById(uStats.id) : null;
                 const unitBaseMax = unitBase ? unitBase.placement : 3;
-                
+
                 // If a Trait like Ruler restricts the unit, the "Available Placements" pool shrinks.
                 // Unused = (Available Placements per Trait) - (Final Build Limit).
                 const availablePool = context.traitObj?.limitPlace || unitBaseMax;
@@ -155,7 +155,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
 
                         const sUnit = window.getUnitById ? window.getUnitById(s.id) : null;
                         const sTags = (sUnit ? sUnit.tags : s.tags) || [];
-                        
+
                         if (sTags.includes('Warlord')) {
                             let sPlacement = (sUnit ? sUnit.placement : s.placement) || 1;
                             const sTraitId = (window.unitTraits && window.unitTraits[s.id]);
@@ -178,11 +178,12 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
             if (p.name === "Unrivaled Mark") {
                 const isPotential = window.CALCULATION_MODE === 'potential';
                 if (!isPotential) {
-                    const hotbar = window.hotbarState;
-                    if (hotbar && hotbar.slots) {
-                        const slotIdx = hotbar.slots.findIndex(s => s && (s.id.split('-')[0] === uStats.id.split('-')[0]));
-                        if (slotIdx !== 0) return;
-                    }
+                    const normalizeUnitId = id => String(id || '').split('-')[0];
+                    const hotbarUnitIds = new Set([
+                        ...(window.hotbarState?.slots || []).filter(Boolean).map(slot => slot.id),
+                        ...(typeof window.getActiveFusions === 'function' ? window.getActiveFusions().map(fusion => fusion.id) : [])
+                    ].filter(Boolean).map(normalizeUnitId));
+                    if (window.CALCULATION_MODE === 'loadout' && !hotbarUnitIds.has(normalizeUnitId(uStats.id))) return;
                 }
             }
 
@@ -206,18 +207,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
             if (isAbhDynamic) {
                 pDmg = 0;
                 let totalAlliedCrit = 0;
-                let myPlacement = (uStats.placement !== undefined) ? uStats.placement : 1;
-                
-                if (myPlacement > 1) {
-                    let myCrit = uStats.stats?.crit || uStats.crit || 0;
-                    if (context.traitObj && context.traitObj.critRate) myCrit += context.traitObj.critRate;
-                    if (uStats.passives) {
-                        uStats.passives.forEach(pa => {
-                            if (pa.name === "Lightspeed Reflexes") myCrit += 50;
-                        });
-                    }
-                    totalAlliedCrit += myCrit * (myPlacement - 1);
-                }
+                const abhAllyCritContributions = [];
 
                 if (window.CALCULATION_MODE === 'loadout') {
                     const isInHotbar = window.hotbarState?.slots?.some(s => s && (s.id === uStats.id || (window.isUnit && window.isUnit(s.id, uStats.id))));
@@ -226,15 +216,26 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                         hotbarSlots.forEach((s, slotIdx) => {
                             if (!s) return;
                             if (s.id === uStats.id || (window.isUnit && window.isUnit(s.id, uStats.id))) return;
-                            
+
                             const sUnit = window.getUnitById ? window.getUnitById(s.id) : null;
                             if (sUnit) {
                                 const sPlacement = (s.placement !== undefined) ? s.placement : (sUnit.placement || 1);
-                                totalAlliedCrit += window.getUnitUncappedCrit(sUnit, slotIdx) * sPlacement;
+                                const critRate = typeof window.getUnitUncappedCrit === 'function' ? window.getUnitUncappedCrit(sUnit, slotIdx) : (sUnit.stats?.crit || sUnit.crit || 0);
+                                const critContribution = critRate * sPlacement;
+                                totalAlliedCrit += critContribution;
+                                abhAllyCritContributions.push({
+                                    unitId: sUnit.id,
+                                    unitName: sUnit.name || sUnit.id,
+                                    displayName: sUnit.name || sUnit.id,
+                                    slotIndex: slotIdx + 1,
+                                    critRate,
+                                    placement: sPlacement,
+                                    critContribution,
+                                    dmgContribution: 0,
+                                    percentOfPassive: 0
+                                });
                             }
                         });
-                    } else {
-                        totalAlliedCrit = 0;
                     }
                 }
 
@@ -242,6 +243,14 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                     const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
                     const mult = (eLevel >= 4) ? 1.0 : 0.5;
                     pDmg = totalAlliedCrit * mult;
+                    abhAllyCritContributions.forEach(c => {
+                        c.dmgContribution = c.critContribution * mult;
+                        c.percentOfPassive = totalAlliedCrit > 0 ? (c.critContribution / totalAlliedCrit) * 100 : 0;
+                    });
+                }
+
+                if (abhAllyCritContributions.length > 0) {
+                    p.abhAllyCritContributions = abhAllyCritContributions;
                 }
             }
 
@@ -348,8 +357,15 @@ window.calcGlobalBuffs = function (uStats, context, headPiece) {
                 const isPotential = window.CALCULATION_MODE === 'potential';
                 const leader = window.hotbarState?.slots?.[0];
                 const leadingId = isPotential ? uStats.id : (leader ? leader.id : null);
-                
+
                 if (buff.id === 'unrivaledMark' && leadingId) {
+                    const normalizeUnitId = id => String(id || '').split('-')[0];
+                    const hotbarUnitIds = new Set([
+                        ...(window.hotbarState?.slots || []).filter(Boolean).map(slot => slot.id),
+                        ...(typeof window.getActiveFusions === 'function' ? window.getActiveFusions().map(fusion => fusion.id) : [])
+                    ].filter(Boolean).map(normalizeUnitId));
+                    if (window.CALCULATION_MODE === 'loadout' && !hotbarUnitIds.has(normalizeUnitId(uStats.id))) return;
+
                     const uTags = uStats.tags || [];
                     const uElement = String(uStats.element || uStats.stats?.element || '').toLowerCase();
                     const isAbh = window.isUnit(leadingId, 'angel_born_in_hell');

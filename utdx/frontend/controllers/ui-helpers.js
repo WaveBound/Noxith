@@ -145,8 +145,17 @@ window.GLOBAL_BUFF_DATA = {
         hideButton: true,
         math: (uStats, context) => {
             const isPotential = window.CALCULATION_MODE === 'potential';
+            const isLoadout = window.CALCULATION_MODE === 'loadout';
+            const normalizeUnitId = id => String(id || '').split('-')[0];
             const unrivaledMarkActive = context.unrivaledMark || window.unrivaledMark || (window.hotbarState?.buffState?.unrivaledMark);
             const leader = window.hotbarState?.slots?.[0];
+            const hotbarIds = [
+                ...(window.hotbarState?.slots || []).filter(Boolean).map(slot => slot.id),
+                ...(typeof window.getActiveFusions === 'function' ? window.getActiveFusions().map(fusion => fusion.id) : [])
+            ];
+            const hotbarUnitIds = new Set(hotbarIds.filter(Boolean).map(normalizeUnitId));
+
+            if (isLoadout && !hotbarUnitIds.has(normalizeUnitId(uStats.id))) return {};
 
             let activeLeaderId = null;
             if (isPotential) {
@@ -221,13 +230,21 @@ window.toggleCalcMode = function (mode) {
     if (hotbarEl) hotbarEl.style.display = mode === 'loadout' ? '' : 'none';
 
     const onDone = () => {
+        const hasPendingCustomPairs = window.pendingCustomPairBuilds?.size > 0;
+
         window.resetCachesForBuffChange();
         if (mode === 'loadout') {
-            callIfFn('precalculateAllLoadoutBuilds');
-            callIfFn('recalculateHotbarTeam');
+            if (!hasPendingCustomPairs) {
+                callIfFn('precalculateAllLoadoutBuilds');
+                callIfFn('recalculateHotbarTeam');
+            } else {
+                callIfFn('showToast', "Loadout recalculations are paused because custom pairs are pending. Quick-load the affected cards first.");
+            }
         }
         callIfFn('resetAndRender');
-        callIfFn('updateHotbarUI');
+        if (!hasPendingCustomPairs) {
+            callIfFn('updateHotbarUI');
+        }
     };
 
     if (mode === 'loadout' && typeof window.loadHotbarDb === 'function') {

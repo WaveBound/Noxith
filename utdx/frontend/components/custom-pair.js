@@ -249,7 +249,7 @@ function markCustomPairUnitsPending(unitIds) {
             window.forceCustomPairBuildRefresh.delete(unitId);
         }
 
-        if (typeof updateBuildListDisplay === 'function') {
+        if (window.CALCULATION_MODE !== 'loadout' && typeof updateBuildListDisplay === 'function') {
             updateBuildListDisplay(unitId, true);
         }
         renderCustomPairPendingBanner(unitId);
@@ -298,7 +298,7 @@ window.refreshCustomPairBuilds = function (unitId) {
 
     clearCustomPairUnitCache(unitId);
 
-    if (typeof updateBuildListDisplay === 'function') {
+    if (window.CALCULATION_MODE !== 'loadout' && typeof updateBuildListDisplay === 'function') {
         updateBuildListDisplay(unitId, true);
     }
 

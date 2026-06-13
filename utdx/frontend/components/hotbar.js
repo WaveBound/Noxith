@@ -86,7 +86,7 @@
         if (!unit || !build) return null;
         const placements = build.placement !== undefined ? build.placement : (unit.placement || 1);
         const totalDmg = (build.dmgVal || 0) * placements;
-        return { unit, build, dmg: totalDmg, dps: build.dps || 0, teamDmg: totalDmg, teamDps: build.dps || 0, placementsCounted: placements, placements };
+        return { unit, build, dmg: totalDmg, dps: build.dps || 0, bossDps: build.bossDps || 0, teamDmg: totalDmg, teamDps: build.dps || 0, placementsCounted: placements, placements };
     };
 
     // --- DECLARATIVE CUSTOM UNIT EFFECTS MAP ---
@@ -607,6 +607,13 @@
                             <span id="totalTeamDps">0</span>
                         </div>
                     </div>
+                    <div class="hotbar-stat-group boss-dps-group" title="Total Team Boss DPS">
+                        <div class="stat-label">BOSS DPS</div>
+                        <div class="stat-value-box boss-dps-value-box">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-13h-9l1-7z"></path></svg>
+                            <span id="totalTeamBossDps">0</span>
+                        </div>
+                    </div>
                 </div>
                 <button class="hotbar-extra-btn hotbar-info-btn" onclick="event.stopPropagation(); openTeamSummary();">Info</button>
             </div>
@@ -895,7 +902,11 @@
                 } else if (hotbarState.buffState[k]) {
                     hotbarState.buffState[k] = false;
                     if (window.HOTBAR_BUFF_STATE) window.HOTBAR_BUFF_STATE[k] = false;
-                    setTimeout(() => callWin('renderDatabase'), 0);
+                    setTimeout(() => {
+                        callWin('resetCachesForBuffChange');
+                        callWin('updateAllUnitsBuilds');
+                        if (!window.visibleUnitIds?.size) callWin('renderDatabase');
+                    }, 0);
                 }
             });
         }
@@ -925,10 +936,10 @@
             });
         }
 
-        let teamDmg = 0, teamDps = 0;
+        let teamDmg = 0, teamDps = 0, teamBossDps = 0;
         const getStats = (id) => {
             const det = getDetailedUnitStats(id);
-            return det ? { dmg: det.dmg, dps: det.dps, placements: det.placementsCounted || 1 } : { dmg: 0, dps: 0, placements: 1 };
+            return det ? { dmg: det.dmg, dps: det.dps, bossDps: det.bossDps, placements: det.placementsCounted || 1 } : { dmg: 0, dps: 0, bossDps: 0, placements: 1 };
         };
 
         hotbarState.slots.forEach(u => {
@@ -936,19 +947,20 @@
             const isComp = hotbarState.fusionMode && activeFusions.some(f => f.components.includes(u.id) || f.components.some(c => isUnit(u.id, c)));
             if (isComp) return;
             const s = getStats(u.id);
-            teamDmg += s.dmg; teamDps += s.dps;
+            teamDmg += s.dmg; teamDps += s.dps; teamBossDps += s.bossDps;
         });
 
         if (hotbarState.fusionMode) {
             activeFusions.forEach(f => {
                 const s = getStats(f.id);
-                teamDmg += s.dmg; teamDps += s.dps;
+                teamDmg += s.dmg; teamDps += s.dps; teamBossDps += s.bossDps;
             });
         }
 
-        const teamDmgEl = $('#totalTeamDmg'), teamDpsEl = $('#totalTeamDps');
+        const teamDmgEl = $('#totalTeamDmg'), teamDpsEl = $('#totalTeamDps'), teamBossDpsEl = $('#totalTeamBossDps');
         if (teamDmgEl) teamDmgEl.innerText = formatVal(teamDmg);
         if (teamDpsEl) teamDpsEl.innerText = formatVal(teamDps);
+        if (teamBossDpsEl) teamBossDpsEl.innerText = formatVal(teamBossDps);
         $('.hotbar-stats-box')?.classList.toggle('fusion-active', hotbarState.fusionMode && activeFusions.length > 0);
 
         const fusionMap = new Map();
@@ -1062,6 +1074,7 @@
                     statsOverlay.innerHTML = `
                         <div class="stat-mini dmg"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"></path><path d="M13 19l6-6"></path><path d="M16 16l4 4"></path><path d="M19 13l2 2"></path></svg><span class="dmg-val">${formatVal(s.dmg)}</span></div>
                         <div class="stat-mini dps"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg><span class="dps-val">${formatVal(s.dps)}</span></div>
+                        <div class="stat-mini boss-dps" title="Boss DPS"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M13 2L3 14h9l-1 8 10-13h-9l1-7z"></path></svg><span class="boss-dps-val">${formatVal(s.bossDps)}</span></div>
                         ${traitBtn}
                     `;
                 }
@@ -1096,7 +1109,7 @@
         `;
 
         hotbarState.slots.forEach((s, i) => {
-        if (!s) return;
+            if (!s) return;
             const isTargeted = hotbarState.fernTargets.includes(i);
             html += `
                 <div class="fern-menu-item" onclick="toggleFernTarget(${i}); openFernTargetMenu();" style="background: #1e293b; border: 2px solid ${isTargeted ? '#8b5cf6' : 'rgba(255,255,255,0.05)'}; border-radius: 12px; padding: 10px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; ${isTargeted ? 'box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);' : ''}">
