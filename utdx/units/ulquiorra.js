@@ -1,6 +1,6 @@
 unitDatabase.push({
     id: "ulquiorra",
-    name: "Ultiorra",
+    name: "Ultiorra (Oblivion)",
     img: "images/units/Ulqiorra.png",
     level: 70,
     placement: 3,
@@ -20,7 +20,7 @@ unitDatabase.push({
         dotStacks: 1,
         spaCap: 2,
         passiveDmg: 0,
-        passiveSpa: 5,
+        passiveSpa: 0,
         element: "Dark",
         dotDuration: 0
     },
@@ -37,7 +37,7 @@ unitDatabase.push({
         { dmg: 1428, spa: 5.5, range: 30, cost: 4880 }, // Up 8 (Line AoE)
         { dmg: 1530, spa: 5, range: 33, cost: 5275, unlocksAbility: true } // Up 9
     ],
-    ability: { buffDmg: 65, passiveSpa: 2.5, crit: 10 },
+    ability: { name: "Resurrect", passiveDmg: 75, passiveSpa: 5, crit: 20 },
 
     // PASSIVES (displayed in unit info panel)
     passives: [
