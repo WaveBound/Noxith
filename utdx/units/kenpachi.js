@@ -3,10 +3,10 @@ unitDatabase.push({
     name: "Berserker",
     img: "images/units/Kenpachi.png",
     level: 70,
-    placement: 3,
+    placement: 1,
     placementType: "Hybrid",
     role: "Damage / Slow",
-    tags: ["Peroxide", "Reaper", "Rage"],
+    tags: ["Peroxide", "Reaper", "Rage", "Uncontrollable Power", "Sword"],
     meta: {
         short: "Ruler",
         long: "Ruler",
@@ -34,5 +34,26 @@ unitDatabase.push({
         { dmg: 1750, spa: 7, range: 24, cost: 9800 },  // Up 7
         { dmg: 1900, spa: 10, range: 27, cost: 12500 }, // Up 8 (AoE → Full AoE, Gains Hybrid)
         { dmg: 2400, spa: 10, range: 27, cost: 16000 }  // Up 9
+    ],
+    // PASSIVES (displayed in unit info panel)
+    passives: [
+        {
+            name: "Cut Through EVERYTHING!!!",
+            desc: "On Attack:<br>• Ignores 70% Elemental Restrictions on Armor/Hyperarmor."
+        },
+        {
+            name: "Spirit Aura",
+            desc: "During Attack:<br>• Slows Enemies by 20%<br>• Increases enemy damage taken by 15%."
+        }
+    ],
+
+    // ETHEREALIZATION (E1-E6 upgrade descriptions)
+    etherealization: [
+        "+10 Stat Points", // E1
+        "When this unit fully depletes 10 enemies' armor or hyper armor, gain 10% Damage and Range for 3 attacks. (Max 30%)", // E2
+        "+10 Stat Points", // E3
+        "This unit deals 15% more damage to enemy armor and hyper armor.", // E4
+        "+10 Stat Points", // E5
+        "Passive Ability: Cut Through EVERYTHING!!! gains an additional 20% elemental pierce.", // E6
     ]
 });

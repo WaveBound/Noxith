@@ -77,6 +77,13 @@ if (isMainThread) {
     const unitsPerJob = tasksForCounting.length;
     const totalTasks = totalJobs * unitsPerJob;
     let completedTasks = 0;
+    const generatorStartedAt = Date.now();
+
+    function getElapsedLabel() {
+        return ((Date.now() - generatorStartedAt) / 1000).toFixed(1) + 's';
+    }
+
+    console.log(`__STATUS__:LOG:summary:Generating ${totalJobs} combo(s) × ${unitsPerJob} unit(s) = ${totalTasks} unit-combos`);
 
     // Strictly limit workers to prevent CPU thrashing (deadlocks)
     const numWorkers = Math.min(threads || os.cpus().length, totalJobs);
@@ -99,7 +106,7 @@ if (isMainThread) {
                 completedTasks++;
                 const pct = (completedTasks / totalTasks) * 100;
                 // Granular update per unit
-                console.log(`__STATUS__:PROGRESS:${pct}:[${msg.outName}] Calcs done for ${msg.unitName}`);
+                console.log(`__STATUS__:PROGRESS:${pct}:[${msg.outName}] Calcs done for ${msg.unitName} · ${getElapsedLabel()}`);
             } else if (msg.type === 'done') {
                 dispatchJob(worker);
             } else if (msg.type === 'log') {
@@ -1275,6 +1282,7 @@ HTML = """
         #progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.1s linear; }
         #progress-status { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 5px; }
         #progress-log { font-size: 0.8rem; color: var(--accent); }
+        .last-generation-time { min-width: 170px; font-size: 0.78rem; color: #4ade80; text-align: right; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
@@ -1286,7 +1294,8 @@ HTML = """
             <h1>Database Generator</h1>
             <p>Select units to re-calculate or update</p>
         </div>
-        <div style="display: flex; gap: 10px;">
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <div id="last-generation-time" class="last-generation-time"></div>
             <button class="btn btn-outline" onclick="selectAll(true)">Select All</button>
             <button class="btn btn-outline" onclick="selectAll(false)">Clear</button>
             <button id="start-btn" class="btn" onclick="start()">Start Generation</button>
@@ -1390,6 +1399,7 @@ HTML = """
 
     <script>
         let units = []; let selected = new Set();
+        const LAST_GENERATE_KEY = 'utdxLastGenerateTime';
         const relicSets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi', 'Fused Warrior'];
         const headPieces = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings'];
         let selectedSets = new Set(relicSets);
@@ -1399,6 +1409,7 @@ HTML = """
             units = await pywebview.api.get_units();
             renderUnits();
             renderGearSelection();
+            restoreLastGenerateTime();
         });
         
         function escapeHtml(value) {
@@ -1409,6 +1420,19 @@ HTML = """
                 if (char === '"') return String.fromCharCode(34) + 'quot;';
                 return String.fromCharCode(39) + '#39;';
             });
+        }
+
+        function restoreLastGenerateTime() {
+            const label = document.getElementById('last-generation-time');
+            const last = localStorage.getItem(LAST_GENERATE_KEY);
+            if (label && last) label.innerText = 'Last generate: ' + last + 's';
+        }
+
+        function setLastGenerateTime(time) {
+            const elapsed = time.toFixed(2);
+            localStorage.setItem(LAST_GENERATE_KEY, elapsed);
+            const label = document.getElementById('last-generation-time');
+            if (label) label.innerText = 'Last generate: ' + elapsed + 's';
         }
 
         function renderUnits() {
@@ -1487,15 +1511,17 @@ HTML = """
         function updateStatus(msg) { document.getElementById('progress-log').innerText = msg; }
         
         function onComplete(time) {
+            const elapsed = time.toFixed(2) + 's';
             document.getElementById('progress-title').innerText = 'Generation Complete!';
-            document.getElementById('progress-log').innerText = 'Successfully finished in ' + time.toFixed(2) + 's';
+            document.getElementById('progress-log').innerText = 'Successfully finished in ' + elapsed;
+            setLastGenerateTime(time);
             document.getElementById('start-btn').innerText = 'Start Again';
             document.getElementById('stop-gen-btn').style.display = 'none';
             setTimeout(() => {
                 document.getElementById('overlay').style.display = 'none';
                 document.getElementById('progress-fill').style.width = '0%';
                 document.getElementById('progress-status').innerText = '0.0%';
-            }, 3000);
+            }, 5000);
         }
     </script>
 </body>

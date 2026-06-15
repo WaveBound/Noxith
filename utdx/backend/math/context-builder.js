@@ -36,6 +36,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     if (unit.customSummons) effectiveStats.customSummons = unit.customSummons;
     if (unit.summonStats) effectiveStats.summonStats = unit.summonStats;
     if (unit.passives) effectiveStats.passives = unit.passives;
+    if (unit.ability) effectiveStats.ability = unit.ability;
     if (unit.stats && unit.stats.customFollowUp) effectiveStats.customFollowUp = { ...unit.stats.customFollowUp };
 
     const state = (forcedModeIdx !== undefined) ? forcedModeIdx : (window.unitModesState && window.unitModesState[unit.id]);

@@ -258,7 +258,8 @@ function calculateDPS(uStats, relicStats, context) {
 
     let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassiveMod + headDmgTag + globalDmg + abilityDmg;
 
-    const isFusedWarrior = window.isUnit(uStats.id, 'ultimate_fused_warrior') || window.isUnit(uStats.id, 'fused_warrior') || (uStats.id && uStats.id.toLowerCase().includes('fused'));
+    const isFusedWarrior = window.isUnit(uStats.id, 'ultimate_fused_warrior') || window.isUnit(uStats.id, 'fused_warrior');
+    const isFusedWarriorSyncro = window.isUnit(uStats.id, 'fused_warrior_super_syncro');
 
     let warlordData = null;
     if (relicStats.set === 'warlord') {
@@ -400,6 +401,30 @@ function calculateDPS(uStats, relicStats, context) {
             label: "Fused Godly Might",
             usedSpa: usedSpa
         };
+    } else if (isFusedWarriorSyncro) {
+        const fuaChance = uStats.customFollowUp?.chance ?? 25;
+        const fuaDmgMult = uStats.customFollowUp?.dmgMult || 1.0;
+        const critGatedExtra = (finalCritRate / 100) * (fuaChance / 100) * fuaDmgMult;
+
+        attackMultiplier = 1 + critGatedExtra;
+        usedSpa = finalSpa;
+
+        hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
+        bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
+        normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
+        extraAttacksData = {
+            req: `On Crit: ${fuaChance}% FUA`,
+            hits: `${finalCritRate.toFixed(1)}% Crit × ${fuaChance}% FUA`,
+            extra: critGatedExtra,
+            attacksNeeded: 1,
+            mult: attackMultiplier,
+            label: uStats.customFollowUp?.label || "Crit-Gated Follow-Up",
+            usedSpa: finalSpa,
+            critGated: true,
+            critRate: finalCritRate,
+            fuaChance,
+            fuaDmgMult
+        };
     } else if (window.isUnit(uStats.id, 'strongest_swordsman_hunter')) {
         const stance2DmgBonus = (upgradeLevel >= 6) ? 60 : 40;
         const stance2CritBonus = (upgradeLevel >= 6) ? 20 : 15;
@@ -492,7 +517,7 @@ function calculateDPS(uStats, relicStats, context) {
         normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
     }
 
-    if (uStats.customFollowUp && !isFusedWarrior) {
+    if (uStats.customFollowUp && !isFusedWarrior && !isFusedWarriorSyncro) {
         const cooldown = uStats.customFollowUp.cooldown;
         const fuaDmgMult = uStats.customFollowUp.dmgMult || 1.0;
         const fuaAnim = uStats.customFollowUp.fuaAnimation || 0;
@@ -550,28 +575,56 @@ function calculateDPS(uStats, relicStats, context) {
             }
         } else {
             const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
-            let chance = uStats.customFollowUp.chance;
+            let chance = uStats.customFollowUp.chance ?? 100;
             if (eLevel >= uStats.customFollowUp.eLevelReq) chance = uStats.customFollowUp.eLevelChance;
 
             const atkAnim = effectiveSpaCap;
             const timeIfFua = Math.max(finalSpa, atkAnim + fuaAnim);
             const timeIfNoFua = Math.max(finalSpa, atkAnim);
             const computedSpa = (chance / 100) * timeIfFua + (1 - (chance / 100)) * timeIfNoFua;
-            attackMultiplier = 1 + (chance / 100) * fuaDmgMult;
+            const critGated = uStats.customFollowUp.critGated || uStats.customFollowUp.requireCrit;
 
-            usedSpa = finalSpa;
-            hitDpsTotal = (avgHit / computedSpa) * placement * attackMultiplier;
-            bossHitDpsTotal = (avgHitBoss / computedSpa) * placement * attackMultiplier;
+            if (critGated) {
+                const critChance = finalCritRate / 100;
+                const gatedExtra = critChance * (chance / 100) * fuaDmgMult;
 
-            extraAttacksData = {
-                req: `Follow-Up (${chance}%)`,
-                hits: `1 + ${fuaDmgMult}x`,
-                extra: (chance / 100) * fuaDmgMult,
-                attacksNeeded: 1,
-                mult: attackMultiplier,
-                label: uStats.customFollowUp.label || "Follow-Up",
-                usedSpa: computedSpa
-            };
+                attackMultiplier = 1 + gatedExtra;
+                usedSpa = finalSpa;
+                hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
+                bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
+                normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
+
+                extraAttacksData = {
+                    req: `On Crit: ${chance}% FUA`,
+                    hits: `${finalCritRate.toFixed(1)}% Crit × ${chance}% FUA`,
+                    extra: gatedExtra,
+                    attacksNeeded: 1,
+                    mult: attackMultiplier,
+                    label: uStats.customFollowUp.label || "Crit-Gated Follow-Up",
+                    usedSpa: finalSpa,
+                    critGated: true,
+                    critRate: finalCritRate,
+                    fuaChance: chance,
+                    fuaDmgMult
+                };
+            } else {
+                attackMultiplier = 1 + (chance / 100) * fuaDmgMult;
+
+                usedSpa = finalSpa;
+                hitDpsTotal = (avgHit / computedSpa) * placement * attackMultiplier;
+                bossHitDpsTotal = (avgHitBoss / computedSpa) * placement * attackMultiplier;
+                normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
+
+                extraAttacksData = {
+                    req: `Follow-Up (${chance}%)`,
+                    hits: `1 + ${fuaDmgMult}x`,
+                    extra: (chance / 100) * fuaDmgMult,
+                    attacksNeeded: 1,
+                    mult: attackMultiplier,
+                    label: uStats.customFollowUp.label || "Follow-Up",
+                    usedSpa: computedSpa
+                };
+            }
         }
     }
 
@@ -587,6 +640,60 @@ function calculateDPS(uStats, relicStats, context) {
 
         hitDpsTotal += abilityDps;
         bossHitDpsTotal += abilityDpsBoss;
+    }
+
+    // Only allocate abilityFollowUps for Syncro (rendering-only data, not needed in generator hot path)
+    let abilityFollowUps = null;
+
+    if (uStats.ability && Array.isArray(uStats.ability)) {
+        uStats.ability.forEach(ab => {
+            if (ab.reqUp !== undefined && upgradeLevel < ab.reqUp) return;
+            
+            if (ab.noToggle && ab.dmgMult && ab.cooldown) {
+                const abAvgHit = finalDmg * ab.dmgMult * avgCritMult;
+                const abAvgHitBoss = finalDmgBoss * ab.dmgMult * avgCritMultBoss;
+
+                const abDps = (abAvgHit / ab.cooldown) * placement;
+                const abDpsBoss = (abAvgHitBoss / ab.cooldown) * placement;
+
+                hitDpsTotal += abDps;
+                bossHitDpsTotal += abDpsBoss;
+
+                if (isFusedWarriorSyncro) {
+                    if (!abilityFollowUps) abilityFollowUps = [];
+                    abilityFollowUps.push({
+                        abilityName: ab.abilityName || "Passive Ability",
+                        cooldown: ab.cooldown,
+                        dmgMult: ab.dmgMult,
+                        avgHit: abAvgHit,
+                        avgHitBoss: abAvgHitBoss,
+                        dps: abDps,
+                        dpsBoss: abDpsBoss,
+                        placement
+                    });
+                    return;
+                }
+
+                const baseHitDps = (avgHit / usedSpa) * placement;
+                const abilityMultContrib = baseHitDps > 0 ? (abDps / baseHitDps) : 0;
+
+                if (!extraAttacksData) {
+                    extraAttacksData = {
+                        req: `Ability CD: ${ab.cooldown}s`,
+                        hits: `${ab.dmgMult}x Dmg`,
+                        extra: 0,
+                        attacksNeeded: 1,
+                        mult: 1 + abilityMultContrib,
+                        label: ab.abilityName || "Passive Ability",
+                        usedSpa: ab.cooldown
+                    };
+                } else {
+                    extraAttacksData.hits += ` & ${ab.dmgMult}x Ability`;
+                    extraAttacksData.label += ` & ${ab.abilityName || "Ability"}`;
+                    extraAttacksData.mult += abilityMultContrib;
+                }
+            }
+        });
     }
 
     let tripleThreatFuaDmgNormal = finalDmgNormal;
@@ -890,15 +997,15 @@ function calculateDPS(uStats, relicStats, context) {
         conditionalData: uStats.burnMultiplier ? { name: "Target: Burn", val: uStats.burnMultiplier, mult: (1 + uStats.burnMultiplier / 100) } : (uStats.finalMult > 1 ? { name: uStats.id === 'mochi_pirate' ? "Evercrush Dough" : "Raw Multiplier", val: 0, mult: uStats.finalMult } : null),
         headBuffs: { dmg: headDmgBase + headDmgPassiveMod + headDmgTag, headBase: headDmgBase, passiveDmg: headDmgPassiveMod, tagDmg: headDmgTag, dot: headDotBuff, type: headPiece, warlordSpa, ...headCalc },
         dotData: dotBreakdown,
-        critData: { 
-            rate: finalCritRate, 
-            rawRate: rawCritRate, 
-            cdmg: finalCdmgStat, 
-            baseCdmg: uStats.cdmg, 
-            relicCmPct: baseR_Cm, 
-            setCm: sBonus.cm, 
-            totalCmBuff: (sBonus.cm || 0) + baseR_Cm, 
-            preRelicCdmg: uStats.cdmg, 
+        critData: {
+            rate: finalCritRate,
+            rawRate: rawCritRate,
+            cdmg: finalCdmgStat,
+            baseCdmg: uStats.cdmg,
+            relicCmPct: baseR_Cm,
+            setCm: sBonus.cm,
+            totalCmBuff: (sBonus.cm || 0) + baseR_Cm,
+            preRelicCdmg: uStats.cdmg,
             avgMult: avgCritMult,
             globalCrit: globalCrit,
             globalCritSources: activeGlobalBuffsList.filter(b => b && (b.crit || b.critRate || b.cRate || 0) > 0),
@@ -926,6 +1033,7 @@ function calculateDPS(uStats, relicStats, context) {
         singleUnitDoT: dotDpsTotal / (traitObj.allowDotStack || traitObj.allowPlacementStack ? placement : 1),
         hasStackingDoT: traitObj.allowDotStack || traitObj.allowPlacementStack,
         extraAttacks: extraAttacksData,
+        abilityFollowUps,
         abilityBuff: (uStats.buffDmg || 0) + abilityDmg,
         warlordData,
         relicStats,

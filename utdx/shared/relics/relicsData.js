@@ -51,7 +51,7 @@ const SETS = [
         location: "Raid 1: Sea Warlord",
         locationImage: "images/location/sea_warlord.png"
     },
-        {
+    {
         id: "fused_set", name: "Fused Warrior", rarity: "Secret", source: "Raid",
         bonus: { dmg: 0, spa: 0, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, armorDmg: 0, passive: "fused_set" },
         accessory: { dmg: 0, spa: 0, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, passive: "fused_earrings_acc" },

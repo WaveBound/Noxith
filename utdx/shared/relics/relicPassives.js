@@ -153,6 +153,7 @@ const PASSIVES = {
         syncroDmgBuff: 15,
         syncroRangeBuff: 25
     },
+
 };
 
 // ─── TAG PERKS ──────────────────────────────────────────────
@@ -231,7 +232,7 @@ function applyPassiveBonus(passiveId, unitStats, originalUnit = null) {
 
         // Detect Synchro forms via Display Name or unit ID as requested (must contain "syncro" or be in the fused list)
         const isSyncro = unitNameLower.includes('(syncro)') || ['unparalleled_armor', 'majestic_armor', 'sjw'].includes(unitIdLower);
-        
+
         // Detect Clash/Fusion capability explicitly for the requested units (Nutaru, Sasuke, etc.)
         const hasClash = ['nutaru_beast', 'ancient_shinob', 'sasuke_great_war'].includes(unitIdLower);
 
@@ -241,12 +242,12 @@ function applyPassiveBonus(passiveId, unitStats, originalUnit = null) {
         } else if (hasClash) {
             effectiveStats.dmg = Math.floor(effectiveStats.dmg * (1 + (passive.clashDmgBuff || 50) / 100));
         }
-        return { 
-            effectiveStats, 
-            uptimeInfo: { 
-                note: isSyncro ? `Syncro Form (+${passive.syncroDmgBuff}% DMG, +${passive.syncroRangeBuff}% RNG)` : 
-                      (hasClash ? `Clash Potential (+${passive.clashDmgBuff}% DMG)` : "No specialized bonus applied") 
-            } 
+        return {
+            effectiveStats,
+            uptimeInfo: {
+                note: isSyncro ? `Syncro Form (+${passive.syncroDmgBuff}% DMG, +${passive.syncroRangeBuff}% RNG)` :
+                    (hasClash ? `Clash Potential (+${passive.clashDmgBuff}% DMG)` : "No specialized bonus applied")
+            }
         };
     }
 
@@ -255,6 +256,17 @@ function applyPassiveBonus(passiveId, unitStats, originalUnit = null) {
             effectiveStats.critRate = 0;
             effectiveStats.critDmg = 0;
         }
+
+        if (passive.allowedUnitIds && passive.allowedUnitIds.length > 0) {
+            const unitId = String(originalUnit?.id || originalUnit?._fileName || "").split("-")[0].toLowerCase();
+            const unitName = String(originalUnit?.name || "").toLowerCase();
+            const isAllowed = passive.allowedUnitIds.some(id => unitId === id || unitName.includes(id));
+
+            if (!isAllowed) {
+                return { effectiveStats, uptimeInfo: { note: `Requires ${passive.allowedUnitIds.join(" / ")}` } };
+            }
+        }
+
         if (passive.dmgBuff) {
             effectiveStats.dmg = Math.floor(effectiveStats.dmg * (1 + passive.dmgBuff / 100));
         }

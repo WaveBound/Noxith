@@ -819,6 +819,7 @@ function renderCritSection(data, setTagCfTotal, setTagCmTotal, cleanHeadDisplayN
                     <tr><td class="mt-cell-label mt-pl-sm mt-text-gold mt-text-bold mt-pt-md">Crit Damage Calculation</td><td class="mt-cell-formula mt-pt-md"></td><td class="mt-cell-val mt-pt-md"></td></tr>
                     <tr><td class="mt-cell-label mt-pl-sm text-gray">↳ CDmg Base</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-gray font-normal">${fmt.fix(data.critData?.baseCdmg, 0)}</td></tr>
                     ${data.relicBuffs?.cm > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs">• Relics</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">+${fmt.fix(data.relicBuffs.cm, 1)}%</td></tr>` : ''}
+                    ${setCmVal > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs" style="line-height: 1.4;">↳ Set Bonus<br>&nbsp;&nbsp;&nbsp;&nbsp;(${relicSetName} Set)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs" style="vertical-align: top; padding-top: 4px;">+${fmt.fix(setCmVal, 1)}%</td></tr>` : ''}
                     ${accCmVal > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs" style="line-height: 1.4;">↳ Accessory Base<br>&nbsp;&nbsp;&nbsp;&nbsp;(${cleanHeadDisplayName})</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs" style="vertical-align: top; padding-top: 4px;">+${fmt.fix(accCmVal, 1)}%</td></tr>` : ''}
                     ${getTagPerkRowsHtml('cdmg', data)}
                     ${globalCdmgBreakdownHtml}
@@ -1123,6 +1124,57 @@ function renderDotSection(data, headDotRow) {
 }
 
 function renderAttackRateSection(data) {
+    const isSyncro = window.isUnit?.(data.baseStats?.id, 'fused_warrior_super_syncro');
+    if (isSyncro) {
+        const f = data.baseStats?.customFollowUp || {};
+        const ea = data.extraAttacks || {};
+        const critRate = data.critData?.rate ?? 0;
+        const fuaChance = f.chance ?? ea.fuaChance ?? 25;
+        const fuaDmgMult = f.dmgMult ?? ea.fuaDmgMult ?? 1;
+        const critGatedExtra = (critRate / 100) * (fuaChance / 100) * fuaDmgMult;
+        const attackMult = ea.mult ?? (1 + critGatedExtra);
+        const baseHitDps = (data.dmgVal * (data.critData?.avgMult || 1) / (data.finalSpa || data.spa || 1)) * (data.placement || 1);
+        const critGatedDps = baseHitDps * critGatedExtra;
+        const abilities = (data.baseStats?.ability || []).filter(ab => ab.noToggle && ab.dmgMult && ab.cooldown);
+        const abilityRows = abilities.map(ab => {
+            const abDmg = data.dmgVal * ab.dmgMult * (data.critData?.avgMult || 1);
+            const abDps = (abDmg / ab.cooldown) * (data.placement || 1);
+
+            return `
+                <tr><td class="mt-cell-label text-custom" style="font-weight: 700;">${ab.abilityName || 'Ability Follow-Up'}</td><td class="mt-cell-formula">Every ${ab.cooldown}s · Can Crit</td><td class="mt-cell-val" style="color: #4ade80;">${fmt.num(abDps)} DPS</td></tr>
+                <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Ability Damage</td><td class="mt-cell-formula">${fmt.fix(ab.dmgMult * 100, 1)}% × Avg Crit Mult</td><td class="mt-cell-val">${fmt.num(abDmg)}</td></tr>
+            `;
+        }).join('');
+        const totalAbilityDps = abilities.reduce((sum, ab) => sum + ((data.dmgVal * ab.dmgMult * (data.critData?.avgMult || 1) / ab.cooldown) * (data.placement || 1)), 0);
+
+        return `
+            <div class="dd-section" style="border-left: 3px solid #4ade80;">
+                <div class="dd-title mt-text-green"><span>5. Crit-Gated Follow-Up (On Crit)</span> <button class="calc-info-btn" onclick="openInfoPopup('attack_rate')">?</button></div>
+                <table class="calc-table">
+                    <tr><td class="mt-cell-label">Trigger Formula</td><td class="mt-cell-formula">Crit Rate × ${fmt.fix(fuaChance, 1)}% FUA</td><td class="mt-cell-val text-custom">${fmt.fix(critRate, 1)}% × ${fmt.fix(fuaChance, 1)}%</td></tr>
+                    <tr><td class="mt-cell-label opacity-70 mt-pl-md">↳ Crit Rate / ${fmt.fix(100 / fuaChance, 0)}</td><td class="mt-cell-formula">${fmt.fix(critRate, 1)}% / ${fmt.fix(100 / fuaChance, 0)}</td><td class="mt-cell-val opacity-70">${fmt.fix(critGatedExtra * 100, 1)}% Avg Attack Mult</td></tr>
+                    <tr><td class="mt-cell-label text-accent-start">Average FUA Damage Added</td><td class="mt-cell-formula">Base Hit DPS × Extra Mult</td><td class="mt-cell-val text-accent-start">${fmt.num(baseHitDps)} × ${fmt.fix(critGatedExtra, 3)}</td></tr>
+                    <tr><td class="mt-cell-label text-accent-start">Crit-Gated FUA DPS</td><td class="mt-cell-formula">Base Hit DPS × (Crit × FUA Chance)</td><td class="mt-cell-val text-accent-start">${fmt.num(critGatedDps)} DPS</td></tr>
+                    <tr class="mt-border-top">
+                        <td class="mt-cell-label mt-pt-sm text-white" style="font-weight: 900;">Final Attack Mult</td>
+                        <td class="mt-cell-formula mt-pt-sm">1 + (Crit Rate × FUA Chance × FUA Mult)</td>
+                        <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size: 1.15rem; color: #4ade80;">x${fmt.fix(attackMult, 3)}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="dd-section" style="border-left: 3px solid #4ade80;">
+                <div class="dd-title mt-text-green"><span>6. Ability Follow-Up Attacks</span></div>
+                <table class="calc-table">
+                    ${abilityRows || '<tr><td colspan="3" class="mt-cell-label opacity-50">No no-toggle ability follow-ups found.</td></tr>'}
+                    <tr class="mt-border-top">
+                        <td class="mt-cell-label mt-pt-sm text-white" style="font-weight: 900;">Total Ability DPS Added</td>
+                        <td class="mt-cell-formula mt-pt-sm"></td>
+                        <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size: 1.15rem; color: #4ade80;">${fmt.num(totalAbilityDps)} DPS</td>
+                    </tr>
+                </table>
+            </div>`;
+    }
+
     if (data.baseStats?.customFollowUp) {
         const f = data.baseStats.customFollowUp;
         const ea = data.extraAttacks;
@@ -1185,7 +1237,7 @@ function renderAttackRateSection(data) {
         }
     }
 
-    const isFW = window.isUnit?.(data.baseStats?.id, 'ultimate_fused_warrior') || window.isUnit?.(data.baseStats?.id, 'fused_warrior') || (data.baseStats?.id && data.baseStats.id.toLowerCase().includes('fused'));
+    const isFW = (window.isUnit?.(data.baseStats?.id, 'ultimate_fused_warrior') || window.isUnit?.(data.baseStats?.id, 'fused_warrior') || (data.baseStats?.id && data.baseStats.id.toLowerCase().includes('fused'))) && !window.isUnit?.(data.baseStats?.id, 'fused_warrior_super_syncro');
     if (isFW && data.extraAttacks) {
         const ea = data.extraAttacks;
         const eLevel = data.upgradeLevel !== undefined ? data.upgradeLevel : 6;
@@ -1279,6 +1331,31 @@ function renderAttackRateSection(data) {
                         <td class="mt-cell-label text-white mt-pt-sm">Final Stance DPS Multiplier</td>
                         <td class="mt-cell-formula mt-pt-sm">Total Dmg / 6 Hits</td>
                         <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size: 1.15rem; color: #4ade80;">x${fmt.fix(ea.mult, 3)}</td>
+                    </tr>
+                </table>
+            </div>`;
+    }
+
+    // Render dedicated section for units with noToggle abilities tracked in the ability array
+    const noToggleAbilities = (data.baseStats?.ability || []).filter(ab => ab.noToggle && ab.dmgMult && ab.cooldown);
+    if (noToggleAbilities.length > 0) {
+        const abilityRows = noToggleAbilities.map(ab => {
+            const abDmg = data.dmgVal * ab.dmgMult * (data.critData?.avgMult || 1);
+            const abDps = abDmg / ab.cooldown;
+            return `
+                <tr><td class="mt-cell-label text-custom" style="font-weight:700;">${ab.abilityName || 'Ability Follow-Up'}</td><td class="mt-cell-formula">Every ${ab.cooldown}s</td><td class="mt-cell-val" style="color:#4ade80;">${fmt.num(abDps * (data.placement || 1))} DPS</td></tr>
+                <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Ability Damage (${ab.dmgMult * 100}% × Avg Crit Mult)</td><td class="mt-cell-formula"></td><td class="mt-cell-val">${fmt.num(abDmg)}</td></tr>
+            `;
+        }).join('');
+        return `
+            <div class="dd-section" style="border-left: 3px solid #4ade80;">
+                <div class="dd-title mt-text-green"><span>5. Ability Follow-Up Attacks</span></div>
+                <table class="calc-table">
+                    ${abilityRows}
+                    <tr class="mt-border-top">
+                        <td class="mt-cell-label mt-pt-sm text-white" style="font-weight: 900;">Total Ability DPS Added</td>
+                        <td class="mt-cell-formula"></td>
+                        <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size: 1.15rem; color: #4ade80;">${fmt.num(noToggleAbilities.reduce((sum, ab) => sum + (data.dmgVal * ab.dmgMult * (data.critData?.avgMult || 1) / ab.cooldown) * (data.placement || 1), 0))}</td>
                     </tr>
                 </table>
             </div>`;

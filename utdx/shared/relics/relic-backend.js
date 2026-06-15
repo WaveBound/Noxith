@@ -2,7 +2,7 @@
 // RELIC-BACKEND.JS - Centralized Math for Relic Stats and Substats
 // ============================================================================
 
-window.calcRelicStats = function(relicStats, uStats, headPiece, context, traitObj, starMult, statConfig) {
+window.calcRelicStats = function (relicStats, uStats, headPiece, context, traitObj, starMult, statConfig) {
     let { sBonus, tagBuffs, setPerkDmg } = window._calcSetAndTagBonuses(relicStats, uStats, headPiece, context);
     if (starMult && starMult !== 1) { for (let key in sBonus) { if (typeof sBonus[key] === 'number') sBonus[key] *= starMult; } }
 
@@ -24,7 +24,7 @@ window.calcRelicStats = function(relicStats, uStats, headPiece, context, traitOb
     return { sBonus, tagBuffs, setPerkDmg, baseR_Dmg, baseR_Spa, baseR_Cm, baseR_Cf, baseR_Dot, baseR_Range };
 };
 
-window._calcSetAndTagBonuses = function(relicStats, uStats, headPiece, context = {}) {
+window._calcSetAndTagBonuses = function (relicStats, uStats, headPiece, context = {}) {
     let sBonus = { dmg: 0, spa: 0, range: 0, cf: 0, cm: 0, dot: 0, bossDmg: 0, trueDmg: 0, elementalAll: 0, hyperArmor: 0, armorPen: 0, buffPotency: 0, activeTags: [] };
     let tagBuffs = { dmg: 0, spa: 0, cm: 0, cf: 0, range: 0, dot: 0, elementalAll: 0, hyperArmor: 0 };
     let setPerkDmg = 0;
@@ -44,7 +44,7 @@ window._calcSetAndTagBonuses = function(relicStats, uStats, headPiece, context =
         sBonus.trueDmg = b.trueDmg || 0;
         sBonus.hyperArmor = b.hyperArmor || 0;
         sBonus.armorDmg = b.armorDmg || 0;
-        
+
         // Handle set elemental bonus if matching attacker element
         const unitElement = uStats ? (uStats.element || "None") : "None";
         if (b.elemental && b.elemental[unitElement]) {
@@ -93,7 +93,7 @@ window._calcSetAndTagBonuses = function(relicStats, uStats, headPiece, context =
     // --- TAG PERKS ENGINE ---
     // Logic: Only check sets that the unit is currently wearing (Set or Accessory).
     const setsToCheck = [activeSetId];
-    
+
     if (mappedHeadSetId && mappedHeadSetId !== activeSetId) {
         // Exclude accessories that handle their own specific perks in _calcHeadDynamicBuffs to prevent double-dipping
         if (headPiece !== 'fused_earrings' && headPiece !== 'monarch' && headPiece !== 'monarch_cape' && headPiece !== 'monarch_head' && headPiece !== 'rebellious' && headPiece !== 'rebellious_head' && headPiece !== 'bloodline_head') {
@@ -182,7 +182,7 @@ window._calcSetAndTagBonuses = function(relicStats, uStats, headPiece, context =
 
             const summonCountTotal = (uStats.customSummons || []).reduce((acc, s, sIdx) => {
                 if (upLevel < (s.reqUp || 0)) return acc;
-                
+
                 let isEnabled = true;
                 if (uStats.id === 'the_strongest_in_history') {
                     isEnabled = false;
@@ -194,7 +194,7 @@ window._calcSetAndTagBonuses = function(relicStats, uStats, headPiece, context =
                         const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels[uStats.id] !== undefined)
                             ? window.unitSystemLevels[uStats.id]
                             : (uStats.systemLevel ? (uStats.systemLevel.default || 100) : 100);
-                        
+
                         if (sIdx === 1 && sysLvl < 40) isEnabled = false;
                         if (sIdx === 2 && sysLvl < 60) isEnabled = false;
                         if (sIdx === 3 && sysLvl < 80) isEnabled = false;
@@ -231,20 +231,31 @@ window._calcSetAndTagBonuses = function(relicStats, uStats, headPiece, context =
 
     // Fused Warrior Set logic
     if (activeSetId === 'fused_set') {
-        // 2-Piece Passive: Crit DMG on DoT (Averaged Uptime: 15 / 22.5 = 66.7%)
-        if (uStats && (uStats.dot > 0 || (uStats.stats && uStats.stats.dot > 0))) {
-            const uptime = 15 / (15 + 7.5);
-            sBonus.cm += 50 * uptime;
+        // 2-Piece Passive: Crit DMG on DoT
+        // If the unit applies DoT (natively, via passives, or via custom follow up), give +50% Crit DMG (100% uptime since buff duration > cooldown)
+        const hasDot = uStats && (
+            (uStats.dot > 0) ||
+            (uStats.stats && uStats.stats.dot > 0) ||
+            (uStats.burnMultiplier > 0) ||
+            (uStats.stats && uStats.stats.burnMultiplier > 0) ||
+            (uStats.passives && uStats.passives.some(p => (p.dot && p.dot > 0) || p.name === "Fiery Legacy" || p.name === "Brutal Slashes")) ||
+            (uStats.customFollowUp && (uStats.customFollowUp.dotPct > 0 || uStats.customFollowUp.dot > 0)) ||
+            (window.isUnit && window.isUnit(uStats.id, 'kirito')) ||
+            (uStats.id && uStats.id.includes('kirito'))
+        );
+
+        if (hasDot) {
+            sBonus.cm += 50;
         }
     }
 
     return { sBonus, tagBuffs, setPerkDmg };
 };
 
-window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats, relicStats = {}, context = {}) {
+window._calcHeadDynamicBuffs = function (headPiece, finalSpa, finalRange, uStats, relicStats = {}, context = {}) {
     let headDmgBase = 0, headDmgPassive = 0, headDmgTag = 0, headDotBuff = 0, headCfTag = 0, headCmTag = 0;
     let headCalc = { type: headPiece, uptime: 1, trigger: 0, duration: 0, attacks: 0, cf: 0, cm: 0, elementalAll: 0, hyperArmor: 0, activeTags: [] };
-    
+
     // Map of headPiece ID to Set ID
     const headSetIdMap = {
         sun_god: 'sun_god',
@@ -285,8 +296,9 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
             headCalc.cm = acc.cDmg || 0;
             headDotBuff = acc.dot || 0;
             headCalc.hyperArmor = acc.hyperArmor || 0;
-            headCalc.elementalAll = (acc.elementalAll || 0) + 30;
-            
+            if (acc.elementalAll) headCalc.elementalAll = acc.elementalAll;
+            else if (mappedSetId === 'fused_set') headCalc.elementalAll = 30;
+
             passiveId = acc.passive;
         }
     }
@@ -295,7 +307,7 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
     if (passiveId && typeof applyPassiveBonus === 'function') {
         const uCrit = uStats ? (uStats.crit || 0) : 0;
         const uCDmg = uStats ? (uStats.cdmg || 0) : 0;
-        
+
         const unitStatsSim = {
             dmg: 1000,
             spa: finalSpa,
@@ -308,11 +320,11 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
 
         const isSasuke = uStats && uStats.id && (uStats.id.includes('sasuke') || (uStats._fileName && uStats._fileName.includes('sasuke')));
         const isTripleThreat = uStats && uStats.id && (uStats.id.includes('triple_threat') || (uStats._fileName && uStats._fileName.includes('triple_threat')));
-        
+
         if (passiveId === 'biju_acc') {
             // ONLY works on specific charged attack units
             const isBijuAllowed = uStats && uStats.id && (
-                uStats.id.includes('triple_threat') || 
+                uStats.id.includes('triple_threat') ||
                 uStats.id === 'alpha_devil' ||
                 uStats.id === 'devil_hunter' ||
                 (uStats._fileName && uStats._fileName.includes('triple_threat'))
@@ -409,7 +421,7 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
     }
 
     if (uStats && (headPiece === 'monarch_cape' || headPiece === 'monarch_head' || headPiece === 'monarch') && (relicStats && (relicStats.set === 'monarch' || (window.isUnit && window.isUnit(uStats.id, 'gluttonous_warlord'))))) {
-        headDmgBase = 0; 
+        headDmgBase = 0;
         const upLevel = context.upgradeLevel !== undefined ? context.upgradeLevel : 6;
         let summonCount = 0;
 
@@ -424,7 +436,7 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
 
             const summonCountTotal = (uStats.customSummons || []).reduce((acc, s, sIdx) => {
                 if (upLevel < (s.reqUp || 0)) return acc;
-                
+
                 let isEnabled = true;
                 if (uStats.id === 'the_strongest_in_history') {
                     isEnabled = false;
@@ -436,7 +448,7 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
                         const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels[uStats.id] !== undefined)
                             ? window.unitSystemLevels[uStats.id]
                             : (uStats.systemLevel ? (uStats.systemLevel.default || 100) : 100);
-                        
+
                         if (sIdx === 1 && sysLvl < 40) isEnabled = false;
                         if (sIdx === 2 && sysLvl < 60) isEnabled = false;
                         if (sIdx === 3 && sysLvl < 80) isEnabled = false;
@@ -496,7 +508,7 @@ window._calcHeadDynamicBuffs = function(headPiece, finalSpa, finalRange, uStats,
                 }
             });
         }
-        
+
         if (headCalc.type === 'none') headCalc.type = 'rebellious';
     }
 

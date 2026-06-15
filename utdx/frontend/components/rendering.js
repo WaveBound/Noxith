@@ -277,11 +277,13 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             border: 2px solid rgba(255, 255, 255, 0.38);
             box-shadow: 0 6px 14px rgba(0, 0, 0, 0.42);
         }
-        .unit-title { min-width: 0; min-height: 72px; text-align: left; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 6px; padding: 25px 0 30px 0; position: relative; }
-        .unit-title-text { min-width: 0; margin-right: 0; }
+        .unit-title { min-width: 0; min-height: 72px; text-align: left; display: flex; flex-direction: row; align-items: flex-end; justify-content: space-between; padding: 10px 0; position: relative; gap: 6px; }
+        .unit-title-text { min-width: 0; flex: 1; padding-right: 0; }
         .unit-title h2 {
             margin: 0;
-            overflow-wrap: break-word;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             font-size: 0.96rem !important;
             line-height: 1.1;
             color: #f8fafc;
@@ -308,11 +310,9 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             letter-spacing: 0.08em;
         }
         .trait-guide-btn {
-            position: absolute !important;
-            top: auto !important;
-            right: 0 !important;
-            left: auto !important;
-            bottom: 18px !important;
+            position: static !important;
+            align-self: flex-end !important;
+            flex-shrink: 0;
             z-index: 4;
             width: max-content !important;
             max-width: 115px !important;
@@ -323,10 +323,7 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             justify-content: center !important;
             gap: 4px !important;
             box-sizing: border-box !important;
-            justify-self: auto;
-            flex-shrink: 0;
-            margin-right: 0;
-            border-radius: 999px;
+            border-radius: 50px;
             border: 1px solid rgba(129, 140, 248, 0.35);
             background: linear-gradient(135deg, rgba(129, 140, 248, 0.22), rgba(168, 85, 247, 0.16));
             box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
@@ -669,8 +666,8 @@ const HEAD_CONFIG = {
     strongest_sorcerer_glasses: { name: 'Strongest', search: 'Strongest', cls: 'custom' },
     monarch: { name: 'Monarch Cape', search: 'Monarch', cls: 'custom' },
     warlord_hat: { name: 'Warlord Hat', search: 'Warlord', cls: 'custom' },
-    mochi_scarf: { name: 'Mochi Scarf', search: 'Mochi', cls: 'custom' },
-    flaming_donut: { name: 'Flaming Donut', search: 'Flaming Donut', cls: 'custom' },
+    mochi_scarf: { name: 'Mochi Scarf', search: 'Scarf', cls: 'custom' },
+    flaming_donut: { name: 'Flaming Donut', search: 'Donut', cls: 'custom' },
     fused_earrings: { name: 'Fused Earrings', search: 'Earrings', cls: 'custom' }
 };
 
@@ -1944,9 +1941,9 @@ function renderUnitCard(unit, absoluteIndex) {
             const clean = name.split('(')[0].trim();
             const trait = typeof traitsList !== 'undefined' && traitsList.find(t => t.name === clean || t.id === clean.toLowerCase());
             const icon = trait ? `<div class="trait-img-rainbow trait-icon-small"><img src="images/traits/${trait.name}.png" onerror="this.parentElement.style.display='none'"></div>` : '🌟';
-            traitBadgeHtml = `<div class="trait-guide-btn" style="font-size: 0.65rem; padding: 2px 6px; cursor: default; background: linear-gradient(135deg, #a855f7, #6366f1); border-color: #818cf8; font-weight: bold; color: white; display: flex; align-items: center; gap: 4px;">${icon} ${name}</div>`;
+            traitBadgeHtml = `<div class="trait-guide-btn" style="font-size: 0.65rem; padding: 2px 6px; cursor: default; background: linear-gradient(135deg, #a855f7, #6366f1); border-color: #818cf8; font-weight: bold; color: white; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${icon} ${name}</div>`;
         } else {
-            traitBadgeHtml = `<button class="trait-guide-btn" onclick="openTraitGuide('${unit.id}')" style="font-size: 0.65rem; padding: 2px 6px;">📋 Rec. Traits</button>`;
+            traitBadgeHtml = `<button class="trait-guide-btn" onclick="openTraitGuide('${unit.id}')" style="font-size: 0.65rem; padding: 2px 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">📋 Rec. Traits</button>`;
         }
     }
 
@@ -2090,8 +2087,11 @@ function stripHtml(value) {
     return String(value || '')
         .replace(/<[^>]*>/g, ' ')
         .replace(/&nbsp;/g, ' ')
+        .replace(/[_-]/g, ' ')
+        .replace(/[()]/g, ' ')
         .replace(/\s+/g, ' ')
-        .trim();
+        .trim()
+        .toLowerCase();
 }
 
 function flattenSearchValue(value) {
@@ -2101,6 +2101,16 @@ function flattenSearchValue(value) {
         return Object.values(value).flatMap(flattenSearchValue);
     }
     return [stripHtml(value)];
+}
+
+function getUnitNameSearchText(unit) {
+    const tags = Array.isArray(unit?.tags) ? unit.tags : [];
+
+    return [
+        stripHtml(unit?.name),
+        stripHtml(unit?.id),
+        ...tags.map(stripHtml)
+    ].filter(Boolean).join(' | ');
 }
 
 function getUnitSearchText(unit) {
@@ -2129,7 +2139,7 @@ function getSearchTokens(term) {
         .trim()
         .toLowerCase()
         .split(/\s+/)
-        .map(token => token.replace(/:$/, ''))
+        .map(token => token.replace(/[:.,;()[\]{}]/g, ''))
         .filter(Boolean);
 }
 
@@ -2165,6 +2175,13 @@ function unitMatchesSearchTerm(unit, term) {
             ? placementTokens.some(token => ['ground', 'hybrid', 'hill'].includes(token))
             : placementTokens.includes(placement);
         if (!matchesPlacement) return false;
+    }
+
+    const genericPhrase = genericTokens.length > 1 ? genericTokens.join(' ') : '';
+    const nameSearchText = getUnitNameSearchText(unit);
+
+    if (genericPhrase && !nameSearchText.includes(genericPhrase)) {
+        return false;
     }
 
     const searchText = getUnitSearchText(unit);
