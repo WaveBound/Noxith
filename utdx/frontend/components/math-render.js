@@ -1616,7 +1616,8 @@ window.renderMathContent = function (data, isSplit = false) {
         'bloodline_head': 'Bloodline', 'reanimated_head': 'Reanimated', 'sorcerer_hunter_spirit': 'S.H. Spirit',
         'strongest_sorcerer_glasses': 'Strongest Glasses', 'monarch_cape': 'Monarch Cape',
         'monarch_head': 'Monarch Head', 'monarch': 'Monarch Cape', 'warlord_hat': 'Warlord Hat',
-        'mochi_scarf': 'Mochi Scarf', 'flaming_donut': 'Flaming Donut', 'fused_earrings': 'Fused Earrings'
+        'mochi_scarf': 'Mochi Scarf', 'flaming_donut': 'Flaming Donut', 'fused_earrings': 'Fused Earrings',
+        'berserk_cleaver': 'Berserk Cleave'
     };
     const headType = (data.headBuffs?.type || data.relicStats?.head || 'none');
     const headDisplayName = String(MAP_HEAD_NAMES[headType] ?? (headType === 'none' || !headType ? 'None' : (String(headType).replace(/_/g, ' ').toUpperCase())));

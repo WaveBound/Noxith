@@ -120,7 +120,8 @@ function calculateDPS(uStats, relicStats, context) {
         junior: 'ninja', biju_head: 'biju_set', rebellious_head: 'rebellious', reanimated_head: 'reanimated_ninja',
         super_roku: 'super_roku', bio_android: 'bio_android', great_mage: 'great_mage', berserk_shinigami: 'berserk_shinigami',
         hokage: 'hokage', sorcerer_hunter_spirit: 'sorcerer_hunter', strongest_sorcerer_glasses: 'strongest_sorcerer',
-        monarch_cape: 'monarch', monarch_head: 'monarch', monarch: 'monarch', warlord_hat: 'warlord', fused_earrings: 'fused_set'
+        monarch_cape: 'monarch', monarch_head: 'monarch', monarch: 'monarch', warlord_hat: 'warlord', fused_earrings: 'fused_set',
+        berserk_cleaver: 'berserk_cleaver'
     };
     const mappedHeadSetId = headSetIdMap[headPiece];
     let headSpaBase = 0;

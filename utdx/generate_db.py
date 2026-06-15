@@ -304,7 +304,7 @@ if (isMainThread) {
         const hasPassiveDoT = effectiveStats.passives && effectiveStats.passives.some(p => p.dot && p.dot > 0);
         const hasNativeDoT = (effectiveStats.dot > 0) || (effectiveStats.burnMultiplier > 0) || isKiritoVR || hasPassiveDoT;
 
-        let allowedHeads = cfg.head ? (jobHeads && jobHeads.length > 0 ? jobHeads : ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings']) : ['none'];
+        let allowedHeads = cfg.head ? (jobHeads && jobHeads.length > 0 ? jobHeads : ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver']) : ['none'];
         
         // Always include 'none' (baseline) when head calculation is enabled
         if (cfg.head && !allowedHeads.includes('none')) {
@@ -478,7 +478,7 @@ if (isMainThread) {
         const MAP_PRIO = { 'dmg': 0, 'spa': 1, 'raw_dmg': 2 };
         const MAP_BODY = { 'dmg': 0, 'dot': 1, 'cm': 2 };
         const MAP_LEGS = { 'dmg': 0, 'spa': 1, 'cf': 2 };
-        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'bloodline_head': 7, 'reanimated_head': 8, 'sorcerer_hunter_spirit': 9, 'strongest_sorcerer_glasses': 10, 'monarch': 11, 'warlord_hat': 12, 'mochi_scarf': 13, 'flaming_donut': 14, 'fused_earrings': 15 };
+        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'bloodline_head': 7, 'reanimated_head': 8, 'sorcerer_hunter_spirit': 9, 'strongest_sorcerer_glasses': 10, 'monarch': 11, 'warlord_hat': 12, 'mochi_scarf': 13, 'flaming_donut': 14, 'fused_earrings': 15, 'berserk_cleaver': 16 };
 
         const stringPool = new Map(); const stringArr = [""]; 
         const subPool = new Map(); const subArr = [null]; 
@@ -519,7 +519,7 @@ if (isMainThread) {
             for (let i = 0; i < len; i++) {
                 const r = rows[i];
                 const offset = i * ROW_SIZE;
-                const meta = (MAP_PRIO[r.prio] || 0) | ((MAP_BODY[r.mainStats.body] || 0) << 2) | ((MAP_LEGS[r.mainStats.legs] || 0) << 4) | ((MAP_HEAD[r.headUsed || 'none'] || 0) << 6) | ((r.isCustom ? 1 : 0) << 10);
+                const meta = (MAP_PRIO[r.prio] || 0) | ((MAP_BODY[r.mainStats.body] || 0) << 2) | ((MAP_LEGS[r.mainStats.legs] || 0) << 4) | ((MAP_HEAD[r.headUsed || 'none'] || 0) << 6) | ((r.isCustom ? 1 : 0) << 11);
 
                 view.setUint8(offset, encodeStr(r.traitName));
                 view.setUint8(offset + 1, encodeStr(r.setName));
@@ -560,7 +560,7 @@ if (isMainThread) {
     const S = RAW.s; const P = RAW.p; const D = RAW.d;
     const PRIO = ['dmg', 'spa', 'raw_dmg'];
     const BODY = ['dmg', 'dot', 'cm']; const LEGS = ['dmg', 'spa', 'cf'];
-    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings'];
+    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver'];
     const DESC_BODY = ['Dmg', 'DoT', 'Crit Dmg']; const DESC_LEGS = ['Dmg', 'Spa', 'Crit Rate'];
     const ROW_SIZE = 18;
 
@@ -593,7 +593,7 @@ if (isMainThread) {
                             const off = i * ROW_SIZE;
                             const meta = view.getUint16(off+10, true);
                             const bIdx = (meta >> 2) & 3; const lIdx = (meta >> 4) & 3;
-                            const headUsed = HEAD[(meta >> 6) & 15];
+                            const headUsed = HEAD[(meta >> 6) & 31];
                             const sName = S[view.getUint8(off+1)];
                             const buildNameRaw = sName + " (" + DESC_BODY[bIdx] + "/" + DESC_LEGS[lIdx] + ")";
                             
@@ -609,7 +609,7 @@ if (isMainThread) {
                                 id: idContext + "-" + S[view.getUint8(off)].toLowerCase() + "-" + buildNameRaw.replace(/[^a-zA-Z0-9]/g, '') + "-" + PRIO[meta & 3] + subsSuffix + "-" + headUsed + modeTag, 
                                 traitName: S[view.getUint8(off)], setName: sName, dps: view.getFloat32(off+2, true), dv: view.getFloat32(off+14, true), 
                                 spa: view.getUint16(off+6, true) / 1000, range: view.getUint16(off+8, true) / 10, prio: PRIO[meta & 3],
-                                mainStats: { body: BODY[bIdx], legs: LEGS[lIdx] }, headUsed: headUsed, isCustom: !!((meta >> 10) & 1), subStats: subs
+                                mainStats: { body: BODY[bIdx], legs: LEGS[lIdx] }, headUsed: headUsed, isCustom: !!((meta >> 11) & 1), subStats: subs
                             });
                         }
                         return result;
@@ -722,8 +722,8 @@ if (isMainThread) {
                     const prio = PRIO[meta & 3];
                     const body = BODY[(meta >> 2) & 3];
                     const legs = LEGS[(meta >> 4) & 3];
-                    const headUsed = HEAD[(meta >> 6) & 15];
-                    const isCustom = !!((meta >> 10) & 1);
+                    const headUsed = HEAD[(meta >> 6) & 31];
+                    const isCustom = !!((meta >> 11) & 1);
                     
                     const subIdx = view.getUint16(off + 12, true);
                     const subRaw = existingRaw.p[subIdx];
@@ -1036,7 +1036,7 @@ if (typeof window !== 'undefined') {
                 return
 
             if selected_heads is None:
-                selected_heads = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings']
+                selected_heads = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver']
             if selected_sets is None:
                 selected_sets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi', 'Fused Warrior']
 
@@ -1401,7 +1401,7 @@ HTML = """
         let units = []; let selected = new Set();
         const LAST_GENERATE_KEY = 'utdxLastGenerateTime';
         const relicSets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi', 'Fused Warrior'];
-        const headPieces = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings'];
+        const headPieces = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver'];
         let selectedSets = new Set(relicSets);
         let selectedHeads = new Set(headPieces);
         
