@@ -388,50 +388,44 @@ window._calcHeadDynamicBuffs = function (headPiece, finalSpa, finalRange, uStats
 
     const tags = uStats ? (uStats.tags || []) : [];
 
-    const exclusiveHead = (typeof EXCLUSIVE_HEADS !== 'undefined') ? EXCLUSIVE_HEADS.find(h => h.id === headPiece) : null;
-
-    if (exclusiveHead) {
-        headCalc.type = headPiece;
-        if (exclusiveHead.noCrits) headCalc.noCrits = true;
-        
-        let isExclusive = false;
-        if (exclusiveHead.exclusiveTo && exclusiveHead.exclusiveTo.length > 0) {
-            if (uStats && (window.isUnit || window.isAnyUnit)) {
-                if (window.isAnyUnit) {
-                    isExclusive = window.isAnyUnit(uStats.id, exclusiveHead.exclusiveTo);
-                } else {
-                    isExclusive = exclusiveHead.exclusiveTo.some(id => window.isUnit(uStats.id, id));
-                }
-            }
-        } else if (exclusiveHead.exclusiveTo && exclusiveHead.exclusiveTo.length === 0) {
-            isExclusive = true;
-        }
-
-        if (isExclusive && exclusiveHead.bonus) {
-            headDmgPassive = exclusiveHead.bonus.dmg || 0;
-        }
-
-        // Special dynamic logic overrides
-        if (headPiece === 'mochi_scarf') {
-            const hasStatus = window.unitHasStatusEffect ? window.unitHasStatusEffect(uStats) : false;
-            const hasNativeDot = uStats && ((uStats.dot > 0) ||
-                (uStats.stats && uStats.stats.dot > 0) ||
-                (uStats.passives && uStats.passives.some(p => p.dot > 0)));
-            if (hasStatus && !hasNativeDot) {
-                headCalc.hasScarfBurn = true;
-                headCalc.scarfBurnPct = 30;
-                headCalc.scarfBurnDuration = 5;
-            }
-        } else if (headPiece === 'bloodline_head') {
-            headCalc.type = isExclusive ? 'bloodline' : 'none';
-        } else if (headPiece === 'sorcerer_hunter_spirit') {
-            headCalc.type = 'sorcerer_hunter';
-        } else if (headPiece === 'strongest_sorcerer_glasses') {
-            headCalc.type = 'strongest_sorcerer';
-        }
-
-    } else if (headPiece === 'junior') {
+    if (headPiece === 'junior') {
         headDmgBase = 0; headCalc.type = 'junior'; headCalc.multiplier = 1.1;
+    } else if (headPiece === 'sorcerer_hunter_spirit') {
+        headCalc.type = 'sorcerer_hunter';
+        headCalc.noCrits = true;
+    } else if (headPiece === 'strongest_sorcerer_glasses') {
+        const canTimestop = uStats && window.isUnit && window.isUnit(uStats.id, 'the_strongest_of_today');
+        if (canTimestop) {
+            headDmgPassive = 50;
+        }
+        headCalc.type = 'strongest_sorcerer';
+    } else if (headPiece === 'bloodline_head') {
+        const isBloodline = uStats && window.isAnyUnit && window.isAnyUnit(uStats.id, ['alpha_devil', 'devil_hunter', 'ancient_mage', 'mimicry_sorcerer']);
+        headDmgPassive = isBloodline ? 30 : 0;
+        headCalc.type = isBloodline ? 'bloodline' : 'none';
+    } else if (headPiece === 'mochi_scarf') {
+        const hasStatus = window.unitHasStatusEffect ? window.unitHasStatusEffect(uStats) : false;
+        const hasNativeDot = uStats && ((uStats.dot > 0) ||
+            (uStats.stats && uStats.stats.dot > 0) ||
+            (uStats.passives && uStats.passives.some(p => p.dot > 0)));
+        if (hasStatus && !hasNativeDot) {
+            headCalc.hasScarfBurn = true;
+            headCalc.scarfBurnPct = 30;
+            headCalc.scarfBurnDuration = 5;
+        }
+        headCalc.type = 'mochi_scarf';
+    } else if (headPiece === 'flaming_donut') {
+        const isAce = uStats && window.isUnit && window.isUnit(uStats.id, 'ace');
+        if (isAce) {
+            headDmgPassive = 100;
+        }
+        headCalc.type = 'flaming_donut';
+    } else if (headPiece === 'berserk_cleaver') {
+        const isKenpachi = uStats && window.isUnit && window.isUnit(uStats.id, 'kenpachi');
+        if (isKenpachi) {
+            headDmgPassive = 400;
+        }
+        headCalc.type = 'berserk_cleaver';
     }
 
     if (uStats && (headPiece === 'monarch_cape' || headPiece === 'monarch_head' || headPiece === 'monarch') && (relicStats && (relicStats.set === 'monarch' || (window.isUnit && window.isUnit(uStats.id, 'gluttonous_warlord'))))) {

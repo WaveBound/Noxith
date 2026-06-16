@@ -12,17 +12,17 @@ unitDatabase.push({
         long: "Ruler",
         note: "Standard DPS selection."
     },
-    totalCost: 41174,
+    totalCost: 41175,
     stats: {
         crit: 0,
         cdmg: 150,
-        dot: 100,
+        dot: 50,
         dotStacks: 1,
         spaCap: 3,
         passiveDmg: 0,
         passiveSpa: 0,
         element: "Water",
-        dotDuration: 5,
+        dotDuration: 10,
         dotType: "Bleed"
     },
 

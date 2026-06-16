@@ -2,20 +2,19 @@
 // ABILITY-BACKEND.JS - Centralized Math & Context Logic for Abilities
 // ============================================================================
 
-window.applyAbilityContext = function (unit, effectiveStats, actualPlacement) {
+window.applyAbilityContext = function(unit, effectiveStats, actualPlacement) {
     if (!unit.ability) return actualPlacement;
 
     const ab = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
-
+    
     if (ab.limitPlace) {
         actualPlacement = Math.min(actualPlacement, ab.limitPlace);
     }
 
-    const abilityName = ab.abilityName || ab.name;
     let mappedToPassive = false;
-    if (abilityName && effectiveStats.passives) {
+    if (ab.abilityName && effectiveStats.passives) {
         effectiveStats.passives = effectiveStats.passives.map(p => {
-            if (p.name === abilityName) {
+            if (p.name === ab.abilityName) {
                 mappedToPassive = true;
                 const newP = { ...p };
                 if (ab.buffDmg) newP.passiveDmg = (newP.passiveDmg || 0) + ab.buffDmg;
@@ -47,25 +46,24 @@ window.applyAbilityContext = function (unit, effectiveStats, actualPlacement) {
     return actualPlacement;
 };
 
-window.getAbilitySpaCap = function (unitId, isAbility, defaultCap) {
+window.getAbilitySpaCap = function(unitId, isAbility, defaultCap) {
     if (isAbility && unitId === 'nutaru_beast') return 3.0;
     return defaultCap || 0.1;
 };
 
-window.getAbilityMultipliers = function (uStats, isAbility) {
+window.getAbilityMultipliers = function(uStats, isAbility) {
     let abilityDmg = 0;
     let abilityFinalMult = 1;
     if (isAbility && uStats.ability) {
         const ab = Array.isArray(uStats.ability) ? uStats.ability[0] : uStats.ability;
-        const abilityName = ab.abilityName || ab.name;
-        const mappedToPassive = abilityName && uStats.passives && uStats.passives.some(p => p.name === abilityName);
+        const mappedToPassive = ab.abilityName && uStats.passives && uStats.passives.some(p => p.name === ab.abilityName);
         if (ab.buffDmg && !mappedToPassive) abilityDmg = ab.buffDmg;
         if (ab.finalMult) abilityFinalMult = ab.finalMult;
     }
     return { abilityDmg, abilityFinalMult };
 };
 
-window.applyAbilityAttackRate = function (uStats, isAbility, currentSpa, currentAttackMult, currentExtraData) {
+window.applyAbilityAttackRate = function(uStats, isAbility, currentSpa, currentAttackMult, currentExtraData) {
     let usedSpa = currentSpa;
     let attackMultiplier = currentAttackMult;
     let extraAttacksData = currentExtraData;

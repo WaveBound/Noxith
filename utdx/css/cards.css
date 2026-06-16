@@ -1018,7 +1018,7 @@
 .prio-badge {
     font-size: 0.6rem;
     font-weight: 800;
-    padding: 2px 3px;
+    padding: 2px 6px;
     border-radius: 4px;
     text-transform: uppercase;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
@@ -1027,14 +1027,6 @@
     border: 1px solid;
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 38px;
-    max-width: 38px;
-    min-width: 38px;
-    height: 28px;
-    line-height: 1.05;
-    text-align: center;
-    flex: 0 0 auto;
 }
 
 .fs-main-row {
