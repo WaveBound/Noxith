@@ -1349,6 +1349,16 @@ HTML = """
                 </div>
                 <div style="display: flex; gap: 10px; margin-top: 4px;"><button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.7rem;" onclick="toggleAllGear('.head-cb', true)">All</button><button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.7rem;" onclick="toggleAllGear('.head-cb', false)">None</button></div>
             </div>
+            <div class="control-group" style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                <label>Unit Relic Preset</label>
+                <div id="unit-preset-label" style="font-size: 0.72rem; color: var(--text-dim); min-height: 18px; margin-bottom: 6px;">No single unit selected — using global/default</div>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.68rem;" onclick="saveUnitGearPreset(currentPresetUnitId)">Save Unit</button>
+                    <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.68rem;" onclick="renderGearSelection()">Load Unit</button>
+                    <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.68rem;" onclick="clearUnitGearPreset(currentPresetUnitId)">Clear Unit</button>
+                </div>
+                <small style="color: var(--text-dim); font-size: 0.68rem;">Select one unit, adjust relic sets/heads, and it auto-saves that unit’s preset. Global selection is also saved.</small>
+            </div>
             <div id="buff-selection" style="display: none; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
                 <div style="display: grid; grid-template-columns: 1fr 60px 60px; gap: 10px; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
                     <span style="font-size: 0.7rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase;">Buff Name</span>
@@ -1416,9 +1426,11 @@ HTML = """
         let units = [];
         const LAST_GENERATE_KEY = 'utdxLastGenerateTime';
         const SELECTED_UNITS_KEY = 'utdxGeneratorSelectedUnits';
-        const GEAR_STORAGE_KEY = 'utdxGeneratorGearSelection';
+        const GLOBAL_GEAR_KEY = 'utdxGlobalGearSelectionV1';
+        const GEAR_PRESET_KEY = 'utdxUnitGearPresetsV1';
         const relicSets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi', 'Fused Warrior'];
         const headPieces = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver', 'ulquiorra_wings'];
+        let currentPresetUnitId = null;
 
         function loadSavedSelectedUnits() {
             try {
@@ -1434,27 +1446,70 @@ HTML = """
             localStorage.setItem(SELECTED_UNITS_KEY, JSON.stringify(Array.from(selected)));
         }
 
-        function loadGearSelection() {
+        function loadGlobalGearSelection() {
             try {
-                const saved = JSON.parse(localStorage.getItem(GEAR_STORAGE_KEY) || '{}');
+                const saved = JSON.parse(localStorage.getItem(GLOBAL_GEAR_KEY) || '{}');
                 return {
-                    sets: Array.isArray(saved.sets) ? saved.sets.filter(s => relicSets.includes(s)) : [...relicSets],
-                    heads: Array.isArray(saved.heads) ? saved.heads.filter(h => headPieces.includes(h)) : [...headPieces]
+                    sets: Array.isArray(saved.sets) && saved.sets.length ? saved.sets.filter(s => relicSets.includes(s)) : [...relicSets],
+                    heads: Array.isArray(saved.heads) && saved.heads.length ? saved.heads.filter(h => headPieces.includes(h)) : [...headPieces]
                 };
             } catch {
                 return { sets: [...relicSets], heads: [...headPieces] };
             }
         }
 
-        const savedGear = loadGearSelection();
-        let selectedSets = new Set(savedGear.sets);
-        let selectedHeads = new Set(savedGear.heads);
-        function saveGearSelection() {
-            localStorage.setItem(GEAR_STORAGE_KEY, JSON.stringify({
+        function saveGlobalGearSelection() {
+            localStorage.setItem(GLOBAL_GEAR_KEY, JSON.stringify({
                 sets: Array.from(selectedSets),
                 heads: Array.from(selectedHeads)
             }));
         }
+
+        function getUnitGearPreset(unitId) {
+            if (!unitId) return null;
+            try {
+                const presets = JSON.parse(localStorage.getItem(GEAR_PRESET_KEY) || '{}');
+                return presets[unitId] || null;
+            } catch {
+                return null;
+            }
+        }
+
+        function saveUnitGearPreset(unitId) {
+            if (!unitId) return;
+            try {
+                const presets = JSON.parse(localStorage.getItem(GEAR_PRESET_KEY) || '{}');
+                presets[unitId] = {
+                    sets: Array.from(selectedSets),
+                    heads: Array.from(selectedHeads)
+                };
+                localStorage.setItem(GEAR_PRESET_KEY, JSON.stringify(presets));
+                updatePresetLabel();
+            } catch {}
+        }
+
+        function clearUnitGearPreset(unitId) {
+            if (!unitId) return;
+            try {
+                const presets = JSON.parse(localStorage.getItem(GEAR_PRESET_KEY) || '{}');
+                delete presets[unitId];
+                localStorage.setItem(GEAR_PRESET_KEY, JSON.stringify(presets));
+                updatePresetLabel();
+            } catch {}
+        }
+
+        function getEffectiveGearSelection() {
+            const preset = getUnitGearPreset(currentPresetUnitId);
+            return {
+                sets: new Set(preset?.sets?.length ? preset.sets.filter(s => relicSets.includes(s)) : Array.from(selectedSets)),
+                heads: new Set(preset?.heads?.length ? preset.heads.filter(h => headPieces.includes(h)) : Array.from(selectedHeads)),
+                hasPreset: !!preset
+            };
+        }
+
+        const savedGlobalGear = loadGlobalGearSelection();
+        let selectedSets = new Set(savedGlobalGear.sets);
+        let selectedHeads = new Set(savedGlobalGear.heads);
         
         window.addEventListener('pywebviewready', async () => {
             units = await pywebview.api.get_units();
@@ -1504,21 +1559,43 @@ HTML = """
             });
         }
         
+        function updatePresetLabel() {
+            const label = document.getElementById('unit-preset-label');
+            if (!label) return;
+            const unit = units.find(u => u.id === currentPresetUnitId);
+            const preset = getUnitGearPreset(currentPresetUnitId);
+            if (currentPresetUnitId) {
+                label.innerText = `${unit?.name || currentPresetUnitId} — ${preset ? 'preset loaded' : 'using global/default'}`;
+            } else {
+                label.innerText = 'No single unit selected — using global/default';
+            }
+        }
+
         function renderGearSelection() {
             const setTerm = (document.getElementById('set-search')?.value || '').trim().toLowerCase();
             const headTerm = (document.getElementById('head-search')?.value || '').trim().toLowerCase();
+            const effective = getEffectiveGearSelection();
 
             document.getElementById('set-selection').innerHTML = relicSets.map(s => {
-                const checked = selectedSets.has(s);
+                const checked = effective.sets.has(s);
                 const hidden = setTerm && !s.toLowerCase().includes(setTerm);
-                return `<div style="display: ${hidden ? 'none' : 'flex'}; gap: 8px; font-size: 0.75rem;"><input type="checkbox" class="set-cb" value="${escapeHtml(s)}" ${checked ? 'checked' : ''} onchange="saveGearSelection()"> <span>${escapeHtml(s)}</span></div>`;
+                return `<div style="display: ${hidden ? 'none' : 'flex'}; gap: 8px; font-size: 0.75rem;"><input type="checkbox" class="set-cb" value="${escapeHtml(s)}" ${checked ? 'checked' : ''} onchange="onGearChanged()"> <span>${escapeHtml(s)}</span></div>`;
             }).join('');
 
             document.getElementById('head-selection').innerHTML = headPieces.map(h => {
-                const checked = selectedHeads.has(h);
+                const checked = effective.heads.has(h);
                 const hidden = headTerm && !h.toLowerCase().includes(headTerm);
-                return `<div style="display: ${hidden ? 'none' : 'flex'}; gap: 8px; font-size: 0.75rem;"><input type="checkbox" class="head-cb" value="${escapeHtml(h)}" ${checked ? 'checked' : ''} onchange="saveGearSelection()"> <span>${escapeHtml(h.replace(/_/g, ' ').toUpperCase())}</span></div>`;
+                return `<div style="display: ${hidden ? 'none' : 'flex'}; gap: 8px; font-size: 0.75rem;"><input type="checkbox" class="head-cb" value="${escapeHtml(h)}" ${checked ? 'checked' : ''} onchange="onGearChanged()"> <span>${escapeHtml(h.replace(/_/g, ' ').toUpperCase())}</span></div>`;
             }).join('');
+
+            updatePresetLabel();
+        }
+
+        function onGearChanged() {
+            selectedSets = new Set(Array.from(document.querySelectorAll('.set-cb:checked')).map(cb => cb.value));
+            selectedHeads = new Set(Array.from(document.querySelectorAll('.head-cb:checked')).map(cb => cb.value));
+            saveGlobalGearSelection();
+            if (currentPresetUnitId) saveUnitGearPreset(currentPresetUnitId);
         }
 
         function toggleAllGear(selector, val) {
@@ -1530,7 +1607,8 @@ HTML = """
                 selectedHeads.clear();
                 if (val) headPieces.forEach(h => selectedHeads.add(h));
             }
-            saveGearSelection();
+            saveGlobalGearSelection();
+            if (currentPresetUnitId) saveUnitGearPreset(currentPresetUnitId);
         }
 
         function toggleBuffSelect() {
@@ -1539,18 +1617,28 @@ HTML = """
         
         function toggleUnit(id) {
             selected.has(id) ? selected.delete(id) : selected.add(id);
+            currentPresetUnitId = selected.size === 1 ? Array.from(selected)[0] : null;
             renderUnits();
+            renderGearSelection();
             saveSelectedUnits();
         }
         function selectAll(val) {
             val ? units.forEach(u => selected.add(u.id)) : selected.clear();
+            currentPresetUnitId = selected.size === 1 ? Array.from(selected)[0] : null;
             renderUnits();
+            renderGearSelection();
             saveSelectedUnits();
         }
         
         function start() {
             const mode = document.getElementById('gen-mode').value;
             const buffs = {};
+            if (currentPresetUnitId && selected.has(currentPresetUnitId)) {
+                const preset = getUnitGearPreset(currentPresetUnitId);
+                if (preset?.sets?.length) selectedSets = new Set(preset.sets.filter(s => relicSets.includes(s)));
+                if (preset?.heads?.length) selectedHeads = new Set(preset.heads.filter(h => headPieces.includes(h)));
+                renderGearSelection();
+            }
             const finalHeads = Array.from(document.querySelectorAll('.head-cb:checked')).map(cb => cb.value);
             const finalSets = Array.from(document.querySelectorAll('.set-cb:checked')).map(cb => cb.value);
 
