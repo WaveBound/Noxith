@@ -37,6 +37,7 @@ unitDatabase.push({
         { dmg: 1428, spa: 5.5, range: 30, cost: 4880 }, // Up 8 (Line AoE)
         { dmg: 1530, spa: 5, range: 33, cost: 5275, unlocksAbility: true } // Up 9
     ],
+    
     ability: { name: "Resurrect", passiveDmg: 75, passiveSpa: 5, crit: 20 },
 
     // PASSIVES (displayed in unit info panel)
