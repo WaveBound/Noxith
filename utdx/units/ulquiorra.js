@@ -9,7 +9,7 @@ unitDatabase.push({
     tags: ["Peroxide", "Hollow", "Villain"],
     meta: {
         short: "Ruler",
-        long: "Eternal",
+        long: "Duelist/Sacred",
         note: "Standard DPS selection."
     },
     totalCost: 31760,
@@ -37,7 +37,10 @@ unitDatabase.push({
         { dmg: 1428, spa: 5.5, range: 30, cost: 4880 }, // Up 8 (Line AoE)
         { dmg: 1530, spa: 5, range: 33, cost: 5275, unlocksAbility: true } // Up 9
     ],
-    ability: { name: "Resurrect", passiveDmg: 75, passiveSpa: 5, crit: 20 },
+    ability: [
+        { abilityName: "Resurrect", name: "Resurrect", passiveDmg: 75, passiveSpa: 5, passiveCrit: 20, passiveRange: 10 },
+        { abilityName: "Relampago", name: "Relampago", abilityGated: true, globalCooldown: true, dmgMult: 3, eDmgMult: 4, cooldown: 45, reqUp: 9 }
+    ],
 
     // PASSIVES (displayed in unit info panel)
     passives: [

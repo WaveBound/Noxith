@@ -649,13 +649,16 @@ function calculateDPS(uStats, relicStats, context) {
     if (uStats.ability && Array.isArray(uStats.ability)) {
         uStats.ability.forEach(ab => {
             if (ab.reqUp !== undefined && upgradeLevel < ab.reqUp) return;
-            
-            if (ab.noToggle && ab.dmgMult && ab.cooldown) {
-                const abAvgHit = finalDmg * ab.dmgMult * avgCritMult;
-                const abAvgHitBoss = finalDmgBoss * ab.dmgMult * avgCritMultBoss;
 
-                const abDps = (abAvgHit / ab.cooldown) * placement;
-                const abDpsBoss = (abAvgHitBoss / ab.cooldown) * placement;
+            const isAbilityGated = ab.abilityGated && isAbility;
+            if ((ab.noToggle || isAbilityGated) && ab.dmgMult && ab.cooldown) {
+                const abilityDmgMult = ab.eDmgMult && (context.upgradeLevel || 0) >= 6 ? ab.eDmgMult : ab.dmgMult;
+                const abilityPlacement = ab.globalCooldown ? 1 : placement;
+                const abAvgHit = finalDmg * abilityDmgMult * avgCritMult;
+                const abAvgHitBoss = finalDmgBoss * abilityDmgMult * avgCritMultBoss;
+
+                const abDps = (abAvgHit / ab.cooldown) * abilityPlacement;
+                const abDpsBoss = (abAvgHitBoss / ab.cooldown) * abilityPlacement;
 
                 hitDpsTotal += abDps;
                 bossHitDpsTotal += abDpsBoss;
@@ -670,7 +673,7 @@ function calculateDPS(uStats, relicStats, context) {
                         avgHitBoss: abAvgHitBoss,
                         dps: abDps,
                         dpsBoss: abDpsBoss,
-                        placement
+                        placement: abilityPlacement
                     });
                     return;
                 }
@@ -680,16 +683,17 @@ function calculateDPS(uStats, relicStats, context) {
 
                 if (!extraAttacksData) {
                     extraAttacksData = {
-                        req: `Ability CD: ${ab.cooldown}s`,
-                        hits: `${ab.dmgMult}x Dmg`,
+                        req: ab.globalCooldown ? `Global Ability CD: ${ab.cooldown}s` : `Ability CD: ${ab.cooldown}s`,
+                        hits: `${abilityDmgMult}x Dmg`,
                         extra: 0,
                         attacksNeeded: 1,
                         mult: 1 + abilityMultContrib,
                         label: ab.abilityName || "Passive Ability",
-                        usedSpa: ab.cooldown
+                        usedSpa: ab.cooldown,
+                        globalCooldown: !!ab.globalCooldown
                     };
                 } else {
-                    extraAttacksData.hits += ` & ${ab.dmgMult}x Ability`;
+                    extraAttacksData.hits += ` & ${abilityDmgMult}x Ability`;
                     extraAttacksData.label += ` & ${ab.abilityName || "Ability"}`;
                     extraAttacksData.mult += abilityMultContrib;
                 }

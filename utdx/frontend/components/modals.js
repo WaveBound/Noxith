@@ -120,10 +120,10 @@
         if (!data) {
             const unitIdPart = id.split('-')[0];
             let unit = window.getUnitById(unitIdPart);
-            
+
             // Robust alias resolution for technical unit IDs (Syncro variants)
             if (!unit && unitIdPart.includes('merciless_god')) unit = window.getUnitById('merciless_god');
-            
+
             if (unit) {
                 window.processUnitCache?.(unit);
                 data = window.cachedResults?.[id];
@@ -349,7 +349,7 @@
                 ${unit.ability ? `
                 <div class="info-section section-ability">
                     ${(Array.isArray(unit.ability) ? unit.ability : [unit.ability]).map(ab => `
-                        <div class="info-sec-title">Active Ability: ${ab.abilityName}</div>
+                        <div class="info-sec-title">Active Ability: ${ab.abilityName || ab.name || 'Ability'}</div>
                         <ul class="info-list">
                             ${ab.cooldown ? `<li><span>Cooldown:</span> <span class="text-gold">${ab.cooldown}s</span></li>` : ''}
                             <li class="info-ability-desc-item"><span class="info-ability-desc">${ab.desc || 'No description available.'}</span></li>
@@ -456,7 +456,7 @@
 
         const state = window.unitModesState[unitId];
         const isMulti = !!unit.allowMultipleModes;
-        
+
         // FIX: Safely unpack array mode states to prevent nested [[0]] array mismatches on single-select mode overlays
         const activeModes = isMulti ? (Array.isArray(state) ? state : []) : (state !== undefined ? (Array.isArray(state) ? state : [state]) : (isUnit(unitId, 'merciless_god') ? [] : [unit.defaultMode ?? 0]));
 

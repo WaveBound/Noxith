@@ -203,6 +203,9 @@
             'sorcerer_hunter_spirit': 'S.H. Spirit', 'strongest_sorcerer_glasses': 'Strongest',
             'monarch': 'Monarch Cape', 'warlord_hat': 'Warlord Hat', 'mochi_scarf': 'Mochi Scarf', 'flaming_donut': 'Flaming Donut', 'none': 'None'
         };
+        if (typeof EXCLUSIVE_HEADS !== 'undefined') {
+            EXCLUSIVE_HEADS.forEach(h => { HEAD_NAMES[h.id] = h.name; });
+        }
         const MAIN_STAT_NAMES = {
             body: { 'dmg': 'Damage', 'dot': 'DoT', 'cm': 'Crit Damage' },
             legs: { 'dmg': 'Damage', 'spa': 'SPA', 'cf': 'Crit Rate', 'range': 'Range' }

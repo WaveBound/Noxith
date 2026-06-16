@@ -651,7 +651,9 @@ window.getUnitsPerPage = () => {
 };
 
 // Constants & Configurations
-const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver'];
+const BASE_HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'reanimated_head', 'monarch', 'warlord_hat'];
+const ALL_EXC = typeof EXCLUSIVE_HEADS !== 'undefined' ? EXCLUSIVE_HEADS.map(h => h.id) : ['bloodline_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver'];
+const HEADS_LIST = [...BASE_HEADS_LIST, ...ALL_EXC];
 
 const HEAD_CONFIG = {
     sun_god: { name: 'Sun God', search: 'Sun God', cls: 'sungod' },
@@ -661,16 +663,23 @@ const HEAD_CONFIG = {
     junior: { name: 'Junior Ninja', search: 'Junior', cls: 'ninja' },
     biju_head: { name: 'Biju', search: 'Biju', cls: 'sungod' },
     reanimated_head: { name: 'Reanimated', search: 'Reanimated', cls: 'reaper' },
-    bloodline_head: { name: 'Bloodline', search: 'Bloodline', cls: 'ninja' },
-    sorcerer_hunter_spirit: { name: 'S.H. Spirit', search: 'S. Hunter', cls: 'custom' },
-    strongest_sorcerer_glasses: { name: 'Strongest', search: 'Strongest', cls: 'custom' },
     monarch: { name: 'Monarch Cape', search: 'Monarch', cls: 'custom' },
-    warlord_hat: { name: 'Warlord Hat', search: 'Warlord', cls: 'custom' },
-    mochi_scarf: { name: 'Mochi Scarf', search: 'Scarf', cls: 'custom' },
-    flaming_donut: { name: 'Flaming Donut', search: 'Donut', cls: 'custom' },
-    fused_earrings: { name: 'Fused Earrings', search: 'Fused Warrior Set', cls: 'fused_set' },
-    berserk_cleaver: { name: 'Berserk Cleave', search: 'Berserk Cleave', cls: 'berserk' }
+    warlord_hat: { name: 'Warlord Hat', search: 'Warlord', cls: 'custom' }
 };
+
+if (typeof EXCLUSIVE_HEADS !== 'undefined') {
+    EXCLUSIVE_HEADS.forEach(h => {
+        HEAD_CONFIG[h.id] = { name: h.name || h.id, search: h.search || h.name || h.id, cls: h.cls || 'custom' };
+    });
+} else {
+    HEAD_CONFIG['bloodline_head'] = { name: 'Bloodline', search: 'Bloodline', cls: 'ninja' };
+    HEAD_CONFIG['sorcerer_hunter_spirit'] = { name: 'S.H. Spirit', search: 'S. Hunter', cls: 'custom' };
+    HEAD_CONFIG['strongest_sorcerer_glasses'] = { name: 'Strongest', search: 'Strongest', cls: 'custom' };
+    HEAD_CONFIG['mochi_scarf'] = { name: 'Mochi Scarf', search: 'Scarf', cls: 'custom' };
+    HEAD_CONFIG['flaming_donut'] = { name: 'Flaming Donut', search: 'Donut', cls: 'custom' };
+    HEAD_CONFIG['fused_earrings'] = { name: 'Fused Earrings', search: 'Fused Warrior Set', cls: 'fused_set' };
+    HEAD_CONFIG['berserk_cleaver'] = { name: 'Berserk Cleave', search: 'Berserk Cleave', cls: 'berserk' };
+}
 
 const COMBO_TITLES = {
     'dmg_dmg': 'Dmg / Dmg',
@@ -1791,7 +1800,7 @@ function renderUnitCard(unit, absoluteIndex) {
     }
 
     const abilityObj = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
-    let abilityLabel = abilityObj?.abilityName || 'Ability', toggleScript = '';
+    let abilityLabel = abilityObj?.abilityName || abilityObj?.name || 'Ability', toggleScript = '';
     const isToggled = activeAbilityIds.has(unit.id);
     const override = TOGGLE_OVERRIDES[window.getFileName(unit.id)];
     if (override) {

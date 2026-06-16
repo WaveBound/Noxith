@@ -207,15 +207,23 @@ if (isMainThread) {
             if (!pStat) return { pStat: null, pVal: 0, sStat: null, sVal: 0, tStat: null, tVal: 0 };
             let pWeight = ratio.p || 0; let sWeight = ratio.s || 0; let tWeight = ratio.t || 0; 
             
-            if (pStat === mainStat) { 
-                let half = Math.floor(pWeight / 2);
-                sWeight = Math.min(6, sWeight + half);
-                tWeight = Math.min(6, tWeight + (pWeight - half));
+            if (pStat === mainStat) {
+                if (tStat) {
+                    let half = Math.floor(pWeight / 2);
+                    sWeight = Math.min(6, sWeight + half);
+                    tWeight = Math.min(6, tWeight + (pWeight - half));
+                } else {
+                    sWeight = Math.min(6, sWeight + pWeight);
+                }
                 pWeight = 0;
             } else if (sStat === mainStat) {
-                let half = Math.floor(sWeight / 2);
-                pWeight = Math.min(6, pWeight + half);
-                tWeight = Math.min(6, tWeight + (sWeight - half));
+                if (tStat) {
+                    let half = Math.floor(sWeight / 2);
+                    pWeight = Math.min(6, pWeight + half);
+                    tWeight = Math.min(6, tWeight + (sWeight - half));
+                } else {
+                    pWeight = Math.min(6, pWeight + sWeight);
+                }
                 sWeight = 0;
             } else if (tStat === mainStat) {
                 let half = Math.floor(tWeight / 2);
@@ -304,7 +312,10 @@ if (isMainThread) {
         const hasPassiveDoT = effectiveStats.passives && effectiveStats.passives.some(p => p.dot && p.dot > 0);
         const hasNativeDoT = (effectiveStats.dot > 0) || (effectiveStats.burnMultiplier > 0) || isKiritoVR || hasPassiveDoT;
 
-        let allowedHeads = cfg.head ? (jobHeads && jobHeads.length > 0 ? jobHeads : ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver']) : ['none'];
+        const ALL_EXC = typeof EXCLUSIVE_HEADS !== 'undefined' ? EXCLUSIVE_HEADS.map(h => h.id) : ['bloodline_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver', 'ulquiorra_wings'];
+        const BASE_HEADS = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'reanimated_head', 'monarch', 'warlord_hat'];
+        const ALL_HEADS = [...BASE_HEADS, ...ALL_EXC];
+        let allowedHeads = cfg.head ? (jobHeads && jobHeads.length > 0 ? jobHeads : ALL_HEADS) : ['none'];
         
         // Always include 'none' (baseline) when head calculation is enabled
         if (cfg.head && !allowedHeads.includes('none')) {
@@ -478,7 +489,9 @@ if (isMainThread) {
         const MAP_PRIO = { 'dmg': 0, 'spa': 1, 'raw_dmg': 2 };
         const MAP_BODY = { 'dmg': 0, 'dot': 1, 'cm': 2 };
         const MAP_LEGS = { 'dmg': 0, 'spa': 1, 'cf': 2 };
-        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'bloodline_head': 7, 'reanimated_head': 8, 'sorcerer_hunter_spirit': 9, 'strongest_sorcerer_glasses': 10, 'monarch': 11, 'warlord_hat': 12, 'mochi_scarf': 13, 'flaming_donut': 14, 'fused_earrings': 15, 'berserk_cleaver': 16 };
+        const ALL_EXC = typeof EXCLUSIVE_HEADS !== 'undefined' ? EXCLUSIVE_HEADS.map(h => h.id) : ['bloodline_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver', 'ulquiorra_wings'];
+        const ALL_HEADS_WITH_NONE = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'reanimated_head', 'monarch', 'warlord_hat', ...ALL_EXC];
+        const MAP_HEAD = ALL_HEADS_WITH_NONE.reduce((acc, h, i) => { acc[h] = i; return acc; }, {});
 
         const stringPool = new Map(); const stringArr = [""]; 
         const subPool = new Map(); const subArr = [null]; 
@@ -560,7 +573,8 @@ if (isMainThread) {
     const S = RAW.s; const P = RAW.p; const D = RAW.d;
     const PRIO = ['dmg', 'spa', 'raw_dmg'];
     const BODY = ['dmg', 'dot', 'cm']; const LEGS = ['dmg', 'spa', 'cf'];
-    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver'];
+    const ALL_EXC = typeof EXCLUSIVE_HEADS !== 'undefined' ? EXCLUSIVE_HEADS.map(h => h.id) : ['bloodline_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver', 'ulquiorra_wings'];
+    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'reanimated_head', 'monarch', 'warlord_hat', ...ALL_EXC];
     const DESC_BODY = ['Dmg', 'DoT', 'Crit Dmg']; const DESC_LEGS = ['Dmg', 'Spa', 'Crit Rate'];
     const ROW_SIZE = 18;
 
@@ -695,7 +709,8 @@ if (isMainThread) {
             const PRIO = ['dmg', 'spa', 'raw_dmg'];
             const BODY = ['dmg', 'dot', 'cm'];
             const LEGS = ['dmg', 'spa', 'cf'];
-            const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings'];
+            const ALL_EXC = typeof EXCLUSIVE_HEADS !== 'undefined' ? EXCLUSIVE_HEADS.map(h => h.id) : ['bloodline_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver', 'ulquiorra_wings'];
+            const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'reanimated_head', 'monarch', 'warlord_hat', ...ALL_EXC];
 
             const decode = (b64) => {
                 const bin = Buffer.from(b64, 'base64').toString('binary');
@@ -1023,7 +1038,7 @@ if (typeof window !== 'undefined') {
                         try:
                             with open(fpath, "r", encoding="utf-8") as f:
                                 first_lines = "".join([f.readline() for _ in range(5)])
-                                if "// BUILDSIG:" not in first_lines or "flaming_donut" not in first_lines or "fused_earrings" not in first_lines:
+                                if "// BUILDSIG:" not in first_lines or "flaming_donut" not in first_lines or "fused_earrings" not in first_lines or "ulquiorra_wings" not in first_lines:
                                     combinations.append(c)
                         except Exception:
                             combinations.append(c)
@@ -1036,7 +1051,7 @@ if (typeof window !== 'undefined') {
                 return
 
             if selected_heads is None:
-                selected_heads = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver']
+                selected_heads = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver', 'ulquiorra_wings']
             if selected_sets is None:
                 selected_sets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi', 'Fused Warrior']
 
@@ -1179,7 +1194,7 @@ if (typeof window !== 'undefined') {
                         try:
                             with open(fpath, "r", encoding="utf-8") as f:
                                 first_lines = "".join([f.readline() for _ in range(5)])
-                                if "// BUILDSIG:" not in first_lines or "flaming_donut" not in first_lines or "fused_earrings" not in first_lines:
+                                if "// BUILDSIG:" not in first_lines or "flaming_donut" not in first_lines or "fused_earrings" not in first_lines or "ulquiorra_wings" not in first_lines:
                                     combinations.append(c)
                         except Exception:
                             combinations.append(c)
@@ -1398,12 +1413,48 @@ HTML = """
     </div>
 
     <script>
-        let units = []; let selected = new Set();
+        let units = [];
         const LAST_GENERATE_KEY = 'utdxLastGenerateTime';
+        const SELECTED_UNITS_KEY = 'utdxGeneratorSelectedUnits';
+        const GEAR_STORAGE_KEY = 'utdxGeneratorGearSelection';
         const relicSets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi', 'Fused Warrior'];
-        const headPieces = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver'];
-        let selectedSets = new Set(relicSets);
-        let selectedHeads = new Set(headPieces);
+        const headPieces = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver', 'ulquiorra_wings'];
+
+        function loadSavedSelectedUnits() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(SELECTED_UNITS_KEY) || '[]');
+                return Array.isArray(saved) ? new Set(saved) : new Set();
+            } catch {
+                return new Set();
+            }
+        }
+
+        let selected = loadSavedSelectedUnits();
+        function saveSelectedUnits() {
+            localStorage.setItem(SELECTED_UNITS_KEY, JSON.stringify(Array.from(selected)));
+        }
+
+        function loadGearSelection() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(GEAR_STORAGE_KEY) || '{}');
+                return {
+                    sets: Array.isArray(saved.sets) ? saved.sets.filter(s => relicSets.includes(s)) : [...relicSets],
+                    heads: Array.isArray(saved.heads) ? saved.heads.filter(h => headPieces.includes(h)) : [...headPieces]
+                };
+            } catch {
+                return { sets: [...relicSets], heads: [...headPieces] };
+            }
+        }
+
+        const savedGear = loadGearSelection();
+        let selectedSets = new Set(savedGear.sets);
+        let selectedHeads = new Set(savedGear.heads);
+        function saveGearSelection() {
+            localStorage.setItem(GEAR_STORAGE_KEY, JSON.stringify({
+                sets: Array.from(selectedSets),
+                heads: Array.from(selectedHeads)
+            }));
+        }
         
         window.addEventListener('pywebviewready', async () => {
             units = await pywebview.api.get_units();
@@ -1454,24 +1505,48 @@ HTML = """
         }
         
         function renderGearSelection() {
-            document.getElementById('set-selection').innerHTML = relicSets.map(s => `<div style="display: flex; gap: 8px; font-size: 0.75rem;"><input type="checkbox" class="set-cb" value="${s}" checked> <span>${s}</span></div>`).join('');
-            document.getElementById('head-selection').innerHTML = headPieces.map(h => `<div style="display: flex; gap: 8px; font-size: 0.75rem;"><input type="checkbox" class="head-cb" value="${h}" checked> <span>${h.replace(/_/g, ' ').toUpperCase()}</span></div>`).join('');
-        }
-        
-        function toggleAllGear(selector, val) {
-            document.querySelectorAll(selector).forEach(i => i.checked = val);
+            const setTerm = (document.getElementById('set-search')?.value || '').trim().toLowerCase();
+            const headTerm = (document.getElementById('head-search')?.value || '').trim().toLowerCase();
+
+            document.getElementById('set-selection').innerHTML = relicSets.map(s => {
+                const checked = selectedSets.has(s);
+                const hidden = setTerm && !s.toLowerCase().includes(setTerm);
+                return `<div style="display: ${hidden ? 'none' : 'flex'}; gap: 8px; font-size: 0.75rem;"><input type="checkbox" class="set-cb" value="${escapeHtml(s)}" ${checked ? 'checked' : ''} onchange="saveGearSelection()"> <span>${escapeHtml(s)}</span></div>`;
+            }).join('');
+
+            document.getElementById('head-selection').innerHTML = headPieces.map(h => {
+                const checked = selectedHeads.has(h);
+                const hidden = headTerm && !h.toLowerCase().includes(headTerm);
+                return `<div style="display: ${hidden ? 'none' : 'flex'}; gap: 8px; font-size: 0.75rem;"><input type="checkbox" class="head-cb" value="${escapeHtml(h)}" ${checked ? 'checked' : ''} onchange="saveGearSelection()"> <span>${escapeHtml(h.replace(/_/g, ' ').toUpperCase())}</span></div>`;
+            }).join('');
         }
 
         function toggleAllGear(selector, val) {
             document.querySelectorAll(selector).forEach(i => i.checked = val);
+            if (selector.includes('set-cb')) {
+                selectedSets.clear();
+                if (val) relicSets.forEach(s => selectedSets.add(s));
+            } else if (selector.includes('head-cb')) {
+                selectedHeads.clear();
+                if (val) headPieces.forEach(h => selectedHeads.add(h));
+            }
+            saveGearSelection();
         }
 
         function toggleBuffSelect() {
             document.getElementById('buff-selection').style.display = document.getElementById('gen-mode').value === 'custom' ? 'block' : 'none';
         }
         
-        function toggleUnit(id) { selected.has(id) ? selected.delete(id) : selected.add(id); renderUnits(); }
-        function selectAll(val) { val ? units.forEach(u => selected.add(u.id)) : selected.clear(); renderUnits(); }
+        function toggleUnit(id) {
+            selected.has(id) ? selected.delete(id) : selected.add(id);
+            renderUnits();
+            saveSelectedUnits();
+        }
+        function selectAll(val) {
+            val ? units.forEach(u => selected.add(u.id)) : selected.clear();
+            renderUnits();
+            saveSelectedUnits();
+        }
         
         function start() {
             const mode = document.getElementById('gen-mode').value;

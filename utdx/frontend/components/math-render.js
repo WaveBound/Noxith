@@ -1336,26 +1336,32 @@ function renderAttackRateSection(data) {
             </div>`;
     }
 
-    // Render dedicated section for units with noToggle abilities tracked in the ability array
-    const noToggleAbilities = (data.baseStats?.ability || []).filter(ab => ab.noToggle && ab.dmgMult && ab.cooldown);
+    // Render dedicated section for units with always-on or ability-gated cooldown attacks
+    const noToggleAbilities = (data.baseStats?.ability || []).filter(ab => ab.dmgMult && ab.cooldown && (ab.noToggle || (ab.abilityGated && data.extraAttacks?.label === ab.abilityName)));
     if (noToggleAbilities.length > 0) {
         const abilityRows = noToggleAbilities.map(ab => {
-            const abDmg = data.dmgVal * ab.dmgMult * (data.critData?.avgMult || 1);
+            const abDmgMult = ab.eDmgMult && data.upgradeLevel >= 6 ? ab.eDmgMult : ab.dmgMult;
+            const abDmg = data.dmgVal * abDmgMult * (data.critData?.avgMult || 1);
             const abDps = abDmg / ab.cooldown;
+            const placementFactor = ab.globalCooldown ? 1 : (data.placement || 1);
+            const cdLabel = ab.globalCooldown ? `Global CD: ${ab.cooldown}s · 1 placement` : `Every ${ab.cooldown}s`;
             return `
-                <tr><td class="mt-cell-label text-custom" style="font-weight:700;">${ab.abilityName || 'Ability Follow-Up'}</td><td class="mt-cell-formula">Every ${ab.cooldown}s</td><td class="mt-cell-val" style="color:#4ade80;">${fmt.num(abDps * (data.placement || 1))} DPS</td></tr>
-                <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Ability Damage (${ab.dmgMult * 100}% × Avg Crit Mult)</td><td class="mt-cell-formula"></td><td class="mt-cell-val">${fmt.num(abDmg)}</td></tr>
+                <tr><td class="mt-cell-label text-custom" style="font-weight:700;">${ab.abilityName || 'Ability Follow-Up'}</td><td class="mt-cell-formula">${cdLabel}</td><td class="mt-cell-val" style="color:#4ade80;">${fmt.num(abDps * placementFactor)} DPS</td></tr>
+                <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Ability Damage (${abDmgMult * 100}% × Avg Crit Mult)</td><td class="mt-cell-formula"></td><td class="mt-cell-val">${fmt.num(abDmg)}</td></tr>
             `;
         }).join('');
         return `
             <div class="dd-section" style="border-left: 3px solid #4ade80;">
-                <div class="dd-title mt-text-green"><span>5. Ability Follow-Up Attacks</span></div>
+                <div class="dd-title mt-text-green"><span>5. Cooldown Ability DPS</span></div>
                 <table class="calc-table">
                     ${abilityRows}
                     <tr class="mt-border-top">
                         <td class="mt-cell-label mt-pt-sm text-white" style="font-weight: 900;">Total Ability DPS Added</td>
                         <td class="mt-cell-formula"></td>
-                        <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size: 1.15rem; color: #4ade80;">${fmt.num(noToggleAbilities.reduce((sum, ab) => sum + (data.dmgVal * ab.dmgMult * (data.critData?.avgMult || 1) / ab.cooldown) * (data.placement || 1), 0))}</td>
+                        <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size: 1.15rem; color: #4ade80;">${fmt.num(noToggleAbilities.reduce((sum, ab) => {
+            const abDmgMult = ab.eDmgMult && data.upgradeLevel >= 6 ? ab.eDmgMult : ab.dmgMult;
+            return sum + (data.dmgVal * abDmgMult * (data.critData?.avgMult || 1) / ab.cooldown) * (ab.globalCooldown ? 1 : (data.placement || 1));
+        }, 0))}</td>
                     </tr>
                 </table>
             </div>`;
@@ -1376,6 +1382,12 @@ function renderAttackRateSection(data) {
         detailRows = `
             <tr class="mt-border-top"><td class="mt-cell-label mt-pt-md">Sword Logic</td><td class="mt-cell-formula mt-pt-md">(200% Dmg * Crit) / 20s</td><td class="mt-cell-val mt-pt-md"></td></tr>
             <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Avg Sword DPS</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-gold">${fmt.num(data.extraAttacks.swordDps)}</td></tr>
+        `;
+    } else if (isUlquiorra && data.extraAttacks.label === 'Relampago') {
+        const relampagoDps = data.baseHitDps * Math.max(0, data.extraAttacks.mult - 1);
+        detailRows = `
+            <tr class="mt-border-top"><td class="mt-cell-label mt-pt-md">Relampago Ability</td><td class="mt-cell-formula mt-pt-md">${data.extraAttacks.hits}</td><td class="mt-cell-val mt-pt-md"></td></tr>
+            <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Avg DPS Add</td><td class="mt-cell-formula">${fmt.num(data.baseHitDps)} × ${(data.extraAttacks.mult - 1).toFixed(2)}</td><td class="mt-cell-val text-gold">${fmt.num(relampagoDps)}</td></tr>
         `;
     }
 
