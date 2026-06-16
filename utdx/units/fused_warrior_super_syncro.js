@@ -7,7 +7,7 @@ unitDatabase.push({
     placement: 2,
     placementType: "Hybrid",
     role: "DPS",
-    tags: ["Super Warrior", "Hero"],
+    tags: ["Super Warrior", "Hero", "Fusion"],
 
     // META (Build Guide / Trait Tier List)
     meta: {
