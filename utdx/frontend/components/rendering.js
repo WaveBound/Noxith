@@ -651,7 +651,7 @@ window.getUnitsPerPage = () => {
 };
 
 // Constants & Configurations
-const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'berserk_cleaver'];
+const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings'];
 
 const HEAD_CONFIG = {
     sun_god: { name: 'Sun God', search: 'Sun God', cls: 'sungod' },
@@ -668,8 +668,7 @@ const HEAD_CONFIG = {
     warlord_hat: { name: 'Warlord Hat', search: 'Warlord', cls: 'custom' },
     mochi_scarf: { name: 'Mochi Scarf', search: 'Scarf', cls: 'custom' },
     flaming_donut: { name: 'Flaming Donut', search: 'Donut', cls: 'custom' },
-    fused_earrings: { name: 'Fused Earrings', search: 'Fused Warrior Set', cls: 'fused_set' },
-    berserk_cleaver: { name: 'Berserk Cleave', search: 'Berserk Cleave', cls: 'berserk' }
+    fused_earrings: { name: 'Fused Earrings', search: 'Earrings', cls: 'custom' }
 };
 
 const COMBO_TITLES = {

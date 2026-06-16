@@ -19,7 +19,7 @@ unitDatabase.push({
         cdmg: 150,
         dot: 0,
         dotStacks: 1,
-        spaCap: 33.5,
+        spaCap: 3.5,
         hitCount: 14,
         reqCrits: 50,
         extraAttacks: 0,

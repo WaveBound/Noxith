@@ -75,8 +75,7 @@ window._calcSetAndTagBonuses = function (relicStats, uStats, headPiece, context 
         warlord_hat: 'warlord',
         sun_god: 'sun_god',
         ninja: 'ninja',
-        fused_earrings: 'fused_set',
-        berserk_cleaver: 'berserk_cleaver'
+        fused_earrings: 'fused_set'
     };
 
     const mappedHeadSetId = headSetIdMap[headPiece];
@@ -280,8 +279,7 @@ window._calcHeadDynamicBuffs = function (headPiece, finalSpa, finalRange, uStats
         monarch_cape: 'monarch',
         monarch_head: 'monarch',
         warlord_hat: 'warlord',
-        fused_earrings: 'fused_set',
-        berserk_cleaver: 'berserk_cleaver'
+        fused_earrings: 'fused_set'
     };
 
     const mappedSetId = headSetIdMap[headPiece];
@@ -420,12 +418,6 @@ window._calcHeadDynamicBuffs = function (headPiece, finalSpa, finalRange, uStats
             headDmgPassive = 100;
         }
         headCalc.type = 'flaming_donut';
-    } else if (headPiece === 'berserk_cleaver') {
-        const isKenpachi = uStats && window.isUnit && window.isUnit(uStats.id, 'kenpachi');
-        if (isKenpachi) {
-            headDmgPassive = 400;
-        }
-        headCalc.type = 'berserk_cleaver';
     }
 
     if (uStats && (headPiece === 'monarch_cape' || headPiece === 'monarch_head' || headPiece === 'monarch') && (relicStats && (relicStats.set === 'monarch' || (window.isUnit && window.isUnit(uStats.id, 'gluttonous_warlord'))))) {
