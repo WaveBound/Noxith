@@ -361,6 +361,7 @@ let buffUpdateTimer = null;
 window.resetCachesForBuffChange = (unitId, excludeIds = []) => {
     window.LIVE_SCORE_CACHE = {};
     window.modeBenchmarks = {};
+    window.nextLevelStatsCache = {};
     window.customTraitBuildCache = {};
     window.pendingCustomPairBuilds = window.pendingCustomPairBuilds || new Set();
     window.forceCustomPairBuildRefresh = window.forceCustomPairBuildRefresh || new Set();
@@ -549,14 +550,18 @@ window.toggleCheckbox = (checkbox, callback) => {
 };
 
 // --- 4. CALCULATION HELPERS ---
-window.getFilteredBuilds = () => globalBuilds.filter(b =>
+window.getFilteredBuilds = () => (Array.isArray(globalBuilds) ? globalBuilds : []).filter(b =>
+    b &&
     (statConfig.applyRelicCrit || (b.cf <= 0 && b.cm <= 0)) &&
     (statConfig.applyRelicDot || b.dot <= 0) &&
+    (statConfig.applyRelicRange || b.legType !== 'range') &&
     (!(!statConfig.applyRelicDmg && b.dmg > 10) && !(!statConfig.applyRelicSpa && b.spa > 10))
 );
 
-window.getValidSubCandidates = () => SUB_CANDIDATES.filter(c =>
-    (statConfig.applyRelicCrit || (c !== 'cm' && c !== 'cf')) && (statConfig.applyRelicDot || c !== 'dot')
+window.getValidSubCandidates = () => (Array.isArray(SUB_CANDIDATES) ? SUB_CANDIDATES : []).filter(c =>
+    (statConfig.applyRelicCrit || (c !== 'cm' && c !== 'cf')) &&
+    (statConfig.applyRelicDot || c !== 'dot') &&
+    (statConfig.applyRelicRange || c !== 'range')
 );
 
 // --- 5. COMPACT TOGGLES & SYNCS ---

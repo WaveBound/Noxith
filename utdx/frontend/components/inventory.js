@@ -708,7 +708,7 @@ window.runOptimalityCalc = function (relicId) {
             });
             benchStats[bestMain] = slotMains[bestMain] * starMult;
 
-            // Apply 1 Master Stat (6 Rolls)
+            // Apply 1 Master Stat (base + 5 upgrades = 6 rolls)
             benchStats[masterStat] += MAX_SUB_STAT_VALUES[masterStat] * starMult;
 
             // Apply 3 Filler Stats (1 Roll Each) for a "Legal" God Roll

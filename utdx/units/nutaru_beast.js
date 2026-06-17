@@ -39,10 +39,10 @@ unitDatabase.push({
     ability: {
         abilityName: "Beast Mode",
         desc: `[E6] Unleash the Beast: 
-            • +30% Damage, +50% CDmg
-            • +35% Crit Rate, +50% Cycle Dmg
-            • SPA Cap: 3.0s
-            • Clones active.`,
+• +30% Damage, +50% CDmg
+• +35% Crit Rate, +50% Cycle Dmg
+• SPA Cap: 3.0s
+• Clones active.`,
         passiveDmg: 120, // 30 (Beast) + 40 (Clone Loss) + 50 (Cycle)
         crit: 35,
         cdmg: 200,

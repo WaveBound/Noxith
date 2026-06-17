@@ -2,16 +2,16 @@ const MAIN_STAT_VALS = {
     body: { dmg: 70, dot: 99, cm: 120 },
     legs: { dmg: 70, spa: 22.5, cf: 37.5 },
     // Visual values for Head (Math engine ignores these currently)
-    head: { potency: 45, elemental: 30 } 
+    head: { potency: 45, elemental: 30 }
 };
 
 // CSS Class Mapping
 const STAT_CODE_TO_CLASS = {
-    dmg:   'border-dmg',
-    spa:   'border-spa',
-    cdmg:  'border-cdmg',
-    crit:  'border-crit',
-    dot:   'border-dot',
+    dmg: 'border-dmg',
+    spa: 'border-spa',
+    cdmg: 'border-cdmg',
+    crit: 'border-crit',
+    dot: 'border-dot',
     range: 'border-range',
     potency: 'border-potency',
     elemental: 'border-elemental',
@@ -26,7 +26,7 @@ const STAT_LABELS = {
     meter: 'Meter Gain', hyper: 'Hyper Dmg'
 };
 
-// Assuming a max of 6 rolls for each sub-stat
+// Base roll plus 5 upgrades = 6 total rolls per sub-stat
 const MAX_SUB_STAT_VALUES = {
     dmg: 24,    // 4 * 6
     spa: 9,     // 1.5 * 6
@@ -41,8 +41,8 @@ const NAME_TO_CODE = {
     "Dmg": "dmg", "Damage": "dmg",
     "SPA": "spa",
     "Crit Dmg": "cm", "Crit Damage": "cm",
-    "Crit Rate": "cf", "Crit": "cf", 
-    "DoT": "dot", 
+    "Crit Rate": "cf", "Crit": "cf",
+    "DoT": "dot",
     "Range": "range",
     "Potency": "potency", "Buff Potency": "potency",
     "Elemental Dmg": "elemental", "Elem Dmg": "elemental", "Elemental": "elemental"

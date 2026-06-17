@@ -13,8 +13,7 @@ export const MAIN_STAT_BASES = {
     Top: [
         { stat: "dmg", value: 70 },
         { stat: "cDmg", value: 120 },
-        { stat: "dot", value: 99 },
-        { stat: "hyperArmor", value: 100 }
+        { stat: "dot", value: 99 }
     ],
     Bottom: [
         { stat: "range", value: 30 },

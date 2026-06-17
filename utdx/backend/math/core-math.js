@@ -1,9 +1,11 @@
-// combineTraits moved to shared/traits/trait-backend.js
+// ============================================================================
+// CORE-MATH.JS - Optimized Greedy Sub-Stat Allocation & Stats Core
+// ============================================================================
 
 function getLevelStats(baseDmg, baseSpa, baseRange, dmgPoints, spaPoints, rangePoints) {
-    const dmgMult = Math.pow(1.0045125, dmgPoints);
-    const spaMult = Math.pow(0.9954875, spaPoints);
-    const rangeMult = Math.pow(1.0045125, rangePoints || 0);
+    const dmgMult = Math.pow(1.0045, dmgPoints);
+    const spaMult = Math.pow(0.9955, spaPoints);
+    const rangeMult = Math.pow(1.0045, rangePoints || 0);
 
     return {
         dmg: baseDmg * dmgMult,
@@ -28,7 +30,6 @@ const checkIsBetter = (res, currentBest, optimizeFor) => {
     }
     if (res.total > currentBest.total) return true;
     if (res.total === currentBest.total) {
-        // Tiebreaker: prefer lower rawRate to avoid wasting substats on overcapped crit
         const resWasted = (res.critData && res.critData.rawRate > 100) ? res.critData.rawRate - 100 : 0;
         const bestWasted = (currentBest.critData && currentBest.critData.rawRate > 100) ? currentBest.critData.rawRate - 100 : 0;
         if (resWasted < bestWasted) return true;
@@ -37,16 +38,16 @@ const checkIsBetter = (res, currentBest, optimizeFor) => {
 };
 
 // --- CC DETECTION UTILITY ---
-window.unitHasCC = function(uStats) {
+window.unitHasCC = function (uStats) {
     if (!uStats) return false;
     let s = "";
     if (uStats.support) s += uStats.support.toLowerCase() + ",";
     if (uStats.tags && Array.isArray(uStats.tags)) s += uStats.tags.join(',').toLowerCase();
-    
+
     return s.includes('slow') || s.includes('stun') || s.includes('confuse') || s.includes('timestop');
 };
 
-window.unitHasTimeSnail = function(uStats) {
+window.unitHasTimeSnail = function (uStats) {
     if (!uStats) return false;
     return window.isUnit && (
         window.isUnit(uStats.id, 'water_god') ||
@@ -55,11 +56,11 @@ window.unitHasTimeSnail = function(uStats) {
     );
 };
 
-window.unitHasStatusEffect = function(uStats) {
+window.unitHasStatusEffect = function (uStats) {
     if (!uStats) return false;
     if (window.unitHasCC(uStats)) return true;
     if (window.unitHasTimeSnail(uStats)) return true;
-    
+
     if (uStats.stats && (uStats.stats.dot > 0 || uStats.stats.bossDot > 0)) return true;
     if (uStats.dot > 0 || uStats.bossDot > 0) return true;
     if (uStats.customSummons && uStats.customSummons.some(s => s.dotPct > 0)) return true;
@@ -67,88 +68,26 @@ window.unitHasStatusEffect = function(uStats) {
     if (uStats.modes && Array.isArray(uStats.modes)) {
         if (uStats.modes.some(m => m && (m.dot > 0 || (m.customFollowUp && m.customFollowUp.dotPct > 0)))) return true;
     }
-    
+
     let s = "";
     if (uStats.support) s += uStats.support.toLowerCase() + ",";
     if (uStats.tags && Array.isArray(uStats.tags)) s += uStats.tags.join(',').toLowerCase();
-    
+
     return s.includes('freeze') || s.includes('burn') || s.includes('bleed') || s.includes('poison') || s.includes('electrified') || s.includes('slow') || s.includes('stun');
 };
 
 const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optimizeFor = 'dps') => {
     let mode = headMode;
     if (mode === true) mode = 'auto';
-    if (mode === false) mode = 'none';
+    if (mode === 'none') mode = 'none';
 
     let headOptions = (mode === 'auto')
-        ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'rebellious_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut']
+        ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut']
         : (mode && mode !== 'none' ? [mode] : ['none']);
 
     let globalBestRes = { total: -1, range: -1 };
     let globalBestAssignments = {};
     let globalBestHead = 'none';
-
-        const applyContextualStats = (b, pieceName, mainStat, pStat, sStat, tStat, ratio, validCandidates, stats, context) => {
-            let pWeight = ratio.p || 0;
-            let sWeight = ratio.s || 0;
-            let tWeight = ratio.t || 0;
-
-            if (pStat === mainStat) { 
-                let half = Math.floor(pWeight / 2);
-                sWeight = Math.min(6, sWeight + half);
-                tWeight = Math.min(6, tWeight + (pWeight - half));
-                pWeight = 0;
-            } else if (sStat === mainStat) {
-                let half = Math.floor(sWeight / 2);
-                pWeight = Math.min(6, pWeight + half);
-                tWeight = Math.min(6, tWeight + (sWeight - half));
-                sWeight = 0;
-            } else if (tStat === mainStat) {
-                let half = Math.floor(tWeight / 2);
-                pWeight = Math.min(6, pWeight + half);
-                sWeight = Math.min(6, sWeight + (tWeight - half));
-                tWeight = 0;
-            }
-
-            if (pStat === mainStat) pWeight = 0;
-            if (sStat === mainStat) sWeight = 0;
-            if (tStat === mainStat) tWeight = 0;
-
-            let pVal = 0, sVal = 0, tVal = 0;
-            if (pWeight > 0) { pVal = PERFECT_SUBS[pStat] * pWeight; b[pStat] = (b[pStat] || 0) + pVal; }
-            if (sWeight > 0) { sVal = PERFECT_SUBS[sStat] * sWeight; b[sStat] = (b[sStat] || 0) + sVal; }
-            if (tWeight > 0 && tStat) { tVal = PERFECT_SUBS[tStat] * tWeight; b[tStat] = (b[tStat] || 0) + tVal; }
-
-        let activeFillers = [...validCandidates];
-        if (activeFillers.includes('cf') || activeFillers.includes('cm')) {
-            const checkRes = calculateDPS(stats, b, context);
-            if (checkRes.critData) {
-                const currentRaw = checkRes.critData.rawRate; 
-                if (currentRaw >= 99.9 || checkRes.critData.rate === 0) {
-                    activeFillers = activeFillers.filter(
-                        c =>
-                            (c === 'cf' && currentRaw < 100) ||
-                            (c === 'cm' && checkRes.critData.rate > 0) ||
-                            (c !== 'cf' && c !== 'cm')
-                    );
-                }
-            }
-        }
-
-        activeFillers.forEach(cand => {
-            if (cand === mainStat || (cand === pStat && pWeight > 0) || (cand === sStat && sWeight > 0) || (cand === tStat && tWeight > 0)) return;
-            b[cand] = (b[cand] || 0) + PERFECT_SUBS[cand];
-        });
-        return { pStat, pVal, sStat, sVal, tStat, tVal };
-    };
-
-    const formatAssignment = (res) => {
-        let arr = [];
-        if (res.pVal > 0) arr.push({ type: res.pStat, val: res.pVal });
-        if (res.sVal > 0) arr.push({ type: res.sStat, val: res.sVal });
-        if (res.tVal > 0) arr.push({ type: res.tStat, val: res.tVal });
-        return arr;
-    };
 
     headOptions.forEach(headType => {
         const actualIncludeHead = (headType !== 'none');
@@ -163,90 +102,107 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
             return;
         }
 
-        let activeCandidates = candidates;
-        
+        // --- GREEDY PIECE-INDIVIDUAL SUB-STAT ALLOCATION ENGINE ---
+        const pieces = [];
+        if (actualIncludeHead) pieces.push({ name: 'head', main: null, subs: {}, maxSubs: 5, upgrades: 5 });
+        pieces.push({ name: 'body', main: build.bodyType, subs: {}, maxSubs: 5, upgrades: 5 });
+        pieces.push({ name: 'legs', main: build.legType, subs: {}, maxSubs: 5, upgrades: 5 });
+
+        let activeCandidates = [...candidates];
         if (headType === 'sorcerer_hunter_spirit') {
             activeCandidates = activeCandidates.filter(c => c !== 'cf' && c !== 'cm');
-        } else {
-            let baseBuild = { dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0, set: build.set || build.setName };
-            if (build.bodyType) baseBuild[build.bodyType] = (MAIN_STAT_VALS.body[build.bodyType] || 0);
-            if (build.legType) baseBuild[build.legType] = (MAIN_STAT_VALS.legs[build.legType] || 0);
-
-            const baseRes = calculateDPS(stats, baseBuild, { ...stats.context, headPiece: headType });
-            
-            const testResCf = calculateDPS(stats, { ...baseBuild, cf: (baseBuild.cf || 0) + 5 }, { ...stats.context, headPiece: headType });
-            if (testResCf.total <= baseRes.total && testResCf.bossTotal <= baseRes.bossTotal) {
-                activeCandidates = activeCandidates.filter(c => c !== 'cf');
-            }
-            
-            if (baseRes.critData && baseRes.critData.rate <= 0) {
-                activeCandidates = activeCandidates.filter(c => c !== 'cm');
-            }
         }
 
-        let strategies = [];
-        activeCandidates.forEach(c => strategies.push({ p: c, s: c, t: null, ratio: { p: 6, s: 0, t: 0 } }));
-        
-        const pairs = [
-            ['dmg', 'cf'], ['cf', 'dmg'], 
-            ['dmg', 'spa'], ['spa', 'dmg'], 
-            ['dmg', 'range'], ['range', 'dmg'], 
-            ['dmg', 'cm'], ['cm', 'dmg'], 
-            ['cf', 'cm'], ['cm', 'cf'], 
-            ['spa', 'range'], ['range', 'spa'], 
-            ['spa', 'cf'], ['cf', 'spa'], 
-            ['spa', 'cm'], ['cm', 'spa'],
-            ['dot', 'dmg'], ['dmg', 'dot'], 
-            ['dot', 'spa'], ['spa', 'dot'], 
-            ['dot', 'cf'], ['cf', 'dot'], 
-            ['dot', 'cm'], ['cm', 'dot']
-        ];
-        
-        const ratios = [
-            { p: 6, s: 0 }, { p: 5, s: 1 }, { p: 4, s: 2 }, { p: 3, s: 3 }
-        ];
-
-        pairs.forEach(pair => {
-            const [c1, c2] = pair;
-            if (!activeCandidates.includes(c1) || !activeCandidates.includes(c2)) return;
-            ratios.forEach(r => strategies.push({ p: c1, s: c2, t: null, ratio: r }));
+        pieces.forEach(p => {
+            activeCandidates.forEach(cand => {
+                if (cand === p.main) return;
+                p.subs[cand] = 1;
+            });
         });
 
-        // 2:2:2 Triplets
-        for (let i = 0; i < activeCandidates.length; i++) {
-            for (let j = i + 1; j < activeCandidates.length; j++) {
-                for (let k = j + 1; k < activeCandidates.length; k++) {
-                    strategies.push({ p: activeCandidates[i], s: activeCandidates[j], t: activeCandidates[k], ratio: { p: 2, s: 2, t: 2 } });
+        const buildRelicStats = () => {
+            const rStats = { set: build.set || build.setName, dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0 };
+            const starMult = stats.context.starMult || 1;
+            if (build.bodyType) rStats[build.bodyType] += (MAIN_STAT_VALS.body[build.bodyType] || 0) * starMult;
+            if (build.legType) rStats[build.legType] += (MAIN_STAT_VALS.legs[build.legType] || 0) * starMult;
+
+            pieces.forEach(p => {
+                const hStarMult = p.name === 'head' ? (stats.context.headStarMult || starMult) : starMult;
+                Object.entries(p.subs).forEach(([k, rolls]) => {
+                    rStats[k] += rolls * PERFECT_SUBS[k] * hStarMult;
+                });
+            });
+            return rStats;
+        };
+
+        const totalUpgrades = pieces.reduce((sum, p) => sum + p.upgrades, 0);
+
+        for (let step = 0, governor = 0; step < totalUpgrades && governor < 100; governor++) {
+            let bestUpgrade = null;
+            let bestScore = -Infinity;
+            let fallbackUpgrade = null;
+
+            for (let pIdx = 0; pIdx < pieces.length; pIdx++) {
+                const p = pieces[pIdx];
+                if (p.upgrades <= 0) continue;
+
+                for (let cIdx = 0; cIdx < activeCandidates.length; cIdx++) {
+                    const cand = activeCandidates[cIdx];
+                    if (cand === p.main) continue;
+                    if ((p.subs[cand] || 0) >= 6) continue; // max 6 rolls per stat (1 base + 5 upgrades)
+
+                    p.subs[cand] = (p.subs[cand] || 0) + 1;
+                    const rStats = buildRelicStats();
+                    const res = calculateDPS(stats, rStats, stats.context);
+                    p.subs[cand]--;
+
+                    const score = optimizeFor === 'range' ? res.range :
+                        (optimizeFor === 'raw_dmg' || optimizeFor === 'damage' ? res.dmgVal : res.total);
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestUpgrade = { pieceIndex: pIdx, candidate: cand };
+                    }
+                    if (!fallbackUpgrade) fallbackUpgrade = { pieceIndex: pIdx, candidate: cand };
                 }
             }
+
+            const chosenUpgrade = bestUpgrade || fallbackUpgrade;
+            if (chosenUpgrade) {
+                const p = pieces[chosenUpgrade.pieceIndex];
+                p.subs[chosenUpgrade.candidate] = (p.subs[chosenUpgrade.candidate] || 0) + 1;
+                p.upgrades--;
+                step++;
+            } else {
+                break;
+            }
         }
 
-        strategies.forEach(strat => {
-            let testBuild = { dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0 };
-            if (build.set || build.setName) testBuild.set = build.set || build.setName;
-            if (build.bodyType) testBuild[build.bodyType] = (testBuild[build.bodyType] || 0) + (MAIN_STAT_VALS.body[build.bodyType] || 0);
-            if (build.legType) testBuild[build.legType] = (testBuild[build.legType] || 0) + (MAIN_STAT_VALS.legs[build.legType] || 0);
+        const finalRStats = buildRelicStats();
+        const finalRes = calculateDPS(stats, finalRStats, stats.context);
+        finalRes.totalStats = finalRStats;
 
-            let currentAssignments = {};
-            if (actualIncludeHead) {
-                const res = applyContextualStats(testBuild, 'head', null, strat.p, strat.s, strat.t, strat.ratio, activeCandidates, stats, stats.context);
-                currentAssignments.head = formatAssignment(res);
-            }
-            const resBody = applyContextualStats(testBuild, 'body', build.bodyType, strat.p, strat.s, strat.t, strat.ratio, activeCandidates, stats, stats.context);
-            currentAssignments.body = formatAssignment(resBody);
-            const resLegs = applyContextualStats(testBuild, 'legs', build.legType, strat.p, strat.s, strat.t, strat.ratio, activeCandidates, stats, stats.context);
-            currentAssignments.legs = formatAssignment(resLegs);
+        if (checkIsBetter(finalRes, globalBestRes, optimizeFor)) {
+            globalBestRes = finalRes;
+            globalBestHead = headType;
 
-            let res = calculateDPS(stats, testBuild, stats.context);
-            res.totalStats = testBuild;
+            const formatPieceAssignment = (p) => {
+                const hStarMult = p.name === 'head' ? (stats.context.headStarMult || stats.context.starMult || 1) : (stats.context.starMult || 1);
+                return Object.entries(p.subs)
+                    .filter(([k, rolls]) => rolls > 1) // only show stats that received upgrades (base-only rolls are fillers)
+                    .map(([k, rolls]) => ({
+                        type: k,
+                        val: rolls * PERFECT_SUBS[k] * hStarMult
+                    }));
+            };
 
-            if (checkIsBetter(res, globalBestRes, optimizeFor)) {
-                globalBestRes = res;
-                globalBestHead = headType;
-                globalBestAssignments = currentAssignments;
-                globalBestAssignments.selectedHead = headType;
-            }
-        });
+            globalBestAssignments = {
+                head: actualIncludeHead ? formatPieceAssignment(pieces.find(p => p.name === 'head')) : null,
+                body: formatPieceAssignment(pieces.find(p => p.name === 'body')),
+                legs: formatPieceAssignment(pieces.find(p => p.name === 'legs')),
+                selectedHead: headType
+            };
+        }
     });
 
     globalBestAssignments.selectedHead = globalBestHead;
@@ -323,7 +279,7 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         radTotalDmg: 0,
         isMultiHit: false
     };
-    
+
     if (uStats.requiresDot && window.CALCULATION_MODE === 'loadout') {
         const hotbar = window.hotbarState;
         let requirementMet = false;
@@ -358,7 +314,7 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
     if (uStats.dot > 0 || uStats.bossDot > 0) {
         let normalTickPct = uStats.dot * combinedMultiplier;
         let normalTotalDmg = finalDmg * (normalTickPct / 100) * dotCritMult;
-        
+
         let bossBasePct = uStats.bossDot || uStats.dot;
         let bossTickPct = bossBasePct * combinedMultiplier;
         const actualFinalDmgBoss = finalDmgBoss !== undefined ? finalDmgBoss : finalDmg;
@@ -370,9 +326,9 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         if (isChief) {
             interval = 9.0;
         }
-        
-        dotBreakdown.nativeTotalDmg = normalTotalDmg; 
-        dotBreakdown.nativeInterval = interval; 
+
+        dotBreakdown.nativeTotalDmg = normalTotalDmg;
+        dotBreakdown.nativeInterval = interval;
         dotBreakdown.nativeDps = normalTotalDmg / interval;
         dotBreakdown.bossNativeDps = bossTotalDmg / interval;
     }
@@ -391,7 +347,7 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         const radPct = baseRadPct * combinedMultiplier;
         const totalRadDmg = finalDmg * (radPct / 100) * dotCritMult;
         dotBreakdown.radTotalDmg = totalRadDmg;
-        dotBreakdown.radInterval = baseRadInterval; 
+        dotBreakdown.radInterval = baseRadInterval;
         dotBreakdown.radDps = totalRadDmg / baseRadInterval;
     }
 
@@ -401,7 +357,6 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
     return { dotDpsTotal, bossDotDpsTotal, dotBreakdown };
 }
 
-// Bind to window for global access across file scopes
 window.getLevelStats = getLevelStats;
 window.checkIsBetter = checkIsBetter;
 window.getBestSubConfig = getBestSubConfig;

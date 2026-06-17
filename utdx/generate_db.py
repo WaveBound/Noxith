@@ -141,6 +141,14 @@ if (isMainThread) {
 
     const CONFIGS = [ { head: true, subs: true } ];
     const PRECALC_TEMPLATES = {};
+    const GENERATOR_STATS = { jobs: 0, units: 0, generatedTemplates: 0, cachedTemplates: 0, templateRows: 0, dpsCalls: 0 };
+    const originalCalculateDPS = typeof calculateDPS === 'function' ? calculateDPS : null;
+    if (originalCalculateDPS) {
+        global.calculateDPS = function(...args) {
+            GENERATOR_STATS.dpsCalls++;
+            return originalCalculateDPS.apply(this, args);
+        };
+    }
 
     // Add unit IDs here to re-enable range combos + range stat points for specific units
     // e.g. when support units are added: new Set(['support_unit_id', 'another_support'])
@@ -207,26 +215,49 @@ if (isMainThread) {
             if (!pStat) return { pStat: null, pVal: 0, sStat: null, sVal: 0, tStat: null, tVal: 0 };
             let pWeight = ratio.p || 0; let sWeight = ratio.s || 0; let tWeight = ratio.t || 0; 
             
-            if (pStat === mainStat) { 
-                let half = Math.floor(pWeight / 2);
-                sWeight = Math.min(6, sWeight + half);
-                tWeight = Math.min(6, tWeight + (pWeight - half));
+            if (pStat === mainStat && pWeight > 0) {
+                let toDist = pWeight;
                 pWeight = 0;
-            } else if (sStat === mainStat) {
-                let half = Math.floor(sWeight / 2);
-                pWeight = Math.min(6, pWeight + half);
-                tWeight = Math.min(6, tWeight + (sWeight - half));
+                let targets = [];
+                if (sStat && sStat !== mainStat) targets.push('s');
+                if (tStat && tStat !== mainStat) targets.push('t');
+                if (targets.length === 2) {
+                    let half = Math.floor(toDist / 2);
+                    sWeight = Math.min(6, sWeight + half);
+                    tWeight = Math.min(6, tWeight + (toDist - half));
+                } else if (targets.length === 1) {
+                    if (targets[0] === 's') sWeight = Math.min(6, sWeight + toDist);
+                    else tWeight = Math.min(6, tWeight + toDist);
+                }
+            } else if (sStat === mainStat && sWeight > 0) {
+                let toDist = sWeight;
                 sWeight = 0;
-            } else if (tStat === mainStat) {
-                let half = Math.floor(tWeight / 2);
-                pWeight = Math.min(6, pWeight + half);
-                sWeight = Math.min(6, sWeight + (tWeight - half));
+                let targets = [];
+                if (pStat && pStat !== mainStat) targets.push('p');
+                if (tStat && tStat !== mainStat) targets.push('t');
+                if (targets.length === 2) {
+                    let half = Math.floor(toDist / 2);
+                    pWeight = Math.min(6, pWeight + half);
+                    tWeight = Math.min(6, tWeight + (toDist - half));
+                } else if (targets.length === 1) {
+                    if (targets[0] === 'p') pWeight = Math.min(6, pWeight + toDist);
+                    else tWeight = Math.min(6, tWeight + toDist);
+                }
+            } else if (tStat === mainStat && tWeight > 0) {
+                let toDist = tWeight;
                 tWeight = 0;
+                let targets = [];
+                if (pStat && pStat !== mainStat) targets.push('p');
+                if (sStat && sStat !== mainStat) targets.push('s');
+                if (targets.length === 2) {
+                    let half = Math.floor(toDist / 2);
+                    pWeight = Math.min(6, pWeight + half);
+                    sWeight = Math.min(6, sWeight + (toDist - half));
+                } else if (targets.length === 1) {
+                    if (targets[0] === 'p') pWeight = Math.min(6, pWeight + toDist);
+                    else sWeight = Math.min(6, sWeight + toDist);
+                }
             }
-
-            if (pStat === mainStat) pWeight = 0;
-            if (sStat === mainStat) sWeight = 0;
-            if (tStat === mainStat) tWeight = 0;
 
             let pVal = 0, sVal = 0, tVal = 0;
             if (pWeight > 0) { pVal = PERFECT_SUBS[pStat] * pWeight; b[pStat] = (b[pStat] || 0) + pVal; }
@@ -331,6 +362,10 @@ if (isMainThread) {
             if(!templates) {
                 templates = generateTemplates(cfg.subs, allowedHeads, isDotPossible, selectedSets, includeRangeSubs);
                 PRECALC_TEMPLATES[templatesKey] = templates;
+                GENERATOR_STATS.generatedTemplates++;
+                GENERATOR_STATS.templateRows += templates.length;
+            } else {
+                GENERATOR_STATS.cachedTemplates++;
             }
             
             // Filter out 'cf' candidates for units that shouldn't get them (Kirito, Gojo)
@@ -705,8 +740,10 @@ if (isMainThread) {
                 return new DataView(bytes.buffer);
             };
 
+            const existingDecodeCache = new Map();
             const unpackBuffer = (b64) => {
                 if (!existingRaw) return [];
+                if (existingDecodeCache.has(b64)) return existingDecodeCache.get(b64);
                 const view = decode(b64);
                 const len = view.byteLength / ROW_SIZE;
                 const result = [];
@@ -759,6 +796,7 @@ if (isMainThread) {
                         dmgVal
                     });
                 }
+                existingDecodeCache.set(b64, result);
                 return result;
             };
 
@@ -870,6 +908,9 @@ if (isMainThread) {
                 parentPort.postMessage({ type: 'unit_done', outName, unitName: u.name });
             });
 
+            GENERATOR_STATS.jobs++;
+            GENERATOR_STATS.units += tasks.length;
+            parentPort.postMessage({ type: 'log', outName, data: `Job summary: ${tasks.length} unit(s), ${GENERATOR_STATS.generatedTemplates} generated template set(s), ${GENERATOR_STATS.templateRows} template row(s), ${GENERATOR_STATS.dpsCalls} DPS call(s)` });
             parentPort.postMessage({ type: 'log', outName, data: 'Writing database file to disk...' });
             finalizeDatabase(workerDb, existingRaw, outPath, selectedHeads.join(','));
             workerDb = null;
@@ -1010,13 +1051,27 @@ if (typeof window !== 'undefined') {
                 elif c[5] == 'ground': p.append('mageground')
                 return "db_base.js" if not p else "db_" + "_".join(p) + ".js"
 
+            def existing_file_has_units(fpath, units):
+                if not units or not os.path.exists(fpath):
+                    return False
+                try:
+                    with open(fpath, "r", encoding="utf-8") as f:
+                        content = f.read()
+                    start = content.index("const RAW = ") + len("const RAW = ")
+                    end = content.index("const S = RAW.s;", start)
+                    raw = json.loads(content[start:end].strip())
+                    unit_keys = set(raw.get("d", {}).keys())
+                    return all(u in unit_keys for u in units)
+                except Exception:
+                    return False
+
             if mode == 'missing':
                 combinations = []
                 for c in all_combos:
                     fpath = os.path.join(db_dir, get_name(c))
-                    # If specific units are selected, we MUST run the combo to merge them into the file
                     if selected_units:
-                        combinations.append(c)
+                        if not existing_file_has_units(fpath, selected_units):
+                            combinations.append(c)
                     elif not os.path.exists(fpath):
                         combinations.append(c)
                     else:
@@ -1038,7 +1093,7 @@ if (typeof window !== 'undefined') {
             if selected_heads is None:
                 selected_heads = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings']
             if selected_sets is None:
-                selected_sets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi', 'Fused Warrior']
+                selected_sets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Fused Warrior']
 
             job_data = {
                 "combinations": combinations,
@@ -1049,6 +1104,7 @@ if (typeof window !== 'undefined') {
                 "selectedSets": selected_sets,
                 "selectedRangeSubs": bool(include_range_subs)
             }
+            print(f"Generator job: {len(combinations)} combo(s), {len(selected_units)} selected unit(s), {len(selected_heads)} head(s), {len(selected_sets)} set(s), range_subs={bool(include_range_subs)}")
             job_file = os.path.join(self.temp_dir, "job.json")
             with open(job_file, "w", encoding="utf-8") as f: json.dump(job_data, f)
 
@@ -1167,12 +1223,27 @@ if (typeof window !== 'undefined') {
                 elif c[5] == 'ground': p.append('mageground')
                 return "db_base.js" if not p else "db_" + "_".join(p) + ".js"
 
+            def existing_file_has_units(fpath, units):
+                if not units or not os.path.exists(fpath):
+                    return False
+                try:
+                    with open(fpath, "r", encoding="utf-8") as f:
+                        content = f.read()
+                    start = content.index("const RAW = ") + len("const RAW = ")
+                    end = content.index("const S = RAW.s;", start)
+                    raw = json.loads(content[start:end].strip())
+                    unit_keys = set(raw.get("d", {}).keys())
+                    return all(u in unit_keys for u in units)
+                except Exception:
+                    return False
+
             if mode == 'missing':
                 combinations = []
                 for c in all_combos:
                     fpath = os.path.join(db_dir, get_name(c))
                     if selected_units:
-                        combinations.append(c)
+                        if not existing_file_has_units(fpath, selected_units):
+                            combinations.append(c)
                     elif not os.path.exists(fpath):
                         combinations.append(c)
                     else:
@@ -1400,7 +1471,7 @@ HTML = """
     <script>
         let units = []; let selected = new Set();
         const LAST_GENERATE_KEY = 'utdxLastGenerateTime';
-        const relicSets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Mochi', 'Fused Warrior'];
+        const relicSets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Fused Warrior'];
         const headPieces = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings'];
         let selectedSets = new Set(relicSets);
         let selectedHeads = new Set(headPieces);

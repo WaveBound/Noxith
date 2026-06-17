@@ -9,7 +9,8 @@ const statConfig = {
     applyRelicDmg: true,
     applyRelicSpa: true,
     applyRelicCrit: !GAME_STATE.BUG_CRIT_RELICS,
-    applyRelicDot: !GAME_STATE.BUG_DOT_RELICS
+    applyRelicDot: !GAME_STATE.BUG_DOT_RELICS,
+    applyRelicRange: false
 };
 
 const PERFECT_SUBS = {

@@ -2,6 +2,7 @@
 window.unitBuildsCache = window.unitBuildsCache || {};
 window.unitActiveBuilds = window.unitActiveBuilds || {};
 window.bestHydratedBuildCache = window.bestHydratedBuildCache || {};
+window.nextLevelStatsCache = window.nextLevelStatsCache || {};
 window.visibleUnitIds = window.visibleUnitIds || new Set();
 window.LIVE_SCORE_CACHE = window.LIVE_SCORE_CACHE || {};
 window.activeAbilityIds = window.activeAbilityIds || new Set();
@@ -829,6 +830,41 @@ function getSynergyBadgeHtml(unit, activeMode) {
         : `<div class="placement-badge synergy-dot-badge" style="color: #71717a; border-color: rgba(113, 113, 122, 0.3); background: rgba(0,0,0,0.2); font-weight: 700; opacity: 0.6;">⛓ REQUIRED: ${requiresDot.toUpperCase()}</div>`;
 }
 
+function getSubstatDetailHtml(build) {
+    const subs = build?.subStats || {};
+    const statLabel = (key) => {
+        const labels = { dmg: 'Damage', spa: 'SPA', cm: 'Crit Dmg', cf: 'Crit Rate', dot: 'Dot', range: 'Range' };
+        return labels[key] || key;
+    };
+    const pieceRows = ['head', 'body', 'legs'].map(piece => {
+        const entries = Array.isArray(subs[piece]) ? subs[piece].filter(item => item && item.type) : [];
+        const totalByStat = {};
+        entries.forEach(item => {
+            totalByStat[item.type] = (totalByStat[item.type] || 0) + (Number(item.val) || 0);
+        });
+        const badgeHtml = entries.length ? entries.map(item => {
+            const val = Number(item.val) || 0;
+            return `<span class="stat-badge ${item.type}" style="font-size:0.72rem;padding:4px 7px;">${statLabel(item.type)} ${val.toFixed(1)}%</span>`;
+        }).join('') : `<span style="color:#64748b;font-size:0.72rem;">No substats</span>`;
+        return `<div style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px;background:rgba(255,255,255,0.02);margin-bottom:8px;">
+            <div style="font-weight:800;text-transform:uppercase;font-size:0.7rem;color:#94a3b8;margin-bottom:6px;">${piece.toUpperCase()}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">${badgeHtml}</div>
+            ${Object.entries(totalByStat).length ? `<div style="margin-top:8px;font-size:0.72rem;color:#cbd5e1;">Totals: ${Object.entries(totalByStat).map(([k, v]) => `${statLabel(k)} ${Number(v).toFixed(1)}%`).join(' · ')}</div>` : ''}
+        </div>`;
+    }).join('');
+    return `<div style="font-size:0.78rem;line-height:1.45;">${pieceRows}</div>`;
+}
+
+window.showSubstatDetails = function (buildId) {
+    const build = window.cachedResults?.[buildId] || window.staticBuildDb?.find?.(b => b.id === buildId);
+    if (!build) return;
+    window.showUniversalModal({
+        title: 'SUBSTAT DETAILS',
+        content: getSubstatDetailHtml(build),
+        size: 'modal-sm'
+    });
+};
+
 function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
     if (!r) return null;
 
@@ -935,7 +971,18 @@ function getBestHydratedBuild(builds, unitId, isHotbar, activeModeIdx = undefine
 
     const globalSortMode = document.querySelector('.search-container select[data-filter="sort"]')?.value || 'dps';
 
-    // Prioritize high-tier baseline builds and endgame relic sets (Warlord, Monarch, Fused) to prevent truncation
+    // PERFORMANCE OPTIMIZATION: If not in Hotbar/Loadout mode and no custom traits are active,
+    // the top build is already pre-sorted at index 0. We don't need to hydrate 128 candidates.
+    const isInventory = (window.inventoryMode === true);
+    const hasCustomTraits = window.customTraits && window.customTraits.length > 0;
+
+    let limit = candidateLimit;
+    if (!isHotbar && !isInventory && !hasCustomTraits) {
+        limit = 2; // Only evaluate the top 2 candidates to resolve minor tie-breakers
+    } else if (isHotbar) {
+        limit = 12; // Capping to 12 candidates in Hotbar/Loadout mode is more than enough to find the best gear under team buffs
+    }
+
     const candidates = [...(builds || [])]
         .sort((a, b) => {
             const scoreB = getBuildSortScore(b, globalSortMode);
@@ -949,7 +996,7 @@ function getBestHydratedBuild(builds, unitId, isHotbar, activeModeIdx = undefine
             if (isEndgameB !== isEndgameA) return isEndgameB ? -1 : 1;
             return 0;
         })
-        .slice(0, candidateLimit);
+        .slice(0, limit);
 
     const ids = candidates.map(b => b?.id || `${b?.t || b?.traitName || ''}:${b?.s || b?.setName || ''}:${b?.h || b?.headUsed || ''}:${b?.b || b?.mainStats?.body || ''}:${b?.l || b?.mainStats?.legs || ''}`).join('|');
     const cacheKey = `${unitId}:${isHotbar ? 1 : 0}:${activeModeIdx}:${ids}`;
@@ -974,12 +1021,17 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     const benchmarkDps = traitBenchmarks[r.traitName] || traitBenchmarks['peak'] || 0;
 
     if (nextLevel <= maxLevel) {
-        try {
-            const nextMath = reconstructMathData(r, nextLevel);
-            if (nextMath) {
-                nextStats = { dmgVal: nextMath.dmgVal, spa: nextMath.spa, range: nextMath.range };
-            }
-        } catch (e) { console.warn("Next Stats Error", e); }
+        const nextCacheKey = `${unitId}:${r.id || r.traitName}:${nextLevel}`;
+        nextStats = window.nextLevelStatsCache[nextCacheKey] || nextStats;
+        if (!window.nextLevelStatsCache[nextCacheKey]) {
+            try {
+                const nextMath = reconstructMathData(r, nextLevel);
+                if (nextMath) {
+                    nextStats = { dmgVal: nextMath.dmgVal, spa: nextMath.spa, range: nextMath.range };
+                    window.nextLevelStatsCache[nextCacheKey] = nextStats;
+                }
+            } catch (e) { console.warn("Next Stats Error", e); }
+        }
     }
 
     const rankClass = `${i < 3 ? `rank-${i + 1}` : 'rank-other'}${r.isCustom ? ' is-custom' : ''}`;
@@ -1011,9 +1063,14 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     if (!window.disableSubStats && unitId === 'ant_king_savage' && r.mainStats?.body === 'dot' && (!Array.isArray(s.body) || s.body.length === 0)) {
         s.body = [{ type: 'dmg', val: (typeof PERFECT_SUBS !== 'undefined' ? PERFECT_SUBS.dmg : 4) * 6 }];
     }
-    const headRow = (!window.disableSubStats && r.headUsed && r.headUsed !== 'none') ? `<div class="stat-line"><span class="sl-label">HEAD</span>${getRichBadgeHtml(s.head || [])}</div>` : '';
-    const bodyRow = window.disableSubStats ? '' : `<div class="stat-line"><span class="sl-label">BODY</span>${getRichBadgeHtml(s.body || [])}</div>`;
-    const legsRow = window.disableSubStats ? '' : `<div class="stat-line"><span class="sl-label">LEGS</span>${getRichBadgeHtml(s.legs || [])}</div>`;
+    const filterBaseRolls = (arr) => arr.filter(s => {
+        if (!s || !s.type) return false;
+        return s.val > (typeof PERFECT_SUBS !== 'undefined' ? PERFECT_SUBS[s.type] : 0);
+    });
+
+    const headRow = (!window.disableSubStats && r.headUsed && r.headUsed !== 'none') ? `<div class="stat-line"><span class="sl-label">HEAD</span>${getRichBadgeHtml(filterBaseRolls(s.head || []))}</div>` : '';
+    const bodyRow = window.disableSubStats ? '' : `<div class="stat-line"><span class="sl-label">BODY</span>${getRichBadgeHtml(filterBaseRolls(s.body || []))}</div>`;
+    const legsRow = window.disableSubStats ? '' : `<div class="stat-line"><span class="sl-label">LEGS</span>${getRichBadgeHtml(filterBaseRolls(s.legs || []))}</div>`;
 
     const isBossHigher = (r.bossDps > (r.dps || 0));
     const displayVal = format(isBossHigher ? r.bossDps : (r.dps || 0));
@@ -1047,16 +1104,14 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
                     <span class="br-sep" style="margin: 0 1px;">/</span>
                     <span class="br-trait" style="font-size: 0.75em; letter-spacing: -0.2px;">${r.traitName}</span>
                 </div>
-                <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
-                    <div style="display:flex; gap:6px; align-items:center;">
-                        ${prioHtml}
-                    </div>
-                    ${optimalityHtml}
+                <div style="display:flex; gap:6px; align-items:center;">
+                    ${prioHtml}
                 </div>
+                ${optimalityHtml}
             </div>
             <div class="br-grid ${window.disableSubStats ? 'no-subs' : ''}">
                 <div class="br-col main" style="flex: 1 !important; width: 100% !important; box-sizing: border-box !important;"><div class="br-col-title">MAIN STAT</div>${getHeadBadgeHtml(r.headUsed)}<div class="stat-line"><span class="sl-label">BODY</span> ${window.getBadgeHtml(r.mainStats.body, MAIN_STAT_VALS.body[r.mainStats.body])}</div><div class="stat-line"><span class="sl-label">LEGS</span> ${window.getBadgeHtml(r.mainStats.legs, MAIN_STAT_VALS.legs[r.mainStats.legs])}</div></div>
-                ${window.disableSubStats ? '' : `<div class="br-col sub" style="flex: 1 !important; width: 100% !important; box-sizing: border-box !important;"><div class="br-col-header"><div class="br-col-title">SUB STAT</div></div>${headRow}${bodyRow}${legsRow}</div>`}
+                ${window.disableSubStats ? '' : `<div class="br-col sub" style="flex: 1 !important; width: 100% !important; box-sizing: border-box !important;"><div class="br-col-header"><div class="br-col-title">SUB STAT</div><button class="info-btn" onclick="event.stopPropagation(); window.showSubstatDetails('${r.id}')" style="width:13px;height:13px;font-size:0.55rem;padding:0;display:inline-flex;align-items:center;justify-content:center;line-height:1;" title="Show full substats">?</button></div>${headRow}${bodyRow}${legsRow}</div>`}
             </div>
             <div class="br-full-stats">
                 <div class="fs-comparison-grid">
@@ -1278,7 +1333,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     }
 
                     dynamicResults = window.calculateUnitBuilds(
-                        unitObj, null, null, ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'], HEADS_LIST,
+                        unitObj, null, window.getFilteredBuilds?.() || [], window.getValidSubCandidates?.() || [], HEADS_LIST,
                         !window.disableSubStats, null, activeType === 'abil', activeMode, isHotbar, true
                     );
                 } finally {
@@ -1618,84 +1673,6 @@ function getCachedCustomTraitBuilds(unit, customTraitsToCalc, activeType, active
     });
 
     return cachedBuilds;
-}
-
-function processUnitCache(unit, specificCfg = null, specificType = null) {
-    if (!window.unitBuildsCache[unit.id]) {
-        window.unitBuildsCache[unit.id] = { base: { fixed: [null] }, abil: { fixed: [null] } };
-    }
-
-    const CONFIGS = [{ head: true, subs: !window.disableSubStats }];
-
-    const performCalSet = (mode, useAbility, targetCache) => {
-        let dbKey = unit.id + (useAbility && unit.ability ? '_abil' : '');
-        const useInventory = (inventoryMode === true);
-
-        for (let i = 0; i < 1; i++) {
-            if (targetCache[i] !== null) continue;
-            const cfg = CONFIGS[i];
-            let calculatedResults = [];
-
-            if (!useInventory) {
-                const dbTable = window.STATIC_BUILD_DB?.[dbKey] || window.STATIC_BUILD_DB?.[unit.id];
-                const dbList = dbTable?.[mode] || dbTable?.[mode === 'fixed' ? 'f' : 'b'];
-                if (dbList && dbList[i]) {
-                    calculatedResults = dbList[i].map(r => ({ ...r }));
-                }
-
-                const anyGlobal = window.GLOBAL_BUFF_DATA && Object.values(window.GLOBAL_BUFF_DATA).some(b => !b.hideButton && !!window[b.stateKey]) || window.disableSubStats;
-                if (anyGlobal && calculatedResults.length > 0) {
-                    calculatedResults = calculatedResults.map(r => {
-                        const setName = r.setName || (typeof r.s === 'number' ? SETS[r.s]?.id : r.s) || window.getSetFast?.(r.setName)?.id;
-                        const traitId = r.traitName || r.trait || (typeof r.t === 'number' ? traitsList[r.t]?.id : r.t);
-                        if (!setName || !traitId) return r;
-
-                        const singleBuilds = window.getFilteredBuilds().filter(b => b.setName === setName);
-                        const singleTrait = traitsList.find(t => t.id === traitId || t.name === traitId);
-                        const optResList = window.calculateUnitBuilds(
-                            unit, null, singleBuilds, window.getValidSubCandidates(), HEADS_LIST,
-                            cfg.subs, singleTrait ? [singleTrait] : null, useAbility, mode
-                        );
-                        return optResList?.reduce((best, cur) => {
-                            const curScore = Math.max(cur.dps || 0, cur.bossDps || 0);
-                            const bestScore = Math.max(best.dps || 0, best.bossDps || 0);
-                            return curScore > bestScore ? cur : best;
-                        }, optResList[0]) || r;
-                    });
-                }
-            }
-
-            calculatedResults.forEach(r => { if (r.id) window.cachedResults[r.id] = r; });
-
-            const selectedTraitId = window.unitTraits?.[unit.id];
-            const selectedTrait = selectedTraitId ? getTraitFast(selectedTraitId) : null;
-            const traitsForCalc = selectedTrait ? [selectedTrait] : null;
-
-            const selectedHead = window.unitHeads?.[unit.id] || 'none';
-            const headsForCalc = selectedHead !== 'none' ? [selectedHead] : (cfg.head ? HEADS_LIST : ['none']);
-
-            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), headsForCalc, cfg.subs, traitsForCalc, useAbility, mode);
-            if (dynamicResults.length > 0) {
-                const seen = new Set(calculatedResults.map(r => r.id));
-                dynamicResults.forEach(r => {
-                    if (!seen.has(r.id)) {
-                        calculatedResults.push(r);
-                        seen.add(r.id);
-                    }
-                });
-            }
-
-            calculatedResults.sort((a, b) => {
-                const scoreA = Math.max(a.dps || a.d || 0, a.bossDps || a.bd || a.bossTotal || 0);
-                const scoreB = Math.max(b.dps || b.d || 0, b.bossDps || b.bd || b.bossTotal || 0);
-                return scoreB - scoreA;
-            });
-            targetCache[i] = calculatedResults;
-        }
-    };
-
-    if (!specificType || specificType === 'base') performCalSet('fixed', false, window.unitBuildsCache[unit.id].base.fixed);
-    if (unit.ability && (!specificType || specificType === 'abil')) performCalSet('fixed', true, window.unitBuildsCache[unit.id].abil.fixed);
 }
 
 window.getQuickScore = (unit) => {
@@ -2322,7 +2299,7 @@ window.applyUnitTrait = function (unitId, traitName) {
         window.resetCachesForBuffChange(unitId);
     }
 
-    if (typeof window.refreshActiveBuild === 'function') {
+    if (typeof window.refreshActiveBuild === 'function' && unit) {
         window.refreshActiveBuild(unit);
     }
 
@@ -2557,10 +2534,10 @@ window.processUnitCache = function (unit, specificCfg = null, specificType = nul
                         const traitId = r.traitName || r.trait || (typeof r.t === 'number' ? traitsList[r.t]?.id : r.t);
                         if (!setName || !traitId) return r;
 
-                        const singleBuilds = window.getFilteredBuilds().filter(b => b.setName === setName);
+                        const singleBuilds = (window.getFilteredBuilds?.() || []).filter(b => b.setName === setName);
                         const singleTrait = traitsList.find(t => t.id === traitId || t.name === traitId);
                         const optResList = window.calculateUnitBuilds(
-                            unit, null, singleBuilds, window.getValidSubCandidates(), HEADS_LIST,
+                            unit, null, singleBuilds, window.getValidSubCandidates?.() || [], HEADS_LIST,
                             cfg.subs, singleTrait ? [singleTrait] : null, useAbility, mode
                         );
                         return optResList?.reduce((best, cur) => {

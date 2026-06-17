@@ -4,6 +4,36 @@
 //             backend/math/core-math.js (getBestSubConfig, calculateDPS)
 // ============================================================================
 
+function isRangeRelicsEnabled() {
+    return !statConfig || statConfig.applyRelicRange !== false;
+}
+
+function normalizeSubCandidates(candidates) {
+    return [...(candidates || [])].filter(c => c && (isRangeRelicsEnabled() || c !== 'range'));
+}
+
+function filterRangeDisabledBuilds(builds) {
+    if (!Array.isArray(builds)) return [];
+    return isRangeRelicsEnabled() ? builds : builds.filter(b => b && b.legType !== 'range');
+}
+
+function trackOptimizerStats(event, detail = {}) {
+    if (!window) return;
+    window.__optimizerStats = window.__optimizerStats || { events: {}, dpsCalls: 0 };
+    window.__optimizerStats.events[event] = (window.__optimizerStats.events[event] || 0) + 1;
+    Object.entries(detail).forEach(([key, value]) => {
+        window.__optimizerStats[key] = (window.__optimizerStats[key] || 0) + value;
+    });
+}
+
+function maybeLogOptimizerStats() {
+    if (!window.DEBUG_OPTIMIZER_STATS || !window.__optimizerStats) return;
+    const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    if ((window.__optimizerStats.lastLogAt || 0) + 5000 > now) return;
+    window.__optimizerStats.lastLogAt = now;
+    console.info('[optimizer-stats]', window.__optimizerStats);
+}
+
 function createResultEntry({ id, buildName, traitName, res, prio, mainStats, subStats, headUsed, isCustom, relicIds = null, baseRes = null, stars = 1 }) {
     const entry = {
         id: id,
@@ -58,23 +88,43 @@ function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsT
     let unitResults = [];
     const { effectiveStats: baseEffective, isKiritoVR: baseVR } = buildCalculationContext(unit, 'ruler', { isAbility: isAbilityContext });
     const hasNativeDoT = (baseEffective.dot > 0) || (baseEffective.burnMultiplier > 0) || baseVR;
-    let unitSubCandidates = [...subCandidates];
+    let unitSubCandidates = normalizeSubCandidates(subCandidates);
     if (!hasNativeDoT) unitSubCandidates = unitSubCandidates.filter(c => c !== 'dot');
     const subsSuffix = includeSubs ? '-SUBS' : '-NOSUBS';
+    const relevantBuilds = filterRangeDisabledBuilds(filteredBuilds);
+    const relevantHeads = [...(headsToProcess || [])].map(h => h === 'rebellious_head' ? 'bloodline_head' : h);
 
     activeTraits.forEach(trait => {
         if (trait.id === 'none') return;
         const { effectiveStats, context, isKiritoVR, suffix, modeTag } = buildCalculationContext(unit, trait, { isAbility: isAbilityContext, mode: mode, isHotbar: isHotbar });
         const traitAddsDot = trait.dotBuff > 0 || trait.hasRadiation || trait.allowDotStack;
         const isDotPossible = hasNativeDoT || traitAddsDot;
-        const currentCandidates = (traitAddsDot) ? subCandidates : unitSubCandidates;
-        const relevantBuilds = (!isDotPossible) ? filteredBuilds.filter(b => b.bodyType !== 'dot') : filteredBuilds;
+        const currentCandidates = normalizeSubCandidates((traitAddsDot) ? subCandidates : unitSubCandidates);
+        const traitBuilds = (!isDotPossible) ? relevantBuilds.filter(b => b.bodyType !== 'dot') : relevantBuilds;
+        const priorityRuns = [];
+        const maxPts = context.maxPts || 99;
+        priorityRuns.push(
+            { dmgP: maxPts, spaP: 0, rangeP: 0, optType: 'dps' },
+            { dmgP: 0, spaP: maxPts, rangeP: 0, optType: 'dps' },
+            { dmgP: maxPts, spaP: 0, rangeP: 0, optType: 'raw_dmg' }
+        );
+        if (isRangeRelicsEnabled()) priorityRuns.push({ dmgP: 0, spaP: 0, rangeP: maxPts, optType: 'range' });
+        if (traitBuilds.length === 0) return;
 
-        relevantBuilds.forEach(build => {
-            let relevantHeads = headsToProcess.map(h => h === 'rebellious_head' ? 'bloodline_head' : h);
-            if (!isDotPossible) relevantHeads = relevantHeads.filter(h => h !== 'ninja' && h !== 'mochi_scarf' && h !== 'flaming_donut');
+        trackOptimizerStats('calculateUnitBuilds.trait', {
+            traits: 1,
+            builds: traitBuilds.length,
+            heads: relevantHeads.length,
+            candidates: currentCandidates.length,
+            dpsCallBudget: traitBuilds.length * relevantHeads.length * priorityRuns.length * (includeSubs ? Math.max(1, currentCandidates.length * 15 + 1) : 1)
+        });
 
-            relevantHeads.forEach(headMode => {
+        traitBuilds.forEach(build => {
+            let headsForBuild = relevantHeads;
+            if (!isDotPossible) headsForBuild = relevantHeads.filter(h => h !== 'ninja' && h !== 'mochi_scarf' && h !== 'flaming_donut');
+            if (headsForBuild.length === 0) return;
+
+            headsForBuild.forEach(headMode => {
                 const runOpt = (dmgP, spaP, rangeP, optType) => {
                     context.dmgPoints = dmgP; context.spaPoints = spaP; context.rangePoints = rangeP;
                     context.isHotbar = isHotbar;
@@ -82,11 +132,14 @@ function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsT
                     return getBestSubConfig(build, effectiveStats, includeSubs, headMode, currentCandidates, optType);
                 };
 
-                const maxPts = context.maxPts || 99;
-                const cfgDmg = runOpt(maxPts, 0, 0, 'dps');
+                const runCfg = (optType) => priorityRuns.find(r => r.optType === optType) || null;
+                const cfgDps = runCfg('dps');
+                const rawCfg = runCfg('raw_dmg');
+                const cfgDmg = runOpt(cfgDps.dmgP, cfgDps.spaP, cfgDps.rangeP, 'dps');
                 const cfgSpa = runOpt(0, maxPts, 0, 'dps');
-                const cfgRaw = runOpt(maxPts, 0, 0, 'raw_dmg');
-                const cfgRange = runOpt(0, 0, 99, 'range');
+                const cfgRaw = runOpt(rawCfg.dmgP, rawCfg.spaP, rawCfg.rangeP, 'raw_dmg');
+                const rangeCfg = runCfg('range');
+                const cfgRange = rangeCfg ? runOpt(rangeCfg.dmgP, rangeCfg.spaP, rangeCfg.rangeP, 'range') : null;
 
                 const baseId = `${unit.id}${suffix}-${trait.id}-${build.name.replace(/[^a-zA-Z0-9]/g, '')}`;
                 const processResult = (config, prioStr) => {
@@ -106,14 +159,16 @@ function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsT
                     return entry;
                 };
 
-                const dmgEntry = processResult(cfgDmg, "dmg");
+                processResult(cfgDmg, "dmg");
                 processResult(cfgSpa, "spa");
                 processResult(cfgRaw, "raw_dmg");
-                processResult(cfgRange, "range");
+                if (cfgRange) processResult(cfgRange, "range");
             });
         });
     });
     unitResults.sort((a, b) => b.dps - a.dps);
+    trackOptimizerStats('calculateUnitBuilds.complete', { units: 1, results: unitResults.length });
+    maybeLogOptimizerStats();
     return unitResults;
 }
 
@@ -154,11 +209,15 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
     let unitResults = [];
 
     // 1. Separate Inventory by Slot
-    const allowHeads = headsToProcess.some(h => h !== 'none');
+    const allowHeads = Array.isArray(headsToProcess) && headsToProcess.some(h => h !== 'none');
+    if (!isRangeRelicsEnabled() && forcedRelic?.slot === 'Legs' && (forcedRelic.mainStat === 'range' || forcedRelic.subs?.range)) return [];
 
     let heads = allowHeads ? relicInventory.filter(r => r.slot === 'Head') : [];
     const bodies = relicInventory.filter(r => r.slot === 'Body');
-    const legs = relicInventory.filter(r => r.slot === 'Legs');
+    let legs = relicInventory.filter(r => r.slot === 'Legs');
+    if (!isRangeRelicsEnabled()) {
+        legs = legs.filter(r => r.mainStat !== 'range' && !(r.subs && r.subs.range));
+    }
 
     // Apply Force Logic (Relic Optimality)
     if (forcedRelic) {
@@ -201,7 +260,7 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
 
                     // B. Construct Total Stats Object (Main + Subs)
                     let totalStats = { set: activeSetKey, dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0 };
-                    const addStat = (type, val) => { if (totalStats[type] !== undefined) totalStats[type] += val; };
+                    const addStat = (type, val) => { if (type === 'range' && !isRangeRelicsEnabled()) return; if (totalStats[type] !== undefined) totalStats[type] += val; };
 
                     const getMainVal = (relic) => {
                         let base = 0;
@@ -226,7 +285,7 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
                     const calcVariations = [
                         { id: 'dmg', dmgPts: maxPts, spaPts: 0, rangePts: 0 },
                         { id: 'spa', dmgPts: 0, spaPts: maxPts, rangePts: 0 },
-                        { id: 'range', dmgPts: 0, spaPts: 0, rangePts: 99 }
+                        ...(isRangeRelicsEnabled() ? [{ id: 'range', dmgPts: 0, spaPts: 0, rangePts: maxPts }] : [])
                     ];
 
                     calcVariations.forEach(prio => {
@@ -240,6 +299,7 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
                         effectiveStats.context = context;
 
                         let res = calculateDPS(effectiveStats, totalStats, context);
+                        trackOptimizerStats('calculateDPS.inventory', { dpsCalls: 1 });
 
                         // OPTIMIZATION: Only keep the best for this Trait + Priority + Set combination
                         const bestKey = `${trait.id}-${prio.id}-${activeSetKey}-${head.setKey}`;
@@ -301,6 +361,8 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
     });
 
     unitResults.sort((a, b) => b.dps - a.dps);
+    trackOptimizerStats('calculateInventoryBuilds.complete', { units: 1, results: unitResults.length });
+    maybeLogOptimizerStats();
     return unitResults;
 }
 
@@ -398,7 +460,7 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
         }
         const mappedMain = mapStatKey(mainStatType);
 
-        const validCandidates = SUB_CANDIDATES.filter(c => {
+        const validCandidates = normalizeSubCandidates(SUB_CANDIDATES).filter(c => {
             if (!statConfig.applyRelicDot && c === 'dot') return false;
             if (!statConfig.applyRelicCrit && (c === 'cm' || c === 'cf')) return false;
             return true;
@@ -446,6 +508,10 @@ window.calculateUnitBuilds = calculateUnitBuilds;
 window.calculateInventoryBuilds = calculateInventoryBuilds;
 window.reconstructMathData = reconstructMathData;
 window.createResultEntry = createResultEntry;
+window.getOptimizerStats = () => window.__optimizerStats || null;
+window.flushOptimizerStats = maybeLogOptimizerStats;
+window.isRangeRelicsEnabled = isRangeRelicsEnabled;
+window.normalizeSubCandidates = normalizeSubCandidates;
 
 window.getBenchmarkDps = function (unitId, traitName, starMult, isAbility) {
     const cacheKey = `${unitId}_${traitName}_${starMult}_${isAbility}`;
@@ -461,7 +527,7 @@ window.getBenchmarkDps = function (unitId, traitName, starMult, isAbility) {
     });
 
     let maxScore = 0;
-    const candidates = ['dmg', 'spa', 'range', 'cm', 'cf', 'dot'].filter(c => {
+    const candidates = normalizeSubCandidates(['dmg', 'spa', 'range', 'cm', 'cf', 'dot']).filter(c => {
         if (c === 'dot' && !statConfig.applyRelicDot) return false;
         if ((c === 'cm' || c === 'cf') && !statConfig.applyRelicCrit) return false;
         return true;
