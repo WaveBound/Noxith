@@ -8,6 +8,12 @@ function isRangeRelicsEnabled() {
     return !statConfig || statConfig.applyRelicRange !== false;
 }
 
+function getActiveRelicInventory() {
+    return (window && window.relicInventory && window.relicInventory.length > 0)
+        ? window.relicInventory
+        : (relicInventory || []);
+}
+
 function normalizeSubCandidates(candidates) {
     return [...(candidates || [])].filter(c => c && (isRangeRelicsEnabled() || c !== 'range'));
 }
@@ -79,7 +85,27 @@ function createResultEntry({ id, buildName, traitName, res, prio, mainStats, sub
 }
 
 function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsToProcess, includeSubs, specificTraitsOnly = null, isAbilityContext = false, mode = 'fixed', isHotbar = false, ignoreInventory = false) {
-    if (!ignoreInventory && window.inventoryMode && relicInventory && relicInventory.length > 0) return calculateInventoryBuilds(unit, null, specificTraitsOnly, isAbilityContext, mode, headsToProcess, includeSubs, null, isHotbar);
+    const inventory = getActiveRelicInventory();
+    if (window.inventoryMode) {
+        console.debug('[INVENTORY-MODE-DIAG] calculateUnitBuilds entry', {
+            unitId: unit?.id,
+            inventoryMode: window.inventoryMode,
+            inventoryLength: inventory.length,
+            ignoreInventory,
+            slotCounts: {
+                head: inventory.filter(r => r.slot === 'Head').length,
+                body: inventory.filter(r => r.slot === 'Body').length,
+                legs: inventory.filter(r => r.slot === 'Legs').length
+            }
+        });
+    }
+    if (!ignoreInventory && window.inventoryMode && inventory.length > 0) {
+        console.debug('[INVENTORY-MODE-DIAG] routing to calculateInventoryBuilds', { unitId: unit?.id, inventoryLength: inventory.length });
+        return calculateInventoryBuilds(unit, null, specificTraitsOnly, isAbilityContext, mode, headsToProcess, includeSubs, null, isHotbar);
+    }
+    if (window.inventoryMode && (ignoreInventory || inventory.length === 0)) {
+        console.debug('[INVENTORY-MODE-DIAG] skipping inventory routing', { unitId: unit?.id, ignoreInventory, inventoryLength: inventory.length });
+    }
     window.cachedResults = window.cachedResults || {};
     let activeTraits = [];
     if (specificTraitsOnly && Array.isArray(specificTraitsOnly)) activeTraits = specificTraitsOnly;
@@ -172,12 +198,40 @@ function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsT
     return unitResults;
 }
 
+function getInventoryFallbackTrait(unit) {
+    if (!unit) return null;
+
+    const preferredNames = [
+        unit.meta?.short,
+        unit.meta?.long,
+        'ruler'
+    ]
+        .flatMap(v => String(v || '').split('/'))
+        .map(v => v.trim())
+        .filter(Boolean);
+
+    const allTraits = [...(traitsList || []), ...(customTraits || []), ...((unitSpecificTraits && unitSpecificTraits[unit.id]) || [])];
+    const normalize = v => String(v || '').toLowerCase().trim();
+
+    for (const preferred of preferredNames) {
+        const preferredLower = normalize(preferred);
+        const trait = (typeof getTraitFast === 'function' ? getTraitFast(preferred) : null)
+            || allTraits.find(t => normalize(t.id) === preferredLower || normalize(t.name) === preferredLower);
+
+        if (trait && trait.id !== 'none') return trait;
+    }
+
+    return null;
+}
+
 // Inventory Mode Calculation
 function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityContext, mode, headsToProcess, includeSubs, forcedRelic = null, isHotbar = false) {
     window.cachedResults = window.cachedResults || {};
+    const inventory = getActiveRelicInventory();
 
     // 1. Determine Traits List
     let activeTraits = [];
+    let assignedTraitId = null;
 
     // First, check if a specific trait was requested by the caller (like Loadout fallback or Custom calc)
     if (specificTraitsOnly && Array.isArray(specificTraitsOnly) && specificTraitsOnly.length > 0) {
@@ -185,7 +239,6 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
     }
     else {
         // If not explicitly requested, determine what trait to use
-        let assignedTraitId = null;
         if (window.CALCULATION_MODE === 'loadout' && window.unitTraits && window.unitTraits[unit.id]) {
             assignedTraitId = window.unitTraits[unit.id];
         } else {
@@ -202,22 +255,58 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
         }
     }
 
-    if (activeTraits.length === 0 && !forcedRelic) {
-        return [];
+    if (activeTraits.length === 0) {
+        const fallbackTrait = getInventoryFallbackTrait(unit);
+        if (fallbackTrait) {
+            activeTraits = [fallbackTrait];
+            console.debug('[INVENTORY-MODE-DIAG] calculateInventoryBuilds using fallback trait', {
+                unitId: unit?.id,
+                assignedTraitId,
+                fallbackTraitId: fallbackTrait.id,
+                fallbackTraitName: fallbackTrait.name,
+                source: unit?.meta?.short || unit?.meta?.long || 'ruler'
+            });
+        } else {
+            console.debug('[INVENTORY-MODE-DIAG] calculateInventoryBuilds returned no trait', {
+                unitId: unit?.id,
+                assignedTraitId,
+                forcedRelicId: forcedRelic?.id || null,
+                inventoryUnitTraits: window.inventoryUnitTraits || {}
+            });
+            return [];
+        }
     }
 
     let unitResults = [];
 
     // 1. Separate Inventory by Slot
     const allowHeads = Array.isArray(headsToProcess) && headsToProcess.some(h => h !== 'none');
-    if (!isRangeRelicsEnabled() && forcedRelic?.slot === 'Legs' && (forcedRelic.mainStat === 'range' || forcedRelic.subs?.range)) return [];
+    if (!isRangeRelicsEnabled() && forcedRelic?.slot === 'Legs' && (forcedRelic.mainStat === 'range' || forcedRelic.subs?.range)) {
+        console.debug('[INVENTORY-MODE-DIAG] calculateInventoryBuilds rejected range legs', { unitId: unit?.id, forcedRelic });
+        return [];
+    }
 
-    let heads = allowHeads ? relicInventory.filter(r => r.slot === 'Head') : [];
-    const bodies = relicInventory.filter(r => r.slot === 'Body');
-    let legs = relicInventory.filter(r => r.slot === 'Legs');
+    let heads = allowHeads ? inventory.filter(r => r.slot === 'Head') : [];
+    const bodies = inventory.filter(r => r.slot === 'Body');
+    let legs = inventory.filter(r => r.slot === 'Legs');
     if (!isRangeRelicsEnabled()) {
         legs = legs.filter(r => r.mainStat !== 'range' && !(r.subs && r.subs.range));
     }
+
+    console.debug('[INVENTORY-MODE-DIAG] calculateInventoryBuilds starting', {
+        unitId: unit?.id,
+        assignedTraitId,
+        activeTraits: activeTraits.map(t => t.id || t.name),
+        inventoryLength: inventory.length,
+        slotCounts: {
+            head: heads.length,
+            body: bodies.length,
+            legs: legs.length
+        },
+        allowHeads,
+        includeSubs,
+        forcedRelicId: forcedRelic?.id || null
+    });
 
     // Apply Force Logic (Relic Optimality)
     if (forcedRelic) {
@@ -361,6 +450,15 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
     });
 
     unitResults.sort((a, b) => b.dps - a.dps);
+    const top = unitResults[0];
+    console.debug('[INVENTORY-MODE-DIAG] calculateInventoryBuilds finished', {
+        unitId: unit?.id,
+        resultCount: unitResults.length,
+        topDps: top?.dps || 0,
+        topSet: top?.setName || null,
+        topTrait: top?.traitName || null,
+        topRelicIds: top?.relicIds || null
+    });
     trackOptimizerStats('calculateInventoryBuilds.complete', { units: 1, results: unitResults.length });
     maybeLogOptimizerStats();
     return unitResults;

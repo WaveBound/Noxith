@@ -441,6 +441,7 @@ function addRelic() {
     renderInventory();
     updateInventoryToggleState();
 
+    if (typeof window.resetCachesForBuffChange === 'function') window.resetCachesForBuffChange();
     if (typeof resetAndRender === 'function') resetAndRender();
     closeModal('addRelicModal');
 }
@@ -451,6 +452,7 @@ function deleteRelic(id) {
         saveInventory();
         renderInventory();
         updateInventoryToggleState();
+        if (typeof window.resetCachesForBuffChange === 'function') window.resetCachesForBuffChange();
         if (typeof resetAndRender === 'function') resetAndRender();
     }
 }

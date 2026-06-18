@@ -1011,14 +1011,17 @@ function getBestHydratedBuild(builds, unitId, isHotbar, activeModeIdx = undefine
 
 // Rendering HTML Rows & Cards
 function generateBuildRowHTML(r, i, unitConfig = {}) {
-    const { totalCost = 50000, placement = 1, sortMode = 'dps', unitId = '', traitBenchmarks = {} } = unitConfig;
+    const { totalCost = 50000, placement = 1, sortMode = 'dps', unitId = '', traitBenchmarks = {}, optimalityBenchmarks = {} } = unitConfig;
     const currentLevel = window.unitELevels[unitId] || 0;
     const nextLevel = currentLevel + 1;
     const unitObj = window.getUnitById(unitId);
     const maxLevel = unitObj?.upgrades ? unitObj.upgrades.length - 1 : 0;
     let nextStats = { dmgVal: 0, spa: 0, range: 0 };
 
-    const benchmarkDps = traitBenchmarks[r.traitName] || traitBenchmarks['peak'] || 0;
+    const optimalityKey = `${r.traitName || ''}|${r.prio || 'default'}|${r.mainStats?.body || ''}_${r.mainStats?.legs || ''}`;
+    const benchmarkDps = (window.inventoryMode && optimalityBenchmarks[optimalityKey])
+        ? optimalityBenchmarks[optimalityKey]
+        : (traitBenchmarks[r.traitName] || traitBenchmarks['peak'] || 0);
 
     if (nextLevel <= maxLevel) {
         const nextCacheKey = `${unitId}:${r.id || r.traitName}:${nextLevel}`;
@@ -1038,11 +1041,11 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
     const effScore = calculateBuildEfficiency(r, totalCost, placement, unitId).toFixed(3);
 
     let optimalityHtml = '';
-    if (inventoryMode && benchmarkDps > 0) {
+    if (window.inventoryMode && benchmarkDps > 0) {
         const optPct = (r.dps / benchmarkDps) * 100;
         const color = optPct >= 95 ? '#00ffaa' : (optPct >= 80 ? '#ffcc00' : '#ff4d4d');
         const glow = `rgba(${optPct >= 95 ? '0, 255, 170' : (optPct >= 80 ? '255, 204, 0' : '255, 77, 77')}, 0.15)`;
-        optimalityHtml = `<div class="optimality-badge" style="color: ${color}; border-color: ${color}33; --glow-color: ${glow}; flex-direction: row; justify-content: center; gap: 6px; width: 100%; box-sizing: border-box; padding: 3px 8px; cursor: default;"><span class="opt-label" style="color: ${color}; margin-bottom: 0;">OPTIMALITY</span><span class="opt-pct">${fix1(optPct)}%</span></div>`;
+        optimalityHtml = `<div class="optimality-badge" style="color: ${color}; border-color: ${color}33; --glow-color: ${glow}; flex-direction: row; justify-content: center; gap: 6px; width: auto; min-width: 112px; box-sizing: border-box; padding: 2px 8px; cursor: default;"><span class="opt-label" style="color: ${color}; margin-bottom: 0;">OPTIMALITY</span><span class="opt-pct">${fix1(optPct)}%</span></div>`;
     }
 
     const prioConfig = { spa: { label: 'SPA STAT', cls: 'prio-spa' }, default: { label: 'DMG STAT', cls: 'prio-dmg' } };
@@ -1094,7 +1097,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
 
     return `
         <div class="build-row ${rankClass} ${sortMode === 'efficiency' ? 'is-efficiency-sort' : ''}">
-            <div class="br-header" style="align-items: center; padding-top: 6px; padding-bottom: 2px;">
+            <div class="br-header" style="align-items: center; padding-top: 6px; padding-bottom: 1px;">
                 <div class="br-header-info" style="margin-top: 0; align-items: center; gap: 4px;">
                     <span class="br-rank" style="font-size: 0.7em; width: auto;">#${i + 1}</span>
                     <div class="br-set-info-text" style="display: flex; align-items: center;" onclick="window.viewBuildRelicDatabase('${r.id}', '${unitId}')" title="Click to view map locations in Relic Database">
@@ -1107,9 +1110,9 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
                 <div style="display:flex; gap:6px; align-items:center;">
                     ${prioHtml}
                 </div>
-                ${optimalityHtml}
             </div>
-            <div class="br-grid ${window.disableSubStats ? 'no-subs' : ''}">
+            ${optimalityHtml ? `<div style="display:flex; justify-content:center; margin-top:1px; margin-bottom:1px;">${optimalityHtml}</div>` : ''}
+            <div class="br-grid ${window.disableSubStats ? 'no-subs' : ''}" style="padding-top:0;">
                 <div class="br-col main" style="flex: 1 !important; width: 100% !important; box-sizing: border-box !important;"><div class="br-col-title">MAIN STAT</div>${getHeadBadgeHtml(r.headUsed)}<div class="stat-line"><span class="sl-label">BODY</span> ${window.getBadgeHtml(r.mainStats.body, MAIN_STAT_VALS.body[r.mainStats.body])}</div><div class="stat-line"><span class="sl-label">LEGS</span> ${window.getBadgeHtml(r.mainStats.legs, MAIN_STAT_VALS.legs[r.mainStats.legs])}</div></div>
                 ${window.disableSubStats ? '' : `<div class="br-col sub" style="flex: 1 !important; width: 100% !important; box-sizing: border-box !important;"><div class="br-col-header"><div class="br-col-title">SUB STAT</div><button class="info-btn" onclick="event.stopPropagation(); window.showSubstatDetails('${r.id}')" style="width:13px;height:13px;font-size:0.55rem;padding:0;display:inline-flex;align-items:center;justify-content:center;line-height:1;" title="Show full substats">?</button></div>${headRow}${bodyRow}${legsRow}</div>`}
             </div>
@@ -1158,6 +1161,15 @@ window.refreshActiveBuild = function (unit) {
     const activeType = (window.activeAbilityIds?.has(unitId) && unit.ability) ? 'abil' : 'base';
     const activeMode = 'fixed';
 
+    if (window.inventoryMode) {
+        console.debug('[INVENTORY-MODE-DIAG] refreshActiveBuild entry', {
+            unitId,
+            isHotbar,
+            inventoryLength: window.relicInventory?.length || 0,
+            assignedTrait: window.getInventoryAssignedTrait?.(unitId) || null
+        });
+    }
+
     let modesToEval = [];
     if (window.unitModesState[unitId] !== undefined) {
         const state = window.unitModesState[unitId];
@@ -1174,7 +1186,18 @@ window.refreshActiveBuild = function (unit) {
 
     let builds = null;
     const db = (isHotbar && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
-    builds = window.getRelicDbEntry(db, unitId, activeType);
+    const ignoreInventory = window.inventoryMode !== true;
+    if (!ignoreInventory) {
+        builds = null;
+        console.debug('[INVENTORY-MODE-DIAG] refreshActiveBuild skipping static-db lookup', {
+            unitId,
+            activeType,
+            inventoryLength: window.relicInventory?.length || 0,
+            assignedTrait: window.getInventoryAssignedTrait?.(unitId) || null
+        });
+    } else {
+        builds = window.getRelicDbEntry(db, unitId, activeType);
+    }
 
     if (!builds || builds.length === 0) {
         if (typeof window.calculateUnitBuilds === 'function') {
@@ -1189,7 +1212,7 @@ window.refreshActiveBuild = function (unit) {
                 unit, null, window.getFilteredBuilds?.() || null,
                 window.getValidSubCandidates?.() || ['dmg', 'spa', 'cm', 'cf', 'range', 'dot'],
                 headsForCalc, !window.disableSubStats, traitsForCalc,
-                activeType === 'abil', activeMode, isHotbar, true
+                activeType === 'abil', activeMode, isHotbar, ignoreInventory
             );
             if (dynamicList && dynamicList.length > 0) builds = dynamicList;
             else return null;
@@ -1221,7 +1244,7 @@ window.refreshActiveBuild = function (unit) {
                 const dynamicList = window.calculateUnitBuilds(
                     unit, null, getFilteredBuilds(), getValidSubCandidates(),
                     selectedHead ? [selectedHead] : HEADS_LIST, !window.disableSubStats,
-                    [singleTraitObj], activeType === 'abil', activeMode, isHotbar, true
+                    [singleTraitObj], activeType === 'abil', activeMode, isHotbar, ignoreInventory
                 );
                 if (dynamicList && dynamicList.length > 0) topBuild = dynamicList[0];
             }
@@ -1282,6 +1305,17 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     const isInHotbarState = window.hotbarState?.slots.some(s => s && (s.id === unitId || s.id.split('-')[0] === unitId.split('-')[0]));
     const isHotbar = card.parentElement?.id === 'hotbarHiddenRender' || !!card.closest('.team-summary-container') || isInHotbarState;
+    const useInventory = window.inventoryMode === true;
+
+    if (useInventory) {
+        console.debug('[INVENTORY-MODE-DIAG] updateBuildListDisplay entry', {
+            unitId,
+            inventoryLength: window.relicInventory?.length || 0,
+            assignedTrait: window.getInventoryAssignedTrait?.(unitId) || null,
+            isHotbar,
+            forceSync
+        });
+    }
 
     let activeModeIdx = getPreferredModeIdx(unitId, unitObj);
 
@@ -1298,7 +1332,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     let traitBenchmarks = {};
     try {
-        if (inventoryMode && window.STATIC_BUILD_DB) {
+        if (!useInventory && window.STATIC_BUILD_DB) {
             const dbKey = unitId + (activeType === 'abil' ? '_abil' : '');
             let dbEntry = window.STATIC_BUILD_DB[dbKey] || {};
             if (!dbEntry.fixed && window.GLOBAL_STATIC_BUILD_DB_BASE?.[dbKey]) {
@@ -1319,7 +1353,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             }
 
             const PEAK_MODE_STATE = window.PEAK_MODE_STATE || {};
-            const needsDynamicBench = !traitBenchmarks['peak'] && inventoryMode && (forceSync || !traitBenchmarks['peak']);
+            const needsDynamicBench = !traitBenchmarks['peak'] && (forceSync || !traitBenchmarks['peak']);
 
             if (needsDynamicBench && unitObj) {
                 const savedState = window.unitModesState[unitId];
@@ -1397,6 +1431,13 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         });
 
         const allHydrated = builds.map(b => hydrateBuildEntry(b, unitId, isHotbar, activeModeIdx)).filter(Boolean);
+        const optimalityBenchmarks = {};
+        allHydrated.forEach(r => {
+            const val = Math.max(r.dps || 0, r.bossDps || 0);
+            if (val <= 0) return;
+            const key = `${r.traitName || ''}|${r.prio || 'default'}|${r.mainStats?.body || ''}_${r.mainStats?.legs || ''}`;
+            if (!optimalityBenchmarks[key] || val > optimalityBenchmarks[key]) optimalityBenchmarks[key] = val;
+        });
 
         const globalSorted = sortBuilds(allHydrated);
         const globalRankMap = new Map();
@@ -1481,6 +1522,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
             sortMode: sortSelect,
             unitId,
             traitBenchmarks,
+            optimalityBenchmarks,
             globalRank: globalRankMap.get(r.id)
         })).join('');
     };
@@ -1490,7 +1532,23 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
 
     let buildData = null;
     const db = (isHotbar && window.HOTBAR_STATIC_BUILD_DB) ? window.HOTBAR_STATIC_BUILD_DB : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
-    if (db && !inventoryMode) {
+    if (useInventory) {
+        try {
+            window.processUnitCache(unitObj, 0, activeType);
+            buildData = window.unitBuildsCache[unitObj.id]?.[activeType]?.[activeMode]?.[0];
+        } catch (e) {
+            console.error('[INVENTORY-MODE-DIAG] updateBuildListDisplay inventory calculation failed', e, { unitId, activeType });
+            container.innerHTML = `<div class="msg-empty">Inventory calculation failed. Check console for details.</div>`;
+            return;
+        }
+        console.debug('[INVENTORY-MODE-DIAG] updateBuildListDisplay using inventory calculation path', {
+            unitId,
+            activeType,
+            dbAvailable: !!db,
+            dbBuildCount: buildData?.length || 0,
+            cacheHit: !!buildData
+        });
+    } else if (db) {
         buildData = window.getRelicDbEntry(db, unitId, activeType);
     }
 
@@ -1514,6 +1572,16 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                     displayBuilds.push(cb);
                     seenIds.add(cb.id);
                 }
+            });
+        }
+
+        if (useInventory) {
+            traitBenchmarks = {};
+            displayBuilds.forEach(r => {
+                const val = Math.max(r.dps || 0, r.bossDps || 0);
+                if (val <= 0) return;
+                if (!traitBenchmarks[r.traitName] || val > traitBenchmarks[r.traitName]) traitBenchmarks[r.traitName] = val;
+                if (!traitBenchmarks['peak'] || val > traitBenchmarks['peak']) traitBenchmarks['peak'] = val;
             });
         }
 
@@ -1690,6 +1758,15 @@ window.getQuickScore = (unit) => {
         if (activeBuild) {
             return Math.max(activeBuild.dps || 0, activeBuild.bossDps || 0);
         }
+    }
+
+    if (window.inventoryMode) {
+        console.debug('[INVENTORY-MODE-DIAG] getQuickScore skipped static-db fallback', {
+            unitId: unit.id,
+            inventoryLength: window.relicInventory?.length || 0,
+            assignedTrait: window.getInventoryAssignedTrait?.(unit.id) || null
+        });
+        return 0;
     }
 
     // 3. Absolute Fallback: Baseline static DB list[0] parsing
@@ -1996,6 +2073,7 @@ function renderCurrentPage() {
 
         const absoluteRank = window.unitAbsoluteRanks?.[entry.unit.id] || (startIdx + i + 1);
         const card = renderUnitCard(entry.unit, absoluteRank);
+        card.classList.add('lazy-build-load');
         card.style.setProperty('--stagger-delay', `${i * 50}ms`);
         fragment.appendChild(card);
     });
@@ -2028,7 +2106,18 @@ function renderCurrentPage() {
         });
     }, { rootMargin: '200px' });
 
-    container.querySelectorAll('.lazy-build-load').forEach(c => window.buildLoadObserver.observe(c));
+    container.querySelectorAll('.lazy-build-load').forEach(c => {
+        window.buildLoadObserver.observe(c);
+        const unitId = c.id.replace('card-', '');
+        window.visibleUnitIds.add(unitId);
+        if (window.getUnitById(unitId)) {
+            try {
+                updateBuildListDisplay(unitId, false, 100);
+            } catch (e) {
+                console.error('[INVENTORY-MODE-DIAG] renderCurrentPage updateBuildListDisplay failed', e, { unitId });
+            }
+        }
+    });
 }
 
 window.goToPage = function (page) {
@@ -2187,9 +2276,10 @@ function _executeGlobalFilter(term) {
     if (clearBtn) clearBtn.style.display = searchTerm ? 'flex' : 'none';
 
     const assignedInventoryUnitIds = new Set(Object.keys(window.inventoryUnitTraits || {}));
+    const hasInventoryAssignments = assignedInventoryUnitIds.size > 0;
     const selectedElement = getSearchElement(term) || document.getElementById('unitElementSort')?.value || 'none';
 
-    const baseList = window.inventoryMode
+    const baseList = window.inventoryMode && hasInventoryAssignments
         ? unitDatabase.filter(unit => assignedInventoryUnitIds.has(unit.id))
         : unitDatabase;
 
@@ -2498,7 +2588,6 @@ window.viewBuildRelicDatabase = function (buildId, unitId) {
 };
 
 // Global Exports
-window.processUnitCache = processUnitCache;
 window.renderUnitCard = renderUnitCard;
 window.renderListInternal = undefined;
 window.updateBuildListDisplay = updateBuildListDisplay;
@@ -2513,7 +2602,19 @@ window.processUnitCache = function (unit, specificCfg = null, specificType = nul
 
     const performCalSet = (mode, useAbility, targetCache) => {
         let dbKey = unit.id + (useAbility && unit.ability ? '_abil' : '');
-        const useInventory = (inventoryMode === true);
+        const useInventory = (window.inventoryMode === true);
+
+        if (window.inventoryMode) {
+            console.debug('[INVENTORY-MODE-DIAG] processUnitCache performCalSet', {
+                unitId: unit.id,
+                mode,
+                useAbility,
+                dbKey,
+                useInventory,
+                inventoryLength: window.relicInventory?.length || 0,
+                assignedTrait: window.getInventoryAssignedTrait?.(unit.id) || null
+            });
+        }
 
         for (let i = 0; i < 1; i++) {
             if (targetCache[i] !== null) continue;
@@ -2558,7 +2659,28 @@ window.processUnitCache = function (unit, specificCfg = null, specificType = nul
             const selectedHead = window.unitHeads?.[unit.id] || 'none';
             const headsForCalc = selectedHead !== 'none' ? [selectedHead] : (cfg.head ? HEADS_LIST : ['none']);
 
-            const dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), headsForCalc, cfg.subs, traitsForCalc, useAbility, mode);
+            let dynamicResults = [];
+            try {
+                dynamicResults = calculateUnitBuilds(unit, null, getFilteredBuilds(), getValidSubCandidates(), headsForCalc, cfg.subs, traitsForCalc, useAbility, mode);
+            } catch (e) {
+                console.error('[INVENTORY-MODE-DIAG] processUnitCache calculateUnitBuilds failed', e, {
+                    unitId: unit.id,
+                    mode,
+                    useAbility,
+                    inventoryMode: window.inventoryMode,
+                    inventoryLength: window.relicInventory?.length || relicInventory?.length || 0
+                });
+            }
+            if (window.inventoryMode) {
+                console.debug('[INVENTORY-MODE-DIAG] processUnitCache dynamicResults', {
+                    unitId: unit.id,
+                    mode,
+                    useAbility,
+                    resultCount: dynamicResults?.length || 0,
+                    topDps: dynamicResults?.[0]?.dps || 0,
+                    topRelicIds: dynamicResults?.[0]?.relicIds || null
+                });
+            }
             if (dynamicResults.length > 0) {
                 const seen = new Set(calculatedResults.map(r => r.id));
                 dynamicResults.forEach(r => {

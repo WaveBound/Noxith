@@ -577,6 +577,12 @@ const syncCheckboxes = (ids, isChecked) => {
 
 window.toggleInventoryMode = (checkbox) => {
     window.inventoryMode = checkbox.checked;
+    if (typeof inventoryMode !== 'undefined') inventoryMode = checkbox.checked;
+    console.debug('[INVENTORY-MODE-DIAG] toggleInventoryMode', {
+        enabled: checkbox.checked,
+        inventoryLength: window.relicInventory?.length || 0,
+        assignments: Object.keys(window.inventoryUnitTraits || {})
+    });
     syncCheckboxes(['globalInventoryMode', 'guideInventoryMode', 'sidebarInventoryMode'], checkbox.checked);
     window.resetCachesForBuffChange();
     window.resetAndRender();

@@ -234,11 +234,18 @@ function loadInventory() {
 }
 
 function updateInventoryToggleState() {
-    const isEmpty = (!relicInventory || relicInventory.length === 0);
+    const inventoryList = (typeof window !== 'undefined' && window.relicInventory && window.relicInventory.length > 0)
+        ? window.relicInventory
+        : (relicInventory || []);
+    const inventoryModeEnabled = (typeof window !== 'undefined' && typeof window.inventoryMode !== 'undefined')
+        ? window.inventoryMode
+        : inventoryMode;
+    const isEmpty = (!inventoryList || inventoryList.length === 0);
     const toggleIds = ['globalInventoryMode', 'guideInventoryMode'];
 
-    if (isEmpty && typeof inventoryMode !== 'undefined' && inventoryMode) {
+    if (isEmpty && typeof inventoryMode !== 'undefined' && inventoryModeEnabled) {
         inventoryMode = false;
+        window.inventoryMode = false;
         if (typeof resetAndRender === 'function') resetAndRender();
     }
 
@@ -254,9 +261,9 @@ function updateInventoryToggleState() {
         } else {
             input.disabled = false; label.classList.remove('disabled');
             label.title = "Calculate using ONLY relics from your Inventory";
-            if (typeof inventoryMode !== 'undefined') {
-                input.checked = inventoryMode;
-                label.classList.toggle('is-checked', inventoryMode);
+            if (typeof inventoryModeEnabled !== 'undefined') {
+                input.checked = inventoryModeEnabled;
+                label.classList.toggle('is-checked', inventoryModeEnabled);
             }
         }
     });
@@ -440,6 +447,7 @@ function addRelic() {
     renderInventory();
     updateInventoryToggleState();
 
+    if (typeof window.resetCachesForBuffChange === 'function') window.resetCachesForBuffChange();
     if (typeof resetAndRender === 'function') resetAndRender();
     closeModal('addRelicModal');
 }
@@ -450,6 +458,7 @@ function deleteRelic(id) {
         saveInventory();
         renderInventory();
         updateInventoryToggleState();
+        if (typeof window.resetCachesForBuffChange === 'function') window.resetCachesForBuffChange();
         if (typeof resetAndRender === 'function') resetAndRender();
     }
 }
