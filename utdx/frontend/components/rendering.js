@@ -999,28 +999,46 @@ function getBestHydratedBuild(builds, unitId, isHotbar, activeModeIdx = undefine
         limit = Math.min(limit, candidateLimit);
     }
 
-    const candidates = [...(builds || [])]
+    const rankedCandidates = [...(builds || [])]
+        .map(build => ({ build, rawScore: getBuildSortScore(build, globalSortMode) }))
         .sort((a, b) => {
-            const scoreB = getBuildSortScore(b, globalSortMode);
-            const scoreA = getBuildSortScore(a, globalSortMode);
-            if (scoreB !== scoreA) return scoreB - scoreA;
+            if (b.rawScore !== a.rawScore) return b.rawScore - a.rawScore;
 
-            const setB = (b.setName || b.s || '').toString().toLowerCase();
-            const setA = (a.setName || a.s || '').toString().toLowerCase();
+            const setB = (b.build.setName || b.build.s || '').toString().toLowerCase();
+            const setA = (a.build.setName || a.build.s || '').toString().toLowerCase();
             const isEndgameB = setB.includes('warlord') || setB.includes('monarch') || setB.includes('fused');
             const isEndgameA = setA.includes('warlord') || setA.includes('monarch') || setA.includes('fused');
             if (isEndgameB !== isEndgameA) return isEndgameB ? -1 : 1;
             return 0;
-        })
-        .slice(0, limit);
+        });
 
-    const ids = candidates.map(b => b?.id || `${b?.t || b?.traitName || ''}:${b?.s || b?.setName || ''}:${b?.h || b?.headUsed || ''}:${b?.b || b?.mainStats?.body || ''}:${b?.l || b?.mainStats?.legs || ''}`).join('|');
+    const ids = rankedCandidates.slice(0, limit).map(item => item.build?.id || `${item.build?.t || item.build?.traitName || ''}:${item.build?.s || item.build?.setName || ''}:${item.build?.h || item.build?.headUsed || ''}:${item.build?.b || item.build?.mainStats?.body || ''}:${item.build?.l || item.build?.mainStats?.legs || ''}`).join('|');
     const cacheKey = `${unitId}:${isHotbar ? 1 : 0}:${activeModeIdx}:${ids}`;
     if (window.bestHydratedBuildCache?.[cacheKey]) return window.bestHydratedBuildCache[cacheKey];
 
-    const hydrated = candidates.map(b => hydrateBuildEntry(b, unitId, isHotbar, activeModeIdx)).filter(Boolean);
-    if (!hydrated.length) return null;
-    const best = hydrated.reduce((best, cur) => getBuildSortScore(cur, globalSortMode) > getBuildSortScore(best, globalSortMode) ? cur : best, hydrated[0]);
+    const HYDRATION_CHUNK_SIZE = 64;
+    let best = null;
+    let bestScore = -1;
+    let evaluated = 0;
+
+    while (evaluated < rankedCandidates.length) {
+        const chunk = rankedCandidates.slice(evaluated, Math.min(evaluated + HYDRATION_CHUNK_SIZE, rankedCandidates.length));
+        const hydrated = chunk.map(item => hydrateBuildEntry(item.build, unitId, isHotbar, activeModeIdx)).filter(Boolean);
+
+        for (const cur of hydrated) {
+            const score = getBuildSortScore(cur, globalSortMode);
+            if (score > bestScore) {
+                bestScore = score;
+                best = cur;
+            }
+        }
+
+        evaluated += chunk.length;
+        const nextRawScore = rankedCandidates[evaluated]?.rawScore ?? -1;
+        if (bestScore >= nextRawScore) break;
+    }
+
+    if (!best) return null;
     window.bestHydratedBuildCache[cacheKey] = best;
     return best;
 }
