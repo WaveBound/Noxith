@@ -9,7 +9,21 @@ window.unitSpecificTraits = window.unitSpecificTraits || {};
 var customTraits = window.customTraits;
 var unitSpecificTraits = window.unitSpecificTraits;
 
+const getAbilityEntry = (unit) => Array.isArray(unit?.ability) ? unit.ability[0] : unit?.ability;
+const isDefaultActiveAbility = (unit) => {
+    const ability = getAbilityEntry(unit);
+    if (!unit?.id || !ability) return false;
+    if (unit.defaultAbilityActive !== undefined) return !!unit.defaultAbilityActive;
+    return !!(ability.defaultActive || ability.defaultOn || ability.enabledByDefault);
+};
+
 window.activeAbilityIds = new Set();
+['phantom_captain', 'megumin', 'ancient_shinob', 'triple_threat', 'marine_hero'].forEach(id => window.activeAbilityIds.add(id));
+if (typeof unitDatabase !== 'undefined') {
+    unitDatabase.forEach(unit => {
+        if (isDefaultActiveAbility(unit)) window.activeAbilityIds.add(unit.id);
+    });
+}
 var activeAbilityIds = window.activeAbilityIds;
 var cachedResults = {};
 var unitBuildsCache = {};

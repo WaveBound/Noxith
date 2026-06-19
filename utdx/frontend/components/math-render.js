@@ -1040,7 +1040,8 @@ function renderAttackRateSection(data) {
             </div>`;
     }
 
-    const noToggleAbilities = (data.baseStats?.ability || []).filter(ab => ab.noToggle && ab.dmgMult && ab.cooldown);
+    const abilityList = Array.isArray(data.baseStats?.ability) ? data.baseStats.ability : (data.baseStats?.ability ? [data.baseStats.ability] : []);
+    const noToggleAbilities = abilityList.filter(ab => ab.noToggle && ab.dmgMult && ab.cooldown);
     if (noToggleAbilities.length > 0) {
         const abilityRows = noToggleAbilities.map(ab => {
             const abDmg = data.dmgVal * ab.dmgMult * (data.critData?.avgMult || 1);

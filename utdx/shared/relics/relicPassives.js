@@ -147,9 +147,10 @@ const PASSIVES = {
     },
     fused_earrings_acc: {
         name: "Fused Earrings",
-        desc: "If unit can synchro clash/fuse, in non synchro form gain 50% dmg, in synchro form gain 25% range and 15% dmg buff.",
+        desc: "If unit can synchro clash/fuse, gain 50% dmg and 25% range in non-synchro fusion/clash forms, or 15% dmg and 25% range in synchro form.",
         trigger: "passive",
         clashDmgBuff: 50,
+        clashRangeBuff: 25,
         syncroDmgBuff: 15,
         syncroRangeBuff: 25
     },
@@ -238,7 +239,7 @@ function applyPassiveBonus(passiveId, unitStats, originalUnit = null) {
         // Detect Clash/Fusion capability explicitly for the requested units.
         const fusionComponentIds = ['superrokuthirdascension', 'limitbreakerprincemarked'];
         const hasFusionPotential = fusionComponentIds.includes(unitIdToken) || unitNameToken.includes('fusion') || unitIdToken.includes('fusion');
-        const clashUnitIds = ['nutarubeast', 'ancientshinob', 'sasukegreatwar'];
+        const clashUnitIds = ['nutarubeast', 'ancientshinob', 'sasukegreatwar', 'quakewarlord', 'pirateking'];
         const hasClash = clashUnitIds.includes(unitIdToken) || unitNameToken.includes('clash') || unitIdToken.includes('clash');
 
         if (isSyncro) {
@@ -246,14 +247,15 @@ function applyPassiveBonus(passiveId, unitStats, originalUnit = null) {
             effectiveStats.range = Math.floor(effectiveStats.range * (1 + (passive.syncroRangeBuff || 25) / 100));
         } else if (hasFusionPotential || hasClash) {
             effectiveStats.dmg = Math.floor(effectiveStats.dmg * (1 + (passive.clashDmgBuff || 50) / 100));
+            effectiveStats.range = Math.floor(effectiveStats.range * (1 + (passive.clashRangeBuff || passive.syncroRangeBuff || 25) / 100));
         }
         return {
             effectiveStats,
             uptimeInfo: {
-                rangeBuffPercent: isSyncro ? (passive.syncroRangeBuff || 25) : 0,
+                rangeBuffPercent: isSyncro ? (passive.syncroRangeBuff || 25) : ((hasFusionPotential || hasClash) ? (passive.clashRangeBuff || passive.syncroRangeBuff || 25) : 0),
                 note: isSyncro ? `Syncro Form (+${passive.syncroDmgBuff}% DMG, +${passive.syncroRangeBuff}% RNG)` :
-                    (hasFusionPotential ? `Fusion Potential (+${passive.clashDmgBuff}% DMG)` :
-                        (hasClash ? `Clash Potential (+${passive.clashDmgBuff}% DMG)` : "No specialized bonus applied"))
+                    (hasFusionPotential ? `Fusion Potential (+${passive.clashDmgBuff}% DMG, +${passive.clashRangeBuff || passive.syncroRangeBuff || 25}% RNG)` :
+                        (hasClash ? `Clash Potential (+${passive.clashDmgBuff}% DMG, +${passive.clashRangeBuff || passive.syncroRangeBuff || 25}% RNG)` : "No specialized bonus applied"))
             }
         };
     }

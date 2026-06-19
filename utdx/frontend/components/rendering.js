@@ -1183,6 +1183,39 @@ function invalidateUnitScoreCaches(unitId) {
 
 window.invalidateUnitScoreCaches = invalidateUnitScoreCaches;
 
+function invalidateUnitMathCaches(unitId) {
+    if (!unitId) return;
+
+    if (window.unitBuildsCache) delete window.unitBuildsCache[unitId];
+
+    const buildPrefixes = [unitId + '-', `${unitId}_abil-`, `${unitId}-BASE-`, `${unitId}-ABILITY-`];
+    if (window.cachedResults) {
+        Object.keys(window.cachedResults).forEach(key => {
+            if (key === unitId || buildPrefixes.some(prefix => key.startsWith(prefix))) {
+                delete window.cachedResults[key];
+            }
+        });
+    }
+
+    if (window.nextLevelStatsCache) {
+        Object.keys(window.nextLevelStatsCache).forEach(key => {
+            if (key === unitId || key.startsWith(`${unitId}:`)) {
+                delete window.nextLevelStatsCache[key];
+            }
+        });
+    }
+
+    if (window.customTraitBuildCache) {
+        Object.keys(window.customTraitBuildCache).forEach(key => {
+            if (key === unitId || key.startsWith(`${unitId}|`) || key.includes(`|${unitId}|`)) {
+                delete window.customTraitBuildCache[key];
+            }
+        });
+    }
+}
+
+window.invalidateUnitMathCaches = invalidateUnitMathCaches;
+
 window.refreshActiveBuild = function (unit) {
     const unitId = unit.id;
     const isLoadout = (window.CALCULATION_MODE === 'loadout');
@@ -1331,7 +1364,7 @@ window.refreshAllActiveBuilds = function () {
 };
 
 // Update Build List display for a card
-function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
+function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150, forcedType = null) {
     const card = document.getElementById('card-' + unitId);
     if (!card) return;
     const unitObj = window.getUnitById(unitId);
@@ -1359,7 +1392,7 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         systemLevelBar.style.setProperty('display', visible ? 'flex' : 'none', 'important');
     }
 
-    const activeType = (window.activeAbilityIds?.has(unitObj.id) && unitObj?.ability) ? 'abil' : 'base';
+    const activeType = ['base', 'abil'].includes(forcedType) ? forcedType : ((window.activeAbilityIds?.has(unitObj.id) && unitObj?.ability) ? 'abil' : 'base');
     const activeMode = 'fixed';
 
     const { unitCost, unitPlace } = getUnitCostAndPlacement(unitObj, activeModeIdx);
@@ -1677,6 +1710,22 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
     }
 }
 
+function refreshUnitAbilityBuildContainers(unitId, forceSync = false, renderLimit = 150) {
+    const unitObj = window.getUnitById?.(unitId);
+    if (!unitObj || !unitObj.ability) {
+        updateBuildListDisplay(unitId, forceSync, renderLimit);
+        return;
+    }
+
+    const activeType = window.activeAbilityIds?.has(unitId) ? 'abil' : 'base';
+    const inactiveType = activeType === 'abil' ? 'base' : 'abil';
+
+    updateBuildListDisplay(unitId, forceSync, renderLimit, inactiveType);
+    updateBuildListDisplay(unitId, forceSync, renderLimit, activeType);
+}
+
+window.refreshUnitAbilityBuildContainers = refreshUnitAbilityBuildContainers;
+
 function getCachedReconstructedCustomTraitBuilds(unit, customTraitsToCalc, activeType, activeMode, isHotbar) {
     if (!unit || !customTraitsToCalc || customTraitsToCalc.length === 0 || typeof window.reconstructMathData !== 'function') {
         return [];
@@ -1885,7 +1934,7 @@ function renderUnitCard(unit, absoluteIndex) {
 
     const abilityObj = Array.isArray(unit.ability) ? unit.ability[0] : unit.ability;
     let abilityLabel = abilityObj?.abilityName || 'Ability', toggleScript = '';
-    const isToggled = activeAbilityIds.has(unit.id);
+    const isToggled = window.activeAbilityIds?.has(unit.id);
     const override = TOGGLE_OVERRIDES[window.getFileName(unit.id)];
     if (override) {
         abilityLabel = override.dynamicLabel ? override.dynamicLabel(isToggled) : override.label;
@@ -1896,7 +1945,7 @@ function renderUnitCard(unit, absoluteIndex) {
     const abilityUnlocked = !upgradesArr || !upgradesArr.some(u => u.unlocksAbility) || upgradesArr.slice(0, currentLevel + 1).some(u => u.unlocksAbility);
 
     const abilityToggleHtml = (unit.ability && !abilityObj.noToggle)
-        ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>`
+        ? `<div class="toggle-wrapper" style="display: ${abilityUnlocked ? 'flex' : 'none'}"><span class="ut-ability-text" title="${abilityLabel}">${abilityLabel}</span><label><input type="checkbox" class="ability-cb" ${isToggled ? 'checked' : ''} onchange="window.toggleAbility('${unit.id}', this)${toggleScript}"><div class="mini-switch"></div></label></div>`
         : '<div></div>';
 
     const modesBtn = Array.isArray(unit.modes) ? `<button class="calc-btn ut-btn-compact modes-btn" onclick="openUnitModes('${unit.id}')" title="Change Mode"><span class="btn-label">${unit.modesLabel || 'Modes'}</span></button>` : '';
@@ -2043,7 +2092,7 @@ function renderUnitCard(unit, absoluteIndex) {
 
     return createBaseUnitCard(unit, {
         id: 'card-' + unit.id,
-        additionalClasses: (window.activeAbilityIds.has(unit.id) ? ' use-ability' : '') + ' lazy-build-load',
+        additionalClasses: (window.activeAbilityIds?.has(unit.id) ? ' use-ability' : '') + ' lazy-build-load',
         bannerContent: `<div class="unit-hero">
             <div class="unit-badge-stack">
                 <div class="banner-badges">

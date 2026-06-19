@@ -391,6 +391,7 @@ const guideData = [
     { unit: "Mob", img: "images/units/Mob.png", isCalculated: true },
     { unit: "Shanks", img: "images/units/Shanks.png", isCalculated: true },
     { unit: "Genos", img: "images/units/Genos.png", isCalculated: true },
+    { unit: "ulquiorra", img: "images/units/Ulquiorra.png", isCalculated: true },
     { unit: "Water God (Primordial)", img: "images/units/WaterGod.png", isCalculated: true },
     { unit: "First Emperor", img: "images/units/FirstEmperor.png", isCalculated: true },
     { unit: "ancient_shinob", img: "images/units/AncientShinob.png", isCalculated: true },

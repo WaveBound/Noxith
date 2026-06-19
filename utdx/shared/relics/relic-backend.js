@@ -171,6 +171,10 @@ window._calcSetAndTagBonuses = function (relicStats, uStats, headPiece, context 
     const hasCC = window.unitHasCC ? window.unitHasCC(uStats) : false;
     context.hasCC = hasCC;
     if (activeSetId === 'rebellious' && hasCC) {
+        const rebelliousPassive = (typeof PASSIVES !== 'undefined') ? PASSIVES.rebellious : null;
+        const rebelliousBuff = rebelliousPassive?.dmgBuff || 30;
+        sBonus.dmg += rebelliousBuff;
+        setPerkDmg += rebelliousBuff;
         context.rebelliousCCActive = true;
     }
 

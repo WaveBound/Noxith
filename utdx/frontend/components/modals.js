@@ -110,23 +110,88 @@
 
     // --- SPECIFIC IMPLEMENTATIONS USING UNIVERSAL MODAL ---
 
+    const getActiveModeIdx = (unitId) => {
+        const state = window.unitModesState?.[unitId] ?? window.getUnitById?.(unitId)?.defaultMode ?? 0;
+        return Array.isArray(state) ? state[0] : state;
+    };
+
+    const resolveMathUnit = (buildId) => {
+        const unitIdPart = String(buildId || '').split('-')[0];
+        let unit = window.getUnitById?.(unitIdPart);
+
+        if (!unit && unitIdPart.includes('merciless_god')) unit = window.getUnitById?.('merciless_god');
+
+        return unit || null;
+    };
+
+    const getActiveTypeForUnit = (unit) => {
+        if (!unit) return 'base';
+        return unit.ability && window.activeAbilityIds?.has(unit.id) ? 'abil' : 'base';
+    };
+
+    const getStaticDbBuildById = (unit, activeType, buildId) => {
+        const db = window.CALCULATION_MODE === 'loadout'
+            ? (window.HOTBAR_STATIC_BUILD_DB || window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB)
+            : (window.GLOBAL_STATIC_BUILD_DB || window.STATIC_BUILD_DB);
+        if (!db) return null;
+
+        const suffix = activeType === 'abil' ? '_abil' : '';
+        const entries = [db[unit.id + suffix], db[unit.id]].filter(Boolean);
+
+        for (const entry of entries) {
+            const builds = entry?.fixed?.[getActiveModeIdx(unit.id)] || entry?.fixed?.[0] || entry?.f?.[0] || [];
+            const build = builds.find?.(b => b.id === buildId);
+            if (build) return build;
+        }
+
+        return null;
+    };
+
+    const hydrateMathBuildById = (buildId) => {
+        if (!buildId || typeof window.reconstructMathData !== 'function') return null;
+
+        const unit = resolveMathUnit(buildId);
+        if (!unit) return null;
+
+        const activeType = getActiveTypeForUnit(unit);
+        let build = window.unitBuildsCache?.[unit.id]?.[activeType]?.fixed?.[getActiveModeIdx(unit.id)]?.find?.(b => b.id === buildId)
+            || window.unitBuildsCache?.[unit.id]?.[activeType]?.fixed?.[0]?.find?.(b => b.id === buildId);
+
+        if (!build) build = getStaticDbBuildById(unit, activeType, buildId);
+        if (!build) return null;
+
+        try {
+            const fullMath = window.reconstructMathData(build, undefined, {
+                isHotbar: window.CALCULATION_MODE === 'loadout',
+                activeModeIdx: getActiveModeIdx(unit.id)
+            });
+
+            if (!fullMath) return null;
+
+            fullMath.id = buildId;
+            window.cachedResults = window.cachedResults || {};
+            window.cachedResults[buildId] = fullMath;
+
+            return fullMath;
+        } catch (e) {
+            console.error('Math hydration error for', buildId, e);
+            return null;
+        }
+    };
+
     /**
      * Shows Math Breakdown
      */
     window.showMath = (id) => {
         let data = window.cachedResults?.[id];
 
-        // FALLBACK: If cache was cleared (due to global toggle), attempt to re-generate
+        if (!data) data = hydrateMathBuildById(id);
+
         if (!data) {
-            const unitIdPart = id.split('-')[0];
-            let unit = window.getUnitById(unitIdPart);
-            
-            // Robust alias resolution for technical unit IDs (Syncro variants)
-            if (!unit && unitIdPart.includes('merciless_god')) unit = window.getUnitById('merciless_god');
-            
+            const unit = resolveMathUnit(id);
             if (unit) {
                 window.processUnitCache?.(unit);
-                data = window.cachedResults?.[id];
+                data = window.cachedResults?.[id] || hydrateMathBuildById(id);
             }
         }
 
@@ -134,7 +199,7 @@
 
         if (!data.lvStats || !data.critData) {
             try {
-                data = reconstructMathData(data);
+                data = window.reconstructMathData?.(data) || reconstructMathData(data);
             } catch (e) { console.error(e); return; }
         }
 
@@ -456,7 +521,7 @@
 
         const state = window.unitModesState[unitId];
         const isMulti = !!unit.allowMultipleModes;
-        
+
         // FIX: Safely unpack array mode states to prevent nested [[0]] array mismatches on single-select mode overlays
         const activeModes = isMulti ? (Array.isArray(state) ? state : []) : (state !== undefined ? (Array.isArray(state) ? state : [state]) : (isUnit(unitId, 'merciless_god') ? [] : [unit.defaultMode ?? 0]));
 

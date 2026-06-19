@@ -282,12 +282,22 @@ if (isMainThread) {
             allowedCombos.add('dot_cf');
         }
 
+        const normalizeSetAlias = (value) => {
+            const normalized = String(value || '');
+            if (normalized === 'Rebellious Set') return ['Rebellious Shinobi', 'rebellious'];
+            if (normalized === 'Reanimated Set') return ['Reanimated Ninja', 'reanimated_ninja'];
+            return [normalized];
+        };
+        const normalizedAllowedSets = (allowedSets || []).flatMap(normalizeSetAlias);
+
         const baseBuilds = globalBuilds.filter(b => {
             if (!allowedCombos.has(b.bodyType + "_" + b.legType)) return false;
-            if (allowedSets && allowedSets.length > 0) {
+            if (normalizedAllowedSets.length > 0) {
                 const splitIdx = b.name.indexOf('(');
                 const setNameStr = splitIdx > 0 ? b.name.substring(0, splitIdx).trim() : b.name;
-                if (!allowedSets.includes(setNameStr)) return false;
+                const setObj = SETS.find(s => s.id === b.set);
+                const setAliases = [setNameStr, setObj?.name, setObj?.id].filter(Boolean);
+                if (!normalizedAllowedSets.some(v => setAliases.includes(v))) return false;
             }
             return true;
         });

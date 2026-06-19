@@ -132,7 +132,7 @@
                 {
                     label: 'TS Enemy (3x)',
                     val: `<label class="ts-ability-toggle ${isToggled ? 'is-on' : ''}" style="--toggle-color: #f472b6;">
-                        <input type="checkbox" ${isToggled ? 'checked' : ''} onchange="toggleAbility('${u.id}', this); var lbl=this.closest('.ts-ability-toggle'); lbl.classList.toggle('is-on',this.checked); lbl.querySelector('.ts-ability-status').textContent=this.checked?'ON':'OFF';" style="display:none;">
+                        <input type="checkbox" ${isToggled ? 'checked' : ''} onchange="window.toggleAbility('${u.id}', this); var lbl=this.closest('.ts-ability-toggle'); lbl.classList.toggle('is-on',this.checked); lbl.querySelector('.ts-ability-status').textContent=this.checked?'ON':'OFF';" style="display:none;">
                         <span class="ts-ability-status">${isToggled ? 'ON' : 'OFF'}</span>
                         <div class="mini-switch"></div>
                     </label>`,

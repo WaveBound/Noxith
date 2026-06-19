@@ -16,6 +16,7 @@ function initApp() {
 
     // Ensure ability tracking Set is declared safely before populating
     window.activeAbilityIds = window.activeAbilityIds || new Set();
+    if (typeof window.initDefaultAbilityState === 'function') window.initDefaultAbilityState();
 
     ['phantom_captain', 'megumin', 'ancient_shinob', 'triple_threat', 'marine_hero'].forEach(file => {
         const dynamicId = window.getUnitId?.(file);
