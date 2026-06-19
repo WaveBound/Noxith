@@ -82,7 +82,7 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
     if (mode === 'none') mode = 'none';
 
     let headOptions = (mode === 'auto')
-        ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut']
+        ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws']
         : (mode && mode !== 'none' ? [mode] : ['none']);
 
     let globalBestRes = { total: -1, range: -1 };

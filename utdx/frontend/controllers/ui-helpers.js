@@ -490,6 +490,7 @@ window.setSystemLevel = function (unitId, value) {
     setTimeout(() => {
         callIfFn('updateBuildListDisplay', unitId, true);
         callIfFn('updateHotbarUI');
+        callIfFn('resortUnitCards');
     }, 10);
 };
 
@@ -533,6 +534,7 @@ window.selectELevel = function (unitId, level) {
     }
 
     callIfFn('updateBuildListDisplay', unitId, true);
+    callIfFn('resortUnitCards');
 };
 
 window.filterList = function (element) {

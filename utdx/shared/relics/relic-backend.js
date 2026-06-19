@@ -453,6 +453,27 @@ window._calcHeadDynamicBuffs = function (headPiece, finalSpa, finalRange, uStats
         const donutData = Array.isArray(HEAD_PIECES) ? HEAD_PIECES.find(piece => piece.id === headPiece) : null;
         headDmgPassive = (donutData && donutData.stats) ? (donutData.stats.dmg || 0) : 0;
         headCalc.type = 'flaming_donut';
+    } else {
+        const headPieceData = Array.isArray(HEAD_PIECES) ? HEAD_PIECES.find(piece => piece.id === headPiece) : null;
+        const headStats = headPieceData && headPieceData.stats ? headPieceData.stats : {};
+        const headType = headPieceData?.id || headPiece;
+
+        if (headPiece !== 'flaming_donut' && headStats.dmg) {
+            headDmgPassive += Number(headStats.dmg) || 0;
+        }
+        const dotValue = Number(headStats.dot) || 0;
+        if (dotValue) {
+            if (headStats.dotOverride) {
+                headCalc.dotOverride = dotValue;
+            } else {
+                headDotBuff += dotValue;
+            }
+            headCalc.type = headType;
+        }
+        if (headStats.dotDuration) {
+            headCalc.dotDuration = Number(headStats.dotDuration) || 0;
+            headCalc.type = headType;
+        }
     }
 
     if (uStats && (headPiece === 'monarch_cape' || headPiece === 'monarch_head' || headPiece === 'monarch') && (relicStats && (relicStats.set === 'monarch' || (window.isUnit && window.isUnit(uStats.id, 'gluttonous_warlord'))))) {

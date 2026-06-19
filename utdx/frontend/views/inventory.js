@@ -46,6 +46,33 @@ const REVERSE_STAT_MAPPING = {
     'cm': 'subCdmg', 'cf': 'subCrit', 'dot': 'subDot'
 };
 
+function getInventoryHeadOptions() {
+    const options = [];
+    const seen = new Set();
+    const addOption = (id, name) => {
+        if (!id || seen.has(id)) return;
+        seen.add(id);
+        options.push({ id, name });
+    };
+
+    (SETS || []).forEach(set => addOption(set.id, set.name));
+    ((typeof window !== 'undefined' && window.HEAD_PIECES) || []).forEach(head => addOption(head.id, head.name));
+
+    return options;
+}
+
+function getRelicDisplayName(setKey) {
+    if (!setKey) return setKey;
+
+    const setObj = (SETS || []).find(s => s.id === setKey);
+    if (setObj) return setObj.name;
+
+    const headObj = ((typeof window !== 'undefined' && window.HEAD_PIECES) || []).find(h => h.id === setKey);
+    if (headObj) return headObj.name;
+
+    return String(setKey).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 let inventoryGrid;
 let inventoryAssignmentPanel;
 let highlightedRelicIds = new Set();
@@ -273,12 +300,18 @@ function updateSetOptions(slot) {
     const setSelect = document.getElementById('newRelicSet');
     if (!setSelect) return;
     const currentSelection = setSelect.value;
-    const filteredSets = SETS;
+    const options = slot === 'Head' ? getInventoryHeadOptions() : (SETS || []).map(s => ({ id: s.id, name: s.name }));
 
-    setSelect.innerHTML = filteredSets.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    setSelect.innerHTML = '';
+    options.forEach(option => {
+        const opt = document.createElement('option');
+        opt.value = option.id;
+        opt.textContent = option.name;
+        setSelect.appendChild(opt);
+    });
 
-    if (filteredSets.some(s => s.id === currentSelection)) setSelect.value = currentSelection;
-    else if (filteredSets.length > 0) setSelect.value = filteredSets[0].id;
+    if (options.some(option => option.id === currentSelection)) setSelect.value = currentSelection;
+    else if (options.length > 0) setSelect.value = options[0].id;
 
     updateStarVisibility();
 }
@@ -288,8 +321,9 @@ function updateStarVisibility() {
     const starSelect = document.getElementById('newRelicStars');
     if (!starSelect) return;
 
-    const selectedSet = SETS.find(s => s.id === setId);
-    const showStars = selectedSet?.rarity === 'Secret';
+    const selectedSet = (SETS || []).find(s => s.id === setId);
+    const selectedHeadPiece = ((typeof window !== 'undefined' && window.HEAD_PIECES) || []).find(h => h.id === setId);
+    const showStars = !!selectedSet && selectedSet.rarity === 'Secret' && !selectedHeadPiece;
     if (showStars) {
         starSelect.parentElement.classList.remove('hidden');
     } else {
@@ -478,6 +512,11 @@ function getRelicVisuals(setKey, slot) {
     if (visualKey === 'rebellious') visualKey = 'rebellious_set';
     if (visualKey === 'fused_earrings') visualKey = 'fused_set';
 
+    const isCustomHeadPiece = ((typeof window !== 'undefined' && window.HEAD_PIECES) || []).some(h => h.id === setKey);
+    if (isCustomHeadPiece && slot === 'Head') {
+        return { src: '', bg: RELIC_COLORS.default };
+    }
+
     const customImages = {
         'ninja': { 'Head': 'JuniorMask.png', 'Body': 'JuniorTop.png', 'Legs': 'JuniorBottom.png' },
         'sun_god': { 'Head': 'SunGodMask.png', 'Body': 'SunGodTop.png', 'Legs': 'SunGodBottom.png' },
@@ -557,7 +596,7 @@ function renderInventory() {
         if (lookupKey === 'warlord_hat') lookupKey = 'warlord';
         if (lookupKey === 'fused_earrings') lookupKey = 'fused_set';
 
-        const setObj = SETS.find(s => s.id === lookupKey) || SETS[0];
+        const setObj = (SETS || []).find(s => s.id === lookupKey);
         let starCount = 0;
         if (setObj && setObj.rarity === 'Secret') {
             if (relic.stars >= 1.05) starCount = 3;
@@ -570,11 +609,12 @@ function renderInventory() {
 
         const subData = Object.entries(relic.subs).map(([k, v]) => ({ type: k, val: v }));
         const subBadges = subData.map(s => getBadgeHtml(s.type, s.val)).join('');
+        const imageHtml = visuals.src ? `<img src="${visuals.src}" class="rc-image" onerror="this.style.display='none'">` : '';
 
         card.innerHTML = `
             <div class="rc-header">
                 <div class="rc-set-info">
-                    <span class="rc-set-name">${setObj.name}</span>
+                    <span class="rc-set-name">${getRelicDisplayName(relic.setKey)}</span>
                     <span class="rc-stars">${starCount > 0 ? "★".repeat(starCount) : ""}</span>
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0; margin-left: auto;">
@@ -587,7 +627,7 @@ function renderInventory() {
             </div>
             <div class="rc-visual-container">
                 <div class="rc-image-wrapper" style="background: ${visuals.bg}">
-                    <img src="${visuals.src}" class="rc-image" onerror="this.style.display='none'">
+                    ${imageHtml}
                     <div class="rc-slot-badge">${relic.slot}</div>
                 </div>
             </div>
@@ -622,7 +662,7 @@ function checkOptimality(relicId) {
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
             <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
                 <div class="text-sm text-dim mb-1">Analyzing Relic:</div>
-                <div class="text-white text-bold">${SETS.find(s => s.id === relic.setKey)?.name || relic.setKey} (${relic.slot})</div>
+                <div class="text-white text-bold">${getRelicDisplayName(relic.setKey)} (${relic.slot})</div>
                 <div class="text-xs text-gold">${relic.mainStat.toUpperCase()} ${relic.stars}★</div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 8px;">

@@ -2,14 +2,14 @@
 // ABILITY-FRONTEND.JS - UI State & Toggle Logic for Abilities
 // ============================================================================
 
-window.isAbilityActive = function(unitId) {
+window.isAbilityActive = function (unitId) {
     return window.activeAbilityIds && window.activeAbilityIds.has(unitId);
 };
 
-window.toggleAbility = function(unitId, checkbox) {
+window.toggleAbility = function (unitId, checkbox) {
     const card = document.getElementById('card-' + unitId);
     if (!card) return;
-    
+
     checkbox.parentNode.classList.toggle('is-checked', checkbox.checked);
     if (checkbox.checked) {
         card.classList.add('use-ability');
@@ -18,8 +18,11 @@ window.toggleAbility = function(unitId, checkbox) {
         card.classList.remove('use-ability');
         window.activeAbilityIds.delete(unitId);
     }
-    
+
     if (typeof window.updateBuildListDisplay === 'function') window.updateBuildListDisplay(unitId, true);
     // Refresh hotbar stats if this unit is in the hotbar
     if (typeof window.updateHotbarUI === 'function') window.updateHotbarUI();
+
+    // Ability state changes DPS, so the unit cards must be resorted by the new final score.
+    if (typeof window.resortUnitCards === 'function') window.resortUnitCards();
 };

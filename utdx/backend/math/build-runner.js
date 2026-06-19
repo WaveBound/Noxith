@@ -147,7 +147,7 @@ function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsT
 
         traitBuilds.forEach(build => {
             let headsForBuild = relevantHeads;
-            if (!isDotPossible) headsForBuild = relevantHeads.filter(h => h !== 'ninja' && h !== 'mochi_scarf' && h !== 'flaming_donut');
+            if (!isDotPossible) headsForBuild = relevantHeads.filter(h => h !== 'ninja' && h !== 'mochi_scarf' && h !== 'flaming_donut' && h !== 'panther_claws');
             if (headsForBuild.length === 0) return;
 
             headsForBuild.forEach(headMode => {

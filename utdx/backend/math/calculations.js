@@ -741,7 +741,7 @@ function calculateDPS(uStats, relicStats, context) {
 
     const gearDotBonus = baseR_Dot + headDotBuff + (sBonus.dot || 0);
 
-    let baseDotVal = uStats.dot || 0;
+    let baseDotVal = headCalc?.dotOverride || uStats.dot || 0;
     let passiveDotBuff = passiveDotFromPassives;
 
     if (baseDotVal === 0 && uStats.passives) {
@@ -778,8 +778,13 @@ function calculateDPS(uStats, relicStats, context) {
         }
     }
 
+    const dotInputStats = { ...uStats, dot: baseDotVal, isBoss: context.isBoss };
+    if (headCalc?.dotDuration) {
+        dotInputStats.dotDuration = headCalc.dotDuration;
+    }
+
     const { dotDpsTotal, bossDotDpsTotal, dotBreakdown } = _calcDoTDPS(
-        { ...uStats, dot: baseDotVal, isBoss: context.isBoss },
+        dotInputStats,
         traitObj,
         traitDotBuff,
         gearDotBonus,

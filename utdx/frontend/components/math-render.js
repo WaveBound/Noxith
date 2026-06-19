@@ -772,7 +772,9 @@ function renderDotSection(data, headDotRow) {
         : (data.baseStats?.id === 'ace' || window.isUnit?.(data.baseStats?.id, 'ace'));
     const donutDmg = donutData?.stats?.dmg || data.headBuffs?.passiveDmg || 100;
     const donutExclusive = donutData?.exclusive?.join(', ') || 'Spade';
-    const baseDot = data.baseStats?.dot || 0;
+    const headDotOverride = data.headBuffs?.dotOverride || 0;
+    const headOverrideLabel = data.headBuffs?.type ? String(data.headBuffs.type).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Head Piece';
+    const baseDot = headDotOverride || data.baseStats?.dot || 0;
 
     const traitDot = data.traitObj?.dotBuff || 0;
     const setDot = data.totalSetStats?.dot || 0;
@@ -825,7 +827,7 @@ function renderDotSection(data, headDotRow) {
             ${headDotRow}
             ${db?.nativeDps > 0 ? `
             <tr><td class="mt-cell-label mt-pt-md">Native Tick %</td><td class="mt-cell-formula mt-pt-md"></td><td class="mt-cell-val mt-pt-md mt-text-bold">${fmt.fix(finalTickPct, 1)}%</td></tr>
-            ${baseDot > 0 ? `<tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ Unit Base</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">${fmt.num(baseDot)}%</td></tr>` : ''}
+            ${baseDot > 0 ? `<tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ ${headDotOverride > 0 ? `Head Piece Override (${headOverrideLabel})` : 'Unit Base'}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">${fmt.num(baseDot)}%</td></tr>` : ''}
             ${(() => {
                 if (data.detailedBuffs && data.detailedBuffs.passiveBreakdown) {
                     let html = '';
@@ -1305,7 +1307,8 @@ window.renderMathContent = function (data, isSplit = false) {
         'bloodline_head': 'Bloodline', 'reanimated_head': 'Reanimated', 'sorcerer_hunter_spirit': 'S.H. Spirit',
         'strongest_sorcerer_glasses': 'Strongest Glasses', 'monarch_cape': 'Monarch Cape',
         'monarch_head': 'Monarch Head', 'monarch': 'Monarch Cape', 'warlord_hat': 'Warlord Hat',
-        'mochi_scarf': 'Mochi Scarf', 'flaming_donut': 'Flaming Donut', 'fused_earrings': 'Fused Earrings'
+        'mochi_scarf': 'Mochi Scarf', 'flaming_donut': 'Flaming Donut', 'ultiorras_wings': "Ultiorra's Wings",
+        'berserks_cleave': "Berserk's Cleave", 'panther_claws': 'Panther Claws', 'fused_earrings': 'Fused Earrings'
     };
     const headType = (data.headBuffs?.type || data.relicStats?.head || 'none');
     const headDisplayName = String(MAP_HEAD_NAMES[headType] ?? (headType === 'none' || !headType ? 'None' : (String(headType).replace(/_/g, ' ').toUpperCase())));
@@ -1341,8 +1344,12 @@ window.renderMathContent = function (data, isSplit = false) {
     }
 
     let headDotRow = '';
-    if (headBuffs.dot > 0) {
-        headDotRow += `<tr><td class="mt-cell-label">Accessory DoT (${headBuffs.type})</td><td class="mt-cell-formula">+${headBuffs.dot}%</td><td class="mt-cell-val"></td></tr>`;
+    const headDotOverride = headBuffs.dotOverride || 0;
+    if (headBuffs.dot > 0 || headDotOverride > 0) {
+        const headDotLabel = cleanHeadDisplayName || headBuffs.type || 'Head Piece';
+        const dotValue = headDotOverride > 0 ? `${fmt.num(headDotOverride)}%${headBuffs.dotDuration ? ` / ${fmt.fix(headBuffs.dotDuration, 1)}s` : ''}` : `+${headBuffs.dot}%`;
+        const dotLabel = headDotOverride > 0 ? 'Accessory DoT Override' : 'Accessory DoT';
+        headDotRow += `<tr><td class="mt-cell-label">${dotLabel} (${headDotLabel})</td><td class="mt-cell-formula">${dotValue}</td><td class="mt-cell-val"></td></tr>`;
     }
 
     const overview = renderOverviewSection(data);

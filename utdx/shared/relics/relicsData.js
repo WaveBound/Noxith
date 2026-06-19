@@ -160,6 +160,29 @@ const HEAD_PIECES = [
         name: "Flaming Donut",
         exclusive: ["Spade"],
         stats: { dmg: 100 }
+    },
+    {
+        id: "ultiorras_wings",
+        name: "Ultiorra's Wings",
+        exclusive: ["ulquiorra"],
+        stats: { dmg: 800 }
+    },
+    {
+        id: "berserks_cleave",
+        name: "Berserk's Cleave",
+        exclusive: ["kenpachi"],
+        stats: { dmg: 400 }
+    },
+    {
+        id: "panther_claws",
+        name: "Panther Claws",
+        exclusive: ["grimjaw"],
+        stats: {
+            dmg: 600,
+            dot: 100,
+            dotDuration: 5,
+            dotOverride: true
+        }
     }
 ];
 

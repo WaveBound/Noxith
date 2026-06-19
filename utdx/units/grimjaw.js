@@ -9,10 +9,10 @@ unitDatabase.push({
     tags: ["Peroxide", "Hollow", "Sword"],
     meta: {
         short: "Ruler",
-        long: "Ruler",
-        note: "Standard DPS selection."
+        long: "Astral",
+        note: "Duelist/Ruler overall as astral is bugged."
     },
-    totalCost: 41175,
+    totalCost: 41174,
     stats: {
         crit: 0,
         cdmg: 150,
@@ -38,5 +38,37 @@ unitDatabase.push({
         { dmg: 1146, spa: 7.5, range: 28, cost: 5010 }, // Up 8
         { dmg: 1362, spa: 7, range: 28, cost: 5675 },  // Up 9
         { dmg: 2040, spa: 9, range: 35, cost: 6450 }   // Up 10
+    ],
+
+    // PASSIVES
+    passives: [
+        {
+            name: "Enhanced Hierro",
+            desc: "On Attack:<br>• Applies Bleed for 30% Damage over 10 ticks.<br>• When Bleed is applied, enemies take +20% Damage until they die."
+        },
+        {
+            name: "Unchained Frenzy",
+            passiveDmg: 30,
+            passiveSpa: 15,
+            desc: "<br>Every 6 attacks [5 attacks on Etherealization 2]: enter Frenzy for 10s. Cooldown: 20s.<br><br>While Frenzied:<br>• +20% Damage, capped at +30%.<br>• -15% SPA, capped at 15%.<br><br>DPS math uses the average 50% uptime from the 10s duration / 20s cooldown."
+        },
+        {
+            name: "Spirited Fighter",
+            desc: "At the start of every wave:<br>• Gain 7.5% Spirit Bar."
+        },
+        {
+            name: "Soul Panther",
+            desc: "Requires Spirit Bar to reach 100%, then transforms into Soul Panther Mode and resets the bar.<br><br>While in Soul Panther Mode:<br>• Attacks apply Panther Mark for 15s, once per enemy.<br>• Marked enemies take +10% Damage from Grimjaw.<br>• When Panther Mark expires, it explodes in a small AOE for 5% of Grimjaw's Damage."
+        }
+    ],
+
+    // ETHEREALIZATION
+    etherealization: [
+        "+10 Stat Points",
+        "Increases Spirit Gains by 7.5%",
+        "+10 Stat Points",
+        "Increases “\Panther Mark Explosion\” DMG To 30% OF Grimmjaw DMG",
+        "+10 Stat Points",
+        "Bleed Now does 50% of total DMG"
     ]
 });

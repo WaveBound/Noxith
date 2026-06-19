@@ -652,7 +652,7 @@ window.getUnitsPerPage = () => {
 };
 
 // Constants & Configurations
-const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings'];
+const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings'];
 
 const HEAD_CONFIG = {
     sun_god: { name: 'Sun God', search: 'Sun God', cls: 'sungod' },
@@ -669,6 +669,9 @@ const HEAD_CONFIG = {
     warlord_hat: { name: 'Warlord Hat', search: 'Warlord', cls: 'custom' },
     mochi_scarf: { name: 'Mochi Scarf', search: 'Scarf', cls: 'custom' },
     flaming_donut: { name: 'Flaming Donut', search: 'Donut', cls: 'custom' },
+    ultiorras_wings: { name: "Ultiorra's Wings", search: 'Ultiorra Wings', cls: 'custom' },
+    berserks_cleave: { name: "Berserk's Cleave", search: 'Berserk Cleave', cls: 'custom' },
+    panther_claws: { name: 'Panther Claws', search: 'Panther Claws', cls: 'custom' },
     fused_earrings: { name: 'Fused Earrings', search: 'Earrings', cls: 'custom' }
 };
 
@@ -865,6 +868,26 @@ window.showSubstatDetails = function (buildId) {
     });
 };
 
+function sortNumber(value, fallback = 0) {
+    const n = Number(value ?? fallback ?? 0);
+    return Number.isFinite(n) ? n : 0;
+}
+
+function getFinalDpsScore(build) {
+    if (!build) return 0;
+    return Math.max(
+        sortNumber(build.sortDps),
+        sortNumber(build.total),
+        sortNumber(build.finalDps),
+        sortNumber(build.dps),
+        sortNumber(build.d),
+        sortNumber(build.bossDps),
+        sortNumber(build.bd),
+        sortNumber(build.bossTotal),
+        sortNumber(build.boss_total)
+    );
+}
+
 function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
     if (!r) return null;
 
@@ -953,19 +976,8 @@ function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
     return res;
 }
 
-function sortNumber(value, fallback = 0) {
-    const n = Number(value ?? fallback ?? 0);
-    return Number.isFinite(n) ? n : 0;
-}
-
-function getBuildSortScore(build, sortMode = 'dps') {
-    if (!build) return 0;
-    // Always seek the absolute highest shown value if displaying in UI to keep sorting intuitive, but respect specific requests
-    return Math.max(
-        sortNumber(build.sortDps),
-        sortNumber(build.dps || build.d),
-        sortNumber(build.bossDps || build.bd || build.bossTotal)
-    );
+function getBuildSortScore(build) {
+    return getFinalDpsScore(build);
 }
 
 function getBestHydratedBuild(builds, unitId, isHotbar, activeModeIdx = undefined, candidateLimit = 128) {
@@ -1053,7 +1065,7 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
         optimalityHtml = `<div class="optimality-badge" style="color: ${color}; border-color: ${color}33; --glow-color: ${glow}; flex-direction: row; justify-content: center; gap: 6px; width: auto; min-width: 112px; box-sizing: border-box; padding: 2px 8px; cursor: default;"><span class="opt-label" style="color: ${color}; margin-bottom: 0;">OPTIMALITY</span><span class="opt-pct">${fix1(optPct)}%</span></div>`;
     }
 
-    const prioConfig = { spa: { label: 'SPA STAT', cls: 'prio-spa' }, default: { label: 'DMG STAT', cls: 'prio-dmg' } };
+    const prioConfig = { spa: { label: 'SPA<br>STAT', cls: 'prio-spa' }, default: { label: 'DMG<br>STAT', cls: 'prio-dmg' } };
     let prioHtml = '';
     if (r.relicIds) {
         const hId = r.relicIds.head || 'none', bId = r.relicIds.body || 'none-b', lId = r.relicIds.legs || 'none-l';
@@ -1273,7 +1285,7 @@ window.refreshActiveBuild = function (unit) {
 
         const hydrated = hydrateBuildEntry(topBuild, unitId, isHotbar, modeIdx);
         if (hydrated) {
-            const score = Math.max(hydrated.dps || 0, hydrated.bossDps || 0);
+            const score = getFinalDpsScore(hydrated);
             if (score > bestScore) {
                 bestScore = score;
                 bestHydrated = hydrated;
@@ -1429,9 +1441,9 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         if (!builds || builds.length === 0) return '<div class="msg-empty">No valid builds found.</div>';
 
         const sortBuilds = (list) => [...list].sort((a, b) => {
-            const dpsScore = (entry) => Math.max(sortNumber(entry.dps), sortNumber(entry.bossDps), sortNumber(entry.sortDps));
-            const bossScore = (entry) => Math.max(sortNumber(entry.bossDps), sortNumber(entry.dps), sortNumber(entry.sortDps));
-            const damageScore = (entry) => Math.max(sortNumber(entry.dmgVal), sortNumber(entry.dps), sortNumber(entry.sortDps));
+            const dpsScore = (entry) => getFinalDpsScore(entry);
+            const bossScore = (entry) => Math.max(sortNumber(entry.bossDps), sortNumber(entry.bd), sortNumber(entry.bossTotal), sortNumber(entry.boss_total));
+            const damageScore = (entry) => Math.max(sortNumber(entry.dmgVal), getFinalDpsScore(entry));
 
             if (window.GLOBAL_MODE_SORT !== 'none' && unitObj?.meta) {
                 const modeKey = window.GLOBAL_MODE_SORT === 'short' ? 'short' : 'long';
@@ -1780,15 +1792,14 @@ window.getQuickScore = (unit) => {
 
     // 1. Fast-Path Cache: If the active build has already been evaluated, return its score instantly
     if (window.unitActiveBuilds && window.unitActiveBuilds[unit.id]) {
-        const cached = window.unitActiveBuilds[unit.id];
-        return Math.max(cached.dps || 0, cached.bossDps || 0);
+        return getFinalDpsScore(window.unitActiveBuilds[unit.id]);
     }
 
     // 2. Delegate to the unified build resolution engine to find the context-appropriate top build
     if (typeof window.refreshActiveBuild === 'function') {
         const activeBuild = window.refreshActiveBuild(unit);
         if (activeBuild) {
-            return Math.max(activeBuild.dps || 0, activeBuild.bossDps || 0);
+            return getFinalDpsScore(activeBuild);
         }
     }
 
@@ -1815,9 +1826,9 @@ window.getQuickScore = (unit) => {
 
         const hydrated = hydrateBuildEntry(topBuild, unit.id, isHotbar, activeMode);
         if (hydrated) {
-            return Math.max(hydrated.dps || 0, hydrated.bossDps || 0);
+            return getFinalDpsScore(hydrated);
         }
-        return Math.max(topBuild.dps || 0, topBuild.bossDps || topBuild.bd || topBuild.bossTotal || 0);
+        return getFinalDpsScore(topBuild);
     }
     return 0;
 };
