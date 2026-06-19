@@ -875,16 +875,22 @@ function sortNumber(value, fallback = 0) {
 
 function getFinalDpsScore(build) {
     if (!build) return 0;
-    return Math.max(
+
+    const displayedDps = Math.max(
         sortNumber(build.sortDps),
-        sortNumber(build.total),
-        sortNumber(build.finalDps),
         sortNumber(build.dps),
-        sortNumber(build.d),
         sortNumber(build.bossDps),
         sortNumber(build.bd),
         sortNumber(build.bossTotal),
         sortNumber(build.boss_total)
+    );
+
+    if (displayedDps > 0) return displayedDps;
+
+    return Math.max(
+        sortNumber(build.total),
+        sortNumber(build.finalDps),
+        sortNumber(build.d)
     );
 }
 
@@ -980,7 +986,7 @@ function getBuildSortScore(build) {
     return getFinalDpsScore(build);
 }
 
-function getBestHydratedBuild(builds, unitId, isHotbar, activeModeIdx = undefined, candidateLimit = 128) {
+function getBestHydratedBuild(builds, unitId, isHotbar, activeModeIdx = undefined, candidateLimit = Infinity) {
     if (activeModeIdx === undefined) {
         const state = window.unitModesState[unitId] ?? (window.getUnitById?.(unitId)?.defaultMode ?? 0);
         activeModeIdx = Array.isArray(state) ? state[0] : state;
@@ -988,16 +994,9 @@ function getBestHydratedBuild(builds, unitId, isHotbar, activeModeIdx = undefine
 
     const globalSortMode = document.querySelector('.search-container select[data-filter="sort"]')?.value || 'dps';
 
-    // PERFORMANCE OPTIMIZATION: If not in Hotbar/Loadout mode and no custom traits are active,
-    // the top build is already pre-sorted at index 0. We don't need to hydrate 128 candidates.
-    const isInventory = (window.inventoryMode === true);
-    const hasCustomTraits = window.customTraits && window.customTraits.length > 0;
-
-    let limit = candidateLimit;
-    if (!isHotbar && !isInventory && !hasCustomTraits) {
-        limit = 2; // Only evaluate the top 2 candidates to resolve minor tie-breakers
-    } else if (isHotbar) {
-        limit = 12; // Capping to 12 candidates in Hotbar/Loadout mode is more than enough to find the best gear under team buffs
+    let limit = Math.min(builds?.length || 0, candidateLimit);
+    if (isHotbar && Number.isFinite(candidateLimit)) {
+        limit = Math.min(limit, candidateLimit);
     }
 
     const candidates = [...(builds || [])]
@@ -1839,7 +1838,7 @@ function getCachedCustomTraitBuilds(unit, customTraitsToCalc, activeType, active
 window.getQuickScore = (unit) => {
     if (!unit) return 0;
 
-    // 1. Fast-Path Cache: If the active build has already been evaluated, return its score instantly
+    // 1. Fast-Path Cache: If the card's displayed active build is already known, sort by that exact value.
     if (window.unitActiveBuilds && window.unitActiveBuilds[unit.id]) {
         return getFinalDpsScore(window.unitActiveBuilds[unit.id]);
     }
