@@ -336,6 +336,10 @@ if (isMainThread) {
         const hasNativeDoT = (effectiveStats.dot > 0) || (effectiveStats.burnMultiplier > 0) || isKiritoVR || hasPassiveDoT;
 
         let allowedHeads = cfg.head ? (jobHeads && jobHeads.length > 0 ? jobHeads : ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings']) : ['none'];
+
+        if (typeof window.isHeadPieceAvailableToUnit === 'function') {
+            allowedHeads = allowedHeads.filter(headType => window.isHeadPieceAvailableToUnit(headType, unit));
+        }
         
         // Always include 'none' (baseline) when head calculation is enabled
         if (cfg.head && !allowedHeads.includes('none')) {

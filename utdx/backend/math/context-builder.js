@@ -31,6 +31,8 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
 
     let effectiveStats = { ...unit.stats };
     effectiveStats.id = unit.id;
+    effectiveStats.name = unit.name;
+    effectiveStats._fileName = unit._fileName;
     effectiveStats.placementType = unit.placementType;
     if (unit.tags) effectiveStats.tags = unit.tags;
     if (unit.customSummons) effectiveStats.customSummons = unit.customSummons;
@@ -270,11 +272,11 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
     let suffix = isAbility ? '-ABILITY' : '-BASE';
     const modeTag = (mode === 'bugged') ? `-b-${activeMode}` : `-f-${activeMode}`;
 
-    const context = { 
-        mode, dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints, 
-        wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: false, 
-        headPiece, starMult, headStarMult: options.headStarMult || starMult, rankData, isAbility, 
-        maxPts, upgradeLevel, isHotbar, activeModeIdx: activeMode 
+    const context = {
+        mode, dmgPoints: options.dmgPoints, spaPoints: options.spaPoints, rangePoints: options.rangePoints,
+        wave, isBoss, traitObj, placement: actualPlacement, isSSS: true, isVirtualRealm: false,
+        headPiece, starMult, headStarMult: options.headStarMult || starMult, rankData, isAbility,
+        maxPts, upgradeLevel, isHotbar, activeModeIdx: activeMode
     };
 
     // Inject synced buff flags into context so calculateDPS identifies them

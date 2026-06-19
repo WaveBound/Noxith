@@ -766,9 +766,14 @@ function renderDotSection(data, headDotRow) {
         if (isChief) return `<span class="text-dim">(${fmt.num(total / 9.0)} / 1.0s ${label})</span>`;
         return `<span class="text-dim">(${fmt.num(total)} / ${fmt.fix(time, 1)}s ${label})</span>`;
     };
-
-    const isSpadeAce = data.baseStats?.id === 'ace' || window.isUnit?.(data.baseStats?.id, 'ace');
+    const donutData = window.HEAD_PIECES?.find(piece => piece.id === 'flaming_donut');
+    const donutAvailableToUnit = typeof window.isHeadPieceAvailableToUnit === 'function'
+        ? window.isHeadPieceAvailableToUnit('flaming_donut', data.baseStats)
+        : (data.baseStats?.id === 'ace' || window.isUnit?.(data.baseStats?.id, 'ace'));
+    const donutDmg = donutData?.stats?.dmg || data.headBuffs?.passiveDmg || 100;
+    const donutExclusive = donutData?.exclusive?.join(', ') || 'Spade';
     const baseDot = data.baseStats?.dot || 0;
+
     const traitDot = data.traitObj?.dotBuff || 0;
     const setDot = data.totalSetStats?.dot || 0;
     const headDot = data.headBuffs?.dot || 0;
@@ -807,8 +812,8 @@ function renderDotSection(data, headDotRow) {
         headDotRow = `
         <tr class="mt-row-ninja" style="background:rgba(239,68,68,0.05); border-left:3px solid #ef4444;"><td colspan="3" class="p-2">
             <div class="mt-flex-between mb-2"><span class="mt-text-bold text-xs tracking-sm" style="color:#fca5a5;">FLAMING DONUT</span><button class="calc-info-btn" onclick="openInfoPopup('flaming_donut_passive')">?</button></div>
-            <div class="mt-flex-between text-xs text-white mb-1"><span class="opacity-70">Damage Passive:</span><span class="mt-font-mono text-white">+100% Dmg (Ace)</span></div>
-            <div class="mt-flex-between mt-border-top mt-pt-sm"><span class="text-white text-xs text-bold">Applied DoT Multiplier</span><span class="text-sm mt-text-bold" style="color:#fca5a5;"> ${isSpadeAce ? '×1.50' : '×1.00'}</span></div>
+            <div class="mt-flex-between text-xs text-white mb-1"><span class="opacity-70">Damage Passive:</span><span class="mt-font-mono text-white">+${fmt.fix(donutDmg, 2)}% Dmg (${donutExclusive})</span></div>
+            <div class="mt-flex-between mt-border-top mt-pt-sm"><span class="text-white text-xs text-bold">Applied DoT Multiplier</span><span class="text-sm mt-text-bold" style="color:#fca5a5;"> ${donutAvailableToUnit ? '×1.50' : '×1.00'}</span></div>
         </td></tr>`;
     }
 
@@ -1089,18 +1094,24 @@ function renderRangeSection(data) {
     const baseRange = data.baseStats?.range || 0;
     const traitRange = data.traitBuffs?.range || 0;
     const relicRange = data.relicBuffs?.range || 0;
+    const headRange = data.headBuffs?.range || 0;
+    const headRangeLabel = data.headBuffs?.type || data.headUsed || 'Head';
     const setRange = data.totalSetStats?.range || 0;
     const passiveRange = (data.passiveRange || 0);
 
+    let globalRange = 0;
     let globalRangeHtml = '';
     if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
         Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
             const bData = data.activeGlobalBuffs[buff.id];
             if (bData && bData.range) {
+                globalRange += Number(bData.range) || 0;
                 globalRangeHtml += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:${buff.color};">↳ ${buff.name}</td><td class="mt-cell-formula" style="color:${buff.color};">+${fmt.fix(bData.range, 1)}%</td><td class="mt-cell-val"></td></tr>`;
             }
         });
     }
+
+    const additiveRange = setRange + passiveRange + headRange + globalRange;
 
     return `
         <div class="dd-section">
@@ -1111,9 +1122,10 @@ function renderRangeSection(data) {
                 ${data.isSSS ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ SSS Rank Bonus</td><td class="mt-cell-formula">×1.2</td><td class="mt-cell-val"></td></tr>` : ''}
                 ${traitRange !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Trait (${data.traitObj?.name})</td><td class="mt-cell-formula">+${fmt.fix(traitRange, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                 <tr><td class="mt-cell-label mt-pt-md">Relic Multiplier</td><td class="mt-cell-formula mt-pt-md">+${fmt.fix(relicRange, 1)}%</td><td class="mt-cell-val mt-pt-md"></td></tr>
-                <tr><td class="mt-cell-label mt-pt-md">Additive Buff Bucket</td><td class="mt-cell-formula mt-pt-md">+${fmt.fix(setRange + passiveRange, 1)}%</td><td class="mt-cell-val mt-pt-md"></td></tr>
+                <tr><td class="mt-cell-label mt-pt-md">Additive Buff Bucket</td><td class="mt-cell-formula mt-pt-md">+${fmt.fix(additiveRange, 1)}%</td><td class="mt-cell-val mt-pt-md"></td></tr>
                 ${setRange !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Bonus</td><td class="mt-cell-formula">+${fmt.fix(setRange, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                 ${passiveRange !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passives</td><td class="mt-cell-formula">+${fmt.fix(passiveRange, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
+                ${headRange !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Head Piece (${headRangeLabel})</td><td class="mt-cell-formula">+${fmt.fix(headRange, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
                 ${globalRangeHtml}
                 <tr class="mt-border-top"><td class="mt-cell-label mt-pt-sm text-white">Final Range</td><td class="mt-cell-formula"></td><td class="mt-cell-val mt-pt-sm calc-highlight" style="color: #60a5fa;">${fmt.fix(data.range, 1)}</td></tr>
             </table>

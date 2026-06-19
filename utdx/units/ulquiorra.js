@@ -18,7 +18,7 @@ unitDatabase.push({
         cdmg: 150,
         dot: 0,
         dotStacks: 1,
-        spaCap: 2,
+        spaCap: 5,
         passiveDmg: 0,
         passiveSpa: 0,
         element: "Dark",

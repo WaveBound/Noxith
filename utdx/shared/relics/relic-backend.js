@@ -2,6 +2,29 @@
 // RELIC-BACKEND.JS - Centralized Math for Relic Stats and Substats
 // ============================================================================
 
+const normalizeRelicUnitToken = (token) => String(token || "")
+    .toLowerCase()
+    .replace(/\.js$/i, "")
+    .replace(/[^a-z0-9]+/g, "");
+
+const getRelicUnitTokens = (unit) => {
+    if (!unit) return [];
+    return [unit.id, unit.name, unit._fileName]
+        .filter(Boolean)
+        .map(normalizeRelicUnitToken);
+};
+
+window.isHeadPieceAvailableToUnit = function (headPiece, unit) {
+    if (headPiece === "none" || !Array.isArray(HEAD_PIECES)) return true;
+
+    const piece = HEAD_PIECES.find(piece => piece.id === headPiece);
+    const exclusive = piece && piece.exclusive;
+    if (!Array.isArray(exclusive) || exclusive.length === 0) return true;
+
+    const unitTokens = getRelicUnitTokens(unit);
+    return exclusive.some(token => unitTokens.includes(normalizeRelicUnitToken(token)));
+};
+
 window.calcRelicStats = function (relicStats, uStats, headPiece, context, traitObj, starMult, statConfig) {
     let { sBonus, tagBuffs, setPerkDmg } = window._calcSetAndTagBonuses(relicStats, uStats, headPiece, context);
     if (starMult && starMult !== 1) { for (let key in sBonus) { if (typeof sBonus[key] === 'number') sBonus[key] *= starMult; } }
@@ -253,6 +276,18 @@ window._calcSetAndTagBonuses = function (relicStats, uStats, headPiece, context 
 };
 
 window._calcHeadDynamicBuffs = function (headPiece, finalSpa, finalRange, uStats, relicStats = {}, context = {}) {
+    if (!window.isHeadPieceAvailableToUnit(headPiece, uStats)) {
+        return {
+            headDmgBase: 0,
+            headDmgPassive: 0,
+            headDmgTag: 0,
+            headDotBuff: 0,
+            headCalc: { type: "none", uptime: 1, trigger: 0, duration: 0, attacks: 0, cf: 0, cm: 0, elementalAll: 0, hyperArmor: 0, activeTags: [] },
+            headCfTag: 0,
+            headCmTag: 0
+        };
+    }
+
     let headDmgBase = 0, headDmgPassive = 0, headDmgTag = 0, headDotBuff = 0, headCfTag = 0, headCmTag = 0;
     let headCalc = { type: headPiece, uptime: 1, trigger: 0, duration: 0, attacks: 0, cf: 0, cm: 0, elementalAll: 0, hyperArmor: 0, activeTags: [] };
 
@@ -359,7 +394,9 @@ window._calcHeadDynamicBuffs = function (headPiece, finalSpa, finalRange, uStats
             if (eff.dmg !== unitStatsSim.dmg) {
                 headDmgPassive = ((eff.dmg / unitStatsSim.dmg) - 1) * 100;
             }
-            if (eff.range !== unitStatsSim.range) {
+            if (passRes.uptimeInfo?.rangeBuffPercent) {
+                headCalc.range = (headCalc.range || 0) + passRes.uptimeInfo.rangeBuffPercent;
+            } else if (eff.range !== unitStatsSim.range) {
                 headCalc.range = (headCalc.range || 0) + (((eff.range / unitStatsSim.range) - 1) * 100);
             }
             if (eff.trueDmg) {
@@ -413,10 +450,8 @@ window._calcHeadDynamicBuffs = function (headPiece, finalSpa, finalRange, uStats
         }
         headCalc.type = 'mochi_scarf';
     } else if (headPiece === 'flaming_donut') {
-        const isAce = uStats && window.isUnit && window.isUnit(uStats.id, 'ace');
-        if (isAce) {
-            headDmgPassive = 100;
-        }
+        const donutData = Array.isArray(HEAD_PIECES) ? HEAD_PIECES.find(piece => piece.id === headPiece) : null;
+        headDmgPassive = (donutData && donutData.stats) ? (donutData.stats.dmg || 0) : 0;
         headCalc.type = 'flaming_donut';
     }
 

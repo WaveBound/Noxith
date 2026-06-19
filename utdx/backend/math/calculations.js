@@ -153,9 +153,6 @@ function calculateDPS(uStats, relicStats, context) {
 
     const tags = uStats.tags || [];
 
-    const totalAdditiveRange = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (window.isUnit(uStats.id, 'king_sailor') ? 10 : 0);
-    let finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
-
     let setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa + headSpaBase;
     let warlordSpa = 0;
 
@@ -192,11 +189,11 @@ function calculateDPS(uStats, relicStats, context) {
         }
     }
 
-    const { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc, headCfTag, headCmTag } = window._calcHeadDynamicBuffs(headPiece, finalSpa, finalRange, uStats, relicStats, context);
-
-    if (headCalc && headCalc.range) {
-        finalRange *= (1 + headCalc.range / 100);
-    }
+    const additiveRangeBeforeHead = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (window.isUnit(uStats.id, 'king_sailor') ? 10 : 0);
+    const preHeadRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + additiveRangeBeforeHead / 100);
+    const { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc, headCfTag, headCmTag } = window._calcHeadDynamicBuffs(headPiece, finalSpa, preHeadRange, uStats, relicStats, context);
+    const totalAdditiveRange = additiveRangeBeforeHead + (headCalc?.range || 0);
+    const finalRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + totalAdditiveRange / 100);
 
     // Compile absolute Boss Damage Multiplier to prevent double-counting bugs
     let extraBossDmg = (sBonus.bossDmg || 0) + (headCalc.bossDmg || 0) + (passiveBossDmgFromPassives || 0);
@@ -648,7 +645,7 @@ function calculateDPS(uStats, relicStats, context) {
     if (uStats.ability && Array.isArray(uStats.ability)) {
         uStats.ability.forEach(ab => {
             if (ab.reqUp !== undefined && upgradeLevel < ab.reqUp) return;
-            
+
             if (ab.noToggle && ab.dmgMult && ab.cooldown) {
                 const abAvgHit = finalDmg * ab.dmgMult * avgCritMult;
                 const abAvgHitBoss = finalDmgBoss * ab.dmgMult * avgCritMultBoss;

@@ -149,3 +149,18 @@ const SETS = [
 
 // Attach to window for non-module compatibility in index.html
 window.SETS = SETS;
+
+// ─── CUSTOM HEAD PIECES / SPECIAL RELICS ─────────────────────
+// id: head piece key used by the generator and calculator.
+// exclusive: optional unit lock. Values may be a unit id, unit name, or unit file name.
+// stats: passive/base stats that are not part of a full SETS entry.
+const HEAD_PIECES = [
+    {
+        id: "flaming_donut",
+        name: "Flaming Donut",
+        exclusive: ["Spade"],
+        stats: { dmg: 100 }
+    }
+];
+
+window.HEAD_PIECES = HEAD_PIECES;

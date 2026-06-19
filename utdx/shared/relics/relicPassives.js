@@ -227,26 +227,33 @@ function applyPassiveBonus(passiveId, unitStats, originalUnit = null) {
     if (passiveId === "fused_earrings_acc") {
         const u = originalUnit || {};
         const unitId = u.id || "";
-        const unitIdLower = unitId.toLowerCase();
-        const unitNameLower = (u.name || "").toLowerCase();
+        const normalizeToken = (token) => String(token || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+        const unitIdToken = normalizeToken(unitId);
+        const unitNameToken = normalizeToken(u.name || "");
 
-        // Detect Synchro forms via Display Name or unit ID as requested (must contain "syncro" or be in the fused list)
-        const isSyncro = unitNameLower.includes('(syncro)') || ['unparalleled_armor', 'majestic_armor', 'sjw'].includes(unitIdLower);
+        // Detect Synchro/Fusion forms via display name, file/id, or known fused-unit IDs.
+        const knownSyncroIds = ['unparalleledarmor', 'majesticarmor', 'sjw', 'fusedwarriorsupersyncro', 'revolutionarychiefsyncro'];
+        const isSyncro = unitNameToken.includes('syncro') || unitNameToken.includes('synchro') || unitIdToken.includes('syncro') || unitIdToken.includes('synchro') || knownSyncroIds.includes(unitIdToken);
 
-        // Detect Clash/Fusion capability explicitly for the requested units (Nutaru, Sasuke, etc.)
-        const hasClash = ['nutaru_beast', 'ancient_shinob', 'sasuke_great_war'].includes(unitIdLower);
+        // Detect Clash/Fusion capability explicitly for the requested units.
+        const fusionComponentIds = ['superrokuthirdascension', 'limitbreakerprincemarked'];
+        const hasFusionPotential = fusionComponentIds.includes(unitIdToken) || unitNameToken.includes('fusion') || unitIdToken.includes('fusion');
+        const clashUnitIds = ['nutarubeast', 'ancientshinob', 'sasukegreatwar'];
+        const hasClash = clashUnitIds.includes(unitIdToken) || unitNameToken.includes('clash') || unitIdToken.includes('clash');
 
         if (isSyncro) {
             effectiveStats.dmg = Math.floor(effectiveStats.dmg * (1 + (passive.syncroDmgBuff || 15) / 100));
             effectiveStats.range = Math.floor(effectiveStats.range * (1 + (passive.syncroRangeBuff || 25) / 100));
-        } else if (hasClash) {
+        } else if (hasFusionPotential || hasClash) {
             effectiveStats.dmg = Math.floor(effectiveStats.dmg * (1 + (passive.clashDmgBuff || 50) / 100));
         }
         return {
             effectiveStats,
             uptimeInfo: {
+                rangeBuffPercent: isSyncro ? (passive.syncroRangeBuff || 25) : 0,
                 note: isSyncro ? `Syncro Form (+${passive.syncroDmgBuff}% DMG, +${passive.syncroRangeBuff}% RNG)` :
-                    (hasClash ? `Clash Potential (+${passive.clashDmgBuff}% DMG)` : "No specialized bonus applied")
+                    (hasFusionPotential ? `Fusion Potential (+${passive.clashDmgBuff}% DMG)` :
+                        (hasClash ? `Clash Potential (+${passive.clashDmgBuff}% DMG)` : "No specialized bonus applied"))
             }
         };
     }

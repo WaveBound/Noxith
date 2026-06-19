@@ -953,13 +953,18 @@ function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
     return res;
 }
 
+function sortNumber(value, fallback = 0) {
+    const n = Number(value ?? fallback ?? 0);
+    return Number.isFinite(n) ? n : 0;
+}
+
 function getBuildSortScore(build, sortMode = 'dps') {
     if (!build) return 0;
     // Always seek the absolute highest shown value if displaying in UI to keep sorting intuitive, but respect specific requests
     return Math.max(
-        build.sortDps || 0,
-        build.dps || build.d || 0,
-        build.bossDps || build.bd || build.bossTotal || 0
+        sortNumber(build.sortDps),
+        sortNumber(build.dps || build.d),
+        sortNumber(build.bossDps || build.bd || build.bossTotal)
     );
 }
 
@@ -1152,6 +1157,20 @@ function generateBuildRowHTML(r, i, unitConfig = {}) {
 }
 
 // Unified Active Build calculation & tracking
+function invalidateUnitScoreCaches(unitId) {
+    if (!unitId) return;
+    if (window.LIVE_SCORE_CACHE) delete window.LIVE_SCORE_CACHE[unitId];
+    if (window.unitActiveBuilds) delete window.unitActiveBuilds[unitId];
+    if (window.hotbarFilteredBuilds) delete window.hotbarFilteredBuilds[unitId];
+    if (window.bestHydratedBuildCache) {
+        Object.keys(window.bestHydratedBuildCache).forEach(key => {
+            if (key === unitId || key.startsWith(`${unitId}:`)) delete window.bestHydratedBuildCache[key];
+        });
+    }
+}
+
+window.invalidateUnitScoreCaches = invalidateUnitScoreCaches;
+
 window.refreshActiveBuild = function (unit) {
     const unitId = unit.id;
     const isLoadout = (window.CALCULATION_MODE === 'loadout');
@@ -1160,6 +1179,8 @@ window.refreshActiveBuild = function (unit) {
 
     const activeType = (window.activeAbilityIds?.has(unitId) && unit.ability) ? 'abil' : 'base';
     const activeMode = 'fixed';
+
+    invalidateUnitScoreCaches(unitId);
 
     if (window.inventoryMode) {
         console.debug('[INVENTORY-MODE-DIAG] refreshActiveBuild entry', {
@@ -1266,6 +1287,7 @@ window.refreshActiveBuild = function (unit) {
 
         if (!window.hotbarFilteredBuilds) window.hotbarFilteredBuilds = {};
         window.hotbarFilteredBuilds[unitId] = bestHydrated;
+        if (window.LIVE_SCORE_CACHE) delete window.LIVE_SCORE_CACHE[unitId];
     }
     return bestHydrated;
 };
@@ -1407,6 +1429,10 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
         if (!builds || builds.length === 0) return '<div class="msg-empty">No valid builds found.</div>';
 
         const sortBuilds = (list) => [...list].sort((a, b) => {
+            const dpsScore = (entry) => Math.max(sortNumber(entry.dps), sortNumber(entry.bossDps), sortNumber(entry.sortDps));
+            const bossScore = (entry) => Math.max(sortNumber(entry.bossDps), sortNumber(entry.dps), sortNumber(entry.sortDps));
+            const damageScore = (entry) => Math.max(sortNumber(entry.dmgVal), sortNumber(entry.dps), sortNumber(entry.sortDps));
+
             if (window.GLOBAL_MODE_SORT !== 'none' && unitObj?.meta) {
                 const modeKey = window.GLOBAL_MODE_SORT === 'short' ? 'short' : 'long';
                 const textRec = (unitObj.meta[modeKey] || '').toLowerCase();
@@ -1416,18 +1442,24 @@ function updateBuildListDisplay(unitId, forceSync = false, renderLimit = 150) {
                 if (aIsRec !== bIsRec) return aIsRec ? -1 : 1;
             }
             if (sortSelect === 'boss') {
-                return (b.bossDps || b.dps || 0) - (a.bossDps || a.dps || 0);
-            }
-            if (sortSelect === 'damage') {
-                if (b.dmgVal !== a.dmgVal) return (b.dmgVal || 0) - (a.dmgVal || 0);
-                return (b.sortDps || b.dps || 0) - (a.sortDps || a.dps || 0);
-            }
-            if (sortSelect === 'efficiency') {
+                const scoreDelta = bossScore(b) - bossScore(a);
+                if (scoreDelta !== 0) return scoreDelta;
+            } else if (sortSelect === 'damage') {
+                const damageDelta = damageScore(b) - damageScore(a);
+                if (damageDelta !== 0) return damageDelta;
+            } else if (sortSelect === 'efficiency') {
                 const effA = calculateBuildEfficiency(a, unitCost, unitPlace, unitId);
                 const effB = calculateBuildEfficiency(b, unitCost, unitPlace, unitId);
-                return effB - effA;
+                const effDelta = sortNumber(effB) - sortNumber(effA);
+                if (effDelta !== 0) return effDelta;
+            } else {
+                const scoreDelta = dpsScore(b) - dpsScore(a);
+                if (scoreDelta !== 0) return scoreDelta;
             }
-            return (b.sortDps || b.dps || 0) - (a.sortDps || a.dps || 0);
+
+            return String(a.traitName || '').localeCompare(String(b.traitName || ''))
+                || String(a.setName || '').localeCompare(String(b.setName || ''))
+                || String(a.headUsed || '').localeCompare(String(b.headUsed || ''));
         });
 
         const allHydrated = builds.map(b => hydrateBuildEntry(b, unitId, isHotbar, activeModeIdx)).filter(Boolean);
@@ -1802,7 +1834,11 @@ window.getLiveScore = (unit) => {
 
 window.resortUnitCards = function () {
     if (!paginatedSortedUnits || paginatedSortedUnits.length === 0) return;
-    paginatedSortedUnits.sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
+    window.LIVE_SCORE_CACHE = {};
+    window.unitActiveBuilds = {};
+    window.hotbarFilteredBuilds = {};
+    window.bestHydratedBuildCache = {};
+    paginatedSortedUnits = [...paginatedSortedUnits].sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
 
     window.unitAbsoluteRanks = {};
     paginatedSortedUnits.forEach((entry, i) => {
@@ -1814,25 +1850,18 @@ window.resortUnitCards = function () {
 
 window.resortUnitCardsInPlace = function () {
     if (!paginatedSortedUnits || paginatedSortedUnits.length === 0) return;
-    paginatedSortedUnits.sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
+    window.LIVE_SCORE_CACHE = {};
+    window.unitActiveBuilds = {};
+    window.hotbarFilteredBuilds = {};
+    window.bestHydratedBuildCache = {};
+    paginatedSortedUnits = [...paginatedSortedUnits].sort((a, b) => getLiveScore(b.unit) - getLiveScore(a.unit));
 
     window.unitAbsoluteRanks = {};
     paginatedSortedUnits.forEach((entry, i) => {
         window.unitAbsoluteRanks[entry.unit.id] = i + 1;
     });
 
-    const container = document.getElementById('dbPage');
-    if (!container) return;
-    paginatedSortedUnits.forEach(entry => {
-        const card = document.getElementById('card-' + entry.unit.id);
-        if (card) {
-            container.appendChild(card);
-            const rankBadge = card.querySelector('.placement-badge:nth-child(3)');
-            if (rankBadge) {
-                rankBadge.innerText = `DPS Rank: #${window.unitAbsoluteRanks[entry.unit.id]}`;
-            }
-        }
-    });
+    renderCurrentPage();
 };
 
 function renderUnitCard(unit, absoluteIndex) {
@@ -2053,7 +2082,34 @@ function renderCurrentPage() {
     const container = document.getElementById('dbPage');
     if (!container) return;
 
-    window.buildLoadObserver?.disconnect();
+    if (window.buildLoadObserver) {
+        window.buildLoadObserver.disconnect();
+        window.buildLoadObserver = null;
+    }
+    window.pendingBuildRenders = window.pendingBuildRenders || new Set();
+
+    const scheduleBuildRender = (unitId, forceSync = false, renderLimit = 100) => {
+        if (!unitId || !window.getUnitById?.(unitId)) return;
+        const key = `${unitId}:${renderLimit}:${forceSync ? 1 : 0}`;
+        if (window.pendingBuildRenders.has(key)) return;
+        window.pendingBuildRenders.add(key);
+
+        const run = () => {
+            window.pendingBuildRenders.delete(key);
+            if (!document.getElementById('card-' + unitId)) return;
+            try {
+                updateBuildListDisplay(unitId, forceSync, renderLimit);
+            } catch (e) {
+                console.error('[INVENTORY-MODE-DIAG] renderCurrentPage updateBuildListDisplay failed', e, { unitId });
+            }
+        };
+
+        if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(run, { timeout: 1000 });
+        } else {
+            window.requestAnimationFrame(run);
+        }
+    };
 
     const upp = getUnitsPerPage();
     const totalUnits = paginatedSortedUnits.length;
@@ -2097,7 +2153,7 @@ function renderCurrentPage() {
             const unitId = entry.target.id.replace('card-', '');
             if (entry.isIntersecting) {
                 window.visibleUnitIds.add(unitId);
-                if (window.getUnitById(unitId)) updateBuildListDisplay(unitId, false, 100);
+                scheduleBuildRender(unitId, false, 100);
                 entry.target.classList.remove('lazy-build-load');
             } else {
                 window.visibleUnitIds.delete(unitId);
@@ -2110,19 +2166,18 @@ function renderCurrentPage() {
         window.buildLoadObserver.observe(c);
         const unitId = c.id.replace('card-', '');
         window.visibleUnitIds.add(unitId);
-        if (window.getUnitById(unitId)) {
-            try {
-                updateBuildListDisplay(unitId, false, 100);
-            } catch (e) {
-                console.error('[INVENTORY-MODE-DIAG] renderCurrentPage updateBuildListDisplay failed', e, { unitId });
-            }
-        }
+        scheduleBuildRender(unitId, false, 100);
     });
 }
 
 window.goToPage = function (page) {
     const totalPages = Math.max(1, Math.ceil(paginatedSortedUnits.length / getUnitsPerPage()));
     if (page < 1 || page > totalPages) return;
+    if (window.buildLoadObserver) {
+        window.buildLoadObserver.disconnect();
+        window.buildLoadObserver = null;
+    }
+    window.pendingBuildRenders = new Set();
     currentPage = page;
     renderCurrentPage();
     document.querySelector('.dashboard-main')?.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2274,6 +2329,10 @@ function _executeGlobalFilter(term) {
     const searchTerm = (term || '').trim().toLowerCase();
     const clearBtn = document.getElementById('globalSearchClear');
     if (clearBtn) clearBtn.style.display = searchTerm ? 'flex' : 'none';
+    window.LIVE_SCORE_CACHE = {};
+    window.unitActiveBuilds = {};
+    window.hotbarFilteredBuilds = {};
+    window.bestHydratedBuildCache = {};
 
     const assignedInventoryUnitIds = new Set(Object.keys(window.inventoryUnitTraits || {}));
     const hasInventoryAssignments = assignedInventoryUnitIds.size > 0;
