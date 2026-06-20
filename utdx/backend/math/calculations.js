@@ -110,6 +110,22 @@ function calculateDPS(uStats, relicStats, context) {
         passiveBreakdown
     } = window.calcPassives(uStats, context, headPiece, upgradeLevel);
 
+    // Fused Warrior (Super) (Syncro): bugged FUA is always active and should be treated as passive damage.
+    if (window.isUnit && window.isUnit(uStats.id, 'fused_warrior_super_syncro')) {
+        const fusedSyncroBuggedFuaPassiveDmg = 100;
+        passivePcent += fusedSyncroBuggedFuaPassiveDmg;
+        passiveBreakdown.push({
+            name: "He is.....Only growing stronger? (Bugged FUA)",
+            dmg: fusedSyncroBuggedFuaPassiveDmg,
+            spa: 0,
+            range: 0,
+            crit: 0,
+            cdmg: 0,
+            trueDmg: 0,
+            dot: 0
+        });
+    }
+
     let { bossMult, traitDmgPct, traitSpaPct, traitCritRate, traitRangePct, traitDotBuff, eternalDmgBuff, eternalRangeBuff } = window.calcTraitSynergies(traitObj, uStats, wave);
     if (eternalDmgBuff > 0) passivePcent += eternalDmgBuff;
 
@@ -357,6 +373,8 @@ function calculateDPS(uStats, relicStats, context) {
     let finalDmgNormal = lvStats.dmg * (1 + traitDmgPct / 100) * (1 + baseR_Dmg / 100) * (1 + additiveTotal / 100) * (uStats.burnMultiplier ? (1 + uStats.burnMultiplier / 100) : 1) * (uStats.finalMult || 1) * abilityFinalMult;
     let finalDmg = finalDmgNormal;
     let finalDmgBoss = finalDmgNormal;
+    const isKingSailor = window.isUnit(uStats.id, 'king_sailor');
+    const kingSailorBaseDmgMultiplier = isKingSailor ? 2.5 : 1;
 
     let avgHit = finalDmg * avgCritMult;
     let avgHitBoss = finalDmgBoss * avgCritMultBoss;
@@ -399,28 +417,29 @@ function calculateDPS(uStats, relicStats, context) {
             usedSpa: usedSpa
         };
     } else if (isFusedWarriorSyncro) {
-        const fuaChance = uStats.customFollowUp?.chance ?? 25;
-        const fuaDmgMult = uStats.customFollowUp?.dmgMult || 1.0;
-        const critGatedExtra = (finalCritRate / 100) * (fuaChance / 100) * fuaDmgMult;
+        const fusedSyncroBuggedFuaPassiveDmg = 100;
 
-        attackMultiplier = 1 + critGatedExtra;
+        // Bugged FUA is always active and is counted as additive passive damage.
+        attackMultiplier = 1;
         usedSpa = finalSpa;
 
         hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
         bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
         normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
         extraAttacksData = {
-            req: `On Crit: ${fuaChance}% FUA`,
-            hits: `${finalCritRate.toFixed(1)}% Crit × ${fuaChance}% FUA`,
-            extra: critGatedExtra,
+            req: "Always active (bugged FUA converted to passive damage)",
+            hits: `+${fusedSyncroBuggedFuaPassiveDmg}% passive damage`,
+            extra: 0,
             attacksNeeded: 1,
-            mult: attackMultiplier,
-            label: uStats.customFollowUp?.label || "Crit-Gated Follow-Up",
+            mult: 1,
+            label: "He is.....Only growing stronger? (Bugged FUA)",
             usedSpa: finalSpa,
-            critGated: true,
+            passiveDamage: fusedSyncroBuggedFuaPassiveDmg,
+            passiveDamageBaseDmg: finalDmgNormal / (1 + fusedSyncroBuggedFuaPassiveDmg / 100),
+            critGated: false,
             critRate: finalCritRate,
-            fuaChance,
-            fuaDmgMult
+            fuaChance: 100,
+            fuaDmgMult: 1
         };
     } else if (window.isUnit(uStats.id, 'strongest_swordsman_hunter')) {
         const stance2DmgBonus = (upgradeLevel >= 6) ? 60 : 40;
@@ -466,10 +485,11 @@ function calculateDPS(uStats, relicStats, context) {
                 mult: attackMultiplier,
                 label: `Water God Follow-up (${effectiveSpaCap}s window)`
             };
-        } else if (window.isUnit(uStats.id, 'king_sailor')) {
+        } else if (isKingSailor) {
             const tickCount = 1;
             const tickDmg = 0.20;
-            attackMultiplier = 1.20;
+            const unmultipliedFinalDmg = finalDmg;
+            attackMultiplier = 1;
             extraAttacksData = {
                 req: "Baal's Lightning",
                 hits: `1 + ${tickCount} Tick`,
@@ -477,10 +497,29 @@ function calculateDPS(uStats, relicStats, context) {
                 attacksNeeded: 1,
                 mult: 1.20,
                 label: "Chain Lightning",
-                tickDmgVal: finalDmg * tickDmg,
-                avgTick: (finalDmg * tickDmg),
-                totalChain: (finalDmg * tickDmg * tickCount)
+                tickDmgVal: unmultipliedFinalDmg * tickDmg,
+                avgTick: (unmultipliedFinalDmg * tickDmg),
+                totalChain: (unmultipliedFinalDmg * tickDmg * tickCount)
             };
+
+            if (window.DEBUG_KING_SAILOR_MULTIPLIER) {
+                console.debug('[KING-SAILOR-MULTIPLIER]', {
+                    id: uStats.id,
+                    unmultipliedFinalDmg,
+                    multiplier: kingSailorBaseDmgMultiplier,
+                    attackMultiplier,
+                    extraAttacksMult: extraAttacksData.mult,
+                    avgHit,
+                    avgHitBoss,
+                    avgHitNormal,
+                    usedSpa,
+                    placement,
+                    expectedBaseDps: ((avgHit / usedSpa) * placement * kingSailorBaseDmgMultiplier),
+                    expectedBossDps: ((avgHitBoss / usedSpa) * placement * kingSailorBaseDmgMultiplier),
+                    expectedNormalDps: ((avgHitNormal / usedSpa) * placement * kingSailorBaseDmgMultiplier),
+                    chainDps: ((unmultipliedFinalDmg * tickDmg) / usedSpa) * placement
+                });
+            }
         } else if (window.isUnit(uStats.id, 'alpha_devil')) {
             const swordCount = 2;
             const swordDmgPct = 0.10;
@@ -509,9 +548,9 @@ function calculateDPS(uStats, relicStats, context) {
             }
         }
 
-        hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
-        bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
-        normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
+        hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier * kingSailorBaseDmgMultiplier);
+        bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier * kingSailorBaseDmgMultiplier);
+        normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier * kingSailorBaseDmgMultiplier);
     }
 
     if (uStats.customFollowUp && !isFusedWarrior && !isFusedWarriorSyncro) {

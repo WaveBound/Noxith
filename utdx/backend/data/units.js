@@ -91,6 +91,7 @@ const UNIT_FILES = [
     'sukuna.js',
     'Jingliu.js',
     'Maid.js',
+    'blanco_beast.js',
     'ace.js',
     'akainu.js',
     'ancient_mage.js',

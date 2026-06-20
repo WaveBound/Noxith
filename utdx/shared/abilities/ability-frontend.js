@@ -53,6 +53,5 @@ window.toggleAbility = function (unitId, checkbox) {
     // Refresh hotbar stats if this unit is in the hotbar
     if (typeof window.updateHotbarUI === 'function') window.updateHotbarUI();
 
-    // Ability state changes DPS, so the unit cards must be resorted by the new final score.
-    if (typeof window.resortUnitCards === 'function') window.resortUnitCards();
+    // Ability state changes DPS for this unit, but card placement stays fixed.
 };

@@ -670,6 +670,21 @@ function renderCritSection(data, setTagCfTotal, setTagCmTotal, cleanHeadDisplayN
     const setCdmgVal = data.totalSetStats?.cm || data.totalSetStats?.cdmg || 0;
     const setCmVal = Math.max(0, setCdmgVal - tagCmVal);
     const relicCdmgVal = data.relicBuffs?.cm || 0;
+    const relicSubCritVal = data.critData?.relicSubCrit || data.detailedBuffs?.relicSubCrit || 0;
+
+    if (window.DEBUG_CRIT_RENDER) {
+        console.debug('[CRIT-DIAG] renderCritSection', {
+            relicBuffsCf: data.relicBuffs?.cf || 0,
+            totalSetStatsCf: data.totalSetStats?.cf || 0,
+            relicSubCritVal,
+            oldRenderedRelicCf: (data.relicBuffs?.cf || 0) - (data.totalSetStats?.cf || 0),
+            setCrit: data.critData?.setCrit || 0,
+            tagCrit: data.critData?.tagCrit || 0,
+            accessoryCrit: data.critData?.accessoryCrit || 0,
+            rawCritRate: data.critData?.rawRate,
+            finalCritRate: data.critData?.rate
+        });
+    }
 
     return `
             <div class="dd-section">
@@ -679,7 +694,7 @@ function renderCritSection(data, setTagCfTotal, setTagCmTotal, cleanHeadDisplayN
                     <tr><td class="mt-cell-label mt-pl-sm mt-text-gold mt-text-bold">Crit Rate</td><td class="mt-cell-formula"></td><td class="mt-cell-val"></td></tr>
                     ${data.baseStats?.crit > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs">• Unit Base</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">${fmt.fix(data.baseStats.crit, 1)}%</td></tr>` : ''}
                     ${(data.traitObj?.critRate || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs">• Trait (${data.traitObj.name})</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">${fmt.fix(data.traitObj.critRate, 1)}%</td></tr>` : ''}
-                    ${(data.relicBuffs?.cf - (data.totalSetStats?.cf || 0)) > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs">• Relics (Main + Sub)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">${fmt.fix(data.relicBuffs.cf - (data.totalSetStats?.cf || 0), 1)}%</td></tr>` : ''}
+                    ${relicSubCritVal > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs">• Relics (Main + Sub)</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">${fmt.fix(relicSubCritVal, 1)}%</td></tr>` : ''}
                     ${setCfVal > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs" style="line-height:1.4;">↳ Set Bonus<br>&nbsp;&nbsp;&nbsp;&nbsp;(${relicSetName})</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs" style="vertical-align:top; padding-top:4px;">${fmt.fix(setCfVal, 1)}%</td></tr>` : ''}
                     ${accCfVal > 0 ? `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs" style="line-height:1.4;">↳ Accessory Base<br>&nbsp;&nbsp;&nbsp;&nbsp;(${cleanHeadDisplayName})</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs" style="vertical-align:top; padding-top:4px;">+${fmt.fix(accCfVal, 1)}%</td></tr>` : ''}
                     ${getTagPerkRowsHtml('cf', data)}
@@ -886,6 +901,47 @@ function renderDotSection(data, headDotRow) {
 function renderAttackRateSection(data) {
     const isSyncro = window.isUnit?.(data.baseStats?.id, 'fused_warrior_super_syncro');
     if (isSyncro) {
+        if (data.extraAttacks?.passiveDamage) {
+            const passiveDamage = data.extraAttacks.passiveDamage;
+            const passiveDamageBaseDmg = data.extraAttacks.passiveDamageBaseDmg || (data.dmgVal / (1 + passiveDamage / 100));
+            const passiveDamageDps = (passiveDamageBaseDmg * (data.critData?.avgMult || 1) / (data.finalSpa || data.spa || 1)) * (data.placement || 1);
+            const abilities = (data.baseStats?.ability || []).filter(ab => ab.noToggle && ab.dmgMult && ab.cooldown);
+            const abilityRows = abilities.map(ab => {
+                const abDmg = data.dmgVal * ab.dmgMult * (data.critData?.avgMult || 1);
+                const abDps = (abDmg / ab.cooldown) * (data.placement || 1);
+                return `
+                    <tr><td class="mt-cell-label text-custom" style="font-weight:700;">${ab.abilityName || 'Ability FUA'}</td><td class="mt-cell-formula">Every ${ab.cooldown}s</td><td class="mt-cell-val" style="color:#4ade80;">${fmt.num(abDps)} DPS</td></tr>
+                `;
+            }).join('');
+            const totalAbilityDps = abilities.reduce((sum, ab) => sum + ((data.dmgVal * ab.dmgMult * (data.critData?.avgMult || 1) / ab.cooldown) * (data.placement || 1)), 0);
+
+            return `
+                <div class="dd-section" style="border-left:3px solid #4ade80;">
+                    <div class="dd-title mt-text-green"><span>5. Bugged FUA Passive Damage</span> <button class="calc-info-btn" onclick="openInfoPopup('attack_rate')">?</button></div>
+                    <table class="calc-table">
+                        <tr><td class="mt-cell-label">Trigger</td><td class="mt-cell-formula">Bugged / Always Active</td><td class="mt-cell-val text-accent-start">+${fmt.fix(passiveDamage, 0)}% Passive Damage</td></tr>
+                        <tr><td class="mt-cell-label opacity-70 mt-pl-md">↳ Source</td><td class="mt-cell-formula">Converted from crit-gated FUA</td><td class="mt-cell-val opacity-70">Not crit-gated</td></tr>
+                        <tr class="mt-border-top">
+                            <td class="mt-cell-label mt-pt-sm text-white" style="font-weight:900;">Final Attack Mult</td>
+                            <td class="mt-cell-formula mt-pt-sm">x1.000</td>
+                            <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size:1.15rem; color:#4ade80;">x1.000</td>
+                        </tr>
+                        <tr><td class="mt-cell-label text-accent-start">Passive Damage Added</td><td class="mt-cell-formula">Base Hit DPS × Passive Damage</td><td class="mt-cell-val text-accent-start">${fmt.num(passiveDamageDps)} DPS</td></tr>
+                    </table>
+                </div>
+                <div class="dd-section" style="border-left:3px solid #4ade80;">
+                    <div class="dd-title mt-text-green"><span>6. Ability Follow-Up Attacks</span></div>
+                    <table class="calc-table">
+                        ${abilityRows || '<tr><td colspan="3" class="mt-cell-label opacity-50">No follow-ups found.</td></tr>'}
+                        <tr class="mt-border-top">
+                            <td class="mt-cell-label mt-pt-sm text-white" style="font-weight:900;">Total Ability DPS Added</td>
+                            <td class="mt-cell-formula"></td>
+                            <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size:1.15rem; color:#4ade80;">${fmt.num(totalAbilityDps)} DPS</td>
+                        </tr>
+                    </table>
+                </div>`;
+        }
+
         const f = data.baseStats?.customFollowUp || {};
         const ea = data.extraAttacks || {};
         const critRate = data.critData?.rate ?? 0;

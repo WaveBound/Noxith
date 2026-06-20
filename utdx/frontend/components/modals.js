@@ -576,7 +576,7 @@
             window.unitModesState[unitId] = modeIdx;
         }
 
-        // Bust sorting and live score caches for this unit dynamically to ensure rank updates correctly
+        // Bust live score caches for this unit; card placement stays fixed for mode UI changes.
         if (window.LIVE_SCORE_CACHE) {
             delete window.LIVE_SCORE_CACHE[unitId];
         }

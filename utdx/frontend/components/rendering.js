@@ -1999,7 +1999,8 @@ function renderUnitCard(unit, absoluteIndex) {
     const defaultSort = isAnyUnit(unit.id, ['sjw', 'esdeath']) ? 'damage' : 'dps';
 
     const notices = {
-        king_sailor: { icon: '⚠️', text: '<strong>Notice:</strong> In-game he does 2.5x dmg currently (e.g. Dps x2.5).', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' },
+        king_sailor: { icon: '⚠️', text: '<strong>Notice:</strong> In-game he does 2.5x base damage currently; chain lightning is calculated separately.', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' },
+        fused_warrior_super_syncro: { icon: '⚠️', text: '<strong>Notice:</strong> Fused Warrior Super Syncro is bugged; his 2x damage bonus against enemies with more than 10x HP does not work.', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' },
         mochi_pirate: { icon: '⚠️', text: '<strong>Notice:</strong> Mochi Pirate is bugged; he does not apply Time Snail currently / Crit Time snail enemies.', color: '#f87171', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.15)' },
         revolutionary_chief_syncro: { icon: '🔥', text: '<strong>Notice:</strong> DoT restarts duration if attacked again. DPS is calculated as 1 continuous tick per second.', color: '#60a5fa', bg: 'rgba(96, 165, 250, 0.08)', border: 'rgba(96, 165, 250, 0.15)' },
         ant_king_savage: { icon: '⚠️', text: '<strong>Notice:</strong> Ant King is bugged; any DoT%+ buffs applied to him are calculated twice.', color: '#f87171', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.15)' },

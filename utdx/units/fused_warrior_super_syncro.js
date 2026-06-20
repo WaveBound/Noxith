@@ -31,7 +31,7 @@ unitDatabase.push({
         dotDuration: 0,
         support: "",
         customFollowUp: {
-            chance: 25,
+            chance: 100,
             dmgMult: 1.0,
             critGated: true,
             requireCrit: true,

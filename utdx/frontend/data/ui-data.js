@@ -8,6 +8,7 @@ const patchNotesData = [
         date: "Jun 11, 2026",
         changes: [
             { type: "Unit", text: "<b>New Unit:</b> Added <b>The Drink Super Rage</b>." },
+            { type: "Unit", text: "<b>New Unit:</b> Added placeholder entry for <b>Blanco Beast</b>." },
             { type: "UI", text: "<b>Design Updates:</b> Applied UI design changes for improved layout and readability." },
             { type: "Fix", text: "<b>Loadout Mode:</b> Fixed hotbar trait selection so selecting a trait now updates the unit’s active trait/build." }
         ]
@@ -428,6 +429,7 @@ const guideData = [
     { unit: "the_drink_super_rage", img: "images/units/TheDrink.png", isCalculated: true },
     { unit: "fused_warrior_super_syncro", img: "images/units/FusedWarriorSuper.png", isCalculated: false },
     { unit: "limit_breaker_prince_marked", img: "images/units/LimitBreaker.png", isCalculated: false },
+    { unit: "blanco_beast", img: "images/units/BlancoBeast.png", isCalculated: false },
     { unit: "super_roku_third_ascension", img: "images/units/SuperRokuThird.png", isCalculated: false }
 ];
 const elementIcons = {
