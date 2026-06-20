@@ -47,28 +47,24 @@ const REVERSE_STAT_MAPPING = {
 };
 
 function getInventoryHeadOptions() {
-    const options = [];
-    const seen = new Set();
-    const addOption = (id, name) => {
-        if (!id || seen.has(id)) return;
-        seen.add(id);
-        options.push({ id, name });
-    };
+    return (window.RELIC_PIECE_CATALOG || [])
+        .filter(piece => piece.slot === 'Head')
+        .map(piece => ({ id: piece.id, name: piece.name }));
+}
 
-    (SETS || []).forEach(set => addOption(set.id, set.name));
-    ((typeof window !== 'undefined' && window.HEAD_PIECES) || []).forEach(head => addOption(head.id, head.name));
-
-    return options;
+function getRelicPiece(setKey, slot) {
+    return (window.RELIC_PIECE_CATALOG || []).find(piece => piece.id === setKey && piece.slot === slot)
+        || (window.RELIC_PIECE_CATALOG || []).find(piece => piece.id === setKey);
 }
 
 function getRelicDisplayName(setKey) {
     if (!setKey) return setKey;
 
+    const piece = getRelicPiece(setKey, 'Head') || getRelicPiece(setKey, 'Body') || getRelicPiece(setKey, 'Legs');
+    if (piece) return piece.name;
+
     const setObj = (SETS || []).find(s => s.id === setKey);
     if (setObj) return setObj.name;
-
-    const headObj = ((typeof window !== 'undefined' && window.HEAD_PIECES) || []).find(h => h.id === setKey);
-    if (headObj) return headObj.name;
 
     return String(setKey).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
@@ -300,7 +296,9 @@ function updateSetOptions(slot) {
     const setSelect = document.getElementById('newRelicSet');
     if (!setSelect) return;
     const currentSelection = setSelect.value;
-    const options = slot === 'Head' ? getInventoryHeadOptions() : (SETS || []).map(s => ({ id: s.id, name: s.name }));
+    const options = (window.RELIC_PIECE_CATALOG || [])
+        .filter(piece => piece.slot === slot)
+        .map(piece => ({ id: piece.id, name: piece.name }));
 
     setSelect.innerHTML = '';
     options.forEach(option => {
@@ -317,20 +315,21 @@ function updateSetOptions(slot) {
 }
 
 function updateStarVisibility() {
+    const slot = document.getElementById('newRelicSlot').value;
     const setId = document.getElementById('newRelicSet').value;
     const starSelect = document.getElementById('newRelicStars');
     if (!starSelect) return;
 
-    const selectedSet = (SETS || []).find(s => s.id === setId);
-    const selectedHeadPiece = ((typeof window !== 'undefined' && window.HEAD_PIECES) || []).find(h => h.id === setId);
-    const showStars = !!selectedSet && selectedSet.rarity === 'Secret' && !selectedHeadPiece;
+    const piece = getRelicPiece(setId, slot);
+    const selectedSet = piece?.setId ? (SETS || []).find(s => s.id === piece.setId) : null;
+    const showStars = !!piece && !!selectedSet && selectedSet.rarity === 'Secret' && !piece.headPiece;
     if (showStars) {
         starSelect.parentElement.classList.remove('hidden');
     } else {
         starSelect.parentElement.classList.add('hidden');
         if (starSelect.value !== "1") {
             starSelect.value = "1";
-            updateMainStatOptions(document.getElementById('newRelicSlot').value);
+            updateMainStatOptions(slot);
             updateSubStatValues(1);
         }
     }
@@ -453,6 +452,7 @@ function addRelic() {
 
     const slot = document.getElementById('newRelicSlot').value;
     let setKey = document.getElementById('newRelicSet').value;
+    const selectedPiece = getRelicPiece(setKey, slot);
 
     if (slot === 'Head') {
         if (setKey === 'shadow_reaper') setKey = 'shadow_reaper_necklace';
@@ -500,7 +500,12 @@ function deleteRelic(id) {
 // --- Visuals & Rendering ---
 
 function getRelicVisuals(setKey, slot) {
-    let visualKey = setKey;
+    const piece = getRelicPiece(setKey, slot);
+    if (piece?.headPiece && slot === 'Head') {
+        return { src: '', bg: RELIC_COLORS.default };
+    }
+
+    let visualKey = piece?.setId || setKey;
     if (visualKey === 'shadow_reaper_necklace') visualKey = 'shadow_reaper';
     if (visualKey === 'reaper_necklace') visualKey = 'reaper_set';
     if (visualKey === 'warlord_hat') visualKey = 'warlord';
@@ -511,11 +516,6 @@ function getRelicVisuals(setKey, slot) {
     if (visualKey === 'junior') visualKey = 'ninja';
     if (visualKey === 'rebellious') visualKey = 'rebellious_set';
     if (visualKey === 'fused_earrings') visualKey = 'fused_set';
-
-    const isCustomHeadPiece = ((typeof window !== 'undefined' && window.HEAD_PIECES) || []).some(h => h.id === setKey);
-    if (isCustomHeadPiece && slot === 'Head') {
-        return { src: '', bg: RELIC_COLORS.default };
-    }
 
     const customImages = {
         'ninja': { 'Head': 'JuniorMask.png', 'Body': 'JuniorTop.png', 'Legs': 'JuniorBottom.png' },
@@ -589,12 +589,8 @@ function renderInventory() {
         card.className = 'relic-card-clean' + (isHighlighted ? ' relic-highlighted' : '');
 
         const visuals = getRelicVisuals(relic.setKey, relic.slot);
-
-        let lookupKey = relic.setKey;
-        if (lookupKey === 'shadow_reaper_necklace') lookupKey = 'shadow_reaper';
-        if (lookupKey === 'reaper_necklace') lookupKey = 'reaper_set';
-        if (lookupKey === 'warlord_hat') lookupKey = 'warlord';
-        if (lookupKey === 'fused_earrings') lookupKey = 'fused_set';
+        const piece = getRelicPiece(relic.setKey, relic.slot);
+        const lookupKey = piece?.setId || relic.setKey;
 
         const setObj = (SETS || []).find(s => s.id === lookupKey);
         let starCount = 0;

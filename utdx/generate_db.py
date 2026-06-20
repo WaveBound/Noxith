@@ -345,12 +345,11 @@ if (isMainThread) {
         const hasPassiveDoT = effectiveStats.passives && effectiveStats.passives.some(p => p.dot && p.dot > 0);
         const hasNativeDoT = (effectiveStats.dot > 0) || (effectiveStats.burnMultiplier > 0) || isKiritoVR || hasPassiveDoT;
 
-        let allowedHeads = cfg.head ? (jobHeads && jobHeads.length > 0 ? jobHeads : ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings']) : ['none'];
+        let allowedHeads = cfg.head ? (jobHeads && jobHeads.length > 0 ? jobHeads : ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings', 'koyotes_sword']) : ['none'];
 
         if (typeof window.isHeadPieceAvailableToUnit === 'function') {
             allowedHeads = allowedHeads.filter(headType => window.isHeadPieceAvailableToUnit(headType, unit));
         }
-        
         // Always include 'none' (baseline) when head calculation is enabled
         if (cfg.head && !allowedHeads.includes('none')) {
             allowedHeads = ['none', ...allowedHeads];
@@ -527,7 +526,7 @@ if (isMainThread) {
         const MAP_PRIO = { 'dmg': 0, 'spa': 1, 'raw_dmg': 2 };
         const MAP_BODY = { 'dmg': 0, 'dot': 1, 'cm': 2 };
         const MAP_LEGS = { 'dmg': 0, 'spa': 1, 'cf': 2 };
-        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'bloodline_head': 7, 'reanimated_head': 8, 'sorcerer_hunter_spirit': 9, 'strongest_sorcerer_glasses': 10, 'monarch': 11, 'warlord_hat': 12, 'mochi_scarf': 13, 'flaming_donut': 14, 'fused_earrings': 15, 'ultiorras_wings': 16, 'berserks_cleave': 17, 'panther_claws': 18 };
+        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'bloodline_head': 7, 'reanimated_head': 8, 'sorcerer_hunter_spirit': 9, 'strongest_sorcerer_glasses': 10, 'monarch': 11, 'warlord_hat': 12, 'mochi_scarf': 13, 'flaming_donut': 14, 'fused_earrings': 15, 'ultiorras_wings': 16, 'berserks_cleave': 17, 'panther_claws': 18, 'koyotes_sword': 19 };
 
         const stringPool = new Map(); const stringArr = [""]; 
         const subPool = new Map(); const subArr = [null]; 
@@ -609,7 +608,7 @@ if (isMainThread) {
     const S = RAW.s; const P = RAW.p; const D = RAW.d;
     const PRIO = ['dmg', 'spa', 'raw_dmg'];
     const BODY = ['dmg', 'dot', 'cm']; const LEGS = ['dmg', 'spa', 'cf'];
-    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'ultiorras_wings', 'berserks_cleave', 'panther_claws'];
+    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'koyotes_sword'];
     const DESC_BODY = ['Dmg', 'DoT', 'Crit Dmg']; const DESC_LEGS = ['Dmg', 'Spa', 'Crit Rate'];
     const ROW_SIZE = 18;
 
@@ -744,7 +743,7 @@ if (isMainThread) {
             const PRIO = ['dmg', 'spa', 'raw_dmg'];
             const BODY = ['dmg', 'dot', 'cm'];
             const LEGS = ['dmg', 'spa', 'cf'];
-            const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'ultiorras_wings', 'berserks_cleave', 'panther_claws'];
+            const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'koyotes_sword'];
 
             const decode = (b64) => {
                 const bin = Buffer.from(b64, 'base64').toString('binary');
@@ -1085,7 +1084,7 @@ if (typeof window !== 'undefined') {
                 try:
                     with open(fpath, "r", encoding="utf-8") as f:
                         first_lines = "".join([f.readline() for _ in range(5)])
-                    required_head_sigs = ["flaming_donut", "fused_earrings", "ultiorras_wings", "berserks_cleave", "panther_claws"]
+                    required_head_sigs = ["flaming_donut", "fused_earrings", "ultiorras_wings", "berserks_cleave", "panther_claws", "koyotes_sword"]
                     return "// BUILDSIG:" in first_lines and all(h in first_lines for h in required_head_sigs)
                 except Exception:
                     return False
@@ -1103,7 +1102,7 @@ if (typeof window !== 'undefined') {
                         try:
                             with open(fpath, "r", encoding="utf-8") as f:
                                 first_lines = "".join([f.readline() for _ in range(5)])
-                                required_head_sigs = ["flaming_donut", "fused_earrings", "ultiorras_wings", "berserks_cleave", "panther_claws"]
+                                required_head_sigs = ["flaming_donut", "fused_earrings", "ultiorras_wings", "berserks_cleave", "panther_claws", "koyotes_sword"]
                                 if "// BUILDSIG:" not in first_lines or any(h not in first_lines for h in required_head_sigs):
                                     combinations.append(c)
                         except Exception:
@@ -1117,7 +1116,7 @@ if (typeof window !== 'undefined') {
                 return
 
             if selected_heads is None:
-                selected_heads = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings']
+                selected_heads = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings', 'koyotes_sword']
             if selected_sets is None:
                 selected_sets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Fused Warrior']
 
@@ -1269,7 +1268,7 @@ if (typeof window !== 'undefined') {
                 try:
                     with open(fpath, "r", encoding="utf-8") as f:
                         first_lines = "".join([f.readline() for _ in range(5)])
-                    required_head_sigs = ["flaming_donut", "fused_earrings", "ultiorras_wings", "berserks_cleave", "panther_claws"]
+                    required_head_sigs = ["flaming_donut", "fused_earrings", "ultiorras_wings", "berserks_cleave", "panther_claws", "koyotes_sword"]
                     return "// BUILDSIG:" in first_lines and all(h in first_lines for h in required_head_sigs)
                 except Exception:
                     return False
@@ -1510,7 +1509,7 @@ HTML = """
         let units = []; let selected = new Set();
         const LAST_GENERATE_KEY = 'utdxLastGenerateTime';
         const relicSets = ['Junior Ninja', 'Sun God', 'Laughing Captain', 'Ex Captain', 'Shadow Reaper', 'Reaper Set', 'Super Roku', 'Bio-Android', 'Biju Set', 'Rebellious Set', 'Reanimated Set', 'Great Mage', 'Sorcerer Hunter', 'Strongest Sorcerer', 'Monarch', 'Warlord', 'Fused Warrior'];
-        const headPieces = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings'];
+        const headPieces = ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings', 'koyotes_sword'];
         let selectedSets = new Set(relicSets);
         let selectedHeads = new Set(headPieces);
         

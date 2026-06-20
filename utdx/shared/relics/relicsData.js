@@ -183,7 +183,104 @@ const HEAD_PIECES = [
             dotDuration: 5,
             dotOverride: true
         }
+    },
+    {
+        id: "koyotes_sword",
+        name: "Koyote's Sword",
+        exclusive: ["stark"],
+        stats: { dmg: 200 }
     }
 ];
 
 window.HEAD_PIECES = HEAD_PIECES;
+
+const HEAD_SET_ID_ALIASES = {
+    shadow_reaper: 'shadow_reaper_necklace',
+    reaper_set: 'reaper_necklace',
+    warlord: 'warlord_hat',
+    reanimated_ninja: 'reanimated_head',
+    biju_set: 'biju_head',
+    strongest_sorcerer: 'strongest_sorcerer_glasses',
+    sorcerer_hunter: 'sorcerer_hunter_spirit',
+    ninja: 'junior',
+    fused_set: 'fused_earrings'
+};
+
+function getRelicPieceCatalog() {
+    const pieces = [];
+    const addPiece = (piece) => {
+        if (!piece || !piece.id || !piece.slot) return;
+        const duplicate = pieces.some(existing => existing.id === piece.id && existing.slot === piece.slot);
+        if (!duplicate) pieces.push(piece);
+    };
+
+    (SETS || []).forEach(set => {
+        const headId = HEAD_SET_ID_ALIASES[set.id] || set.id;
+        addPiece({
+            id: headId,
+            slot: 'Head',
+            name: `${set.name} Head`,
+            setKey: headId,
+            setId: set.id,
+            rarity: set.rarity,
+            source: set.source,
+            location: set.location,
+            locationImage: set.locationImage,
+            bonus: set.accessory || {},
+            accessory: set.accessory || {},
+            headPiece: false,
+            pieceType: 'set-head'
+        });
+        addPiece({
+            id: set.id,
+            slot: 'Body',
+            name: `${set.name} Body`,
+            setKey: set.id,
+            setId: set.id,
+            rarity: set.rarity,
+            source: set.source,
+            location: set.location,
+            locationImage: set.locationImage,
+            bonus: set.bonus || {},
+            headPiece: false,
+            pieceType: 'body'
+        });
+        addPiece({
+            id: set.id,
+            slot: 'Legs',
+            name: `${set.name} Legs`,
+            setKey: set.id,
+            setId: set.id,
+            rarity: set.rarity,
+            source: set.source,
+            location: set.location,
+            locationImage: set.locationImage,
+            bonus: set.bonus || {},
+            headPiece: false,
+            pieceType: 'legs'
+        });
+    });
+
+    (HEAD_PIECES || []).forEach(head => {
+        addPiece({
+            id: head.id,
+            slot: 'Head',
+            name: head.name,
+            setKey: head.id,
+            setId: head.id,
+            rarity: 'Custom',
+            source: 'Virtual Realm',
+            exclusive: head.exclusive || [],
+            stats: head.stats || {},
+            headPiece: true,
+            pieceType: 'head-piece'
+        });
+    });
+
+    return pieces;
+}
+
+const RELIC_PIECE_CATALOG = getRelicPieceCatalog();
+
+window.RELIC_PIECE_CATALOG = RELIC_PIECE_CATALOG;
+window.getRelicPieceCatalog = getRelicPieceCatalog;

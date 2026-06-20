@@ -652,7 +652,7 @@ window.getUnitsPerPage = () => {
 };
 
 // Constants & Configurations
-const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings'];
+const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings', 'koyotes_sword'];
 
 const HEAD_CONFIG = {
     sun_god: { name: 'Sun God', search: 'Sun God', cls: 'sungod' },
@@ -672,7 +672,8 @@ const HEAD_CONFIG = {
     ultiorras_wings: { name: "Ultiorra's Wings", search: 'Ultiorra Wings', cls: 'custom' },
     berserks_cleave: { name: "Berserk's Cleave", search: 'Berserk Cleave', cls: 'custom' },
     panther_claws: { name: 'Panther Claws', search: 'Panther Claws', cls: 'custom' },
-    fused_earrings: { name: 'Fused Earrings', search: 'Earrings', cls: 'custom' }
+    fused_earrings: { name: 'Fused Earrings', search: 'Earrings', cls: 'custom' },
+    koyotes_sword: { name: "Koyote's Sword", search: "Koyote Sword", cls: 'custom' }
 };
 
 const COMBO_TITLES = {

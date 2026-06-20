@@ -33,7 +33,7 @@ unitDatabase.push({
         { dmg: 810, spa: 8, range: 25, cost: 3250 },   // Up 4
         { dmg: 1050, spa: 7.5, range: 28, cost: 3475 },  // Up 5
         { dmg: 1128, spa: 7, range: 35, cost: 3600 },   // Up 6 (Circle AoE)
-        { dmg: 1230, spa: 7, range: 35, cost: 4150 },  // Up 7
+        { dmg: 1230, spa: 7, range: 35, cost: 4150, spaCap: 2 },  // Up 7
         { dmg: 1428, spa: 5.5, range: 30, cost: 4880 }, // Up 8 (Line AoE)
         { dmg: 1530, spa: 5, range: 33, cost: 5275, unlocksAbility: true } // Up 9
     ],

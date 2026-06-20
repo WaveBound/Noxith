@@ -203,7 +203,8 @@
             'sorcerer_hunter_spirit': 'S.H. Spirit', 'strongest_sorcerer_glasses': 'Strongest',
             'monarch': 'Monarch Cape', 'warlord_hat': 'Warlord Hat', 'mochi_scarf': 'Mochi Scarf',
             'flaming_donut': 'Flaming Donut', "ultiorras_wings": "Ultiorra's Wings",
-            "berserks_cleave": "Berserk's Cleave", 'panther_claws': 'Panther Claws', 'none': 'None'
+            "berserks_cleave": "Berserk's Cleave", 'panther_claws': 'Panther Claws',
+            'koyotes_sword': "Koyote's Sword", 'none': 'None'
         };
         const MAIN_STAT_NAMES = {
             body: { 'dmg': 'Damage', 'dot': 'DoT', 'cm': 'Crit Damage' },
