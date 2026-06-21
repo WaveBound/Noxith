@@ -393,9 +393,10 @@ function calculateDPS(uStats, relicStats, context) {
         usedSpa = ar.usedSpa;
         attackMultiplier = ar.attackMultiplier;
         extraAttacksData = ar.extraAttacksData;
-        hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
-        bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
-        normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
+        const kingSailorHitMultiplier = isKingSailor ? kingSailorBaseDmgMultiplier : 1;
+        hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier * kingSailorHitMultiplier);
+        bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier * kingSailorHitMultiplier);
+        normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier * kingSailorHitMultiplier);
     } else if (isFusedWarrior) {
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
         const followUp2Chance = (eLevel >= 2) ? 0.70 : 0.50;
@@ -488,38 +489,19 @@ function calculateDPS(uStats, relicStats, context) {
         } else if (isKingSailor) {
             const tickCount = 1;
             const tickDmg = 0.20;
-            const unmultipliedFinalDmg = finalDmg;
             attackMultiplier = 1;
             extraAttacksData = {
                 req: "Baal's Lightning",
-                hits: `1 + ${tickCount} Tick`,
+                hits: `1 Base + ${tickCount} Tick`,
                 extra: tickCount * tickDmg,
                 attacksNeeded: 1,
-                mult: 1.20,
-                label: "Chain Lightning",
-                tickDmgVal: unmultipliedFinalDmg * tickDmg,
-                avgTick: (unmultipliedFinalDmg * tickDmg),
-                totalChain: (unmultipliedFinalDmg * tickDmg * tickCount)
+                mult: 1.0,
+                label: "Chain Lightning (Separate Non-Crit Tick)",
+                tickDmgVal: finalDmg * tickDmg,
+                avgTick: (finalDmg * tickDmg),
+                totalChain: (finalDmg * tickDmg * tickCount),
+                chainDps: ((finalDmg * tickDmg) / usedSpa) * placement
             };
-
-            if (window.DEBUG_KING_SAILOR_MULTIPLIER) {
-                console.debug('[KING-SAILOR-MULTIPLIER]', {
-                    id: uStats.id,
-                    unmultipliedFinalDmg,
-                    multiplier: kingSailorBaseDmgMultiplier,
-                    attackMultiplier,
-                    extraAttacksMult: extraAttacksData.mult,
-                    avgHit,
-                    avgHitBoss,
-                    avgHitNormal,
-                    usedSpa,
-                    placement,
-                    expectedBaseDps: ((avgHit / usedSpa) * placement * kingSailorBaseDmgMultiplier),
-                    expectedBossDps: ((avgHitBoss / usedSpa) * placement * kingSailorBaseDmgMultiplier),
-                    expectedNormalDps: ((avgHitNormal / usedSpa) * placement * kingSailorBaseDmgMultiplier),
-                    chainDps: ((unmultipliedFinalDmg * tickDmg) / usedSpa) * placement
-                });
-            }
         } else if (window.isUnit(uStats.id, 'alpha_devil')) {
             const swordCount = 2;
             const swordDmgPct = 0.10;
@@ -1035,7 +1017,7 @@ function calculateDPS(uStats, relicStats, context) {
         eternalBuff: eternalDmgBuff,
         eternalRangeBuff: eternalRangeBuff,
         totalAdditivePct: additiveTotal,
-        conditionalData: uStats.burnMultiplier ? { name: "Target: Burn", val: uStats.burnMultiplier, mult: (1 + uStats.burnMultiplier / 100) } : (uStats.finalMult > 1 ? { name: uStats.id === 'mochi_pirate' ? "Evercrush Dough" : "Raw Multiplier", val: 0, mult: uStats.finalMult } : null),
+        conditionalData: isKingSailor ? { name: "5-hit base attack: 2.5x Base Hit Damage", val: 150, mult: kingSailorBaseDmgMultiplier } : (uStats.burnMultiplier ? { name: "Target: Burn", val: uStats.burnMultiplier, mult: (1 + uStats.burnMultiplier / 100) } : (uStats.finalMult > 1 ? { name: uStats.id === 'mochi_pirate' ? "Evercrush Dough" : "Raw Multiplier", val: 0, mult: uStats.finalMult } : null)),
         headBuffs: { dmg: headDmgBase + headDmgPassiveMod + headDmgTag, headBase: headDmgBase, passiveDmg: headDmgPassiveMod, tagDmg: headDmgTag, dot: headDotBuff, type: headPiece, warlordSpa, ...headCalc },
         dotData: dotBreakdown,
         critData: {

@@ -643,6 +643,7 @@ function getTagPerkRowsHtml(statType, data) {
 }
 
 function renderCritSection(data, setTagCfTotal, setTagCmTotal, cleanHeadDisplayName, relicSetName) {
+    const isKingSailor = data.baseStats?.id === 'king_sailor';
     let globalCritBreakdownHtml = '', globalCdmgBreakdownHtml = '';
     if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
         Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
@@ -708,7 +709,7 @@ function renderCritSection(data, setTagCfTotal, setTagCmTotal, cleanHeadDisplayN
                     ${getTagPerkRowsHtml('cdmg', data)}
                     ${globalCdmgBreakdownHtml}${passiveCdmgBreakdownHtml}
                     <tr><td class="mt-cell-label">Total Crit Damage</td><td class="mt-cell-formula">=</td><td class="mt-cell-val calc-highlight">${fmt.fix(data.critData?.cdmg, 0)}%</td></tr>
-                    <tr><td class="mt-cell-label text-right pr-2 mt-pt-md">Avg Damage Per Hit</td><td class="mt-cell-formula mt-pt-md"></td><td class="mt-cell-val calc-result text-right mt-pt-md">${fmt.num((data.dmgVal || 0) * (data.critData?.avgMult || 1))}</td></tr>
+                    <tr><td class="mt-cell-label text-right pr-2 mt-pt-md">${isKingSailor ? 'Avg 5-Hit Base Damage' : 'Avg Damage Per Hit'}</td><td class="mt-cell-formula mt-pt-md">${isKingSailor ? 'x2.50 total hits' : ''}</td><td class="mt-cell-val calc-result text-right mt-pt-md">${fmt.num((data.dmgVal || 0) * (isKingSailor ? 2.5 : 1) * (data.critData?.avgMult || 1))}</td></tr>
                 </table>
             </div>`;
 }
@@ -1121,11 +1122,24 @@ function renderAttackRateSection(data) {
     let detailRows = '';
 
     if (isKS) {
-        detailRows = `
-            <tr class="mt-border-top"><td class="mt-cell-label mt-pt-md">Chain Logic</td><td class="mt-cell-formula mt-pt-md">1 Tick × 20% (Non-Crit)</td><td class="mt-cell-val mt-pt-md"></td></tr>
-            <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Base Tick Dmg</td><td class="mt-cell-formula"></td><td class="mt-cell-val">${fmt.num(data.extraAttacks.tickDmgVal)}</td></tr>
-        `;
-    } else if (isAD) {
+        const chainDps = data.extraAttacks.chainDps ?? (((data.extraAttacks.tickDmgVal || 0) / (data.finalSpa || data.spa || 1)) * (data.placement || 1));
+        return `
+            <div class="dd-section" style="border-left:3px solid #60a5fa;">
+                <div class="dd-title text-custom" style="color:#60a5fa !important;"><span>5. Chain Lightning (Separate Non-Crit Tick)</span> <button class="calc-info-btn" onclick="openInfoPopup('attack_rate')">?</button></div>
+                <table class="calc-table">
+                    <tr><td class="mt-cell-label">Chain Logic</td><td class="mt-cell-formula">1 Tick × 20% (Non-Crit)</td><td class="mt-cell-val"></td></tr>
+                    <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Base Tick Dmg</td><td class="mt-cell-formula"></td><td class="mt-cell-val opacity-70">${fmt.num(data.extraAttacks.tickDmgVal)}</td></tr>
+                    <tr><td class="mt-cell-label text-accent-start">Chain Tick DPS</td><td class="mt-cell-formula">Tick Dmg / Attack Rate</td><td class="mt-cell-val text-accent-start">${fmt.num(chainDps)} DPS</td></tr>
+                    <tr class="mt-border-top">
+                        <td class="mt-cell-label mt-pt-sm text-white">Final Attack Mult</td>
+                        <td class="mt-cell-formula"></td>
+                        <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size:1.15rem; color:#60a5fa;">x1.000</td>
+                    </tr>
+                </table>
+            </div>`;
+    }
+
+    if (isAD) {
         detailRows = `
             <tr class="mt-border-top"><td class="mt-cell-label mt-pt-md">Sword Logic</td><td class="mt-cell-formula mt-pt-md">(200% Dmg * Crit) / 20s</td><td class="mt-cell-val mt-pt-md"></td></tr>
         `;
