@@ -350,6 +350,11 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
                     // B. Construct Total Stats Object (Main + Subs)
                     let totalStats = { set: activeSetKey, dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0 };
                     const addStat = (type, val) => { if (type === 'range' && !isRangeRelicsEnabled()) return; if (totalStats[type] !== undefined) totalStats[type] += val; };
+                    const mapStatKey = (k) => {
+                        if (k === 'cdmg' || k === 'crit dmg') return 'cm';
+                        if (k === 'crit' || k === 'crit rate') return 'cf';
+                        return k;
+                    };
 
                     const getMainVal = (relic) => {
                         let base = 0;
@@ -357,6 +362,39 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
                         if (relic.slot === 'Body') base = MAIN_STAT_VALS.body[relic.mainStat] || 0;
                         if (relic.slot === 'Legs') base = MAIN_STAT_VALS.legs[relic.mainStat] || 0;
                         return base * (relic.stars || 1);
+                    };
+
+                    const formatSubs = (relic) => Object.entries(relic.subs).map(([k, v]) => ({ type: k, val: v }));
+                    const baseFillSubs = { head: [], body: [], legs: [] };
+
+                    const addBaseFillsForSlot = (slot, mainStatType) => {
+                        if (!includeSubs) return;
+                        const existingTypes = new Set();
+                        if (slot === 'head') {
+                            if (head.id === 'none') return;
+                            Object.entries(head.subs).forEach(([k]) => existingTypes.add(mapStatKey(k)));
+                        } else if (slot === 'body') {
+                            if (body.id === 'none-b') return;
+                            Object.entries(body.subs).forEach(([k]) => existingTypes.add(mapStatKey(k)));
+                        } else if (slot === 'legs') {
+                            if (leg.id === 'none-l') return;
+                            Object.entries(leg.subs).forEach(([k]) => existingTypes.add(mapStatKey(k)));
+                        }
+
+                        const mappedMain = mapStatKey(mainStatType);
+                        const validCandidates = normalizeSubCandidates(SUB_CANDIDATES).filter(c => {
+                            if (!statConfig.applyRelicDot && c === 'dot') return false;
+                            if (!statConfig.applyRelicCrit && (c === 'cm' || c === 'cf')) return false;
+                            return true;
+                        });
+
+                        validCandidates.forEach(cand => {
+                            if (cand === mappedMain) return;
+                            if (existingTypes.has(cand)) return;
+                            const fillVal = PERFECT_SUBS[cand] * starMult;
+                            addStat(cand, fillVal);
+                            baseFillSubs[slot].push({ type: cand, val: fillVal, baseFill: true });
+                        });
                     };
 
                     [body, leg].forEach(r => {
@@ -368,6 +406,10 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
                     if (head.id !== 'none' && includeSubs) {
                         Object.entries(head.subs).forEach(([k, v]) => addStat(k, v));
                     }
+
+                    addBaseFillsForSlot('head', null);
+                    addBaseFillsForSlot('body', body.mainStat);
+                    addBaseFillsForSlot('legs', leg.mainStat);
 
                     // C. Run Calculation Loops (DMG, SPA, RANGE)
                     const maxPts = context.maxPts || 99;
@@ -390,19 +432,19 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
                         let res = calculateDPS(effectiveStats, totalStats, context);
                         trackOptimizerStats('calculateDPS.inventory', { dpsCalls: 1 });
 
-                        // OPTIMIZATION: Only keep the best for this Trait + Priority + Set combination
-                        const bestKey = `${trait.id}-${prio.id}-${activeSetKey}-${head.setKey}`;
+                        // OPTIMIZATION: Only keep the best for this Trait + Priority + Set + exact relic combo
+                        const bestKey = `${trait.id}-${prio.id}-${activeSetKey}-${head.id}-${body.id}-${leg.id}`;
                         const currentBest = bestMap.get(bestKey);
 
                         if (!currentBest || window.checkIsBetter(res, currentBest.res, prio.id)) {
                             const entryId = `${unit.id}${suffix}-${trait.id}-INV-${head.id}_${body.id}_${leg.id}${modeTag}${cfgTag}-${prio.id}`;
 
                             // UI Formatting
-                            const formatSubs = (relic) => Object.entries(relic.subs).map(([k, v]) => ({ type: k, val: v }));
+                            const mergeSubs = (explicit, baseFills) => [...(explicit || []), ...(baseFills || [])];
                             let subStatsUI = {
-                                head: (includeSubs && head.id !== 'none') ? formatSubs(head) : null,
-                                body: (includeSubs && body.id !== 'none-b') ? formatSubs(body) : null,
-                                legs: (includeSubs && leg.id !== 'none-l') ? formatSubs(leg) : null,
+                                head: (includeSubs && head.id !== 'none') ? mergeSubs(formatSubs(head), baseFillSubs.head) : null,
+                                body: (includeSubs && body.id !== 'none-b') ? mergeSubs(formatSubs(body), baseFillSubs.body) : null,
+                                legs: (includeSubs && leg.id !== 'none-l') ? mergeSubs(formatSubs(leg), baseFillSubs.legs) : null,
                                 selectedHead: head.setKey
                             };
 
@@ -502,7 +544,8 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
     let spaPts = isSpaPrio ? 999 : 0;
     let rangePts = isRangePrio ? 999 : 0;
 
-    // Use Unified Context Builder
+    // Use Unified Context Builder. Merge ctxOverrides into options so hotbar/global
+    // buff flags are available while context-dependent passives/relics are resolved.
     const traitForContext = ctxOverrides.traitOverride || liteData.traitName;
     const { effectiveStats, context } = buildCalculationContext(unit, traitForContext, {
         isAbility,
@@ -513,10 +556,9 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
         upgradeLevel: forcedUpgradeLevel,
         starMult: liteData.stars || 1,
         forcedModeIdx: extractedModeIdx,
-        isHotbar: ctxOverrides.isHotbar || false
+        isHotbar: ctxOverrides.isHotbar || false,
+        ...(ctxOverrides || {})
     });
-
-    if (ctxOverrides) Object.assign(context, ctxOverrides);
 
     // Redundant sync removed; buildCalculationContext now handles this natively.
 
@@ -550,6 +592,18 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
         });
     }
 
+    // Calculate DPS ONCE before fillers to get accurate baseline crit rate (including global buffs)
+    effectiveStats.context = context;
+    const preFillerRes = typeof calculateDPS === 'function' ? calculateDPS(effectiveStats, totalStats, context) : { critData: { rawRate: 0, rate: 0 } };
+
+    // Check if base unit crit (passives + global buffs + trait) is already >= 100%
+    const zeroRelicRes = typeof calculateDPS === 'function' ? calculateDPS(effectiveStats, {}, context) : { critData: { rawRate: 0 } };
+    const nonRelicRawRate = zeroRelicRes.critData ? zeroRelicRes.critData.rawRate : 0;
+    const overcappedCrit = nonRelicRawRate >= 99.9;
+
+    const baselineRaw = preFillerRes.critData ? preFillerRes.critData.rawRate : 0;
+    const baselineRate = preFillerRes.critData ? preFillerRes.critData.rate : 0;
+
     // 2. FILL MISSING BASE STATS (Auto-fill for Static DB)
     const addBaseFills = (slot, mainStatType) => {
         const existingTypes = new Set();
@@ -564,13 +618,13 @@ function reconstructMathData(liteData, forcedUpgradeLevel = undefined, ctxOverri
             return true;
         });
 
-        // SMART FILL: Prune 'cf' from filler if baseline (main stats + set) is already crit capped.
+        // SMART FILL: Prune 'cm' from filler if unit has 0 crit rate and cannot crit.
         let fillCandidates = [...validCandidates];
-        if (fillCandidates.includes('cf')) {
-            const tempRes = calculateDPS(effectiveStats, totalStats, context);
-            if (tempRes.critData && tempRes.critData.rawRate >= 100) {
-                fillCandidates = fillCandidates.filter(c => c !== 'cf');
-            }
+        if (baselineRate === 0) {
+            fillCandidates = fillCandidates.filter(c => c !== 'cm');
+        }
+        if (overcappedCrit) {
+            fillCandidates = fillCandidates.filter(c => c !== 'cf');
         }
 
         fillCandidates.forEach(cand => {
@@ -624,10 +678,16 @@ window.getBenchmarkDps = function (unitId, traitName, starMult, isAbility) {
         isAbility: isAbility
     });
 
+    const zeroRelicRes = typeof calculateDPS === 'function' ? calculateDPS(effectiveStats, {}, context) : { critData: { rawRate: 0, rate: 0 } };
+    const overcappedCrit = (zeroRelicRes.critData?.rawRate ?? 0) >= 99.9;
+    const noCritPossible = (zeroRelicRes.critData?.rate ?? 0) === 0;
+
     let maxScore = 0;
     const candidates = normalizeSubCandidates(['dmg', 'spa', 'range', 'cm', 'cf', 'dot']).filter(c => {
         if (c === 'dot' && !statConfig.applyRelicDot) return false;
         if ((c === 'cm' || c === 'cf') && !statConfig.applyRelicCrit) return false;
+        if (c === 'cf' && overcappedCrit) return false;
+        if (c === 'cm' && noCritPossible) return false;
         return true;
     });
 

@@ -12,6 +12,14 @@ window.getUnitUncappedCrit = function (slotUnit, slotIndex) {
     let crit = 0;
 
     if (build && build.critData) {
+        if (window.DEBUG_CRIT_OVERFLOW) {
+            console.debug('[CRIT-DIAG] getUnitUncappedCrit using cached build rawRate', {
+                unitId: slotUnit.id,
+                slotIndex,
+                rawRate: build.critData.rawRate,
+                rate: build.critData.rate
+            });
+        }
         return build.critData.rawRate || build.critData.rate || 0;
     }
 
@@ -31,18 +39,6 @@ window.getUnitUncappedCrit = function (slotUnit, slotIndex) {
                         crit += 45;
                     }
                 }
-            }
-        }
-
-        if (hState.buffState.ancientMage) {
-            if (!window.isUnit(slotUnit.id, 'ancient_mage')) {
-                crit += 20;
-            }
-        }
-
-        if (hState.buffState.kingSailor || hState.buffState.ksailor) {
-            if (!window.isUnit(slotUnit.id, 'king_sailor')) {
-                crit += 10;
             }
         }
 
@@ -80,6 +76,13 @@ window.getUnitUncappedCrit = function (slotUnit, slotIndex) {
         }
     }
 
+    if (window.DEBUG_CRIT_OVERFLOW) {
+        console.debug('[CRIT-DIAG] getUnitUncappedCrit fallback computed crit', {
+            unitId: slotUnit.id,
+            slotIndex,
+            baseCrit: crit
+        });
+    }
     return crit;
 };
 
@@ -341,6 +344,21 @@ function calculateDPS(uStats, relicStats, context) {
     };
 
     let rawCritRate = uStats.crit + traitCritRate + globalCrit + (headCalc.cf || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives;
+
+    if (window.DEBUG_CRIT_OVERFLOW) {
+        console.debug('[CRIT-DIAG] calculateDPS raw crit before fixed caps', {
+            unitId: uStats.id,
+            rawCritRate,
+            unitCrit: uStats.crit,
+            traitCritRate,
+            globalCrit,
+            headCrit: headCalc?.cf || 0,
+            relicSubCrit: baseR_Cf,
+            setCrit: sBonus?.cf || 0,
+            passiveCritFromPassives,
+            headPiece
+        });
+    }
 
     if (window.isUnit(uStats.id, 'kirito')) rawCritRate = Math.min(rawCritRate, uStats.crit);
     if (window.isUnit(uStats.id, 'pirate_king')) rawCritRate = 40;

@@ -895,6 +895,30 @@ function getFinalDpsScore(build) {
     );
 }
 
+function getRuntimeEffectiveCritCap(unit, critData, headUsed = 'none') {
+    if (isUnit(unit?.id, 'pirate_king')) return 40;
+    if (headUsed === 'sorcerer_hunter_spirit') return 0;
+    if (isUnit(unit?.id, 'angel_born_in_hell') || isUnit(unit?.id, 'the_strongest_of_today') || isUnit(unit?.id, 'strongest_of_today')) return 50;
+    if (isUnit(unit?.id, 'kirito')) return unit?.stats?.crit || 0;
+    return 100;
+}
+
+function hasCritRateSubstats(subStats) {
+    if (!subStats) return false;
+    return ['head', 'body', 'legs'].some(piece => (subStats[piece] || []).some(sub => sub.type === 'cf'));
+}
+
+function stripCritRateSubstats(subStats) {
+    if (!subStats) return {};
+    const stripped = { ...subStats };
+    ['head', 'body', 'legs'].forEach(piece => {
+        const list = (stripped[piece] || []).filter(sub => sub.type !== 'cf');
+        if (list.length) stripped[piece] = list;
+        else delete stripped[piece];
+    });
+    return stripped;
+}
+
 function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
     if (!r) return null;
 
@@ -903,7 +927,7 @@ function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
         activeModeIdx = Array.isArray(state) ? state[0] : state;
     }
 
-    const res = (r.id && r.mainStats && r.setName) ? { ...r } : {
+    let res = (r.id && r.mainStats && r.setName) ? { ...r } : {
         id: r.id || `${unitId}-static-${Math.random().toString(36).substr(2, 9)}`,
         traitName: (typeof r.t === 'number' ? (traitsList[r.t]?.name) : (r.traitName || r.t)) || 'Unknown Trait',
         setName: (typeof r.s === 'number' ? (SETS[r.s]?.name) : (r.setName || r.s)) || 'Unknown Set', // Set name is needed for display
@@ -928,6 +952,26 @@ function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
         try {
             const fullMath = reconstructMathData(res, undefined, { isHotbar: isHotbar, activeModeIdx: activeModeIdx });
             if (fullMath) {
+                const sanitizerUnit = window.getUnitById(unitId);
+                const ctxOverrides = { isHotbar: isHotbar, activeModeIdx: activeModeIdx };
+                if (hasCritRateSubstats(res.subStats) && fullMath.critData) {
+                    const strippedSubStats = stripCritRateSubstats(res.subStats);
+                    const strippedRes = { ...res, subStats: strippedSubStats };
+                    const strippedMath = reconstructMathData(strippedRes, undefined, ctxOverrides);
+                    if (strippedMath?.critData) {
+                        const cap = getRuntimeEffectiveCritCap(sanitizerUnit, strippedMath.critData, strippedRes.headUsed || 'none');
+                        const strippedRate = strippedMath.critData.rate ?? 0;
+                        const strippedRaw = strippedMath.critData.rawRate ?? 0;
+                        const fixedCritUnit = isUnit(sanitizerUnit?.id, 'pirate_king');
+                        if (fixedCritUnit || strippedRate >= cap || strippedRaw >= cap) {
+                            res = strippedRes;
+                            fullMath = strippedMath;
+                            window.cachedResults[res.id] = fullMath;
+                            fullMath.id = res.id;
+                        }
+                    }
+                }
+
                 window.cachedResults[res.id] = fullMath;
                 fullMath.id = res.id;
 

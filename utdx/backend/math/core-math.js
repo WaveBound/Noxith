@@ -113,13 +113,6 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
             activeCandidates = activeCandidates.filter(c => c !== 'cf' && c !== 'cm');
         }
 
-        pieces.forEach(p => {
-            activeCandidates.forEach(cand => {
-                if (cand === p.main) return;
-                p.subs[cand] = 1;
-            });
-        });
-
         const buildRelicStats = () => {
             const rStats = { set: build.set || build.setName, dmg: 0, spa: 0, range: 0, cm: 0, cf: 0, dot: 0 };
             const starMult = stats.context.starMult || 1;
@@ -135,6 +128,42 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
             return rStats;
         };
 
+        const getEffectiveCritCap = () => {
+            if (window.isUnit(stats.id, 'pirate_king')) return 40;
+            if (headType === 'sorcerer_hunter_spirit') return 0;
+            if (window.isUnit(stats.id, 'angel_born_in_hell') || window.isUnit(stats.id, 'the_strongest_of_today') || window.isUnit(stats.id, 'strongest_of_today')) {
+                return 50;
+            }
+            if (window.isUnit(stats.id, 'kirito')) return stats.crit || 0;
+            return 100;
+        };
+
+        const baseResForCritCap = calculateDPS(stats, buildRelicStats(), stats.context);
+        const baseCritCap = getEffectiveCritCap();
+        const baseEffectiveCritRate = Math.min(baseResForCritCap.critData?.rate ?? 0, baseCritCap);
+        const baseFinalCritRate = baseResForCritCap.critData?.rate ?? 0;
+        const baseRawCritRate = baseResForCritCap.critData?.rawRate ?? 0;
+        const seedCritRate = baseEffectiveCritRate < baseCritCap;
+        if (window.DEBUG_CRIT_OVERFLOW) {
+            console.debug('[CRIT-DIAG] optimizer seed crit', {
+                unitId: stats.id,
+                headType,
+                set: build.set || build.setName,
+                optimizeFor,
+                baseRawCritRate,
+                baseFinalCritRate,
+                seedCritRate
+            });
+        }
+
+        pieces.forEach(p => {
+            activeCandidates.forEach(cand => {
+                if (cand === p.main) return;
+                if (cand === 'cf' && !seedCritRate) return;
+                p.subs[cand] = 1;
+            });
+        });
+
         const totalUpgrades = pieces.reduce((sum, p) => sum + p.upgrades, 0);
 
         for (let step = 0, governor = 0; step < totalUpgrades && governor < 100; governor++) {
@@ -146,15 +175,56 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
                 const p = pieces[pIdx];
                 if (p.upgrades <= 0) continue;
 
+                const currentRStats = buildRelicStats();
+                const currentCritRes = calculateDPS(stats, currentRStats, stats.context);
+                const currentCritCap = getEffectiveCritCap();
+                const currentEffectiveCritRate = Math.min(currentCritRes.critData?.rate ?? 0, currentCritCap);
+                const currentRawCritRate = currentCritRes.critData?.rawRate ?? 0;
+
+                if (window.DEBUG_CRIT_OVERFLOW && currentEffectiveCritRate >= currentCritCap) {
+                    console.debug('[CRIT-DIAG] optimizer sees capped effective crit; crit subs should be skipped', {
+                        unitId: stats.id,
+                        headType,
+                        set: build.set || build.setName,
+                        piece: p.name,
+                        currentRawCritRate,
+                        currentEffectiveCritRate,
+                        currentCritCap,
+                        step,
+                        optimizeFor
+                    });
+                }
+
                 for (let cIdx = 0; cIdx < activeCandidates.length; cIdx++) {
                     const cand = activeCandidates[cIdx];
                     if (cand === p.main) continue;
                     if ((p.subs[cand] || 0) >= 6) continue; // max 6 rolls per stat (1 base + 5 upgrades)
+                    if (cand === 'cf' && currentEffectiveCritRate >= currentCritCap) continue;
 
                     p.subs[cand] = (p.subs[cand] || 0) + 1;
                     const rStats = buildRelicStats();
                     const res = calculateDPS(stats, rStats, stats.context);
                     p.subs[cand]--;
+
+                    const candidateCritCap = getEffectiveCritCap();
+                    const candidateEffectiveCritRate = Math.min(res.critData?.rate ?? 0, candidateCritCap);
+                    if (cand === 'cf' && candidateEffectiveCritRate >= candidateCritCap) {
+                        if (window.DEBUG_CRIT_OVERFLOW) {
+                            console.debug('[CRIT-DIAG] candidate crit roll reaches effective cap', {
+                                unitId: stats.id,
+                                headType,
+                                set: build.set || build.setName,
+                                piece: p.name,
+                                candidate: cand,
+                                rawRate: res.critData.rawRate,
+                                finalRate: res.critData.rate,
+                                effectiveRate: candidateEffectiveCritRate,
+                                candidateCritCap,
+                                step,
+                                optimizeFor
+                            });
+                        }
+                    }
 
                     const score = optimizeFor === 'range' ? res.range :
                         (optimizeFor === 'raw_dmg' || optimizeFor === 'damage' ? res.dmgVal : res.total);
@@ -180,6 +250,20 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
 
         const finalRStats = buildRelicStats();
         const finalRes = calculateDPS(stats, finalRStats, stats.context);
+        const finalCritCap = getEffectiveCritCap();
+        const finalEffectiveCritRate = Math.min(finalRes.critData?.rate ?? 0, finalCritCap);
+        if (window.DEBUG_CRIT_OVERFLOW && finalEffectiveCritRate > finalCritCap) {
+            console.warn('[CRIT-DIAG] optimizer produced effective crit > 100', {
+                unitId: stats.id,
+                headType,
+                set: build.set || build.setName,
+                optimizeFor,
+                rawRate: finalRes.critData.rawRate,
+                finalRate: finalRes.critData.rate,
+                effectiveRate: finalEffectiveCritRate,
+                relicStats: finalRStats
+            });
+        }
         finalRes.totalStats = finalRStats;
 
         if (checkIsBetter(finalRes, globalBestRes, optimizeFor)) {

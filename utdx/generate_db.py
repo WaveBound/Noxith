@@ -135,7 +135,32 @@ if (isMainThread) {
     global.window = global;
     global.unitModesState = { 'joyful_captain': 2 }; // Fix for units with Modes. Evaluate Joyful in Joy Boy mode so SPA builds generate.
     global.hotbarState = { slots: [null, null, null, null, null, null], fernTargets: [] };
-    global.unitELevels = {}; 
+    global.unitELevels = {};
+    global.GLOBAL_BUFF_DATA = {
+        miku: { id: 'miku', stateKey: 'mikuActive', math: () => ({ dmg: 100 }) },
+        enlightenedGod: { id: 'enlightenedgod', stateKey: 'enlightenedGodActive', math: () => ({ dmg: 20, spa: 20 }) },
+        bijuu: { id: 'bijuu', stateKey: 'bijuuActive', math: () => ({ dmg: 25, range: 25, spa: 15 }) },
+        ancientMage: { id: 'ancientMage', stateKey: 'ancientMageActive', math: (uStats) => window.isUnit(uStats.id, 'ancient_mage') ? {} : { crit: 20, cdmg: 20 } },
+        kingSailor: { id: 'ksailor', stateKey: 'kingSailorActive', math: (uStats) => window.isUnit(uStats.id, 'king_sailor') ? {} : { crit: 10, cdmg: 25 } },
+        mageHill: {
+            id: 'magehill', stateKey: 'mageHillActive', math: (uStats) => {
+                if (!window.mageHillActive) return {};
+                const pType = String(uStats.placementType || uStats.placement || 'Ground').toLowerCase();
+                const unitId = String(uStats.id).split('-')[0];
+                const isMatching = pType === 'hill' || pType === 'hybrid' || unitId === 'merciless_god' || unitId === 'prodigy_mage';
+                return isMatching ? { spa: 30 } : {};
+            }
+        },
+        mageGround: {
+            id: 'mageground', stateKey: 'mageGroundActive', math: (uStats) => {
+                if (!window.mageGroundActive) return {};
+                const pType = String(uStats.placementType || uStats.placement || 'Ground').toLowerCase();
+                const unitId = String(uStats.id).split('-')[0];
+                const isMatching = (pType === 'ground' || pType === 'hybrid') && unitId !== 'merciless_god' || unitId === 'prodigy_mage';
+                return isMatching ? { crit: 45 } : {};
+            }
+        }
+    };
     global.btoa = function(str) { return Buffer.from(str, 'binary').toString('base64'); };
     global.atob = function(str) { return Buffer.from(str, 'base64').toString('binary'); };
 
@@ -165,6 +190,32 @@ if (isMainThread) {
         else if (combo[5] === 'ground') parts.push('mageground');
 
         return parts.length === 0 ? "db_base.js" : "db_" + parts.join("_") + ".js";
+    }
+
+    function getGeneratorBuffContextOptions() {
+        return {
+            mikuActive: !!window.mikuActive,
+            enlightenedGodActive: !!window.enlightenedGodActive,
+            bijuuActive: !!window.bijuuActive,
+            ancientMageActive: !!window.ancientMageActive,
+            kingSailorActive: !!window.kingSailorActive,
+            mageHillActive: !!window.mageHillActive,
+            mageGroundActive: !!window.mageGroundActive
+        };
+    }
+
+    function getEffectiveCritCapForGenerator(effectiveStats, critRes, headPiece = 'none') {
+        if (isUnit(effectiveStats.id, 'pirate_king')) return 40;
+        if (headPiece === 'sorcerer_hunter_spirit') return 0;
+        if (isUnit(effectiveStats.id, 'angel_born_in_hell') || isUnit(effectiveStats.id, 'the_strongest_of_today') || isUnit(effectiveStats.id, 'strongest_of_today')) return 50;
+        if (isUnit(effectiveStats.id, 'kirito')) return effectiveStats.crit || 0;
+        return 100;
+    }
+
+    function shouldSkipGeneratorCritSub(effectiveStats, critRes, headPiece = 'none') {
+        const cap = getEffectiveCritCapForGenerator(effectiveStats, critRes, headPiece);
+        const rate = critRes?.critData?.rate ?? 0;
+        return rate >= cap || (critRes?.critData?.rawRate ?? 0) >= cap;
     }
 
     function generateTemplates(includeSubs, allowedHeads, allowDot, allowedSets, includeRangeSubs = false) {
@@ -341,7 +392,8 @@ if (isMainThread) {
 
     function fastCalculateUnitBuilds(unit, cfg, traitsForCalc, isAbility, existingHeads, jobHeads, selectedSets, includeRangeSubs = false) {
         const upgradeLevel = (unit.upgrades && unit.upgrades.length > 0) ? unit.upgrades.length - 1 : 0;
-        const { effectiveStats, isKiritoVR, suffix } = buildCalculationContext(unit, 'ruler', { isAbility, upgradeLevel });
+        const buffContextOptions = getGeneratorBuffContextOptions();
+        const { effectiveStats, isKiritoVR, suffix } = buildCalculationContext(unit, 'ruler', { isAbility, upgradeLevel, ...buffContextOptions });
         const hasPassiveDoT = effectiveStats.passives && effectiveStats.passives.some(p => p.dot && p.dot > 0);
         const hasNativeDoT = (effectiveStats.dot > 0) || (effectiveStats.burnMultiplier > 0) || isKiritoVR || hasPassiveDoT;
 
@@ -366,7 +418,8 @@ if (isMainThread) {
 
         traitsForCalc.forEach(trait => {
             if (trait.id === 'none') return;
-            const { effectiveStats, context } = buildCalculationContext(unit, trait, { isAbility, mode: 'fixed' });
+            const { effectiveStats, context } = buildCalculationContext(unit, trait, { isAbility, mode: 'fixed', ...buffContextOptions });
+            Object.assign(context, buffContextOptions);
             const traitAddsDot = trait.dotBuff > 0 || trait.hasRadiation || trait.allowDotStack;
             const isDotPossible = hasNativeDoT || traitAddsDot;
             
@@ -381,15 +434,21 @@ if (isMainThread) {
                 GENERATOR_STATS.cachedTemplates++;
             }
             
-            // Filter out 'cf' candidates for units that shouldn't get them (Kirito, Gojo)
-            const excludeRelicCrit = (isUnit(unit.id, 'kirito') || isUnit(unit.id, 'the_strongest_of_today') || isUnit(unit.id, 'pirate_king') || (isUnit(unit.id, 'marine_hero') && isAbility));
+            // Check if base unit crit (passives + global buffs + trait) is already at its effective cap
+            context.dmgPoints = maxPts; context.spaPoints = 0; context.rangePoints = 0;
+            const zeroRelicRes = calculateDPS(effectiveStats, {}, context);
+            const zeroRelicCap = getEffectiveCritCapForGenerator(effectiveStats, zeroRelicRes, context.headPiece);
+            const zeroRelicRate = zeroRelicRes.critData ? zeroRelicRes.critData.rate : 0;
+            const overcappedCrit = zeroRelicRate >= zeroRelicCap || (zeroRelicRes.critData?.rawRate ?? 0) >= zeroRelicCap;
+
+            // Filter out 'cf' candidates for units that shouldn't get them (Kirito, Gojo, fixed-cap units)
+            const excludeRelicCrit = overcappedCrit || (isUnit(unit.id, 'kirito') || isUnit(unit.id, 'the_strongest_of_today') || isUnit(unit.id, 'pirate_king') || (isUnit(unit.id, 'marine_hero') && isAbility));
             let unitTemplates = templates;
             if (excludeRelicCrit) {
                 unitTemplates = templates.filter(t => {
-                    const h = t.meta.assignments.head || [];
-                    const b = t.meta.assignments.body || [];
-                    const l = t.meta.assignments.legs || [];
-                    return !h.some(a => a.type === 'cf') && !b.some(a => a.type === 'cf') && !l.some(a => a.type === 'cf');
+                    const hasCfSub = ['head', 'body', 'legs'].some(p => (t.meta.assignments[p] || []).some(a => a.type === 'cf'));
+                    const hasCfMain = t.meta.bodyType === 'cf' || t.meta.legType === 'cf';
+                    return !hasCfSub && !hasCfMain;
                 });
             }
 
@@ -423,6 +482,7 @@ if (isMainThread) {
                     const preFillerRes = calculateDPS(effectiveStats, b, context);
                     let baselineRaw = preFillerRes.critData ? preFillerRes.critData.rawRate : 0;
                     let baselineRate = preFillerRes.critData ? preFillerRes.critData.rate : 0;
+                    const preFillerCritCap = getEffectiveCritCapForGenerator(effectiveStats, preFillerRes, context.headPiece);
 
                     // Add fillers dynamically
                     ['head', 'body', 'legs'].forEach(piece => {
@@ -436,13 +496,11 @@ if (isMainThread) {
                         }
                         
                         let activeFillers = [...t.meta.activeCands];
-                        if (baselineRaw >= 99.9 || baselineRate === 0) {
-                            activeFillers = activeFillers.filter(
-                                c =>
-                                    (c === 'cf' && baselineRaw < 100) ||
-                                    (c === 'cm' && baselineRate > 0) ||
-                                    (c !== 'cf' && c !== 'cm')
-                            );
+                        if (baselineRate >= preFillerCritCap || baselineRaw >= preFillerCritCap) {
+                            activeFillers = activeFillers.filter(c => c !== 'cf');
+                        }
+                        if (baselineRate === 0) {
+                            activeFillers = activeFillers.filter(c => c !== 'cm');
                         }
                         
                         activeFillers.forEach(cand => {
@@ -491,10 +549,11 @@ if (isMainThread) {
                         }
                         
                         let activeFillers = [...t.meta.activeCands];
-                        if (baselineRaw >= 99.9 || baselineRate === 0) {
+                        const spaCritCap = getEffectiveCritCapForGenerator(effectiveStats, preFillerRes, context.headPiece);
+                        if (baselineRate >= spaCritCap || baselineRaw >= spaCritCap || baselineRate === 0) {
                             activeFillers = activeFillers.filter(
                                 c =>
-                                    (c === 'cf' && baselineRaw < 100) ||
+                                    (c === 'cf' && (baselineRaw < spaCritCap && baselineRate < spaCritCap)) ||
                                     (c === 'cm' && baselineRate > 0) ||
                                     (c !== 'cf' && c !== 'cm')
                             );
@@ -689,8 +748,8 @@ if (isMainThread) {
             window.bijuuActive = combo[2] === '1'; 
             window.ancientMageActive = combo[3] === '1';
             window.kingSailorActive = combo[4] === '1';
-            window.fernHillActive = combo[5] === 'hill'; 
-            window.fernGroundActive = combo[5] === 'ground';
+            window.mageHillActive = combo[5] === 'hill'; 
+            window.mageGroundActive = combo[5] === 'ground';
             window.CALCULATION_MODE = 'potential';
  
             // Assume full modes for Sukuna for DB ranking
@@ -825,7 +884,7 @@ if (isMainThread) {
                     workerDb[finalKey] = { fixed: [] }; 
 
                     let existingFixed = [];
-                    if (existingRaw && existingRaw.d[finalKey]) {
+                    if (targetUnits.length === 0 && existingRaw && existingRaw.d[finalKey]) {
                         const d = existingRaw.d[finalKey];
                         if (d.fixed) existingFixed = d.fixed.flatMap(b64 => unpackBuffer(b64));
                     }
