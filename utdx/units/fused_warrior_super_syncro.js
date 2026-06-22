@@ -15,6 +15,13 @@ unitDatabase.push({
         long: "Ruler",
         note: "Light-element Syncro unit with hybrid placement."
     },
+    notice: {
+        icon: '⚠️',
+        text: '<strong>Notice:</strong> Fused Warrior Super Syncro is bugged; his 2x damage bonus against enemies with more than 10x HP does not work.',
+        color: '#fbbf24',
+        bg: 'rgba(245, 158, 11, 0.08)',
+        border: 'rgba(245, 158, 11, 0.15)'
+    },
 
     totalCost: 142000,
 
@@ -41,7 +48,7 @@ unitDatabase.push({
 
     // UPGRADES
     upgrades: [
-        { dmg: 19200, spa: 15, range: 30, cost: 142000 }
+        { dmg: 19200, spa: 5.5, range: 30, cost: 142000 }
     ],
 
     // PASSIVES

@@ -2042,17 +2042,7 @@ function renderUnitCard(unit, absoluteIndex) {
 
     const defaultSort = isAnyUnit(unit.id, ['sjw', 'esdeath']) ? 'damage' : 'dps';
 
-    const notices = {
-        king_sailor: { icon: '⚠️', text: '<strong>Notice:</strong> In-game he hits as 5 base hits instead of 2 for 2.5x total base hit damage; chain lightning scales off his pre-2.5x damage.', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' },
-        fused_warrior_super_syncro: { icon: '⚠️', text: '<strong>Notice:</strong> Fused Warrior Super Syncro is bugged; his 2x damage bonus against enemies with more than 10x HP does not work.', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' },
-        mochi_pirate: { icon: '⚠️', text: '<strong>Notice:</strong> Mochi Pirate is bugged; he does not apply Time Snail currently / Crit Time snail enemies.', color: '#f87171', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.15)' },
-        revolutionary_chief_syncro: { icon: '🔥', text: '<strong>Notice:</strong> DoT restarts duration if attacked again. DPS is calculated as 1 continuous tick per second.', color: '#60a5fa', bg: 'rgba(96, 165, 250, 0.08)', border: 'rgba(96, 165, 250, 0.15)' },
-        ant_king_savage: { icon: '⚠️', text: '<strong>Notice:</strong> Ant King is bugged; any DoT%+ buffs applied to him are calculated twice.', color: '#f87171', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.15)' },
-        angel_born_in_hell: { icon: '⚠️', text: '<strong>Notice:</strong> Angel in Hell is bugged; he has a fixed 50% crit rate that cannot change, and crits work, though he is not meant to crit.', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' },
-        the_drink_super_rage: { icon: '⚠️', text: '<strong>Notice:</strong> The Drink is bugged; his boss damage multiplier is currently non-functional in-game and does nothing.', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' },
-        the_drink: { icon: '⚠️', text: '<strong>Notice:</strong> The Drink is bugged; his boss damage multiplier is currently non-functional in-game and does nothing.', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.15)' }
-    };
-    const notice = notices[unit.id];
+    const notice = unit.notice;
     const customNoticeHtml = notice ? `
         <div class="unit-card-warning" style="padding: 6px 12px; background: ${notice.bg}; border-bottom: 1px solid ${notice.border}; display: flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 700; color: ${notice.color};">
             <span style="font-size: 0.85rem; line-height: 1;">${notice.icon}</span>

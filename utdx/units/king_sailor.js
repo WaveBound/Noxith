@@ -12,6 +12,13 @@ unitDatabase.push({
         long: "Ruler",
         note: "Manipulator of Fate: +50% Dmg / -25% SPA. Baal's Lightning provides +20% non-critical Chain Lightning damage."
     },
+    notice: {
+        icon: '⚠️',
+        text: '<strong>Notice:</strong> In-game he hits as 5 base hits instead of 2 for 2.5x total base hit damage; chain lightning scales off his pre-2.5x damage.',
+        color: '#fbbf24',
+        bg: 'rgba(245, 158, 11, 0.08)',
+        border: 'rgba(245, 158, 11, 0.15)'
+    },
     totalCost: 91800,
     stats: {
         spaCap: 4,

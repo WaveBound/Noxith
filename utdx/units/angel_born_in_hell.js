@@ -15,6 +15,13 @@ unitDatabase.push({
         long: "Ruler",
         note: "Neutral utility unit with hybrid placement."
     },
+    notice: {
+        icon: '⚠️',
+        text: '<strong>Notice:</strong> Angel in Hell is bugged; he has a fixed 50% crit rate that cannot change, and crits work, though he is not meant to crit.',
+        color: '#fbbf24',
+        bg: 'rgba(245, 158, 11, 0.08)',
+        border: 'rgba(245, 158, 11, 0.15)'
+    },
 
     totalCost: 91500,
 

@@ -15,6 +15,13 @@ unitDatabase.push({
         long: "Sacred/Duelist",
         note: "Powerful hybrid DPS that adapts to the battlefield via form switching."
     },
+    notice: {
+        icon: '⚠️',
+        text: '<strong>Notice:</strong> The Drink is bugged; his boss damage multiplier is currently non-functional in-game and does nothing.',
+        color: '#fbbf24',
+        bg: 'rgba(245, 158, 11, 0.08)',
+        border: 'rgba(245, 158, 11, 0.15)'
+    },
 
     totalCost: 68000, // Total gold cost to max
     defaultMode: 1, // Unit starts in Sword form (index 1)

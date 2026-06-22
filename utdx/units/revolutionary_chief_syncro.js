@@ -15,6 +15,13 @@ unitDatabase.push({
         long: "Ruler",
         note: "Relies heavily on critical burn ticks to maximize damage output."
     },
+    notice: {
+        icon: '🔥',
+        text: '<strong>Notice:</strong> DoT restarts duration if attacked again. DPS is calculated as 1 continuous tick per second.',
+        color: '#60a5fa',
+        bg: 'rgba(96, 165, 250, 0.08)',
+        border: 'rgba(96, 165, 250, 0.15)'
+    },
 
     totalCost: 95400,
 
