@@ -876,34 +876,55 @@ function getSubstatDetailHtml(build) {
         return [...stored, ...baseFills];
     };
 
+    const grandTotalByStat = {};
+    const getCssType = (k) => typeof getStatType === 'function' ? getStatType(k) : (k === 'cf' ? 'crit' : (k === 'cm' ? 'cdmg' : k));
+
     const pieceRows = ['head', 'body', 'legs'].map(piece => {
         const entries = getFullPieceEntries(piece);
         if (entries === null) return ''; // piece not equipped
 
-        // Aggregate totals by stat type
-        const totalByStat = {};
         entries.forEach(item => {
-            totalByStat[item.type] = (totalByStat[item.type] || 0) + (Number(item.val) || 0);
+            grandTotalByStat[item.type] = (grandTotalByStat[item.type] || 0) + (Number(item.val) || 0);
         });
 
         const badgeHtml = entries.length ? entries.map(item => {
             const val = Number(item.val) || 0;
-            const dimStyle = item.isBase ? 'opacity:0.55;' : '';
-            return `<span class="stat-badge ${item.type}" style="font-size:0.72rem;padding:4px 7px;${dimStyle}">${statLabel(item.type)} ${val.toFixed(1)}%${item.isBase ? ' <span style="font-size:0.6rem;opacity:0.7;">(base)</span>' : ''}</span>`;
-        }).join('') : `<span style="color:#64748b;font-size:0.72rem;">No substats</span>`;
+            const cssType = getCssType(item.type);
+            const dimStyle = item.isBase ? 'transform: scale(0.95); opacity:0.85;' : '';
+            return `<div class="badge-base border-${cssType}" style="padding:4px 8px; font-size:0.7rem; ${dimStyle}">
+                <span class="text-${cssType}" style="font-weight:800; letter-spacing:0.5px;">${statLabel(item.type).toUpperCase()}</span>
+                <span class="text-${cssType}" style="font-weight:800; margin-left:4px;">${parseFloat(val.toFixed(1))}%</span>
+                ${item.isBase ? `<span class="text-${cssType}" style="font-size:0.55rem; opacity:0.6; margin-left:4px; font-weight:800;">(BASE)</span>` : ''}
+            </div>`;
+        }).join('') : `<span style="color:#64748b;font-size:0.72rem; padding:4px;">No substats</span>`;
 
         return `<div style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px;background:rgba(255,255,255,0.02);margin-bottom:8px;">
             <div style="font-weight:800;text-transform:uppercase;font-size:0.7rem;color:#94a3b8;margin-bottom:6px;">${piece.toUpperCase()}</div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;">${badgeHtml}</div>
-            ${Object.entries(totalByStat).length ? `<div style="margin-top:8px;font-size:0.72rem;color:#cbd5e1;">Totals: ${Object.entries(totalByStat).map(([k, v]) => `${statLabel(k)} ${Number(v).toFixed(1)}%`).join(' · ')}</div>` : ''}
         </div>`;
     }).join('');
-    return `<div style="font-size:0.78rem;line-height:1.45;">${pieceRows}</div>`;
+
+    const grandTotalsHtml = Object.entries(grandTotalByStat).length ? `<div style="border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:10px; background:rgba(255,255,255,0.05); margin-top:12px;">
+        <div style="font-weight:900; letter-spacing:0.5px; text-transform:uppercase; font-size:0.75rem; color:#f8fafc; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8;"><path d="M4 19V5a2 2 0 0 1 2-2h13.4a.5.5 0 0 1 .4.8l-3.3 4.1a2 2 0 0 0 0 2.2l3.3 4.1a.5.5 0 0 1-.4.8H6a2 2 0 0 1-2-2Z"/></svg>
+            SUBSTAT TOTALS
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+            ${Object.entries(grandTotalByStat).sort((a, b) => b[1] - a[1]).map(([k, v]) => {
+                const cssType = getCssType(k);
+                return `<div class="badge-base border-${cssType}" style="background:rgba(0,0,0,0.4); padding:3px 8px;">
+                    <span class="text-${cssType}" style="font-size:0.78rem; font-weight:900;">${statLabel(k).toUpperCase()} ${parseFloat(Number(v).toFixed(1))}%</span>
+                </div>`;
+            }).join('')}
+        </div>
+    </div>` : '';
+
+    return `<div style="font-size:0.78rem;line-height:1.45;padding-right:4px;">${pieceRows}${grandTotalsHtml}</div>`;
 }
 
 
 window.showSubstatDetails = function (buildId) {
-    const build = window.cachedResults?.[buildId] || window.staticBuildDb?.find?.(b => b.id === buildId);
+    const build = window._substatBuilds?.[buildId] || window.cachedResults?.[buildId] || window.staticBuildDb?.find?.(b => b.id === buildId);
     if (!build) return;
     window.showUniversalModal({
         title: 'SUBSTAT DETAILS',
@@ -1133,6 +1154,9 @@ function getBestHydratedBuild(builds, unitId, isHotbar, activeModeIdx = undefine
 
 // Rendering HTML Rows & Cards
 function generateBuildRowHTML(r, i, unitConfig = {}) {
+    window._substatBuilds = window._substatBuilds || {};
+    window._substatBuilds[r.id] = r;
+    
     const { totalCost = 50000, placement = 1, sortMode = 'dps', unitId = '', traitBenchmarks = {}, optimalityBenchmarks = {} } = unitConfig;
     const currentLevel = window.unitELevels[unitId] || 0;
     const nextLevel = currentLevel + 1;
