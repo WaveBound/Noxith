@@ -259,13 +259,41 @@ if (isMainThread) {
                 ratios.forEach(r => strategies.push({ p: c1, s: c2, t: null, ratio: r }));
             });
 
-            // Removed 2:2:2 Triplets to speed up generation
+            // ADD TRIPLET STRATEGIES FOR PRECISE CRIT SPLITS
+            const triplets = [
+                ['dmg', 'cf', 'cm'], ['dmg', 'cm', 'cf'],
+                ['dmg', 'cf', 'spa'], ['dmg', 'spa', 'cf'],
+                ['dot', 'cf', 'cm'], ['dot', 'cm', 'cf'],
+                ['dot', 'cf', 'spa'], ['dot', 'spa', 'cf']
+            ];
+            triplets.forEach(triplet => {
+                const [c1, c2, c3] = triplet;
+                if (!activeCands.includes(c1) || !activeCands.includes(c2) || !activeCands.includes(c3)) return;
+                strategies.push({ p: c1, s: c2, t: c3, ratio: { p: 6, s: 0, t: 0, split: [5, 2] } });
+                strategies.push({ p: c1, s: c2, t: c3, ratio: { p: 6, s: 0, t: 0, split: [4, 3] } });
+                strategies.push({ p: c1, s: c2, t: c3, ratio: { p: 6, s: 0, t: 0, split: [3, 4] } });
+                strategies.push({ p: c1, s: c2, t: c3, ratio: { p: 6, s: 0, t: 0, split: [2, 5] } });
+            });
         }
 
         const applyContextualStats = (b, pieceName, mainStat, pStat, sStat, tStat, ratio, cands) => {
             if (!pStat) return { pStat: null, pVal: 0, sStat: null, sVal: 0, tStat: null, tVal: 0 };
             let pWeight = ratio.p || 0; let sWeight = ratio.s || 0; let tWeight = ratio.t || 0; 
             
+            // Try to assign fallbacks if a stat matches the main stat
+            if (pStat === mainStat && pWeight > 0) {
+                const fallback = cands.find(c => c !== mainStat && c !== sStat && c !== tStat);
+                if (fallback) pStat = fallback;
+            }
+            if (sStat === mainStat && sWeight > 0) {
+                const fallback = cands.find(c => c !== mainStat && c !== pStat && c !== tStat);
+                if (fallback) sStat = fallback;
+            }
+            if (tStat === mainStat && tWeight > 0) {
+                const fallback = cands.find(c => c !== mainStat && c !== pStat && c !== sStat);
+                if (fallback) tStat = fallback;
+            }
+
             if (pStat === mainStat && pWeight > 0) {
                 let toDist = pWeight;
                 pWeight = 0;
@@ -273,9 +301,14 @@ if (isMainThread) {
                 if (sStat && sStat !== mainStat) targets.push('s');
                 if (tStat && tStat !== mainStat) targets.push('t');
                 if (targets.length === 2) {
-                    let half = Math.floor(toDist / 2);
-                    sWeight = Math.min(6, sWeight + half);
-                    tWeight = Math.min(6, tWeight + (toDist - half));
+                    if (ratio.split) {
+                        sWeight = Math.min(6, sWeight + ratio.split[0]);
+                        tWeight = Math.min(6, tWeight + ratio.split[1]);
+                    } else {
+                        let half = Math.floor(toDist / 2);
+                        sWeight = Math.min(6, sWeight + half);
+                        tWeight = Math.min(6, tWeight + (toDist - half));
+                    }
                 } else if (targets.length === 1) {
                     if (targets[0] === 's') sWeight = Math.min(6, sWeight + toDist);
                     else tWeight = Math.min(6, tWeight + toDist);
@@ -287,9 +320,14 @@ if (isMainThread) {
                 if (pStat && pStat !== mainStat) targets.push('p');
                 if (tStat && tStat !== mainStat) targets.push('t');
                 if (targets.length === 2) {
-                    let half = Math.floor(toDist / 2);
-                    pWeight = Math.min(6, pWeight + half);
-                    tWeight = Math.min(6, tWeight + (toDist - half));
+                    if (ratio.split) {
+                        pWeight = Math.min(6, pWeight + ratio.split[0]);
+                        tWeight = Math.min(6, tWeight + ratio.split[1]);
+                    } else {
+                        let half = Math.floor(toDist / 2);
+                        pWeight = Math.min(6, pWeight + half);
+                        tWeight = Math.min(6, tWeight + (toDist - half));
+                    }
                 } else if (targets.length === 1) {
                     if (targets[0] === 'p') pWeight = Math.min(6, pWeight + toDist);
                     else tWeight = Math.min(6, tWeight + toDist);
@@ -301,9 +339,14 @@ if (isMainThread) {
                 if (pStat && pStat !== mainStat) targets.push('p');
                 if (sStat && sStat !== mainStat) targets.push('s');
                 if (targets.length === 2) {
-                    let half = Math.floor(toDist / 2);
-                    pWeight = Math.min(6, pWeight + half);
-                    sWeight = Math.min(6, sWeight + (toDist - half));
+                    if (ratio.split) {
+                        pWeight = Math.min(6, pWeight + ratio.split[0]);
+                        sWeight = Math.min(6, sWeight + ratio.split[1]);
+                    } else {
+                        let half = Math.floor(toDist / 2);
+                        pWeight = Math.min(6, pWeight + half);
+                        sWeight = Math.min(6, sWeight + (toDist - half));
+                    }
                 } else if (targets.length === 1) {
                     if (targets[0] === 'p') pWeight = Math.min(6, pWeight + toDist);
                     else sWeight = Math.min(6, sWeight + toDist);
@@ -457,13 +500,23 @@ if (isMainThread) {
 
             const pushBest = (map, prio) => {
                 for (const best of map.values()) {
+                    let subStats = JSON.parse(JSON.stringify(best.meta.assignments));
+                    if (best.fillers) {
+                        ['head', 'body', 'legs'].forEach(piece => {
+                            if (subStats[piece] && best.fillers[piece]) {
+                                best.fillers[piece].forEach(f => {
+                                    subStats[piece].push({ type: f, val: PERFECT_SUBS[f] });
+                                });
+                            }
+                        });
+                    }
                     traitGroups[trait.name].push({
                         setName: best.meta.setName, buildName: best.meta.buildName,
                         traitName: trait.name, dps: best.res.total, dmgVal: best.res.dmgVal,
                         bossDps: best.res.bossTotal,
                         spa: best.res.spa, range: best.res.range, prio,
                         mainStats: { body: best.meta.bodyType, legs: best.meta.legType },
-                        subStats: best.meta.assignments, headUsed: best.meta.headUsed,
+                        subStats: subStats, headUsed: best.meta.headUsed,
                         isCustom: trait.isCustom
                     });
                 }
@@ -484,15 +537,16 @@ if (isMainThread) {
                     let baselineRate = preFillerRes.critData ? preFillerRes.critData.rate : 0;
                     const preFillerCritCap = getEffectiveCritCapForGenerator(effectiveStats, preFillerRes, context.headPiece);
 
-                    // Add fillers dynamically
+                    let localFillers = { head: [], body: [], legs: [] };
                     ['head', 'body', 'legs'].forEach(piece => {
                         if (piece === 'head' && t.meta.headUsed === 'none') return;
                         let mainStat = piece === 'body' ? t.meta.bodyType : (piece === 'legs' ? t.meta.legType : null);
-                        let pStat = null, sStat = null, pWeight = 0, sWeight = 0;
+                        let pStat = null, sStat = null, tStat = null, pWeight = 0, sWeight = 0, tWeight = 0;
                         let assignment = t.meta.assignments[piece];
                         if (assignment && assignment.length > 0) {
                             pStat = assignment[0].type; pWeight = assignment[0].val / PERFECT_SUBS[pStat];
                             if (assignment.length > 1) { sStat = assignment[1].type; sWeight = assignment[1].val / PERFECT_SUBS[sStat]; }
+                            if (assignment.length > 2) { tStat = assignment[2].type; tWeight = assignment[2].val / PERFECT_SUBS[tStat]; }
                         }
                         
                         let activeFillers = [...t.meta.activeCands];
@@ -504,8 +558,9 @@ if (isMainThread) {
                         }
                         
                         activeFillers.forEach(cand => {
-                            if (cand === mainStat || (cand === pStat && pWeight > 0) || (cand === sStat && sWeight > 0)) return;
+                            if (cand === mainStat || (cand === pStat && pWeight > 0) || (cand === sStat && sWeight > 0) || (cand === tStat && tWeight > 0)) return;
                             b[cand] = (b[cand] || 0) + PERFECT_SUBS[cand];
+                            localFillers[piece].push(cand);
                             if (cand === 'cf') baselineRaw += 2.5; // Track added CF to prevent overcapping on next pieces
                         });
                     });
@@ -516,9 +571,9 @@ if (isMainThread) {
                     const key = t.meta.key;
                     const cd = bestDps.get(key);
                     const bestKnownScore = cd ? Math.max(cd.res.total || 0, cd.res.bossTotal || 0) : -1;
-                    if (!cd || currentScore > bestKnownScore) bestDps.set(key, { res, meta: t.meta });
+                    if (!cd || currentScore > bestKnownScore) bestDps.set(key, { res, meta: t.meta, fillers: localFillers });
                     const cr = bestRaw.get(key);
-                    if (!cr || res.dmgVal > cr.res.dmgVal || (res.dmgVal === cr.res.dmgVal && res.total > cr.res.total)) bestRaw.set(key, { res, meta: t.meta });
+                    if (!cr || res.dmgVal > cr.res.dmgVal || (res.dmgVal === cr.res.dmgVal && res.total > cr.res.total)) bestRaw.set(key, { res, meta: t.meta, fillers: localFillers });
                 }
                 pushBest(bestDps, 'dmg');
                 pushBest(bestRaw, 'raw_dmg');
@@ -538,14 +593,16 @@ if (isMainThread) {
                     let baselineRaw = preFillerRes.critData ? preFillerRes.critData.rawRate : 0;
                     let baselineRate = preFillerRes.critData ? preFillerRes.critData.rate : 0;
 
+                    let localFillers = { head: [], body: [], legs: [] };
                     ['head', 'body', 'legs'].forEach(piece => {
                         if (piece === 'head' && t.meta.headUsed === 'none') return;
                         let mainStat = piece === 'body' ? t.meta.bodyType : (piece === 'legs' ? t.meta.legType : null);
-                        let pStat = null, sStat = null, pWeight = 0, sWeight = 0;
+                        let pStat = null, sStat = null, tStat = null, pWeight = 0, sWeight = 0, tWeight = 0;
                         let assignment = t.meta.assignments[piece];
                         if (assignment && assignment.length > 0) {
                             pStat = assignment[0].type; pWeight = assignment[0].val / PERFECT_SUBS[pStat];
                             if (assignment.length > 1) { sStat = assignment[1].type; sWeight = assignment[1].val / PERFECT_SUBS[sStat]; }
+                            if (assignment.length > 2) { tStat = assignment[2].type; tWeight = assignment[2].val / PERFECT_SUBS[tStat]; }
                         }
                         
                         let activeFillers = [...t.meta.activeCands];
@@ -560,8 +617,9 @@ if (isMainThread) {
                         }
                         
                         activeFillers.forEach(cand => {
-                            if (cand === mainStat || (cand === pStat && pWeight > 0) || (cand === sStat && sWeight > 0)) return;
+                            if (cand === mainStat || (cand === pStat && pWeight > 0) || (cand === sStat && sWeight > 0) || (cand === tStat && tWeight > 0)) return;
                             b[cand] = (b[cand] || 0) + PERFECT_SUBS[cand];
+                            localFillers[piece].push(cand);
                             if (cand === 'cf') baselineRaw += 2.5; // Track added CF
                         });
                     });
@@ -572,7 +630,7 @@ if (isMainThread) {
                     const c = bestSpa.get(key);
                     const currentScore = Math.max(res.total || 0, res.bossTotal || 0);
                     const bestKnownScore = c ? Math.max(c.res.total || 0, c.res.bossTotal || 0) : -1;
-                    if (!c || currentScore > bestKnownScore) bestSpa.set(key, { res, meta: t.meta });
+                    if (!c || currentScore > bestKnownScore) bestSpa.set(key, { res, meta: t.meta, fillers: localFillers });
                 }
                 pushBest(bestSpa, 'spa');
             } catch (err) { console.error(`Error calculating spa points for ${unit.id}:`, err); }

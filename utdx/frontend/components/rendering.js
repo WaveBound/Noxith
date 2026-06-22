@@ -836,20 +836,62 @@ function getSynergyBadgeHtml(unit, activeMode) {
 
 function getSubstatDetailHtml(build) {
     const subs = build?.subStats || {};
+    const mainStats = build?.mainStats || {};
+    const headUsed = build?.headUsed || 'none';
     const statLabel = (key) => {
         const labels = { dmg: 'Damage', spa: 'SPA', cm: 'Crit Dmg', cf: 'Crit Rate', dot: 'Dot', range: 'Range' };
         return labels[key] || key;
     };
+    const mapStatKey = (k) => {
+        if (k === 'cdmg' || k === 'crit dmg') return 'cm';
+        if (k === 'crit' || k === 'crit rate') return 'cf';
+        return k;
+    };
+
+    // Build the full sub-stat list per piece by merging stored entries + base-roll fillers
+    const getFullPieceEntries = (piece) => {
+        // Skip head if not used, skip body/legs if no main stat (not equipped)
+        if (piece === 'head' && headUsed === 'none') return null;
+        if (piece === 'body' && !mainStats.body) return null;
+        if (piece === 'legs' && !mainStats.legs) return null;
+
+        const stored = Array.isArray(subs[piece]) ? subs[piece].filter(item => item && item.type) : [];
+        const existingTypes = new Set(stored.map(s => mapStatKey(s.type)));
+
+        const mainStatType = piece === 'body' ? mainStats.body : (piece === 'legs' ? mainStats.legs : null);
+        const mappedMain = mainStatType ? mapStatKey(mainStatType) : null;
+
+        // Inject base-roll fillers for any sub-stat type not already on this piece
+        const allCandidates = typeof SUB_CANDIDATES !== 'undefined' ? SUB_CANDIDATES : ['dmg', 'spa', 'cf', 'cm', 'dot', 'range'];
+        const baseFills = [];
+        allCandidates.forEach(cand => {
+            if (cand === mappedMain) return;           // skip if it matches main stat
+            if (existingTypes.has(cand)) return;       // skip if already stored
+            if (cand === 'range' && typeof isRangeRelicsEnabled === 'function' && !isRangeRelicsEnabled()) return;
+            const baseVal = typeof PERFECT_SUBS !== 'undefined' ? PERFECT_SUBS[cand] : 0;
+            if (!baseVal) return;
+            baseFills.push({ type: cand, val: baseVal, isBase: true });
+        });
+
+        return [...stored, ...baseFills];
+    };
+
     const pieceRows = ['head', 'body', 'legs'].map(piece => {
-        const entries = Array.isArray(subs[piece]) ? subs[piece].filter(item => item && item.type) : [];
+        const entries = getFullPieceEntries(piece);
+        if (entries === null) return ''; // piece not equipped
+
+        // Aggregate totals by stat type
         const totalByStat = {};
         entries.forEach(item => {
             totalByStat[item.type] = (totalByStat[item.type] || 0) + (Number(item.val) || 0);
         });
+
         const badgeHtml = entries.length ? entries.map(item => {
             const val = Number(item.val) || 0;
-            return `<span class="stat-badge ${item.type}" style="font-size:0.72rem;padding:4px 7px;">${statLabel(item.type)} ${val.toFixed(1)}%</span>`;
+            const dimStyle = item.isBase ? 'opacity:0.55;' : '';
+            return `<span class="stat-badge ${item.type}" style="font-size:0.72rem;padding:4px 7px;${dimStyle}">${statLabel(item.type)} ${val.toFixed(1)}%${item.isBase ? ' <span style="font-size:0.6rem;opacity:0.7;">(base)</span>' : ''}</span>`;
         }).join('') : `<span style="color:#64748b;font-size:0.72rem;">No substats</span>`;
+
         return `<div style="border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px;background:rgba(255,255,255,0.02);margin-bottom:8px;">
             <div style="font-weight:800;text-transform:uppercase;font-size:0.7rem;color:#94a3b8;margin-bottom:6px;">${piece.toUpperCase()}</div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;">${badgeHtml}</div>
@@ -858,6 +900,7 @@ function getSubstatDetailHtml(build) {
     }).join('');
     return `<div style="font-size:0.78rem;line-height:1.45;">${pieceRows}</div>`;
 }
+
 
 window.showSubstatDetails = function (buildId) {
     const build = window.cachedResults?.[buildId] || window.staticBuildDb?.find?.(b => b.id === buildId);
@@ -950,7 +993,7 @@ function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
 
     if (typeof reconstructMathData === 'function') {
         try {
-            const fullMath = reconstructMathData(res, undefined, { isHotbar: isHotbar, activeModeIdx: activeModeIdx });
+            let fullMath = reconstructMathData(res, undefined, { isHotbar: isHotbar, activeModeIdx: activeModeIdx });
             if (fullMath) {
                 const sanitizerUnit = window.getUnitById(unitId);
                 const ctxOverrides = { isHotbar: isHotbar, activeModeIdx: activeModeIdx };
