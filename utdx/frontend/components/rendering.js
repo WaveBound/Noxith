@@ -913,7 +913,7 @@ function getSubstatDetailHtml(build) {
             ${Object.entries(grandTotalByStat).sort((a, b) => b[1] - a[1]).map(([k, v]) => {
                 const cssType = getCssType(k);
                 return `<div class="badge-base border-${cssType}" style="background:rgba(0,0,0,0.4); padding:3px 8px;">
-                    <span class="text-${cssType}" style="font-size:0.78rem; font-weight:900;">${statLabel(k).toUpperCase()} ${parseFloat(Number(v).toFixed(1))}%</span>
+                    <span class="text-${cssType}" style="font-size:0.7rem; font-weight:900;">${statLabel(k).toUpperCase()} ${parseFloat(Number(v).toFixed(1))}%</span>
                 </div>`;
             }).join('')}
         </div>

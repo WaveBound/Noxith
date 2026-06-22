@@ -281,17 +281,10 @@ function calculateInventoryBuilds(unit, _stats, specificTraitsOnly, isAbilityCon
 
     // 1. Separate Inventory by Slot
     const allowHeads = Array.isArray(headsToProcess) && headsToProcess.some(h => h !== 'none');
-    if (!isRangeRelicsEnabled() && forcedRelic?.slot === 'Legs' && (forcedRelic.mainStat === 'range' || forcedRelic.subs?.range)) {
-        console.debug('[INVENTORY-MODE-DIAG] calculateInventoryBuilds rejected range legs', { unitId: unit?.id, forcedRelic });
-        return [];
-    }
 
     let heads = allowHeads ? inventory.filter(r => r.slot === 'Head') : [];
     const bodies = inventory.filter(r => r.slot === 'Body');
     let legs = inventory.filter(r => r.slot === 'Legs');
-    if (!isRangeRelicsEnabled()) {
-        legs = legs.filter(r => r.mainStat !== 'range' && !(r.subs && r.subs.range));
-    }
 
     console.debug('[INVENTORY-MODE-DIAG] calculateInventoryBuilds starting', {
         unitId: unit?.id,

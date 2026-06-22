@@ -140,15 +140,21 @@ function openCalc(unitId) {
     uniqueTraits.forEach(t => traitSelect.add(new Option(t.name, t.id)));
 
     const setSelect = document.getElementById('calcSet');
-    if (setSelect.options.length === 0) SETS.forEach(s => setSelect.add(new Option(s.name, s.id)));
+    if (setSelect.options.length === 0) {
+        setSelect.add(new Option('None', 'none'));
+        SETS.forEach(s => setSelect.add(new Option(s.name, s.id)));
+    }
 
-    // Dynamic headpiece list population from HEADS_LIST to prevent desyncs
+    // Dynamic headpiece list population from RELIC_PIECE_CATALOG to contain all relics
     const headSelect = document.getElementById('calcHead');
-    if (headSelect.options.length === 0) {
-        HEADS_LIST.forEach(h => {
-            const name = HEAD_CONFIG[h]?.name || (h === 'none' ? 'None' : h.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase()));
-            headSelect.add(new Option(name, h));
+    if (headSelect.getAttribute('data-populated') !== 'true') {
+        headSelect.innerHTML = '';
+        headSelect.add(new Option('None', 'none'));
+        (window.RELIC_PIECE_CATALOG || []).filter(p => p.slot === 'Head').forEach(p => {
+            if (p.id === 'none') return;
+            headSelect.add(new Option(p.name, p.id));
         });
+        headSelect.setAttribute('data-populated', 'true');
     }
 
     const headStarsSelect = document.getElementById('calcHeadStars');
@@ -157,7 +163,8 @@ function openCalc(unitId) {
 
     const updateHeadStarVisibility = () => {
         const headVal = headSelect.value;
-        const showStars = (headVal === 'reaper_necklace' || headVal === 'shadow_reaper_necklace' || headVal === 'warlord_hat' || headVal === 'monarch' || headVal === 'fused_earrings');
+        const piece = (window.RELIC_PIECE_CATALOG || []).find(p => p.id === headVal && p.slot === 'Head');
+        const showStars = piece && piece.rarity === 'Secret' && !piece.headPiece;
         headStarsSelect.classList.toggle('hidden', !showStars);
         if (!showStars && headStarsSelect.value !== '1') {
             headStarsSelect.value = '1';
@@ -168,7 +175,8 @@ function openCalc(unitId) {
 
     const updateBodyStarVisibility = () => {
         const setVal = setSelect.value;
-        const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set' || setVal === 'warlord' || setVal === 'monarch' || setVal === 'fused_set');
+        const setObj = (window.SETS || []).find(s => s.id === setVal);
+        const showStars = setObj && setObj.rarity === 'Secret';
         bodyStarsSelect.classList.toggle('hidden', !showStars);
         if (!showStars && bodyStarsSelect.value !== '1') {
             bodyStarsSelect.value = '1';
@@ -180,7 +188,8 @@ function openCalc(unitId) {
 
     const updateLegsStarVisibility = () => {
         const setVal = setSelect.value;
-        const showStars = (setVal === 'shadow_reaper' || setVal === 'reaper_set' || setVal === 'warlord' || setVal === 'monarch' || setVal === 'fused_set');
+        const setObj = (window.SETS || []).find(s => s.id === setVal);
+        const showStars = setObj && setObj.rarity === 'Secret';
         legsStarsSelect.classList.toggle('hidden', !showStars);
         if (!showStars && legsStarsSelect.value !== '1') {
             legsStarsSelect.value = '1';
