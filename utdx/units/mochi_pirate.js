@@ -17,8 +17,12 @@ unitDatabase.push({
     },
     bugs: [
         {
-            name: 'Time Snail — Not Applied',
-            desc: '"Flowing Mochi" is supposed to apply a Time Snail effect to enemies, but this does not work in-game. Additionally, the guaranteed crit from the dough does not trigger.'
+            name: 'Time Snail & Crit Non-Functional',
+            desc: '"Flowing Mochi" is supposed to apply a Time Snail effect to enemies, but this does not work in-game. Additionally, the guaranteed crit against time snail enemies does not trigger.'
+        },
+        {
+            name: 'Dough Bonus Damage Inconsistent',
+            desc: 'The bonus damage from "Evercrush Dough" randomly applies only around +75% instead of the intended +250%.'
         }
     ],
 

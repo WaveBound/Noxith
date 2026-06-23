@@ -17,6 +17,10 @@ unitDatabase.push({
         {
             name: 'DoT Buff Double-Calculation',
             desc: 'Any DoT%+ buff applied to Ant King (e.g., from traits or abilities) is incorrectly calculated twice, making him stronger than intended against builds with DoT buffs.'
+        },
+        {
+            name: 'Radiation Damage Bonus — Non-Functional',
+            desc: 'Ant King\'s radiation is supposed to cause enemies to take +20% damage, but this effect does not currently work.'
         }
     ],
     totalCost: 63000,

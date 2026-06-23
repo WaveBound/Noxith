@@ -16,6 +16,21 @@ unitDatabase.push({
         note: "Ruler as unit is 1 placement."
     },
 
+    bugs: [
+        {
+            name: 'Six Eyes — Cooldown Reset',
+            desc: 'The "Six Eyes" passive does not properly reset ability cooldowns as intended.'
+        },
+        {
+            name: 'Curse Pinball — No Critical Damage',
+            desc: 'The "Curse Pinball" passive does not actually deal critical damage to enemies.'
+        },
+        {
+            name: 'Curse Pinball — Teleport Range Issue',
+            desc: 'The "Curse Pinball" teleport effect does not work on enemies right at the start of his range.'
+        }
+    ],
+
     totalCost: 79000,               // Total gold cost to max
 
     // BASE STATS

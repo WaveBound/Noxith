@@ -16,6 +16,17 @@ unitDatabase.push({
         note: "Powerful wind utility unit with high boss-slaying capacity."
     },
 
+    bugs: [
+        {
+            name: 'Follow-up Damage Calculation',
+            desc: '"Fua for 70% on bleeding enemies" isn\'t actually 70% of his damage, but is incorrectly counted as buff data.'
+        },
+        {
+            name: 'Critical Bleed Non-Functional',
+            desc: '"Critical Bleed" doesn\'t actually work to critically hit enemies.'
+        }
+    ],
+
     totalCost: 89000,
 
     // BASE STATS

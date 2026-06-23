@@ -16,6 +16,13 @@ unitDatabase.push({
         note: "Fire DPS focused on high sustained damage."
     },
 
+    bugs: [
+        {
+            name: 'Disposal Follow-up Cooldown',
+            desc: 'The "Disposal" follow-up attack incorrectly triggers every 20 seconds instead of the intended 10 seconds, even with the E2 upgrade.'
+        }
+    ],
+
     totalCost: 54000,
 
     // BASE STATS

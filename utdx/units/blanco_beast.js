@@ -16,6 +16,13 @@ unitDatabase.push({
         note: "Duelist Long term dps / Pairing with \"Angel born in hell\"."
     },
 
+    bugs: [
+        {
+            name: 'Super Blue Beam — Does Not Crit',
+            desc: 'The "Super Blue Beam" ability does not critically hit as intended.'
+        }
+    ],
+
     // TODO: Replace with final placement + upgrade cost total.
     totalCost: 65900,
 

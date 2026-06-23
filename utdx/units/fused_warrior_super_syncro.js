@@ -19,6 +19,22 @@ unitDatabase.push({
         {
             name: '2× Boss Damage — Non-Functional',
             desc: 'The "I thought you would be stronger" passive states that when an enemy has more than 10× this unit\'s damage, it deals 2× damage. This bonus is currently bugged and does nothing in-game.'
+        },
+        {
+            name: 'AoE Follow-up Bugged',
+            desc: 'The follow-up attack for 50% damage with Full AoE does not work.'
+        },
+        {
+            name: '"Nuh uh" Follow-up Damage Value',
+            desc: 'The "Nuh uh" follow-up attack will sometimes infinitely trigger.'
+        },
+        {
+            name: '"Nuh uh" Follow-up always activating',
+            desc: 'The "Nuh uh" follow-up attack provides +100% passive damage, not the intended 200% of unit\'s damage.'
+        },
+        {
+            name: 'AoE Miss Chance',
+            desc: 'The AoE attack is bugged and misses frequently if enemies arent in a straight path, resulting in 0 damage.'
         }
     ],
 

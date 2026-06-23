@@ -16,6 +16,13 @@ unitDatabase.push({
         note: "Universal Utility: features 6 distinct modes specializing in different stat distributions. No charge-up time required."
     },
 
+    bugs: [
+        {
+            name: 'Follow-up Damage Calculation',
+            desc: '"Fua 140%" isn\'t actually 140% of his damage, but is incorrectly counted as buff data.'
+        }
+    ],
+
     totalCost: 115000,
     defaultMode: 4, // Ensure starting on 2-0-5 (index 4)
 

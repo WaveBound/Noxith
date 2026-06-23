@@ -12,6 +12,13 @@ unitDatabase.push({
         long: "Duelist/Eternal",
         note: "Pond Overlord: High Water AoE damage. Buffs all other Warlord units on the field."
     },
+    bugs: [
+        {
+            name: 'Miku Ability Debuff Calculation',
+            desc: 'This unit incorrectly counts Miku\'s ability as a debuff, giving him an unintended +50% damage boost.'
+        }
+    ],
+
     totalCost: 73000,
     stats: {
         crit: 0,

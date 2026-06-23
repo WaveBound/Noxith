@@ -16,6 +16,13 @@ unitDatabase.push({
         note: "Ruler due to placement count"
     },
 
+    bugs: [
+        {
+            name: 'Roger Sync SPA Issue',
+            desc: 'The Sync SPA buff intended for Roger does not currently work.'
+        }
+    ],
+
     totalCost: 88000,
 
     // BASE STATS

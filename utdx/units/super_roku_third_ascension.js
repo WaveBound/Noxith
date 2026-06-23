@@ -16,6 +16,13 @@ unitDatabase.push({
         note: "Wind-element Hill placement variant for Super Roku."
     },
 
+    bugs: [
+        {
+            name: 'Highest Crit Rate Follow-up',
+            desc: 'This unit does not follow-up attack with the highest crit rate unit as intended.'
+        }
+    ],
+
     totalCost: 73000,
 
     // BASE STATS
