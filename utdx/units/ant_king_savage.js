@@ -13,13 +13,12 @@ unitDatabase.push({
         note: "Predatory Gluttony: Gain +30% True Damage and +30% (+50% at E6) Damage via kill-stacking. Reset after 10s without kill."
 
     },
-    notice: {
-        icon: '⚠️',
-        text: '<strong>Notice:</strong> Ant King is bugged; any DoT%+ buffs applied to him are calculated twice.',
-        color: '#f87171',
-        bg: 'rgba(239, 68, 68, 0.08)',
-        border: 'rgba(239, 68, 68, 0.15)'
-    },
+    bugs: [
+        {
+            name: 'DoT Buff Double-Calculation',
+            desc: 'Any DoT%+ buff applied to Ant King (e.g., from traits or abilities) is incorrectly calculated twice, making him stronger than intended against builds with DoT buffs.'
+        }
+    ],
     totalCost: 63000,
     stats: {
         spaCap: 5.5,

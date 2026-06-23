@@ -15,13 +15,16 @@ unitDatabase.push({
         long: "Ruler",
         note: "Neutral utility unit with hybrid placement."
     },
-    notice: {
-        icon: '⚠️',
-        text: '<strong>Notice:</strong> Angel in Hell is bugged; he has a fixed 50% crit rate that cannot change, and crits work, though he is not meant to crit.',
-        color: '#fbbf24',
-        bg: 'rgba(245, 158, 11, 0.08)',
-        border: 'rgba(245, 158, 11, 0.15)'
-    },
+    bugs: [
+        {
+            name: 'Holy Aura — Applies to Any Unit',
+            desc: '"Holy Aura" is bugged and will apply its +30% damage follow-up buff to <strong>any</strong> allied unit doing follow-up attacks in his range, not just intended targets.'
+        },
+        {
+            name: 'Fixed Crit Rate (50%)',
+            desc: 'This unit has a hardcoded 50% crit rate that cannot be changed by any means. Despite the "Purified Energy" passive stating he cannot crit, crits do in fact work on him at this fixed rate.'
+        }
+    ],
 
     totalCost: 91500,
 

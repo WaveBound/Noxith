@@ -311,7 +311,9 @@ window.getRelicDbEntry = function (db, unitId, activeType) {
             letter-spacing: 0.08em;
         }
         .trait-guide-btn {
-            position: static !important;
+            position: absolute !important;
+            bottom: 2px !important;
+            right: -4px !important;
             align-self: flex-end !important;
             flex-shrink: 0;
             z-index: 4;
@@ -917,11 +919,11 @@ function getSubstatDetailHtml(build) {
         </div>
         <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
             ${Object.entries(grandTotalByStat).sort((a, b) => b[1] - a[1]).map(([k, v]) => {
-                const cssType = getCssType(k);
-                return `<div class="badge-base border-${cssType}" style="background:rgba(0,0,0,0.4); padding:3px 8px;">
+        const cssType = getCssType(k);
+        return `<div class="badge-base border-${cssType}" style="background:rgba(0,0,0,0.4); padding:3px 8px;">
                     <span class="text-${cssType}" style="font-size:0.7rem; font-weight:900;">${statLabel(k).toUpperCase()} ${parseFloat(Number(v).toFixed(1))}%</span>
                 </div>`;
-            }).join('')}
+    }).join('')}
         </div>
     </div>` : '';
 
@@ -1162,7 +1164,7 @@ function getBestHydratedBuild(builds, unitId, isHotbar, activeModeIdx = undefine
 function generateBuildRowHTML(r, i, unitConfig = {}) {
     window._substatBuilds = window._substatBuilds || {};
     window._substatBuilds[r.id] = r;
-    
+
     const { totalCost = 50000, placement = 1, sortMode = 'dps', unitId = '', traitBenchmarks = {}, optimalityBenchmarks = {} } = unitConfig;
     const currentLevel = window.unitELevels[unitId] || 0;
     const nextLevel = currentLevel + 1;
@@ -2216,10 +2218,15 @@ function renderUnitCard(unit, absoluteIndex) {
         }
     }
 
+    const bugsBtnHtml = (unit.bugs && unit.bugs.length > 0)
+        ? `<button class="unit-bugs-btn" onclick="openUnitBugs('${unit.id}')">🐛 Bugs</button>`
+        : '';
+
     return createBaseUnitCard(unit, {
         id: 'card-' + unit.id,
         additionalClasses: (window.activeAbilityIds?.has(unit.id) ? ' use-ability' : '') + ' lazy-build-load',
         bannerContent: `<div class="unit-hero">
+            ${bugsBtnHtml}
             <div class="unit-badge-stack">
                 <div class="banner-badges">
                     <div class="placement-badge">Max Place: ${dynamicPlacement}</div>

@@ -301,6 +301,44 @@
         });
     };
 
+    /**
+     * Shows Known Bugs for a Unit
+     */
+    window.openUnitBugs = (unitId) => {
+        const unit = window.getUnitById(unitId);
+        if (!unit || !unit.bugs || unit.bugs.length === 0) return;
+
+        const bugsHtml = unit.bugs.map((bug, i) => `
+            <div style="
+                display: flex; gap: 14px; align-items: flex-start;
+                padding: 14px 16px;
+                background: rgba(239, 68, 68, 0.06);
+                border: 1px solid rgba(239, 68, 68, 0.18);
+                border-radius: 10px;
+                margin-bottom: ${i < unit.bugs.length - 1 ? '10px' : '0'};
+            ">
+                <span style="font-size: 1.3rem; line-height: 1; flex-shrink: 0; margin-top: 1px;">🐛</span>
+                <div>
+                    ${bug.name ? `<div style="font-size: 0.85rem; font-weight: 800; color: #fca5a5; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px;">${bug.name}</div>` : ''}
+                    <div style="font-size: 0.82rem; color: #d1d5db; line-height: 1.55;">${bug.desc}</div>
+                </div>
+            </div>
+        `).join('');
+
+        window.showUniversalModal({
+            title: `<span style="color: #f87171;">🐛 KNOWN BUGS</span> <span style="font-size: 0.75rem; color: #9ca3af; font-weight: 500; text-transform: none;">${unit.name}</span>`,
+            content: `
+                <div style="padding: 4px 0 8px;">
+                    <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 14px; padding: 8px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                        ⚠️ These are known in-game bugs that may affect how this unit behaves or how the calculator handles it.
+                    </div>
+                    ${bugsHtml}
+                </div>
+            `,
+            size: 'modal-sm'
+        });
+    };
+
     window.openUnitInfo = (unitId) => {
         const unit = window.getUnitById(unitId);
         if (!unit) return;
@@ -842,4 +880,124 @@
         getEl('mathInfoPopup')?.remove();
         if (!hasVisibleModals()) document.body.classList.remove('modal-open');
     };
+
+    /**
+     * General bugs not tied to a specific unit
+     */
+    const GENERAL_BUGS = [
+        {
+            name: 'Astral Trait — DoT Stacking Broken',
+            desc: 'The <strong>Astral</strong> trait is currently bugged and no longer stacks DoT. It does not function as intended in DoT-based builds.'
+        },
+        {
+            name: 'Elemental Advantages/Disadvantages',
+            desc: 'The <strong>Elemental Advantages/Disadvantages</strong> system is currently bugged and does not provide any damage bonus or damage reductions.'
+        }
+    ];
+
+    /**
+     * Shows All Known Bugs (unit-specific + general)
+     */
+    window.openAllBugsGuide = () => {
+        if (typeof unitDatabase === 'undefined') return;
+
+        const unitsWithBugs = unitDatabase.filter(u => u.bugs && u.bugs.length > 0);
+
+        const generalSection = GENERAL_BUGS.length > 0 ? `
+            <div style="margin-bottom: 22px;">
+                <div style="
+                    display: flex; align-items: center; gap: 10px;
+                    margin-bottom: 12px; padding-bottom: 8px;
+                    border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+                ">
+                    <span style="font-size: 1.1rem;">🌐</span>
+                    <span style="font-size: 0.8rem; font-weight: 900; color: #f87171; text-transform: uppercase; letter-spacing: 1px;">General / Game-Wide Bugs</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    ${GENERAL_BUGS.map(bug => `
+                        <div style="
+                            display: flex; gap: 12px; align-items: flex-start;
+                            padding: 12px 14px;
+                            background: rgba(239, 68, 68, 0.06);
+                            border: 1px solid rgba(239, 68, 68, 0.18);
+                            border-radius: 9px;
+                        ">
+                            <span style="font-size: 1.1rem; flex-shrink: 0; margin-top: 1px;">🐛</span>
+                            <div>
+                                <div style="font-size: 0.82rem; font-weight: 800; color: #fca5a5; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px;">${bug.name}</div>
+                                <div style="font-size: 0.8rem; color: #d1d5db; line-height: 1.5;">${bug.desc}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        ` : '';
+
+        const unitBugsHtml = unitsWithBugs.map(unit => `
+            <div style="margin-bottom: 18px;">
+                <div style="
+                    display: flex; align-items: center; gap: 10px;
+                    margin-bottom: 10px; padding-bottom: 8px;
+                    border-bottom: 1px solid rgba(239, 68, 68, 0.15);
+                ">
+                    <img src="${unit.img}" alt="${unit.name}" style="
+                        width: 34px; height: 34px; border-radius: 6px; object-fit: cover;
+                        border: 1px solid rgba(239, 68, 68, 0.25);
+                        background: rgba(0,0,0,0.4);
+                        flex-shrink: 0;
+                    " onerror="this.style.display='none'">
+                    <div>
+                        <div style="font-size: 0.82rem; font-weight: 900; color: #f9a8d4; text-transform: uppercase; letter-spacing: 0.5px;">${unit.name}</div>
+                        <div style="font-size: 0.68rem; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;">${unit.role} · ${unit.placementType || 'Ground'}</div>
+                    </div>
+                    <div style="margin-left: auto;">
+                        <span style="
+                            font-size: 0.6rem; font-weight: 900; padding: 2px 7px;
+                            background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3);
+                            border-radius: 50px; color: #f87171; text-transform: uppercase; letter-spacing: 0.5px;
+                        ">${unit.bugs.length} bug${unit.bugs.length > 1 ? 's' : ''}</span>
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 7px; padding-left: 4px;">
+                    ${unit.bugs.map(bug => `
+                        <div style="
+                            display: flex; gap: 12px; align-items: flex-start;
+                            padding: 11px 13px;
+                            background: rgba(239, 68, 68, 0.05);
+                            border: 1px solid rgba(239, 68, 68, 0.14);
+                            border-radius: 8px;
+                        ">
+                            <span style="font-size: 1rem; flex-shrink: 0; margin-top: 1px;">🐛</span>
+                            <div>
+                                ${bug.name ? `<div style="font-size: 0.79rem; font-weight: 800; color: #fca5a5; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.3px;">${bug.name}</div>` : ''}
+                                <div style="font-size: 0.78rem; color: #d1d5db; line-height: 1.5;">${bug.desc}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+
+        const totalBugs = GENERAL_BUGS.length + unitsWithBugs.reduce((acc, u) => acc + u.bugs.length, 0);
+
+        window.showUniversalModal({
+            title: `<span style="color: #f87171;">🐛 KNOWN BUGS</span> <span style="font-size: 0.7rem; color: #6b7280; font-weight: 500; text-transform: none;">${totalBugs} total</span>`,
+            content: `
+                <div style="padding: 2px 0 8px;">
+                    <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 16px; padding: 9px 12px; background: rgba(239, 68, 68, 0.05); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.1); line-height: 1.5;">
+                        ⚠️ These are known in-game bugs that may affect unit behaviour or calculator accuracy. Some bugs are reflected in the numbers, others are noted for awareness.
+                    </div>
+                    ${generalSection}
+                    ${unitsWithBugs.length > 0 ? `
+                        <div style="font-size: 0.75rem; font-weight: 900; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            Unit-Specific Bugs (${unitsWithBugs.length} units)
+                        </div>
+                        ${unitBugsHtml}
+                    ` : '<div style="color: #4b5563; text-align: center; padding: 20px;">No unit-specific bugs on record.</div>'}
+                </div>
+            `,
+            size: 'modal-md'
+        });
+    };
+
 })();

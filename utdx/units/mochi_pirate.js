@@ -15,13 +15,12 @@ unitDatabase.push({
         long: "Ruler",
         note: "Ruler due to placement count, Sacred/Eternal for support use.<br><span style='color: #f87171;'>⚠️ Bugged: Does not apply Time Snail in-game, and has 0% base crit rate currently.</span>"
     },
-    notice: {
-        icon: '⚠️',
-        text: '<strong>Notice:</strong> Mochi Pirate is bugged; he does not apply Time Snail currently / Crit Time snail enemies.',
-        color: '#f87171',
-        bg: 'rgba(239, 68, 68, 0.08)',
-        border: 'rgba(239, 68, 68, 0.15)'
-    },
+    bugs: [
+        {
+            name: 'Time Snail — Not Applied',
+            desc: '"Flowing Mochi" is supposed to apply a Time Snail effect to enemies, but this does not work in-game. Additionally, the guaranteed crit from the dough does not trigger.'
+        }
+    ],
 
     totalCost: 67500,
 

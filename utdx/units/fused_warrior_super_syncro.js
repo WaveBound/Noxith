@@ -15,13 +15,12 @@ unitDatabase.push({
         long: "Ruler",
         note: "Light-element Syncro unit with hybrid placement."
     },
-    notice: {
-        icon: '⚠️',
-        text: '<strong>Notice:</strong> Fused Warrior Super Syncro is bugged; his 2x damage bonus against enemies with more than 10x HP does not work.',
-        color: '#fbbf24',
-        bg: 'rgba(245, 158, 11, 0.08)',
-        border: 'rgba(245, 158, 11, 0.15)'
-    },
+    bugs: [
+        {
+            name: '2× Boss Damage — Non-Functional',
+            desc: 'The "I thought you would be stronger" passive states that when an enemy has more than 10× this unit\'s damage, it deals 2× damage. This bonus is currently bugged and does nothing in-game.'
+        }
+    ],
 
     totalCost: 142000,
 
