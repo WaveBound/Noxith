@@ -250,7 +250,7 @@ if (isMainThread) {
                 ['dot', 'cm'], ['cm', 'dot']
             ];
             const ratios = [
-                { p: 6, s: 0 }, { p: 5, s: 1 }, { p: 4, s: 2 }, { p: 3, s: 3 }
+                { p: 6, s: 0 }, { p: 5, s: 2 }, { p: 4, s: 3 }
             ];
 
             pairs.forEach(pair => {
@@ -279,20 +279,7 @@ if (isMainThread) {
         const applyContextualStats = (b, pieceName, mainStat, pStat, sStat, tStat, ratio, cands) => {
             if (!pStat) return { pStat: null, pVal: 0, sStat: null, sVal: 0, tStat: null, tVal: 0 };
             let pWeight = ratio.p || 0; let sWeight = ratio.s || 0; let tWeight = ratio.t || 0; 
-            
-            // Try to assign fallbacks if a stat matches the main stat
-            if (pStat === mainStat && pWeight > 0) {
-                const fallback = cands.find(c => c !== mainStat && c !== sStat && c !== tStat);
-                if (fallback) pStat = fallback;
-            }
-            if (sStat === mainStat && sWeight > 0) {
-                const fallback = cands.find(c => c !== mainStat && c !== pStat && c !== tStat);
-                if (fallback) sStat = fallback;
-            }
-            if (tStat === mainStat && tWeight > 0) {
-                const fallback = cands.find(c => c !== mainStat && c !== pStat && c !== sStat);
-                if (fallback) tStat = fallback;
-            }
+
 
             if (pStat === mainStat && pWeight > 0) {
                 let toDist = pWeight;
@@ -350,6 +337,22 @@ if (isMainThread) {
                 } else if (targets.length === 1) {
                     if (targets[0] === 'p') pWeight = Math.min(6, pWeight + toDist);
                     else sWeight = Math.min(6, sWeight + toDist);
+                }
+            }
+
+            let totalWeight = pWeight + sWeight + tWeight;
+            let targetWeight = (ratio.p || 0) + (ratio.s || 0) + (ratio.t || 0);
+            
+            if (totalWeight < targetWeight) {
+                let missing = targetWeight - totalWeight;
+                const fallback = cands.find(c => c !== mainStat && c !== pStat && c !== sStat && c !== tStat);
+                if (fallback) {
+                    if (pWeight === 0) { pStat = fallback; pWeight = missing; }
+                    else if (sWeight === 0) { sStat = fallback; sWeight = missing; }
+                    else if (tWeight === 0) { tStat = fallback; tWeight = missing; }
+                    else if (!tStat) { tStat = fallback; tWeight = missing; }
+                    else if (!sStat) { sStat = fallback; sWeight = missing; }
+                    else if (!pStat) { pStat = fallback; pWeight = missing; }
                 }
             }
 
@@ -643,7 +646,7 @@ if (isMainThread) {
         const MAP_PRIO = { 'dmg': 0, 'spa': 1, 'raw_dmg': 2 };
         const MAP_BODY = { 'dmg': 0, 'dot': 1, 'cm': 2 };
         const MAP_LEGS = { 'dmg': 0, 'spa': 1, 'cf': 2 };
-        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'bloodline_head': 7, 'reanimated_head': 8, 'sorcerer_hunter_spirit': 9, 'strongest_sorcerer_glasses': 10, 'monarch': 11, 'warlord_hat': 12, 'mochi_scarf': 13, 'flaming_donut': 14, 'fused_earrings': 15, 'ultiorras_wings': 16, 'berserks_cleave': 17, 'panther_claws': 18, 'koyotes_sword': 19 };
+        const MAP_HEAD = { 'none': 0, 'sun_god': 1, 'ninja': 2, 'reaper_necklace': 3, 'shadow_reaper_necklace': 4, 'junior': 5, 'biju_head': 6, 'bloodline_head': 7, 'reanimated_head': 8, 'sorcerer_hunter_spirit': 9, 'strongest_sorcerer_glasses': 10, 'monarch': 11, 'warlord_hat': 12, 'mochi_scarf': 13, 'flaming_donut': 14, 'ultiorras_wings': 15, 'berserks_cleave': 16, 'panther_claws': 17, 'fused_earrings': 18, 'koyotes_sword': 19 };
 
         const stringPool = new Map(); const stringArr = [""]; 
         const subPool = new Map(); const subArr = [null]; 
@@ -725,7 +728,7 @@ if (isMainThread) {
     const S = RAW.s; const P = RAW.p; const D = RAW.d;
     const PRIO = ['dmg', 'spa', 'raw_dmg'];
     const BODY = ['dmg', 'dot', 'cm']; const LEGS = ['dmg', 'spa', 'cf'];
-    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'koyotes_sword'];
+    const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings', 'koyotes_sword'];
     const DESC_BODY = ['Dmg', 'DoT', 'Crit Dmg']; const DESC_LEGS = ['Dmg', 'Spa', 'Crit Rate'];
     const ROW_SIZE = 18;
 
@@ -860,7 +863,7 @@ if (isMainThread) {
             const PRIO = ['dmg', 'spa', 'raw_dmg'];
             const BODY = ['dmg', 'dot', 'cm'];
             const LEGS = ['dmg', 'spa', 'cf'];
-            const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'fused_earrings', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'koyotes_sword'];
+            const HEAD = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings', 'koyotes_sword'];
 
             const decode = (b64) => {
                 const bin = Buffer.from(b64, 'base64').toString('binary');
@@ -989,7 +992,7 @@ if (isMainThread) {
                                     const exactKey = b.setName + "_" + (b.headUsed || 'none') + "_" + comboKey;
                                     
                                     if (!comboCounts[comboKey]) comboCounts[comboKey] = 0;
-                                    if (comboCounts[comboKey] >= 3) continue;
+                                    if (comboCounts[comboKey] >= 5) continue;
 
                                     if (!seenKeys.has(exactKey)) {
                                         uniqueList.push(b);

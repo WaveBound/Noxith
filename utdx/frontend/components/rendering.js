@@ -855,7 +855,13 @@ function getSubstatDetailHtml(build) {
         if (piece === 'body' && !mainStats.body) return null;
         if (piece === 'legs' && !mainStats.legs) return null;
 
-        const stored = Array.isArray(subs[piece]) ? subs[piece].filter(item => item && item.type) : [];
+        const stored = Array.isArray(subs[piece]) ? subs[piece].filter(item => item && item.type).map(item => {
+            const candType = mapStatKey(item.type);
+            const baseVal = typeof PERFECT_SUBS !== 'undefined' ? PERFECT_SUBS[candType] : 0;
+            // If the value matches the base value exactly, flag it as a base stat so the UI shows (BASE)
+            const isBase = baseVal && Math.abs(Number(item.val) - baseVal) < 0.01;
+            return { ...item, isBase: isBase };
+        }) : [];
         const existingTypes = new Set(stored.map(s => mapStatKey(s.type)));
 
         const mainStatType = piece === 'body' ? mainStats.body : (piece === 'legs' ? mainStats.legs : null);
@@ -891,7 +897,7 @@ function getSubstatDetailHtml(build) {
             const val = Number(item.val) || 0;
             const cssType = getCssType(item.type);
             const dimStyle = item.isBase ? 'transform: scale(0.95); opacity:0.85;' : '';
-            return `<div class="badge-base border-${cssType}" style="padding:4px 8px; font-size:0.7rem; ${dimStyle}">
+            return `<div class="badge-base border-${cssType}" style="padding:4px 8px; font-size:0.7rem; background: rgba(0, 0, 0, 0.6); ${dimStyle}">
                 <span class="text-${cssType}" style="font-weight:800; letter-spacing:0.5px;">${statLabel(item.type).toUpperCase()}</span>
                 <span class="text-${cssType}" style="font-weight:800; margin-left:4px;">${parseFloat(val.toFixed(1))}%</span>
                 ${item.isBase ? `<span class="text-${cssType}" style="font-size:0.55rem; opacity:0.6; margin-left:4px; font-weight:800;">(BASE)</span>` : ''}
