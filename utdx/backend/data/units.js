@@ -156,7 +156,8 @@ const UNIT_FILES = [
     'the_drink_super_rage.js',
     'fused_warrior_super_syncro.js',
     'limit_breaker_prince_marked.js',
-    'super_roku_third_ascension.js'
+    'super_roku_third_ascension.js',
+    'wavechaser_surfer.js'
 ];
 
 // Resolves after every unit script has loaded (or errored).

@@ -430,7 +430,8 @@ const guideData = [
     { unit: "fused_warrior_super_syncro", img: "images/units/FusedWarriorSuper.png", isCalculated: false },
     { unit: "limit_breaker_prince_marked", img: "images/units/LimitBreaker.png", isCalculated: false },
     { unit: "blanco_beast", img: "images/units/BlancoBeast.png", isCalculated: false },
-    { unit: "super_roku_third_ascension", img: "images/units/SuperRokuThird.png", isCalculated: false }
+    { unit: "super_roku_third_ascension", img: "images/units/SuperRokuThird.png", isCalculated: false },
+    { unit: "wavechaser_surfer", img: "images/units/Wavechaser_surfer.png", isCalculated: false }
 ];
 const elementIcons = {
     "Water": "images/elements/Water.png",
