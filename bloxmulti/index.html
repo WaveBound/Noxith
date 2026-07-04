@@ -676,14 +676,14 @@
       line-height: 1.6;
     }
 
-    /* ── Interactive Tabbed Widgets Showcase ── */
-    .widgets-section {
+    /* ── Tabs Overview Section ── */
+    .tabs-section {
       padding: 100px 0;
       position: relative;
       z-index: 1;
     }
 
-    .widgets-intro {
+    .tabs-intro {
       font-size: 16px;
       color: var(--muted);
       text-align: center;
@@ -693,113 +693,8 @@
       opacity: 0;
     }
 
-    .widgets-showcase {
-      display: grid;
-      grid-template-columns: 420px 1fr;
-      gap: 32px;
-      align-items: center;
-      opacity: 0;
-    }
-
-    .widgets-nav {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .widget-tab {
-      background: rgba(10, 9, 20, 0.4);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px;
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-    }
-
-    .widget-tab:hover {
-      background: rgba(15, 14, 28, 0.7);
-      border-color: rgba(157, 111, 255, 0.25);
-    }
-
-    .widget-tab.active {
-      background: rgba(157, 111, 255, 0.08);
-      border-color: var(--accent);
-      box-shadow: 0 0 12px var(--accent-glow);
-    }
-
-    .widget-tab-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: rgba(157, 111, 255, 0.08);
-      border: 1px solid rgba(157, 111, 255, 0.15);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent-light);
-      flex-shrink: 0;
-    }
-
-    .widget-tab.active .widget-tab-icon {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
-    .widget-nav-body {
-      flex: 1;
-    }
-
-    .widget-tab-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-
-    .widget-tab-desc {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .widgets-preview-panel {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .widget-preview-frame {
-      width: 100%;
-      max-width: 600px;
-      aspect-ratio: 5 / 3.5;
-      background: rgba(10, 9, 20, 0.8);
-      border: 1px solid var(--border-hi);
-      border-radius: 16px;
-      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
-      overflow: hidden;
-      position: relative;
-    }
-
-    .widget-preview-frame img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    @media (max-width: 900px) {
-      .widgets-showcase {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* ── Updates for "How to change a widget" box ── */
-    .widget-how-to {
+    /* ── Updates for "How tabs work" box ── */
+    .tabs-how-to {
       margin-top: 40px;
       background: rgba(157, 111, 255, 0.05);
       border: 1px solid rgba(157, 111, 255, 0.15);
@@ -810,7 +705,7 @@
       gap: 24px;
     }
 
-    .widget-how-to-icon {
+    .tabs-how-to-icon {
       width: 44px;
       height: 44px;
       border-radius: 12px;
@@ -824,27 +719,27 @@
       margin-top: 2px;
     }
 
-    .widget-how-to-title {
+    .tabs-how-to-title {
       font-size: 16px;
       font-weight: 700;
       color: var(--accent-light);
       margin-bottom: 8px;
     }
 
-    .widget-how-to-text {
+    .tabs-how-to-text {
       font-size: 14px;
       color: var(--muted);
       line-height: 1.6;
     }
 
-    .widget-how-to-steps {
+    .tabs-how-to-steps {
       margin-top: 14px;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
 
-    .widget-step {
+    .tabs-step {
       display: flex;
       align-items: flex-start;
       gap: 16px;
@@ -852,7 +747,7 @@
       color: var(--muted);
     }
 
-    .widget-step-num {
+    .tabs-step-num {
       width: 24px;
       height: 24px;
       border-radius: 50%;
@@ -869,13 +764,13 @@
       line-height: 1;
     }
 
-    .widget-step-text {
+    .tabs-step-text {
       flex: 1;
       line-height: 1.6;
     }
 
     @media (max-width: 768px) {
-      .widget-how-to {
+      .tabs-how-to {
         flex-direction: column;
         padding: 24px;
       }
@@ -1219,8 +1114,8 @@
       line-height: 1.5;
     }
 
-    /* premium badge on widget card */
-    .widget-premium-badge {
+    /* premium badge on tab card */
+    .tab-premium-badge {
       display: inline-flex;
       align-items: center;
       gap: 4px;
@@ -1590,7 +1485,7 @@
     <div class="nav-right">
       <ul class="nav-links">
         <li><a href="#features">Features</a></li>
-        <li><a href="#widgets">Widgets</a></li>
+        <li><a href="#tabs">Tabs</a></li>
         <li><a href="#premium">Premium</a></li>
         <li><a href="#download">Download</a></li>
       </ul>
@@ -1643,7 +1538,7 @@
     <div class="container" style="display: flex; flex-direction: column; align-items: center;">
       <div class="hero-badge animate">
         <div class="hero-badge-dot"></div>
-        v1.2.2 - Account Focus Switching Added, Running Instances Widget Improved
+        v1.2.2 - Account Focus Switching Added, Running Instances Tab Improved
       </div>
 
       <h1 class="hero-title animate" style="transition-delay:0.1s">
@@ -1652,7 +1547,7 @@
 
       <p class="hero-sub animate" style="transition-delay:0.2s">
         Launch and manage multiple Roblox accounts at the same time, each with its own isolated session. Customize your
-        dashboard with swappable widgets, organize accounts, and monitor performance.
+        dashboard with an open, closable, and fully reorderable tab bar, organize accounts, and monitor performance.
       </p>
 
       <div class="hero-actions animate" style="transition-delay:0.3s">
@@ -1949,127 +1844,97 @@
     </div>
   </section>
 
-  <!-- Interactive Modular Widgets Showcase -->
-  <section class="widgets-section" id="widgets">
+  <!-- Modular Tabs Overview -->
+  <section class="tabs-section" id="tabs">
     <div class="container">
-      <div class="section-label animate">Dashboard Panels</div>
-      <h2 class="section-title animate">Modular layouts</h2>
-      <p class="widgets-intro animate">
-        Your four-panel dashboard is made up of swap-enabled utility widgets. Choose from our set of modules to
-        construct your layout.
+      <div class="section-label animate">Dashboard Tabs</div>
+      <h2 class="section-title animate">Open exactly what you need</h2>
+      <p class="tabs-intro animate">
+        Every panel lives in a single tab bar. Open as many as you want, drag them into any order, and close the
+        ones you don't need — no fixed layout, just the tools you're actually using.
       </p>
 
-      <div class="widgets-showcase animate">
-        <!-- Interactive Left Navigation (Includes 5th Tab with Premium Badge) -->
-        <div class="widgets-nav">
-          <!-- Tab 1 -->
-          <div class="widget-tab active" onclick="switchWidgetTab(0)">
-            <div class="widget-tab-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-            </div>
-            <div class="widget-nav-body">
-              <div class="widget-tab-title">Saved Games</div>
-              <div class="widget-tab-desc">Bookmark active places with thumbnail art and pinning.</div>
-            </div>
+      <div class="features-grid stagger">
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
           </div>
-          <!-- Tab 2 -->
-          <div class="widget-tab" onclick="switchWidgetTab(1)">
-            <div class="widget-tab-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
-                <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
-                <line x1="6" y1="6" x2="6.01" y2="6" />
-                <line x1="6" y1="18" x2="6.01" y2="18" />
-              </svg>
-            </div>
-            <div class="widget-nav-body">
-              <div class="widget-tab-title">Saved Private Servers</div>
-              <div class="widget-tab-desc">Keep private server invite codes stored next to their games.</div>
-            </div>
-          </div>
-          <!-- Tab 3 -->
-          <div class="widget-tab" onclick="switchWidgetTab(2)">
-            <div class="widget-tab-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-            </div>
-            <div class="widget-nav-body">
-              <div class="widget-tab-title">Recent Launches</div>
-              <div class="widget-tab-desc">Logs a timeline history of the last 10 game servers joined.</div>
-            </div>
-          </div>
-          <!-- Tab 4 -->
-          <div class="widget-tab" onclick="switchWidgetTab(3)">
-            <div class="widget-tab-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
-            </div>
-            <div class="widget-nav-body">
-              <div class="widget-tab-title">Launch Logs</div>
-              <div class="widget-tab-desc">Track real-time process events, connection statuses, and launcher logs.</div>
-            </div>
-          </div>
-          <!-- Tab 5 -->
-          <div class="widget-tab" onclick="switchWidgetTab(4)">
-            <div class="widget-tab-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-            </div>
-            <div class="widget-nav-body">
-              <div class="widget-tab-title">Online Friends</div>
-              <div class="widget-tab-desc">Track online friend locations with quick-join triggers.</div>
-            </div>
-          </div>
-          <!-- Tab 6 (Premium Running Instances) -->
-          <div class="widget-tab" onclick="switchWidgetTab(5)">
-            <div class="widget-tab-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="3" width="20" height="14" rx="2" />
-                <path d="M8 21h8M12 17v4" />
-                <polyline points="7 10 10 7 13 10 17 6" />
-              </svg>
-            </div>
-            <div class="widget-nav-body">
-              <div class="widget-tab-title" style="display: flex; align-items: center; justify-content: space-between;">
-                Running Instances
-                <span class="widget-premium-badge">Premium</span>
-              </div>
-              <div class="widget-tab-desc">Monitor live hardware stats per active client window.</div>
-            </div>
-          </div>
+          <div class="feat-title">Launch</div>
+          <div class="feat-desc">Bookmark saved games and private servers, launch instantly, and browse your recent
+            launch history — all from one tab.</div>
         </div>
 
-        <!-- Right Side Live Visual Panel -->
-        <div class="widgets-preview-panel">
-          <div class="widget-preview-frame">
-            <img id="widgetPreviewImg" src="Widget-SavedGames.png" alt="Saved Games"
-              onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2250%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Saved Games Widget (Widget-SavedGames.png)</text></svg>';" />
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
           </div>
+          <div class="feat-title">Launch Logs</div>
+          <div class="feat-desc">Real-time process events, connection statuses, and error details for every launch
+            attempt — searchable and copyable.</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          </div>
+          <div class="feat-title">Online Friends</div>
+          <div class="feat-desc">See where your friends are playing right now and quick-join their server in one
+            click.</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg>
+          </div>
+          <div class="feat-title" style="display:flex; align-items:center; justify-content:space-between;">
+            Remote View
+            <span class="tab-premium-badge">Premium</span>
+          </div>
+          <div class="feat-desc">Stream your screen securely to any device with local, peer-to-peer encoding.</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <path d="M8 21h8M12 17v4" />
+              <polyline points="7 10 10 7 13 10 17 6" />
+            </svg>
+          </div>
+          <div class="feat-title" style="display:flex; align-items:center; justify-content:space-between;">
+            Running Instances
+            <span class="tab-premium-badge">Premium</span>
+          </div>
+          <div class="feat-desc">Live CPU, RAM, and GPU stats per running client, with a quick process-kill
+            trigger.</div>
         </div>
       </div>
 
       <!-- Walkthrough Panel -->
-      <div class="widget-how-to animate">
-        <div class="widget-how-to-icon">
+      <div class="tabs-how-to animate">
+        <div class="tabs-how-to-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3" />
@@ -2077,27 +1942,30 @@
               d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
           </svg>
         </div>
-        <div class="widget-how-to-body">
-          <div class="widget-how-to-title">How to swap a widget</div>
-          <div class="widget-how-to-text">Swapping a panel is handled natively and updates in real time.</div>
-          <div class="widget-how-to-steps">
-            <div class="widget-step">
-              <div class="widget-step-num">1</div>
-              <div class="widget-step-text">
-                <strong style="color:var(--text);">Right-click</strong> the small panel label at the top of any active
-                widget slot (e.g. "SAVED GAMES").
+        <div class="tabs-how-to-body">
+          <div class="tabs-how-to-title">How tabs work</div>
+          <div class="tabs-how-to-text">Your dashboard is a live tab bar — open, reorder, and close tabs on the fly,
+            just like a browser.</div>
+          <div class="tabs-how-to-steps">
+            <div class="tabs-step">
+              <div class="tabs-step-num">1</div>
+              <div class="tabs-step-text">
+                Click the <strong style="color:var(--text);">+</strong> at the end of the tab bar and pick a panel —
+                Launch, Logs, Remote View, and more.
               </div>
             </div>
-            <div class="widget-step">
-              <div class="widget-step-num">2</div>
-              <div class="widget-step-text">
-                A custom picker window will appear. Widgets already assigned to other slots are greyed out.
+            <div class="tabs-step">
+              <div class="tabs-step-num">2</div>
+              <div class="tabs-step-text">
+                <strong style="color:var(--text);">Drag</strong> any tab left or right to reorder the bar exactly how
+                you like it.
               </div>
             </div>
-            <div class="widget-step">
-              <div class="widget-step-num">3</div>
-              <div class="widget-step-text">
-                Select the widget you want—the panel loads immediately and your choice is saved.
+            <div class="tabs-step">
+              <div class="tabs-step-num">3</div>
+              <div class="tabs-step-text">
+                Click the <strong style="color:var(--text);">×</strong> on a tab to close it, or right-click for quick
+                actions like Close Tab and Close Other Tabs.
               </div>
             </div>
           </div>
@@ -2181,7 +2049,7 @@
             </div>
           </div>
 
-          <!-- Running Instances Widget -->
+          <!-- Running Instances Tab -->
           <div class="premium-feat animate" style="transition-delay:0.3s">
             <div class="premium-feat-left">
               <div class="premium-feat-icon">
@@ -2193,7 +2061,7 @@
                 </svg>
               </div>
               <div class="premium-feat-body">
-                <div class="premium-feat-title">Running Instances Widget</div>
+                <div class="premium-feat-title">Running Instances Tab</div>
                 <div class="premium-feat-desc">An interactive dashboard monitor that maps running clients to their
                   parent account, showing real-time CPU percentages, working memory, and GPU usage bars. Includes a
                   quick process-kill trigger.</div>
@@ -2445,38 +2313,6 @@
       });
     }
 
-    // ── Interactive Widgets Panel Showcase ──
-    const widgetImages = [
-      "Widget-SavedGames.png",
-      "Widget-SavedServers.png",
-      "Widget-RecentLaunches.png",
-      "Widget-LaunchLogs.png",
-      "Widget-OnlineFriends.png",
-      "Live-Monitor.png"
-    ];
-    const widgetFallbacks = [
-      "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Saved Games Widget (Widget-SavedGames.png)</text></svg>",
-      "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Saved Private Servers Widget (Widget-SavedServers.png)</text></svg>",
-      "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Recent Launches Widget (Widget-RecentLaunches.png)</text></svg>",
-      "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Launch Logs Widget (Widget-LaunchLogs.png)</text></svg>",
-      "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%230c0b18%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Online Friends Widget (Widget-OnlineFriends.png)</text></svg>",
-      "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22 style=%22background:%232af598%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%232af598%22 font-family=%22sans-serif%22 font-size=%2216%22 text-anchor=%22middle%22>Running Instances Monitor (Live-Monitor.png)</text></svg>"
-    ];
-
-    function switchWidgetTab(index) {
-      document.querySelectorAll('.widget-tab').forEach((tab, i) => {
-        tab.classList.toggle('active', i === index);
-      });
-      const img = document.getElementById('widgetPreviewImg');
-      if (img) {
-        img.src = widgetImages[index];
-        img.onerror = function () {
-          this.onerror = null;
-          this.src = widgetFallbacks[index];
-        };
-      }
-    }
-
     // ── Scroll Animations (Intersection Observer) ──
     const observerOptions = {
       threshold: 0.1,
@@ -2492,12 +2328,12 @@
       });
     }, observerOptions);
 
-    document.querySelectorAll('.animate, .stagger, .premium-feat, .widget-card, .premium-card, .widgets-showcase').forEach(el => observer.observe(el));
+    document.querySelectorAll('.animate, .stagger, .premium-feat, .premium-card').forEach(el => observer.observe(el));
 
     // Fallback in case Observer fails
     window.addEventListener('load', () => {
       setTimeout(() => {
-        document.querySelectorAll('.animate, .stagger, .premium-feat, .widget-card, .premium-card, .widgets-showcase').forEach(el => {
+        document.querySelectorAll('.animate, .stagger, .premium-feat, .premium-card').forEach(el => {
           el.classList.add('in');
         });
       }, 1000);
