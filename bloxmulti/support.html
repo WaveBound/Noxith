@@ -1408,7 +1408,7 @@
     <h2>Frequently Asked Questions (FAQ)</h2>
     <h3>What is BloxMulti?</h3>
     <p>BloxMulti is a Windows desktop utility that allows you to launch and manage multiple Roblox instances
-      simultaneously. It features a customizable, widget-based interface powered by WebView2.</p>
+      simultaneously. It features a customizable, tab-based interface powered by WebView2.</p>
     <h3>Do I need to install anything for the UI to work?</h3>
     <p>BloxMulti uses <strong>Microsoft Edge WebView2</strong> to render its modern interface. Most modern Windows 10
       and 11 systems have this installed by default. If the app fails to open or displays a blank screen, you may need
@@ -1417,12 +1417,13 @@
     <h2>Troubleshooting</h2>
     <h3>The app won't open / nothing happens</h3>
     <ul>
-      <li><strong>Extract the files first:</strong> The app will <strong>not start</strong> if you run it directly from
-        inside a <code>.zip</code> archive. You must right-click the downloaded zip file, select "Extract All...", and
-        run <code>BloxMulti.exe</code> from the newly extracted folder.</li>
+      <li><strong>SmartScreen / Unblock the file:</strong> Because BloxMulti is a standalone executable, Windows
+        SmartScreen may occasionally prevent it from running. If nothing happens when launching, right-click
+        <code>BloxMulti.exe</code>, select <strong>Properties</strong>, check the <strong>Unblock</strong> box at the
+        bottom, click Apply, and open it again.</li>
     </ul>
-    <h3>Widgets aren't saving their positions</h3>
-    <p>If you close the app and your widgets reset to their default positions:</p>
+    <h3>Tabs aren't saving their configurations</h3>
+    <p>If you close the app and your tabs reset to their default states:</p>
     <ul>
       <li>Ensure the app is located in a folder where it has write permissions (like your Desktop or Documents). The app
         needs permission to create and update its local JSON configuration file.</li>
