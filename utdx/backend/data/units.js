@@ -157,7 +157,8 @@ const UNIT_FILES = [
     'fused_warrior_super_syncro.js',
     'limit_breaker_prince_marked.js',
     'super_roku_third_ascension.js',
-    'wavechaser_surfer.js'
+    'wavechaser_surfer.js',
+    'funeral_parlor_fragrance.js'
 ];
 
 // Resolves after every unit script has loaded (or errored).

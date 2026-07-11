@@ -654,7 +654,7 @@ window.getUnitsPerPage = () => {
 };
 
 // Constants & Configurations
-const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings', 'koyotes_sword'];
+const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings', 'koyotes_sword', 'phantom_stealer_head'];
 
 const HEAD_CONFIG = {
     sun_god: { name: 'Sun God', search: 'Sun God', cls: 'sungod' },
@@ -675,7 +675,8 @@ const HEAD_CONFIG = {
     berserks_cleave: { name: "Berserk's Cleave", search: 'Berserk Cleave', cls: 'custom' },
     panther_claws: { name: 'Panther Claws', search: 'Panther Claws', cls: 'custom' },
     fused_earrings: { name: 'Fused Earrings', search: 'Earrings', cls: 'custom' },
-    koyotes_sword: { name: "Koyote's Sword", search: "Koyote Sword", cls: 'custom' }
+    koyotes_sword: { name: "Koyote's Sword", search: "Koyote Sword", cls: 'custom' },
+    phantom_stealer_head: { name: 'Phantom Stealer', search: 'Phantom Stealer', cls: 'custom' }
 };
 
 const COMBO_TITLES = {
@@ -1057,7 +1058,8 @@ function hydrateBuildEntry(r, unitId, isHotbar, activeModeIdx = undefined) {
                     (fullMath.dotData.nativeTotalDmg || 0) +
                     (fullMath.dotData.radTotalDmg || 0) +
                     (fullMath.dotData.fuaDotTotalDmg || 0) +
-                    (fullMath.dotData.scarfBurnTotalDmg || 0)
+                    (fullMath.dotData.scarfBurnTotalDmg || 0) +
+                    (fullMath.dotData.customTotalDmg || 0)
                 ) : 0;
                 res.placement = fullMath.placement;
                 res.detailedBuffs = fullMath.detailedBuffs;
@@ -1911,7 +1913,8 @@ function getCachedReconstructedCustomTraitBuilds(unit, customTraitsToCalc, activ
                         (res.dotData.nativeTotalDmg || 0) +
                         (res.dotData.radTotalDmg || 0) +
                         (res.dotData.fuaDotTotalDmg || 0) +
-                        (res.dotData.scarfBurnTotalDmg || 0)
+                        (res.dotData.scarfBurnTotalDmg || 0) +
+                        (res.dotData.customTotalDmg || 0)
                     ) : 0,
                     placement: res.placement || build.placement || build.p || 0,
                     isCustom: true,

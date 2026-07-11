@@ -265,6 +265,12 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                 }
             }
 
+            if (p.name === "Burning Afterlife") {
+                const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+                pDmg = 30;
+                pSpa = (eLevel >= 4) ? 25 : 15;
+            }
+
             if (pDmg !== 0 || pSpa !== 0 || pRange !== 0 || pTrue !== 0 || pCrit !== 0 || pCdmg !== 0 || pDot !== 0 || pBoss !== 0 || isKsDynamic || isAkDynamic || isUgDynamic || isMhDynamic || isAbhDynamic) {
                 passivePcent += pDmg;
                 passiveSpaPcent += pSpa;

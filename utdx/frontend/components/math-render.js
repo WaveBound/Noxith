@@ -884,10 +884,24 @@ function renderDotSection(data, headDotRow) {
                 <td class="mt-cell-val mt-text-bold mt-pt-md" style="color:#fb923c">${fmt.num(db.scarfBurnDps)} DPS</td>
             </tr>
             ` : ''}
+            ${db?.customDotDps > 0 ? `
+            <tr><td class="mt-cell-label mt-pt-md">Pyro Stack Base Dmg</td><td class="mt-cell-formula mt-pt-md"></td><td class="mt-cell-val mt-pt-md mt-text-bold">${fmt.num(db.baseStackDmg)}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ Pyro Stacks</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">x${db.sysLvl}</td></tr>
+            ${db.multiplier > 1 ? `<tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ E6 Double Dmg Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">x${db.multiplier}</td></tr>` : ''}
+            <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-custom">1. Trait Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-custom text-bold">${fmt.pct(db.traitDotBuff)}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-accent-end">2. Gear Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-end text-bold">${fmt.pct(db.gearDotBonus)}</td></tr>
+            ${db.passiveDotBuff > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-gray">3. Passive Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-gray text-bold">${fmt.pct(db.passiveDotBuff)}</td></tr>` : ''}
+            <tr class="mt-border-top"><td class="mt-cell-label mt-pl-sm mt-pt-sm text-bold text-gray">↳ Combined DoT Multiplier</td><td class="mt-cell-formula mt-pt-sm text-bold"><span class="op">×</span>${fmt.fix(db.combinedMultiplier, 3)}</td><td class="mt-cell-val"></td></tr>
+            <tr>
+                <td class="mt-cell-label mt-pt-md mt-text-bold" style="color:#f87171">${db.customLabel || 'Custom DoT'} (${db.customInterval || 5}s)</td>
+                <td class="mt-cell-formula mt-pt-md">${getFormula(db.customTotalDmg, db.customInterval)}</td>
+                <td class="mt-cell-val mt-text-bold mt-pt-md" style="color:#f87171">${fmt.num(db.customDotDps)} DPS</td>
+            </tr>
+            ` : ''}
             <tr class="mt-border-top">
                 <td class="mt-cell-label text-white mt-pt-md">Total DoT (1 Unit)</td>
                 <td class="mt-cell-formula mt-pt-md"></td>
-                <td class="mt-cell-val text-white mt-pt-md">${fmt.num((db?.nativeDps || 0) + (db?.radDps || 0) + (db?.fuaDotDps || 0) + (db?.scarfBurnDps || 0))}</td>
+                <td class="mt-cell-val text-white mt-pt-md">${fmt.num((db?.nativeDps || 0) + (db?.radDps || 0) + (db?.fuaDotDps || 0) + (db?.scarfBurnDps || 0) + (db?.customDotDps || 0))}</td>
             </tr>
             ${data.placement > 1 ? `
             <tr>
@@ -1380,7 +1394,7 @@ window.renderMathContent = function (data, isSplit = false) {
         'monarch_head': 'Monarch Head', 'monarch': 'Monarch Cape', 'warlord_hat': 'Warlord Hat',
         'mochi_scarf': 'Mochi Scarf', 'flaming_donut': 'Flaming Donut', 'ultiorras_wings': "Ultiorra's Wings",
         'berserks_cleave': "Berserk's Cleave", 'panther_claws': 'Panther Claws', 'fused_earrings': 'Fused Earrings',
-        'koyotes_sword': "Koyote's Sword"
+        'koyotes_sword': "Koyote's Sword", 'phantom_stealer_head': 'Phantom Stealer', 'phantom_stealer': 'Phantom Stealer'
     };
     const headType = (data.headBuffs?.type || data.relicStats?.head || 'none');
     const headDisplayName = String(MAP_HEAD_NAMES[headType] ?? (headType === 'none' || !headType ? 'None' : (String(headType).replace(/_/g, ' ').toUpperCase())));

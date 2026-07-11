@@ -368,7 +368,10 @@ function calculateDPS(uStats, relicStats, context) {
 
     let finalCritRate = Math.min(rawCritRate, 100);
 
-    if (window.isUnit(uStats.id, 'angel_born_in_hell') || window.isUnit(uStats.id, 'the_strongest_of_today') || window.isUnit(uStats.id, 'strongest_of_today')) {
+    if (window.isUnit(uStats.id, 'angel_born_in_hell')) {
+        finalCritRate = 0;
+        rawCritRate = 0;
+    } else if (window.isUnit(uStats.id, 'the_strongest_of_today') || window.isUnit(uStats.id, 'strongest_of_today')) {
         finalCritRate = 50;
         rawCritRate = 50;
     }
@@ -840,6 +843,40 @@ function calculateDPS(uStats, relicStats, context) {
 
     let finalDotDps = dotDpsTotal;
     let finalBossDotDps = bossDotDpsTotal;
+
+    if (window.isUnit && window.isUnit(uStats.id, 'funeral_parlor_fragrance')) {
+        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+        let sysLvl = 25;
+        if (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels['funeral_parlor_fragrance'] !== undefined) {
+            sysLvl = Number(window.unitSystemLevels['funeral_parlor_fragrance']);
+        } else if (uStats.systemLevel) {
+            sysLvl = uStats.systemLevel.default || 25;
+        }
+
+        const baseStackDmg = (eLevel >= 2) ? 7500 : 5000;
+        const multiplier = (eLevel >= 6) ? 2 : 1;
+        const combinedMultiplier = (1 + ((traitDotBuff + gearDotBonus + passiveDotBuff) / 100)) * (globalDotMult || 1.0);
+        const totalDotDmg = baseStackDmg * sysLvl * multiplier * combinedMultiplier;
+        const customDotDps = (totalDotDmg / 5) * placement;
+
+        finalDotDps += customDotDps;
+        finalBossDotDps += customDotDps;
+
+        if (dotBreakdown) {
+            dotBreakdown.customDotDps = customDotDps / placement;
+            dotBreakdown.customLabel = "Blossom Blaze Pyro Stacks";
+            dotBreakdown.customTotalDmg = totalDotDmg;
+            dotBreakdown.customInterval = 5;
+            dotBreakdown.sysLvl = sysLvl;
+            dotBreakdown.baseStackDmg = baseStackDmg;
+            dotBreakdown.multiplier = multiplier;
+            dotBreakdown.combinedMultiplier = combinedMultiplier;
+            dotBreakdown.traitDotBuff = traitDotBuff;
+            dotBreakdown.gearDotBonus = gearDotBonus;
+            dotBreakdown.passiveDotBuff = passiveDotBuff;
+            dotBreakdown.globalDotMult = globalDotMult;
+        }
+    }
 
     if (isFusedWarrior) {
         const traitMultiplier = 1 + (traitDotBuff / 100);

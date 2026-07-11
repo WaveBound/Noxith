@@ -154,6 +154,21 @@ const PASSIVES = {
         syncroDmgBuff: 15,
         syncroRangeBuff: 25
     },
+    phantom_stealer: {
+        name: "Soul Steal",
+        desc: "If this unit spawns a permanent summon, buff summons and unit's damage by 25%.",
+        trigger: "passive",
+        dmgBuff: 25,
+        summonDmgBuff: 25,
+        requiresSummon: true
+    },
+    phantom_stealer_acc: {
+        name: "Phantom Aura",
+        desc: "Buffs boss damage by 5% per unit in range, max 25%.",
+        trigger: "passive",
+        bossDmgPerUnit: 5,
+        maxBossDmg: 25
+    },
 
 };
 
@@ -201,6 +216,13 @@ const TAG_PERKS = {
     fused_earrings_acc: [
         { tag: "Hero", bonus: { dmg: 10, dot: 20 } },
         { tag: "Fusion", bonus: { dmg: 10, bossDmg: 25 } },
+    ],
+    phantom_stealer_acc: [
+        { tag: "Uncontrollable Power", bonus: { dmg: 15, range: 15, elementalAll: 10, hyperArmor: 15 } },
+    ],
+    phantom_stealer: [
+        { tag: "Phantoms", bonus: { bossDmg: 10, elementalAll: 10 } },
+        { tag: "King", bonus: { dmg: 10, spa: 5, range: 15 } },
     ],
 };
 

@@ -131,7 +131,10 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
         const getEffectiveCritCap = () => {
             if (window.isUnit(stats.id, 'pirate_king')) return 40;
             if (headType === 'sorcerer_hunter_spirit') return 0;
-            if (window.isUnit(stats.id, 'angel_born_in_hell') || window.isUnit(stats.id, 'the_strongest_of_today') || window.isUnit(stats.id, 'strongest_of_today')) {
+            if (window.isUnit(stats.id, 'angel_born_in_hell')) {
+                return 0;
+            }
+            if (window.isUnit(stats.id, 'the_strongest_of_today') || window.isUnit(stats.id, 'strongest_of_today')) {
                 return 50;
             }
             if (window.isUnit(stats.id, 'kirito')) return stats.crit || 0;

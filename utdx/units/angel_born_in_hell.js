@@ -19,10 +19,6 @@ unitDatabase.push({
         {
             name: 'Holy Aura — Applies to Any Unit',
             desc: '"Holy Aura" is bugged and will apply its +30% damage follow-up buff to <strong>any</strong> allied unit doing follow-up attacks in his range, not just intended targets.'
-        },
-        {
-            name: 'Fixed Crit Rate (50%)',
-            desc: 'This unit has a hardcoded 50% crit rate that cannot be changed by any means. Despite the "Purified Energy" passive stating he cannot crit, crits do in fact work on him at this fixed rate.'
         }
     ],
 
@@ -30,8 +26,8 @@ unitDatabase.push({
 
     // BASE STATS
     stats: {
-        crit: 50,
-        cdmg: 150,
+        crit: 0,
+        cdmg: 0,
         dot: 0,
         dotStacks: 1,
         spaCap: 3,

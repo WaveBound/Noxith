@@ -98,7 +98,9 @@ window._calcSetAndTagBonuses = function (relicStats, uStats, headPiece, context 
         warlord_hat: 'warlord',
         sun_god: 'sun_god',
         ninja: 'ninja',
-        fused_earrings: 'fused_set'
+        fused_earrings: 'fused_set',
+        phantom_stealer: 'phantom_stealer',
+        phantom_stealer_head: 'phantom_stealer'
     };
 
     const mappedHeadSetId = headSetIdMap[headPiece];
@@ -119,7 +121,7 @@ window._calcSetAndTagBonuses = function (relicStats, uStats, headPiece, context 
 
     if (mappedHeadSetId && mappedHeadSetId !== activeSetId) {
         // Exclude accessories that handle their own specific perks in _calcHeadDynamicBuffs to prevent double-dipping
-        if (headPiece !== 'fused_earrings' && headPiece !== 'monarch' && headPiece !== 'monarch_cape' && headPiece !== 'monarch_head' && headPiece !== 'rebellious' && headPiece !== 'rebellious_head' && headPiece !== 'bloodline_head') {
+        if (headPiece !== 'fused_earrings' && headPiece !== 'monarch' && headPiece !== 'monarch_cape' && headPiece !== 'monarch_head' && headPiece !== 'rebellious' && headPiece !== 'rebellious_head' && headPiece !== 'bloodline_head' && headPiece !== 'phantom_stealer' && headPiece !== 'phantom_stealer_head') {
             setsToCheck.push(mappedHeadSetId);
         }
     }
@@ -276,6 +278,20 @@ window._calcSetAndTagBonuses = function (relicStats, uStats, headPiece, context 
         }
     }
 
+    // Phantom Stealer Set logic (Top/Bottom)
+    if (activeSetId === 'phantom_stealer') {
+        const hasSummon = uStats && (
+            (uStats.summonStats && uStats.summonStats.maxCount > 0) ||
+            (uStats.customSummons && uStats.customSummons.length > 0)
+        );
+        if (hasSummon) {
+            const psPassive = (typeof PASSIVES !== 'undefined') ? PASSIVES.phantom_stealer : null;
+            const psBuff = psPassive ? psPassive.dmgBuff : 25;
+            sBonus.dmg += psBuff;
+            setPerkDmg += psBuff;
+        }
+    }
+
     return { sBonus, tagBuffs, setPerkDmg };
 };
 
@@ -318,7 +334,9 @@ window._calcHeadDynamicBuffs = function (headPiece, finalSpa, finalRange, uStats
         monarch_cape: 'monarch',
         monarch_head: 'monarch',
         warlord_hat: 'warlord',
-        fused_earrings: 'fused_set'
+        fused_earrings: 'fused_set',
+        phantom_stealer: 'phantom_stealer',
+        phantom_stealer_head: 'phantom_stealer'
     };
 
     const mappedSetId = headSetIdMap[headPiece];
@@ -590,6 +608,34 @@ window._calcHeadDynamicBuffs = function (headPiece, finalSpa, finalRange, uStats
         }
 
         headCalc.type = 'fused_earrings';
+    }
+
+    // Phantom Stealer accessory: +25% boss damage (potential/max mode)
+    if (headPiece === 'phantom_stealer' || headPiece === 'phantom_stealer_head') {
+        const psAccPassive = (typeof PASSIVES !== 'undefined') ? PASSIVES.phantom_stealer_acc : null;
+        const maxBoss = psAccPassive ? psAccPassive.maxBossDmg : 25;
+        headCalc.bossDmg = (headCalc.bossDmg || 0) + maxBoss;
+        headCalc.type = 'phantom_stealer';
+
+        // Phantom Stealer accessory tag perks
+        const psAccPerks = (typeof TAG_PERKS !== 'undefined') ? TAG_PERKS.phantom_stealer_acc : null;
+        if (psAccPerks) {
+            psAccPerks.forEach(perk => {
+                if (tags.includes(perk.tag)) {
+                    const b = perk.bonus || {};
+                    headDmgTag += b.dmg || 0;
+                    headCalc.cf += b.cRate || 0;
+                    headCalc.cm += b.cDmg || 0;
+                    headDotBuff += b.dot || 0;
+                    if (b.range) headCalc.range = (headCalc.range || 0) + b.range;
+                    headCalc.elementalAll = (headCalc.elementalAll || 0) + (b.elementalAll || 0);
+                    headCalc.hyperArmor = (headCalc.hyperArmor || 0) + (b.hyperArmor || 0);
+                    headCalc.activeTags.push(perk.tag);
+                    headCfTag += b.cRate || 0;
+                    headCmTag += b.cDmg || 0;
+                }
+            });
+        }
     }
 
     return { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc, headCfTag, headCmTag };

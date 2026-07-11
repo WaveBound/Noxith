@@ -58,6 +58,13 @@ const SETS = [
         location: "Raid: Fused Warrior",
         locationImage: "images/location/fused_warrior.png"
     },
+    {
+        id: "phantom_stealer", name: "Phantom Stealer", rarity: "Secret", source: "Raid",
+        bonus: { dmg: 0, spa: 0, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, hyperArmor: 0, armorDmg: 0, passive: "phantom_stealer" },
+        accessory: { dmg: 0, spa: 0, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, hyperArmor: 0, armorDmg: 0, passive: "phantom_stealer_acc" },
+        location: "Raid: Phantom Stealer",
+        locationImage: "images/location/phantom_stealer.png"
+    },
 
 
     // === STORY / MYTHICAL SETS ===
@@ -203,7 +210,8 @@ const HEAD_SET_ID_ALIASES = {
     strongest_sorcerer: 'strongest_sorcerer_glasses',
     sorcerer_hunter: 'sorcerer_hunter_spirit',
     ninja: 'junior',
-    fused_set: 'fused_earrings'
+    fused_set: 'fused_earrings',
+    phantom_stealer: 'phantom_stealer_head'
 };
 
 function getRelicPieceCatalog() {
