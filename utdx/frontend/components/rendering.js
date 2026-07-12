@@ -654,7 +654,7 @@ window.getUnitsPerPage = () => {
 };
 
 // Constants & Configurations
-const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings', 'koyotes_sword', 'phantom_stealer_head'];
+const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings', 'koyotes_sword', 'phantom_stealer_head', 'almighty_accessory'];
 
 const HEAD_CONFIG = {
     sun_god: { name: 'Sun God', search: 'Sun God', cls: 'sungod' },
@@ -676,7 +676,8 @@ const HEAD_CONFIG = {
     panther_claws: { name: 'Panther Claws', search: 'Panther Claws', cls: 'custom' },
     fused_earrings: { name: 'Fused Earrings', search: 'Earrings', cls: 'custom' },
     koyotes_sword: { name: "Koyote's Sword", search: "Koyote Sword", cls: 'custom' },
-    phantom_stealer_head: { name: 'Phantom Stealer', search: 'Phantom Stealer', cls: 'custom' }
+    phantom_stealer_head: { name: 'Phantom Stealer', search: 'Phantom Stealer', cls: 'custom' },
+    almighty_accessory: { name: 'Almighty', search: 'Almighty Accessory', cls: 'custom' }
 };
 
 const COMBO_TITLES = {
@@ -699,6 +700,7 @@ const TOGGLE_OVERRIDES = {
     ancient_shinob: { label: 'Reanimation' },
     super_roku: { label: 'Same Enemy' },
     marine_hero: { label: 'Boss' },
+    fused_warrior_super_syncro: { label: '2× Boss' },
     cell: {
         dynamicLabel: (isChecked) => isChecked ? 'Perfect Form' : 'True Form',
         script: `this.parentElement.previousElementSibling.innerText = this.checked ? 'Perfect Form' : 'True Form'; this.closest('.unit-toolbar').firstElementChild.style.gap = '2px';`
@@ -2172,7 +2174,7 @@ function renderUnitCard(unit, absoluteIndex) {
                                      onclick="selectELevel('${unit.id}', ${idx})" data-level="${idx}" title="Upgrade ${idx}">${idx}</div>`;
     }).join('')}
         </div>` : ''}
-        ${unit.systemLevel && window.CALCULATION_MODE !== 'loadout' ? (() => {
+        ${unit.systemLevel ? (() => {
             const cfg = unit.systemLevel;
             if (cfg.restrictModes) {
                 const activeMode = (window.unitModesState && window.unitModesState[unit.id] !== undefined) ? window.unitModesState[unit.id] : 0;
@@ -2188,7 +2190,6 @@ function renderUnitCard(unit, absoluteIndex) {
                         style="flex:1; height:4px; background:rgba(99,102,241,0.2); border-radius:2px; cursor:pointer; accent-color:#818cf8; outline:none;"
                         oninput="document.getElementById('sys-lvl-val-${unit.id}').innerText = this.value; setSystemLevel('${unit.id}', this.value)">
                     <span id="sys-lvl-val-${unit.id}" style="font-size:0.8rem; font-weight:700; color:#e0e7ff; background:rgba(99,102,241,0.3); padding:1px 6px; border-radius:4px; min-width:18px; text-align:center;">${currentSysLvl}</span>
-                    <span style="font-size:0.65rem; color:rgba(165,180,252,0.4);">MAX LV. ${cfg.max || 100}</span>
                 </div>`;
             } else {
                 return `<div class="system-level-bar" style="display:flex; align-items:center; gap:8px; padding:4px 15px; background:rgba(99,102,241,0.06); border-bottom:1px solid var(--card-border);">
@@ -2196,7 +2197,6 @@ function renderUnitCard(unit, absoluteIndex) {
                     <input type="number" min="${cfg.min || 1}" max="${cfg.max || 100}" value="${currentSysLvl}"
                         style="width:45px; padding:1px 4px; background:rgba(0,0,0,0.4); border:1px solid rgba(99,102,241,0.3); border-radius:4px; color:#e0e7ff; font-size:0.8rem; font-weight:700; text-align:center;"
                         onchange="setSystemLevel('${unit.id}', this.value)" onkeyup="if(event.key==='Enter') setSystemLevel('${unit.id}', this.value)">
-                    <span style="font-size:0.65rem; color:rgba(165,180,252,0.4); margin-left: auto;">MAX LV. ${cfg.max || 100}</span>
                 </div>`;
             }
         })() : ''}

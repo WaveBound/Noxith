@@ -4,6 +4,13 @@ const comingSoonData = [
 
 const patchNotesData = [
     {
+        version: "v6.8",
+        date: "Jul 12, 2026",
+        changes: [
+            { type: "Item", text: "<b>New Gear:</b><br>Added the <b>Almighty</b> set — <b>Almighty Top & Bottom</b><br>when DOT is applied, gain +45% Damage for 10s;<br><br>Set bonuses:<br>Hollow Destroyers +25% DMG / -10% SPA / +30% DoT<br>Royal Guards +15% DMG / +15% Elemental / +10% Range<br><br><b>Almighty Accessory</b> (disables Crits, all global buff gains ×1.3;<br><br>Set bonuses:<br>King +10% DMG / +20% DoT / +20% Buff Potency, Villain +10% DMG / +15% Crit Rate)." }
+        ]
+    },
+    {
         version: "v6.7",
         date: "Jun 11, 2026",
         changes: [
@@ -432,7 +439,8 @@ const guideData = [
     { unit: "blanco_beast", img: "images/units/BlancoBeast.png", isCalculated: false },
     { unit: "super_roku_third_ascension", img: "images/units/SuperRokuThird.png", isCalculated: false },
     { unit: "wavechaser_surfer", img: "images/units/Wavechaser_surfer.png", isCalculated: false },
-    { unit: "funeral_parlor_fragrance", img: "images/units/funeral_parlor_fragrance.png", isCalculated: false }
+    { unit: "funeral_parlor_fragrance", img: "images/units/funeral_parlor_fragrance.png", isCalculated: false },
+    { unit: "the_almighty", img: "images/units/the_almighty.png", isCalculated: true }
 ];
 const elementIcons = {
     "Water": "images/elements/Water.png",

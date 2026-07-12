@@ -158,7 +158,8 @@ const UNIT_FILES = [
     'limit_breaker_prince_marked.js',
     'super_roku_third_ascension.js',
     'wavechaser_surfer.js',
-    'funeral_parlor_fragrance.js'
+    'funeral_parlor_fragrance.js',
+    'the_almighty.js'
 ];
 
 // Resolves after every unit script has loaded (or errored).

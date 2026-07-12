@@ -139,7 +139,8 @@ function calculateDPS(uStats, relicStats, context) {
         junior: 'ninja', biju_head: 'biju_set', rebellious_head: 'rebellious', reanimated_head: 'reanimated_ninja',
         super_roku: 'super_roku', bio_android: 'bio_android', great_mage: 'great_mage', berserk_shinigami: 'berserk_shinigami',
         hokage: 'hokage', sorcerer_hunter_spirit: 'sorcerer_hunter', strongest_sorcerer_glasses: 'strongest_sorcerer',
-        monarch_cape: 'monarch', monarch_head: 'monarch', monarch: 'monarch', warlord_hat: 'warlord', fused_earrings: 'fused_set'
+        monarch_cape: 'monarch', monarch_head: 'monarch', monarch: 'monarch', warlord_hat: 'warlord', fused_earrings: 'fused_set',
+        phantom_stealer_head: 'phantom_stealer', almighty_accessory: 'almighty'
     };
     const mappedHeadSetId = headSetIdMap[headPiece];
     let headSpaBase = 0;
@@ -152,6 +153,50 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     let { globalDmg, globalSpa, globalRange, globalCrit, globalCdmg, activeGlobalBuffs } = window.calcGlobalBuffs(uStats, context, headPiece);
+
+    // Apply buffPotency multiplier to Buff Data and Gear DoT
+    let headBuffPotency = 0;
+    // The almighty_accessory's base passive grants +30% buff gain (buffGainMultiplier: 1.3)
+    if (headPiece === 'almighty_accessory') {
+        const almightyAccPassive = (typeof PASSIVES !== 'undefined') ? PASSIVES.almighty_acc : null;
+        if (almightyAccPassive && almightyAccPassive.buffGainMultiplier) {
+            headBuffPotency += (almightyAccPassive.buffGainMultiplier - 1) * 100; // e.g. 1.3 → 30
+        }
+    }
+    if (typeof TAG_PERKS !== 'undefined') {
+        const accPerksList = {
+            'monarch': TAG_PERKS.monarch_acc,
+            'monarch_cape': TAG_PERKS.monarch_acc,
+            'monarch_head': TAG_PERKS.monarch_acc,
+            'rebellious': TAG_PERKS.rebellious_acc,
+            'rebellious_head': TAG_PERKS.rebellious_acc,
+            'phantom_stealer_head': TAG_PERKS.phantom_stealer_acc,
+            'almighty_accessory': TAG_PERKS.almighty_acc,
+            'fused_earrings': TAG_PERKS.fused_earrings_acc
+        };
+        const headPerks = accPerksList[headPiece] || accPerksList[mappedHeadSetId];
+        if (headPerks) {
+            headPerks.forEach(perk => {
+                if ((uStats.tags || []).includes(perk.tag)) {
+                    headBuffPotency += (perk.bonus?.buffPotency || 0);
+                }
+            });
+        }
+    }
+
+    const totalBuffPotency = (sBonus.buffPotency || 0) + headBuffPotency;
+    let bpMult = 1.0;
+    if (totalBuffPotency > 0) {
+        bpMult = 1 + totalBuffPotency / 100;
+        
+        for (let key in activeGlobalBuffs) {
+            for (let stat in activeGlobalBuffs[key]) {
+                if (typeof activeGlobalBuffs[key][stat] === 'number') {
+                    activeGlobalBuffs[key][stat] *= bpMult;
+                }
+            }
+        }
+    }
 
     // Keep activeGlobalBuffs as a Map/Object for math-render.js key lookup
     const activeGlobalBuffsMap = { ...activeGlobalBuffs };
@@ -172,7 +217,7 @@ function calculateDPS(uStats, relicStats, context) {
 
     const tags = uStats.tags || [];
 
-    let setAndPassiveSpa = (sBonus.spa || 0) + passiveSpaPcent + globalSpa + headSpaBase;
+    let setAndPassiveSpa = ((sBonus.spa || 0) + passiveSpaPcent + globalSpa + headSpaBase) * bpMult;
     let warlordSpa = 0;
 
     if (headPiece === 'warlord_hat') {
@@ -208,7 +253,17 @@ function calculateDPS(uStats, relicStats, context) {
         }
     }
 
-    const additiveRangeBeforeHead = (sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (window.isUnit(uStats.id, 'king_sailor') ? 10 : 0);
+    // Force The Almighty's SPA to exactly 4.5s (his FUA cap) in Self Buff mode if base SPA is under 9 seconds.
+    if (window.isUnit(uStats.id, 'the_almighty')) {
+        const activeModeIdx = (window.unitModesState && window.unitModesState['the_almighty'] !== undefined)
+            ? (Array.isArray(window.unitModesState['the_almighty']) ? window.unitModesState['the_almighty'][0] : window.unitModesState['the_almighty'])
+            : 0;
+        if (activeModeIdx === 0 && finalSpa < 9.0) {
+            finalSpa = 4.5;
+        }
+    }
+
+    const additiveRangeBeforeHead = ((sBonus.range || 0) + (uStats.passiveRange || 0) + eternalRangeBuff + globalRange + (window.isUnit(uStats.id, 'king_sailor') ? 10 : 0)) * bpMult;
     const preHeadRange = lvStats.range * (1 + traitRangePct / 100) * (1 + baseR_Range / 100) * (1 + additiveRangeBeforeHead / 100);
     const { headDmgBase, headDmgPassive, headDmgTag, headDotBuff, headCalc, headCfTag, headCmTag } = window._calcHeadDynamicBuffs(headPiece, finalSpa, preHeadRange, uStats, relicStats, context);
     const totalAdditiveRange = additiveRangeBeforeHead + (headCalc?.range || 0);
@@ -272,7 +327,7 @@ function calculateDPS(uStats, relicStats, context) {
         }
     }
 
-    let additiveTotal = (sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassiveMod + headDmgTag + globalDmg + abilityDmg;
+    let additiveTotal = ((sBonus.dmg || 0) + passivePcent + headDmgBase + headDmgPassiveMod + headDmgTag + globalDmg + abilityDmg) * bpMult;
 
     const isFusedWarrior = window.isUnit(uStats.id, 'ultimate_fused_warrior') || window.isUnit(uStats.id, 'fused_warrior');
     const isFusedWarriorSyncro = window.isUnit(uStats.id, 'fused_warrior_super_syncro');
@@ -284,6 +339,9 @@ function calculateDPS(uStats, relicStats, context) {
             estCritRate = 40;
         }
         if (headPiece === 'sorcerer_hunter_spirit') {
+            estCritRate = 0;
+        }
+        if (headPiece === 'almighty_accessory') {
             estCritRate = 0;
         }
         if (estCritRate > 0) {
@@ -307,9 +365,10 @@ function calculateDPS(uStats, relicStats, context) {
                 uptime = expectedActive / cycleTime;
             }
 
-            const warlordDmg = 45 * uptime * (starMult || 1);
+            const warlordDmgRaw = 45 * uptime * (starMult || 1);
+            const warlordDmg = warlordDmgRaw * bpMult;
             additiveTotal += warlordDmg;
-            setPerkDmg += warlordDmg;
+            setPerkDmg += warlordDmgRaw;
             warlordData = {
                 critRate: estCritRate,
                 attacksToCrit,
@@ -324,11 +383,11 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     const detailedBuffs = {
-        setBase: (sBonus.dmg || 0) - (tagBuffs.dmg || 0) - (relicStats.set === 'great_mage' ? 18 : 0) - (relicStats.set === 'monarch' ? setPerkDmg : 0),
+        setBase: ((sBonus.dmg || 0) - (tagBuffs.dmg || 0) - (relicStats.set === 'great_mage' ? 18 : 0) - setPerkDmg),
         setPerk: setPerkDmg,
         accessoryBase: headDmgBase,
         accessoryPerk: headDmgPassiveMod,
-        tagBonus: (tagBuffs.dmg || 0) + headDmgTag,
+        tagBonus: ((tagBuffs.dmg || 0) + headDmgTag),
         unitPassive: passivePcent,
         abilityBuff: abilityDmg,
         globalDmg: globalDmg,
@@ -340,7 +399,9 @@ function calculateDPS(uStats, relicStats, context) {
         activeGlobalBuffs: activeGlobalBuffsList,
         tagCrit: (tagBuffs.cf || 0) + (headCfTag || 0),
         tagCdmg: (tagBuffs.cm || 0) + (headCmTag || 0),
-        passiveBreakdown: passiveBreakdown
+        dotTagBonus: (tagBuffs.dot || 0),
+        dotSetBase: ((sBonus.dot || 0) - (tagBuffs.dot || 0)),
+        passiveBreakdown: passiveBreakdown.map(p => ({ ...p }))
     };
 
     let rawCritRate = uStats.crit + traitCritRate + globalCrit + (headCalc.cf || 0) + baseR_Cf + (sBonus.cf || 0) + passiveCritFromPassives;
@@ -363,6 +424,7 @@ function calculateDPS(uStats, relicStats, context) {
     if (window.isUnit(uStats.id, 'kirito')) rawCritRate = Math.min(rawCritRate, uStats.crit);
     if (window.isUnit(uStats.id, 'pirate_king')) rawCritRate = 40;
     if (headPiece === 'sorcerer_hunter_spirit') rawCritRate = 0;
+    if (headPiece === 'almighty_accessory') rawCritRate = 0;
 
     const finalCdmgStat = uStats.cdmg + (sBonus.cm || 0) + baseR_Cm + globalCdmg + (headCalc.cm || 0) + passiveCdmgFromPassives;
 
@@ -449,19 +511,20 @@ function calculateDPS(uStats, relicStats, context) {
         bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
         normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
         extraAttacksData = {
-            req: "Always active (bugged FUA converted to passive damage)",
-            hits: `+${fusedSyncroBuggedFuaPassiveDmg}% passive damage`,
+            req: "Always active (bugged FUA converted to passive damage)" + (isAbility ? " | 2× Boss Active" : ""),
+            hits: `+${fusedSyncroBuggedFuaPassiveDmg}% passive damage` + (isAbility ? " | 2× Boss DMG" : ""),
             extra: 0,
             attacksNeeded: 1,
             mult: 1,
-            label: "He is.....Only growing stronger? (Bugged FUA)",
+            label: "He is.....Only growing stronger? (Bugged FUA)" + (isAbility ? " + 2× Boss" : ""),
             usedSpa: finalSpa,
             passiveDamage: fusedSyncroBuggedFuaPassiveDmg,
             passiveDamageBaseDmg: finalDmgNormal / (1 + fusedSyncroBuggedFuaPassiveDmg / 100),
             critGated: false,
             critRate: finalCritRate,
             fuaChance: 100,
-            fuaDmgMult: 1
+            fuaDmgMult: 1,
+            boss2xActive: isAbility
         };
     } else if (window.isUnit(uStats.id, 'strongest_swordsman_hunter')) {
         const stance2DmgBonus = (upgradeLevel >= 6) ? 60 : 40;
@@ -759,6 +822,12 @@ function calculateDPS(uStats, relicStats, context) {
     let finalHitDps = hitDpsTotal;
     let finalBossHitDps = bossHitDpsTotal;
 
+    // "I thought you would be stronger": 2x DMG to enemies with HP > 10x this unit's dmg (toggle-gated)
+    if (isFusedWarriorSyncro && isAbility) {
+        finalHitDps *= 2;
+        finalBossHitDps *= 2;
+    }
+
     let chainLightningDps = 0;
     if (window.isUnit(uStats.id, 'king_sailor')) {
         chainLightningDps = ((finalDmg * 0.20) / usedSpa) * placement;
@@ -781,10 +850,19 @@ function calculateDPS(uStats, relicStats, context) {
         }
     }
 
-    const gearDotBonus = baseR_Dot + headDotBuff + (sBonus.dot || 0);
+    let externalDotBonus = ((sBonus.dot || 0) + headDotBuff) * bpMult;
+    const gearDotBonus = baseR_Dot;
 
     let baseDotVal = headCalc?.dotOverride || uStats.dot || 0;
-    let passiveDotBuff = passiveDotFromPassives;
+    if (window.isUnit && window.isUnit(uStats.id, 'the_almighty')) {
+        // base dot (from unit file) + per-unit passive addon (from passive-backend pDot)
+        baseDotVal = (uStats.dot || 0) + passiveDotFromPassives;
+    }
+    // For the_almighty, passiveDotFromPassives IS the base dot, not an additive bonus on top —
+    // so don't include it in passiveDotBuff (which becomes part of combinedMultiplier in _calcDoTDPS)
+    let passiveDotBuff = (window.isUnit && window.isUnit(uStats.id, 'the_almighty'))
+        ? 0
+        : passiveDotFromPassives;
 
     if (baseDotVal === 0 && uStats.passives) {
         const dotSrc = uStats.passives.find(p => p.dot > 0 || p.name === "Brutal Slashes" || p.name === "Fiery Legacy");
@@ -803,17 +881,18 @@ function calculateDPS(uStats, relicStats, context) {
         globalDotMult *= 1.5;
     }
 
-    if (typeof window !== 'undefined' && window.CALCULATION_MODE === 'loadout' && window.hotbarState && window.hotbarState.units) {
-        if (window.hotbarState.units.includes('merciless_god') && uStats.id !== 'merciless_god') {
+    if (typeof window !== 'undefined' && window.CALCULATION_MODE === 'loadout' && window.hotbarState && window.hotbarState.slots) {
+        const mgPresent = window.hotbarState.slots.some(s => s && s.id && s.id.split('-')[0] === 'merciless_god');
+        if (mgPresent && uStats.id.split('-')[0] !== 'merciless_god') {
             const mgState = window.unitModesState ? window.unitModesState['merciless_god'] : undefined;
             const mgIdx = Array.isArray(mgState) ? mgState[0] : (mgState !== undefined ? mgState : 4);
             const mgUnit = typeof window.getUnitById === 'function' ? window.getUnitById('merciless_god') : null;
             if (mgUnit && mgUnit.modes && mgUnit.modes[mgIdx]) {
                 const passives = mgUnit.modes[mgIdx].passives || [];
                 if (passives.some(p => p.name === 'Godly Earrings')) {
-                    globalDotMult *= 1.5;
+                    externalDotBonus += (50 * bpMult);
                     if (detailedBuffs) {
-                        detailedBuffs.globalBuffs = (detailedBuffs.globalBuffs || 0) + 50;
+                        detailedBuffs.globalBuffs = (detailedBuffs.globalBuffs || 0) + (50 * bpMult);
                     }
                 }
             }
@@ -829,7 +908,7 @@ function calculateDPS(uStats, relicStats, context) {
         dotInputStats,
         traitObj,
         traitDotBuff,
-        gearDotBonus,
+        gearDotBonus + externalDotBonus,
         finalDmg,
         finalSpa,
         placement,
@@ -840,6 +919,11 @@ function calculateDPS(uStats, relicStats, context) {
         passiveDotBuff,
         globalDotMult
     );
+
+    if (dotBreakdown) {
+        dotBreakdown.gearDotBonus = gearDotBonus;
+        dotBreakdown.externalDotBonus = externalDotBonus;
+    }
 
     let finalDotDps = dotDpsTotal;
     let finalBossDotDps = bossDotDpsTotal;
@@ -1043,6 +1127,7 @@ function calculateDPS(uStats, relicStats, context) {
         total: rawTotal,
         bossTotal: rawBossTotal,
         bossMult: bossMult,
+        bpMult: bpMult,
         hit: elemFinalHitDps,
         baseHitDps: hitDpsTotal,
         trueDmgPct,

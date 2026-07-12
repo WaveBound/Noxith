@@ -113,7 +113,8 @@ function calculateUnitBuilds(unit, _stats, filteredBuilds, subCandidates, headsT
 
     let unitResults = [];
     const { effectiveStats: baseEffective, isKiritoVR: baseVR } = buildCalculationContext(unit, 'ruler', { isAbility: isAbilityContext });
-    const hasNativeDoT = (baseEffective.dot > 0) || (baseEffective.burnMultiplier > 0) || baseVR;
+    const hasNativeDoT = (baseEffective.dot > 0) || (baseEffective.burnMultiplier > 0) || baseVR
+        || (window.isUnit && window.isUnit(unit.id, 'the_almighty'));
     let unitSubCandidates = normalizeSubCandidates(subCandidates);
     if (!hasNativeDoT) unitSubCandidates = unitSubCandidates.filter(c => c !== 'dot');
     const subsSuffix = includeSubs ? '-SUBS' : '-NOSUBS';

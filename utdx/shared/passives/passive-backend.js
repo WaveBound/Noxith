@@ -79,6 +79,68 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                 pDmg = Math.min(maxBuff, divinityCount * 15);
             }
 
+            if (window.isUnit && window.isUnit(uStats.id, 'the_almighty')) {
+                const sysLvl = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels[uStats.id] !== undefined)
+                    ? window.unitSystemLevels[uStats.id]
+                    : 15; // default to 15
+
+                if (p.name === "Reishi Manipulation") {
+                    // Per-unit addon only — base 20% lives in the unit file (dot: 20)
+                    // calculations.js combines: baseDotVal = uStats.dot + passiveDotFromPassives
+                    pDot = 20 * sysLvl;
+                    uStats.dotDuration = 5;
+                }
+
+                if (p.name === "All-Seeing Eye") {
+                    const activeMode = (window.unitModesState && window.unitModesState[uStats.id] !== undefined)
+                        ? (Array.isArray(window.unitModesState[uStats.id]) ? window.unitModesState[uStats.id][0] : window.unitModesState[uStats.id])
+                        : 0;
+
+                    if (activeMode === 0) {
+                        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+
+                        // Self Buff: +150% Passive Damage (flat, no damage debuff to self)
+                        // -20% Range is a self-range penalty only
+                        pDmg = 150;
+                        pRange = -20;
+                        
+                        // E4 increases Follow-up Damage to 100% (otherwise 60%)
+                        const fuaDmgMult = (eLevel >= 4) ? 1.0 : 0.60;
+                        const fuaConfig = {
+                            chance: 100,
+                            dmgMult: fuaDmgMult,
+                            fuaAnimation: 4.5
+                        };
+                        if (uStats.stats) {
+                            uStats.stats.customFollowUp = fuaConfig;
+                        } else {
+                            uStats.customFollowUp = fuaConfig;
+                        }
+                    } else if (activeMode === 1) {
+                        // Other Buff: buff allies based on game mode
+                        // Since this buffs *other* units, we don't buff self, but let's check globalModeSort value
+                        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+                        const isE6 = eLevel >= 6;
+                        const sortMode = typeof document !== 'undefined' && document.getElementById('globalModeSort')?.value;
+
+                        if (sortMode === 'short') {
+                            // Progression / Rift: E6 increases to 60% DMG, -15% SPA (Base is 45% DMG, -10% SPA)
+                            pDmg = isE6 ? 60 : 45;
+                            pSpa = isE6 ? 15 : 10;
+                        } else if (sortMode === 'long') {
+                            // Infinite: E6 increases to +3% DMG per wave (Cap 250%), -1.5% SPA (Cap -15%)
+                            // Base is +2% DMG per wave (Cap 200%), -1% SPA (Cap -10%)
+                            const currentWave = context.wave || 25;
+                            pDmg = isE6 ? Math.min(250, currentWave * 3) : Math.min(200, currentWave * 2);
+                            pSpa = isE6 ? Math.min(15, currentWave * 1.5) : Math.min(10, currentWave * 1);
+                        } else {
+                            // Default / Other: E6 increases to 50% DMG (Base is 35% DMG)
+                            pDmg = isE6 ? 50 : 35;
+                        }
+                    }
+                }
+            }
+
             if (window.CALCULATION_MODE === 'loadout' && window.isUnit && window.isUnit(uStats.id, 'king_sailor')) {
                 if (p.name === "Manipulator of Fate") {
                     pDmg = 0;

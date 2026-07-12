@@ -5,7 +5,15 @@
 const fmt = {
     pct: (n) => `${(n || 0) >= 0 ? '+' : ''}${parseFloat((n || 0).toFixed(1))}%`,
     num: (n) => (n || 0).toLocaleString(undefined, { maximumFractionDigits: 1 }),
-    fix: (n, d = 2) => (n !== undefined && n !== null) ? parseFloat(n.toFixed(d)) : 0
+    fix: (n, d = 2) => (n !== undefined && n !== null) ? parseFloat(n.toFixed(d)) : 0,
+    pctMult: (n, bpMult) => {
+        if (!n && n !== 0) return '';
+        const base = bpMult && bpMult > 1.01 ? n / bpMult : n;
+        if (bpMult && bpMult > 1.01) {
+            return `<span style="font-size:0.85em; opacity:0.6;">${base > 0 ? '+' : ''}${parseFloat(base.toFixed(1))}% × ${parseFloat(bpMult.toFixed(2))} = </span><span>${n > 0 ? '+' : ''}${parseFloat(n.toFixed(1))}%</span>`;
+        }
+        return `${(n || 0) >= 0 ? '+' : ''}${parseFloat((n || 0).toFixed(1))}%`;
+    }
 };
 
 function getAbhHotbarContributions(data) {
@@ -492,15 +500,15 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
         Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
             const bData = data.activeGlobalBuffs[buff.id];
             if (bData && bData.dmg > 0) {
-                globalDmgBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:${buff.color};">↳ ${buff.name}</td><td class="mt-cell-formula" style="color:${buff.color};">${fmt.pct(bData.dmg)}</td><td class="mt-cell-val"></td></tr>`;
+                globalDmgBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:${buff.color};">↳ ${buff.name}</td><td class="mt-cell-formula" style="color:${buff.color};">${fmt.pct(bData.dmg / (data.bpMult || 1))}</td><td class="mt-cell-val"></td></tr>`;
             }
         });
     }
 
-    let warlordHtml = '';
+    let headPieceHtml = '';
     if (data.warlordData) {
         const w = data.warlordData;
-        warlordHtml += `
+        headPieceHtml += `
         <tr class="mt-row-warlord"><td colspan="3" class="p-2">
             <div class="mt-flex-between mb-2">
                 <span class="mt-text-bold text-xs tracking-sm" style="color:#a78bfa;">WARLORD SET PASSIVE</span>
@@ -524,6 +532,28 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
         </td></tr>`;
     }
 
+    if (data.headBuffs && (data.headBuffs.type === 'almighty_accessory' || data.headBuffs.type === 'almighty')) {
+        const activeTags = data.headBuffs.activeTags || [];
+        const tagRows = activeTags.map(tag => {
+            const perkList = (typeof TAG_PERKS !== 'undefined') ? (TAG_PERKS.almighty_acc || []) : [];
+            const perk = perkList.find(p => p.tag === tag);
+            if (!perk) return '';
+            const b = perk.bonus || {};
+            let parts = [];
+            if (b.dmg) parts.push(`+${b.dmg}% DMG`);
+            if (b.dot) parts.push(`+${b.dot}% DoT`);
+            if (b.cRate) parts.push(`+${b.cRate}% Crit Rate`);
+            return `<div class="mt-flex-between text-xs text-white mb-1"><span class="opacity-70">↳ ${tag}</span><span class="mt-font-mono" style="color:#c4b5fd;">${parts.join(', ')}</span></div>`;
+        }).join('');
+        headPieceHtml += `
+        <tr class="mt-row-ninja" style="background:rgba(167,139,250,0.08); border-left:3px solid #a78bfa;"><td colspan="3" class="p-2">
+            <div class="mt-flex-between mb-2"><span class="mt-text-bold text-xs tracking-sm" style="color:#c4b5fd;">ALMIGHTY ACCESSORY</span><button class="calc-info-btn" onclick="openInfoPopup('dot_logic')">?</button></div>
+            <div class="mt-flex-between text-xs text-white mb-1"><span class="opacity-70">Critical Hits:</span><span class="mt-font-mono" style="color:#f87171;">Disabled</span></div>
+            ${tagRows}
+            <div class="mt-flex-between mt-border-top mt-pt-sm"><span class="text-white text-xs text-bold">Global Buff Multiplier</span><span class="mt-text-bold" style="color:#c4b5fd;">×1.30</span></div>
+        </td></tr>`;
+    }
+
     return `
             <div class="dd-section">
                 <div class="dd-title mt-text-red"><span>1. Base Damage Calculation</span></div>
@@ -533,14 +563,14 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
                     ${data.isSSS ? `<tr><td class="mt-cell-label">SSS Rank Bonus</td><td class="mt-cell-formula"><span class="op">×</span>1.2</td><td class="mt-cell-val">${fmt.num(data.lvStats?.dmg)}</td></tr>` : ''}
                     ${traitRowsDmg}
                     <tr><td class="mt-cell-label text-accent-end">Relic Multiplier <button class="calc-info-btn" onclick="openInfoPopup('relic_multi')">?</button></td><td class="mt-cell-formula text-accent-end">${fmt.pct(data.relicBuffs?.dmg)}</td><td class="mt-cell-val">${fmt.num(dmgAfterRelic)}</td></tr>
-                    ${warlordHtml} 
+                    ${headPieceHtml} 
                     <tr>
                         <td class="mt-cell-label mt-pt-md">Buff Data <button class="calc-info-btn" onclick="openInfoPopup('tag_logic')">?</button></td>
-                        <td class="mt-cell-formula mt-pt-md mt-text-gold mt-text-bold">${fmt.pct(data.totalAdditivePct)}</td>
+                        <td class="mt-cell-formula mt-pt-md mt-text-gold mt-text-bold" style="white-space:nowrap;">${fmt.pctMult(data.totalAdditivePct, data.bpMult)}</td>
                         <td class="mt-cell-val calc-highlight mt-pt-md">${fmt.num(preConditionalDmg)}</td>
                     </tr>
-                    ${(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg) !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base Bonus <span style="font-size: 0.65rem; color:#a78bfa;">(${relicSetName})</span></td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${(data.detailedBuffs?.accessoryBase || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Accessory Base <span style="font-size: 0.65rem; color:#a78bfa;">(${cleanHeadDisplayName})</span></td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.accessoryBase)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg) !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base Bonus <span style="font-size: 0.65rem; color:#a78bfa;">(${relicSetName})</span></td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(data.detailedBuffs ? data.detailedBuffs.setBase : baseSetDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.detailedBuffs?.accessoryBase || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Accessory Base <span style="font-size: 0.65rem; color:#a78bfa;">(${cleanHeadDisplayName})</span></td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(data.detailedBuffs.accessoryBase)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(() => {
             const val = data.detailedBuffs?.accessoryPerk || 0;
             if (val === 0) return '';
@@ -548,12 +578,12 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
             let label = `↳ Accessory Passive Perk`;
             if (note.includes('Clash')) label = `↳ Clash Potential Bonus`;
             else if (note.includes('Syncro')) label = `↳ Synchro Form Bonus`;
-            return `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label} <span style="font-size:0.65rem; color:#a78bfa;">(${cleanHeadDisplayName})</span></td><td class="mt-cell-formula" style="vertical-align: middle;">${fmt.pct(val)}</td><td class="mt-cell-val"></td></tr>`;
+            return `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label} <span style="font-size:0.65rem; color:#a78bfa;">(${cleanHeadDisplayName})</span></td><td class="mt-cell-formula" style="vertical-align: middle; white-space:nowrap;">${fmt.pct(val)}</td><td class="mt-cell-val"></td></tr>`;
         })()}
                     ${(() => {
             const val = (data.detailedBuffs ? data.detailedBuffs.tagBonus : tagDmg);
             if (val === 0) return '';
-            return `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonus</td><td class="mt-cell-formula">${fmt.pct(val)}</td><td class="mt-cell-val"></td></tr>`;
+            return `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonus</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(val)}</td><td class="mt-cell-val"></td></tr>`;
         })()}
                     ${(() => {
             if (!data.detailedBuffs) return '';
@@ -566,7 +596,7 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
                 } else if (data.relicStats && data.relicStats.set === 'warlord') {
                     label = `↳ Set Perks (Warlord)`;
                 }
-                html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label}</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.setPerk)}</td><td class="mt-cell-val"></td></tr>`;
+                html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">${label}</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(data.detailedBuffs.setPerk)}</td><td class="mt-cell-val"></td></tr>`;
             }
             return html;
         })()}
@@ -575,22 +605,22 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
             let html = '';
             if (data.detailedBuffs.passiveBreakdown && data.detailedBuffs.passiveBreakdown.length > 0) {
                 data.detailedBuffs.passiveBreakdown.forEach(p => {
-                    if (p.dmg !== 0) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ ${p.name}</td><td class="mt-cell-formula">${p.dmg > 0 ? '+' : ''}${fmt.fix(p.dmg, 1)}%</td><td class="mt-cell-val"></td></tr>`;
+                    if (p.dmg !== 0) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ ${p.name}</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(p.dmg)}</td><td class="mt-cell-val"></td></tr>`;
                     html += getAbhContributionRowsHtml(p, data, 'table');
                 });
                 const namedDmg = data.detailedBuffs.passiveBreakdown.reduce((sum, p) => sum + (p.dmg || 0), 0);
                 const eternalSub = (data.traitObj && data.traitObj.isEternal) ? (Math.min(data.wave || 12, 12) * 5) : 0;
                 const rem = (data.detailedBuffs.unitPassive || 0) - namedDmg - eternalSub;
-                if (Math.abs(rem) > 0.01) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Base</td><td class="mt-cell-formula">${rem > 0 ? '+' : ''}${fmt.fix(rem, 1)}%</td><td class="mt-cell-val"></td></tr>`;
+                if (Math.abs(rem) > 0.01) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Base</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(rem)}</td><td class="mt-cell-val"></td></tr>`;
             } else {
                 const eternalSub = (data.traitObj && data.traitObj.isEternal) ? (Math.min(data.wave || 12, 12) * 5) : 0;
                 const val = (data.detailedBuffs ? data.detailedBuffs.unitPassive : passiveDmg) - eternalSub;
-                if (Math.abs(val) > 0.01) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${val > 0 ? '+' : ''}${fmt.fix(val, 1)}%</td><td class="mt-cell-val"></td></tr>`;
+                if (Math.abs(val) > 0.01) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(val)}</td><td class="mt-cell-val"></td></tr>`;
             }
             return html;
         })()}
                     ${eternalDmg > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-accent-start opacity-70">↳ Eternal (Wave 12+)</td><td class="mt-cell-formula text-accent-start">${fmt.pct(eternalDmg)}</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${(data.abilityBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-custom opacity-70">↳ Ability Buffs</td><td class="mt-cell-formula text-custom">${fmt.pct(data.abilityBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.abilityBuff || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-md text-custom opacity-70">↳ Ability Buffs</td><td class="mt-cell-formula text-custom" style="white-space:nowrap;">${fmt.pct(data.abilityBuff)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${globalDmgBreakdownHtml}
                     ${data.conditionalData ? `<tr><td class="mt-cell-label mt-pt-md mt-text-orange mt-text-bold">${data.conditionalData.name}</td><td class="mt-cell-formula mt-pt-md mt-text-orange mt-text-bold">x${data.conditionalData.mult.toFixed(2)}</td><td class="mt-cell-val calc-highlight mt-pt-md">${fmt.num(data.dmgVal)}</td></tr>` : ''}
                 </table>
@@ -649,8 +679,8 @@ function renderCritSection(data, setTagCfTotal, setTagCmTotal, cleanHeadDisplayN
         Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
             const bData = data.activeGlobalBuffs[buff.id];
             if (bData) {
-                if (bData.crit > 0) globalCritBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs" style="color:${buff.color}">• ${buff.name}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs" style="color:${buff.color}">+${fmt.fix(bData.crit, 1)}%</td></tr>`;
-                if (bData.cdmg > 0) globalCdmgBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs" style="color:${buff.color}">• ${buff.name}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs" style="color:${buff.color}">+${fmt.fix(bData.cdmg, 1)}%</td></tr>`;
+                if (bData.crit > 0) globalCritBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs" style="color:${buff.color}">• ${buff.name}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs" style="color:${buff.color}; white-space:nowrap;">+${fmt.fix(bData.crit / (data.bpMult || 1), 1)}%</td></tr>`;
+                if (bData.cdmg > 0) globalCdmgBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-lg text-dim text-xs" style="color:${buff.color}">• ${buff.name}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs" style="color:${buff.color}; white-space:nowrap;">+${fmt.fix(bData.cdmg / (data.bpMult || 1), 1)}%</td></tr>`;
             }
         });
     }
@@ -723,7 +753,7 @@ function renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa, cl
         Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
             const bData = data.activeGlobalBuffs[buff.id];
             if (bData && bData.spa > 0) {
-                globalSpaBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:${buff.color};">↳ ${buff.name}</td><td class="mt-cell-formula" style="color:${buff.color};">-${fmt.fix(bData.spa, 1)}%</td><td class="mt-cell-val"></td></tr>`;
+                globalSpaBreakdownHtml += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:${buff.color};">↳ ${buff.name}</td><td class="mt-cell-formula" style="color:${buff.color}; white-space:nowrap;">${fmt.pct(-(bData.spa / (data.bpMult || 1)))}</td><td class="mt-cell-val"></td></tr>`;
             }
         });
     }
@@ -737,22 +767,22 @@ function renderSpaSection(data, traitRowsSpa, baseSetSpa, tagSpa, passiveSpa, cl
                     ${data.isSSS ? `<tr><td class="mt-cell-label">SSS Rank (-8%)</td><td class="mt-cell-formula"><span class="op">×</span>0.92</td><td class="mt-cell-val">${fmt.fix(data.lvStats?.spa, 3)}s</td></tr>` : ''}
                     ${traitRowsSpa}
                     <tr><td class="mt-cell-label mt-pt-md">Relic Multiplier</td><td class="mt-cell-formula mt-pt-md">-${fmt.fix(data.relicBuffs?.spa, 1)}%</td><td class="mt-cell-val mt-pt-md">${fmt.fix(data.spaAfterRelic, 3)}s</td></tr>
-                    <tr><td class="mt-cell-label mt-pt-md">Set + Passive + Abilities <button class="calc-info-btn" onclick="openInfoPopup('tag_logic')">?</button></td><td class="mt-cell-formula mt-pt-md">${data.setAndPassiveSpa >= 0 ? '-' : '+'}${Math.abs(fmt.fix(data.setAndPassiveSpa, 1))}%</td><td class="mt-cell-val mt-pt-md">${fmt.fix(data.rawFinalSpa, 3)}s</td></tr>
-                    <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base</td><td class="mt-cell-formula">-${fmt.fix(baseSetSpa, 1)}%</td><td class="mt-cell-val"></td></tr>
-                    ${headSpaVal > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Accessory Base <span style="font-size:0.65rem; color:#a78bfa;">(${cleanHeadDisplayName})</span></td><td class="mt-cell-formula">-${fmt.fix(headSpaVal, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${(data.headBuffs && data.headBuffs.warlordSpa > 0) ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Warlord Hat</td><td class="mt-cell-formula">-${fmt.fix(data.headBuffs.warlordSpa, 1)}%</td><td class="mt-cell-val"></td></tr>` : ''}
-                    ${tagSpa !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonuses</td><td class="mt-cell-formula">${tagSpa > 0 ? '-' : '+'}${Math.abs(fmt.fix(tagSpa, 1))}%</td><td class="mt-cell-val"></td></tr>` : ''}
+                    <tr><td class="mt-cell-label mt-pt-md">Set + Passive + Abilities <button class="calc-info-btn" onclick="openInfoPopup('tag_logic')">?</button></td><td class="mt-cell-formula mt-pt-md" style="white-space:nowrap;">${fmt.pctMult(-data.setAndPassiveSpa, data.bpMult)}</td><td class="mt-cell-val mt-pt-md">${fmt.fix(data.rawFinalSpa, 3)}s</td></tr>
+                    <tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(-baseSetSpa)}</td><td class="mt-cell-val"></td></tr>
+                    ${headSpaVal > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Accessory Base <span style="font-size:0.65rem; color:#a78bfa;">(${cleanHeadDisplayName})</span></td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(-headSpaVal)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${(data.headBuffs && data.headBuffs.warlordSpa > 0) ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Warlord Hat</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(-data.headBuffs.warlordSpa)}</td><td class="mt-cell-val"></td></tr>` : ''}
+                    ${tagSpa !== 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonuses</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(-tagSpa)}</td><td class="mt-cell-val"></td></tr>` : ''}
                     ${(() => {
             let html = '';
             if (data.detailedBuffs && data.detailedBuffs.passiveBreakdown && data.detailedBuffs.passiveBreakdown.length > 0) {
                 data.detailedBuffs.passiveBreakdown.forEach(p => {
-                    if (p.spa !== 0) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ ${p.name}</td><td class="mt-cell-formula">${p.spa > 0 ? '-' : '+'}${Math.abs(fmt.fix(p.spa, 1))}%</td><td class="mt-cell-val"></td></tr>`;
+                    if (p.spa !== 0) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ ${p.name}</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(-p.spa)}</td><td class="mt-cell-val"></td></tr>`;
                 });
                 const namedSpa = data.detailedBuffs.passiveBreakdown.reduce((sum, p) => sum + (p.spa || 0), 0);
                 const rem = passiveSpa - namedSpa;
-                if (Math.abs(rem) > 0.01) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${rem > 0 ? '-' : '+'}${Math.abs(fmt.fix(rem, 1))}%</td><td class="mt-cell-val"></td></tr>`;
+                if (Math.abs(rem) > 0.01) html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(-rem)}</td><td class="mt-cell-val"></td></tr>`;
             } else {
-                if (passiveSpa !== 0) html = `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula">${passiveSpa > 0 ? '-' : '+'}${Math.abs(fmt.fix(passiveSpa, 1))}%</td><td class="mt-cell-val"></td></tr>`;
+                if (passiveSpa !== 0) html = `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Unit Passive</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(-passiveSpa)}</td><td class="mt-cell-val"></td></tr>`;
             }
             return html;
         })()}
@@ -793,13 +823,11 @@ function renderDotSection(data, headDotRow) {
     const baseDot = headDotOverride || data.baseStats?.dot || 0;
 
     const traitDot = data.traitObj?.dotBuff || 0;
-    const setDot = data.totalSetStats?.dot || 0;
-    const headDot = data.headBuffs?.dot || 0;
-    const relicDot = data.relicBuffs?.dot || 0;
     const passiveDot = data.dotData?.passiveBonus || 0;
-    const gearBonus = relicDot + setDot + headDot;
+    const gearBonus = db?.gearDotBonus !== undefined ? db.gearDotBonus : (data.relicBuffs?.dot || 0 + (data.totalSetStats?.dot || 0) + (data.headBuffs?.dot || 0));
+    const externalDotBonus = db?.externalDotBonus || 0;
     const bugMult = (data.baseStats?.id === 'ant_king_savage' || (window.isUnit && window.isUnit(data.baseStats?.id, 'ant_king_savage'))) ? 2 : 1;
-    const combinedMultiplier = (1 + ((traitDot + gearBonus + passiveDot) * bugMult) / 100) * (db?.globalDotMult || 1.0);
+    const combinedMultiplier = (1 + ((traitDot + gearBonus + externalDotBonus + passiveDot) * bugMult) / 100) * (db?.globalDotMult || 1.0);
     const baseDotPctVal = db?.nativeDps > 0 ? (db?.base || 0) : (data.baseStats?.customFollowUp?.dotPct || 0);
     const finalTickPct = baseDotPctVal * combinedMultiplier;
 
@@ -835,6 +863,29 @@ function renderDotSection(data, headDotRow) {
         </td></tr>`;
     }
 
+    if (data.headBuffs && (data.headBuffs.type === 'almighty_accessory' || data.headBuffs.type === 'almighty')) {
+        const bpTotal = data.headBuffs.buffPotency || 0;
+        const activeTags = data.headBuffs.activeTags || [];
+        const tagRows = activeTags.map(tag => {
+            const perkList = (typeof TAG_PERKS !== 'undefined') ? (TAG_PERKS.almighty_acc || []) : [];
+            const perk = perkList.find(p => p.tag === tag);
+            if (!perk) return '';
+            const b = perk.bonus || {};
+            let parts = [];
+            if (b.dmg) parts.push(`+${b.dmg}% DMG`);
+            if (b.dot) parts.push(`+${b.dot}% DoT`);
+            if (b.cRate) parts.push(`+${b.cRate}% Crit Rate`);
+            return `<div class="mt-flex-between text-xs text-white mb-1"><span class="opacity-70">↳ ${tag}</span><span class="mt-font-mono" style="color:#c4b5fd;">${parts.join(', ')}</span></div>`;
+        }).join('');
+        headDotRow = `
+        <tr class="mt-row-ninja" style="background:rgba(167,139,250,0.08); border-left:3px solid #a78bfa;"><td colspan="3" class="p-2">
+            <div class="mt-flex-between mb-2"><span class="mt-text-bold text-xs tracking-sm" style="color:#c4b5fd;">ALMIGHTY ACCESSORY</span><button class="calc-info-btn" onclick="openInfoPopup('dot_logic')">?</button></div>
+            <div class="mt-flex-between text-xs text-white mb-1"><span class="opacity-70">Critical Hits:</span><span class="mt-font-mono" style="color:#f87171;">Disabled</span></div>
+            ${tagRows}
+            <div class="mt-flex-between mt-border-top mt-pt-sm"><span class="text-white text-xs text-bold">Global Buff Multiplier</span><span class="mt-text-bold" style="color:#c4b5fd;">×1.30</span></div>
+        </td></tr>`;
+    }
+
     return `
     <div class="dd-section">
         <div class="dd-title text-accent-end"><span>6. Status Effect Breakdown</span> <button class="calc-info-btn" onclick="openInfoPopup('dot_logic')">?</button></div>
@@ -842,14 +893,16 @@ function renderDotSection(data, headDotRow) {
             <tr><td class="mt-cell-label">Hit Ref ${db?.critMult > 1 ? '(Crit Avg)' : '(Non-Crit)'}</td><td class="mt-cell-val" colspan="2">${fmt.num(data.dmgVal * (db?.critMult || 1))}</td></tr>
             ${headDotRow}
             ${db?.nativeDps > 0 ? `
-            <tr><td class="mt-cell-label mt-pt-md">Native Tick %</td><td class="mt-cell-formula mt-pt-md"></td><td class="mt-cell-val mt-pt-md mt-text-bold">${fmt.fix(finalTickPct, 1)}%</td></tr>
-            ${baseDot > 0 ? `<tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ ${headDotOverride > 0 ? `Head Piece Override (${headOverrideLabel})` : 'Unit Base'}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">${fmt.num(baseDot)}%</td></tr>` : ''}
+            <tr><td class="mt-cell-label mt-pt-md">Native Tick %</td><td class="mt-cell-formula mt-pt-md"></td><td class="mt-cell-val mt-pt-md mt-text-bold">${fmt.fix(baseDotPctVal, 1)}%</td></tr>
+            ${baseDot > 0 ? `<tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ ${headDotOverride > 0 ? `Head Piece Override (${headOverrideLabel})` : ((window.isUnit && window.isUnit(data.baseStats?.id, 'the_almighty')) ? 'Reishi Manipulation' : 'Unit Base')}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">${fmt.num((window.isUnit && window.isUnit(data.baseStats?.id, 'the_almighty')) ? baseDotPctVal : baseDot)}%</td></tr>` : ''}
             ${(() => {
                 if (data.detailedBuffs && data.detailedBuffs.passiveBreakdown) {
+                    // For the_almighty, per-unit dot scaling is baked into the base dot row — skip additive display
+                    const isAlmighty = window.isUnit && window.isUnit(data.baseStats?.id, 'the_almighty');
                     let html = '';
                     const seen = new Set();
                     data.detailedBuffs.passiveBreakdown.forEach(p => {
-                        if (p.dot > 0 && !seen.has(p.name)) {
+                        if (p.dot > 0 && !seen.has(p.name) && !isAlmighty) {
                             html += `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs">↳ ${p.name}</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-dim text-xs">+${fmt.num(p.dot)}%</td></tr>`;
                             seen.add(p.name);
                         }
@@ -860,6 +913,10 @@ function renderDotSection(data, headDotRow) {
             })()}
             <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-custom">1. Trait Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-custom text-bold">${fmt.pct(traitDot)}</td></tr>
             <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-accent-end">2. Gear Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-end text-bold">${fmt.pct(gearBonus)}</td></tr>
+            ${externalDotBonus > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-blue">3. Set & External Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pctMult(externalDotBonus, data.bpMult)}</td><td class="mt-cell-val text-blue text-bold"></td></tr>
+            ${data.detailedBuffs?.dotSetBase > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base DoT</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.dotSetBase)}</td><td class="mt-cell-val"></td></tr>` : ''}
+            ${data.detailedBuffs?.dotTagBonus > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonus DoT</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.dotTagBonus)}</td><td class="mt-cell-val"></td></tr>` : ''}` : ''}
+            ${passiveDot > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-gray">${externalDotBonus > 0 ? '4' : '3'}. Passive Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(passiveDot)}</td><td class="mt-cell-val text-gray text-bold"></td></tr>` : ''}
             ${bugMult > 1 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs" style="color:#f87171 !important;">↳ Bugged Double Scaling</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs" style="color:#f87171 !important;">×2.0 Buffs</td></tr>` : ''}
             <tr class="mt-border-top"><td class="mt-cell-label mt-pl-sm mt-pt-sm text-bold text-gray">↳ Combined DoT Multiplier</td><td class="mt-cell-formula mt-pt-sm text-bold"><span class="op">×</span>${fmt.fix(combinedMultiplier, 3)}</td><td class="mt-cell-val"></td></tr>
             <tr><td class="mt-cell-label mt-pt-md">Final Native Tick %</td><td class="mt-cell-formula">=</td><td class="mt-cell-val calc-highlight">${fmt.fix(finalTickPct, 2)}%</td></tr>
@@ -890,7 +947,8 @@ function renderDotSection(data, headDotRow) {
             ${db.multiplier > 1 ? `<tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ E6 Double Dmg Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">x${db.multiplier}</td></tr>` : ''}
             <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-custom">1. Trait Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-custom text-bold">${fmt.pct(db.traitDotBuff)}</td></tr>
             <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-accent-end">2. Gear Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-end text-bold">${fmt.pct(db.gearDotBonus)}</td></tr>
-            ${db.passiveDotBuff > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-gray">3. Passive Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-gray text-bold">${fmt.pct(db.passiveDotBuff)}</td></tr>` : ''}
+            ${db.externalDotBonus > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-blue">3. Set & External Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(db.externalDotBonus)}</td><td class="mt-cell-val text-blue text-bold"></td></tr>` : ''}
+            ${db.passiveDotBuff > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-gray">${db.externalDotBonus > 0 ? '4' : '3'}. Passive Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(db.passiveDotBuff)}</td><td class="mt-cell-val text-gray text-bold"></td></tr>` : ''}
             <tr class="mt-border-top"><td class="mt-cell-label mt-pl-sm mt-pt-sm text-bold text-gray">↳ Combined DoT Multiplier</td><td class="mt-cell-formula mt-pt-sm text-bold"><span class="op">×</span>${fmt.fix(db.combinedMultiplier, 3)}</td><td class="mt-cell-val"></td></tr>
             <tr>
                 <td class="mt-cell-label mt-pt-md mt-text-bold" style="color:#f87171">${db.customLabel || 'Custom DoT'} (${db.customInterval || 5}s)</td>
@@ -1394,7 +1452,8 @@ window.renderMathContent = function (data, isSplit = false) {
         'monarch_head': 'Monarch Head', 'monarch': 'Monarch Cape', 'warlord_hat': 'Warlord Hat',
         'mochi_scarf': 'Mochi Scarf', 'flaming_donut': 'Flaming Donut', 'ultiorras_wings': "Ultiorra's Wings",
         'berserks_cleave': "Berserk's Cleave", 'panther_claws': 'Panther Claws', 'fused_earrings': 'Fused Earrings',
-        'koyotes_sword': "Koyote's Sword", 'phantom_stealer_head': 'Phantom Stealer', 'phantom_stealer': 'Phantom Stealer'
+        'koyotes_sword': "Koyote's Sword", 'phantom_stealer_head': 'Phantom Stealer', 'phantom_stealer': 'Phantom Stealer',
+        'almighty_accessory': 'Almighty Accessory', 'almighty': 'Almighty Accessory'
     };
     const headType = (data.headBuffs?.type || data.relicStats?.head || 'none');
     const headDisplayName = String(MAP_HEAD_NAMES[headType] ?? (headType === 'none' || !headType ? 'None' : (String(headType).replace(/_/g, ' ').toUpperCase())));

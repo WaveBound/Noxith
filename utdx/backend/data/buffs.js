@@ -428,6 +428,15 @@ window.calcGlobalBuffs = function (uStats, context, headPiece) {
                     if (buffStats.spa) buffStats.spa *= 1.1;
                 }
 
+                // Almighty Accessory: all global buff gains are increased by 30%
+                if (headPiece === 'almighty_accessory') {
+                    if (buffStats.dmg || buffStats.damage) { let k = buffStats.dmg ? 'dmg' : 'damage'; buffStats[k] *= 1.3; }
+                    if (buffStats.spa) buffStats.spa *= 1.3;
+                    if (buffStats.crit || buffStats.critRate || buffStats.cRate) { const ck = buffStats.crit ? 'crit' : (buffStats.critRate ? 'critRate' : 'cRate'); buffStats[ck] *= 1.3; }
+                    if (buffStats.cdmg || buffStats.critDmg || buffStats.cDmg) { const dk = buffStats.cdmg ? 'cdmg' : (buffStats.critDmg ? 'critDmg' : 'cDmg'); buffStats[dk] *= 1.3; }
+                    if (buffStats.range || buffStats.rangeBonus) { const rk = buffStats.range ? 'range' : 'rangeBonus'; buffStats[rk] *= 1.3; }
+                }
+
                 if (buffStats && Object.values(buffStats).some(v => v !== 0)) {
                     activeGlobalBuffs[buff.id] = buffStats;
                     const s = buffStats;

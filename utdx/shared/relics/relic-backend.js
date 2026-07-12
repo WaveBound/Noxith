@@ -100,7 +100,8 @@ window._calcSetAndTagBonuses = function (relicStats, uStats, headPiece, context 
         ninja: 'ninja',
         fused_earrings: 'fused_set',
         phantom_stealer: 'phantom_stealer',
-        phantom_stealer_head: 'phantom_stealer'
+        phantom_stealer_head: 'phantom_stealer',
+        almighty_accessory: 'almighty'
     };
 
     const mappedHeadSetId = headSetIdMap[headPiece];
@@ -121,7 +122,7 @@ window._calcSetAndTagBonuses = function (relicStats, uStats, headPiece, context 
 
     if (mappedHeadSetId && mappedHeadSetId !== activeSetId) {
         // Exclude accessories that handle their own specific perks in _calcHeadDynamicBuffs to prevent double-dipping
-        if (headPiece !== 'fused_earrings' && headPiece !== 'monarch' && headPiece !== 'monarch_cape' && headPiece !== 'monarch_head' && headPiece !== 'rebellious' && headPiece !== 'rebellious_head' && headPiece !== 'bloodline_head' && headPiece !== 'phantom_stealer' && headPiece !== 'phantom_stealer_head') {
+        if (headPiece !== 'fused_earrings' && headPiece !== 'monarch' && headPiece !== 'monarch_cape' && headPiece !== 'monarch_head' && headPiece !== 'rebellious' && headPiece !== 'rebellious_head' && headPiece !== 'bloodline_head' && headPiece !== 'phantom_stealer' && headPiece !== 'phantom_stealer_head' && headPiece !== 'almighty_accessory') {
             setsToCheck.push(mappedHeadSetId);
         }
     }
@@ -292,6 +293,27 @@ window._calcSetAndTagBonuses = function (relicStats, uStats, headPiece, context 
         }
     }
 
+    // Almighty Set logic (Top/Bottom)
+    // When this unit applies a DOT, grant +45% Damage for 10 seconds.
+    // Uptime: if hasDot and SPA < duration, buff is near-permanent; use duration/(SPA+duration) cycle.
+    if (activeSetId === 'almighty') {
+        const hasDot = uStats && (
+            (uStats.dot > 0) ||
+            (uStats.stats && uStats.stats.dot > 0) ||
+            (uStats.burnMultiplier > 0) ||
+            (uStats.stats && uStats.stats.burnMultiplier > 0) ||
+            (uStats.passives && uStats.passives.some(p => (p.dot && p.dot > 0) || p.name === 'Fiery Legacy' || p.name === 'Brutal Slashes')) ||
+            (uStats.customFollowUp && (uStats.customFollowUp.dotPct > 0 || uStats.customFollowUp.dot > 0)) ||
+            (window.isUnit && window.isUnit(uStats.id, 'the_almighty'))
+        );
+        if (hasDot) {
+            const almightyPassive = (typeof PASSIVES !== 'undefined') ? PASSIVES.almighty_set : null;
+            const dotBuff = almightyPassive ? almightyPassive.dmgBuff : 45;
+            sBonus.dmg += dotBuff;
+            setPerkDmg += dotBuff;
+        }
+    }
+
     return { sBonus, tagBuffs, setPerkDmg };
 };
 
@@ -336,7 +358,8 @@ window._calcHeadDynamicBuffs = function (headPiece, finalSpa, finalRange, uStats
         warlord_hat: 'warlord',
         fused_earrings: 'fused_set',
         phantom_stealer: 'phantom_stealer',
-        phantom_stealer_head: 'phantom_stealer'
+        phantom_stealer_head: 'phantom_stealer',
+        almighty_accessory: 'almighty'
     };
 
     const mappedSetId = headSetIdMap[headPiece];
@@ -630,6 +653,31 @@ window._calcHeadDynamicBuffs = function (headPiece, finalSpa, finalRange, uStats
                     if (b.range) headCalc.range = (headCalc.range || 0) + b.range;
                     headCalc.elementalAll = (headCalc.elementalAll || 0) + (b.elementalAll || 0);
                     headCalc.hyperArmor = (headCalc.hyperArmor || 0) + (b.hyperArmor || 0);
+                    headCalc.activeTags.push(perk.tag);
+                    headCfTag += b.cRate || 0;
+                    headCmTag += b.cDmg || 0;
+                }
+            });
+        }
+    }
+
+    // Almighty Accessory: disable crits + apply tag perks (King, Villain)
+    if (headPiece === 'almighty_accessory') {
+        headCalc.noCrits = true;
+        headCalc.type = 'almighty';
+
+        const almightyAccPerks = (typeof TAG_PERKS !== 'undefined') ? TAG_PERKS.almighty_acc : null;
+        if (almightyAccPerks) {
+            almightyAccPerks.forEach(perk => {
+                if (tags.includes(perk.tag)) {
+                    const b = perk.bonus || {};
+                    headDmgTag += b.dmg || 0;
+                    headCalc.cf += b.cRate || 0;
+                    headCalc.cm += b.cDmg || 0;
+                    headDotBuff += b.dot || 0;
+                    if (b.range) headCalc.range = (headCalc.range || 0) + b.range;
+                    headCalc.elementalAll = (headCalc.elementalAll || 0) + (b.elementalAll || 0);
+                    headCalc.buffPotency = (headCalc.buffPotency || 0) + (b.buffPotency || 0);
                     headCalc.activeTags.push(perk.tag);
                     headCfTag += b.cRate || 0;
                     headCmTag += b.cDmg || 0;

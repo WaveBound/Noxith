@@ -17,10 +17,6 @@ unitDatabase.push({
     },
     bugs: [
         {
-            name: '2× Boss Damage — Non-Functional',
-            desc: 'The "I thought you would be stronger" passive states that when an enemy has more than 10× this unit\'s damage, it deals 2× damage. This bonus is currently bugged and does nothing in-game.'
-        },
-        {
             name: 'AoE Follow-up Bugged',
             desc: 'The follow-up attack for 50% damage with Full AoE does not work.'
         },
@@ -70,7 +66,7 @@ unitDatabase.push({
     passives: [
         {
             name: "I thought you would be stronger",
-            desc: "If an enemy has less Health then 10x this units Damage:<br> Do a Full AOE Follow-up for 50% Damage.<br>Otherwise: Deal 2x Damage to the enemy<br>(Bugged: Deal 2x dmg doesn't work)"
+            desc: "If an enemy has less Health than 10x this unit's Damage:<br> Do a Full AOE Follow-up for 50% Damage.<br>Otherwise: Deal 2x Damage to the enemy."
         },
         {
             name: "Nuh Uh",
@@ -86,6 +82,13 @@ unitDatabase.push({
 
     // ABILITIES
     ability: [
+        {
+            abilityName: "x2 Damage",
+            desc: "Toggle: When enemy HP > 10x this unit's Damage, deal 2x Damage to them (\"I thought you would be stronger\").",
+            noToggle: false,
+            cooldown: 0,
+            dmgMult: 0
+        },
         {
             abilityName: "Spirit Blade Stab",
             desc: "Deal 250% Damage in a large Line AOE. Apply Stun for 5 seconds. Cooldown: 30s. (Accounts for DPS: Deals 250% Dmg every 30s, can crit).",

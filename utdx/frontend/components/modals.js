@@ -520,7 +520,6 @@
         sliderContainer.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                 <span style="font-size: 0.75rem; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 1px;">Adjust ${cfg.label || 'System Level'}</span>
-                <span style="font-size: 0.75rem; color: rgba(165, 180, 252, 0.5);">MAX LV. ${cfg.max || 100}</span>
             </div>
             <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
                 <input id="overlay-system-level-${unitId}" type="range" min="${cfg.min || 1}" max="${cfg.max || 100}" value="${currentSysLvl}"

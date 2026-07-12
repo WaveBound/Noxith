@@ -169,6 +169,20 @@ const PASSIVES = {
         bossDmgPerUnit: 5,
         maxBossDmg: 25
     },
+    almighty_acc: {
+        name: "Almighty Power",
+        desc: "This unit can no longer Critical Hit. All buff gains (global buffs) are increased by 30%.",
+        trigger: "passive",
+        disableCrit: true,
+        buffGainMultiplier: 1.3
+    },
+    almighty_set: {
+        name: "DOT Surge",
+        desc: "When this unit applies a DOT, grant this unit +45% Damage for 10 seconds.",
+        trigger: "onDotApply",
+        dmgBuff: 45,
+        duration: 10
+    },
 
 };
 
@@ -179,7 +193,7 @@ const PASSIVES = {
 const TAG_PERKS = {
     // === RAID / SECRET TAG PERKS ===
     reaper_set: [
-        { tag: "Peroxide", bonus: { dmg: 10, buffPotency: 5, cDmg: 8.5 } },
+        { tag: "Peroxide", bonus: { dmg: 10, cDmg: 8.5 } },
         { tag: "Reaper", bonus: { hyperArmor: 20, armorPen: 12.5, range: 15 } },
         { tag: "Rage", bonus: { cDmg: 25, cRate: 10, range: 10 } },
         { tag: "Hollow", bonus: { dmg: 12.5, spa: 7.5, range: 15 } },
@@ -187,7 +201,7 @@ const TAG_PERKS = {
     shadow_reaper: [
         { tag: "Peroxide", bonus: { armorPen: 10, hyperArmor: 15, spa: 10 } },
         { tag: "Reaper", bonus: { elementalAll: 30, spa: 12.5, dmg: -5 } },
-        { tag: "Rage", bonus: { elementalAll: 15, spa: 8.5, buffPotency: 10 } },
+        { tag: "Rage", bonus: { elementalAll: 15, spa: 8.5 } },
         { tag: "Hollow", bonus: { cRate: 20, cDmg: 12.5, hyperArmor: 5 } },
     ],
     rebellious: [
@@ -223,6 +237,14 @@ const TAG_PERKS = {
     phantom_stealer: [
         { tag: "Phantoms", bonus: { bossDmg: 10, elementalAll: 10 } },
         { tag: "King", bonus: { dmg: 10, spa: 5, range: 15 } },
+    ],
+    almighty_acc: [
+        { tag: "King",    bonus: { dmg: 10, dot: 20 } },
+        { tag: "Villain", bonus: { dmg: 10, cRate: 15 } },
+    ],
+    almighty: [
+        { tag: "Hollow Destroyer", bonus: { dmg: 25, spa: 10, dot: 30 } },
+        { tag: "Royal Guards",     bonus: { dmg: 15, elementalAll: 15, range: 10 } },
     ],
 };
 

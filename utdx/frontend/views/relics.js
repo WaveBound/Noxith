@@ -640,6 +640,7 @@ function formatRelicBonus(bonus) {
     if (bonus.abilityCd) parts.push(`-${bonus.abilityCd}% Skill CD`);
     if (bonus.upgradeRefund) parts.push(`+${bonus.upgradeRefund}% Refund`);
     if (bonus.buffReceivedMultiplier) parts.push(`+${Math.round((bonus.buffReceivedMultiplier - 1)*100)}% Buff Potency`);
+    if (bonus.buffGainMultiplier) parts.push(`+${Math.round((bonus.buffGainMultiplier - 1)*100)}% Global Buff Gain`);
     if (bonus.elemental) {
         const elems = Object.entries(bonus.elemental).map(([el, val]) => `+${val}% ${el}`).join(', ');
         parts.push(`Elemental (${elems})`);

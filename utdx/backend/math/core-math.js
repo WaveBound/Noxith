@@ -82,7 +82,7 @@ const getBestSubConfig = (build, stats, includeSubs, headMode, candidates, optim
     if (mode === 'none') mode = 'none';
 
     let headOptions = (mode === 'auto')
-        ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws']
+        ? ['sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings', 'koyotes_sword', 'phantom_stealer_head', 'almighty_accessory']
         : (mode && mode !== 'none' ? [mode] : ['none']);
 
     let globalBestRes = { total: -1, range: -1 };
@@ -412,6 +412,18 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         const isChief = uStats.id === 'revolutionary_chief_syncro' || (window.isUnit && window.isUnit(uStats.id, 'revolutionary_chief_syncro'));
         if (isChief) {
             interval = 9.0;
+        }
+        
+        // For The Almighty in Self Buff mode, FUA triggers DoT as well.
+        // His 5s duration DoT goes off entirely every attack cycle because FUA triggers it,
+        // so the effective DoT interval is finalSpa (4.5s) rather than 9s.
+        if (window.isUnit && window.isUnit(uStats.id, 'the_almighty')) {
+            const activeMode = (window.unitModesState && window.unitModesState['the_almighty'] !== undefined)
+                ? (Array.isArray(window.unitModesState['the_almighty']) ? window.unitModesState['the_almighty'][0] : window.unitModesState['the_almighty'])
+                : 0;
+            if (activeMode === 0) {
+                interval = finalSpa;
+            }
         }
 
         dotBreakdown.nativeTotalDmg = normalTotalDmg;
