@@ -234,9 +234,11 @@ window.GLOBAL_BUFF_DATA = {
         math: (uStats, context) => {
             const s = window.customBuffState || {};
             const result = {};
-            if (s.dmg) result.dmg = Number(s.dmg) || 0;
-            if (s.spa) result.spa = Number(s.spa) || 0;
-            if (s.dot) result.dot = Number(s.dot) || 0;
+            if (s.dmg)  result.dmg  = Number(s.dmg)  || 0;
+            if (s.spa)  result.spa  = Number(s.spa)  || 0;
+            if (s.dot)  result.dot  = Number(s.dot)  || 0;
+            if (s.crit) result.crit = Number(s.crit) || 0;
+            if (s.cdmg) result.cdmg = Number(s.cdmg) || 0;
             return result;
         }
     }

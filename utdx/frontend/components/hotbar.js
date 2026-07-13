@@ -578,6 +578,146 @@
         });
     }
 
+    window.openCustomBuffPanel = function openCustomBuffPanel() {
+        const s = window.customBuffState || {};
+        const dmgVal  = s.dmg  || '';
+        const spaVal  = s.spa  || '';
+        const dotVal  = s.dot  || '';
+        const critVal = s.crit || '';
+        const cdmgVal = s.cdmg || '';
+        const isActive = !!(Number(dmgVal) || Number(spaVal) || Number(dotVal) || Number(critVal) || Number(cdmgVal));
+
+        const html = `
+        <div style="font-family:'Inter',sans-serif; color:#e2e8f0; padding:4px 0 8px;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+                <div style="width:8px; height:28px; border-radius:4px; background:linear-gradient(180deg,#a3e635,#65a30d);"></div>
+                <div>
+                    <div style="font-size:1.05rem; font-weight:700; color:#a3e635; letter-spacing:0.04em;">CUSTOM BUFF</div>
+                    <div style="font-size:0.72rem; color:#94a3b8; margin-top:2px;">Applied globally to all units in loadout mode</div>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
+                <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:12px;">
+                    <label style="display:block; font-size:0.68rem; font-weight:600; letter-spacing:0.08em; color:#fca5a5; margin-bottom:8px;">DMG BUFF %</label>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <input id="cBuff_dmg" type="number" min="0" max="9999" step="0.1" value="${dmgVal}"
+                            placeholder="0"
+                            style="width:100%; background:rgba(15,23,42,0.8); border:1px solid rgba(239,68,68,0.3); border-radius:6px; color:#f8fafc; padding:6px 8px; font-size:0.9rem; font-family:monospace; outline:none;"
+                            onfocus="this.style.borderColor='#fca5a5'" onblur="this.style.borderColor='rgba(239,68,68,0.3)'"/>
+                        <span style="color:#fca5a5; font-size:0.85rem;">%</span>
+                    </div>
+                </div>
+                <div style="background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.25); border-radius:10px; padding:12px;">
+                    <label style="display:block; font-size:0.68rem; font-weight:600; letter-spacing:0.08em; color:#93c5fd; margin-bottom:8px;">SPA BUFF %</label>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <input id="cBuff_spa" type="number" min="0" max="9999" step="0.1" value="${spaVal}"
+                            placeholder="0"
+                            style="width:100%; background:rgba(15,23,42,0.8); border:1px solid rgba(59,130,246,0.3); border-radius:6px; color:#f8fafc; padding:6px 8px; font-size:0.9rem; font-family:monospace; outline:none;"
+                            onfocus="this.style.borderColor='#93c5fd'" onblur="this.style.borderColor='rgba(59,130,246,0.3)'"/>
+                        <span style="color:#93c5fd; font-size:0.85rem;">%</span>
+                    </div>
+                </div>
+                <div style="background:rgba(251,146,60,0.08); border:1px solid rgba(251,146,60,0.25); border-radius:10px; padding:12px;">
+                    <label style="display:block; font-size:0.68rem; font-weight:600; letter-spacing:0.08em; color:#fdba74; margin-bottom:8px;">DOT BUFF %</label>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <input id="cBuff_dot" type="number" min="0" max="9999" step="0.1" value="${dotVal}"
+                            placeholder="0"
+                            style="width:100%; background:rgba(15,23,42,0.8); border:1px solid rgba(251,146,60,0.3); border-radius:6px; color:#f8fafc; padding:6px 8px; font-size:0.9rem; font-family:monospace; outline:none;"
+                            onfocus="this.style.borderColor='#fdba74'" onblur="this.style.borderColor='rgba(251,146,60,0.3)'"/>
+                        <span style="color:#fdba74; font-size:0.85rem;">%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+                <div style="background:rgba(234,179,8,0.08); border:1px solid rgba(234,179,8,0.25); border-radius:10px; padding:12px;">
+                    <label style="display:block; font-size:0.68rem; font-weight:600; letter-spacing:0.08em; color:#fde047; margin-bottom:8px;">CRIT RATE %</label>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <input id="cBuff_crit" type="number" min="0" max="100" step="0.1" value="${critVal}"
+                            placeholder="0"
+                            style="width:100%; background:rgba(15,23,42,0.8); border:1px solid rgba(234,179,8,0.3); border-radius:6px; color:#f8fafc; padding:6px 8px; font-size:0.9rem; font-family:monospace; outline:none;"
+                            onfocus="this.style.borderColor='#fde047'" onblur="this.style.borderColor='rgba(234,179,8,0.3)'"/>
+                        <span style="color:#fde047; font-size:0.85rem;">%</span>
+                    </div>
+                </div>
+                <div style="background:rgba(168,85,247,0.08); border:1px solid rgba(168,85,247,0.25); border-radius:10px; padding:12px;">
+                    <label style="display:block; font-size:0.68rem; font-weight:600; letter-spacing:0.08em; color:#d8b4fe; margin-bottom:8px;">CRIT DMG %</label>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <input id="cBuff_cdmg" type="number" min="0" max="9999" step="0.1" value="${cdmgVal}"
+                            placeholder="0"
+                            style="width:100%; background:rgba(15,23,42,0.8); border:1px solid rgba(168,85,247,0.3); border-radius:6px; color:#f8fafc; padding:6px 8px; font-size:0.9rem; font-family:monospace; outline:none;"
+                            onfocus="this.style.borderColor='#d8b4fe'" onblur="this.style.borderColor='rgba(168,85,247,0.3)'"/>
+                        <span style="color:#d8b4fe; font-size:0.85rem;">%</span>
+                    </div>
+                </div>
+            </div>
+
+            ${isActive ? `<div style="background:rgba(163,230,53,0.08); border:1px solid rgba(163,230,53,0.25); border-radius:8px; padding:8px 12px; margin-bottom:16px; font-size:0.75rem; color:#a3e635; display:flex; align-items:center; gap:8px;">
+                <span style="font-size:1rem;">✓</span>
+                <span>Active: ${[dmgVal ? dmgVal+'% DMG' : '', spaVal ? spaVal+'% SPA' : '', dotVal ? dotVal+'% DoT' : '', critVal ? critVal+'% CR' : '', cdmgVal ? cdmgVal+'% CD' : ''].filter(Boolean).join(' · ')}</span>
+            </div>` : ''}
+
+            <div style="display:flex; gap:8px; justify-content:flex-end;">
+                <button onclick="window.applyCustomBuff()" style="background:linear-gradient(135deg,#a3e635,#65a30d); color:#0f172a; border:none; border-radius:8px; padding:8px 20px; font-weight:700; font-size:0.85rem; cursor:pointer; letter-spacing:0.05em;">APPLY</button>
+                <button onclick="window.clearCustomBuff()" style="background:rgba(239,68,68,0.12); color:#fca5a5; border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:8px 16px; font-weight:600; font-size:0.85rem; cursor:pointer;">CLEAR</button>
+            </div>
+        </div>`;
+
+        if (typeof showUniversalModal === 'function') {
+            showUniversalModal({ title: 'Custom Buff', content: html, size: 'modal-sm' });
+        }
+    };
+
+    window.applyCustomBuff = function applyCustomBuff() {
+        const dmg  = parseFloat(document.getElementById('cBuff_dmg')?.value)  || 0;
+        const spa  = parseFloat(document.getElementById('cBuff_spa')?.value)  || 0;
+        const dot  = parseFloat(document.getElementById('cBuff_dot')?.value)  || 0;
+        const crit = parseFloat(document.getElementById('cBuff_crit')?.value) || 0;
+        const cdmg = parseFloat(document.getElementById('cBuff_cdmg')?.value) || 0;
+        window.customBuffState = { dmg, spa, dot, crit, cdmg };
+        // Mark as active in buff state so calcGlobalBuffs picks it up
+        if (window.hotbarState) window.hotbarState.buffState['customBuff'] = true;
+        if (window.HOTBAR_BUFF_STATE) window.HOTBAR_BUFF_STATE['customBuff'] = true;
+        window.customBuffActive = true;
+        // Update button appearance
+        const btn = document.getElementById('customBuffBtn');
+        if (btn) {
+            const hasValues = dmg > 0 || spa > 0 || dot > 0 || crit > 0 || cdmg > 0;
+            btn.style.borderColor = hasValues ? '#a3e635' : '';
+            btn.style.color       = hasValues ? '#a3e635' : '';
+            btn.style.boxShadow   = hasValues ? '0 0 6px rgba(163,230,53,0.35)' : '';
+            btn.title = hasValues
+                ? `Active: ${[dmg ? dmg+'% DMG' : '', spa ? spa+'% SPA' : '', dot ? dot+'% DoT' : '', crit ? crit+'% CR' : '', cdmg ? cdmg+'% CD' : ''].filter(Boolean).join(' · ')}`
+                : 'Enter custom DMG / SPA / DoT / Crit buff values';
+        }
+        callWin('resetCachesForBuffChange');
+        callWin('updateAllUnitsBuilds');
+        if (!window.visibleUnitIds?.size) callWin('renderDatabase');
+        // Close modal
+        const modalClose = document.querySelector('.modal-close-btn, [data-modal-close], .universal-modal-overlay');
+        if (modalClose) modalClose.click();
+    };
+
+    window.clearCustomBuff = function clearCustomBuff() {
+        window.customBuffState = { dmg: 0, spa: 0, dot: 0 };
+        if (window.hotbarState) window.hotbarState.buffState['customBuff'] = false;
+        if (window.HOTBAR_BUFF_STATE) window.HOTBAR_BUFF_STATE['customBuff'] = false;
+        window.customBuffActive = false;
+        const btn = document.getElementById('customBuffBtn');
+        if (btn) {
+            btn.style.borderColor = '';
+            btn.style.color       = '';
+            btn.style.boxShadow   = '';
+            btn.title = 'Enter custom DMG / SPA / DoT buff values';
+        }
+        callWin('resetCachesForBuffChange');
+        callWin('updateAllUnitsBuilds');
+        if (!window.visibleUnitIds?.size) callWin('renderDatabase');
+        const modalClose = document.querySelector('.modal-close-btn, [data-modal-close], .universal-modal-overlay');
+        if (modalClose) modalClose.click();
+    };
+
     function toggleExtraMenu(selector) {
         const target = $(selector);
         $$('.hotbar-extra-menu').forEach(m => m !== target && m.classList.remove('active'));
@@ -637,6 +777,9 @@
                 <div class="hotbar-extra-container">
                     <button class="hotbar-extra-btn buffers-btn" onclick="event.stopPropagation(); toggleExtraMenu('.buffers-menu')">Buffers</button>
                     <div class="hotbar-extra-menu buffers-menu" onclick="event.stopPropagation();"></div>
+                </div>
+                <div class="hotbar-extra-container">
+                    <button id="customBuffBtn" class="hotbar-extra-btn custom-buff-btn" onclick="event.stopPropagation(); openCustomBuffPanel()" title="Enter custom DMG / SPA / DoT buff values">Custom Buff</button>
                 </div>
             </div>
         `;
