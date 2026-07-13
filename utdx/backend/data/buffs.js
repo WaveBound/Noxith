@@ -332,7 +332,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
 };
 
 window.calcGlobalBuffs = function (uStats, context, headPiece) {
-    let globalDmg = 0, globalSpa = 0, globalRange = 0, globalCrit = 0, globalCdmg = 0;
+    let globalDmg = 0, globalSpa = 0, globalRange = 0, globalCrit = 0, globalCdmg = 0, globalDot = 0;
     let activeGlobalBuffs = {};
 
     if (typeof window !== 'undefined' && window.GLOBAL_BUFF_DATA) {
@@ -445,10 +445,11 @@ window.calcGlobalBuffs = function (uStats, context, headPiece) {
                     globalRange += s.range || s.rangeBonus || 0;
                     globalCrit += s.crit || s.critRate || s.cRate || 0;
                     globalCdmg += s.cdmg || s.critDmg || s.cDmg || 0;
+                    globalDot += s.dot || 0;
                 }
             }
         });
     }
 
-    return { globalDmg, globalSpa, globalRange, globalCrit, globalCdmg, activeGlobalBuffs };
+    return { globalDmg, globalSpa, globalRange, globalCrit, globalCdmg, globalDot, activeGlobalBuffs };
 };

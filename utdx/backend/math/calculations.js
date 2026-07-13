@@ -850,7 +850,15 @@ function calculateDPS(uStats, relicStats, context) {
         }
     }
 
-    let externalDotBonus = ((sBonus.dot || 0) + headDotBuff) * bpMult;
+    let finalGlobalDot = 0;
+    if (activeGlobalBuffsMap) {
+        for (let key in activeGlobalBuffsMap) {
+            if (activeGlobalBuffsMap[key] && activeGlobalBuffsMap[key].dot) {
+                finalGlobalDot += activeGlobalBuffsMap[key].dot;
+            }
+        }
+    }
+    let externalDotBonus = ((sBonus.dot || 0) + headDotBuff) * bpMult + finalGlobalDot;
     const gearDotBonus = baseR_Dot;
 
     let baseDotVal = headCalc?.dotOverride || uStats.dot || 0;
@@ -881,24 +889,6 @@ function calculateDPS(uStats, relicStats, context) {
         globalDotMult *= 1.5;
     }
 
-    if (typeof window !== 'undefined' && window.CALCULATION_MODE === 'loadout' && window.hotbarState && window.hotbarState.slots) {
-        const mgPresent = window.hotbarState.slots.some(s => s && s.id && s.id.split('-')[0] === 'merciless_god');
-        if (mgPresent && uStats.id.split('-')[0] !== 'merciless_god') {
-            const mgState = window.unitModesState ? window.unitModesState['merciless_god'] : undefined;
-            const mgIdx = Array.isArray(mgState) ? mgState[0] : (mgState !== undefined ? mgState : 4);
-            const mgUnit = typeof window.getUnitById === 'function' ? window.getUnitById('merciless_god') : null;
-            if (mgUnit && mgUnit.modes && mgUnit.modes[mgIdx]) {
-                const passives = mgUnit.modes[mgIdx].passives || [];
-                if (passives.some(p => p.name === 'Godly Earrings')) {
-                    externalDotBonus += (50 * bpMult);
-                    if (detailedBuffs) {
-                        detailedBuffs.globalBuffs = (detailedBuffs.globalBuffs || 0) + (50 * bpMult);
-                    }
-                }
-            }
-        }
-    }
-
     const dotInputStats = { ...uStats, dot: baseDotVal, isBoss: context.isBoss };
     if (headCalc?.dotDuration) {
         dotInputStats.dotDuration = headCalc.dotDuration;
@@ -908,7 +898,8 @@ function calculateDPS(uStats, relicStats, context) {
         dotInputStats,
         traitObj,
         traitDotBuff,
-        gearDotBonus + externalDotBonus,
+        gearDotBonus,
+        externalDotBonus,
         finalDmg,
         finalSpa,
         placement,
@@ -921,7 +912,7 @@ function calculateDPS(uStats, relicStats, context) {
     );
 
     if (dotBreakdown) {
-        dotBreakdown.gearDotBonus = gearDotBonus;
+        dotBreakdown.relicBonus = gearDotBonus;
         dotBreakdown.externalDotBonus = externalDotBonus;
     }
 
@@ -939,7 +930,7 @@ function calculateDPS(uStats, relicStats, context) {
 
         const baseStackDmg = (eLevel >= 2) ? 7500 : 5000;
         const multiplier = (eLevel >= 6) ? 2 : 1;
-        const combinedMultiplier = (1 + ((traitDotBuff + gearDotBonus + passiveDotBuff) / 100)) * (globalDotMult || 1.0);
+        const combinedMultiplier = (1 + ((traitDotBuff + passiveDotBuff) / 100)) * (1 + (gearDotBonus / 100)) * (globalDotMult || 1.0);
         const totalDotDmg = baseStackDmg * sysLvl * multiplier * combinedMultiplier;
         const customDotDps = (totalDotDmg / 5) * placement;
 
@@ -956,7 +947,7 @@ function calculateDPS(uStats, relicStats, context) {
             dotBreakdown.multiplier = multiplier;
             dotBreakdown.combinedMultiplier = combinedMultiplier;
             dotBreakdown.traitDotBuff = traitDotBuff;
-            dotBreakdown.gearDotBonus = gearDotBonus;
+            dotBreakdown.relicBonus = gearDotBonus;
             dotBreakdown.passiveDotBuff = passiveDotBuff;
             dotBreakdown.globalDotMult = globalDotMult;
         }

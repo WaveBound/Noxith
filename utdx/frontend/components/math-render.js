@@ -672,6 +672,106 @@ function getTagPerkRowsHtml(statType, data) {
     return html;
 }
 
+function getTagPerkRowsHtmlForDot(data) {
+    const unitTags = data.baseStats?.tags || [];
+    let html = '';
+    const uniqueSets = new Set();
+    const checkSet = [];
+    const setKey = data.relicStats?.set;
+
+    if (setKey && setKey !== 'none') {
+        let cleanSet = setKey.replace('_set', '');
+        uniqueSets.add(cleanSet);
+        checkSet.push({ id: setKey });
+    }
+
+    const headKey = data.headBuffs?.type || data.relicStats?.head;
+    if (headKey && headKey !== 'none') {
+        let cleanHead = headKey.replace('_necklace', '').replace('_hat', '').replace('_set', '');
+        if (!uniqueSets.has(cleanHead)) {
+            uniqueSets.add(cleanHead);
+            checkSet.push({ id: headKey });
+        }
+    }
+
+    const activeSetId = data.relicStats?.set || 'none';
+    const headPiece = data.headBuffs?.type || data.relicStats?.head || 'none';
+    const headSetIdMap = {
+        reaper_necklace: 'reaper_set',
+        shadow_reaper_necklace: 'shadow_reaper',
+        junior: 'ninja',
+        biju_head: 'biju_set',
+        rebellious: 'rebellious',
+        rebellious_head: 'rebellious',
+        bloodline_head: 'rebellious',
+        reanimated_head: 'reanimated_ninja',
+        super_roku: 'super_roku',
+        bio_android: 'bio_android',
+        great_mage: 'great_mage',
+        berserk_shinigami: 'berserk_shinigami',
+        hokage: 'hokage',
+        sorcerer_hunter_spirit: 'sorcerer_hunter',
+        strongest_sorcerer_glasses: 'strongest_sorcerer',
+        monarch: 'monarch',
+        monarch_cape: 'monarch',
+        monarch_head: 'monarch',
+        warlord_hat: 'warlord',
+        sun_god: 'sun_god',
+        ninja: 'ninja',
+        fused_earrings: 'fused_set',
+        phantom_stealer: 'phantom_stealer',
+        phantom_stealer_head: 'phantom_stealer',
+        almighty_accessory: 'almighty'
+    };
+    const mappedHeadSetId = headSetIdMap[headPiece];
+
+    const setsToCheck = [activeSetId];
+    if (mappedHeadSetId && mappedHeadSetId !== activeSetId) {
+        if (headPiece !== 'fused_earrings' && headPiece !== 'monarch' && headPiece !== 'monarch_cape' && headPiece !== 'monarch_head' && headPiece !== 'rebellious' && headPiece !== 'rebellious_head' && headPiece !== 'bloodline_head' && headPiece !== 'phantom_stealer' && headPiece !== 'phantom_stealer_head' && headPiece !== 'almighty_accessory') {
+            setsToCheck.push(mappedHeadSetId);
+        }
+    }
+
+    if (headPiece === 'monarch' || headPiece === 'monarch_cape' || headPiece === 'monarch_head') {
+        setsToCheck.push('monarch_acc');
+    }
+    if (headPiece === 'rebellious' || headPiece === 'rebellious_head' || headPiece === 'bloodline_head') {
+        setsToCheck.push('rebellious_acc');
+    }
+    if (headPiece === 'fused_earrings') {
+        setsToCheck.push('fused_earrings_acc');
+    }
+    if (headPiece === 'phantom_stealer' || headPiece === 'phantom_stealer_head') {
+        setsToCheck.push('phantom_stealer_acc');
+    }
+    if (headPiece === 'almighty_accessory') {
+        setsToCheck.push('almighty_acc');
+    }
+
+    const seen = new Set();
+    setsToCheck.forEach(setId => {
+        if (setId === 'none') return;
+        const perks = window.TAG_PERKS?.[setId];
+        if (perks) {
+            perks.forEach(perk => {
+                if (unitTags.includes(perk.tag)) {
+                    const dotVal = perk.bonus?.dot;
+                    if (dotVal) {
+                        const key = `${setId}-${perk.tag}`;
+                        if (seen.has(key)) return;
+                        seen.add(key);
+                        let cleanSet = setId.replace('_set', '').replace('_acc', '').replace('_necklace', '').replace('_hat', '');
+                        cleanSet = cleanSet.replace('_', ' ').toUpperCase();
+                        html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonus: ${perk.tag} (${cleanSet})</td><td class="mt-cell-formula">${fmt.pctMult(dotVal * (data.bpMult || 1), data.bpMult)}</td><td class="mt-cell-val"></td></tr>`;
+                    }
+                }
+            });
+        }
+    });
+
+    return html;
+}
+
 function renderCritSection(data, setTagCfTotal, setTagCmTotal, cleanHeadDisplayName, relicSetName) {
     const isKingSailor = data.baseStats?.id === 'king_sailor';
     let globalCritBreakdownHtml = '', globalCdmgBreakdownHtml = '';
@@ -824,10 +924,14 @@ function renderDotSection(data, headDotRow) {
 
     const traitDot = data.traitObj?.dotBuff || 0;
     const passiveDot = data.dotData?.passiveBonus || 0;
-    const gearBonus = db?.gearDotBonus !== undefined ? db.gearDotBonus : (data.relicBuffs?.dot || 0 + (data.totalSetStats?.dot || 0) + (data.headBuffs?.dot || 0));
+    // relicBonus = relic main/sub stat DoT% (its own multiplier)
+    const relicDotBonus = db?.relicBonus !== undefined ? db.relicBonus : (data.relicBuffs?.dot || 0);
+    // externalDotBonus = set bonus + accessory + global buffs (additive pool)
     const externalDotBonus = db?.externalDotBonus || 0;
     const bugMult = (data.baseStats?.id === 'ant_king_savage' || (window.isUnit && window.isUnit(data.baseStats?.id, 'ant_king_savage'))) ? 2 : 1;
-    const combinedMultiplier = (1 + ((traitDot + gearBonus + externalDotBonus + passiveDot) * bugMult) / 100) * (db?.globalDotMult || 1.0);
+    // Match backend: (1 + additive/100) × (1 + relicDot/100) × globalDotMult
+    const relicMult = 1 + (relicDotBonus / 100);
+    const combinedMultiplier = (1 + ((traitDot + externalDotBonus + passiveDot) * bugMult) / 100) * relicMult * (db?.globalDotMult || 1.0);
     const baseDotPctVal = db?.nativeDps > 0 ? (db?.base || 0) : (data.baseStats?.customFollowUp?.dotPct || 0);
     const finalTickPct = baseDotPctVal * combinedMultiplier;
 
@@ -912,11 +1016,23 @@ function renderDotSection(data, headDotRow) {
                 return '';
             })()}
             <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-custom">1. Trait Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-custom text-bold">${fmt.pct(traitDot)}</td></tr>
-            <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-accent-end">2. Gear Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-end text-bold">${fmt.pct(gearBonus)}</td></tr>
-            ${externalDotBonus > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-blue">3. Set & External Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pctMult(externalDotBonus, data.bpMult)}</td><td class="mt-cell-val text-blue text-bold"></td></tr>
+            ${relicDotBonus > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-accent-end">2. Relic Main/Sub Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-end text-bold">${fmt.pct(relicDotBonus)}</td></tr>` : ''}
+            ${externalDotBonus > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-blue">${relicDotBonus > 0 ? '3' : '2'}. Set & External Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pctMult(externalDotBonus, data.bpMult)}</td><td class="mt-cell-val text-blue text-bold"></td></tr>
             ${data.detailedBuffs?.dotSetBase > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base DoT</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.dotSetBase)}</td><td class="mt-cell-val"></td></tr>` : ''}
-            ${data.detailedBuffs?.dotTagBonus > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonus DoT</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.dotTagBonus)}</td><td class="mt-cell-val"></td></tr>` : ''}` : ''}
-            ${passiveDot > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-gray">${externalDotBonus > 0 ? '4' : '3'}. Passive Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(passiveDot)}</td><td class="mt-cell-val text-gray text-bold"></td></tr>` : ''}
+            ${getTagPerkRowsHtmlForDot(data)}
+            ${(() => {
+                if (!data.activeGlobalBuffs || !window.GLOBAL_BUFF_DATA) return '';
+                let rows = '';
+                Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
+                    const bData = data.activeGlobalBuffs[buff.id];
+                    if (bData && bData.dot > 0) {
+                        rows += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:${buff.color};">↳ ${buff.name}</td><td class="mt-cell-formula" style="color:${buff.color};">${fmt.pct(bData.dot)}</td><td class="mt-cell-val"></td></tr>`;
+                    }
+                });
+                return rows;
+            })()}
+            ` : ''}
+            ${passiveDot > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-gray">${externalDotBonus > 0 ? (relicDotBonus > 0 ? '4' : '3') : (relicDotBonus > 0 ? '3' : '2')}. Passive Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(passiveDot)}</td><td class="mt-cell-val text-gray text-bold"></td></tr>` : ''}
             ${bugMult > 1 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs" style="color:#f87171 !important;">↳ Bugged Double Scaling</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs" style="color:#f87171 !important;">×2.0 Buffs</td></tr>` : ''}
             <tr class="mt-border-top"><td class="mt-cell-label mt-pl-sm mt-pt-sm text-bold text-gray">↳ Combined DoT Multiplier</td><td class="mt-cell-formula mt-pt-sm text-bold"><span class="op">×</span>${fmt.fix(combinedMultiplier, 3)}</td><td class="mt-cell-val"></td></tr>
             <tr><td class="mt-cell-label mt-pt-md">Final Native Tick %</td><td class="mt-cell-formula">=</td><td class="mt-cell-val calc-highlight">${fmt.fix(finalTickPct, 2)}%</td></tr>
@@ -946,9 +1062,23 @@ function renderDotSection(data, headDotRow) {
             <tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ Pyro Stacks</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">x${db.sysLvl}</td></tr>
             ${db.multiplier > 1 ? `<tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ E6 Double Dmg Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">x${db.multiplier}</td></tr>` : ''}
             <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-custom">1. Trait Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-custom text-bold">${fmt.pct(db.traitDotBuff)}</td></tr>
-            <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-accent-end">2. Gear Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-end text-bold">${fmt.pct(db.gearDotBonus)}</td></tr>
-            ${db.externalDotBonus > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-blue">3. Set & External Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(db.externalDotBonus)}</td><td class="mt-cell-val text-blue text-bold"></td></tr>` : ''}
-            ${db.passiveDotBuff > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-gray">${db.externalDotBonus > 0 ? '4' : '3'}. Passive Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(db.passiveDotBuff)}</td><td class="mt-cell-val text-gray text-bold"></td></tr>` : ''}
+            ${(db.relicBonus || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-accent-end">2. Relic Main/Sub Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-end text-bold">${fmt.pct(db.relicBonus)}</td></tr>` : ''}
+            ${db.externalDotBonus > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-blue">${(db.relicBonus || 0) > 0 ? '3' : '2'}. Set & External Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(db.externalDotBonus)}</td><td class="mt-cell-val text-blue text-bold"></td></tr>
+            ${data.detailedBuffs?.dotSetBase > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base DoT</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.dotSetBase)}</td><td class="mt-cell-val"></td></tr>` : ''}
+            ${getTagPerkRowsHtmlForDot(data)}
+            ${(() => {
+                if (!data.activeGlobalBuffs || !window.GLOBAL_BUFF_DATA) return '';
+                let rows = '';
+                Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
+                    const bData = data.activeGlobalBuffs[buff.id];
+                    if (bData && bData.dot > 0) {
+                        rows += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:${buff.color};">↳ ${buff.name}</td><td class="mt-cell-formula" style="color:${buff.color};">${fmt.pct(bData.dot)}</td><td class="mt-cell-val"></td></tr>`;
+                    }
+                });
+                return rows;
+            })()}
+            ` : ''}
+            ${db.passiveDotBuff > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-gray">${db.externalDotBonus > 0 ? ((db.relicBonus || 0) > 0 ? '4' : '3') : ((db.relicBonus || 0) > 0 ? '3' : '2')}. Passive Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(db.passiveDotBuff)}</td><td class="mt-cell-val text-gray text-bold"></td></tr>` : ''}
             <tr class="mt-border-top"><td class="mt-cell-label mt-pl-sm mt-pt-sm text-bold text-gray">↳ Combined DoT Multiplier</td><td class="mt-cell-formula mt-pt-sm text-bold"><span class="op">×</span>${fmt.fix(db.combinedMultiplier, 3)}</td><td class="mt-cell-val"></td></tr>
             <tr>
                 <td class="mt-cell-label mt-pt-md mt-text-bold" style="color:#f87171">${db.customLabel || 'Custom DoT'} (${db.customInterval || 5}s)</td>

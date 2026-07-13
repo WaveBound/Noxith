@@ -193,6 +193,52 @@ window.GLOBAL_BUFF_DATA = {
             }
             return {};
         }
+    },
+    mercilessGod: {
+        id: 'merciless_god',
+        name: 'Merciless God',
+        stateKey: 'mercilessGodActive',
+        color: '#fca5a5',
+        desc: 'Apply Merciless God\'s +50% DoT Buff (from Godly Earrings)',
+        tagLabel: 'Merciless God',
+        hideButton: true,
+        math: (uStats, context) => {
+            if (!uStats || !uStats.id) return {};
+            if (uStats.id.split('-')[0] === 'merciless_god') return {};
+            if (window.CALCULATION_MODE === 'loadout' && window.hotbarState && window.hotbarState.slots) {
+                const slots = window.hotbarState.slots;
+                const mgPresent = slots.some(s => s && s.id && s.id.split('-')[0] === 'merciless_god');
+                if (mgPresent) {
+                    const mgState = window.unitModesState ? window.unitModesState['merciless_god'] : undefined;
+                    const mgIdx = Array.isArray(mgState) ? mgState[0] : (mgState !== undefined ? mgState : 4);
+                    const mgUnit = typeof window.getUnitById === 'function' ? window.getUnitById('merciless_god') : null;
+                    if (mgUnit && mgUnit.modes && mgUnit.modes[mgIdx]) {
+                        const passives = mgUnit.modes[mgIdx].passives || [];
+                        if (passives.some(p => p.name === 'Godly Earrings')) {
+                            return { dot: 50 };
+                        }
+                    }
+                }
+            }
+            return {};
+        }
+    },
+    customBuff: {
+        id: 'customBuff',
+        name: 'Custom Buff',
+        stateKey: 'customBuffActive',
+        color: '#a3e635',
+        desc: 'Apply manually entered custom DMG/SPA/DoT buffs',
+        tagLabel: 'Custom Buff',
+        hideButton: true,
+        math: (uStats, context) => {
+            const s = window.customBuffState || {};
+            const result = {};
+            if (s.dmg) result.dmg = Number(s.dmg) || 0;
+            if (s.spa) result.spa = Number(s.spa) || 0;
+            if (s.dot) result.dot = Number(s.dot) || 0;
+            return result;
+        }
     }
 };
 

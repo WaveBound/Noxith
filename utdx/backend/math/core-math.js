@@ -321,7 +321,7 @@ function _calcSummonDPS(uStats, finalDmg, finalSpa, placement) {
     return { summonDpsTotal: (avgOnePlaneDps * actualCount) * placement, summonData: { count: actualCount, max: s.maxCount, avgPlaneDps: avgOnePlaneDps, hostSpa: finalSpa, avgDuration: avgDuration, dpsA: dpsA, dpsB: dpsB } };
 }
 
-function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult, finalDmgBoss = undefined, avgCritMultBoss = undefined, passiveDotBuff = 0, globalDotMult = 1) {
+function _calcDoTDPS(uStats, traitObj, traitDotBonus, relicDotBonus, externalDotBonus, finalDmg, finalSpa, placement, isVirtualRealm, avgCritMult, finalDmgBoss = undefined, avgCritMultBoss = undefined, passiveDotBuff = 0, globalDotMult = 1) {
     let dotDpsTotal = 0;
     let bossDotDpsTotal = 0;
     let dotCritMult = isVirtualRealm ? avgCritMult : 1;
@@ -341,11 +341,12 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         dotCritMult = avgCritMult;
         dotCritMultBoss = avgCritMultBoss || avgCritMult;
     }
-    let additiveBonus = (traitDotBonus || 0) + (gearDotBonus || 0) + (passiveDotBuff || 0);
+    let additiveBonus = (traitDotBonus || 0) + (externalDotBonus || 0) + (passiveDotBuff || 0);
     if (uStats.id && (uStats.id === 'ant_king_savage' || (window.isUnit && window.isUnit(uStats.id, 'ant_king_savage')))) {
         additiveBonus *= 2;
     }
-    let combinedMultiplier = (1 + (additiveBonus / 100)) * (globalDotMult || 1);
+    let relicMult = 1 + ((relicDotBonus || 0) / 100);
+    let combinedMultiplier = (1 + (additiveBonus / 100)) * relicMult * (globalDotMult || 1);
 
     let dotBreakdown = {
         nativeDps: 0,
@@ -353,9 +354,10 @@ function _calcDoTDPS(uStats, traitObj, traitDotBonus, gearDotBonus, finalDmg, fi
         radDps: 0,
         base: uStats.dot,
         traitBonus: traitDotBonus,
-        gearBonus: gearDotBonus,
+        relicBonus: relicDotBonus,
+        externalDotBonus: externalDotBonus,
         traitMult: 1 + (traitDotBonus / 100),
-        gearMult: 1 + (gearDotBonus / 100),
+        relicMult: relicMult,
         globalDotMult: globalDotMult,
         passiveMult: (passiveDotBuff / 100),
         passiveBonus: passiveDotBuff,
