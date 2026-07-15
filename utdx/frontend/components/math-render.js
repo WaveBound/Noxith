@@ -762,7 +762,7 @@ function getTagPerkRowsHtmlForDot(data) {
                         seen.add(key);
                         let cleanSet = setId.replace('_set', '').replace('_acc', '').replace('_necklace', '').replace('_hat', '');
                         cleanSet = cleanSet.replace('_', ' ').toUpperCase();
-                        html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonus: ${perk.tag} (${cleanSet})</td><td class="mt-cell-formula">${fmt.pctMult(dotVal * (data.bpMult || 1), data.bpMult)}</td><td class="mt-cell-val"></td></tr>`;
+                        html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Tag Bonus: ${perk.tag} (${cleanSet})</td><td class="mt-cell-formula">${fmt.pct(dotVal)}</td><td class="mt-cell-val"></td></tr>`;
                     }
                 }
             });
@@ -839,7 +839,7 @@ function renderCritSection(data, setTagCfTotal, setTagCmTotal, cleanHeadDisplayN
                     ${getTagPerkRowsHtml('cdmg', data)}
                     ${globalCdmgBreakdownHtml}${passiveCdmgBreakdownHtml}
                     <tr><td class="mt-cell-label">Total Crit Damage</td><td class="mt-cell-formula">=</td><td class="mt-cell-val calc-highlight">${fmt.fix(data.critData?.cdmg, 0)}%</td></tr>
-                    <tr><td class="mt-cell-label text-right pr-2 mt-pt-md">${isKingSailor ? 'Avg 5-Hit Base Damage' : 'Avg Damage Per Hit'}</td><td class="mt-cell-formula mt-pt-md">${isKingSailor ? 'x2.50 total hits' : ''}</td><td class="mt-cell-val calc-result text-right mt-pt-md">${fmt.num((data.dmgVal || 0) * (isKingSailor ? 2.5 : 1) * (data.critData?.avgMult || 1))}</td></tr>
+                    <tr><td class="mt-cell-label text-right pr-2 mt-pt-md">Avg Damage Per Hit</td><td class="mt-cell-formula mt-pt-md"></td><td class="mt-cell-val calc-result text-right mt-pt-md">${fmt.num((data.dmgVal || 0) * (data.critData?.avgMult || 1))}</td></tr>
                 </table>
             </div>`;
 }
@@ -920,18 +920,22 @@ function renderDotSection(data, headDotRow) {
     const donutExclusive = donutData?.exclusive?.join(', ') || 'Spade';
     const headDotOverride = data.headBuffs?.dotOverride || 0;
     const headOverrideLabel = data.headBuffs?.type ? String(data.headBuffs.type).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Head Piece';
-    const baseDot = headDotOverride || data.baseStats?.dot || 0;
+    const baseDot = headDotOverride || data.baseStats?.dot || (db?.base || 0) || 0;
 
     const traitDot = data.traitObj?.dotBuff || 0;
     const passiveDot = data.dotData?.passiveBonus || 0;
     // relicBonus = relic main/sub stat DoT% (its own multiplier)
     const relicDotBonus = db?.relicBonus !== undefined ? db.relicBonus : (data.relicBuffs?.dot || 0);
-    // externalDotBonus = set bonus + accessory + global buffs (additive pool)
+    // externalDotBonus = set bonus + accessory (set/tag/head only)
     const externalDotBonus = db?.externalDotBonus || 0;
+    const globalDotBonus = db?.globalDotBonus || 0;
     const bugMult = (data.baseStats?.id === 'ant_king_savage' || (window.isUnit && window.isUnit(data.baseStats?.id, 'ant_king_savage'))) ? 2 : 1;
-    // Match backend: (1 + additive/100) × (1 + relicDot/100) × globalDotMult
+    const traitMult = 1 + (traitDot / 100);
     const relicMult = 1 + (relicDotBonus / 100);
-    const combinedMultiplier = (1 + ((traitDot + externalDotBonus + passiveDot) * bugMult) / 100) * relicMult * (db?.globalDotMult || 1.0);
+    const externalMult = 1 + ((externalDotBonus * bugMult) / 100);
+    const globalMult = 1 + (globalDotBonus / 100);
+    const passiveMult = 1 + (passiveDot / 100);
+    const combinedMultiplier = traitMult * relicMult * externalMult * globalMult * passiveMult * (db?.globalDotMult || 1.0);
     const baseDotPctVal = db?.nativeDps > 0 ? (db?.base || 0) : (data.baseStats?.customFollowUp?.dotPct || 0);
     const finalTickPct = baseDotPctVal * combinedMultiplier;
 
@@ -1015,26 +1019,51 @@ function renderDotSection(data, headDotRow) {
                 }
                 return '';
             })()}
-            <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-custom">1. Trait Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-custom text-bold">${fmt.pct(traitDot)}</td></tr>
-            ${relicDotBonus > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-accent-end">2. Relic Main/Sub Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-end text-bold">${fmt.pct(relicDotBonus)}</td></tr>` : ''}
-            ${externalDotBonus > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-blue">${relicDotBonus > 0 ? '3' : '2'}. Set & External Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pctMult(externalDotBonus, data.bpMult)}</td><td class="mt-cell-val text-blue text-bold"></td></tr>
-            ${data.detailedBuffs?.dotSetBase > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base DoT</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.dotSetBase)}</td><td class="mt-cell-val"></td></tr>` : ''}
-            ${getTagPerkRowsHtmlForDot(data)}
+            <tr><td class="mt-cell-label mt-pt-md">Base DoT Damage</td><td class="mt-cell-formula mt-pt-md">=</td><td class="mt-cell-val mt-pt-md text-gray mt-text-bold">${fmt.num((data.dmgVal * (db?.critMult || 1)) * (baseDotPctVal / 100))}</td></tr>
+            <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-custom">1. Trait Multiplier</td><td class="mt-cell-formula"><span class="op">×</span>${fmt.fix(traitMult, 3)}</td><td class="mt-cell-val text-custom text-bold">${fmt.pct(traitDot)}</td></tr>
+            ${relicDotBonus > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-accent-end">2. Relic Main/Sub Multiplier</td><td class="mt-cell-formula"><span class="op">×</span>${fmt.fix(relicMult, 3)}</td><td class="mt-cell-val text-accent-end text-bold">${fmt.pct(relicDotBonus)}</td></tr>` : ''}
+            
             ${(() => {
-                if (!data.activeGlobalBuffs || !window.GLOBAL_BUFF_DATA) return '';
-                let rows = '';
-                Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
-                    const bData = data.activeGlobalBuffs[buff.id];
-                    if (bData && bData.dot > 0) {
-                        rows += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:${buff.color};">↳ ${buff.name}</td><td class="mt-cell-formula" style="color:${buff.color};">${fmt.pct(bData.dot)}</td><td class="mt-cell-val"></td></tr>`;
+                let nextIdx = relicDotBonus > 0 ? 3 : 2;
+                let html = '';
+                
+                if (externalDotBonus > 0) {
+                    html += `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-blue">${nextIdx}. Set & External Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;"><span class="op">×</span>${fmt.fix(externalMult, 3)}</td><td class="mt-cell-val text-blue text-bold">${fmt.pctMult(externalDotBonus, data.bpMult)}</td></tr>`;
+                    if (data.detailedBuffs?.dotSetBase > 0) {
+                        html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base DoT</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.dotSetBase)}</td><td class="mt-cell-val"></td></tr>`;
                     }
-                });
-                return rows;
+                    html += getTagPerkRowsHtmlForDot(data);
+                    const headDot = data.headBuffs?.dot || 0;
+                    if (headDot > 0) {
+                        const _headTypeRaw = data.headBuffs?.type || 'Head Piece';
+                        const _HEAD_NAME_MAP = { almighty_accessory: 'Almighty', fused_earrings: 'Fused Earrings', monarch: 'Monarch Cape', monarch_cape: 'Monarch Cape', monarch_head: 'Monarch Head', warlord_hat: 'Warlord Hat', mochi_scarf: 'Mochi Scarf', flaming_donut: 'Flaming Donut', phantom_stealer_head: 'Phantom Stealer', phantom_stealer: 'Phantom Stealer', reaper_necklace: 'Reaper Head', shadow_reaper_necklace: 'Shadow Reaper', biju_head: 'Biju Headband', rebellious: 'Rebellious', rebellious_head: 'Rebellious', bloodline_head: 'Bloodline', sun_god: 'Sun God', ninja: 'Ninja', junior: 'Junior Ninja' };
+                        const _headName = _HEAD_NAME_MAP[_headTypeRaw] || _headTypeRaw.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                        html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Head Piece DoT (${_headName})</td><td class="mt-cell-formula">${fmt.pct(headDot)}</td><td class="mt-cell-val"></td></tr>`;
+                    }
+                    nextIdx++;
+                }
+                
+                if (globalDotBonus > 0) {
+                    html += `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-orange">${nextIdx}. Global Buffs Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;"><span class="op">×</span>${fmt.fix(globalMult, 3)}</td><td class="mt-cell-val text-orange text-bold">${fmt.pct(globalDotBonus)}</td></tr>`;
+                    if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
+                        Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
+                            const bData = data.activeGlobalBuffs[buff.id];
+                            if (bData && bData.dot > 0) {
+                                html += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:${buff.color};">↳ ${buff.name}</td><td class="mt-cell-formula" style="color:${buff.color};">${fmt.pct(bData.dot)}</td><td class="mt-cell-val"></td></tr>`;
+                            }
+                        });
+                    }
+                    nextIdx++;
+                }
+                
+                if (passiveDot > 0) {
+                    html += `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-gray">${nextIdx}. Passive Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;"><span class="op">×</span>${fmt.fix(passiveMult, 3)}</td><td class="mt-cell-val text-gray text-bold">${fmt.pct(passiveDot)}</td></tr>`;
+                }
+                
+                return html;
             })()}
-            ` : ''}
-            ${passiveDot > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-gray">${externalDotBonus > 0 ? (relicDotBonus > 0 ? '4' : '3') : (relicDotBonus > 0 ? '3' : '2')}. Passive Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(passiveDot)}</td><td class="mt-cell-val text-gray text-bold"></td></tr>` : ''}
             ${bugMult > 1 ? `<tr><td class="mt-cell-label mt-pl-md text-dim text-xs" style="color:#f87171 !important;">↳ Bugged Double Scaling</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs" style="color:#f87171 !important;">×2.0 Buffs</td></tr>` : ''}
-            <tr class="mt-border-top"><td class="mt-cell-label mt-pl-sm mt-pt-sm text-bold text-gray">↳ Combined DoT Multiplier</td><td class="mt-cell-formula mt-pt-sm text-bold"><span class="op">×</span>${fmt.fix(combinedMultiplier, 3)}</td><td class="mt-cell-val"></td></tr>
+            <tr class="mt-border-top"><td class="mt-cell-label mt-pl-sm mt-pt-sm text-bold text-gray">↳ Combined DoT Multiplier</td><td class="mt-cell-formula mt-pt-sm text-bold"><span class="op">×</span>${fmt.fix(db?.combinedMultiplier || combinedMultiplier, 3)}</td><td class="mt-cell-val"></td></tr>
             <tr><td class="mt-cell-label mt-pt-md">Final Native Tick %</td><td class="mt-cell-formula">=</td><td class="mt-cell-val calc-highlight">${fmt.fix(finalTickPct, 2)}%</td></tr>
             <tr><td class="mt-cell-label mt-pl-sm text-accent-end mt-pt-sm">↳ Total Damage</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-end mt-pt-sm">${fmt.num(db.nativeTotalDmg)}</td></tr>
             <tr>
@@ -1063,22 +1092,49 @@ function renderDotSection(data, headDotRow) {
             ${db.multiplier > 1 ? `<tr><td class="mt-cell-label mt-pl-sm opacity-70">↳ E6 Double Dmg Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-xs text-white">x${db.multiplier}</td></tr>` : ''}
             <tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-custom">1. Trait Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-custom text-bold">${fmt.pct(db.traitDotBuff)}</td></tr>
             ${(db.relicBonus || 0) > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-accent-end">2. Relic Main/Sub Multiplier</td><td class="mt-cell-formula"></td><td class="mt-cell-val text-accent-end text-bold">${fmt.pct(db.relicBonus)}</td></tr>` : ''}
-            ${db.externalDotBonus > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-blue">${(db.relicBonus || 0) > 0 ? '3' : '2'}. Set & External Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(db.externalDotBonus)}</td><td class="mt-cell-val text-blue text-bold"></td></tr>
-            ${data.detailedBuffs?.dotSetBase > 0 ? `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base DoT</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.dotSetBase)}</td><td class="mt-cell-val"></td></tr>` : ''}
-            ${getTagPerkRowsHtmlForDot(data)}
+            
             ${(() => {
-                if (!data.activeGlobalBuffs || !window.GLOBAL_BUFF_DATA) return '';
-                let rows = '';
-                Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
-                    const bData = data.activeGlobalBuffs[buff.id];
-                    if (bData && bData.dot > 0) {
-                        rows += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:${buff.color};">↳ ${buff.name}</td><td class="mt-cell-formula" style="color:${buff.color};">${fmt.pct(bData.dot)}</td><td class="mt-cell-val"></td></tr>`;
+                let nextIdx = (db.relicBonus || 0) > 0 ? 3 : 2;
+                let html = '';
+                const extBonus = db.externalDotBonus || 0;
+                const glbBonus = db.globalDotBonus || 0;
+                
+                if (extBonus > 0) {
+                    const extMult = 1 + (extBonus / 100);
+                    html += `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-blue">${nextIdx}. Set & External Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;"><span class="op">×</span>${fmt.fix(extMult, 3)}</td><td class="mt-cell-val text-blue text-bold">${fmt.pct(extBonus)}</td></tr>`;
+                    if (data.detailedBuffs?.dotSetBase > 0) {
+                        html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Set Base DoT</td><td class="mt-cell-formula">${fmt.pct(data.detailedBuffs.dotSetBase)}</td><td class="mt-cell-val"></td></tr>`;
                     }
-                });
-                return rows;
+                    html += getTagPerkRowsHtmlForDot(data);
+                    const headDot = data.headBuffs?.dot || 0;
+                    if (headDot > 0) {
+                        const _headTypeRaw = data.headBuffs?.type || 'Head Piece';
+                        const _HEAD_NAME_MAP = { almighty_accessory: 'Almighty', fused_earrings: 'Fused Earrings', monarch: 'Monarch Cape', monarch_cape: 'Monarch Cape', monarch_head: 'Monarch Head', warlord_hat: 'Warlord Hat', mochi_scarf: 'Mochi Scarf', flaming_donut: 'Flaming Donut', phantom_stealer_head: 'Phantom Stealer', phantom_stealer: 'Phantom Stealer', reaper_necklace: 'Reaper Head', shadow_reaper_necklace: 'Shadow Reaper', biju_head: 'Biju Headband', rebellious: 'Rebellious', rebellious_head: 'Rebellious', bloodline_head: 'Bloodline', sun_god: 'Sun God', ninja: 'Ninja', junior: 'Junior Ninja' };
+                        const _headName = _HEAD_NAME_MAP[_headTypeRaw] || _headTypeRaw.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                        html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Head Piece DoT (${_headName})</td><td class="mt-cell-formula">${fmt.pct(headDot)}</td><td class="mt-cell-val"></td></tr>`;
+                    }
+                    nextIdx++;
+                }
+                
+                if (glbBonus > 0) {
+                    html += `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-orange">${nextIdx}. Global Buffs Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(glbBonus)}</td><td class="mt-cell-val text-orange text-bold"></td></tr>`;
+                    if (data.activeGlobalBuffs && window.GLOBAL_BUFF_DATA) {
+                        Object.values(window.GLOBAL_BUFF_DATA).forEach(buff => {
+                            const bData = data.activeGlobalBuffs[buff.id];
+                            if (bData && bData.dot > 0) {
+                                html += `<tr><td class="mt-cell-label mt-pl-md opacity-70" style="color:${buff.color};">↳ ${buff.name}</td><td class="mt-cell-formula" style="color:${buff.color};">${fmt.pct(bData.dot)}</td><td class="mt-cell-val"></td></tr>`;
+                            }
+                        });
+                    }
+                    nextIdx++;
+                }
+                
+                if (db.passiveDotBuff > 0) {
+                    html += `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-gray">${nextIdx}. Passive Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(db.passiveDotBuff)}</td><td class="mt-cell-val text-gray text-bold"></td></tr>`;
+                }
+                
+                return html;
             })()}
-            ` : ''}
-            ${db.passiveDotBuff > 0 ? `<tr><td class="mt-cell-label mt-pl-sm mt-text-bold text-gray">${db.externalDotBonus > 0 ? ((db.relicBonus || 0) > 0 ? '4' : '3') : ((db.relicBonus || 0) > 0 ? '3' : '2')}. Passive Multiplier</td><td class="mt-cell-formula" style="white-space:nowrap;">${fmt.pct(db.passiveDotBuff)}</td><td class="mt-cell-val text-gray text-bold"></td></tr>` : ''}
             <tr class="mt-border-top"><td class="mt-cell-label mt-pl-sm mt-pt-sm text-bold text-gray">↳ Combined DoT Multiplier</td><td class="mt-cell-formula mt-pt-sm text-bold"><span class="op">×</span>${fmt.fix(db.combinedMultiplier, 3)}</td><td class="mt-cell-val"></td></tr>
             <tr>
                 <td class="mt-cell-label mt-pt-md mt-text-bold" style="color:#f87171">${db.customLabel || 'Custom DoT'} (${db.customInterval || 5}s)</td>
@@ -1102,94 +1158,6 @@ function renderDotSection(data, headDotRow) {
 }
 
 function renderAttackRateSection(data) {
-    const isSyncro = window.isUnit?.(data.baseStats?.id, 'fused_warrior_super_syncro');
-    if (isSyncro) {
-        if (data.extraAttacks?.passiveDamage) {
-            const passiveDamage = data.extraAttacks.passiveDamage;
-            const passiveDamageBaseDmg = data.extraAttacks.passiveDamageBaseDmg || (data.dmgVal / (1 + passiveDamage / 100));
-            const passiveDamageDps = (passiveDamageBaseDmg * (data.critData?.avgMult || 1) / (data.finalSpa || data.spa || 1)) * (data.placement || 1);
-            const abilities = (data.baseStats?.ability || []).filter(ab => ab.noToggle && ab.dmgMult && ab.cooldown);
-            const abilityRows = abilities.map(ab => {
-                const abDmg = data.dmgVal * ab.dmgMult * (data.critData?.avgMult || 1);
-                const abDps = (abDmg / ab.cooldown) * (data.placement || 1);
-                return `
-                    <tr><td class="mt-cell-label text-custom" style="font-weight:700;">${ab.abilityName || 'Ability FUA'}</td><td class="mt-cell-formula">Every ${ab.cooldown}s</td><td class="mt-cell-val" style="color:#4ade80;">${fmt.num(abDps)} DPS</td></tr>
-                `;
-            }).join('');
-            const totalAbilityDps = abilities.reduce((sum, ab) => sum + ((data.dmgVal * ab.dmgMult * (data.critData?.avgMult || 1) / ab.cooldown) * (data.placement || 1)), 0);
-
-            return `
-                <div class="dd-section" style="border-left:3px solid #4ade80;">
-                    <div class="dd-title mt-text-green"><span>5. Bugged FUA Passive Damage</span> <button class="calc-info-btn" onclick="openInfoPopup('attack_rate')">?</button></div>
-                    <table class="calc-table">
-                        <tr><td class="mt-cell-label">Trigger</td><td class="mt-cell-formula">Bugged / Always Active</td><td class="mt-cell-val text-accent-start">+${fmt.fix(passiveDamage, 0)}% Passive Damage</td></tr>
-                        <tr><td class="mt-cell-label opacity-70 mt-pl-md">↳ Source</td><td class="mt-cell-formula">Converted from crit-gated FUA</td><td class="mt-cell-val opacity-70">Not crit-gated</td></tr>
-                        <tr class="mt-border-top">
-                            <td class="mt-cell-label mt-pt-sm text-white" style="font-weight:900;">Final Attack Mult</td>
-                            <td class="mt-cell-formula mt-pt-sm">x1.000</td>
-                            <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size:1.15rem; color:#4ade80;">x1.000</td>
-                        </tr>
-                        <tr><td class="mt-cell-label text-accent-start">Passive Damage Added</td><td class="mt-cell-formula">Base Hit DPS × Passive Damage</td><td class="mt-cell-val text-accent-start">${fmt.num(passiveDamageDps)} DPS</td></tr>
-                    </table>
-                </div>
-                <div class="dd-section" style="border-left:3px solid #4ade80;">
-                    <div class="dd-title mt-text-green"><span>6. Ability Follow-Up Attacks</span></div>
-                    <table class="calc-table">
-                        ${abilityRows || '<tr><td colspan="3" class="mt-cell-label opacity-50">No follow-ups found.</td></tr>'}
-                        <tr class="mt-border-top">
-                            <td class="mt-cell-label mt-pt-sm text-white" style="font-weight:900;">Total Ability DPS Added</td>
-                            <td class="mt-cell-formula"></td>
-                            <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size:1.15rem; color:#4ade80;">${fmt.num(totalAbilityDps)} DPS</td>
-                        </tr>
-                    </table>
-                </div>`;
-        }
-
-        const f = data.baseStats?.customFollowUp || {};
-        const ea = data.extraAttacks || {};
-        const critRate = data.critData?.rate ?? 0;
-        const fuaChance = f.chance ?? ea.fuaChance ?? 25;
-        const fuaDmgMult = f.dmgMult ?? ea.fuaDmgMult ?? 1;
-        const critGatedExtra = (critRate / 100) * (fuaChance / 100) * fuaDmgMult;
-        const attackMult = ea.mult ?? (1 + critGatedExtra);
-        const baseHitDps = (data.dmgVal * (data.critData?.avgMult || 1) / (data.finalSpa || data.spa || 1)) * (data.placement || 1);
-        const critGatedDps = baseHitDps * critGatedExtra;
-        const abilities = (data.baseStats?.ability || []).filter(ab => ab.noToggle && ab.dmgMult && ab.cooldown);
-        const abilityRows = abilities.map(ab => {
-            const abDmg = data.dmgVal * ab.dmgMult * (data.critData?.avgMult || 1);
-            const abDps = (abDmg / ab.cooldown) * (data.placement || 1);
-            return `
-                <tr><td class="mt-cell-label text-custom" style="font-weight:700;">${ab.abilityName || 'Ability FUA'}</td><td class="mt-cell-formula">Every ${ab.cooldown}s</td><td class="mt-cell-val" style="color:#4ade80;">${fmt.num(abDps)} DPS</td></tr>
-            `;
-        }).join('');
-        const totalAbilityDps = abilities.reduce((sum, ab) => sum + ((data.dmgVal * ab.dmgMult * (data.critData?.avgMult || 1) / ab.cooldown) * (data.placement || 1)), 0);
-
-        return `
-            <div class="dd-section" style="border-left:3px solid #4ade80;">
-                <div class="dd-title mt-text-green"><span>5. Crit-Gated Follow-Up (On Crit)</span> <button class="calc-info-btn" onclick="openInfoPopup('attack_rate')">?</button></div>
-                <table class="calc-table">
-                    <tr><td class="mt-cell-label">Trigger Formula</td><td class="mt-cell-formula">Crit Rate × ${fmt.fix(fuaChance, 1)}% FUA</td><td class="mt-cell-val text-custom">${fmt.fix(critRate, 1)}% × ${fmt.fix(fuaChance, 1)}%</td></tr>
-                    <tr><td class="mt-cell-label opacity-70 mt-pl-md">↳ Crit Rate Factor</td><td class="mt-cell-formula">${fmt.fix(critRate, 1)}% / ${fmt.fix(100 / fuaChance, 0)}</td><td class="mt-cell-val opacity-70">${fmt.fix(critGatedExtra * 100, 1)}% Avg Attack Mult</td></tr>
-                    <tr><td class="mt-cell-label text-accent-start">Average FUA Damage</td><td class="mt-cell-formula">Base Hit DPS × Extra Mult</td><td class="mt-cell-val text-accent-start">${fmt.num(baseHitDps)} × ${fmt.fix(critGatedExtra, 3)}</td></tr>
-                    <tr class="mt-border-top">
-                        <td class="mt-cell-label mt-pt-sm text-white" style="font-weight:900;">Final Attack Mult</td>
-                        <td class="mt-cell-formula mt-pt-sm">1 + (Crit Rate × FUA Chance × FUA Mult)</td>
-                        <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size:1.15rem; color:#4ade80;">x${fmt.fix(attackMult, 3)}</td>
-                    </tr>
-                </table>
-            </div>
-            <div class="dd-section" style="border-left:3px solid #4ade80;">
-                <div class="dd-title mt-text-green"><span>6. Ability Follow-Up Attacks</span></div>
-                <table class="calc-table">
-                    ${abilityRows || '<tr><td colspan="3" class="mt-cell-label opacity-50">No follow-ups found.</td></tr>'}
-                    <tr class="mt-border-top">
-                        <td class="mt-cell-label mt-pt-sm text-white" style="font-weight:900;">Total Ability DPS Added</td>
-                        <td class="mt-cell-formula"></td>
-                        <td class="mt-cell-val mt-pt-sm calc-highlight" style="font-size:1.15rem; color:#4ade80;">${fmt.num(totalAbilityDps)} DPS</td>
-                    </tr>
-                </table>
-            </div>`;
-    }
 
     if (data.baseStats?.customFollowUp) {
         const f = data.baseStats.customFollowUp;

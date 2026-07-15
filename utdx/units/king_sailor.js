@@ -12,12 +12,7 @@ unitDatabase.push({
         long: "Ruler",
         note: "Manipulator of Fate: +50% Dmg / -25% SPA. Baal's Lightning provides +20% non-critical Chain Lightning damage."
     },
-    bugs: [
-        {
-            name: 'Final Upgrade — 5 Hits Instead of 2',
-            desc: 'On his final upgrade, King Sailor fires <strong>5 hits</strong> instead of the intended 2, resulting in <strong>2.5× total base hit damage</strong>. Chain lightning scales off the pre-2.5× (base 2-hit) damage value, not the bugged total.'
-        }
-    ],
+    bugs: [],
     totalCost: 91800,
     stats: {
         spaCap: 4,

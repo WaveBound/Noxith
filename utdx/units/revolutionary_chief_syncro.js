@@ -23,16 +23,7 @@ unitDatabase.push({
         border: 'rgba(96, 165, 250, 0.15)'
     },
 
-    bugs: [
-        {
-            name: 'Burn Does Not Crit',
-            desc: 'The burn effect applied by this unit does not critically hit itself.'
-        },
-        {
-            name: 'Burn Scaling on Crit',
-            desc: 'The burn damage scales incorrectly when it is based on a critical hit.'
-        }
-    ],
+    bugs: [],
 
     totalCost: 95400,
 

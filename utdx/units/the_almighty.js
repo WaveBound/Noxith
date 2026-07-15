@@ -23,7 +23,7 @@ unitDatabase.push({
         spaCap: 4.5,
         crit: 0,
         cdmg: 150,
-        dot: 20,
+        dot: 0,
         dotDuration: 5,
         element: "Water"
     },
@@ -43,7 +43,7 @@ unitDatabase.push({
     systemLevel: {
         label: "Units in Range",
         min: 1,
-        max: 100,
+        max: 30,
         default: 15,
         controlType: "number",
         passiveName: "Reishi Manipulation"
@@ -53,7 +53,7 @@ unitDatabase.push({
     passives: [
         {
             name: "Reishi Manipulation",
-            desc: "On Attack: Apply Blue Burn for 20% Damage for every unit in Range over 5 ticks (base 20% + 20% per unit). Default is 15 units (320% DoT over 5 ticks)."
+            desc: "On Attack: Apply Blue Burn for 10% Damage for every unit in Range over 5 ticks (10% per unit, caps at 300% / 30 units). Default is 15 units (150% DoT over 5 ticks)."
         },
         {
             name: "The Almighty",

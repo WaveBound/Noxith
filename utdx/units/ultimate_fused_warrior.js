@@ -16,13 +16,6 @@ unitDatabase.push({
         note: "Wind DPS with a powerful damage-over-time ability."
     },
 
-    bugs: [
-        {
-            name: 'Dark Enemies Elemental Buff',
-            desc: 'This unit incorrectly receives an Elemental damage buff against Dark enemies from Head Piece relics despite his passive stating he shouldnt get any elemental buffs.'
-        }
-    ],
-
     totalCost: 107000,
 
     // BASE STATS

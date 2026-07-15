@@ -85,9 +85,10 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                     : 15; // default to 15
 
                 if (p.name === "Reishi Manipulation") {
-                    // Per-unit addon only — base 20% lives in the unit file (dot: 20)
+                    // Per-unit addon: 10% per unit in range, capped at 300% (30 units).
+                    // Base dot in the unit file is 0, so total = 10% * units (max 300%).
                     // calculations.js combines: baseDotVal = uStats.dot + passiveDotFromPassives
-                    pDot = 20 * sysLvl;
+                    pDot = Math.min(300, 10 * sysLvl);
                     uStats.dotDuration = 5;
                 }
 
@@ -103,7 +104,7 @@ window.calcPassives = function (uStats, context, headPiece, upgradeLevel) {
                         // -20% Range is a self-range penalty only
                         pDmg = 150;
                         pRange = -20;
-                        
+
                         // E4 increases Follow-up Damage to 100% (otherwise 60%)
                         const fuaDmgMult = (eLevel >= 4) ? 1.0 : 0.60;
                         const fuaConfig = {

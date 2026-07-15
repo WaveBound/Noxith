@@ -15,12 +15,7 @@ unitDatabase.push({
         long: "Sacred/Duelist",
         note: "Powerful hybrid DPS that adapts to the battlefield via form switching."
     },
-    bugs: [
-        {
-            name: 'Boss Damage Multiplier — Non-Functional',
-            desc: 'Sword Form\'s "+100% Boss Damage" passive bonus is currently bugged and does nothing in-game. The multiplier is not applied to any damage calculations.'
-        }
-    ],
+    bugs: [],
 
     totalCost: 68000, // Total gold cost to max
     defaultMode: 1, // Unit starts in Sword form (index 1)

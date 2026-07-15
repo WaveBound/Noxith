@@ -15,12 +15,7 @@ unitDatabase.push({
         long: "Ruler",
         note: "Neutral utility unit with hybrid placement."
     },
-    bugs: [
-        {
-            name: 'Holy Aura — Applies to Any Unit',
-            desc: '"Holy Aura" is bugged and will apply its +30% damage follow-up buff to <strong>any</strong> allied unit doing follow-up attacks in his range, not just intended targets.'
-        }
-    ],
+    bugs: [],
 
     totalCost: 91500,
 

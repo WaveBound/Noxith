@@ -17,16 +17,8 @@ unitDatabase.push({
     },
     bugs: [
         {
-            name: 'AoE Follow-up Bugged',
-            desc: 'The follow-up attack for 50% damage with Full AoE does not work.'
-        },
-        {
-            name: '"Nuh uh" Follow-up Damage Value',
-            desc: 'The "Nuh uh" follow-up attack will sometimes infinitely trigger.'
-        },
-        {
-            name: '"Nuh uh" Follow-up always activating',
-            desc: 'The "Nuh uh" follow-up attack provides +100% passive damage, not the intended 200% of unit\'s damage.'
+            name: 'Nuh Uh Follow up',
+            desc: 'Doesn\'t scale with "i Thought you would be stronger" 2x damage.'
         },
         {
             name: 'AoE Miss Chance',
@@ -42,24 +34,24 @@ unitDatabase.push({
         cdmg: 150,
         dot: 0,
         dotStacks: 1,
-        spaCap: 5.5,
+        spaCap: 4,
         passiveDmg: 50,
         passivecDmg: 100,
         element: "Light",
         dotDuration: 0,
         support: "",
         customFollowUp: {
-            chance: 100,
-            dmgMult: 1.0,
+            chance: 25,
+            dmgMult: 2.0,
             critGated: true,
             requireCrit: true,
-            label: "Crit-Gated Follow-Up"
+            label: "Nuh Uh Follow-Up (200% Dmg on Crit)"
         }
     },
 
     // UPGRADES
     upgrades: [
-        { dmg: 19200, spa: 5.5, range: 30, cost: 142000 }
+        { dmg: 19200, spa: 4.0, range: 30, cost: 142000 }
     ],
 
     // PASSIVES
@@ -70,7 +62,7 @@ unitDatabase.push({
         },
         {
             name: "Nuh Uh",
-            desc: "When any unit gets Debuffed: Follow-up for 200% Damage."
+            desc: "On Crit: 25% chance to Follow-up for 200% Damage."
         },
         {
             name: "He is.....Only growing stronger?",

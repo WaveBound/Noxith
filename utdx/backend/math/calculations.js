@@ -113,22 +113,6 @@ function calculateDPS(uStats, relicStats, context) {
         passiveBreakdown
     } = window.calcPassives(uStats, context, headPiece, upgradeLevel);
 
-    // Fused Warrior (Super) (Syncro): bugged FUA is always active and should be treated as passive damage.
-    if (window.isUnit && window.isUnit(uStats.id, 'fused_warrior_super_syncro')) {
-        const fusedSyncroBuggedFuaPassiveDmg = 100;
-        passivePcent += fusedSyncroBuggedFuaPassiveDmg;
-        passiveBreakdown.push({
-            name: "He is.....Only growing stronger? (Bugged FUA)",
-            dmg: fusedSyncroBuggedFuaPassiveDmg,
-            spa: 0,
-            range: 0,
-            crit: 0,
-            cdmg: 0,
-            trueDmg: 0,
-            dot: 0
-        });
-    }
-
     let { bossMult, traitDmgPct, traitSpaPct, traitCritRate, traitRangePct, traitDotBuff, eternalDmgBuff, eternalRangeBuff } = window.calcTraitSynergies(traitObj, uStats, wave);
     if (eternalDmgBuff > 0) passivePcent += eternalDmgBuff;
 
@@ -457,7 +441,6 @@ function calculateDPS(uStats, relicStats, context) {
     let finalDmg = finalDmgNormal;
     let finalDmgBoss = finalDmgNormal;
     const isKingSailor = window.isUnit(uStats.id, 'king_sailor');
-    const kingSailorBaseDmgMultiplier = isKingSailor ? 2.5 : 1;
 
     let avgHit = finalDmg * avgCritMult;
     let avgHitBoss = finalDmgBoss * avgCritMultBoss;
@@ -476,10 +459,9 @@ function calculateDPS(uStats, relicStats, context) {
         usedSpa = ar.usedSpa;
         attackMultiplier = ar.attackMultiplier;
         extraAttacksData = ar.extraAttacksData;
-        const kingSailorHitMultiplier = isKingSailor ? kingSailorBaseDmgMultiplier : 1;
-        hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier * kingSailorHitMultiplier);
-        bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier * kingSailorHitMultiplier);
-        normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier * kingSailorHitMultiplier);
+        hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
+        bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
+        normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
     } else if (isFusedWarrior) {
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
         const followUp2Chance = (eLevel >= 2) ? 0.70 : 0.50;
@@ -501,29 +483,29 @@ function calculateDPS(uStats, relicStats, context) {
             usedSpa: usedSpa
         };
     } else if (isFusedWarriorSyncro) {
-        const fusedSyncroBuggedFuaPassiveDmg = 100;
+        // "Nuh Uh": On Crit: 25% chance to Follow-up for 200% Damage.
+        const fuaChance = (uStats.customFollowUp?.chance ?? 25) / 100;
+        const fuaDmgMult = uStats.customFollowUp?.dmgMult ?? 2.0;
+        const critGatedFuaExtra = (finalCritRate / 100) * fuaChance * fuaDmgMult;
 
-        // Bugged FUA is always active and is counted as additive passive damage.
-        attackMultiplier = 1;
+        attackMultiplier = 1 + critGatedFuaExtra;
         usedSpa = finalSpa;
 
         hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
         bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
         normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
         extraAttacksData = {
-            req: "Always active (bugged FUA converted to passive damage)" + (isAbility ? " | 2× Boss Active" : ""),
-            hits: `+${fusedSyncroBuggedFuaPassiveDmg}% passive damage` + (isAbility ? " | 2× Boss DMG" : ""),
-            extra: 0,
+            req: "On Crit (25% chance)",
+            hits: `+${(critGatedFuaExtra * 100).toFixed(1)}% avg extra (${(fuaChance * 100).toFixed(0)}% × ${(fuaDmgMult * 100).toFixed(0)}% dmg × ${finalCritRate.toFixed(1)}% crit)`,
+            extra: critGatedFuaExtra,
             attacksNeeded: 1,
-            mult: 1,
-            label: "He is.....Only growing stronger? (Bugged FUA)" + (isAbility ? " + 2× Boss" : ""),
+            mult: attackMultiplier,
+            label: "Nuh Uh Follow-Up (200% Dmg on Crit)",
             usedSpa: finalSpa,
-            passiveDamage: fusedSyncroBuggedFuaPassiveDmg,
-            passiveDamageBaseDmg: finalDmgNormal / (1 + fusedSyncroBuggedFuaPassiveDmg / 100),
-            critGated: false,
+            critGated: true,
             critRate: finalCritRate,
-            fuaChance: 100,
-            fuaDmgMult: 1,
+            fuaChance: fuaChance * 100,
+            fuaDmgMult: fuaDmgMult,
             boss2xActive: isAbility
         };
     } else if (window.isUnit(uStats.id, 'strongest_swordsman_hunter')) {
@@ -614,9 +596,9 @@ function calculateDPS(uStats, relicStats, context) {
             }
         }
 
-        hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier * kingSailorBaseDmgMultiplier);
-        bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier * kingSailorBaseDmgMultiplier);
-        normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier * kingSailorBaseDmgMultiplier);
+        hitDpsTotal = ((avgHit / usedSpa) * placement * attackMultiplier);
+        bossHitDpsTotal = ((avgHitBoss / usedSpa) * placement * attackMultiplier);
+        normalHitDpsTotal = ((avgHitNormal / usedSpa) * placement * attackMultiplier);
     }
 
     if (uStats.customFollowUp && !isFusedWarrior && !isFusedWarriorSyncro) {
@@ -858,7 +840,8 @@ function calculateDPS(uStats, relicStats, context) {
             }
         }
     }
-    let externalDotBonus = ((sBonus.dot || 0) + headDotBuff) * bpMult + finalGlobalDot;
+    let externalDotBonus = ((sBonus.dot || 0) + headDotBuff) * bpMult;
+    const globalDotBonus = finalGlobalDot;
     const gearDotBonus = baseR_Dot;
 
     let baseDotVal = headCalc?.dotOverride || uStats.dot || 0;
@@ -908,12 +891,14 @@ function calculateDPS(uStats, relicStats, context) {
         finalDmgBoss,
         avgCritMultBoss,
         passiveDotBuff,
-        globalDotMult
+        globalDotMult,
+        globalDotBonus
     );
 
     if (dotBreakdown) {
         dotBreakdown.relicBonus = gearDotBonus;
-        dotBreakdown.externalDotBonus = externalDotBonus;
+        dotBreakdown.externalDotBonus = externalDotBonus; // set/tag/head only
+        dotBreakdown.globalDotBonus = globalDotBonus;    // global buffs only
     }
 
     let finalDotDps = dotDpsTotal;
@@ -930,7 +915,7 @@ function calculateDPS(uStats, relicStats, context) {
 
         const baseStackDmg = (eLevel >= 2) ? 7500 : 5000;
         const multiplier = (eLevel >= 6) ? 2 : 1;
-        const combinedMultiplier = (1 + ((traitDotBuff + passiveDotBuff) / 100)) * (1 + (gearDotBonus / 100)) * (globalDotMult || 1.0);
+        const combinedMultiplier = (1 + (traitDotBuff / 100)) * (1 + (gearDotBonus / 100)) * (1 + (externalDotBonus / 100)) * (1 + (globalDotBonus / 100)) * (1 + (passiveDotBuff / 100)) * (globalDotMult || 1.0);
         const totalDotDmg = baseStackDmg * sysLvl * multiplier * combinedMultiplier;
         const customDotDps = (totalDotDmg / 5) * placement;
 
@@ -1148,7 +1133,7 @@ function calculateDPS(uStats, relicStats, context) {
         eternalBuff: eternalDmgBuff,
         eternalRangeBuff: eternalRangeBuff,
         totalAdditivePct: additiveTotal,
-        conditionalData: isKingSailor ? { name: "5-hit base attack: 2.5x Base Hit Damage", val: 150, mult: kingSailorBaseDmgMultiplier } : (uStats.burnMultiplier ? { name: "Target: Burn", val: uStats.burnMultiplier, mult: (1 + uStats.burnMultiplier / 100) } : (uStats.finalMult > 1 ? { name: uStats.id === 'mochi_pirate' ? "Evercrush Dough" : "Raw Multiplier", val: 0, mult: uStats.finalMult } : null)),
+        conditionalData: isKingSailor ? { name: "Chain Lightning (20% Non-Crit)", val: 20, mult: 1.0 } : (uStats.burnMultiplier ? { name: "Target: Burn", val: uStats.burnMultiplier, mult: (1 + uStats.burnMultiplier / 100) } : (uStats.finalMult > 1 ? { name: uStats.id === 'mochi_pirate' ? "Evercrush Dough" : "Raw Multiplier", val: 0, mult: uStats.finalMult } : null)),
         headBuffs: { dmg: headDmgBase + headDmgPassiveMod + headDmgTag, headBase: headDmgBase, passiveDmg: headDmgPassiveMod, tagDmg: headDmgTag, dot: headDotBuff, type: headPiece, warlordSpa, ...headCalc },
         dotData: dotBreakdown,
         critData: {
