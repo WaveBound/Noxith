@@ -440,7 +440,9 @@ const guideData = [
     { unit: "super_roku_third_ascension", img: "images/units/SuperRokuThird.png", isCalculated: false },
     { unit: "wavechaser_surfer", img: "images/units/Wavechaser_surfer.png", isCalculated: false },
     { unit: "funeral_parlor_fragrance", img: "images/units/funeral_parlor_fragrance.png", isCalculated: false },
-    { unit: "the_almighty", img: "images/units/the_almighty.png", isCalculated: true }
+    { unit: "the_almighty", img: "images/units/the_almighty.png", isCalculated: true },
+    { unit: "alien_spider", img: "images/units/AlienSpider.png", isCalculated: true },
+    { unit: "mechanical_spider", img: "images/units/MechanicalSpider.png", isCalculated: true }
 ];
 const elementIcons = {
     "Water": "images/elements/Water.png",

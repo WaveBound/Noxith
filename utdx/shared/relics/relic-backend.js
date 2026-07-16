@@ -101,7 +101,8 @@ window._calcSetAndTagBonuses = function (relicStats, uStats, headPiece, context 
         fused_earrings: 'fused_set',
         phantom_stealer: 'phantom_stealer',
         phantom_stealer_head: 'phantom_stealer',
-        almighty_accessory: 'almighty'
+        almighty_accessory: 'almighty',
+        hero_accessory: 'hero_set'
     };
 
     const mappedHeadSetId = headSetIdMap[headPiece];
@@ -359,7 +360,8 @@ window._calcHeadDynamicBuffs = function (headPiece, finalSpa, finalRange, uStats
         fused_earrings: 'fused_set',
         phantom_stealer: 'phantom_stealer',
         phantom_stealer_head: 'phantom_stealer',
-        almighty_accessory: 'almighty'
+        almighty_accessory: 'almighty',
+        hero_accessory: 'hero_set'
     };
 
     const mappedSetId = headSetIdMap[headPiece];
@@ -678,6 +680,30 @@ window._calcHeadDynamicBuffs = function (headPiece, finalSpa, finalRange, uStats
                     if (b.range) headCalc.range = (headCalc.range || 0) + b.range;
                     headCalc.elementalAll = (headCalc.elementalAll || 0) + (b.elementalAll || 0);
                     headCalc.buffPotency = (headCalc.buffPotency || 0) + (b.buffPotency || 0);
+                    headCalc.activeTags.push(perk.tag);
+                    headCfTag += b.cRate || 0;
+                    headCmTag += b.cDmg || 0;
+                }
+            });
+        }
+    }
+
+    // Hero Accessory: apply tag perks (Uncontrollable Power)
+    if (headPiece === 'hero_accessory') {
+        headCalc.type = 'hero_set';
+
+        const heroAccPerks = (typeof TAG_PERKS !== 'undefined') ? TAG_PERKS.hero_acc : null;
+        if (heroAccPerks) {
+            heroAccPerks.forEach(perk => {
+                if (tags.includes(perk.tag)) {
+                    const b = perk.bonus || {};
+                    headDmgTag += b.dmg || 0;
+                    headCalc.cf += b.cRate || 0;
+                    headCalc.cm += b.cDmg || 0;
+                    headDotBuff += b.dot || 0;
+                    if (b.range) headCalc.range = (headCalc.range || 0) + b.range;
+                    headCalc.elementalAll = (headCalc.elementalAll || 0) + (b.elementalAll || 0);
+                    headCalc.hyperArmor = (headCalc.hyperArmor || 0) + (b.hyperArmor || 0);
                     headCalc.activeTags.push(perk.tag);
                     headCfTag += b.cRate || 0;
                     headCmTag += b.cDmg || 0;

@@ -654,7 +654,7 @@ window.getUnitsPerPage = () => {
 };
 
 // Constants & Configurations
-const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings', 'koyotes_sword', 'phantom_stealer_head', 'almighty_accessory'];
+const HEADS_LIST = ['none', 'sun_god', 'ninja', 'reaper_necklace', 'shadow_reaper_necklace', 'junior', 'biju_head', 'bloodline_head', 'reanimated_head', 'sorcerer_hunter_spirit', 'strongest_sorcerer_glasses', 'monarch', 'warlord_hat', 'mochi_scarf', 'flaming_donut', 'ultiorras_wings', 'berserks_cleave', 'panther_claws', 'fused_earrings', 'koyotes_sword', 'phantom_stealer_head', 'almighty_accessory', 'hero_accessory'];
 
 const HEAD_CONFIG = {
     sun_god: { name: 'Sun God', search: 'Sun God', cls: 'sungod' },
@@ -677,7 +677,8 @@ const HEAD_CONFIG = {
     fused_earrings: { name: 'Fused Earrings', search: 'Earrings', cls: 'custom' },
     koyotes_sword: { name: "Koyote's Sword", search: "Koyote Sword", cls: 'custom' },
     phantom_stealer_head: { name: 'Phantom Stealer', search: 'Phantom Stealer', cls: 'custom' },
-    almighty_accessory: { name: 'Almighty', search: 'Almighty Accessory', cls: 'custom' }
+    almighty_accessory: { name: 'Almighty', search: 'Almighty Accessory', cls: 'custom' },
+    hero_accessory: { name: 'Hero Accessory', search: 'Hero Accessory', cls: 'custom' }
 };
 
 const COMBO_TITLES = {
@@ -803,15 +804,69 @@ function getHeadBadgeHtml(headUsed) {
     if (!headUsed || headUsed === 'none') return '';
 
     const h = HEAD_CONFIG[headUsed] || { name: 'Unknown', cls: 'custom' };
-    const label = "Elemental";
-    const val = "30%";
-    const color = "#f97316";
+
+    // Look up this accessory's stats from RELIC_PIECE_CATALOG
+    const catalog = window.RELIC_PIECE_CATALOG || [];
+    const piece = catalog.find(p => p.slot === 'Head' && p.id === headUsed);
+    const accStats = piece?.accessory || piece?.bonus || piece?.stats || {};
+    const passiveId = accStats.passive;
+
+    // Build stat badges for any numeric bonuses > 0
+    const STAT_LABELS = {
+        dmg: { label: 'DMG', color: '#f97316' },
+        spa: { label: 'SPA', color: '#06b6d4' },
+        range: { label: 'RNG', color: '#a78bfa' },
+        cRate: { label: 'C.Rate', color: '#facc15' },
+        cDmg: { label: 'C.Dmg', color: '#fb923c' },
+        dot: { label: 'DoT', color: '#f43f5e' },
+        bossDmg: { label: 'Boss', color: '#e879f9' },
+        trueDmg: { label: 'True', color: '#818cf8' },
+        elementalAll: { label: 'Elem', color: '#34d399' },
+        hyperArmor: { label: 'HA', color: '#94a3b8' },
+    };
+
+    const badges = [];
+    for (const [key, cfg] of Object.entries(STAT_LABELS)) {
+        const v = accStats[key];
+        if (v && typeof v === 'number' && v !== 0) {
+            const sign = v > 0 ? '+' : '';
+            badges.push(`<div class="badge-base" style="border-color:${cfg.color}66;" title="${h.name}: ${sign}${v}% ${cfg.label}">
+                <span style="color:${cfg.color};">${cfg.label}</span>
+                <span class="badge-val val-main" style="color:white !important;">${sign}${v}%</span>
+            </div>`);
+        }
+    }
+
+    // Elemental bonus from set (e.g. Sun God: Light +10%)
+    if (accStats.elemental && typeof accStats.elemental === 'object') {
+        for (const [elem, val] of Object.entries(accStats.elemental)) {
+            if (val) {
+                badges.push(`<div class="badge-base" style="border-color:#34d39966;" title="${h.name}: +${val}% ${elem}">
+                    <span style="color:#34d399;">${elem}</span>
+                    <span class="badge-val val-main" style="color:white !important;">+${val}%</span>
+                </div>`);
+            }
+        }
+    }
+
+    // Passive-only accessories: show the passive name from PASSIVES
+    if (badges.length === 0 && passiveId) {
+        const passiveData = (window.PASSIVES || {})[passiveId];
+        const passiveName = passiveData?.name || passiveId.replace(/_/g, ' ');
+        const color = '#a78bfa';
+        badges.push(`<div class="badge-base" style="border-color:${color}66;" title="${passiveName}">
+            <span style="color:${color};">PASSIVE</span>
+            <span class="badge-val val-main" style="color:white !important;font-size:0.65em;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${passiveName}</span>
+        </div>`);
+    }
+
+    if (badges.length === 0) return '';
 
     return `<div class="stat-line"><span class="sl-label">HEAD</span>
-                <div class="badge-base" style="border-color: ${color}66;" title="${h.name}">
-                    <span style="color: ${color};">${label}</span><span class="badge-val val-main" style="color: white !important;">${val}</span>
-                </div>
-            </div>`;
+        <div style="display:flex;flex-wrap:wrap;gap:2px;">
+            ${badges.join('')}
+        </div>
+    </div>`;
 }
 
 function getSynergyBadgeHtml(unit, activeMode) {

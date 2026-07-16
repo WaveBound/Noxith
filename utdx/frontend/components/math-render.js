@@ -554,6 +554,32 @@ function renderBaseDamageSection(data, levelMult, traitRowsDmg, dmgAfterRelic, p
         </td></tr>`;
     }
 
+    if (data.headBuffs && data.headBuffs.type === 'hero_accessory') {
+        const activeTags = data.headBuffs.activeTags || [];
+        const tagRows = activeTags.map(tag => {
+            const perkList = (typeof TAG_PERKS !== 'undefined') ? (TAG_PERKS.hero_acc || []) : [];
+            const perk = perkList.find(p => p.tag === tag);
+            if (!perk) return '';
+            const b = perk.bonus || {};
+            let parts = [];
+            if (b.dmg) parts.push(`+${b.dmg}% DMG`);
+            if (b.range) parts.push(`+${b.range}% RNG`);
+            if (b.elementalAll) parts.push(`+${b.elementalAll}% Elem`);
+            if (b.hyperArmor) parts.push(`+${b.hyperArmor}% HA`);
+            return `<div class="mt-flex-between text-xs text-white mb-1"><span class="opacity-70">↳ ${tag}</span><span class="mt-font-mono" style="color:#86efac;">${parts.join(', ')}</span></div>`;
+        }).join('');
+        const isDebuffer = data.headBuffs?.debuffActive ?? true;
+        headPieceHtml += `
+        <tr class="mt-row-ninja" style="background:rgba(134,239,172,0.06); border-left:3px solid #86efac;"><td colspan="3" class="p-2">
+            <div class="mt-flex-between mb-2"><span class="mt-text-bold text-xs tracking-sm" style="color:#86efac;">HERO ACCESSORY</span><button class="calc-info-btn" onclick="openInfoPopup('dot_logic')">?</button></div>
+            <div class="mt-flex-between text-xs text-white mb-1"><span class="opacity-70">Debuff Potency:</span><span class="mt-font-mono" style="color:${isDebuffer ? '#86efac' : '#f87171'};">${isDebuffer ? '+12% DMG (Active)' : 'No Debuff (Inactive)'}</span></div>
+            <div class="mt-flex-between text-xs text-white mb-1"><span class="opacity-70">Debuff Duration:</span><span class="mt-font-mono" style="color:#86efac;">+10%</span></div>
+            ${tagRows}
+        </td></tr>`;
+    }
+
+
+
     return `
             <div class="dd-section">
                 <div class="dd-title mt-text-red"><span>1. Base Damage Calculation</span></div>
@@ -721,13 +747,14 @@ function getTagPerkRowsHtmlForDot(data) {
         fused_earrings: 'fused_set',
         phantom_stealer: 'phantom_stealer',
         phantom_stealer_head: 'phantom_stealer',
-        almighty_accessory: 'almighty'
+        almighty_accessory: 'almighty',
+        hero_accessory: 'hero_set'
     };
     const mappedHeadSetId = headSetIdMap[headPiece];
 
     const setsToCheck = [activeSetId];
     if (mappedHeadSetId && mappedHeadSetId !== activeSetId) {
-        if (headPiece !== 'fused_earrings' && headPiece !== 'monarch' && headPiece !== 'monarch_cape' && headPiece !== 'monarch_head' && headPiece !== 'rebellious' && headPiece !== 'rebellious_head' && headPiece !== 'bloodline_head' && headPiece !== 'phantom_stealer' && headPiece !== 'phantom_stealer_head' && headPiece !== 'almighty_accessory') {
+        if (headPiece !== 'fused_earrings' && headPiece !== 'monarch' && headPiece !== 'monarch_cape' && headPiece !== 'monarch_head' && headPiece !== 'rebellious' && headPiece !== 'rebellious_head' && headPiece !== 'bloodline_head' && headPiece !== 'phantom_stealer' && headPiece !== 'phantom_stealer_head' && headPiece !== 'almighty_accessory' && headPiece !== 'hero_accessory') {
             setsToCheck.push(mappedHeadSetId);
         }
     }
@@ -746,6 +773,9 @@ function getTagPerkRowsHtmlForDot(data) {
     }
     if (headPiece === 'almighty_accessory') {
         setsToCheck.push('almighty_acc');
+    }
+    if (headPiece === 'hero_accessory') {
+        setsToCheck.push('hero_acc');
     }
 
     const seen = new Set();
@@ -994,6 +1024,31 @@ function renderDotSection(data, headDotRow) {
         </td></tr>`;
     }
 
+    if (data.headBuffs && data.headBuffs.type === 'hero_accessory') {
+        const activeTags = data.headBuffs.activeTags || [];
+        const tagRowsDot = activeTags.map(tag => {
+            const perkList = (typeof TAG_PERKS !== 'undefined') ? (TAG_PERKS.hero_acc || []) : [];
+            const perk = perkList.find(p => p.tag === tag);
+            if (!perk) return '';
+            const b = perk.bonus || {};
+            let parts = [];
+            if (b.dmg) parts.push(`+${b.dmg}% DMG`);
+            if (b.range) parts.push(`+${b.range}% RNG`);
+            if (b.elementalAll) parts.push(`+${b.elementalAll}% Elem`);
+            if (b.hyperArmor) parts.push(`+${b.hyperArmor}% HA`);
+            return `<div class="mt-flex-between text-xs text-white mb-1"><span class="opacity-70">↳ ${tag}</span><span class="mt-font-mono" style="color:#86efac;">${parts.join(', ')}</span></div>`;
+        }).join('');
+        const isDebuffer = data.headBuffs?.debuffActive ?? true;
+        headDotRow += `
+        <tr class="mt-row-ninja" style="background:rgba(134,239,172,0.06); border-left:3px solid #86efac;"><td colspan="3" class="p-2">
+            <div class="mt-flex-between mb-2"><span class="mt-text-bold text-xs tracking-sm" style="color:#86efac;">HERO ACCESSORY</span><button class="calc-info-btn" onclick="openInfoPopup('dot_logic')">?</button></div>
+            <div class="mt-flex-between text-xs text-white mb-1"><span class="opacity-70">Debuff Potency:</span><span class="mt-font-mono" style="color:${isDebuffer ? '#86efac' : '#f87171'};">${isDebuffer ? '+12% DMG (Active)' : 'No Debuff (Inactive)'}</span></div>
+            <div class="mt-flex-between text-xs text-white mb-1"><span class="opacity-70">Debuff Duration:</span><span class="mt-font-mono" style="color:#86efac;">+10%</span></div>
+            ${tagRowsDot}
+        </td></tr>`;
+    }
+
+
     return `
     <div class="dd-section">
         <div class="dd-title text-accent-end"><span>6. Status Effect Breakdown</span> <button class="calc-info-btn" onclick="openInfoPopup('dot_logic')">?</button></div>
@@ -1036,7 +1091,7 @@ function renderDotSection(data, headDotRow) {
                     const headDot = data.headBuffs?.dot || 0;
                     if (headDot > 0) {
                         const _headTypeRaw = data.headBuffs?.type || 'Head Piece';
-                        const _HEAD_NAME_MAP = { almighty_accessory: 'Almighty', fused_earrings: 'Fused Earrings', monarch: 'Monarch Cape', monarch_cape: 'Monarch Cape', monarch_head: 'Monarch Head', warlord_hat: 'Warlord Hat', mochi_scarf: 'Mochi Scarf', flaming_donut: 'Flaming Donut', phantom_stealer_head: 'Phantom Stealer', phantom_stealer: 'Phantom Stealer', reaper_necklace: 'Reaper Head', shadow_reaper_necklace: 'Shadow Reaper', biju_head: 'Biju Headband', rebellious: 'Rebellious', rebellious_head: 'Rebellious', bloodline_head: 'Bloodline', sun_god: 'Sun God', ninja: 'Ninja', junior: 'Junior Ninja' };
+                        const _HEAD_NAME_MAP = { almighty_accessory: 'Almighty', hero_accessory: 'Hero Accessory', fused_earrings: 'Fused Earrings', monarch: 'Monarch Cape', monarch_cape: 'Monarch Cape', monarch_head: 'Monarch Head', warlord_hat: 'Warlord Hat', mochi_scarf: 'Mochi Scarf', flaming_donut: 'Flaming Donut', phantom_stealer_head: 'Phantom Stealer', phantom_stealer: 'Phantom Stealer', reaper_necklace: 'Reaper Head', shadow_reaper_necklace: 'Shadow Reaper', biju_head: 'Biju Headband', rebellious: 'Rebellious', rebellious_head: 'Rebellious', bloodline_head: 'Bloodline', sun_god: 'Sun God', ninja: 'Ninja', junior: 'Junior Ninja' };
                         const _headName = _HEAD_NAME_MAP[_headTypeRaw] || _headTypeRaw.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
                         html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Head Piece DoT (${_headName})</td><td class="mt-cell-formula">${fmt.pct(headDot)}</td><td class="mt-cell-val"></td></tr>`;
                     }
@@ -1109,7 +1164,7 @@ function renderDotSection(data, headDotRow) {
                     const headDot = data.headBuffs?.dot || 0;
                     if (headDot > 0) {
                         const _headTypeRaw = data.headBuffs?.type || 'Head Piece';
-                        const _HEAD_NAME_MAP = { almighty_accessory: 'Almighty', fused_earrings: 'Fused Earrings', monarch: 'Monarch Cape', monarch_cape: 'Monarch Cape', monarch_head: 'Monarch Head', warlord_hat: 'Warlord Hat', mochi_scarf: 'Mochi Scarf', flaming_donut: 'Flaming Donut', phantom_stealer_head: 'Phantom Stealer', phantom_stealer: 'Phantom Stealer', reaper_necklace: 'Reaper Head', shadow_reaper_necklace: 'Shadow Reaper', biju_head: 'Biju Headband', rebellious: 'Rebellious', rebellious_head: 'Rebellious', bloodline_head: 'Bloodline', sun_god: 'Sun God', ninja: 'Ninja', junior: 'Junior Ninja' };
+                        const _HEAD_NAME_MAP = { almighty_accessory: 'Almighty', hero_accessory: 'Hero Accessory', fused_earrings: 'Fused Earrings', monarch: 'Monarch Cape', monarch_cape: 'Monarch Cape', monarch_head: 'Monarch Head', warlord_hat: 'Warlord Hat', mochi_scarf: 'Mochi Scarf', flaming_donut: 'Flaming Donut', phantom_stealer_head: 'Phantom Stealer', phantom_stealer: 'Phantom Stealer', reaper_necklace: 'Reaper Head', shadow_reaper_necklace: 'Shadow Reaper', biju_head: 'Biju Headband', rebellious: 'Rebellious', rebellious_head: 'Rebellious', bloodline_head: 'Bloodline', sun_god: 'Sun God', ninja: 'Ninja', junior: 'Junior Ninja' };
                         const _headName = _HEAD_NAME_MAP[_headTypeRaw] || _headTypeRaw.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
                         html += `<tr><td class="mt-cell-label mt-pl-md opacity-70">↳ Head Piece DoT (${_headName})</td><td class="mt-cell-formula">${fmt.pct(headDot)}</td><td class="mt-cell-val"></td></tr>`;
                     }
@@ -1551,7 +1606,8 @@ window.renderMathContent = function (data, isSplit = false) {
         'mochi_scarf': 'Mochi Scarf', 'flaming_donut': 'Flaming Donut', 'ultiorras_wings': "Ultiorra's Wings",
         'berserks_cleave': "Berserk's Cleave", 'panther_claws': 'Panther Claws', 'fused_earrings': 'Fused Earrings',
         'koyotes_sword': "Koyote's Sword", 'phantom_stealer_head': 'Phantom Stealer', 'phantom_stealer': 'Phantom Stealer',
-        'almighty_accessory': 'Almighty Accessory', 'almighty': 'Almighty Accessory'
+        'almighty_accessory': 'Almighty Accessory', 'almighty': 'Almighty Accessory',
+        'hero_accessory': 'Hero Accessory', 'hero_set': 'Hero Set'
     };
     const headType = (data.headBuffs?.type || data.relicStats?.head || 'none');
     const headDisplayName = String(MAP_HEAD_NAMES[headType] ?? (headType === 'none' || !headType ? 'None' : (String(headType).replace(/_/g, ' ').toUpperCase())));

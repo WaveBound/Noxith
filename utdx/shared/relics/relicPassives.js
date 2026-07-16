@@ -183,7 +183,19 @@ const PASSIVES = {
         dmgBuff: 45,
         duration: 10
     },
-
+    hero_set: {
+        name: "Debuff Surge",
+        desc: "When a ‘Debuff’ is applied, increase damage by 40%.",
+        trigger: "passive",
+        dmgBuff: 40
+    },
+    hero_acc: {
+        name: "Debuff Potency",
+        desc: "When this unit applies a ‘Debuff’ increases Damage by 12% for 10 seconds. And increase debuff duration by 10%.",
+        trigger: "passive",
+        dmgBuff: 12,
+        duration: 10
+    }
 };
 
 // ─── TAG PERKS ──────────────────────────────────────────────
@@ -246,6 +258,12 @@ const TAG_PERKS = {
         { tag: "Hollow Destroyer", bonus: { dmg: 25, spa: 10, dot: 30 } },
         { tag: "Royal Guards",     bonus: { dmg: 15, elementalAll: 15, range: 10 } },
     ],
+    hero_set: [
+        { tag: "Hero", bonus: { dmg: 25, spa: -5, elementalAll: 15, cf: 5 } }
+    ],
+    hero_acc: [
+        { tag: "Uncontrollable Power", bonus: { dmg: 15, range: 15, elementalAll: 10, hyperArmor: 15 } }
+    ],
 };
 
 // ─── PASSIVE MATH ───────────────────────────────────────────
@@ -268,6 +286,44 @@ function applyPassiveBonus(passiveId, unitStats, originalUnit = null) {
     if (!passive) return { effectiveStats: unitStats, uptimeInfo: null };
 
     let effectiveStats = { ...unitStats };
+
+    if (passiveId === "hero_set" || passiveId === "hero_acc") {
+        const hasDebuff = (originalUnit) => {
+            if (!originalUnit) return false;
+            const id = originalUnit.id || '';
+            if (id === 'alien_spider' || id === 'mechanical_spider') return true;
+            if (originalUnit.dot > 0 || (originalUnit.stats && originalUnit.stats.dot > 0)) return true;
+            if (originalUnit.customFollowUp && originalUnit.customFollowUp.dotType) return true;
+            if (originalUnit.stats && originalUnit.stats.customFollowUp && originalUnit.stats.customFollowUp.dotType) return true;
+            if (originalUnit.support && (originalUnit.support.includes('Stun') || originalUnit.support.includes('Slow') || originalUnit.support.includes('Freeze'))) return true;
+            if (originalUnit.passives) {
+                const text = JSON.stringify(originalUnit.passives).toLowerCase();
+                if (text.includes('stun') || text.includes('slow') || text.includes('freeze') || text.includes('ionized') || text.includes('burn') || text.includes('bleed') || text.includes('poison') || text.includes('nanotech') || text.includes('biomass') || text.includes('debuff')) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        const isAllowed = hasDebuff(originalUnit);
+        if (isAllowed) {
+            const mult = passiveId === "hero_set" ? 1.40 : 1.12;
+            effectiveStats.dmg = Math.floor(effectiveStats.dmg * mult);
+            return {
+                effectiveStats,
+                uptimeInfo: {
+                    note: passiveId === "hero_set" ? "Debuff Surge Active (+40% DMG)" : "Debuff Potency Active (+12% DMG, +10% Duration)"
+                }
+            };
+        } else {
+            return {
+                effectiveStats,
+                uptimeInfo: {
+                    note: "No debuffs/DoT in kit (inactive)"
+                }
+            };
+        }
+    }
 
     if (passiveId === "fused_earrings_acc") {
         const u = originalUnit || {};

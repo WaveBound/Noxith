@@ -93,6 +93,28 @@ window.getUnitUncappedCrit = function (slotUnit, slotIndex) {
 function calculateDPS(uStats, relicStats, context) {
     const { dmgPoints, spaPoints, rangePoints, wave, isBoss, traitObj, placement, isSSS, headPiece, isVirtualRealm, starMult, isAbility, upgradeLevel, defenderElement } = context;
 
+    if (window.isUnit && window.isUnit(uStats.id, 'alien_spider')) {
+        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+        const fuaDmgMult = eLevel >= 2 ? 0.70 : 0.50;
+        uStats.customFollowUp = {
+            chance: 100,
+            dmgMult: fuaDmgMult,
+            noCrit: true,
+            label: "We are One"
+        };
+    }
+    if (window.isUnit && window.isUnit(uStats.id, 'mechanical_spider')) {
+        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+        const fuaDmgMult = (eLevel >= 6) ? 1.0 : 0.8;
+        uStats.customFollowUp = {
+            chance: 100,
+            dmgMult: fuaDmgMult,
+            noCrit: true,
+            label: "Mechanical Legs"
+        };
+        uStats.finalMult = (eLevel >= 6) ? 1.30 : 1.20;
+    }
+
     let lvStats = getLevelStats(uStats.dmg || 0, uStats.spa || 1, uStats.range || 0, dmgPoints, spaPoints, rangePoints);
     let rDmg = 0, rSpa = 0, rRange = 0;
     if (context.rankData) { rDmg = context.rankData.dmg || 0; rSpa = context.rankData.spa || 0; rRange = context.rankData.range || 0; }
@@ -124,7 +146,7 @@ function calculateDPS(uStats, relicStats, context) {
         super_roku: 'super_roku', bio_android: 'bio_android', great_mage: 'great_mage', berserk_shinigami: 'berserk_shinigami',
         hokage: 'hokage', sorcerer_hunter_spirit: 'sorcerer_hunter', strongest_sorcerer_glasses: 'strongest_sorcerer',
         monarch_cape: 'monarch', monarch_head: 'monarch', monarch: 'monarch', warlord_hat: 'warlord', fused_earrings: 'fused_set',
-        phantom_stealer_head: 'phantom_stealer', almighty_accessory: 'almighty'
+        phantom_stealer_head: 'phantom_stealer', almighty_accessory: 'almighty', hero_accessory: 'hero_set'
     };
     const mappedHeadSetId = headSetIdMap[headPiece];
     let headSpaBase = 0;
@@ -873,7 +895,10 @@ function calculateDPS(uStats, relicStats, context) {
     }
 
     const dotInputStats = { ...uStats, dot: baseDotVal, isBoss: context.isBoss };
-    if (headCalc?.dotDuration) {
+    if (headPiece === 'hero_accessory') {
+        const baseDuration = headCalc?.dotDuration || uStats.dotDuration || 0;
+        dotInputStats.dotDuration = baseDuration * 1.10;
+    } else if (headCalc?.dotDuration) {
         dotInputStats.dotDuration = headCalc.dotDuration;
     }
 
@@ -1079,6 +1104,9 @@ function calculateDPS(uStats, relicStats, context) {
     if (uStats.id === 'angel_born_in_hell') {
         elemMult = 1.1;
     }
+    if (window.isUnit && window.isUnit(uStats.id, 'alien_spider') && defenderElement === 'Dark') {
+        elemMult = 1.5;
+    }
 
     let finalDebuffMult = 1.0;
     let appliedDebuffs = [];
@@ -1133,7 +1161,7 @@ function calculateDPS(uStats, relicStats, context) {
         eternalBuff: eternalDmgBuff,
         eternalRangeBuff: eternalRangeBuff,
         totalAdditivePct: additiveTotal,
-        conditionalData: isKingSailor ? { name: "Chain Lightning (20% Non-Crit)", val: 20, mult: 1.0 } : (uStats.burnMultiplier ? { name: "Target: Burn", val: uStats.burnMultiplier, mult: (1 + uStats.burnMultiplier / 100) } : (uStats.finalMult > 1 ? { name: uStats.id === 'mochi_pirate' ? "Evercrush Dough" : "Raw Multiplier", val: 0, mult: uStats.finalMult } : null)),
+        conditionalData: isKingSailor ? { name: "Chain Lightning (20% Non-Crit)", val: 20, mult: 1.0 } : (uStats.burnMultiplier ? { name: "Target: Burn", val: uStats.burnMultiplier, mult: (1 + uStats.burnMultiplier / 100) } : (uStats.finalMult > 1 ? { name: uStats.id === 'mochi_pirate' ? "Evercrush Dough" : (uStats.id === 'mechanical_spider' ? "Nanotechnology" : "Raw Multiplier"), val: 0, mult: uStats.finalMult } : null)),
         headBuffs: { dmg: headDmgBase + headDmgPassiveMod + headDmgTag, headBase: headDmgBase, passiveDmg: headDmgPassiveMod, tagDmg: headDmgTag, dot: headDotBuff, type: headPiece, warlordSpa, ...headCalc },
         dotData: dotBreakdown,
         critData: {

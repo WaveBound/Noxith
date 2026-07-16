@@ -159,7 +159,9 @@ const UNIT_FILES = [
     'super_roku_third_ascension.js',
     'wavechaser_surfer.js',
     'funeral_parlor_fragrance.js',
-    'the_almighty.js'
+    'the_almighty.js',
+    'alien_spider.js',
+    'mechanical_spider.js'
 ];
 
 // Resolves after every unit script has loaded (or errored).

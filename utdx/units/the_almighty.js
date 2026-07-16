@@ -97,7 +97,7 @@ unitDatabase.push({
 
     etherealization: [
         "+10 Stat Points",
-        "+10 Stat Points",
+        '"All-Seeing Eye" Self Buff Reduced to -20% Damage and Rangea.',
         "+10 Stat Points",
         '"All-Seeing Eye" Self Buff Follow-up Damage increased to 100%.',
         "+10 Stat Points",
