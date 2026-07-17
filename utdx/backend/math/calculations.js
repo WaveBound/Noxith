@@ -94,14 +94,9 @@ function calculateDPS(uStats, relicStats, context) {
     const { dmgPoints, spaPoints, rangePoints, wave, isBoss, traitObj, placement, isSSS, headPiece, isVirtualRealm, starMult, isAbility, upgradeLevel, defenderElement } = context;
 
     if (window.isUnit && window.isUnit(uStats.id, 'alien_spider')) {
-        const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
-        const fuaDmgMult = eLevel >= 2 ? 0.70 : 0.50;
-        uStats.customFollowUp = {
-            chance: 100,
-            dmgMult: fuaDmgMult,
-            noCrit: true,
-            label: "We are One"
-        };
+        uStats.finalMult = 1.50;
+        const eLevelWAO = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
+        uStats.weAreOneMult = eLevelWAO >= 2 ? 0.70 : 0.50;
     }
     if (window.isUnit && window.isUnit(uStats.id, 'mechanical_spider')) {
         const eLevel = context.rankData?.eLevel !== undefined ? context.rankData.eLevel : 6;
@@ -194,7 +189,7 @@ function calculateDPS(uStats, relicStats, context) {
     let bpMult = 1.0;
     if (totalBuffPotency > 0) {
         bpMult = 1 + totalBuffPotency / 100;
-        
+
         for (let key in activeGlobalBuffs) {
             for (let stat in activeGlobalBuffs[key]) {
                 if (typeof activeGlobalBuffs[key][stat] === 'number') {
@@ -467,13 +462,22 @@ function calculateDPS(uStats, relicStats, context) {
     let avgHit = finalDmg * avgCritMult;
     let avgHitBoss = finalDmgBoss * avgCritMultBoss;
     let avgHitNormal = finalDmgNormal * avgCritMult;
+    let extraAttacksData = null;
+
+    if (uStats.weAreOneMult) {
+        const weAreOneBase = finalDmgNormal / (uStats.finalMult || 1);
+        const weAreOneHit = weAreOneBase * uStats.weAreOneMult;
+        avgHit += weAreOneHit;
+        avgHitBoss += weAreOneHit * bossMult;
+        avgHitNormal += weAreOneHit;
+        extraAttacksData = { req: "We are One (Always)", hits: "1 + " + uStats.weAreOneMult + "x Non-Crit (pre-Biomass)", extra: uStats.weAreOneMult, attacksNeeded: 1, mult: 1 + (uStats.weAreOneMult / (uStats.finalMult || 1)), label: "We are One", usedSpa: finalSpa, nonCrit: true };
+    }
 
     let hitDpsTotal = 0;
     let bossHitDpsTotal = 0;
     let normalHitDpsTotal = 0;
 
     let attackMultiplier = 1;
-    let extraAttacksData = null;
     let usedSpa = finalSpa;
 
     const ar = window.applyAbilityAttackRate ? window.applyAbilityAttackRate(uStats, isAbility, finalSpa, 1, null) : null;
@@ -1161,7 +1165,7 @@ function calculateDPS(uStats, relicStats, context) {
         eternalBuff: eternalDmgBuff,
         eternalRangeBuff: eternalRangeBuff,
         totalAdditivePct: additiveTotal,
-        conditionalData: isKingSailor ? { name: "Chain Lightning (20% Non-Crit)", val: 20, mult: 1.0 } : (uStats.burnMultiplier ? { name: "Target: Burn", val: uStats.burnMultiplier, mult: (1 + uStats.burnMultiplier / 100) } : (uStats.finalMult > 1 ? { name: uStats.id === 'mochi_pirate' ? "Evercrush Dough" : (uStats.id === 'mechanical_spider' ? "Nanotechnology" : "Raw Multiplier"), val: 0, mult: uStats.finalMult } : null)),
+        conditionalData: isKingSailor ? { name: "Chain Lightning (20% Non-Crit)", val: 20, mult: 1.0 } : (uStats.burnMultiplier ? { name: "Target: Burn", val: uStats.burnMultiplier, mult: (1 + uStats.burnMultiplier / 100) } : (uStats.finalMult > 1 ? { name: uStats.id === 'mochi_pirate' ? "Evercrush Dough" : (uStats.id === 'mechanical_spider' ? "Nanotechnology" : (uStats.id === 'alien_spider' ? "Biomass" : "Raw Multiplier")), val: 0, mult: uStats.finalMult } : null)),
         headBuffs: { dmg: headDmgBase + headDmgPassiveMod + headDmgTag, headBase: headDmgBase, passiveDmg: headDmgPassiveMod, tagDmg: headDmgTag, dot: headDotBuff, type: headPiece, warlordSpa, ...headCalc },
         dotData: dotBreakdown,
         critData: {

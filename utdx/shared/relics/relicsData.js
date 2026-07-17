@@ -72,13 +72,6 @@ const SETS = [
         location: "Virtual Realm",
         locationImage: "images/location/virtual_realm.png"
     },
-    {
-        id: "hero_set", name: "Hero", rarity: "Secret", source: "Raid",
-        bonus: { dmg: 0, spa: 0, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, hyperArmor: 0, armorDmg: 0, passive: "hero_set" },
-        accessory: { dmg: 0, spa: 0, range: 0, cRate: 0, cDmg: 0, dot: 0, bossDmg: 0, trueDmg: 0, hyperArmor: 0, armorDmg: 0, passive: "hero_acc" },
-        location: "Raid: Hero",
-        locationImage: "images/location/hero.png"
-    },
 
 
     // === STORY / MYTHICAL SETS ===
@@ -226,8 +219,7 @@ const HEAD_SET_ID_ALIASES = {
     ninja: 'junior',
     fused_set: 'fused_earrings',
     phantom_stealer: 'phantom_stealer_head',
-    almighty: 'almighty_accessory',
-    hero_set: 'hero_accessory'
+    almighty: 'almighty_accessory'
 };
 
 function getRelicPieceCatalog() {

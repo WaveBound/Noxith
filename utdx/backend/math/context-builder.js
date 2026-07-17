@@ -190,7 +190,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
             if (unit.id === 'joyful_captain' && cfg.passiveName === 'Charge') {
                 const passiveName = 'Charge';
                 if (!effectiveStats.passives) effectiveStats.passives = [];
-                else if (!Array.isArray(effectiveStats.passives)) effectiveStats.passives = [...effectiveStats.passives];
+                else if (effectiveStats.passives === unit.passives) effectiveStats.passives = [...effectiveStats.passives];
                 effectiveStats.passives = effectiveStats.passives.filter(p => p.name !== passiveName);
 
                 // Uncapped SPA is exactly equal to the charge slider level (sysLvl)
@@ -233,7 +233,7 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
                         if (sysLvl >= t.level) {
                             const passiveName = cfg.passiveName || 'System Level';
                             if (!effectiveStats.passives) effectiveStats.passives = [];
-                            else if (!Array.isArray(effectiveStats.passives)) effectiveStats.passives = [...effectiveStats.passives];
+                            else if (effectiveStats.passives === unit.passives) effectiveStats.passives = [...effectiveStats.passives];
                             const existing = effectiveStats.passives.find(p => p.name === passiveName);
                             if (existing) {
                                 const idx = effectiveStats.passives.indexOf(existing);
@@ -250,6 +250,35 @@ function buildCalculationContext(unit, traitIdent, options = {}) {
                         }
                     });
                 }
+            }
+        }
+    }
+
+    // --- ALIEN SPIDER: Enemies in Range (Symbiotic Web Trap) ---
+    // +10% Dmg, +10% Range, -1% SPA per Biomass/Tethered enemy in range.
+    // Cap: 10 enemies (15 at E6). Default 1.
+    if (unit.id === 'alien_spider') {
+        const eLevel = (typeof window !== 'undefined' && window.unitELevels && window.unitELevels['alien_spider'] !== undefined) ? window.unitELevels['alien_spider'] : 6;
+        const cap = 15;
+        let enemiesInRange = (typeof window !== 'undefined' && window.unitSystemLevels && window.unitSystemLevels['alien_spider'] !== undefined)
+            ? Number(window.unitSystemLevels['alien_spider'])
+            : 1;
+        if (isNaN(enemiesInRange) || enemiesInRange < 0) enemiesInRange = 0;
+        enemiesInRange = Math.min(enemiesInRange, cap);
+        if (enemiesInRange > 0) {
+            const passiveName = 'Symbiotic Web Trap';
+            if (!effectiveStats.passives) effectiveStats.passives = [];
+            else if (effectiveStats.passives === unit.passives) effectiveStats.passives = [...effectiveStats.passives];
+            const existing = effectiveStats.passives.find(p => p.name === passiveName);
+            const newP = existing ? { ...existing } : { name: passiveName };
+            newP.passiveDmg = (newP.passiveDmg || 0) + (10 * enemiesInRange);
+            newP.passiveRange = (newP.passiveRange || 0) + (10 * enemiesInRange);
+            newP.passiveSpa = (newP.passiveSpa || 0) + (-1 * enemiesInRange);
+            if (existing) {
+                const idx2 = effectiveStats.passives.indexOf(existing);
+                effectiveStats.passives[idx2] = newP;
+            } else {
+                effectiveStats.passives.push(newP);
             }
         }
     }

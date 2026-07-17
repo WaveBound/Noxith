@@ -51,7 +51,7 @@ unitDatabase.push({
 
     // UPGRADES
     upgrades: [
-        { dmg: 19200, spa: 4.0, range: 30, cost: 142000 }
+        { dmg: 19200, spa: 15.0, range: 30, cost: 142000 }
     ],
 
     // PASSIVES
@@ -62,7 +62,7 @@ unitDatabase.push({
         },
         {
             name: "Nuh Uh",
-            desc: "On Crit: 25% chance to Follow-up for 200% Damage."
+            desc: "When any unit gets Debuffed: Follow-up for 200% Damage."
         },
         {
             name: "He is.....Only growing stronger?",
