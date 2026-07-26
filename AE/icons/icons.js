@@ -1,61 +1,64 @@
+// Dynamic Base Resolution for hosted servers (resolves relative to icons.js file location)
+const resolveIcon = (path) => new URL(path, import.meta.url).href;
+
 export const UNIT_INFO_ICONS = {
-    totalCost: "icons/unit-info/yen.png",
-    yen: "icons/unit-info/yen.png",
-    damage: "icons/unit-info/damage.png",
-    spa: "icons/unit-info/spa.png",
-    range: "icons/unit-info/range.png",
-    critChance: "icons/unit-info/critrate.png",
-    critDamage: "icons/unit-info/critdamage.png",
+    totalCost: resolveIcon("./unit-info/yen.png"),
+    yen: resolveIcon("./unit-info/yen.png"),
+    damage: resolveIcon("./unit-info/damage.png"),
+    spa: resolveIcon("./unit-info/spa.png"),
+    range: resolveIcon("./unit-info/range.png"),
+    critChance: resolveIcon("./unit-info/critrate.png"),
+    critDamage: resolveIcon("./unit-info/critdamage.png"),
 };
 
 // ── Element / Archetype / Status PNG icons ──────────────────────────────────
 export const ELEMENT_ICONS = {
-    hydro: "icons/elements/hydro.png",
-    flame: "icons/elements/flame.png",
-    terra: "icons/elements/terra.png",
-    gale: "icons/elements/gale.png",
-    storm: "icons/elements/storm.png",
-    light: "icons/elements/light.png",
-    dark: "icons/elements/dark.png",
-    neutral: "icons/elements/neutral.png",
+    hydro: resolveIcon("./elements/hydro.png"),
+    flame: resolveIcon("./elements/flame.png"),
+    terra: resolveIcon("./elements/terra.png"),
+    gale: resolveIcon("./elements/gale.png"),
+    storm: resolveIcon("./elements/storm.png"),
+    light: resolveIcon("./elements/light.png"),
+    dark: resolveIcon("./elements/dark.png"),
+    neutral: resolveIcon("./elements/neutral.png"),
 };
 
 export const ARCHETYPE_ICONS = {
-    magical: "icons/archetypes/magical.png",
-    physical: "icons/archetypes/physical.png",
-    psychic: "icons/archetypes/psychic.png",
+    magical: resolveIcon("./archetypes/magical.png"),
+    physical: resolveIcon("./archetypes/physical.png"),
+    psychic: resolveIcon("./archetypes/psychic.png"),
 };
 
 export const STATUS_ICONS = {
-    bleed: "icons/status/bleed.png",
-    burn: "icons/status/burn.png",
-    austereflames: "icons/status/AustereFlames.png",
-    manaburn: "icons/status/ManaBurn.png",
-    freeze: "icons/status/freeze.png",
-    slow: "icons/status/slow.png",
-    stun: "icons/status/stun.png",
-    puppetmark: "icons/status/PuppetMark.png",
-    dismembered: "icons/status/Dismembered.png",
+    bleed: resolveIcon("./status/bleed.png"),
+    burn: resolveIcon("./status/burn.png"),
+    austereflames: resolveIcon("./status/AustereFlames.png"),
+    manaburn: resolveIcon("./status/ManaBurn.png"),
+    freeze: resolveIcon("./status/freeze.png"),
+    slow: resolveIcon("./status/slow.png"),
+    stun: resolveIcon("./status/stun.png"),
+    puppetmark: resolveIcon("./status/PuppetMark.png"),
+    dismembered: resolveIcon("./status/Dismembered.png"),
 };
 
 // ── Relic artwork (PNG) ────────────────────────────────────────────────────
 export const RELIC_ICONS = {
-    "relic-promise-ring": "icons/relics/PromiseRing.png",
-    "relic-elven-battle-staff": "icons/relics/ElvenBattleStaff.png",
-    "relic-kunai": "icons/relics/Kunai.png",
-    "relic-enhanced-katana": "icons/relics/EnhancedKatana.png",
-    "relic-three-swords-from-hell": "icons/relics/ThreeSwordsFromHell.png",
-    "relic-shinigami-sword": "icons/relics/ShinigamiSword.png",
-    "relic-staff-of-chaos": "icons/relics/StaffofChaos.png",
-    "relic-warriors-axe": "icons/relics/WarriorAxe.png",
-    "relic-katana": "icons/relics/Katana.png",
-    "relic-accursed-equipment": "icons/relics/AccursedEquipment.png",
-    "relic-red-finger": "icons/relics/RedFinger.png",
-    "relic-magic-book": "icons/relics/MagicBook.png",
+    "relic-promise-ring": resolveIcon("./relics/PromiseRing.png"),
+    "relic-elven-battle-staff": resolveIcon("./relics/ElvenBattleStaff.png"),
+    "relic-kunai": resolveIcon("./relics/Kunai.png"),
+    "relic-enhanced-katana": resolveIcon("./relics/EnhancedKatana.png"),
+    "relic-three-swords-from-hell": resolveIcon("./relics/ThreeSwordsFromHell.png"),
+    "relic-shinigami-sword": resolveIcon("./relics/ShinigamiSword.png"),
+    "relic-staff-of-chaos": resolveIcon("./relics/StaffofChaos.png"),
+    "relic-warriors-axe": resolveIcon("./relics/WarriorAxe.png"),
+    "relic-katana": resolveIcon("./relics/Katana.png"),
+    "relic-accursed-equipment": resolveIcon("./relics/AccursedEquipment.png"),
+    "relic-red-finger": resolveIcon("./relics/RedFinger.png"),
+    "relic-magic-book": resolveIcon("./relics/MagicBook.png"),
 };
 
 export function relicImg(id) {
-    return RELIC_ICONS[id] || "assets/placeholder.svg";
+    return RELIC_ICONS[id] || resolveIcon("../assets/placeholder.svg");
 }
 
 const RELIC_NAME_TO_IMG = {
@@ -71,24 +74,24 @@ const RELIC_NAME_TO_IMG = {
     "Accursed Equipment": RELIC_ICONS["relic-accursed-equipment"],
     "Red Finger": RELIC_ICONS["relic-red-finger"],
     "Magic Book": RELIC_ICONS["relic-magic-book"],
-    "Hexed Blade": "icons/relics/HexedBlade.png",
-    "Hair Bells": "icons/relics/HairBells.png",
-    "Spirit of the Moonblade": "icons/relics/SpiritoftheMoonblade.png",
-    "Calamity's Eye": "icons/relics/CalamitysEye.png",
-    "Boulder": "icons/relics/Boulder.png",
-    "Webbed Fruit": "icons/relics/WebbedFruit.png",
-    "Emperor's Attire": "icons/relics/EmperorsAttire.png",
-    "Hell's Flower": "icons/relics/HellsFlower.png",
-    "Technique Amplifier": "icons/relics/TechniqueAmplifier.png",
-    "Dark Scepter": "icons/relics/DarkScepter.png",
+    "Hexed Blade": resolveIcon("./relics/HexedBlade.png"),
+    "Hair Bells": resolveIcon("./relics/HairBells.png"),
+    "Spirit of the Moonblade": resolveIcon("./relics/SpiritoftheMoonblade.png"),
+    "Calamity's Eye": resolveIcon("./relics/CalamitysEye.png"),
+    "Boulder": resolveIcon("./relics/Boulder.png"),
+    "Webbed Fruit": resolveIcon("./relics/WebbedFruit.png"),
+    "Emperor's Attire": resolveIcon("./relics/EmperorsAttire.png"),
+    "Hell's Flower": resolveIcon("./relics/HellsFlower.png"),
+    "Technique Amplifier": resolveIcon("./relics/TechniqueAmplifier.png"),
+    "Dark Scepter": resolveIcon("./relics/DarkScepter.png"),
 };
 
 export function relicImgByName(name) {
-    if (!name) return "assets/placeholder.svg";
+    if (!name) return resolveIcon("../assets/placeholder.svg");
     const key = Object.keys(RELIC_NAME_TO_IMG).find(
         (k) => k.toLowerCase() === String(name).toLowerCase()
     );
-    return (key && RELIC_NAME_TO_IMG[key]) || "assets/placeholder.svg";
+    return (key && RELIC_NAME_TO_IMG[key]) || resolveIcon("../assets/placeholder.svg");
 }
 
 export function iconImg(src, alt = "", cls = "icon-img") {
@@ -245,20 +248,20 @@ if (typeof window !== "undefined") {
 
     function getTooltipImage(target) {
         if (!target) return "";
-        if (target.classList.contains("p-mana-burn")) return "icons/info/ManaBurnInfo.png";
-        if (target.classList.contains("p-bleed")) return "icons/info/bleedinfo.png";
-        if (target.classList.contains("p-ent")) return "icons/info/batinfo.png";
-        if (target.classList.contains("p-fua")) return "icons/info/followupinfo.png";
-        if (target.classList.contains("p-stun")) return "icons/info/StunInfo.png";
-        if (target.classList.contains("p-stagger")) return "icons/info/StaggerInfo.png";
-        if (target.classList.contains("p-slow")) return "icons/info/SlowInfo.png";
-        if (target.classList.contains("p-freeze")) return "icons/info/FreezeInfo.png";
-        if (target.classList.contains("p-frostbite")) return "icons/info/FrostbiteInfo.png";
-        if (target.classList.contains("p-rock")) return "icons/info/RockInfo.png";
-        if (target.classList.contains("p-rock-chunk")) return "icons/info/RockChunksInfo.png";
-        if (target.classList.contains("p-stone-wall")) return "icons/info/StoneWallInfo.png";
-        if (target.classList.contains("p-buffs")) return "icons/info/BuffInfo.png";
-        if (target.classList.contains("p-dismembered")) return "icons/info/DismemberedInfo.png";
+        if (target.classList.contains("p-mana-burn")) return resolveIcon("./info/ManaBurnInfo.png");
+        if (target.classList.contains("p-bleed")) return resolveIcon("./info/bleedinfo.png");
+        if (target.classList.contains("p-ent")) return resolveIcon("./info/batinfo.png");
+        if (target.classList.contains("p-fua")) return resolveIcon("./info/followupinfo.png");
+        if (target.classList.contains("p-stun")) return resolveIcon("./info/StunInfo.png");
+        if (target.classList.contains("p-stagger")) return resolveIcon("./info/StaggerInfo.png");
+        if (target.classList.contains("p-slow")) return resolveIcon("./info/SlowInfo.png");
+        if (target.classList.contains("p-freeze")) return resolveIcon("./info/FreezeInfo.png");
+        if (target.classList.contains("p-frostbite")) return resolveIcon("./info/FrostbiteInfo.png");
+        if (target.classList.contains("p-rock")) return resolveIcon("./info/RockInfo.png");
+        if (target.classList.contains("p-rock-chunk")) return resolveIcon("./info/RockChunksInfo.png");
+        if (target.classList.contains("p-stone-wall")) return resolveIcon("./info/StoneWallInfo.png");
+        if (target.classList.contains("p-buffs")) return resolveIcon("./info/BuffInfo.png");
+        if (target.classList.contains("p-dismembered")) return resolveIcon("./info/DismemberedInfo.png");
         return "";
     }
 
