@@ -370,7 +370,12 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const critAvgMult = 1 + effCritChance * effCritDamage;
 
   const avgHitDamage = effDamage * critAvgMult;
-  const effDotMult = (base.dotMultiplier || 0) * (1 + (trait.dotBonus || 0)) * (1 + relicDotBonus);
+
+  // Dark Mage's Lightning Arc is a passive aura, NOT a DoT status effect.
+  // Therefore, Trait DoT bonus (Draconic) and Relic DoT bonus do NOT apply to Dark Mage.
+  const effDotMult = isDarkMage
+    ? (base.dotMultiplier || 0)
+    : (base.dotMultiplier || 0) * (1 + (trait.dotBonus || 0)) * (1 + relicDotBonus);
 
   const dotDuration = 8.0;
   let dotIntervalMultiplier = Math.ceil(dotDuration / effSpa);
