@@ -1,64 +1,73 @@
-// Dynamic Base Resolution for hosted servers (resolves relative to icons.js file location)
-const resolveIcon = (path) => new URL(path, import.meta.url).href;
+// Base URL resolution derived from where icons.js is hosted on the server
+const BASE_URL = new URL('../', import.meta.url).href;
+
+export function toAbsoluteUrl(relativePath) {
+    if (!relativePath) return "";
+    if (relativePath.startsWith("http://") || relativePath.startsWith("https://") || relativePath.startsWith("data:")) {
+        return relativePath;
+    }
+    const clean = relativePath.replace(/^(\.\/|\/)+/, "");
+    return new URL(clean, BASE_URL).href;
+}
 
 export const UNIT_INFO_ICONS = {
-    totalCost: resolveIcon("./unit-info/yen.png"),
-    yen: resolveIcon("./unit-info/yen.png"),
-    damage: resolveIcon("./unit-info/damage.png"),
-    spa: resolveIcon("./unit-info/spa.png"),
-    range: resolveIcon("./unit-info/range.png"),
-    critChance: resolveIcon("./unit-info/critrate.png"),
-    critDamage: resolveIcon("./unit-info/critdamage.png"),
+    totalCost: toAbsoluteUrl("icons/unit-info/yen.png"),
+    yen: toAbsoluteUrl("icons/unit-info/yen.png"),
+    damage: toAbsoluteUrl("icons/unit-info/damage.png"),
+    spa: toAbsoluteUrl("icons/unit-info/spa.png"),
+    range: toAbsoluteUrl("icons/unit-info/range.png"),
+    critChance: toAbsoluteUrl("icons/unit-info/critrate.png"),
+    critDamage: toAbsoluteUrl("icons/unit-info/critdamage.png"),
 };
 
 // ── Element / Archetype / Status PNG icons ──────────────────────────────────
 export const ELEMENT_ICONS = {
-    hydro: resolveIcon("./elements/hydro.png"),
-    flame: resolveIcon("./elements/flame.png"),
-    terra: resolveIcon("./elements/terra.png"),
-    gale: resolveIcon("./elements/gale.png"),
-    storm: resolveIcon("./elements/storm.png"),
-    light: resolveIcon("./elements/light.png"),
-    dark: resolveIcon("./elements/dark.png"),
-    neutral: resolveIcon("./elements/neutral.png"),
+    hydro: toAbsoluteUrl("icons/elements/hydro.png"),
+    flame: toAbsoluteUrl("icons/elements/flame.png"),
+    terra: toAbsoluteUrl("icons/elements/terra.png"),
+    gale: toAbsoluteUrl("icons/elements/gale.png"),
+    storm: toAbsoluteUrl("icons/elements/storm.png"),
+    light: toAbsoluteUrl("icons/elements/light.png"),
+    dark: toAbsoluteUrl("icons/elements/dark.png"),
+    neutral: toAbsoluteUrl("icons/elements/neutral.png"),
 };
 
 export const ARCHETYPE_ICONS = {
-    magical: resolveIcon("./archetypes/magical.png"),
-    physical: resolveIcon("./archetypes/physical.png"),
-    psychic: resolveIcon("./archetypes/psychic.png"),
+    magical: toAbsoluteUrl("icons/archetypes/magical.png"),
+    physical: toAbsoluteUrl("icons/archetypes/physical.png"),
+    psychic: toAbsoluteUrl("icons/archetypes/psychic.png"),
 };
 
 export const STATUS_ICONS = {
-    bleed: resolveIcon("./status/bleed.png"),
-    burn: resolveIcon("./status/burn.png"),
-    austereflames: resolveIcon("./status/AustereFlames.png"),
-    manaburn: resolveIcon("./status/ManaBurn.png"),
-    freeze: resolveIcon("./status/freeze.png"),
-    slow: resolveIcon("./status/slow.png"),
-    stun: resolveIcon("./status/stun.png"),
-    puppetmark: resolveIcon("./status/PuppetMark.png"),
-    dismembered: resolveIcon("./status/Dismembered.png"),
+    bleed: toAbsoluteUrl("icons/status/bleed.png"),
+    burn: toAbsoluteUrl("icons/status/burn.png"),
+    austereflames: toAbsoluteUrl("icons/status/AustereFlames.png"),
+    manaburn: toAbsoluteUrl("icons/status/ManaBurn.png"),
+    freeze: toAbsoluteUrl("icons/status/freeze.png"),
+    slow: toAbsoluteUrl("icons/status/slow.png"),
+    stun: toAbsoluteUrl("icons/status/stun.png"),
+    puppetmark: toAbsoluteUrl("icons/status/PuppetMark.png"),
+    dismembered: toAbsoluteUrl("icons/status/Dismembered.png"),
 };
 
 // ── Relic artwork (PNG) ────────────────────────────────────────────────────
 export const RELIC_ICONS = {
-    "relic-promise-ring": resolveIcon("./relics/PromiseRing.png"),
-    "relic-elven-battle-staff": resolveIcon("./relics/ElvenBattleStaff.png"),
-    "relic-kunai": resolveIcon("./relics/Kunai.png"),
-    "relic-enhanced-katana": resolveIcon("./relics/EnhancedKatana.png"),
-    "relic-three-swords-from-hell": resolveIcon("./relics/ThreeSwordsFromHell.png"),
-    "relic-shinigami-sword": resolveIcon("./relics/ShinigamiSword.png"),
-    "relic-staff-of-chaos": resolveIcon("./relics/StaffofChaos.png"),
-    "relic-warriors-axe": resolveIcon("./relics/WarriorAxe.png"),
-    "relic-katana": resolveIcon("./relics/Katana.png"),
-    "relic-accursed-equipment": resolveIcon("./relics/AccursedEquipment.png"),
-    "relic-red-finger": resolveIcon("./relics/RedFinger.png"),
-    "relic-magic-book": resolveIcon("./relics/MagicBook.png"),
+    "relic-promise-ring": toAbsoluteUrl("icons/relics/PromiseRing.png"),
+    "relic-elven-battle-staff": toAbsoluteUrl("icons/relics/ElvenBattleStaff.png"),
+    "relic-kunai": toAbsoluteUrl("icons/relics/Kunai.png"),
+    "relic-enhanced-katana": toAbsoluteUrl("icons/relics/EnhancedKatana.png"),
+    "relic-three-swords-from-hell": toAbsoluteUrl("icons/relics/ThreeSwordsFromHell.png"),
+    "relic-shinigami-sword": toAbsoluteUrl("icons/relics/ShinigamiSword.png"),
+    "relic-staff-of-chaos": toAbsoluteUrl("icons/relics/StaffofChaos.png"),
+    "relic-warriors-axe": toAbsoluteUrl("icons/relics/WarriorAxe.png"),
+    "relic-katana": toAbsoluteUrl("icons/relics/Katana.png"),
+    "relic-accursed-equipment": toAbsoluteUrl("icons/relics/AccursedEquipment.png"),
+    "relic-red-finger": toAbsoluteUrl("icons/relics/RedFinger.png"),
+    "relic-magic-book": toAbsoluteUrl("icons/relics/MagicBook.png"),
 };
 
 export function relicImg(id) {
-    return RELIC_ICONS[id] || resolveIcon("../assets/placeholder.svg");
+    return RELIC_ICONS[id] || toAbsoluteUrl("assets/placeholder.svg");
 }
 
 const RELIC_NAME_TO_IMG = {
@@ -74,29 +83,30 @@ const RELIC_NAME_TO_IMG = {
     "Accursed Equipment": RELIC_ICONS["relic-accursed-equipment"],
     "Red Finger": RELIC_ICONS["relic-red-finger"],
     "Magic Book": RELIC_ICONS["relic-magic-book"],
-    "Hexed Blade": resolveIcon("./relics/HexedBlade.png"),
-    "Hair Bells": resolveIcon("./relics/HairBells.png"),
-    "Spirit of the Moonblade": resolveIcon("./relics/SpiritoftheMoonblade.png"),
-    "Calamity's Eye": resolveIcon("./relics/CalamitysEye.png"),
-    "Boulder": resolveIcon("./relics/Boulder.png"),
-    "Webbed Fruit": resolveIcon("./relics/WebbedFruit.png"),
-    "Emperor's Attire": resolveIcon("./relics/EmperorsAttire.png"),
-    "Hell's Flower": resolveIcon("./relics/HellsFlower.png"),
-    "Technique Amplifier": resolveIcon("./relics/TechniqueAmplifier.png"),
-    "Dark Scepter": resolveIcon("./relics/DarkScepter.png"),
+    "Hexed Blade": toAbsoluteUrl("icons/relics/HexedBlade.png"),
+    "Hair Bells": toAbsoluteUrl("icons/relics/HairBells.png"),
+    "Spirit of the Moonblade": toAbsoluteUrl("icons/relics/SpiritoftheMoonblade.png"),
+    "Calamity's Eye": toAbsoluteUrl("icons/relics/CalamitysEye.png"),
+    "Boulder": toAbsoluteUrl("icons/relics/Boulder.png"),
+    "Webbed Fruit": toAbsoluteUrl("icons/relics/WebbedFruit.png"),
+    "Emperor's Attire": toAbsoluteUrl("icons/relics/EmperorsAttire.png"),
+    "Hell's Flower": toAbsoluteUrl("icons/relics/HellsFlower.png"),
+    "Technique Amplifier": toAbsoluteUrl("icons/relics/TechniqueAmplifier.png"),
+    "Dark Scepter": toAbsoluteUrl("icons/relics/DarkScepter.png"),
 };
 
 export function relicImgByName(name) {
-    if (!name) return resolveIcon("../assets/placeholder.svg");
+    if (!name) return toAbsoluteUrl("assets/placeholder.svg");
     const key = Object.keys(RELIC_NAME_TO_IMG).find(
         (k) => k.toLowerCase() === String(name).toLowerCase()
     );
-    return (key && RELIC_NAME_TO_IMG[key]) || resolveIcon("../assets/placeholder.svg");
+    return (key && RELIC_NAME_TO_IMG[key]) || toAbsoluteUrl("assets/placeholder.svg");
 }
 
 export function iconImg(src, alt = "", cls = "icon-img") {
     if (!src) return "";
-    return `<img src="${src}" alt="${alt}" class="${cls}" />`;
+    const abs = toAbsoluteUrl(src);
+    return `<img src="${abs}" alt="${alt}" class="${cls}" />`;
 }
 
 export const STAT_ICONS = {
@@ -172,7 +182,7 @@ export function formatPassiveText(text) {
     });
 
     // Phase 3: Inject clean HTML markup
-    const iconImgTag = (src) => src ? `<img src="${src}" class="p-kw-icon" alt="" />` : "";
+    const iconImgTag = (src) => src ? `<img src="${toAbsoluteUrl(src)}" class="p-kw-icon" alt="" />` : "";
 
     out = out.replace(/@@TC@@/g, `<span class="p-kw p-atk-name"><span>Thunderclap Cut</span></span>`);
     out = out.replace(/@@UR@@/g, `<span class="p-kw p-atk-name"><span>Unrestrained Rampage</span></span>`);
@@ -248,20 +258,20 @@ if (typeof window !== "undefined") {
 
     function getTooltipImage(target) {
         if (!target) return "";
-        if (target.classList.contains("p-mana-burn")) return resolveIcon("./info/ManaBurnInfo.png");
-        if (target.classList.contains("p-bleed")) return resolveIcon("./info/bleedinfo.png");
-        if (target.classList.contains("p-ent")) return resolveIcon("./info/batinfo.png");
-        if (target.classList.contains("p-fua")) return resolveIcon("./info/followupinfo.png");
-        if (target.classList.contains("p-stun")) return resolveIcon("./info/StunInfo.png");
-        if (target.classList.contains("p-stagger")) return resolveIcon("./info/StaggerInfo.png");
-        if (target.classList.contains("p-slow")) return resolveIcon("./info/SlowInfo.png");
-        if (target.classList.contains("p-freeze")) return resolveIcon("./info/FreezeInfo.png");
-        if (target.classList.contains("p-frostbite")) return resolveIcon("./info/FrostbiteInfo.png");
-        if (target.classList.contains("p-rock")) return resolveIcon("./info/RockInfo.png");
-        if (target.classList.contains("p-rock-chunk")) return resolveIcon("./info/RockChunksInfo.png");
-        if (target.classList.contains("p-stone-wall")) return resolveIcon("./info/StoneWallInfo.png");
-        if (target.classList.contains("p-buffs")) return resolveIcon("./info/BuffInfo.png");
-        if (target.classList.contains("p-dismembered")) return resolveIcon("./info/DismemberedInfo.png");
+        if (target.classList.contains("p-mana-burn")) return toAbsoluteUrl("icons/info/ManaBurnInfo.png");
+        if (target.classList.contains("p-bleed")) return toAbsoluteUrl("icons/info/bleedinfo.png");
+        if (target.classList.contains("p-ent")) return toAbsoluteUrl("icons/info/batinfo.png");
+        if (target.classList.contains("p-fua")) return toAbsoluteUrl("icons/info/followupinfo.png");
+        if (target.classList.contains("p-stun")) return toAbsoluteUrl("icons/info/StunInfo.png");
+        if (target.classList.contains("p-stagger")) return toAbsoluteUrl("icons/info/StaggerInfo.png");
+        if (target.classList.contains("p-slow")) return toAbsoluteUrl("icons/info/SlowInfo.png");
+        if (target.classList.contains("p-freeze")) return toAbsoluteUrl("icons/info/FreezeInfo.png");
+        if (target.classList.contains("p-frostbite")) return toAbsoluteUrl("icons/info/FrostbiteInfo.png");
+        if (target.classList.contains("p-rock")) return toAbsoluteUrl("icons/info/RockInfo.png");
+        if (target.classList.contains("p-rock-chunk")) return toAbsoluteUrl("icons/info/RockChunksInfo.png");
+        if (target.classList.contains("p-stone-wall")) return toAbsoluteUrl("icons/info/StoneWallInfo.png");
+        if (target.classList.contains("p-buffs")) return toAbsoluteUrl("icons/info/BuffInfo.png");
+        if (target.classList.contains("p-dismembered")) return toAbsoluteUrl("icons/info/DismemberedInfo.png");
         return "";
     }
 
