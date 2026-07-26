@@ -19,56 +19,56 @@ export const unit = {
 
     placement: [
         {
-            upgrade: 0, damage: "290", spa: "6", range: "22", cost: "1,500",
+            upgrade: 0, damage: "280", spa: "6", range: "22", cost: "1,500",
             attackName: "Elemental Weapons",
             aoe: "Circle 12",
             attackTime: "2.5",
             description: "Deals 1 tick in a Circle AoE (Size 12) over 2.5s"
         },
         {
-            upgrade: 1, damage: "430", spa: "5.8", range: "22", cost: "2,400",
+            upgrade: 1, damage: "415", spa: "5.8", range: "22", cost: "2,400",
             attackName: "Elemental Weapons",
             aoe: "Circle 12",
             attackTime: "2.5",
         },
         {
-            upgrade: 2, damage: "699", spa: "5.8", range: "23", cost: "3,550",
+            upgrade: 2, damage: "675", spa: "5.8", range: "23", cost: "3,550",
             attackName: "Elemental Weapons",
             aoe: "Circle 12",
             attackTime: "2.5",
         },
         {
-            upgrade: 3, damage: "895", spa: "5.7", range: "24", cost: "4,200",
+            upgrade: 3, damage: "864", spa: "5.7", range: "24", cost: "4,200",
             attackName: "Elemental Weapons",
             aoe: "Circle 12",
             attackTime: "2.5",
         },
         {
-            upgrade: 4, damage: "1,071", spa: "5.6", range: "24", cost: "6,950",
+            upgrade: 4, damage: "1,034", spa: "5.6", range: "24", cost: "6,950",
             attackName: "Elemental Weapons",
             aoe: "Circle 12",
             attackTime: "2.5",
         },
         {
-            upgrade: 5, damage: "1,185", spa: "5.6", range: "25", cost: "7,750",
+            upgrade: 5, damage: "1,144", spa: "5.6", range: "25", cost: "7,750",
             attackName: "Elemental Weapons",
             aoe: "Circle 12",
             attackTime: "2.5",
         },
         {
-            upgrade: 6, damage: "1,443", spa: "5.5", range: "25", cost: "11,750",
+            upgrade: 6, damage: "1,393", spa: "5.5", range: "25", cost: "11,750",
             attackName: "Elemental Weapons",
             aoe: "Circle 12",
             attackTime: "2.5",
         },
         {
-            upgrade: 7, damage: "1,693", spa: "5.4", range: "26", cost: "13,250",
+            upgrade: 7, damage: "1,456", spa: "5.4", range: "26", cost: "13,250",
             attackName: "Elemental Weapons",
             aoe: "Circle 12",
             attackTime: "2.5",
         },
         {
-            upgrade: 8, damage: "1,822", spa: "5.4", range: "26", cost: "13,750",
+            upgrade: 8, damage: "1,622", spa: "5.4", range: "26", cost: "13,750",
             attackName: "Elemental Weapons",
             aoe: "Circle 12",
             attackTime: "2.5",
