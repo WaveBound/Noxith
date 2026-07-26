@@ -6,6 +6,7 @@
   overflow: hidden !important;
   padding: 0;
   cursor: pointer;
+  border-top: none !important;
   transition: border-color var(--t-fast, 150ms) var(--ease, ease);
 }
 
@@ -49,25 +50,13 @@
       rgba(8, 8, 11, 0) 58%);
 }
 
-/* Rarity Accents */
-.unit-card.rarity-secret {
-  border-top: 2px solid #f0a500;
-}
-
-.unit-card.rarity-mythic {
-  border-top: 2px solid #c084fc;
-}
-
-.unit-card.rarity-legendary {
-  border-top: 2px solid #fb923c;
-}
-
-.unit-card.rarity-epic {
-  border-top: 2px solid var(--purple-strong, #818cf8);
-}
-
+/* Rarity Accents - Top borders removed */
+.unit-card.rarity-secret,
+.unit-card.rarity-mythic,
+.unit-card.rarity-legendary,
+.unit-card.rarity-epic,
 .unit-card.rarity-rare {
-  border-top: 2px solid #60a5fa;
+  border-top: none !important;
 }
 
 /* Portrait Meta & Chips */
