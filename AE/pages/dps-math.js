@@ -225,7 +225,11 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isLadyGiant = unit && (unit.id === "ladygiantenvy" || (unit.name && unit.name.includes("Lady Giant")));
   const isEighthSword = unit && (unit.id === "8thswordberserk" || (unit.name && unit.name.includes("8th Sword")));
 
-  const darkMageLightningMode = unit && unit.darkMageLightningMode !== false;
+  // Dark Mage mode: "lightning" | "both" | "normal"
+  const darkMageMode = isDarkMage
+    ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
+    : "lightning";
+
   const giantForm = unit && !!unit.giantForm;
   const berserkState = unit && !!unit.berserkState;
   const demonicPresence = unit && !!unit.demonicPresence;
@@ -371,8 +375,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
 
   const avgHitDamage = effDamage * critAvgMult;
 
-  // Dark Mage's Lightning Arc is a passive aura, NOT a DoT status effect.
-  // Therefore, Trait DoT bonus (Draconic) and Relic DoT bonus do NOT apply to Dark Mage.
+  // Dark Mage's Lightning Arc is a passive field tick, NOT a DoT status effect.
+  // Therefore, Trait DoT bonus (Draconic) and Relic DoT bonus do NOT apply.
   const effDotMult = isDarkMage
     ? (base.dotMultiplier || 0)
     : (base.dotMultiplier || 0) * (1 + (trait.dotBonus || 0)) * (1 + relicDotBonus);
@@ -447,11 +451,15 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   } else if (isDarkMage) {
     dotIntervalMultiplier = 1;
     dotIntervalSPA = 1.0;
-    if (darkMageLightningMode) {
-      unitDirectDPS = 0;
-      unitDoTDPS = avgHitDamage * effDotMult;
-    } else {
+
+    if (darkMageMode === "normal") {
       unitDirectDPS = avgHitDamage / effSpa;
+      unitDoTDPS = 0;
+    } else if (darkMageMode === "both") {
+      unitDirectDPS = avgHitDamage / effSpa;
+      unitDoTDPS = avgHitDamage * effDotMult;
+    } else { // "lightning"
+      unitDirectDPS = 0;
       unitDoTDPS = avgHitDamage * effDotMult;
     }
   } else if (isLadyGiant) {
@@ -554,7 +562,10 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   }
 
   const combinedDPS = unitDirectDPS + unitDoTDPS + totalSummonDPS + fuaDps;
-  const singlePlacementDmg = (isDarkMage && darkMageLightningMode ? 0 : avgHitDamage) + ((base.dotMultiplier || 0) > 0 ? (isDarkMage ? avgHitDamage * effDotMult : dotDamage) : 0) + totalSummonDmg + singleFuaDmg;
+
+  const singlePlacementDmg = (isDarkMage ? (darkMageMode === "lightning" ? 0 : avgHitDamage) : avgHitDamage) +
+    ((base.dotMultiplier || 0) > 0 ? (isDarkMage ? (darkMageMode === "normal" ? 0 : avgHitDamage * effDotMult) : dotDamage) : 0) +
+    totalSummonDmg + singleFuaDmg;
 
   return {
     unitName: unit.name || "Unit",
@@ -600,7 +611,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     totalSummonDPS,
     isElfMage,
     isDarkMage,
-    darkMageLightningMode,
+    darkMageMode,
     isReaper,
     isLadyGiant,
     giantForm,
