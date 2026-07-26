@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#181822"/>
+  <rect x="0.5" y="0.5" width="199" height="199" fill="none" stroke="#2a2a38" stroke-width="1"/>
+  <g stroke="#3a3a4d" stroke-width="1.6" fill="none">
+    <path d="M60 130 L90 90 L115 115 L140 75 L155 100" />
+    <circle cx="70" cy="70" r="10" />
+  </g>
+  <text x="100" y="175" font-family="monospace" font-size="12" fill="#5a5a70" text-anchor="middle">placeholder</text>
+</svg>

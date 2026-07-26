@@ -1,0 +1,228 @@
+/* ── Home / landing page ─────────────────────────────────────────────────────── */
+.home-page {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* ── Hero ──────────────────────────────────────────────────────────────────── */
+.home-hero {
+    padding: 28px 4px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+}
+
+.home-hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--purple-strong);
+    margin-bottom: 12px;
+}
+
+.home-hero-title {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    max-width: 640px;
+}
+
+.home-hero-sub {
+    margin-top: 12px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    max-width: 560px;
+    line-height: 1.6;
+}
+
+.home-stats {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+.home-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 18px;
+    min-width: 96px;
+}
+
+.home-stat-value {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.home-stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+}
+
+/* ── Section heading ────────────────────────────────────────────────────────── */
+.home-section-head {
+    margin-bottom: 16px;
+}
+
+.home-section-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.home-section-sub {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+/* ── Navigation cards ───────────────────────────────────────────────────────── */
+.home-nav-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+@media (max-width: 720px) {
+    .home-nav-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .home-hero-title {
+        font-size: 24px;
+    }
+}
+
+.home-nav-card {
+    position: relative;
+    display: block;
+    text-align: left;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--card);
+    min-height: 152px;
+    isolation: isolate;
+    transition: transform var(--t-med) var(--ease),
+        border-color var(--t-med) var(--ease),
+        box-shadow var(--t-med) var(--ease);
+}
+
+.home-nav-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--border-strong);
+    box-shadow: none;
+}
+
+.home-nav-card:focus-visible {
+    outline: 2px solid var(--purple-strong);
+    outline-offset: 2px;
+}
+
+/* Darkened placeholder image sitting behind the text */
+.home-nav-card-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+    opacity: 0.45;
+    filter: saturate(0.85);
+    transition: transform var(--t-med) var(--ease), opacity var(--t-med) var(--ease);
+}
+
+.home-nav-card:hover .home-nav-card-img {
+    transform: scale(1.05);
+    opacity: 0.6;
+}
+
+/* Gradient scrim so the wording stays legible over the image */
+.home-nav-card-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        linear-gradient(180deg, rgba(9, 9, 11, 0.55) 0%, rgba(9, 9, 11, 0.84) 100%),
+        radial-gradient(120% 120% at 0% 0%, rgba(99, 102, 241, 0.18), transparent 60%);
+}
+
+.home-nav-card-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px;
+    height: 100%;
+}
+
+.home-nav-card-icon {
+    width: 26px;
+    height: 26px;
+    color: var(--purple-strong);
+    display: inline-flex;
+}
+
+.home-nav-card-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.home-nav-card-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.home-nav-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+}
+
+.home-nav-card-badge {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--muted);
+    background: var(--background-elevated);
+    border: 1px solid var(--border);
+    padding: 1px 5px;
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+}
+
+.home-nav-card-desc {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    max-width: 92%;
+}
+
+.home-nav-card-cta {
+    margin-top: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--purple-strong);
+}
+
+.home-nav-card-cta svg {
+    width: 14px;
+    height: 14px;
+    transition: transform var(--t-med) var(--ease);
+}
+
+.home-nav-card:hover .home-nav-card-cta svg {
+    transform: translateX(3px);
+}

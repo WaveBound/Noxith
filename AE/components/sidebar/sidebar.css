@@ -1,0 +1,257 @@
+.sidebar {
+  height: 100vh;
+  width: var(--sidebar-width);
+  background: var(--background);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 14px 10px;
+  transition: transform var(--t-med) var(--ease);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+/* ── Brand ─────────────────────────────────────────────────────────────────── */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 4px 16px;
+}
+
+.brand-logo {
+  width: 16px;
+  height: 16px;
+  color: var(--purple-strong);
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.brand-name {
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+/* ── Nav ────────────────────────────────────────────────────────────────────── */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  position: relative;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+  text-align: left;
+  width: 100%;
+}
+
+.nav-item:hover {
+  background: var(--card-hover);
+  color: var(--text-secondary);
+}
+
+.nav-item.active {
+  color: var(--text);
+  background: var(--card);
+}
+
+.nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 20%;
+  height: 60%;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--purple-strong);
+}
+
+.nav-item .nav-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  display: inline-flex;
+  opacity: 0.7;
+}
+
+.nav-item.active .nav-icon {
+  opacity: 1;
+  color: var(--purple-strong);
+}
+
+.nav-item .nav-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.nav-item .nav-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--muted);
+  background: var(--background-elevated);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+
+/* ── Divider ────────────────────────────────────────────────────────────────── */
+.sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 10px 4px;
+}
+
+/* ── Unit tabs ──────────────────────────────────────────────────────────────── */
+.sidebar-unit-tabs-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-unit-tabs-section.hidden {
+  display: none;
+}
+
+.sidebar-unit-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.nav-unit-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px 5px 16px;
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+  text-align: left;
+  width: 100%;
+}
+
+.nav-unit-tab:hover {
+  background: var(--card-hover);
+  color: var(--text-secondary);
+}
+
+.nav-unit-tab.active {
+  background: var(--card);
+  color: var(--text);
+}
+
+.nav-unit-icon {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  display: inline-flex;
+  opacity: 0.6;
+}
+
+.nav-unit-tab.active .nav-unit-icon {
+  opacity: 0.9;
+  color: var(--purple-strong);
+}
+
+.nav-unit-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.nav-unit-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.nav-unit-close {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+  color: var(--muted);
+}
+
+.nav-unit-tab:hover .nav-unit-close {
+  opacity: 1;
+}
+
+.nav-unit-close:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--negative);
+}
+
+.nav-unit-close svg {
+  width: 8px;
+  height: 8px;
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────────── */
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.sidebar-footer-card {
+  background: transparent;
+  border-top: 1px solid var(--border);
+  padding: 10px 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-footer-label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.sidebar-footer-value {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ── Mobile Off-Canvas Drawer (< 1100px) ───────────────────────────────── */
+@media (max-width: 1100px) {
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    z-index: 1000 !important;
+    width: 240px !important;
+    transform: translateX(-100%) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.8) !important;
+  }
+
+  .sidebar.open {
+    transform: translateX(0) !important;
+  }
+}

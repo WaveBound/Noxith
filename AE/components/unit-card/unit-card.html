@@ -1,0 +1,44 @@
+<!-- --- START OF FILE unit-card.html --- -->
+<template id="tpl-unit-card">
+  <div class="unit-card glass-card">
+    <div class="unit-card-image">
+      <img data-role="image" src="" alt="" />
+      <div class="unit-card-portrait-meta">
+        <span class="unit-card-element" data-role="element">—</span>
+        <span class="unit-card-archetype" data-role="archetype">—</span>
+      </div>
+      <div class="unit-card-nameplate">
+        <span class="unit-card-name" data-role="name">---</span>
+        <div class="unit-card-meta-row">
+          <span class="unit-card-sub" data-role="trait">---</span>
+          <span class="unit-card-ascend-chip" data-role="ascend">Ascended 3</span>
+        </div>
+      </div>
+    </div>
+    <div class="unit-card-body">
+      <div class="unit-card-stat">
+        <span class="unit-card-stat-label stat-dmg">DMG</span>
+        <span class="unit-card-stat-value stat-value" data-role="damage">—</span>
+      </div>
+      <div class="unit-card-stat">
+        <span class="unit-card-stat-label stat-spa">SPA</span>
+        <span class="unit-card-stat-value stat-value" data-role="spa">—</span>
+      </div>
+      <div class="unit-card-stat">
+        <span class="unit-card-stat-label stat-rng">RNG</span>
+        <span class="unit-card-stat-value stat-value" data-role="range">—</span>
+      </div>
+    </div>
+    <div class="unit-card-footer">
+      <button type="button" class="unit-card-dps-btn" data-role="breakdown-btn">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        <span>DPS Breakdown</span>
+      </button>
+    </div>
+  </div>
+</template>

@@ -1,0 +1,49 @@
+/*
+  Design tokens for the Anime Tower Defense Wiki.
+  Change values here to re-theme the entire site.
+*/
+:root {
+  /* ---- Core palette ---- */
+  --background: #060608;
+  --background-elevated: #0a0a0c;
+  --card: #0e0e12;
+  --card-hover: #131317;
+  --glass: rgba(14, 14, 18, 0.85);
+  --border: #16161a;
+  --border-strong: #24242b;
+
+  --purple: #6366f1;
+  /* Premium indigo/purple matching selected item */
+  --purple-strong: #818cf8;
+  --purple-dim: rgba(99, 102, 241, 0.08);
+  --purple-glow: rgba(99, 102, 241, 0.02);
+
+  --text: #fafafa;
+  --text-secondary: #a1a1aa;
+  --muted: #71717a;
+
+  --positive: #10b981;
+  --negative: #ef4444;
+
+  /* ---- Typography ---- */
+  --font-display: "Montserrat", sans-serif;
+  --font-body: "Montserrat", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* ---- Layout ---- */
+  --sidebar-width: 200px;
+  --header-height: 48px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  /* ---- Elevation ---- */
+  --shadow-soft: none;
+  --shadow-lift: none;
+  --shadow-glow: none;
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 100ms;
+  --t-med: 200ms;
+}

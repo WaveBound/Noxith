@@ -1,0 +1,114 @@
+#app {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: 100vh;
+}
+
+#main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#page-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 24px 48px;
+}
+
+.page {
+  animation: page-in var(--t-med) var(--ease);
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-title-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 16px;
+}
+
+.page-title-row h1 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.page-title-row .page-subtitle {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ── Relics page: split sections ─────────────────────────────────────────── */
+.relic-section {
+  margin-bottom: 24px;
+}
+
+.relic-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.relic-section-empty {
+  color: var(--muted);
+  font-size: 12px;
+  padding: 8px 0 4px;
+}
+
+/* ── Sidebar Mobile Backdrop ────────────────────────────────────────────── */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s var(--ease), visibility 0.25s var(--ease);
+}
+
+.sidebar-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ── Responsive Layout (< 1100px) ───────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  #app {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+  }
+
+  #main {
+    width: 100vw !important;
+    height: 100vh !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  #page-container {
+    padding: 10px 14px 32px !important;
+  }
+}

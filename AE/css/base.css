@@ -1,0 +1,443 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap");
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+* {
+  font-family: var(--font-body) !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+.unit-card-name,
+.relic-modal-name,
+.trait-card-name {
+  font-family: var(--font-display) !important;
+}
+
+.stat-value,
+.upgrade-stat-value,
+.p-num,
+.level-btn,
+.relic-modal-stat-value,
+.trait-card-drop {
+  font-family: var(--font-mono) !important;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+.hidden {
+  display: none !important;
+}
+
+ul {
+  list-style: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--purple-dim);
+}
+
+:focus-visible {
+  outline: 2px solid var(--purple-strong);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.glass-card {
+  background: linear-gradient(135deg, #09090d 0%, #040406 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  box-shadow: none !important;
+  transition: border-color var(--t-med) var(--ease), background var(--t-med) var(--ease);
+}
+
+.glass-card:hover {
+  background: linear-gradient(135deg, #0d0d12 0%, #060608 100%);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Universal Element & Archetype Badge Styling ───────────────────────────── */
+.dps-portrait-badge img,
+.dps-portrait-badge svg,
+.unit-card-element img,
+.unit-card-archetype img,
+.badge-element img,
+.badge-archetype img {
+  width: 12px !important;
+  height: 12px !important;
+  max-width: 12px !important;
+  max-height: 12px !important;
+  flex-shrink: 0 !important;
+  object-fit: contain !important;
+  display: inline-block !important;
+}
+
+.element-hydro {
+  background: rgba(56, 189, 248, 0.12) !important;
+  color: #38bdf8 !important;
+  border-color: rgba(56, 189, 248, 0.28) !important;
+}
+
+.element-flame {
+  background: rgba(249, 115, 22, 0.12) !important;
+  color: #f97316 !important;
+  border-color: rgba(249, 115, 22, 0.28) !important;
+}
+
+.element-terra {
+  background: rgba(234, 179, 8, 0.12) !important;
+  color: #eab308 !important;
+  border-color: rgba(234, 179, 8, 0.28) !important;
+}
+
+.element-gale {
+  background: rgba(34, 197, 94, 0.12) !important;
+  color: #4ade80 !important;
+  border-color: rgba(34, 197, 94, 0.28) !important;
+}
+
+.element-storm {
+  background: rgba(20, 184, 166, 0.12) !important;
+  color: #2dd4bf !important;
+  border-color: rgba(20, 184, 166, 0.28) !important;
+}
+
+.element-light {
+  background: rgba(250, 204, 21, 0.12) !important;
+  color: #facc15 !important;
+  border-color: rgba(250, 204, 21, 0.28) !important;
+}
+
+.element-dark {
+  background: rgba(168, 85, 247, 0.12) !important;
+  color: #c084fc !important;
+  border-color: rgba(168, 85, 247, 0.28) !important;
+}
+
+.element-neutral {
+  background: rgba(148, 163, 184, 0.12) !important;
+  color: #94a3b8 !important;
+  border-color: rgba(148, 163, 184, 0.28) !important;
+}
+
+.archetype-physical {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #f87171 !important;
+  border-color: rgba(239, 68, 68, 0.28) !important;
+}
+
+.archetype-magical,
+.archetype-magic {
+  background: rgba(56, 189, 248, 0.12) !important;
+  color: #38bdf8 !important;
+  border-color: rgba(56, 189, 248, 0.28) !important;
+}
+
+.archetype-psychic {
+  background: rgba(244, 114, 182, 0.12) !important;
+  color: #f472b6 !important;
+  border-color: rgba(244, 114, 182, 0.28) !important;
+}
+
+/* ── Universal Keyword Highlights ─────────────────────────────────────────── */
+:root {
+  --kw-darkness: 25%;
+}
+
+.p-kw,
+.p-ent,
+.p-spell {
+  position: relative;
+  display: inline-block;
+  vertical-align: baseline;
+  font-size: inherit;
+  line-height: inherit;
+  filter: drop-shadow(0px 0.75px 1px #000000);
+}
+
+.p-kw-icon {
+  width: 1.0em !important;
+  height: 1.5em !important;
+  max-width: 20px !important;
+  max-height: 25px !important;
+  margin-right: 1px !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  transform: translateY(1px) !important;
+  object-fit: contain !important;
+  flex-shrink: 0 !important;
+  filter: none !important;
+}
+
+.p-kw>span {
+  display: inline !important;
+  vertical-align: baseline !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+/* Numbers inside status/passive descriptions */
+.p-num {
+  font-family: var(--font-mono) !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+}
+
+/* Cleanse & Attack Names -> White Text with White Underline */
+.p-kw.p-cleanse>span,
+.p-kw.p-atk-name>span {
+  --kw-color: #ffffff;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #ffffff !important;
+  text-underline-offset: 2px !important;
+}
+
+/* Keyword Colors */
+.p-kw.p-reg-attack>span {
+  --kw-color: #dadada;
+  color: #dadada !important;
+  -webkit-text-fill-color: #dadada !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #dadada !important;
+  text-underline-offset: 2px !important;
+}
+
+.p-kw.p-frostbite>span,
+.p-kw.p-freeze>span {
+  --kw-color: #38bdf8;
+}
+
+.p-spell,
+.p-spell-text,
+.p-mana-burn,
+.p-mana-burn-text {
+  --kw-color: #38bdf8;
+}
+
+.p-kw.p-fua>span,
+.p-fua-text {
+  --kw-color: #fde047;
+  background: linear-gradient(180deg, color-mix(in srgb, #fde047 88%, #000) 0%, #fde047 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #fde047 !important;
+  text-underline-offset: 2px !important;
+}
+
+.p-ent,
+.p-bat-text {
+  --kw-color: #ad2eff;
+}
+
+.p-kw.p-bleed>span,
+.p-bleed-text {
+  --kw-color: #d20000;
+}
+
+.p-kw.p-burn>span,
+.p-burn-text {
+  --kw-color: #ff7b00;
+}
+
+.p-kw.p-stone-wall>span,
+.p-kw.p-rock-chunk>span,
+.p-kw.p-rock>span {
+  --kw-color: #ac5c31;
+}
+
+.p-kw.p-austere-flames>span {
+  --kw-color: #ff6124;
+}
+
+.p-kw.p-stun>span,
+.p-kw.p-slow>span,
+.p-kw.p-stagger>span,
+.p-kw.p-rewind>span,
+.p-kw.p-cocoon>span,
+.p-kw.p-puppet-mark>span,
+.p-kw.p-dismembered>span {
+  --kw-color: #9900ff;
+}
+
+.p-kw.p-winged-spirit>span {
+  --kw-color: #8f43ff;
+}
+
+.p-kw.p-buffs>span {
+  --kw-color: #22c55e;
+}
+
+/* Master Gradient Engine for Keywords */
+.p-spell,
+.p-spell-text,
+.p-mana-burn,
+.p-mana-burn-text,
+.p-ent,
+.p-bat-text,
+.p-kw.p-bleed>span,
+.p-bleed-text,
+.p-kw.p-burn>span,
+.p-burn-text,
+.p-kw.p-frostbite>span,
+.p-kw.p-freeze>span,
+.p-kw.p-stone-wall>span,
+.p-kw.p-rock-chunk>span,
+.p-kw.p-rock>span,
+.p-kw.p-austere-flames>span,
+.p-kw.p-stun>span,
+.p-kw.p-slow>span,
+.p-kw.p-stagger>span,
+.p-kw.p-rewind>span,
+.p-kw.p-cocoon>span,
+.p-kw.p-puppet-mark>span,
+.p-kw.p-dismembered>span,
+.p-kw.p-winged-spirit>span,
+.p-kw.p-buffs>span {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--kw-color) calc(100% - var(--kw-darkness)), #000) 0%, var(--kw-color) 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: var(--kw-color) !important;
+  text-underline-offset: 2px !important;
+}
+
+/* Doll / Dolls -> Custom Gradient */
+.p-kw.p-doll {
+  position: relative;
+  display: inline-block;
+  vertical-align: baseline;
+  filter: drop-shadow(0px 0.75px 1px #000000);
+}
+
+.p-doll-text {
+  background: linear-gradient(180deg, #c3e6ff 0%, #d4c7ff 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #d4c7ff !important;
+  text-underline-offset: 2px !important;
+  display: inline !important;
+}
+
+/* Disable duplicate tooltips */
+.p-kw.p-bleed::after,
+.p-ent::after,
+.p-kw.p-fua::after,
+.p-kw.p-mana-burn::after {
+  display: none !important;
+  content: none !important;
+}
+
+.floating-status-tooltip {
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+@media (min-width: 2500px) {
+  html {
+    zoom: 1.25;
+  }
+}
+
+/* Text sizes for descriptions */
+.relic-modal-passive-text,
+.unit-detail-passive-desc,
+.passive-desc,
+.passive-effect,
+.passive-text,
+.upgrade-desc,
+.upgrade-effect,
+.upgrade-text,
+.unit-upgrade-desc {
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}

@@ -1,0 +1,29 @@
+<template id="tpl-sidebar">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <svg class="brand-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+        <path d="M3 5V19A9 3 0 0 0 21 19V5"></path>
+        <path d="M3 12A9 3 0 0 0 21 12"></path>
+      </svg>
+      <span class="brand-name">TD Database</span>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebar-nav">
+      <!-- nav items injected by sidebar.js from NAV_ITEMS data -->
+    </nav>
+
+    <!-- Unit tabs injected by sidebar.js when units are open -->
+    <div class="sidebar-unit-tabs-section hidden" id="sidebar-unit-tabs-section">
+      <div class="sidebar-divider"></div>
+      <div id="sidebar-unit-tabs" class="sidebar-unit-tabs"></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-card">
+        <span class="sidebar-footer-label">Catalog</span>
+        <span class="sidebar-footer-value">v1.2.0</span>
+      </div>
+    </div>
+  </aside>
+</template>

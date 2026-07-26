@@ -1,0 +1,246 @@
+/* Grid for trait cards */
+.traits-grid {
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)) !important;
+}
+
+/* ── Trait Card — modern neon redesign ─────────────────────────────────── */
+.trait-card {
+  --trait-accent: #c084fc;
+  --trait-soft: color-mix(in srgb, var(--trait-accent) 22%, transparent);
+  display: flex !important;
+  flex-direction: column !important;
+  text-align: left !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  cursor: default !important;
+  border-radius: 14px !important;
+  background:
+    radial-gradient(130% 70% at 50% 0%, color-mix(in srgb, var(--trait-accent) 9%, transparent) 0%, transparent 55%),
+    linear-gradient(160deg, #0d0d15 0%, #06060a 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  position: relative !important;
+  transition:
+    border-color var(--t-fast) var(--ease),
+    transform var(--t-med) var(--ease),
+    box-shadow var(--t-med) var(--ease) !important;
+}
+
+/* Animated neon top edge */
+.trait-card::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, transparent, var(--trait-accent), #67e8f9, var(--trait-accent), transparent) !important;
+  background-size: 200% 100% !important;
+  animation: trait-scan 4s linear infinite !important;
+  z-index: 3 !important;
+}
+
+@keyframes trait-scan {
+  0% {
+    background-position: 0% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.trait-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: color-mix(in srgb, var(--trait-accent) 55%, transparent) !important;
+  box-shadow: none !important;
+}
+
+/* Media / portrait area — shorter so it doesn't run too far down */
+.trait-card-media {
+  aspect-ratio: 5 / 4 !important;
+  background:
+    radial-gradient(circle at 50% 32%, color-mix(in srgb, var(--trait-accent) 22%, transparent) 0%, transparent 55%),
+    linear-gradient(160deg, #12121c 0%, #07070d 100%) !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding-top: 10% !important;
+  overflow: hidden !important;
+  position: relative !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--trait-accent) 18%, transparent) !important;
+}
+
+/* Soft glow halo behind the trait image */
+.trait-card-media::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 8% !important;
+  left: 50% !important;
+  width: 64% !important;
+  height: 64% !important;
+  transform: translateX(-50%) !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, color-mix(in srgb, var(--trait-accent) 55%, transparent) 0%, transparent 70%) !important;
+  filter: blur(18px) !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+.trait-card-media img {
+  width: 60% !important;
+  height: 60% !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 0 16px color-mix(in srgb, var(--trait-accent) 50%, transparent)) !important;
+  transition: transform var(--t-med) var(--ease) !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.trait-card:hover .trait-card-media img {
+  transform: scale(1.07) !important;
+}
+
+/* Darkening gradient so the name plate stays legible */
+.trait-card-media::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background: linear-gradient(to bottom,
+      rgba(8, 8, 12, 0) 50%,
+      rgba(8, 8, 12, 0.6) 76%,
+      rgba(8, 8, 12, 0.95) 100%) !important;
+  z-index: 1 !important;
+}
+
+/* Drop-rate chip, top-right of the portrait */
+.trait-card-drop {
+  position: absolute !important;
+  top: 9px !important;
+  right: 9px !important;
+  z-index: 2 !important;
+  font-family: var(--font-mono) !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  color: #e9d5ff !important;
+  background: rgba(10, 10, 16, 0.7) !important;
+  backdrop-filter: blur(6px) !important;
+  border: 1px solid color-mix(in srgb, var(--trait-accent) 45%, transparent) !important;
+  border-radius: 999px !important;
+  padding: 2px 8px !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+}
+
+/* Name plate pinned to the bottom of the portrait */
+.trait-card-nameplate {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 2 !important;
+  padding: 8px 9px 6px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
+}
+
+.trait-card-name {
+  font-family: var(--font-display) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  background: linear-gradient(90deg, #ec4899 0%, #a855f7 25%, #3b82f6 50%, #06b6d4 75%, #ec4899 100%) !important;
+  background-size: 200% 100% !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: rainbow-loop 8s linear infinite !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  letter-spacing: 0.01em !important;
+}
+
+.trait-card-sub {
+  font-size: 8.5px !important;
+  font-weight: 700 !important;
+  color: var(--trait-accent) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.14em !important;
+  text-shadow: 0 0 8px color-mix(in srgb, var(--trait-accent) 60%, transparent) !important;
+}
+
+/* Compact stat strip — 2-column mini grid */
+.trait-card-stats {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 4px !important;
+  padding: 7px 8px 9px !important;
+  background: linear-gradient(180deg, #0a0a0f 0%, #060609 100%) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.trait-card-stat {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 1px !important;
+  padding: 5px 3px !important;
+  border-radius: 7px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease) !important;
+}
+
+.trait-card-stat:hover {
+  background: color-mix(in srgb, var(--trait-accent) 8%, transparent) !important;
+  border-color: color-mix(in srgb, var(--trait-accent) 30%, transparent) !important;
+  box-shadow: none !important;
+}
+
+.trait-card-stat-label {
+  font-size: 7.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  color: #8f9cae !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+}
+
+.trait-card-stat-label.stat-dmg {
+  color: #f87171 !important;
+}
+
+.trait-card-stat-label.stat-spa {
+  color: #38bdf8 !important;
+}
+
+.trait-card-stat-label.stat-rng {
+  color: #fbbf24 !important;
+}
+
+.trait-card-stat-label.stat-crit {
+  color: #c084fc !important;
+}
+
+.trait-card-stat-label.stat-dot {
+  color: #fb923c !important;
+}
+
+.trait-card-stat-label.stat-place {
+  color: #34d399 !important;
+}
+
+.trait-card-stat-value {
+  font-family: var(--font-mono) !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  color: #e2e8f0 !important;
+  white-space: nowrap !important;
+}

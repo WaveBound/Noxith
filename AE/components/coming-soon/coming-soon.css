@@ -1,0 +1,38 @@
+.coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 100px 20px;
+  text-align: center;
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border-strong);
+  background: var(--background-elevated);
+}
+
+.coming-soon-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--purple-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--purple-strong);
+}
+
+.coming-soon-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.coming-soon h2 {
+  font-size: 18px;
+}
+
+.coming-soon p {
+  color: var(--muted);
+  font-size: 13px;
+  max-width: 40ch;
+}

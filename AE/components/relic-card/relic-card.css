@@ -1,0 +1,440 @@
+/* ── Relic Card Container — Clean Fixed Size ─────────── */
+.relic-card-container {
+  position: relative !important;
+  display: block !important;
+  width: 130px !important;
+  height: 130px !important;
+  max-width: 130px !important;
+  max-height: 130px !important;
+  aspect-ratio: 1 / 1 !important;
+  align-self: start !important;
+  box-sizing: border-box !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  pointer-events: auto !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+}
+
+.relic-card-container:hover {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Prevent highlighting / dragging the relic images */
+.relic-card-container img,
+.relic-modal img {
+  -webkit-user-drag: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  pointer-events: none !important;
+}
+
+.relic-card-container:focus-visible {
+  outline: 1px solid #6366f1 !important;
+  outline-offset: 1px !important;
+}
+
+/* Background image layer — Fits 100% inside container */
+.relic-card-bg {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-image: url("../../icons/relics/RelicBackground.png") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-radius: 8px !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+
+/* Relic artwork overlaid on top — Tight scale */
+.relic-card-art {
+  position: absolute !important;
+  top: 45% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 82% !important;
+  height: 82% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
+}
+
+.relic-card-art img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.55)) !important;
+  transition: transform var(--t-med) var(--ease), filter var(--t-med) var(--ease) !important;
+  transform-origin: center center !important;
+  pointer-events: none !important;
+}
+
+/* Tight hover expansion */
+.relic-card-container:hover .relic-card-art img {
+  transform: scale(1.04) !important;
+  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.65)) brightness(1.05) !important;
+}
+
+/* Relic name pinned to bottom left */
+.relic-card-name {
+  position: absolute !important;
+  left: 6px !important;
+  right: 6px !important;
+  bottom: 6px !important;
+  z-index: 3 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  line-height: 1.15 !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+  max-width: calc(100% - 12px) !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+  text-shadow:
+    -1px -1px 0 #000000,
+    1px -1px 0 #000000,
+    -1px 1px 0 #000000,
+    1px 1px 0 #000000,
+    0px 2px 4px rgba(0, 0, 0, 0.95) !important;
+  pointer-events: none !important;
+}
+
+/* ── Relic detail modal (stats + passive) ─────────────────────────────────── */
+.relic-modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 20px !important;
+  background: rgba(4, 4, 8, 0.72) !important;
+  backdrop-filter: blur(4px) !important;
+  animation: relic-modal-fade 0.25s var(--ease) forwards !important;
+}
+
+@keyframes relic-modal-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.relic-modal {
+  position: relative !important;
+  width: min(420px, 100%) !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+  background: linear-gradient(160deg, #0c0c12 0%, #060608 100%) !important;
+  border: 1px solid rgba(99, 102, 241, 0.35) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 12px !important;
+  transform-origin: center center !important;
+  animation: relic-modal-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+
+@keyframes relic-modal-pop {
+  from {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+.relic-modal-close {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  z-index: 20 !important;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: var(--radius-sm) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #cbd5e1 !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease) !important;
+}
+
+.relic-modal-close:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+.relic-modal-head {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 14px !important;
+  padding-right: 30px !important;
+}
+
+.relic-modal-art {
+  width: 52px !important;
+  height: 52px !important;
+  flex-shrink: 0 !important;
+  border-radius: var(--radius-md) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: radial-gradient(120% 80% at 50% 0%, #16161f 0%, #08080b 70%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+}
+
+.relic-modal-art img {
+  width: 90% !important;
+  height: 90% !important;
+  object-fit: contain !important;
+}
+
+.relic-modal-title {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+  min-width: 0 !important;
+}
+
+.relic-modal-slot {
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  color: #6b7280 !important;
+  line-height: 1.2 !important;
+}
+
+.relic-modal-name {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #f4f4f5 !important;
+  line-height: 1.2 !important;
+}
+
+/* Stats grid inside modal */
+.relic-modal-stats {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 6px !important;
+  width: 100% !important;
+  margin-bottom: 14px !important;
+}
+
+.relic-modal-stat-box {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 6px 9px !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-radius: var(--radius-sm) !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.relic-modal-stat-icon {
+  width: 15px !important;
+  height: 15px !important;
+  display: inline-flex !important;
+  color: #8b8f9a !important;
+  flex-shrink: 0 !important;
+}
+
+.relic-modal-stat-icon svg,
+.relic-modal-stat-icon img {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.relic-modal-stat-body {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  min-width: 0 !important;
+  line-height: 1.15 !important;
+}
+
+.relic-modal-stat-label {
+  color: #9ca3af !important;
+  font-size: 8.5px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+}
+
+.relic-modal-stat-value {
+  font-family: var(--font-mono) !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  white-space: nowrap !important;
+}
+
+/* Passive block inside modal */
+.relic-modal-passive {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.relic-modal-passive-header {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  margin-bottom: 6px !important;
+}
+
+.relic-modal-passive-tag {
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  color: #0a0a10 !important;
+  background: linear-gradient(90deg, #22d3ee, #38bdf8) !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+}
+
+.relic-modal-passive-title {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.relic-modal-passive-text {
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 13.5px !important;
+  line-height: 1.45 !important;
+  color: #9ca3af !important;
+  padding: 10px 12px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(99, 102, 241, 0.18) !important;
+  border-radius: var(--radius-md) !important;
+  box-sizing: border-box !important;
+}
+
+/* ── Section Header Spacing ── */
+.relic-section {
+  margin-bottom: 16px !important;
+}
+
+.relic-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px !important;
+}
+
+.relic-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+  padding-bottom: 0 !important;
+  border-bottom: none !important;
+}
+
+.relic-section-badge {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.relic-section-badge.unit-badge {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.relic-section-badge.global-badge {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.relic-section-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.relic-section-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 10px 0 14px 0 !important;
+}
+
+/* Relic Grid Cells — Tight 8px Gap */
+.relic-section .entity-grid {
+  grid-template-columns: repeat(auto-fill, 130px) !important;
+  gap: 8px !important;
+  justify-content: start !important;
+}
+
+@media (max-width: 600px) {
+  .relic-section .entity-grid {
+    grid-template-columns: repeat(auto-fill, 86px) !important;
+    gap: 6px !important;
+  }
+
+  .relic-card-container {
+    width: 86px !important;
+    height: 86px !important;
+    max-width: 86px !important;
+    max-height: 86px !important;
+    border-radius: 6px !important;
+  }
+}
