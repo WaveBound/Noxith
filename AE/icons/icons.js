@@ -1,57 +1,57 @@
 export const UNIT_INFO_ICONS = {
-    totalCost: "icons/unit-info/yen.png",
-    yen: "icons/unit-info/yen.png",
-    damage: "icons/unit-info/damage.png",
-    spa: "icons/unit-info/spa.png",
-    range: "icons/unit-info/range.png",
-    critChance: "icons/unit-info/critrate.png",
-    critDamage: "icons/unit-info/critdamage.png",
+    totalCost: "./icons/unit-info/yen.png",
+    yen: "./icons/unit-info/yen.png",
+    damage: "./icons/unit-info/damage.png",
+    spa: "./icons/unit-info/spa.png",
+    range: "./icons/unit-info/range.png",
+    critChance: "./icons/unit-info/critrate.png",
+    critDamage: "./icons/unit-info/critdamage.png",
 };
 
 // ── Element / Archetype / Status PNG icons ──────────────────────────────────
 export const ELEMENT_ICONS = {
-    hydro: "icons/elements/hydro.png",
-    flame: "icons/elements/flame.png",
-    terra: "icons/elements/terra.png",
-    gale: "icons/elements/gale.png",
-    storm: "icons/elements/storm.png",
-    light: "icons/elements/light.png",
-    dark: "icons/elements/dark.png",
-    neutral: "icons/elements/neutral.png",
+    hydro: "./icons/elements/hydro.png",
+    flame: "./icons/elements/flame.png",
+    terra: "./icons/elements/terra.png",
+    gale: "./icons/elements/gale.png",
+    storm: "./icons/elements/storm.png",
+    light: "./icons/elements/light.png",
+    dark: "./icons/elements/dark.png",
+    neutral: "./icons/elements/neutral.png",
 };
 
 export const ARCHETYPE_ICONS = {
-    magical: "icons/archetypes/magical.png",
-    physical: "icons/archetypes/physical.png",
-    psychic: "icons/archetypes/psychic.png",
+    magical: "./icons/archetypes/magical.png",
+    physical: "./icons/archetypes/physical.png",
+    psychic: "./icons/archetypes/psychic.png",
 };
 
 export const STATUS_ICONS = {
-    bleed: "icons/status/bleed.png",
-    burn: "icons/status/burn.png",
-    austereflames: "icons/status/AustereFlames.png",
-    manaburn: "icons/status/ManaBurn.png",
-    freeze: "icons/status/freeze.png",
-    slow: "icons/status/slow.png",
-    stun: "icons/status/stun.png",
-    puppetmark: "icons/status/PuppetMark.png",
-    dismembered: "icons/status/Dismembered.png",
+    bleed: "./icons/status/bleed.png",
+    burn: "./icons/status/burn.png",
+    austereflames: "./icons/status/AustereFlames.png",
+    manaburn: "./icons/status/ManaBurn.png",
+    freeze: "./icons/status/freeze.png",
+    slow: "./icons/status/slow.png",
+    stun: "./icons/status/stun.png",
+    puppetmark: "./icons/status/PuppetMark.png",
+    dismembered: "./icons/status/Dismembered.png",
 };
 
 // ── Relic artwork (PNG) ────────────────────────────────────────────────────
 export const RELIC_ICONS = {
-    "relic-promise-ring": "icons/relics/PromiseRing.png",
-    "relic-elven-battle-staff": "icons/relics/ElvenBattleStaff.png",
-    "relic-kunai": "icons/relics/Kunai.png",
-    "relic-enhanced-katana": "icons/relics/EnhancedKatana.png",
-    "relic-three-swords-from-hell": "icons/relics/ThreeSwordsFromHell.png",
-    "relic-shinigami-sword": "icons/relics/ShinigamiSword.png",
-    "relic-staff-of-chaos": "icons/relics/StaffofChaos.png",
-    "relic-warriors-axe": "icons/relics/WarriorAxe.png",
-    "relic-katana": "icons/relics/Katana.png",
-    "relic-accursed-equipment": "icons/relics/AccursedEquipment.png",
-    "relic-red-finger": "icons/relics/RedFinger.png",
-    "relic-magic-book": "icons/relics/MagicBook.png",
+    "relic-promise-ring": "./icons/relics/PromiseRing.png",
+    "relic-elven-battle-staff": "./icons/relics/ElvenBattleStaff.png",
+    "relic-kunai": "./icons/relics/Kunai.png",
+    "relic-enhanced-katana": "./icons/relics/EnhancedKatana.png",
+    "relic-three-swords-from-hell": "./icons/relics/ThreeSwordsFromHell.png",
+    "relic-shinigami-sword": "./icons/relics/ShinigamiSword.png",
+    "relic-staff-of-chaos": "./icons/relics/StaffofChaos.png",
+    "relic-warriors-axe": "./icons/relics/WarriorAxe.png",
+    "relic-katana": "./icons/relics/Katana.png",
+    "relic-accursed-equipment": "./icons/relics/AccursedEquipment.png",
+    "relic-red-finger": "./icons/relics/RedFinger.png",
+    "relic-magic-book": "./icons/relics/MagicBook.png",
 };
 
 export function relicImg(id) {
@@ -71,16 +71,16 @@ const RELIC_NAME_TO_IMG = {
     "Accursed Equipment": RELIC_ICONS["relic-accursed-equipment"],
     "Red Finger": RELIC_ICONS["relic-red-finger"],
     "Magic Book": RELIC_ICONS["relic-magic-book"],
-    "Hexed Blade": "icons/relics/HexedBlade.png",
-    "Hair Bells": "icons/relics/HairBells.png",
-    "Spirit of the Moonblade": "icons/relics/SpiritoftheMoonblade.png",
-    "Calamity's Eye": "icons/relics/CalamitysEye.png",
-    "Boulder": "icons/relics/Boulder.png",
-    "Webbed Fruit": "icons/relics/WebbedFruit.png",
-    "Emperor's Attire": "icons/relics/EmperorsAttire.png",
-    "Hell's Flower": "icons/relics/HellsFlower.png",
-    "Technique Amplifier": "icons/relics/TechniqueAmplifier.png",
-    "Dark Scepter": "icons/relics/DarkScepter.png",
+    "Hexed Blade": "./icons/relics/HexedBlade.png",
+    "Hair Bells": "./icons/relics/HairBells.png",
+    "Spirit of the Moonblade": "./icons/relics/SpiritoftheMoonblade.png",
+    "Calamity's Eye": "./icons/relics/CalamitysEye.png",
+    "Boulder": "./icons/relics/Boulder.png",
+    "Webbed Fruit": "./icons/relics/WebbedFruit.png",
+    "Emperor's Attire": "./icons/relics/EmperorsAttire.png",
+    "Hell's Flower": "./icons/relics/HellsFlower.png",
+    "Technique Amplifier": "./icons/relics/TechniqueAmplifier.png",
+    "Dark Scepter": "./icons/relics/DarkScepter.png",
 };
 
 export function relicImgByName(name) {
@@ -93,7 +93,7 @@ export function relicImgByName(name) {
 
 export function iconImg(src, alt = "", cls = "icon-img") {
     if (!src) return "";
-    return `<img src="${src}" alt="${alt}" class="${cls}" />`;
+    return `<img src="${src}" alt="${alt}" class="${cls}" onerror="this.style.display='none'" />`;
 }
 
 export const STAT_ICONS = {
@@ -169,7 +169,7 @@ export function formatPassiveText(text) {
     });
 
     // Phase 3: Inject clean HTML markup
-    const iconImgTag = (src) => src ? `<img src="${src}" class="p-kw-icon" alt="" />` : "";
+    const iconImgTag = (src) => src ? `<img src="${src}" class="p-kw-icon" alt="" onerror="this.style.display='none'" />` : "";
 
     out = out.replace(/@@TC@@/g, `<span class="p-kw p-atk-name"><span>Thunderclap Cut</span></span>`);
     out = out.replace(/@@UR@@/g, `<span class="p-kw p-atk-name"><span>Unrestrained Rampage</span></span>`);
@@ -245,20 +245,20 @@ if (typeof window !== "undefined") {
 
     function getTooltipImage(target) {
         if (!target) return "";
-        if (target.classList.contains("p-mana-burn")) return "icons/info/ManaBurnInfo.png";
-        if (target.classList.contains("p-bleed")) return "icons/info/bleedinfo.png";
-        if (target.classList.contains("p-ent")) return "icons/info/batinfo.png";
-        if (target.classList.contains("p-fua")) return "icons/info/followupinfo.png";
-        if (target.classList.contains("p-stun")) return "icons/info/StunInfo.png";
-        if (target.classList.contains("p-stagger")) return "icons/info/StaggerInfo.png";
-        if (target.classList.contains("p-slow")) return "icons/info/SlowInfo.png";
-        if (target.classList.contains("p-freeze")) return "icons/info/FreezeInfo.png";
-        if (target.classList.contains("p-frostbite")) return "icons/info/FrostbiteInfo.png";
-        if (target.classList.contains("p-rock")) return "icons/info/RockInfo.png";
-        if (target.classList.contains("p-rock-chunk")) return "icons/info/RockChunksInfo.png";
-        if (target.classList.contains("p-stone-wall")) return "icons/info/StoneWallInfo.png";
-        if (target.classList.contains("p-buffs")) return "icons/info/BuffInfo.png";
-        if (target.classList.contains("p-dismembered")) return "icons/info/DismemberedInfo.png";
+        if (target.classList.contains("p-mana-burn")) return "./icons/info/ManaBurnInfo.png";
+        if (target.classList.contains("p-bleed")) return "./icons/info/bleedinfo.png";
+        if (target.classList.contains("p-ent")) return "./icons/info/batinfo.png";
+        if (target.classList.contains("p-fua")) return "./icons/info/followupinfo.png";
+        if (target.classList.contains("p-stun")) return "./icons/info/StunInfo.png";
+        if (target.classList.contains("p-stagger")) return "./icons/info/StaggerInfo.png";
+        if (target.classList.contains("p-slow")) return "./icons/info/SlowInfo.png";
+        if (target.classList.contains("p-freeze")) return "./icons/info/FreezeInfo.png";
+        if (target.classList.contains("p-frostbite")) return "./icons/info/FrostbiteInfo.png";
+        if (target.classList.contains("p-rock")) return "./icons/info/RockInfo.png";
+        if (target.classList.contains("p-rock-chunk")) return "./icons/info/RockChunksInfo.png";
+        if (target.classList.contains("p-stone-wall")) return "./icons/info/StoneWallInfo.png";
+        if (target.classList.contains("p-buffs")) return "./icons/info/BuffInfo.png";
+        if (target.classList.contains("p-dismembered")) return "./icons/info/DismemberedInfo.png";
         return "";
     }
 

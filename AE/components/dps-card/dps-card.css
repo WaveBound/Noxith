@@ -53,16 +53,16 @@
   border-color: rgba(99, 102, 241, 0.45);
 }
 
-/* ── Multi-Column Grid Layout (Expanded width to prevent text cutoff) ── */
+/* ── Multi-Column Grid Layout (Fluid width to match original site scale) ── */
 .dps-page-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(235px, 265px));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 16px;
   width: 100%;
-  justify-content: flex-start;
+  justify-content: stretch;
 }
 
-/* ── Sleek Compact Vertical Card Container (265px max width) ───────────── */
+/* ── Sleek Card Container ───────────── */
 .dps-calculator-card {
   display: flex;
   flex-direction: column;
@@ -71,7 +71,7 @@
   border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: var(--radius-md);
   width: 100%;
-  max-width: 265px;
+  max-width: 100%;
   box-sizing: border-box;
   overflow: hidden;
   box-shadow: none !important;
@@ -446,7 +446,7 @@
   height: 26px;
   border: none !important;
   background-color: transparent !important;
-  background-image: url("../../icons/relics/RelicBackground.png") !important;
+  background-image: url("./icons/relics/RelicBackground.png") !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
