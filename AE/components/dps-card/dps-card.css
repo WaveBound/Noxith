@@ -53,7 +53,7 @@
   border-color: rgba(99, 102, 241, 0.45);
 }
 
-/* ── Multi-Column Grid Layout (Fluid width to match original site scale) ── */
+/* ── Fluid Responsive Grid Layout ── */
 .dps-page-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
@@ -62,7 +62,7 @@
   justify-content: stretch;
 }
 
-/* ── Sleek Card Container ───────────── */
+/* ── Sleek Responsive DPS Card Container ───────────── */
 .dps-calculator-card {
   display: flex;
   flex-direction: column;
@@ -77,7 +77,7 @@
   box-shadow: none !important;
 }
 
-/* ── Top Left Simple Black Rank Badge (#1, #2, #3...) ───────────────────── */
+/* ── Top Left Rank Badge (#1, #2, #3...) ───────────────────── */
 .dps-rank-badge {
   position: absolute;
   top: 6px;
@@ -446,7 +446,7 @@
   height: 26px;
   border: none !important;
   background-color: transparent !important;
-  background-image: url("./icons/relics/RelicBackground.png") !important;
+  background-image: url("../../icons/relics/RelicBackground.png") !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
