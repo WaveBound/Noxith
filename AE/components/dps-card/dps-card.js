@@ -1,7 +1,7 @@
 import { getTraitBreakdown, formatDPS, TRAIT_DEFINITIONS, getSummonsData } from "../../pages/dps-math.js";
 import { globalRelics } from "../../data/relics.js";
 import { getRelicStatsByName } from "../../data/relicstats.js";
-import { relicImgByName, ELEMENT_ICONS, ARCHETYPE_ICONS, iconImg, STAT_ICONS, formatPassiveText, STATUS_ICONS } from "../../icons/icons.js";
+import { relicImgByName, ELEMENT_ICONS, ARCHETYPE_ICONS, iconImg, STAT_ICONS, formatPassiveText, STATUS_ICONS, toAbsoluteUrl } from "../../icons/icons.js";
 import { traits as allTraitsCatalog } from "../../data/traits.js";
 
 const formatFullDPS = (value) => Math.round(Number(value) || 0).toLocaleString();
@@ -51,7 +51,7 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       selectedDpsEquip1: eq1,
       selectedDpsEquip2: eq2,
       simulateShinigamiPassive,
-      darkMageLightningMode: unit.darkMageLightningMode !== undefined ? unit.darkMageLightningMode : options.darkMageLightningMode,
+      darkMageMode: unit.darkMageMode || options.darkMageMode || "lightning",
       giantForm: unit.giantForm !== undefined ? unit.giantForm : !!options.giantForm,
       berserkState: unit.berserkState !== undefined ? unit.berserkState : !!options.berserkState,
       demonicPresence: unit.demonicPresence !== undefined ? unit.demonicPresence : !!options.demonicPresence,
@@ -557,8 +557,8 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           </div>
           ${reaperSpaRowHtml}
           <div class="dps-table-row primary">
-            <span class="dps-table-lbl spa-highlight">${breakdown.isDarkMage && breakdown.darkMageLightningMode ? "Disabled in Lightning Mode" : "Final Effective SPA"}</span>
-            <span class="dps-table-val font-mono spa-highlight">${breakdown.isDarkMage && breakdown.darkMageLightningMode ? "1.0s Constant" : breakdown.effSpa.toFixed(2) + "s"}</span>
+            <span class="dps-table-lbl spa-highlight">${breakdown.isDarkMage && breakdown.darkMageMode === "lightning" ? "Disabled in Lightning Mode" : "Final Effective SPA"}</span>
+            <span class="dps-table-val font-mono spa-highlight">${breakdown.isDarkMage && breakdown.darkMageMode === "lightning" ? "1.0s Constant" : breakdown.effSpa.toFixed(2) + "s"}</span>
           </div>
         </div>
       </div>
@@ -717,7 +717,6 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     </div>
   `;
 
-  // Attach mobile switcher tab header if summons exist
   if (summonsPanel) {
     const mobileTabs = document.createElement("div");
     mobileTabs.className = "dps-modal-mobile-tabs";
@@ -766,6 +765,12 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   });
 }
 
+function getDarkMageLabel(mode) {
+  if (mode === "both") return "Mode: Attack + Lightning";
+  if (mode === "normal") return "Mode: Attack Only";
+  return "Mode: Lightning Only (0.5x/s)";
+}
+
 export async function DpsCard(unit, options = {}) {
   const card = document.createElement("div");
   card.className = "dps-calculator-card glass-card";
@@ -774,7 +779,7 @@ export async function DpsCard(unit, options = {}) {
   const isLadyGiant = unit.id === "ladygiantenvy" || (unit.name && unit.name.includes("Lady Giant"));
   const isEighthSword = unit.id === "8thswordberserk" || (unit.name && unit.name.includes("8th Sword"));
 
-  let darkMageLightningMode = unit.darkMageLightningMode !== undefined ? unit.darkMageLightningMode : true;
+  let darkMageMode = unit.darkMageMode || "lightning";
   let giantForm = unit.giantForm !== undefined ? unit.giantForm : false;
   let berserkState = unit.berserkState !== undefined ? unit.berserkState : false;
   let demonicPresence = unit.demonicPresence !== undefined ? unit.demonicPresence : false;
@@ -794,7 +799,7 @@ export async function DpsCard(unit, options = {}) {
 
   card.innerHTML = `
     <div class="dps-card-media">
-      <img class="dps-card-portrait-full" src="${unit.image || "assets/placeholder.svg"}" alt="${unit.name}" onerror="this.src='assets/placeholder.svg'" />
+      <img class="dps-card-portrait-full" src="${toAbsoluteUrl(unit.image || "assets/placeholder.svg")}" alt="${unit.name}" onerror="this.src='assets/placeholder.svg'" />
       
       ${rank ? `<div class="dps-rank-badge ${rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : ''}">#${rank}</div>` : ""}
 
@@ -816,8 +821,8 @@ export async function DpsCard(unit, options = {}) {
     <div class="dps-optimized-container">
       <div class="dps-options-row">
         ${isDarkMage ? `
-          <button type="button" class="dps-shinigami-toggle ${darkMageLightningMode ? 'active' : ''}" id="darkmage-toggle-${unit.id}" aria-pressed="${darkMageLightningMode}">
-            Mode: ${darkMageLightningMode ? "Lightning (0.5x/s)" : "Normal Cycle"}
+          <button type="button" class="dps-shinigami-toggle active" id="darkmage-toggle-${unit.id}">
+            ${getDarkMageLabel(darkMageMode)}
           </button>
         ` : ""}
         ${isLadyGiant ? `
@@ -889,11 +894,12 @@ export async function DpsCard(unit, options = {}) {
   });
 
   darkMageToggle?.addEventListener("click", () => {
-    darkMageLightningMode = !darkMageLightningMode;
-    unit.darkMageLightningMode = darkMageLightningMode;
-    darkMageToggle.classList.toggle("active", darkMageLightningMode);
-    darkMageToggle.setAttribute("aria-pressed", String(darkMageLightningMode));
-    darkMageToggle.textContent = `Mode: ${darkMageLightningMode ? "Lightning (0.5x/s)" : "Normal Cycle"}`;
+    if (darkMageMode === "lightning") darkMageMode = "both";
+    else if (darkMageMode === "both") darkMageMode = "normal";
+    else darkMageMode = "lightning";
+
+    unit.darkMageMode = darkMageMode;
+    darkMageToggle.textContent = getDarkMageLabel(darkMageMode);
     renderCalculations();
   });
 
@@ -1016,7 +1022,7 @@ export async function DpsCard(unit, options = {}) {
     panel.innerHTML = `
       <!-- Left Side: Standalone Unit Image -->
       <div class="dps-modal-unit-standalone">
-        <img class="dps-modal-unit-img-only" src="${unit.image || "assets/placeholder.svg"}" alt="${unit.name}" onerror="this.src='assets/placeholder.svg'" />
+        <img class="dps-modal-unit-img-only" src="${toAbsoluteUrl(unit.image || "assets/placeholder.svg")}" alt="${unit.name}" onerror="this.src='assets/placeholder.svg'" />
       </div>
 
       <!-- Right Side: Clean Leaderboard Table -->
@@ -1026,7 +1032,7 @@ export async function DpsCard(unit, options = {}) {
             <div class="dps-modal-unit-row">
               <span class="dps-lh-main">${unit.name}</span>
               <span class="dps-modal-trait-badge">
-                <img src="${traitIconSrc}" alt="" onerror="this.style.display='none'" />
+                <img src="${toAbsoluteUrl(traitIconSrc)}" alt="" onerror="this.style.display='none'" />
                 ${traitDef.name} Trait
               </span>
             </div>
@@ -1092,7 +1098,7 @@ export async function DpsCard(unit, options = {}) {
     const sortedTraits = Object.keys(TRAIT_DEFINITIONS).filter(traitKey => traitKey !== "base").map(traitKey => {
       const result = optimizeRelicsForTrait(unit, traitKey, {
         simulateShinigamiPassive: shinigamiPassiveActive,
-        darkMageLightningMode,
+        darkMageMode,
         giantForm,
         berserkState,
         demonicPresence,
@@ -1115,7 +1121,7 @@ export async function DpsCard(unit, options = {}) {
         <div class="dps-trait-row-summary">
           <div class="dps-trait-info-col">
             <div class="dps-row-trait-header">
-              <img class="dps-row-trait-icon" src="${traitIconSrc}" alt="${traitDef.name}" title="${traitDef.name}" onerror="this.style.display='none'" />
+              <img class="dps-row-trait-icon" src="${toAbsoluteUrl(traitIconSrc)}" alt="${traitDef.name}" title="${traitDef.name}" onerror="this.style.display='none'" />
               <div class="dps-loadout-icons-col">${buildLoadoutIcons(topBuild)}</div>
             </div>
           </div>

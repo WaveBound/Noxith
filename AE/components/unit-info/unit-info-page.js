@@ -1,4 +1,4 @@
-import { STAT_ICONS, ELEMENT_ICONS, ARCHETYPE_ICONS, UNIT_INFO_ICONS, STATUS_ICONS, iconImg, formatPassiveText, relicImgByName } from "../../icons/icons.js";
+import { STAT_ICONS, ELEMENT_ICONS, ARCHETYPE_ICONS, UNIT_INFO_ICONS, STATUS_ICONS, iconImg, formatPassiveText, relicImgByName, toAbsoluteUrl } from "../../icons/icons.js";
 import { traits } from "../../data/traits.js";
 import { getTraitBreakdown, formatDPS } from "../../pages/dps-math.js";
 import { relicStats } from "../../data/relicstats.js";
@@ -18,7 +18,7 @@ function setUnitSubTab(unitId, tab) {
 function resolveRelicImg(name) {
   if (!name) return "";
   const match = allRelicsCatalog.find(r => r.name.toLowerCase() === String(name).toLowerCase());
-  if (match && match.image) return match.image;
+  if (match && match.image) return toAbsoluteUrl(match.image);
   return relicImgByName(name) || "";
 }
 
@@ -68,7 +68,7 @@ function buildLoadoutPanel(unit) {
   const itemsHtml = items.map(({ title, data }) => {
     if (!data) return "";
 
-    const imgSrc = resolveRelicImg(data.name) || data.image || "assets/placeholder.svg";
+    const imgSrc = resolveRelicImg(data.name) || toAbsoluteUrl(data.image || "assets/placeholder.svg");
 
     const modsHtml = (data.modifiers || []).map(m => `
       <div class="loadout-mod">
@@ -333,7 +333,7 @@ function buildStatusEffectsPanel(unit) {
           <div class="status-effect-cooldown">${e.cooldown || "0s"} Cooldown</div>
         </div>
         <div class="status-effect-icon">
-          <img src="${iconSrc}" alt="${e.name}" onerror="this.style.display='none'" />
+          <img src="${toAbsoluteUrl(iconSrc)}" alt="${e.name}" onerror="this.style.display='none'" />
         </div>
       </div>`;
   }).join("");
@@ -398,11 +398,11 @@ function buildInspector(unit) {
 
   const prefTrait = (unit.preferredTrait || "").toString().trim();
   const prefTraitDef = traits.find(t => t.name.toLowerCase() === prefTrait.toLowerCase());
-  const prefTraitImg = prefTraitDef?.image || "assets/placeholder.svg";
+  const prefTraitImg = prefTraitDef?.image ? toAbsoluteUrl(prefTraitDef.image) : "assets/placeholder.svg";
 
   panel.innerHTML = `
     <div class="inspector-portrait">
-      <img src="${unit.image || "assets/placeholder.svg"}" alt="${unit.name}" />
+      <img src="${toAbsoluteUrl(unit.image || "assets/placeholder.svg")}" alt="${unit.name}" />
     </div>
     <div class="inspector-identity">
       <div class="inspector-name">${unit.name || ""}</div>
@@ -428,8 +428,8 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
   const isLadyGiant = unit.id === "ladygiantenvy" || (unit.name && unit.name.includes("Lady Giant"));
   const isEighthSword = unit.id === "8thswordberserk" || (unit.name && unit.name.includes("8th Sword"));
 
-  if (isDarkMage && unit.darkMageLightningMode === undefined) {
-    unit.darkMageLightningMode = true;
+  if (isDarkMage && !unit.darkMageMode) {
+    unit.darkMageMode = "lightning";
   }
   if (isLadyGiant && unit.giantForm === undefined) {
     unit.giantForm = false;
@@ -458,7 +458,7 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
       effCritChance, effCritDamage, critAvgMult, avgHitDamage, effDotMult,
       unitDirectDPS, unitDoTDPS, totalSummonDPS, fuaDps, scaledBaseDamage,
       summonCount, summonDamageMult, summonDamage, summonDirectDPS, summonDoTDPS,
-      dotIntervalSPA, isElfMage, fuaBreakdowns, isReaper, giantForm, berserkState, demonicPresence } = bd;
+      dotIntervalSPA, isElfMage, fuaBreakdowns, isReaper, giantForm, berserkState, demonicPresence, darkMageMode } = bd;
 
     const placementCount = parseInt(String(unit.placementCount || unit.stats?.placementCount || "1").replace(/[^0-9]/g, ""), 10) || 1;
     const isCursedStudent = unit.id === "cursestudenttruelove" || (unit.name && unit.name.includes("Cursed Student"));
@@ -587,8 +587,9 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
             <div class="uip-dps-col-title-controls">
               ${isDarkMage ? `
                 <div class="uip-dps-stat-mode-picker">
-                  <button type="button" class="uip-dps-lvl-btn${unit.darkMageLightningMode ? " active" : ""}" data-darkmage-mode="lightning">Lightning Mode</button>
-                  <button type="button" class="uip-dps-lvl-btn${!unit.darkMageLightningMode ? " active" : ""}" data-darkmage-mode="normal">Normal Cycle</button>
+                  <button type="button" class="uip-dps-lvl-btn${(unit.darkMageMode || "lightning") === "lightning" ? " active" : ""}" data-darkmage-mode="lightning">Lightning Only</button>
+                  <button type="button" class="uip-dps-lvl-btn${unit.darkMageMode === "both" ? " active" : ""}" data-darkmage-mode="both">Attack + Lightning</button>
+                  <button type="button" class="uip-dps-lvl-btn${unit.darkMageMode === "normal" ? " active" : ""}" data-darkmage-mode="normal">Attack Only</button>
                 </div>
               ` : ""}
               ${isLadyGiant ? `
@@ -641,7 +642,7 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
                     ${isReaper ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Critical Tempo <span class="faint-mult">(-10% SPA)</span></span><span class="dps-kv-val font-mono">${(intermediateSpa * 0.90).toFixed(2)}s</span></div>` : ""}
                     ${isLadyGiant && giantForm ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Giant Form <span class="faint-mult">(+25% SPA time)</span></span><span class="dps-kv-val font-mono">${(intermediateSpa * 1.25).toFixed(2)}s</span></div>` : ""}
                     ${isEighthSword && berserkState ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Berserk State <span class="faint-mult">(-10% SPA)</span></span><span class="dps-kv-val font-mono">${(intermediateSpa * 0.90).toFixed(2)}s</span></div>` : ""}
-                    <div class="dps-kv primary"><span class="dps-kv-lbl spa-highlight">${isDarkMage && unit.darkMageLightningMode ? "Disabled in Lightning Mode" : "Final"}</span><span class="dps-kv-val font-mono spa-highlight">${isDarkMage && unit.darkMageLightningMode ? "1.0s Ticks" : effSpa.toFixed(2) + "s"}</span></div>
+                    <div class="dps-kv primary"><span class="dps-kv-lbl spa-highlight">${isDarkMage && darkMageMode === "lightning" ? "Disabled in Lightning Mode" : "Final"}</span><span class="dps-kv-val font-mono spa-highlight">${isDarkMage && darkMageMode === "lightning" ? "1.0s Ticks" : effSpa.toFixed(2) + "s"}</span></div>
                   </div>
                 </div>
                 <div class="dps-section section-range">
@@ -723,7 +724,7 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
             render();
           }
         } else if (btn.dataset.darkmageMode) {
-          unit.darkMageLightningMode = btn.dataset.darkmageMode === "lightning";
+          unit.darkMageMode = btn.dataset.darkmageMode;
           render();
         } else if (btn.dataset.giantMode) {
           unit.giantForm = btn.dataset.giantMode === "on";
@@ -781,7 +782,7 @@ export async function UnitInfoPage(unit, overrideSubTab = null) {
   const tiersHtml = (unit.tiers || []).map(t => `<span class="uip-tier">${t}</span>`).join("");
   headerLeft.innerHTML = `
     <div class="uip-avatar">
-      <img src="${unit.image || "assets/placeholder.svg"}" alt="${unit.name}" />
+      <img src="${toAbsoluteUrl(unit.image || "assets/placeholder.svg")}" alt="${unit.name}" />
     </div>
     <div class="uip-meta">
       <h1 class="uip-name">${unit.name || ""}</h1>
