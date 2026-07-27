@@ -1,3 +1,4 @@
+/* ── Unit Card Base Styles ─────────────────────────────────────────────────── */
 .unit-card {
   display: flex;
   flex-direction: column;
@@ -131,8 +132,8 @@
 }
 
 .element-storm {
-  background: rgba(14, 116, 144, 0.88) !important;
-  border-color: rgba(6, 182, 212, 0.7) !important;
+  background: rgba(15, 76, 73, 0.90) !important;
+  border-color: rgba(45, 212, 191, 0.75) !important;
   color: #ffffff !important;
 }
 
