@@ -37,11 +37,11 @@ export const ARCHETYPE_ICONS = {
 };
 
 export const STATUS_ICONS = {
-    bleed: toAbsoluteUrl("icons/status/Bleed.png"),
+    bleed: toAbsoluteUrl("icons/status/bleed.png"),
     burn: toAbsoluteUrl("icons/status/Burn.png"),
     austereflames: toAbsoluteUrl("icons/status/AustereFlames.png"),
     manaburn: toAbsoluteUrl("icons/status/ManaBurn.png"),
-    freeze: toAbsoluteUrl("icons/status/Freeze.png"),
+    freeze: toAbsoluteUrl("icons/status/freeze.png"),
     slow: toAbsoluteUrl("icons/status/Slow.png"),
     stun: toAbsoluteUrl("icons/status/Stun.png"),
     puppetmark: toAbsoluteUrl("icons/status/PuppetMark.png"),
