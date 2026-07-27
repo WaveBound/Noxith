@@ -1,4 +1,5 @@
 import { toAbsoluteUrl } from "../../icons/icons.js";
+import { units } from "../../data/units.js";
 
 const STAT_META = {
   damage: { label: "DMG", cls: "stat-dmg" },
@@ -25,6 +26,16 @@ async function loadTemplate() {
   return templatePromise;
 }
 
+// Strictly filters units where preferredTrait (recommendedTrait in unit JS file) matches this trait
+function getSynergizedUnitsForTrait(trait) {
+  const traitNameLower = (trait.name || trait.id || "").trim().toLowerCase();
+
+  return units.filter((u) => {
+    const pref = (u.preferredTrait || "").trim().toLowerCase();
+    return pref === traitNameLower;
+  });
+}
+
 function openTraitModal(trait) {
   const existing = document.querySelector(".trait-modal-backdrop");
   if (existing) existing.remove();
@@ -42,9 +53,16 @@ function openTraitModal(trait) {
     if (e.target === backdrop) close();
   });
 
-  const bestUnitsHtml = (trait.bestUnits || []).map(u => `
-    <span class="trait-synergy-chip">${u}</span>
-  `).join("");
+  const synergizedUnits = getSynergizedUnitsForTrait(trait);
+
+  const bestUnitsHtml = synergizedUnits.length > 0
+    ? synergizedUnits.map((u) => `
+        <button type="button" class="trait-synergy-chip" data-unit-id="${u.id}">
+          <img class="trait-synergy-img" src="${toAbsoluteUrl(u.image || "assets/placeholder.svg")}" alt="${u.name}" onerror="this.src='assets/placeholder.svg'" />
+          <span>${u.name}</span>
+        </button>
+      `).join("")
+    : `<span class="trait-synergy-none">No units currently list this trait as their recommended trait.</span>`;
 
   const modal = document.createElement("div");
   modal.className = "trait-detail-modal glass-card";
@@ -58,7 +76,7 @@ function openTraitModal(trait) {
           <h2>${trait.name} Trait</h2>
           <span class="trait-modal-rarity-badge">${trait.rarity}</span>
         </div>
-        <div class="trait-modal-sub">${trait.tag || "Stat Modifier Trait"} &middot; ${trait.dropRate || "0.1%"} Roll Odds</div>
+        <div class="trait-modal-sub">${trait.tag || "Stat Modifier Trait"} &middot; ${trait.dropRate || "0.1%"} Roll Odds &middot; Pity: ${trait.pity ? trait.pity.toLocaleString() : "---"}</div>
       </div>
       <button type="button" class="dps-panel-close trait-modal-close">&times;</button>
     </div>
@@ -85,15 +103,24 @@ function openTraitModal(trait) {
         </div>
       </div>
 
-      ${trait.bestUnits && trait.bestUnits.length > 0 ? `
       <div class="dps-section">
-        <div class="dps-section-hd">Best Synergized Units</div>
+        <div class="dps-section-hd">Units Recommending This Trait (${synergizedUnits.length})</div>
         <div class="trait-synergy-list">${bestUnitsHtml}</div>
-      </div>` : ""}
+      </div>
     </div>
   `;
 
   modal.querySelector(".trait-modal-close").addEventListener("click", close);
+
+  // Bind click listeners to navigate to unit page when clicking unit chip
+  modal.querySelectorAll(".trait-synergy-chip").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const unitId = btn.dataset.unitId;
+      if (!unitId) return;
+      close();
+      window.dispatchEvent(new CustomEvent("open-unit", { detail: { id: unitId } }));
+    });
+  });
 
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
@@ -115,15 +142,7 @@ export async function TraitCard(data) {
   card.querySelector('[data-role="name"]').textContent = data.name || "---";
   card.querySelector('[data-role="tag"]').textContent = data.tag || `${data.rarity || "Mythic"} Trait`;
   card.querySelector('[data-role="rarity"]').textContent = data.rarity || "Mythic";
-  card.querySelector('[data-role="drop"]').textContent = `${data.dropRate || "0.1%"} Rate`;
-  card.querySelector('[data-role="pity"]').textContent = data.pity ? data.pity.toLocaleString() : "---";
-
-  const descEl = card.querySelector('[data-role="desc"]');
-  if (data.description) {
-    descEl.textContent = data.description;
-  } else {
-    descEl.style.display = "none";
-  }
+  card.querySelector('[data-role="drop"]').textContent = `${data.dropRate || "0.1%"}`;
 
   const statsList = card.querySelector('[data-role="stats-list"]');
   statsList.innerHTML = "";
@@ -143,12 +162,6 @@ export async function TraitCard(data) {
       statsList.appendChild(cell);
     });
   }
-
-  const detailBtn = card.querySelector('[data-role="detail-btn"]');
-  detailBtn?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    openTraitModal(data);
-  });
 
   card.addEventListener("click", () => {
     openTraitModal(data);

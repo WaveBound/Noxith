@@ -15,8 +15,8 @@ export async function TraitsPage(filter = "") {
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
         </div>
-        <h1 class="traits-locked-title">Traits Catalog Under Construction</h1>
-        <p class="traits-locked-sub">The Trait Database is currently set to unpublished. Set <code>IS_TRAITS_PUBLISHED = true</code> in <code>data/traits.js</code> to publish it.</p>
+        <h1 class="traits-locked-title">Traits Database Under Construction</h1>
+        <p class="traits-locked-sub">The Trait Database is currently unpublished. Set <code>IS_TRAITS_PUBLISHED = true</code> in <code>data/traits.js</code> to publish it.</p>
       </div>
     `;
     return page;
@@ -26,26 +26,11 @@ export async function TraitsPage(filter = "") {
   let searchFilter = filter.toLowerCase().trim();
 
   page.innerHTML = `
-    <!-- Top Hero Banner & Pity Stats -->
-    <div class="traits-hero-banner glass-card">
-      <div class="traits-hero-info">
-        <span class="traits-hero-eyebrow">Reroll System Guide</span>
-        <h1 class="traits-hero-title">Traits &amp; Stat Modifiers</h1>
-        <p class="traits-hero-sub">Traits modify base stats, attack speed, range, and status effects. Higher rarity traits significantly increase total DPS.</p>
-      </div>
-      <div class="traits-hero-stats">
-        <div class="traits-stat-card">
-          <span class="traits-stat-val">0.1%</span>
-          <span class="traits-stat-lbl">Mythic Odds</span>
-        </div>
-        <div class="traits-stat-card">
-          <span class="traits-stat-val">1,500</span>
-          <span class="traits-stat-lbl">Mythic Pity</span>
-        </div>
-        <div class="traits-stat-card">
-          <span class="traits-stat-val">${traits.length}</span>
-          <span class="traits-stat-lbl">Total Traits</span>
-        </div>
+    <!-- Standard Page Header -->
+    <div class="page-title-row">
+      <div>
+        <h1>Traits</h1>
+        <div class="page-subtitle">${traits.length} traits &middot; click a trait to view details &amp; unit synergies</div>
       </div>
     </div>
 

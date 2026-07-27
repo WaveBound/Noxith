@@ -1,4 +1,4 @@
-// Set to true when you are ready to publish the Traits tab
+// Set to true when you want to publish the Traits tab
 export const IS_TRAITS_PUBLISHED = true;
 
 export const traits = [
@@ -12,7 +12,6 @@ export const traits = [
     dropRate: "0.1%",
     pity: 1500,
     description: "Grants astronomical raw damage, reduced SPA, and extra range, but restricts team placement to 1 single unit on the field.",
-    bestUnits: ["Cursed Student (True Love)", "Dark Mage (Sovereign)", "Elf Mage (Unleashed)"],
     stats: [
       { key: "damage", label: "DMG", value: "+350%", type: "buff" },
       { key: "spa", label: "SPA", value: "-5%", type: "buff" },
@@ -30,7 +29,6 @@ export const traits = [
     dropRate: "0.2%",
     pity: 750,
     description: "The premier all-rounder trait. Delivers substantial boosts to damage, attack speed, and range across all placements.",
-    bestUnits: ["Cursed Student (True Love)", "Reaper (Released)", "Lady Giant (Envy)"],
     stats: [
       { key: "damage", label: "DMG", value: "+35%", type: "buff" },
       { key: "spa", label: "SPA", value: "-15%", type: "buff" },
@@ -47,7 +45,6 @@ export const traits = [
     dropRate: "0.3%",
     pity: 500,
     description: "Specializes in critical hits, granting massive Crit Chance and Crit Damage bonuses alongside bonus range.",
-    bestUnits: ["Reaper (Released)", "Puppet (Telekinetic)", "8th Sword (Berserk)"],
     stats: [
       { key: "critChance", label: "CRIT", value: "+35%", type: "buff" },
       { key: "critDamage", label: "CDMG", value: "+35%", type: "buff" },
@@ -64,7 +61,6 @@ export const traits = [
     dropRate: "0.5%",
     pity: 300,
     description: "Amplifies status effect damage for units utilizing Bleed, Burn, Poison, or Damage-Over-Time passives.",
-    bestUnits: ["Cursed Student (True Love)", "Flame Emperor", "Hollow Blaze"],
     stats: [
       { key: "damage", label: "DMG", value: "+20%", type: "buff" },
       { key: "dotDamage", label: "DOT", value: "+50%", type: "buff" },

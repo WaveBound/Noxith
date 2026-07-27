@@ -1,34 +1,24 @@
 <template id="tpl-trait-card">
   <div class="trait-card glass-card">
-    <div class="trait-card-top-bar">
-      <span class="trait-card-rarity-pill" data-role="rarity">Mythic</span>
-      <span class="trait-card-drop-pill" data-role="drop">0.1%</span>
+    <!-- Emblem Banner Header -->
+    <div class="trait-card-media">
+      <div class="trait-media-aura"></div>
+      <img data-role="image" src="" alt="" />
+      <span class="trait-badge-rarity" data-role="rarity">Mythic</span>
+      <span class="trait-badge-rate" data-role="drop">0.1% Rate</span>
     </div>
 
-    <div class="trait-card-hero">
-      <div class="trait-card-icon-frame">
-        <img data-role="image" src="" alt="" />
+    <!-- Card Body & Stats -->
+    <div class="trait-card-body">
+      <div class="trait-title-block">
+        <h3 class="trait-name" data-role="name">---</h3>
+        <span class="trait-tag" data-role="tag">---</span>
       </div>
-      <div class="trait-card-header-text">
-        <h3 class="trait-card-title" data-role="name">---</h3>
-        <span class="trait-card-tag" data-role="tag">---</span>
+
+      <!-- Stat Modifiers Grid -->
+      <div class="trait-stats-grid" data-role="stats-list">
+        <!-- Rendered stat chips -->
       </div>
-    </div>
-
-    <p class="trait-card-description" data-role="desc">---</p>
-
-    <div class="trait-card-stats-grid" data-role="stats-list">
-      <!-- Stat pills injected dynamically -->
-    </div>
-
-    <div class="trait-card-footer">
-      <span class="trait-card-pity-label">Pity Threshold: <strong data-role="pity">---</strong></span>
-      <button type="button" class="trait-card-detail-btn" data-role="detail-btn">
-        <span>Details</span>
-        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
-          <polyline points="9 18 15 12 9 6" />
-        </svg>
-      </button>
     </div>
   </div>
 </template>
