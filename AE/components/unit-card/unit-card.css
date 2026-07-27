@@ -1,103 +1,126 @@
-/* ── Unit Card Base Styles ─────────────────────────────────────────────────── */
+/* ── Unit Card Container ─────────────────────────────────────────────────── */
 .unit-card {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
+  display: flex !important;
+  flex-direction: column !important;
+  text-align: left !important;
   overflow: hidden !important;
-  padding: 0;
-  cursor: pointer;
-  border-top: none !important;
-  transition: border-color var(--t-fast, 150ms) var(--ease, ease);
+  padding: 0 !important;
+  cursor: pointer !important;
+  border-radius: 12px !important;
+  background: linear-gradient(160deg, rgba(18, 18, 26, 0.95) 0%, rgba(8, 8, 12, 0.98) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  position: relative !important;
+  transition: transform var(--t-med) var(--ease), border-color var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease) !important;
 }
 
 .unit-card:hover {
-  border-color: var(--border-strong, #2c2c32);
-  transform: none !important;
-  box-shadow: none !important;
+  transform: translateY(-4px) !important;
+  border-color: rgba(99, 102, 241, 0.45) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Portrait & Image Placement */
-.unit-card-image {
-  aspect-ratio: 1 / 1;
-  background: radial-gradient(120% 80% at 50% 0%, #1a1a24 0%, #0c0c12 70%), var(--background-elevated, #0e0e11);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  position: relative;
-  border-bottom: 1px solid var(--border, #1e1e22);
+/* ── Portrait Media Area ───────────────────────────────────────────────────── */
+.unit-card-media {
+  height: 200px !important;
+  background: radial-gradient(120% 80% at 50% 0%, #1a1a24 0%, #0c0c12 70%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  position: relative !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
-.unit-card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform var(--t-med, 200ms) var(--ease, ease);
+.unit-card-media img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 20% !important;
+  transition: transform var(--t-med) var(--ease) !important;
 }
 
-.unit-card:hover .unit-card-image img {
-  transform: scale(1.05);
+.unit-card:hover .unit-card-media img {
+  transform: scale(1.05) !important;
 }
 
-.unit-card-image::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(to top,
-      rgba(8, 8, 11, 0.95) 0%,
-      rgba(8, 8, 11, 0.5) 30%,
-      rgba(8, 8, 11, 0) 58%);
+.unit-card-media::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background: linear-gradient(to top, rgba(8, 8, 11, 0.98) 0%, rgba(8, 8, 11, 0.4) 40%, rgba(8, 8, 11, 0) 65%) !important;
+  z-index: 1 !important;
 }
 
-/* Rarity Accents - Top borders removed */
-.unit-card.rarity-secret,
-.unit-card.rarity-mythic,
-.unit-card.rarity-legendary,
-.unit-card.rarity-epic,
-.unit-card.rarity-rare {
-  border-top: none !important;
+/* Top Left Ascension Chip */
+.unit-card-top-left {
+  position: absolute !important;
+  top: 8px !important;
+  left: 8px !important;
+  z-index: 2 !important;
 }
 
-/* Portrait Meta & Chips */
+.unit-card-ascend-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  background: rgba(16, 185, 129, 0.18) !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+  color: #34d399 !important;
+  backdrop-filter: blur(6px) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.03em !important;
+}
+
+.unit-card-ascend-chip[hidden] {
+  display: none !important;
+}
+
+/* Top Right Portrait Meta & Badges */
 .unit-card-portrait-meta {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  z-index: 2 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 4px !important;
 }
 
 .unit-card-element,
 .unit-card-archetype {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  width: auto;
-  min-width: 22px;
-  height: 22px;
-  gap: 4px;
-  padding: 2px 7px;
-  border-radius: 5px;
-  background: rgba(10, 10, 14, 0.85);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  line-height: 1;
-  color: #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 2px 7px !important;
+  border-radius: 5px !important;
+  background: rgba(10, 10, 14, 0.85) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  line-height: 1 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
 }
 
 .unit-card-element img,
 .unit-card-archetype img {
-  width: 14px;
-  height: 14px;
-  object-fit: contain;
+  width: 12px !important;
+  height: 12px !important;
+  object-fit: contain !important;
 }
 
-/* ── Comprehensive Elemental & Archetype Badges Color Styles ── */
+.unit-card-badge-text {
+  font-size: 8.5px !important;
+  font-weight: 750 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.03em !important;
+}
+
+/* ── Elemental & Archetype Theme Color Styles ── */
 .element-dark,
 .element-shadow,
 .element-curse {
@@ -177,40 +200,8 @@
   color: #ffffff !important;
 }
 
-.element-cosmic,
-.element-astro,
-.element-spatial {
-  background: rgba(30, 27, 75, 0.85) !important;
-  border-color: rgba(99, 102, 241, 0.6) !important;
-  color: #ffffff !important;
-}
-
-.element-poison,
-.element-toxic,
-.element-venom {
-  background: rgba(54, 83, 20, 0.85) !important;
-  border-color: rgba(132, 204, 22, 0.6) !important;
-  color: #ffffff !important;
-}
-
-.element-nature,
-.element-grass,
-.element-leaf {
-  background: rgba(20, 83, 45, 0.85) !important;
-  border-color: rgba(34, 197, 94, 0.6) !important;
-  color: #ffffff !important;
-}
-
-.element-blood,
-.element-bleed {
-  background: rgba(69, 10, 10, 0.85) !important;
-  border-color: rgba(220, 38, 38, 0.6) !important;
-  color: #ffffff !important;
-}
-
 .element-neutral,
-.element-none,
-.element-untyped {
+.element-none {
   background: rgba(30, 41, 59, 0.85) !important;
   border-color: rgba(100, 116, 139, 0.6) !important;
   color: #ffffff !important;
@@ -229,154 +220,131 @@
   color: #ffffff !important;
 }
 
-.archetype-hybrid {
-  background: rgba(46, 16, 101, 0.85) !important;
-  border-color: rgba(139, 92, 246, 0.6) !important;
-  color: #ffffff !important;
-}
-
-/* Text Overlays */
+/* ── Bottom Nameplate Overlay ─────────────────────────────────────────────── */
 .unit-card-nameplate {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
-  padding: 10px 10px 9px;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 2 !important;
+  padding: 8px 10px 6px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
 }
 
 .unit-card-name {
-  font-family: var(--font-display, inherit);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text, #fafafa);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display, inherit) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  letter-spacing: -0.01em !important;
   text-shadow:
-    -1px -1px 0 #000000,
-    1px -1px 0 #000000,
-    -1px 1px 0 #000000,
-    1px 1px 0 #000000,
-    0px 1px 3px rgba(0, 0, 0, 0.95);
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0px 2px 4px rgba(0, 0, 0, 0.95) !important;
 }
 
 .unit-card-sub {
-  font-size: 10.5px;
-  color: var(--muted, #71717a);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 9.5px !important;
+  font-weight: 600 !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
-.unit-card-meta-row {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  min-width: 0;
-}
-
-.unit-card-ascend-chip {
-  flex-shrink: 0;
-  padding: 1px 4px;
-  border: 1px solid rgba(16, 185, 129, 0.28);
-  border-radius: 2px;
-  background: rgba(16, 185, 129, 0.14);
-  color: #34d399;
-  font-size: 8.5px;
-  font-weight: 700;
-}
-
-.unit-card-ascend-chip[hidden] {
-  display: none;
-}
-
-.unit-card-badge-text {
-  font-size: 8.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-/* Stat Rows */
+/* ── Stat Section Bar ─────────────────────────────────────────────────────── */
 .unit-card-body {
-  padding: 8px 10px 8px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  background: linear-gradient(180deg, #0d0d12 0%, #0a0a0e 100%);
+  padding: 8px 10px !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 5px !important;
+  background: linear-gradient(180deg, #0b0b10 0%, #060608 100%) !important;
 }
 
 .unit-card-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 6px 2px;
-  border-radius: var(--radius-sm, 4px);
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border, #1e1e22);
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  padding: 5px 2px !important;
+  border-radius: 6px !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
 .unit-card-stat-label {
-  font-size: 8.5px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
 }
 
 .unit-card-stat-label.stat-dmg {
-  color: #c0392b;
+  color: #f87171 !important;
 }
 
 .unit-card-stat-label.stat-spa {
-  color: #38bdf8;
+  color: #38bdf8 !important;
 }
 
 .unit-card-stat-label.stat-rng {
-  color: #facc15;
+  color: #fbbf24 !important;
 }
 
 .unit-card-stat-value {
-  font-size: 11px;
-  color: var(--text, #fafafa);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  white-space: nowrap !important;
 }
 
-/* Card Footer Trigger */
+/* ── Integrated Footer Action Button ──────────────────────────────────────── */
 .unit-card-footer {
-  padding: 0 10px 10px;
-  background: #0a0a0e;
+  padding: 0 8px 8px !important;
+  background: #060608 !important;
 }
 
 .unit-card-dps-btn {
-  width: 100%;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm, 4px);
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  color: var(--text-secondary, #a1a1aa);
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 120ms ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
+  width: 100% !important;
+  padding: 6px 10px !important;
+  border-radius: 6px !important;
+  background: rgba(99, 102, 241, 0.1) !important;
+  border: 1px solid rgba(99, 102, 241, 0.28) !important;
+  color: #a5b4fc !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 120ms ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
 }
 
 .unit-card-dps-btn:hover {
-  background: rgba(99, 102, 241, 0.16);
-  border-color: var(--purple-strong, #818cf8);
-  color: var(--text, #fafafa);
+  background: rgba(99, 102, 241, 0.22) !important;
+  border-color: rgba(99, 102, 241, 0.5) !important;
+  color: #ffffff !important;
+}
+
+.unit-card-btn-arrow {
+  margin-left: auto !important;
+  opacity: 0.6 !important;
+  transition: transform 120ms ease, opacity 120ms ease !important;
+}
+
+.unit-card-dps-btn:hover .unit-card-btn-arrow {
+  transform: translateX(2px) !important;
+  opacity: 1 !important;
 }
 
 /* ── Modal Backdrop and standard typography layout ───────── */

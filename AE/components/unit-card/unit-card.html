@@ -1,34 +1,45 @@
-<!-- --- START OF FILE unit-card.html --- -->
 <template id="tpl-unit-card">
   <div class="unit-card glass-card">
-    <div class="unit-card-image">
+    <div class="unit-card-media">
       <img data-role="image" src="" alt="" />
+
+      <!-- Top Left Ascended Badge -->
+      <div class="unit-card-top-left">
+        <span class="unit-card-ascend-chip" data-role="ascend">Ascended 3</span>
+      </div>
+
+      <!-- Top Right Element & Archetype Badges -->
       <div class="unit-card-portrait-meta">
         <span class="unit-card-element" data-role="element">—</span>
         <span class="unit-card-archetype" data-role="archetype">—</span>
       </div>
+
+      <!-- Bottom Overlay Nameplate -->
       <div class="unit-card-nameplate">
-        <span class="unit-card-name" data-role="name">---</span>
+        <h3 class="unit-card-name" data-role="name">---</h3>
         <div class="unit-card-meta-row">
           <span class="unit-card-sub" data-role="trait">---</span>
-          <span class="unit-card-ascend-chip" data-role="ascend">Ascended 3</span>
         </div>
       </div>
     </div>
+
+    <!-- 3-Column Compact Stat Bar -->
     <div class="unit-card-body">
-      <div class="unit-card-stat">
+      <div class="unit-card-stat stat-box-dmg">
         <span class="unit-card-stat-label stat-dmg">DMG</span>
         <span class="unit-card-stat-value stat-value" data-role="damage">—</span>
       </div>
-      <div class="unit-card-stat">
+      <div class="unit-card-stat stat-box-spa">
         <span class="unit-card-stat-label stat-spa">SPA</span>
         <span class="unit-card-stat-value stat-value" data-role="spa">—</span>
       </div>
-      <div class="unit-card-stat">
+      <div class="unit-card-stat stat-box-rng">
         <span class="unit-card-stat-label stat-rng">RNG</span>
         <span class="unit-card-stat-value stat-value" data-role="range">—</span>
       </div>
     </div>
+
+    <!-- Integrated Footer Action -->
     <div class="unit-card-footer">
       <button type="button" class="unit-card-dps-btn" data-role="breakdown-btn">
         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"
@@ -38,6 +49,10 @@
           <line x1="6" y1="20" x2="6" y2="14"></line>
         </svg>
         <span>DPS Breakdown</span>
+        <svg class="unit-card-btn-arrow" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor"
+          stroke-width="2.5">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
       </button>
     </div>
   </div>

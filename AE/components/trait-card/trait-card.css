@@ -1,216 +1,236 @@
 /* Grid for trait cards */
 .traits-grid {
-  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)) !important;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  gap: 16px !important;
+  width: 100% !important;
 }
 
-/* ── Trait Card — modern neon redesign ─────────────────────────────────── */
+/* Locked / Preview Screen */
+.traits-locked-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  margin: 40px auto;
+  max-width: 520px;
+  border-radius: 12px;
+}
+
+.traits-locked-icon {
+  color: var(--purple-strong, #818cf8);
+  margin-bottom: 16px;
+  opacity: 0.85;
+}
+
+.traits-locked-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text, #fafafa);
+  margin-bottom: 8px;
+}
+
+.traits-locked-sub {
+  font-size: 13px;
+  color: var(--muted, #71717a);
+  line-height: 1.5;
+}
+
+/* Header & Filter Bar */
+.traits-page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.traits-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.traits-rarity-chips {
+  display: flex;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border, #16161a);
+  padding: 3px;
+  border-radius: 6px;
+}
+
+.trait-filter-btn {
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary, #a1a1aa);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.trait-filter-btn:hover {
+  color: var(--text, #fafafa);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.trait-filter-btn.active {
+  color: #ffffff;
+  background: rgba(99, 102, 241, 0.22);
+  border-color: rgba(99, 102, 241, 0.45);
+}
+
+.traits-empty-state {
+  padding: 40px;
+  text-align: center;
+  color: var(--muted, #71717a);
+  font-size: 13px;
+}
+
+/* ── Trait Card — Modern Neon Redesign ─────────────────────────────────── */
 .trait-card {
-  --trait-accent: #c084fc;
-  --trait-soft: color-mix(in srgb, var(--trait-accent) 22%, transparent);
+  --trait-accent: #a855f7;
   display: flex !important;
   flex-direction: column !important;
   text-align: left !important;
   overflow: hidden !important;
   padding: 0 !important;
   cursor: default !important;
-  border-radius: 14px !important;
-  background:
-    radial-gradient(130% 70% at 50% 0%, color-mix(in srgb, var(--trait-accent) 9%, transparent) 0%, transparent 55%),
-    linear-gradient(160deg, #0d0d15 0%, #06060a 100%) !important;
+  border-radius: 12px !important;
+  background: linear-gradient(160deg, #0e0e14 0%, #060609 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   position: relative !important;
-  transition:
-    border-color var(--t-fast) var(--ease),
-    transform var(--t-med) var(--ease),
-    box-shadow var(--t-med) var(--ease) !important;
-}
-
-/* Animated neon top edge */
-.trait-card::before {
-  content: "" !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  height: 2px !important;
-  background: linear-gradient(90deg, transparent, var(--trait-accent), #67e8f9, var(--trait-accent), transparent) !important;
-  background-size: 200% 100% !important;
-  animation: trait-scan 4s linear infinite !important;
-  z-index: 3 !important;
-}
-
-@keyframes trait-scan {
-  0% {
-    background-position: 0% 0;
-  }
-
-  100% {
-    background-position: 200% 0;
-  }
+  transition: border-color var(--t-fast) var(--ease), transform var(--t-med) var(--ease) !important;
 }
 
 .trait-card:hover {
-  transform: translateY(-4px) !important;
-  border-color: color-mix(in srgb, var(--trait-accent) 55%, transparent) !important;
-  box-shadow: none !important;
+  transform: translateY(-3px) !important;
+  border-color: rgba(168, 85, 247, 0.45) !important;
 }
 
-/* Media / portrait area — shorter so it doesn't run too far down */
+/* Media / Portrait Area */
 .trait-card-media {
-  aspect-ratio: 5 / 4 !important;
-  background:
-    radial-gradient(circle at 50% 32%, color-mix(in srgb, var(--trait-accent) 22%, transparent) 0%, transparent 55%),
-    linear-gradient(160deg, #12121c 0%, #07070d 100%) !important;
+  height: 140px !important;
+  background: radial-gradient(120% 80% at 50% 0%, rgba(168, 85, 247, 0.18) 0%, rgba(12, 12, 18, 0.9) 70%) !important;
   display: flex !important;
-  align-items: flex-start !important;
+  align-items: center !important;
   justify-content: center !important;
-  padding-top: 10% !important;
   overflow: hidden !important;
   position: relative !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--trait-accent) 18%, transparent) !important;
-}
-
-/* Soft glow halo behind the trait image */
-.trait-card-media::before {
-  content: "" !important;
-  position: absolute !important;
-  top: 8% !important;
-  left: 50% !important;
-  width: 64% !important;
-  height: 64% !important;
-  transform: translateX(-50%) !important;
-  border-radius: 50% !important;
-  background: radial-gradient(circle, color-mix(in srgb, var(--trait-accent) 55%, transparent) 0%, transparent 70%) !important;
-  filter: blur(18px) !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
 .trait-card-media img {
-  width: 60% !important;
-  height: 60% !important;
+  width: 72px !important;
+  height: 72px !important;
   object-fit: contain !important;
-  filter: drop-shadow(0 0 16px color-mix(in srgb, var(--trait-accent) 50%, transparent)) !important;
+  filter: drop-shadow(0 4px 12px rgba(168, 85, 247, 0.4)) !important;
   transition: transform var(--t-med) var(--ease) !important;
-  position: relative !important;
-  z-index: 1 !important;
 }
 
 .trait-card:hover .trait-card-media img {
-  transform: scale(1.07) !important;
+  transform: scale(1.08) !important;
 }
 
-/* Darkening gradient so the name plate stays legible */
-.trait-card-media::after {
-  content: "" !important;
+.trait-card-badges {
   position: absolute !important;
-  inset: 0 !important;
-  pointer-events: none !important;
-  background: linear-gradient(to bottom,
-      rgba(8, 8, 12, 0) 50%,
-      rgba(8, 8, 12, 0.6) 76%,
-      rgba(8, 8, 12, 0.95) 100%) !important;
-  z-index: 1 !important;
-}
-
-/* Drop-rate chip, top-right of the portrait */
-.trait-card-drop {
-  position: absolute !important;
-  top: 9px !important;
-  right: 9px !important;
+  top: 8px !important;
+  right: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 4px !important;
   z-index: 2 !important;
-  font-family: var(--font-mono) !important;
-  font-size: 9px !important;
-  font-weight: 700 !important;
-  color: #e9d5ff !important;
-  background: rgba(10, 10, 16, 0.7) !important;
-  backdrop-filter: blur(6px) !important;
-  border: 1px solid color-mix(in srgb, var(--trait-accent) 45%, transparent) !important;
-  border-radius: 999px !important;
-  padding: 2px 8px !important;
-  white-space: nowrap !important;
-  box-shadow: none !important;
 }
 
-/* Name plate pinned to the bottom of the portrait */
+.trait-card-drop,
+.trait-card-pity {
+  font-family: var(--font-mono) !important;
+  font-size: 8.5px !important;
+  font-weight: 700 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  background: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(6px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  text-transform: uppercase !important;
+}
+
+.trait-card-drop {
+  border-color: rgba(168, 85, 247, 0.4) !important;
+  color: #c084fc !important;
+}
+
 .trait-card-nameplate {
   position: absolute !important;
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
   z-index: 2 !important;
-  padding: 8px 9px 6px !important;
+  padding: 8px 10px !important;
   display: flex !important;
   flex-direction: column !important;
   gap: 1px !important;
+  background: linear-gradient(to top, rgba(8, 8, 12, 0.95) 0%, rgba(8, 8, 12, 0) 100%) !important;
 }
 
 .trait-card-name {
   font-family: var(--font-display) !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
   font-weight: 800 !important;
-  background: linear-gradient(90deg, #ec4899 0%, #a855f7 25%, #3b82f6 50%, #06b6d4 75%, #ec4899 100%) !important;
-  background-size: 200% 100% !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  animation: rainbow-loop 8s linear infinite !important;
+  color: #ffffff !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  letter-spacing: 0.01em !important;
 }
 
 .trait-card-sub {
-  font-size: 8.5px !important;
+  font-size: 9px !important;
   font-weight: 700 !important;
-  color: var(--trait-accent) !important;
+  color: #c084fc !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.14em !important;
-  text-shadow: 0 0 8px color-mix(in srgb, var(--trait-accent) 60%, transparent) !important;
+  letter-spacing: 0.05em !important;
 }
 
-/* Compact stat strip — 2-column mini grid */
+.trait-card-desc {
+  font-size: 10.5px !important;
+  color: var(--text-secondary, #a1a1aa) !important;
+  line-height: 1.35 !important;
+  padding: 8px 10px 4px !important;
+}
+
+/* Compact Stat Strip */
 .trait-card-stats {
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
-  gap: 4px !important;
-  padding: 7px 8px 9px !important;
-  background: linear-gradient(180deg, #0a0a0f 0%, #060609 100%) !important;
+  gap: 5px !important;
+  padding: 8px 10px 10px !important;
   width: 100% !important;
   box-sizing: border-box !important;
 }
 
 .trait-card-stat {
   display: flex !important;
-  flex-direction: column !important;
   align-items: center !important;
-  justify-content: center !important;
-  gap: 1px !important;
-  padding: 5px 3px !important;
-  border-radius: 7px !important;
-  background: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
-  transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease) !important;
-}
-
-.trait-card-stat:hover {
-  background: color-mix(in srgb, var(--trait-accent) 8%, transparent) !important;
-  border-color: color-mix(in srgb, var(--trait-accent) 30%, transparent) !important;
-  box-shadow: none !important;
+  justify-content: space-between !important;
+  padding: 4px 6px !important;
+  border-radius: 5px !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
 .trait-card-stat-label {
-  font-size: 7.5px !important;
+  font-size: 8px !important;
   font-weight: 700 !important;
-  letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
   color: #8f9cae !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  max-width: 100% !important;
 }
 
 .trait-card-stat-label.stat-dmg {
@@ -239,8 +259,7 @@
 
 .trait-card-stat-value {
   font-family: var(--font-mono) !important;
-  font-size: 10.5px !important;
-  font-weight: 700 !important;
-  color: #e2e8f0 !important;
-  white-space: nowrap !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
 }

@@ -1,10 +1,8 @@
-// Compact top toolbar: breadcrumb path + interactive Spotlight Search popdown + Mobile Hamburger Menu + Persistent Dynamic Notifications.
-
 import { setActiveTab, openTab } from "../tabs/tabs.js";
 import { openRelicModal } from "../relic-card/relic-card.js";
 import { units } from "../../data/units.js";
 import { relics } from "../../data/relics.js";
-import { traits } from "../../data/traits.js";
+import { traits, IS_TRAITS_PUBLISHED } from "../../data/traits.js";
 import { getItem, setItem } from "../../js/store.js";
 
 const NOTIF_STORAGE_KEY = "notifications-read-state";
@@ -42,7 +40,7 @@ function generateDynamicNotifications() {
   }));
 }
 
-const MAIN_TABS = [
+const ALL_MAIN_TABS = [
   {
     id: "home",
     name: "Home Dashboard",
@@ -73,6 +71,7 @@ const MAIN_TABS = [
     subtitle: "Unit Trait Modifiers & Rarity",
     badge: "Section",
     type: "main-tab",
+    published: IS_TRAITS_PUBLISHED,
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3c0 5 14 5 14 10s-14 5-14 10"/><path d="M19 3c0 5-14 5-14 10"/><path d="M7 7h10M7 17h10"/></svg>`,
   },
   {
@@ -94,6 +93,8 @@ const MAIN_TABS = [
 ];
 
 export function renderHeader(mountEl) {
+  const MAIN_TABS = ALL_MAIN_TABS.filter(t => t.id !== "traits" || IS_TRAITS_PUBLISHED);
+
   const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform || "") ||
     /Mac/.test(navigator.userAgent || "");
   const kbdLabel = isMac ? "⌘K" : "Ctrl K";
@@ -121,7 +122,7 @@ export function renderHeader(mountEl) {
     <div class="header-search-container">
       <div class="header-search">
         <svg class="search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input type="text" placeholder="Search tabs, units, relics, traits…" id="global-search" autocomplete="off" />
+        <input type="text" placeholder="Search tabs, units, relics..." id="global-search" autocomplete="off" />
         <button type="button" class="search-clear-btn" id="search-clear-btn" title="Clear search" hidden>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
@@ -133,7 +134,7 @@ export function renderHeader(mountEl) {
           <button type="button" class="filter-tab" data-filter="tabs">Tabs</button>
           <button type="button" class="filter-tab" data-filter="units">Units</button>
           <button type="button" class="filter-tab" data-filter="relics">Relics</button>
-          <button type="button" class="filter-tab" data-filter="traits">Traits</button>
+          ${IS_TRAITS_PUBLISHED ? `<button type="button" class="filter-tab" data-filter="traits">Traits</button>` : ""}
         </div>
         <div class="search-popdown-results" id="search-popdown-results"></div>
         <div class="search-popdown-footer">
@@ -175,7 +176,6 @@ export function renderHeader(mountEl) {
 
   mountEl.appendChild(header);
 
-  // Setup Mobile Drawer Toggle & Overlay Backdrop
   let backdrop = document.querySelector(".sidebar-backdrop");
   if (!backdrop) {
     backdrop = document.createElement("div");
@@ -238,7 +238,6 @@ export function renderHeader(mountEl) {
   function getMatches(query) {
     const q = query.trim().toLowerCase();
 
-    // 1. Main Navigation Tabs
     const mainMatches = MAIN_TABS.filter((t) => {
       if (activeFilter !== "all" && activeFilter !== "tabs") return false;
       if (!q) return true;
@@ -253,7 +252,6 @@ export function renderHeader(mountEl) {
       badgeClass: "badge-tab",
     }));
 
-    // 2. Units
     const unitMatches = units.filter((u) => {
       if (activeFilter !== "all" && activeFilter !== "units") return false;
       if (!q) return true;
@@ -272,7 +270,6 @@ export function renderHeader(mountEl) {
       image: u.image || "assets/placeholder.svg",
     }));
 
-    // 3. Relics
     const relicMatches = relics.filter((r) => {
       if (activeFilter !== "all" && activeFilter !== "relics") return false;
       if (!q) return true;
@@ -291,8 +288,7 @@ export function renderHeader(mountEl) {
       image: r.image || "assets/placeholder.svg",
     }));
 
-    // 4. Traits
-    const traitMatches = traits.filter((tr) => {
+    const traitMatches = IS_TRAITS_PUBLISHED ? traits.filter((tr) => {
       if (activeFilter !== "all" && activeFilter !== "traits") return false;
       if (!q) return true;
       return (
@@ -307,7 +303,7 @@ export function renderHeader(mountEl) {
       badgeClass: "badge-trait",
       type: "trait",
       image: tr.image || "assets/placeholder.svg",
-    }));
+    })) : [];
 
     return { mainMatches, unitMatches, relicMatches, traitMatches, q };
   }
@@ -444,7 +440,7 @@ export function renderHeader(mountEl) {
       if (targetRelic) {
         setTimeout(() => openRelicModal(targetRelic), 50);
       }
-    } else if (type === "trait") {
+    } else if (type === "trait" && IS_TRAITS_PUBLISHED) {
       window.dispatchEvent(new CustomEvent("navigate", { detail: { id: "traits" } }));
     }
 
@@ -538,7 +534,6 @@ export function renderHeader(mountEl) {
     window.dispatchEvent(new CustomEvent("navigate", { detail: { id: section } }));
   });
 
-  // Persistent Notifications logic
   const notifBtn = header.querySelector("#notif-btn");
   const notifTray = header.querySelector("#notif-tray");
   const notifClear = header.querySelector("#notif-clear");

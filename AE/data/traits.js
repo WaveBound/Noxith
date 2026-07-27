@@ -1,10 +1,5 @@
-// Trait catalog. Append new objects to add traits — no HTML changes needed.
-//
-// Each trait uses the same stat-modifier shape as relics:
-//   stats: [ { damage: "+350%" }, { spa: "-5%" }, ... ]
-// Rarity drives the card accent color (rarityColor) and the drop-rate badge.
-//   dropRate: display string for the base roll chance
-//   pity:     number of rolls until a guaranteed pull
+// Set to true when you are ready to publish the Traits tab
+export const IS_TRAITS_PUBLISHED = true;
 
 export const traits = [
   {
@@ -15,11 +10,12 @@ export const traits = [
     rarityColor: "#a855f7",
     dropRate: "0.1%",
     pity: 1500,
+    description: "Massive damage boost at the cost of restricting placement count to 1 unit.",
     stats: [
-      { damage: "+350%" },
-      { spa: "-5%" },
-      { range: "+10%" },
-      { placement: "1" },
+      { key: "damage", label: "DMG", value: "+350%", type: "buff" },
+      { key: "spa", label: "SPA", value: "-5%", type: "buff" },
+      { key: "range", label: "RNG", value: "+10%", type: "buff" },
+      { key: "placement", label: "PLACE", value: "1 Max", type: "limit" },
     ],
   },
   {
@@ -30,10 +26,11 @@ export const traits = [
     rarityColor: "#a855f7",
     dropRate: "0.2%",
     pity: 750,
+    description: "Balanced high-tier trait boosting raw damage, attack speed, and range.",
     stats: [
-      { damage: "+35%" },
-      { spa: "-15%" },
-      { range: "+20%" },
+      { key: "damage", label: "DMG", value: "+35%", type: "buff" },
+      { key: "spa", label: "SPA", value: "-15%", type: "buff" },
+      { key: "range", label: "RNG", value: "+20%", type: "buff" },
     ],
   },
   {
@@ -44,10 +41,11 @@ export const traits = [
     rarityColor: "#a855f7",
     dropRate: "0.3%",
     pity: 500,
+    description: "Critical strike specialization granting high Crit Rate and Crit Damage.",
     stats: [
-      { critDamage: "+35%" },
-      { critChance: "+35%" },
-      { range: "+10%" },
+      { key: "critChance", label: "CRIT", value: "+35%", type: "buff" },
+      { key: "critDamage", label: "CDMG", value: "+35%", type: "buff" },
+      { key: "range", label: "RNG", value: "+10%", type: "buff" },
     ],
   },
   {
@@ -58,10 +56,11 @@ export const traits = [
     rarityColor: "#a855f7",
     dropRate: "0.5%",
     pity: 300,
+    description: "Empowers status effect damage for units with Bleed or DoT abilities.",
     stats: [
-      { damage: "+20%" },
-      { dotDamage: "+50%" },
-      { range: "+10%" },
+      { key: "damage", label: "DMG", value: "+20%", type: "buff" },
+      { key: "dotDamage", label: "DOT", value: "+50%", type: "buff" },
+      { key: "range", label: "RNG", value: "+10%", type: "buff" },
     ],
   },
 ];
