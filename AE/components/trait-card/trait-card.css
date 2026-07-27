@@ -1,4 +1,4 @@
-/* ── Traits Page Grid Layout ──────────────────────────────────────────────── */
+/* Grid for trait cards */
 .traits-grid {
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)) !important;
@@ -6,7 +6,46 @@
   width: 100% !important;
 }
 
-/* ── Hero Banner ──────────────────────────────────────────────────────────── */
+/* ── Top Subnav View Switcher ──────────────────────────────────────────────── */
+.traits-top-subnav {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-bottom: 16px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid var(--border-strong, #24242b) !important;
+  padding: 4px !important;
+  border-radius: 8px !important;
+  width: max-content !important;
+}
+
+.traits-subnav-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 6px 14px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: var(--text-secondary, #a1a1aa) !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  transition: all 120ms ease !important;
+}
+
+.traits-subnav-btn:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.traits-subnav-btn.active {
+  color: #ffffff !important;
+  background: rgba(168, 85, 247, 0.22) !important;
+  border-color: rgba(168, 85, 247, 0.45) !important;
+}
+
+/* Hero Banner */
 .traits-hero-banner {
   display: flex !important;
   align-items: center !important;
@@ -84,7 +123,7 @@
   margin-top: 2px !important;
 }
 
-/* ── Filter Bar ───────────────────────────────────────────────────────────── */
+/* Filter Bar */
 .traits-filter-bar {
   display: flex !important;
   align-items: center !important;
@@ -154,7 +193,6 @@
   box-shadow: 0 8px 24px rgba(168, 85, 247, 0.15) !important;
 }
 
-/* Top Bar Pills */
 .trait-card-top-bar {
   display: flex !important;
   align-items: center !important;
@@ -185,7 +223,6 @@
   color: #ffffff !important;
 }
 
-/* Hero Section */
 .trait-card-hero {
   display: flex !important;
   align-items: center !important;
@@ -248,7 +285,6 @@
   margin: 0 !important;
 }
 
-/* Stat Grid */
 .trait-card-stats-grid {
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
@@ -304,7 +340,6 @@
   color: #ffffff !important;
 }
 
-/* Footer Action */
 .trait-card-footer {
   display: flex !important;
   align-items: center !important;
@@ -345,136 +380,342 @@
   color: #ffffff !important;
 }
 
-/* ── Interactive Modal ────────────────────────────────────────────────────── */
-.trait-detail-modal {
-  width: min(520px, 92vw);
-  background: #09090e;
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  border-radius: 12px;
-  overflow: hidden;
-  padding: 20px;
+/* ── REROLL GAMBLING SIMULATOR STYLES ────────────────────────────────────── */
+.sim-dashboard {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  animation: dps-modal-in 140ms ease-out;
+  padding: 20px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #0d0d15 0%, #06060a 100%);
+  border: 1px solid rgba(168, 85, 247, 0.3);
 }
 
-.trait-modal-header {
+.sim-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.sim-stat-box {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sim-stat-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted, #71717a);
+}
+
+.sim-stat-val {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 2px;
+}
+
+.color-pity {
+  color: #facc15 !important;
+}
+
+.color-gems {
+  color: #38bdf8 !important;
+}
+
+.color-mythic {
+  color: #c084fc !important;
+}
+
+.sim-pity-progress-wrapper {
+  width: 100%;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sim-pity-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a855f7 0%, #facc15 100%);
+  border-radius: 999px;
+  transition: width 150ms ease;
+}
+
+/* Stage Area */
+.sim-stage-area {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 14px;
-  position: relative;
+  padding: 24px 16px;
+  background: radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.15) 0%, rgba(5, 5, 8, 0.95) 75%);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.trait-modal-icon-box {
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
-  background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.28) 0%, rgba(10, 10, 16, 0.95) 80%);
-  border: 1px solid rgba(168, 85, 247, 0.4);
+.sim-luck-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 3px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sim-luck-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted, #71717a);
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+
+.sim-luck-btn {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-secondary, #a1a1aa);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.sim-luck-btn.active {
+  color: #ffffff;
+  background: rgba(168, 85, 247, 0.25);
+  border-color: rgba(168, 85, 247, 0.5);
+}
+
+.sim-pull-display {
+  width: 100%;
+  min-height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
-.trait-modal-icon-box img {
-  width: 48px;
-  height: 48px;
+.sim-pull-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted, #71717a);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sim-orb-glow {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.8) 0%, rgba(168, 85, 247, 0) 70%);
+  animation: orbPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes orbPulse {
+  from {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+
+  to {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+.sim-pull-grid {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+.sim-pull-grid.count-1 {
+  grid-template-columns: minmax(0, 280px);
+  justify-content: center;
+}
+
+.sim-pull-grid.count-10 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.sim-pull-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(12, 12, 18, 0.9);
+  border: 1px solid var(--rarity-color, #a855f7);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  animation: cardPopIn 140ms ease-out;
+}
+
+@keyframes cardPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.sim-pull-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sim-pull-icon img {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 
-.trait-modal-meta {
+.sim-pull-info {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  flex: 1;
-  min-width: 0;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+  margin-top: 6px;
 }
 
-.trait-modal-title-row {
+.sim-pull-name {
+  font-size: 12px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.sim-pull-rarity {
+  font-size: 8.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--rarity-color, #a855f7);
+}
+
+.sim-pull-stats {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  color: var(--text-secondary, #a1a1aa);
+  margin-top: 2px;
+}
+
+/* Control Buttons */
+.sim-controls-row {
   display: flex;
   align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.sim-roll-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 120ms ease;
+  border: 1px solid transparent;
+}
+
+.btn-single {
+  background: rgba(99, 102, 241, 0.18);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #ffffff;
+}
+
+.btn-single:hover {
+  background: rgba(99, 102, 241, 0.35);
+}
+
+.btn-multi {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(99, 102, 241, 0.3) 100%);
+  border-color: rgba(168, 85, 247, 0.5);
+  color: #ffffff;
+}
+
+.btn-multi:hover {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.5) 0%, rgba(99, 102, 241, 0.5) 100%);
+}
+
+.btn-auto {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.btn-auto.active,
+.btn-auto:hover {
+  background: rgba(239, 68, 68, 0.35);
+  color: #ffffff;
+}
+
+/* Roll History */
+.sim-history-section {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.trait-modal-title-row h2 {
-  font-size: 18px;
-  font-weight: 800;
-  color: #ffffff;
-  margin: 0;
-}
-
-.trait-modal-rarity-badge {
-  font-size: 9.5px;
+.sim-history-title {
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(168, 85, 247, 0.2);
-  border: 1px solid rgba(168, 85, 247, 0.4);
-  color: #c084fc;
+  letter-spacing: 0.05em;
+  color: var(--muted, #71717a);
 }
 
-.trait-modal-sub {
+.sim-history-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 90px;
+  overflow-y: auto;
+}
+
+.sim-empty-history {
   font-size: 11px;
   color: var(--muted, #71717a);
 }
 
-.trait-modal-body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.trait-modal-desc-text {
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--text-secondary, #a1a1aa);
-  margin: 0;
-}
-
-.trait-modal-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
-
-.trait-modal-stat-pill {
-  display: flex;
+.sim-history-item {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.03);
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 10px;
 }
 
-.trait-modal-stat-lbl {
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.trait-modal-stat-val {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-weight: 800;
+.sim-hist-name {
+  font-weight: 700;
   color: #ffffff;
 }
 
-.trait-synergy-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.trait-synergy-chip {
-  font-size: 10.5px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: rgba(99, 102, 241, 0.12);
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  color: #c7d2fe;
+.sim-hist-rarity {
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 8px;
 }
