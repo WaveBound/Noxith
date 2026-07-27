@@ -32,6 +32,17 @@ export const relicStats = {
         },
     },
 
+    "Illusion Crow": {
+        stats: [
+            { damage: { min: "+1%", max: "+10%" } },
+            { range: { min: "+1%", max: "+5%" } },
+        ],
+        passive: {
+            name: "Broken Mind",
+            desc: `While an enemy is in Illusion state:<br>- Store all damage taken from this unit<br>When Illusion expires:<br>- Deal stored damage at 50% effectiveness in a small AoE (2 range)<br><br>Overrides original passive`,
+        },
+    },
+
     "Magic Book": {
         stats: [
             { magicdamage: { min: "+1%", max: "+20%" } },
@@ -108,7 +119,6 @@ export const relicStats = {
         },
     },
 
-    // ── Newly Added Unit Specific Relics ───────────────────────────────────────
     "Hexed Blade": {
         stats: [
             { range: { min: "+1%", max: "+5%" } },

@@ -6,6 +6,7 @@ import reaperreleased from "./units/reaperreleased.js";
 import ladygiantenvy from "./units/ladygiantenvy.js";
 import eighthswordberserk from "./units/8thswordberserk.js";
 import shadowdivine from "./units/shadowdivine.js";
+import crowblackfire from "./units/crowblackfire.js";
 
 import { getRelicStatsByName } from "./relicstats.js";
 import { relicImgByName } from "../icons/icons.js";
@@ -19,6 +20,7 @@ const rawUnits = [
   ladygiantenvy,
   eighthswordberserk,
   shadowdivine,
+  crowblackfire,
 ];
 
 function formatRange(v) {

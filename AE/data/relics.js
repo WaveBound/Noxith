@@ -52,9 +52,16 @@ const UNIT_NAME_MAP = {
   "HollowBlaze": "Hollow Blaze",
   "SalmonSorcerer": "Salmon Sorcerer",
   "DarkMage": "Dark Mage (Sovereign)",
+  "Crow": "Crow (Black Fire)",
 };
 
 const rawRelics = [
+  {
+    id: "relic-illusion-crow",
+    name: "Illusion Crow",
+    image: relicImgByName("Illusion Crow"),
+    unitEquip: "Crow (Black Fire)",
+  },
   {
     id: "relic-dark-scepter",
     name: "Dark Scepter",

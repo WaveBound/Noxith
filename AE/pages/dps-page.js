@@ -7,14 +7,22 @@ let currentMode = "dps"; // "dps" or "dmg"
 function calculateUnitBestStanding(unit, mode) {
   let maxOutput = -1;
   Object.keys(TRAIT_DEFINITIONS).filter(k => k !== "base").forEach(traitKey => {
-    const res = optimizeRelicsForTrait(unit, traitKey, { mode });
+    const res = optimizeRelicsForTrait(unit, traitKey, {
+      mode,
+      simulateShinigamiPassive: unit.simulateShinigamiPassive,
+      darkMageMode: unit.darkMageMode,
+      giantForm: unit.giantForm,
+      berserkState: unit.berserkState,
+      demonicPresence: unit.demonicPresence,
+      crowEnemiesHit: unit.crowEnemiesHit,
+      fuaDamages: unit.fuaDamages
+    });
     const val = mode === "dmg" ? (res.breakdown?.totalDmg || 0) : (res.breakdown?.dps || 0);
     if (val > maxOutput) maxOutput = val;
   });
   return maxOutput;
 }
 
-// DpsPage(filter) -> HTMLElement
 export async function DpsPage(filter = "") {
   const page = document.createElement("div");
   page.className = "page dps-page";
@@ -32,7 +40,7 @@ export async function DpsPage(filter = "") {
       </div>
     </div>
 
-    <!-- Clean list container for sorted cards -->
+    <!-- Container for sorted cards -->
     <div class="dps-page-list"></div>
   `;
 
@@ -69,6 +77,13 @@ export async function DpsPage(filter = "") {
       renderSortedCards();
     });
   });
+
+  // Re-sort cards dynamically when any toggle or slider changes DPS values
+  const handleReSort = () => {
+    renderSortedCards();
+  };
+
+  window.addEventListener("dps-value-changed", handleReSort);
 
   await renderSortedCards();
 

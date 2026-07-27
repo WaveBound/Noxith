@@ -6,7 +6,6 @@
   overflow: visible;
   display: flex;
   flex-direction: column;
-  /* Slightly larger text scale vs rest of site */
   font-size: 1.04em;
 }
 
@@ -262,7 +261,6 @@
   padding-bottom: 24px;
 }
 
-/* Scale inspector column only above 1080p (matches zoom breakpoints) */
 @media (min-width: 2000px) {
   .uip-body {
     grid-template-columns: minmax(0, 1fr) 300px;
@@ -493,7 +491,6 @@
   box-shadow: none !important;
 }
 
-/* Height is set dynamically by JS to show exactly 3 rows */
 .upgrades-rows {
   display: flex;
   flex-direction: column;
@@ -572,7 +569,6 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* Bold Upgrade Stats */
 .upgrade-stats {
   display: flex;
   align-items: center;
@@ -638,7 +634,6 @@
   font-weight: 700;
 }
 
-/* ── Right Panel Tab Switcher (Passives / Abilities) ── */
 .right-panel-switcher {
   display: flex;
   align-items: center;
@@ -727,7 +722,7 @@
   line-height: 1.45;
 }
 
-/* ── Status Effects Container & Gap ── */
+/* ── Status Effects Custom Boxes with Flow Gradients ── */
 .status-effects-table {
   display: flex;
   flex-direction: column;
@@ -765,10 +760,7 @@
 .status-effect-box.status-card-bleed::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: linear-gradient(180deg,
       rgba(0, 0, 0, 0) 0%,
       rgba(80, 0, 0, 0.1) 20%,
@@ -814,18 +806,46 @@
   animation: statusTagShimmer 10s linear infinite;
 }
 
-@keyframes statusTagShimmer {
-  from {
-    background-position: 100% 100%;
-  }
-
-  to {
-    background-position: 0% 0%;
-  }
+.status-effect-box.status-card-illusion {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 16px;
+  overflow: hidden;
+  background-color: #040000;
+  background-image: url('icons/status/IllusionInfo.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  border: 1px solid #3d0505;
+  border-radius: 12px;
 }
 
-.status-effect-box .status-effect-cooldown,
-.status-effect-box.status-card-bleed .status-effect-cooldown {
+.status-effect-box.status-card-illusion::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(231, 26, 16, 0) 0%, rgba(180, 20, 12, 0.12) 50%, rgba(231, 26, 16, 0) 100%);
+  background-size: 100% 200%;
+  filter: blur(10px);
+  pointer-events: none;
+  z-index: 1;
+  animation: statusRedFlowDown 6.5s linear infinite;
+}
+
+.status-effect-box.status-card-illusion .status-effect-tag {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background-image: linear-gradient(135deg, #e71a10 0%, #b8140c 50%, #e71a10 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.status-effect-box.status-card-illusion .status-effect-cooldown {
   position: relative;
   z-index: 1;
   display: inline-block;
@@ -834,7 +854,76 @@
   font-weight: 600;
   color: #ffffff;
   padding: 2px 8px;
-  border: 1px solid rgba(210, 0, 0, 0.45);
+  border: 1px solid rgba(231, 26, 16, 0.45);
+  border-radius: var(--radius-sm);
+  background: #0a0a0d;
+}
+
+.status-effect-box.status-card-blackfire {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 16px;
+  overflow: hidden;
+  background-color: #050507;
+  background-image: url('icons/status/BlackFireInfo.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  border: 1px solid #27272a;
+  border-radius: 12px;
+}
+
+.status-effect-box.status-card-blackfire::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(80, 80, 90, 0.12) 20%,
+      rgba(120, 120, 135, 0.18) 45%,
+      rgba(120, 120, 135, 0.18) 55%,
+      rgba(60, 60, 70, 0.12) 80%,
+      rgba(0, 0, 0, 0) 100%);
+  background-size: 100% 200%;
+  filter: blur(12px);
+  pointer-events: none;
+  z-index: 1;
+  animation: statusGreyFlowDown 6.5s linear infinite;
+}
+
+@keyframes statusGreyFlowDown {
+  0% {
+    background-position: 50% 50%;
+  }
+
+  100% {
+    background-position: 50% -150%;
+  }
+}
+
+.status-effect-box.status-card-blackfire .status-effect-tag {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background-image: linear-gradient(135deg, #767676 0%, #a1a1aa 50%, #d4d4d8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.status-effect-box.status-card-blackfire .status-effect-cooldown {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  padding: 2px 8px;
+  border: 1px solid rgba(118, 118, 118, 0.45);
   border-radius: var(--radius-sm);
   background: #0a0a0d;
 }
@@ -847,12 +936,12 @@
   gap: 5px;
   padding: 12px 16px;
   overflow: hidden;
-  background-color: #000000;
+  background-color: #030008;
   background-image: url('icons/status/StunInfo.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-  border: 1px solid #28004d;
+  border: 1px solid #3b0764;
   border-radius: 12px;
   box-shadow: none !important;
 }
@@ -861,16 +950,13 @@
 .status-effect-box.status-card-dismembered::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: linear-gradient(180deg,
       rgba(0, 0, 0, 0) 0%,
-      rgba(50, 0, 100, 0.08) 20%,
-      rgba(90, 0, 160, 0.12) 45%,
-      rgba(90, 0, 160, 0.12) 55%,
-      rgba(40, 0, 80, 0.08) 80%,
+      rgba(147, 51, 234, 0.12) 20%,
+      rgba(168, 85, 247, 0.22) 45%,
+      rgba(168, 85, 247, 0.22) 55%,
+      rgba(126, 34, 206, 0.12) 80%,
       rgba(0, 0, 0, 0) 100%);
   background-size: 100% 200%;
   filter: blur(12px);
@@ -892,22 +978,13 @@
 .status-effect-box.status-card-stun .status-effect-tag,
 .status-effect-box.status-card-dismembered .status-effect-tag {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background-image: linear-gradient(135deg,
-      #c084fc 0%,
-      #a855f7 38%,
-      rgba(168, 85, 247, 0.55) 50%,
-      #a855f7 62%,
-      #c084fc 100%);
-  background-size: 500% 500%;
-  background-repeat: no-repeat;
+  background-image: linear-gradient(135deg, #a855f7 0%, #9900ff 50%, #c084fc 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation: statusTagShimmer 10s linear infinite;
 }
 
 .status-effect-box.status-card-stun .status-effect-cooldown,
@@ -920,7 +997,7 @@
   font-weight: 600;
   color: #ffffff;
   padding: 2px 8px;
-  border: 1px solid rgba(168, 85, 247, 0.35);
+  border: 1px solid rgba(168, 85, 247, 0.45);
   border-radius: var(--radius-sm);
   background: #0a0a0d;
 }
@@ -937,10 +1014,7 @@
 .status-effect-box.status-card-freeze::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: linear-gradient(180deg,
       rgba(0, 0, 0, 0) 0%,
       rgba(0, 40, 80, 0.1) 20%,
@@ -1033,7 +1107,6 @@
   box-shadow: none !important;
 }
 
-/* Scale inspector portrait on wider viewports */
 .inspector-portrait {
   width: 100%;
   height: 200px;

@@ -223,6 +223,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isReaper = unit && (unit.id === "reaperreleased" || (unit.name && unit.name.includes("Reaper")));
   const isLadyGiant = unit && (unit.id === "ladygiantenvy" || (unit.name && unit.name.includes("Lady Giant")));
   const isEighthSword = unit && (unit.id === "8thswordberserk" || (unit.name && unit.name.includes("8th Sword")));
+  const isCrow = unit && (unit.id === "crowblackfire" || (unit.name && unit.name.includes("Crow")));
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
@@ -256,6 +257,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
 
     base.dotMultiplier = lightningMult;
     base.dotName = "Lightning Arc";
+  } else if (isCrow) {
+    base.dotMultiplier = 2.0;
+    base.dotName = "Black Fire";
   }
 
   const lvl = Math.max(1, parseInt(level) || 1);
@@ -319,10 +323,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const hasShinigami = relics.some(r => r.name === "Shinigami Sword");
   const shinigamiActive = hasShinigami && !!unit.simulateShinigamiPassive;
 
-  // Step 1: Base & Trait & Relic Damage
   let effDamage = scaledBaseDamage * (1 + (trait.damageBonus || 0)) * (1 + relicDamageMult) * (1 + relicArchetypeDamageMult);
 
-  // Step 2: Z Stat & Ascension Multipliers
   if (statMode === "Z") {
     effDamage = effDamage * 1.2;
   }
@@ -332,21 +334,17 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     effDamage = effDamage * 1.15;
   }
 
-  // Step 3: Shinigami + Unit Passives
   let totalPassiveDamageBonus = (shinigamiActive ? 0.15 : 0) + passiveDamageMult;
   if (totalPassiveDamageBonus > 0) {
     effDamage = effDamage * (1 + totalPassiveDamageBonus);
   }
 
-  // Step 1: Base & Trait & Relic SPA
   let effSpa = (base.spa || 1) * (1 + (trait.spaBonus || 0)) * (1 + relicSpaMult);
 
-  // Step 2: Z Stat Multiplier
   if (statMode === "Z") {
     effSpa = effSpa * 0.85;
   }
 
-  // Step 3: Passives
   if (passiveSpaMult !== 0) {
     effSpa = effSpa * (1 + passiveSpaMult);
   }
@@ -373,15 +371,20 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
 
   const avgHitDamage = effDamage * critAvgMult;
 
-  // Dark Mage's Lightning Arc is a passive field tick, NOT a DoT status effect.
   const effDotMult = isDarkMage
     ? (base.dotMultiplier || 0)
     : (base.dotMultiplier || 0) * (1 + (trait.dotBonus || 0)) * (1 + relicDotBonus);
 
-  const dotDuration = 8.0;
+  let dotDuration = 8.0;
   let dotIntervalMultiplier = Math.ceil(dotDuration / effSpa);
   let dotIntervalSPA = dotIntervalMultiplier * effSpa;
-  const dotDamage = effDamage * effDotMult;
+  let dotDamage = effDamage * effDotMult;
+
+  if (isCrow) {
+    dotDuration = 12.0;
+    dotIntervalMultiplier = Math.ceil(12.0 / effSpa);
+    dotIntervalSPA = dotIntervalMultiplier * effSpa;
+  }
 
   let unitDirectDPS = 0;
   let unitDoTDPS = 0;
@@ -390,7 +393,6 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   let singleFuaDmg = 0;
   let hasElfRelicOverride = false;
 
-  // ── Elf Mage Arcane Spells Calculation ──
   if (isElfMage) {
     let activeUnitEquip = "";
     if (unit.selectedDpsRelic !== undefined && unit.selectedDpsRelic !== null && unit.selectedDpsRelic !== "") {
@@ -489,6 +491,79 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
       dotIntervalMultiplier = 1;
       dotIntervalSPA = 1.0;
     }
+  } else if (isCrow) {
+    // Direct DPS = avgHitDamage / effSpa
+    unitDirectDPS = avgHitDamage / effSpa;
+
+    // Black Fire DoT: 2.0x base hit damage over 12s, re-proc interval = roundup(12 / SPA) * SPA
+    const blackFireDotDamage = effDamage * effDotMult; // 2.0x Base Hit
+    unitDoTDPS = blackFireDotDamage / dotIntervalSPA;
+
+    // Illusion Status Effect Calculation (12s active storing window)
+    let activeUnitEquip = "";
+    if (unit.selectedDpsRelic !== undefined && unit.selectedDpsRelic !== null && unit.selectedDpsRelic !== "") {
+      activeUnitEquip = unit.selectedDpsRelic;
+    } else if (unit.relic && unit.relic.name) {
+      activeUnitEquip = unit.relic.name;
+    } else if (unit.recommendedEquips?.unitEquip) {
+      activeUnitEquip = unit.recommendedEquips.unitEquip;
+    }
+
+    const hasIllusionCrow = activeUnitEquip === "Illusion Crow";
+    const illusionEffectiveness = hasIllusionCrow ? 0.50 : 0.25;
+
+    // Target Enemies Hit Multiplier (from card control or default 1)
+    const enemiesHit = Math.max(1, parseInt(unit.crowEnemiesHit || 1, 10) || 1);
+
+    // Storing attacks in 12s Illusion window = roundup(12 / SPA)
+    const storingAttacks = Math.ceil(12.0 / effSpa);
+
+    // Direct Stored DMG = storingAttacks * avgHitDamage (includes Crits on stored attacks!)
+    const directStoredDmg = storingAttacks * avgHitDamage;
+
+    // Black Fire DoT Stored = 200% Base Hit (blackFireDotDamage)
+    const dotStoredDmg = blackFireDotDamage;
+
+    // Total Stored DMG per unit = Direct Stored + Black Fire DoT Stored
+    const totalStoredDmg = directStoredDmg + dotStoredDmg;
+
+    // Illusion Base Explosion Output = Total Stored * effectiveness (25% / 50%)
+    const baseExplosionDamage = totalStoredDmg * illusionEffectiveness;
+
+    // Explosion hit CAN ALSO CRIT (Multiplied by critAvgMult!):
+    const explosionDamageWithCrit = baseExplosionDamage * critAvgMult;
+
+    // Total Explosion per unit across all target enemies = explosionDamageWithCrit * enemiesHit
+    const totalExplosionPerUnit = explosionDamageWithCrit * enemiesHit;
+
+    // Illusion Total Cycle Window = roundup(22 / SPA) * SPA
+    const cycleAttacks = Math.ceil(22.0 / effSpa);
+    const cycleTimeSeconds = cycleAttacks * effSpa;
+    const illusionDpsVal = totalExplosionPerUnit / cycleTimeSeconds;
+
+    fuaDps = illusionDpsVal;
+    fuaBreakdowns = [
+      {
+        index: 0,
+        name: `Illusion Explosion (${hasIllusionCrow ? "50% Relic" : "25% Base"})`,
+        inputDamage: totalStoredDmg,
+        effectiveFollowUpDamage: totalExplosionPerUnit,
+        averageFollowUpHit: totalExplosionPerUnit,
+        baseExplosionDamage,
+        explosionDamageWithCrit,
+        critAvgMult,
+        storingAttacks,
+        directStoredDmg,
+        dotStoredDmg,
+        illusionEffectiveness,
+        enemiesHit,
+        cycleAttacks,
+        cycleTimeSeconds,
+        dps: illusionDpsVal,
+        isStatusEffect: true
+      }
+    ];
+    singleFuaDmg = totalExplosionPerUnit;
   } else {
     unitDirectDPS = avgHitDamage / effSpa;
     unitDoTDPS = (base.dotMultiplier || 0) > 0 ? (dotDamage / dotIntervalSPA) : 0;
@@ -575,7 +650,6 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
       const sAvgHit = sEffDmg * critAvgMult;
       const sSinglePlacementDps = (sAvgHit * singlePlacementCount) / sEffSpa;
 
-      // Calculate Summon DoT DPS (Bleed from Spirit Wolf or Bat Spirits)
       const appliesBleed = (sData.status && sData.status.toLowerCase().includes("bleed")) ||
         (sData.statusEffect && sData.statusEffect.name && sData.statusEffect.name.toLowerCase().includes("bleed")) ||
         (base.dotName && base.dotName.toLowerCase().includes("bleed"));
@@ -694,6 +768,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     isEighthSword,
     berserkState,
     demonicPresence,
+    isCrow,
+    crowEnemiesHit: unit.crowEnemiesHit || 1,
     fuaDps,
     fuaDamages: unit.fuaDamages || [],
     fuaBreakdowns,

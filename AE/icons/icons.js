@@ -1,3 +1,4 @@
+// Base URL resolution derived from where icons.js is hosted on the server
 const BASE_URL = new URL('../', import.meta.url).href;
 
 export function toAbsoluteUrl(relativePath) {
@@ -19,6 +20,7 @@ export const UNIT_INFO_ICONS = {
     critDamage: toAbsoluteUrl("icons/unit-info/CritDamage.png"),
 };
 
+// ── Element / Archetype / Status PNG icons ──────────────────────────────────
 export const ELEMENT_ICONS = {
     hydro: toAbsoluteUrl("icons/elements/Hydro.png"),
     flame: toAbsoluteUrl("icons/elements/Flame.png"),
@@ -47,8 +49,10 @@ export const STATUS_ICONS = {
     puppetmark: toAbsoluteUrl("icons/status/PuppetMark.png"),
     dismembered: toAbsoluteUrl("icons/status/Dismembered.png"),
     blackfire: toAbsoluteUrl("icons/status/BlackFire.png"),
+    illusion: toAbsoluteUrl("icons/status/Illusion.png"),
 };
 
+// ── Relic artwork (PNG) ────────────────────────────────────────────────────
 export const RELIC_ICONS = {
     "relic-promise-ring": toAbsoluteUrl("icons/relics/PromiseRing.png"),
     "relic-elven-battle-staff": toAbsoluteUrl("icons/relics/ElvenBattleStaff.png"),
@@ -91,6 +95,7 @@ const RELIC_NAME_TO_IMG = {
     "Hell's Flower": toAbsoluteUrl("icons/relics/HellsFlower.png"),
     "Technique Amplifier": toAbsoluteUrl("icons/relics/TechniqueAmplifier.png"),
     "Dark Scepter": toAbsoluteUrl("icons/relics/DarkScepter.png"),
+    "Illusion Crow": toAbsoluteUrl("icons/relics/IllusionCrow.png"),
 };
 
 export function relicImgByName(name) {
@@ -131,21 +136,20 @@ export function formatPassiveText(text) {
     out = out.replace(/<br\s*\/?>/gi, "__BR__");
 
     // Phase 1: Tokenize keywords
-    out = out.replace(/Shadow[\s\xA0]+Realm/gi, "@@SRM@@");
-    out = out.replace(/Shadow[\s\xA0]+Rewind/gi, "@@SRW@@");
-    out = out.replace(/Divine[\s\xA0]+Spirit/gi, "@@DS@@");
-    out = out.replace(/Spirit[\s\xA0]+Wolf/gi, "@@SWF@@");
-    out = out.replace(/Winged[\s\xA0]+Spirit/gi, "@@WS@@");
-    out = out.replace(/Takedowns?|Takedown/gi, "@@TKD@@");
-    out = out.replace(/Magical/gi, "@@MGC@@");
-
     out = out.replace(/Thunderclap[\s\xA0]+Cut/gi, "@@TC@@");
     out = out.replace(/Unrestrained[\s\xA0]+Rampage/gi, "@@UR@@");
     out = out.replace(/Skyward[\s\xA0]+Slash/gi, "@@SS@@");
     out = out.replace(/Way[\s\xA0]+of[\s\xA0]+the[\s\xA0]+Sword/gi, "@@WSW@@");
 
     out = out.replace(/Austere[\s\xA0]+Flames/gi, "@@AF@@");
+    out = out.replace(/Winged[\s\xA0]+Spirit/gi, "@@WS@@");
+    out = out.replace(/Wolf[\s\xA0]+Spirit/gi, "@@WFS@@");
+    out = out.replace(/Divine[\s\xA0]+Spirit/gi, "@@DVS@@");
     out = out.replace(/Puppet[\s\xA0]+Mark/gi, "@@PM@@");
+    out = out.replace(/Black[\s\xA0]+Fire/gi, "@@BFI@@");
+    out = out.replace(/Illusions/gi, "@@ILS@@");
+    out = out.replace(/Illusion/gi, "@@IL@@");
+    out = out.replace(/Shadow[\s\xA0]+Rewind/gi, "@@SRW@@");
     out = out.replace(/Stone[\s\xA0]+Wall/gi, "@@SW@@");
     out = out.replace(/Rock[\s\xA0]+Chunks?/gi, "@@RC@@");
     out = out.replace(/\bRock\b/gi, "@@RK@@");
@@ -153,6 +157,7 @@ export function formatPassiveText(text) {
     out = out.replace(/Crumble[\s\xA0]+Away/gi, "@@CA@@");
     out = out.replace(/Radial[\s\xA0]+Flames/gi, "@@RF@@");
 
+    out = out.replace(/Magical/gi, "@@MAG@@");
     out = out.replace(/Mana[\s\xA0]+Burn/gi, "@@MB@@");
     out = out.replace(/Old[\s\xA0]+Magic/gi, "@@OM@@");
     out = out.replace(/Eruption/gi, "@@ER@@");
@@ -189,26 +194,26 @@ export function formatPassiveText(text) {
     // Phase 3: Inject clean HTML markup
     const iconImgTag = (src) => src ? `<img src="${toAbsoluteUrl(src)}" class="p-kw-icon" alt="" />` : "";
 
-    out = out.replace(/@@SRM@@/g, `<span class="p-kw p-shadow-realm"><span>Shadow Realm</span></span>`);
-    out = out.replace(/@@SRW@@/g, `<span class="p-kw p-shadow-rewind"><span>Shadow Rewind</span></span>`);
-    out = out.replace(/@@DS@@/g, `<span class="p-kw p-divine-spirit"><span>Divine Spirit</span></span>`);
-    out = out.replace(/@@SWF@@/g, `<span class="p-kw p-spirit-wolf"><span>Spirit Wolf</span></span>`);
-    out = out.replace(/@@WS@@/g, `<span class="p-kw p-winged-spirit"><span>Winged Spirit</span></span>`);
-    out = out.replace(/@@TKD@@/g, `<span class="p-kw p-takedown"><span>Takedown</span></span>`);
-    out = out.replace(/@@MGC@@/g, `<span class="p-kw p-magical"><span>Magical</span></span>`);
-
     out = out.replace(/@@TC@@/g, `<span class="p-kw p-atk-name"><span>Thunderclap Cut</span></span>`);
     out = out.replace(/@@UR@@/g, `<span class="p-kw p-atk-name"><span>Unrestrained Rampage</span></span>`);
     out = out.replace(/@@SS@@/g, `<span class="p-kw p-atk-name"><span>Skyward Slash</span></span>`);
     out = out.replace(/@@WSW@@/g, `<span class="p-kw p-atk-name"><span>Way of the Sword</span></span>`);
 
     out = out.replace(/@@AF@@/g, `<span class="p-kw p-austere-flames">${iconImgTag(STATUS_ICONS.burn)}<span>Austere Flames</span></span>`);
+    out = out.replace(/@@WS@@/g, `<span class="p-kw p-winged-spirit"><span>Winged Spirit</span></span>`);
+    out = out.replace(/@@WFS@@/g, `<span class="p-kw p-wolf-spirit"><span>Wolf Spirit</span></span>`);
+    out = out.replace(/@@DVS@@/g, `<span class="p-kw p-divine-spirit"><span>Divine Spirit</span></span>`);
     out = out.replace(/@@PM@@/g, `<span class="p-kw p-puppet-mark">${iconImgTag(STATUS_ICONS.puppetmark)}<span>Puppet Mark</span></span>`);
+    out = out.replace(/@@BFI@@/g, `<span class="p-kw p-black-fire">${iconImgTag(STATUS_ICONS.blackfire)}<span>Black Fire</span></span>`);
+    out = out.replace(/@@ILS@@/g, `<span class="p-kw p-illusion"><span>Illusions</span></span>`);
+    out = out.replace(/@@IL@@/g, `<span class="p-kw p-illusion"><span>Illusion</span></span>`);
+    out = out.replace(/@@SRW@@/g, `<span class="p-kw p-shadow-rewind"><span>Shadow Rewind</span></span>`);
     out = out.replace(/@@SW@@/g, `<span class="p-kw p-stone-wall"><span>Stone Wall</span></span>`);
     out = out.replace(/@@RC@@/g, `<span class="p-kw p-rock-chunk"><span>Rock Chunks</span></span>`);
     out = out.replace(/@@RK@@/g, `<span class="p-kw p-rock"><span>Rock</span></span>`);
     out = out.replace(/@@CC@@/g, `<span class="p-kw p-cocoon"><span>Cocoon of Carnage</span></span>`);
 
+    out = out.replace(/@@MAG@@/g, `<span class="p-kw p-magical"><span class="p-magical-text">Magical</span></span>`);
     out = out.replace(/@@MB@@/g, `<span class="p-kw p-mana-burn">${iconImgTag(STATUS_ICONS.manaburn)}<span class="p-mana-burn-text">Mana Burn</span></span>`);
     out = out.replace(/@@OM@@/g, `<span class="p-kw p-spell"><span class="p-spell-text">Old Magic</span></span>`);
     out = out.replace(/@@ER@@/g, `<span class="p-kw p-spell"><span class="p-spell-text">Eruption</span></span>`);
@@ -270,16 +275,15 @@ if (typeof window !== "undefined") {
 
     function getTooltipImage(target) {
         if (!target) return "";
-        if (target.classList.contains("p-shadow-realm")) return toAbsoluteUrl("icons/info/ShadowRealmInfo.png");
-        if (target.classList.contains("p-shadow-rewind")) return toAbsoluteUrl("icons/info/ShadowRewindInfo.png");
-        if (target.classList.contains("p-spirit-wolf")) return toAbsoluteUrl("icons/info/SpiritWolfInfo.png");
-        if (target.classList.contains("p-divine-spirit")) return toAbsoluteUrl("icons/info/DivineSpiritInfo.png");
         if (target.classList.contains("p-winged-spirit")) return toAbsoluteUrl("icons/info/WingedSpiritInfo.png");
-        if (target.classList.contains("p-takedown")) return toAbsoluteUrl("icons/info/TakeDownInfo.png");
         if (target.classList.contains("p-magical")) return toAbsoluteUrl("icons/info/MagicalInfo.png");
-
+        if (target.classList.contains("p-wolf-spirit")) return toAbsoluteUrl("icons/info/WolfSpiritInfo.png");
+        if (target.classList.contains("p-divine-spirit")) return toAbsoluteUrl("icons/info/DivineSpiritInfo.png");
+        if (target.classList.contains("p-shadow-rewind")) return toAbsoluteUrl("icons/info/ShadowRewindInfo.png");
+        if (target.classList.contains("p-black-fire")) return toAbsoluteUrl("icons/info/BlackFireInfo.png");
+        if (target.classList.contains("p-illusion")) return toAbsoluteUrl("icons/info/IllusionInfo.png");
         if (target.classList.contains("p-mana-burn")) return toAbsoluteUrl("icons/info/ManaBurnInfo.png");
-        if (target.classList.contains("p-bleed")) return toAbsoluteUrl("icons/info/bleedinfo.png");
+        if (target.classList.contains("p-bleed")) return toAbsoluteUrl("icons/info/BleedInfo.png");
         if (target.classList.contains("p-ent")) return toAbsoluteUrl("icons/info/batinfo.png");
         if (target.classList.contains("p-fua")) return toAbsoluteUrl("icons/info/followupinfo.png");
         if (target.classList.contains("p-stun")) return toAbsoluteUrl("icons/info/StunInfo.png");
@@ -292,6 +296,8 @@ if (typeof window !== "undefined") {
         if (target.classList.contains("p-stone-wall")) return toAbsoluteUrl("icons/info/StoneWallInfo.png");
         if (target.classList.contains("p-buffs")) return toAbsoluteUrl("icons/info/BuffInfo.png");
         if (target.classList.contains("p-dismembered")) return toAbsoluteUrl("icons/info/DismemberedInfo.png");
+        if (target.classList.contains("p-puppet-mark")) return toAbsoluteUrl("icons/info/PuppetMarkInfo.png");
+        if (target.classList.contains("p-rewind")) return toAbsoluteUrl("icons/info/RewindInfo.png");
         return "";
     }
 
@@ -323,18 +329,18 @@ if (typeof window !== "undefined") {
         const width = 280;
         const height = 140;
 
-        const offsetX = 6;
-        const offsetY = -8;
+        const offsetX = 12;
+        const offsetY = 12;
 
         let targetX = (e.clientX + offsetX) / pageZoom;
         let targetY = (e.clientY + offsetY) / pageZoom;
 
         if (e.clientX + offsetX + width * pageZoom > window.innerWidth - 10) {
-            targetX = (e.clientX - (width * pageZoom) - 10) / pageZoom;
+            targetX = (e.clientX - (width * pageZoom) - 12) / pageZoom;
         }
 
         if (e.clientY + offsetY + height * pageZoom > window.innerHeight - 10) {
-            targetY = (e.clientY - (height * pageZoom) - 10) / pageZoom;
+            targetY = (e.clientY - (height * pageZoom) - 12) / pageZoom;
         }
 
         targetX = Math.max(5, targetX);
