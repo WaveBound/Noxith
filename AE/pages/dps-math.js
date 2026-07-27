@@ -319,7 +319,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     });
   });
 
-  const hasShinigami = relics.some(r => r.name === "Shinigami Sword") || !!unit.simulateShinigamiPassive;
+  // Strict check: Shinigami Passive ONLY applies if Shinigami Sword is equipped in this loadout
+  const hasShinigami = relics.some(r => r.name === "Shinigami Sword");
   const shinigamiActive = hasShinigami && !!unit.simulateShinigamiPassive;
 
   let effDamage = scaledBaseDamage * (1 + (trait.damageBonus || 0)) * (1 + relicDamageMult) * (1 + relicArchetypeDamageMult);
@@ -678,6 +679,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
         effDamage: sEffDmg,
         baseSpa: baseSummonSpa,
         effSpa: sEffSpa,
+        critAvgMult,
+        effCritChance,
+        effCritDamage,
         avgHitDamage: sAvgHit,
         directDps: sSinglePlacementDps,
         dotDps: sDoTDps,
@@ -693,8 +697,6 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
 
   const combinedDPS = unitDirectDPS + unitDoTDPS + totalSummonDPS + fuaDps;
 
-  // Single placement DMG per attack: (Avg Hit DMG) + (DoT DMG) + (Summon DMG)
-  // [Follow-Up Attacks are explicitly EXCLUDED from DMG per attack]
   const directHitDmg = (isDarkMage && darkMageMode === "lightning") ? 0 : avgHitDamage;
   const dotDmgVal = (base.dotMultiplier || 0) > 0
     ? (isDarkMage ? (darkMageMode === "normal" ? 0 : effDamage * effDotMult) : dotDamage)
