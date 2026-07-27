@@ -46,6 +46,7 @@ export const STATUS_ICONS = {
     stun: toAbsoluteUrl("icons/status/Stun.png"),
     puppetmark: toAbsoluteUrl("icons/status/PuppetMark.png"),
     dismembered: toAbsoluteUrl("icons/status/Dismembered.png"),
+    blackfire: toAbsoluteUrl("icons/status/BlackFire.png"),
 };
 
 export const RELIC_ICONS = {
