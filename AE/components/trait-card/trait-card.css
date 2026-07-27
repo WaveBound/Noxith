@@ -1,265 +1,480 @@
-/* Grid for trait cards */
+/* ── Traits Page Grid Layout ──────────────────────────────────────────────── */
 .traits-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)) !important;
   gap: 16px !important;
   width: 100% !important;
 }
 
-/* Locked / Preview Screen */
-.traits-locked-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
-  margin: 40px auto;
-  max-width: 520px;
-  border-radius: 12px;
+/* ── Hero Banner ──────────────────────────────────────────────────────────── */
+.traits-hero-banner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  padding: 20px 24px !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(10, 10, 16, 0.95) 100%) !important;
+  border: 1px solid rgba(168, 85, 247, 0.25) !important;
+  margin-bottom: 18px !important;
+  flex-wrap: wrap !important;
 }
 
-.traits-locked-icon {
-  color: var(--purple-strong, #818cf8);
-  margin-bottom: 16px;
-  opacity: 0.85;
+.traits-hero-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  max-width: 580px !important;
 }
 
-.traits-locked-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text, #fafafa);
-  margin-bottom: 8px;
+.traits-hero-eyebrow {
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  color: var(--purple-strong, #818cf8) !important;
 }
 
-.traits-locked-sub {
-  font-size: 13px;
-  color: var(--muted, #71717a);
-  line-height: 1.5;
+.traits-hero-title {
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+  line-height: 1.15 !important;
 }
 
-/* Header & Filter Bar */
-.traits-page-header {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
+.traits-hero-sub {
+  font-size: 12px !important;
+  color: var(--text-secondary, #a1a1aa) !important;
+  line-height: 1.5 !important;
+  margin-top: 2px !important;
 }
 
+.traits-hero-stats {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.traits-stat-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 10px 16px !important;
+  border-radius: 8px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  min-width: 80px !important;
+}
+
+.traits-stat-val {
+  font-family: var(--font-mono) !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: #c084fc !important;
+}
+
+.traits-stat-lbl {
+  font-size: 8.5px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: var(--muted, #71717a) !important;
+  margin-top: 2px !important;
+}
+
+/* ── Filter Bar ───────────────────────────────────────────────────────────── */
 .traits-filter-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-bottom: 18px !important;
 }
 
 .traits-rarity-chips {
-  display: flex;
-  gap: 6px;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid var(--border, #16161a);
-  padding: 3px;
-  border-radius: 6px;
+  display: flex !important;
+  gap: 6px !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid var(--border, #16161a) !important;
+  padding: 3px !important;
+  border-radius: 6px !important;
 }
 
 .trait-filter-btn {
-  padding: 5px 12px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-secondary, #a1a1aa);
-  border: 1px solid transparent;
-  background: transparent;
-  cursor: pointer;
-  transition: all 120ms ease;
+  padding: 5px 14px !important;
+  border-radius: 4px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: var(--text-secondary, #a1a1aa) !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  transition: all 120ms ease !important;
 }
 
 .trait-filter-btn:hover {
-  color: var(--text, #fafafa);
-  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.05) !important;
 }
 
 .trait-filter-btn.active {
-  color: #ffffff;
-  background: rgba(99, 102, 241, 0.22);
-  border-color: rgba(99, 102, 241, 0.45);
+  color: #ffffff !important;
+  background: rgba(168, 85, 247, 0.22) !important;
+  border-color: rgba(168, 85, 247, 0.45) !important;
 }
 
 .traits-empty-state {
-  padding: 40px;
-  text-align: center;
-  color: var(--muted, #71717a);
-  font-size: 13px;
+  padding: 40px !important;
+  text-align: center !important;
+  color: var(--muted, #71717a) !important;
+  font-size: 13px !important;
 }
 
-/* ── Trait Card — Modern Neon Redesign ─────────────────────────────────── */
+/* ── Redesigned Trait Card ────────────────────────────────────────────────── */
 .trait-card {
   --trait-accent: #a855f7;
   display: flex !important;
   flex-direction: column !important;
-  text-align: left !important;
-  overflow: hidden !important;
-  padding: 0 !important;
-  cursor: default !important;
+  padding: 14px !important;
+  gap: 10px !important;
   border-radius: 12px !important;
-  background: linear-gradient(160deg, #0e0e14 0%, #060609 100%) !important;
+  background: linear-gradient(160deg, rgba(20, 20, 28, 0.95) 0%, rgba(8, 8, 12, 0.98) 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   position: relative !important;
-  transition: border-color var(--t-fast) var(--ease), transform var(--t-med) var(--ease) !important;
+  box-sizing: border-box !important;
+  cursor: pointer !important;
+  transition: transform var(--t-med) var(--ease), border-color var(--t-med) var(--ease), box-shadow var(--t-med) var(--ease) !important;
 }
 
 .trait-card:hover {
-  transform: translateY(-3px) !important;
-  border-color: rgba(168, 85, 247, 0.45) !important;
+  transform: translateY(-4px) !important;
+  border-color: rgba(168, 85, 247, 0.5) !important;
+  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.15) !important;
 }
 
-/* Media / Portrait Area */
-.trait-card-media {
-  height: 140px !important;
-  background: radial-gradient(120% 80% at 50% 0%, rgba(168, 85, 247, 0.18) 0%, rgba(12, 12, 18, 0.9) 70%) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  overflow: hidden !important;
-  position: relative !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
-}
-
-.trait-card-media img {
-  width: 72px !important;
-  height: 72px !important;
-  object-fit: contain !important;
-  filter: drop-shadow(0 4px 12px rgba(168, 85, 247, 0.4)) !important;
-  transition: transform var(--t-med) var(--ease) !important;
-}
-
-.trait-card:hover .trait-card-media img {
-  transform: scale(1.08) !important;
-}
-
-.trait-card-badges {
-  position: absolute !important;
-  top: 8px !important;
-  right: 8px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-end !important;
-  gap: 4px !important;
-  z-index: 2 !important;
-}
-
-.trait-card-drop,
-.trait-card-pity {
-  font-family: var(--font-mono) !important;
-  font-size: 8.5px !important;
-  font-weight: 700 !important;
-  padding: 2px 6px !important;
-  border-radius: 4px !important;
-  background: rgba(0, 0, 0, 0.75) !important;
-  backdrop-filter: blur(6px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  color: #ffffff !important;
-  text-transform: uppercase !important;
-}
-
-.trait-card-drop {
-  border-color: rgba(168, 85, 247, 0.4) !important;
-  color: #c084fc !important;
-}
-
-.trait-card-nameplate {
-  position: absolute !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  z-index: 2 !important;
-  padding: 8px 10px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 1px !important;
-  background: linear-gradient(to top, rgba(8, 8, 12, 0.95) 0%, rgba(8, 8, 12, 0) 100%) !important;
-}
-
-.trait-card-name {
-  font-family: var(--font-display) !important;
-  font-size: 14px !important;
-  font-weight: 800 !important;
-  color: #ffffff !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-.trait-card-sub {
-  font-size: 9px !important;
-  font-weight: 700 !important;
-  color: #c084fc !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
-}
-
-.trait-card-desc {
-  font-size: 10.5px !important;
-  color: var(--text-secondary, #a1a1aa) !important;
-  line-height: 1.35 !important;
-  padding: 8px 10px 4px !important;
-}
-
-/* Compact Stat Strip */
-.trait-card-stats {
-  display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important;
-  gap: 5px !important;
-  padding: 8px 10px 10px !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.trait-card-stat {
+/* Top Bar Pills */
+.trait-card-top-bar {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  padding: 4px 6px !important;
-  border-radius: 5px !important;
-  background: rgba(255, 255, 255, 0.02) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  gap: 6px !important;
 }
 
-.trait-card-stat-label {
-  font-size: 8px !important;
-  font-weight: 700 !important;
+.trait-card-rarity-pill {
+  font-size: 9px !important;
+  font-weight: 800 !important;
   text-transform: uppercase !important;
-  color: #8f9cae !important;
-}
-
-.trait-card-stat-label.stat-dmg {
-  color: #f87171 !important;
-}
-
-.trait-card-stat-label.stat-spa {
-  color: #38bdf8 !important;
-}
-
-.trait-card-stat-label.stat-rng {
-  color: #fbbf24 !important;
-}
-
-.trait-card-stat-label.stat-crit {
+  letter-spacing: 0.05em !important;
+  padding: 2px 7px !important;
+  border-radius: 4px !important;
+  background: rgba(168, 85, 247, 0.15) !important;
+  border: 1px solid rgba(168, 85, 247, 0.35) !important;
   color: #c084fc !important;
 }
 
-.trait-card-stat-label.stat-dot {
+.trait-card-drop-pill {
+  font-family: var(--font-mono) !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  padding: 2px 7px !important;
+  border-radius: 4px !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+/* Hero Section */
+.trait-card-hero {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-top: 2px !important;
+}
+
+.trait-card-icon-frame {
+  width: 56px !important;
+  height: 56px !important;
+  min-width: 56px !important;
+  border-radius: 10px !important;
+  background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.22) 0%, rgba(10, 10, 16, 0.9) 80%) !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.trait-card-icon-frame img {
+  width: 42px !important;
+  height: 42px !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 2px 6px rgba(168, 85, 247, 0.4)) !important;
+  transition: transform var(--t-med) var(--ease) !important;
+}
+
+.trait-card:hover .trait-card-icon-frame img {
+  transform: scale(1.08) !important;
+}
+
+.trait-card-header-text {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+}
+
+.trait-card-title {
+  font-family: var(--font-display) !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+  line-height: 1.15 !important;
+}
+
+.trait-card-tag {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  color: var(--purple-strong, #818cf8) !important;
+}
+
+.trait-card-description {
+  font-size: 11px !important;
+  color: var(--text-secondary, #a1a1aa) !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
+}
+
+/* Stat Grid */
+.trait-card-stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 6px !important;
+  width: 100% !important;
+  margin-top: 2px !important;
+}
+
+.trait-stat-pill {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 5px 8px !important;
+  border-radius: 6px !important;
+  background: rgba(255, 255, 255, 0.025) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.trait-stat-label {
+  font-size: 8.5px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+}
+
+.trait-stat-label.stat-dmg {
+  color: #f87171 !important;
+}
+
+.trait-stat-label.stat-spa {
+  color: #38bdf8 !important;
+}
+
+.trait-stat-label.stat-rng {
+  color: #fbbf24 !important;
+}
+
+.trait-stat-label.stat-crit {
+  color: #c084fc !important;
+}
+
+.trait-stat-label.stat-dot {
   color: #fb923c !important;
 }
 
-.trait-card-stat-label.stat-place {
+.trait-stat-label.stat-place {
   color: #34d399 !important;
 }
 
-.trait-card-stat-value {
+.trait-stat-value {
   font-family: var(--font-mono) !important;
-  font-size: 10px !important;
+  font-size: 10.5px !important;
   font-weight: 800 !important;
   color: #ffffff !important;
+}
+
+/* Footer Action */
+.trait-card-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin-top: 4px !important;
+  padding-top: 8px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.trait-card-pity-label {
+  font-size: 10px !important;
+  color: var(--muted, #71717a) !important;
+}
+
+.trait-card-pity-label strong {
+  font-family: var(--font-mono) !important;
+  color: var(--text, #fafafa) !important;
+}
+
+.trait-card-detail-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #c084fc !important;
+  background: rgba(168, 85, 247, 0.12) !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+  padding: 3px 8px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  transition: all 120ms ease !important;
+}
+
+.trait-card-detail-btn:hover {
+  background: rgba(168, 85, 247, 0.25) !important;
+  color: #ffffff !important;
+}
+
+/* ── Interactive Modal ────────────────────────────────────────────────────── */
+.trait-detail-modal {
+  width: min(520px, 92vw);
+  background: #09090e;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: dps-modal-in 140ms ease-out;
+}
+
+.trait-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+}
+
+.trait-modal-icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.28) 0%, rgba(10, 10, 16, 0.95) 80%);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.trait-modal-icon-box img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.trait-modal-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.trait-modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trait-modal-title-row h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+}
+
+.trait-modal-rarity-badge {
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #c084fc;
+}
+
+.trait-modal-sub {
+  font-size: 11px;
+  color: var(--muted, #71717a);
+}
+
+.trait-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trait-modal-desc-text {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary, #a1a1aa);
+  margin: 0;
+}
+
+.trait-modal-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.trait-modal-stat-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.trait-modal-stat-lbl {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.trait-modal-stat-val {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.trait-synergy-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.trait-synergy-chip {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: #c7d2fe;
 }
