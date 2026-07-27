@@ -581,10 +581,12 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
         (base.dotName && base.dotName.toLowerCase().includes("bleed"));
 
       let sDoTDps = 0;
+      let sDotScale = 0;
+      let sDotDmg = 0;
       if (appliesBleed) {
         const baseBleedScale = base.dotMultiplier || 0.65;
-        const sDotMult = baseBleedScale * (1 + (trait.dotBonus || 0)) * (1 + relicDotBonus);
-        const sDotDmg = sEffDmg * sDotMult;
+        sDotScale = baseBleedScale * (1 + (trait.dotBonus || 0)) * (1 + relicDotBonus);
+        sDotDmg = sEffDmg * sDotScale;
         sDoTDps = (sDotDmg * singlePlacementCount) / (dotIntervalSPA || 9.1);
       }
 
@@ -602,17 +604,32 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
         summonDoTDPS = sDoTDps;
       }
 
+      const traitDmgBonus = trait.damageBonus || 0;
+      const relicTotalDmgMult = relicDamageMult + relicArchetypeDamageMult;
+      const isZStat = statMode === "Z";
+
       summonBreakdowns.push({
         id: sData.id,
-        name: sData.name,
+        name: sData.name || sData.id || "Summon",
         activeCount: singlePlacementCount,
+        hasOwnUpgrades: !!sData.hasOwnUpgrades,
+        rawMaxDamage: sData.maxDamage || 0,
+        levelMult,
         baseDamage: baseSummonDmg,
+        traitDmgBonus,
+        relicTotalDmgMult,
+        isZStat,
+        hasAscend,
         effDamage: sEffDmg,
         baseSpa: baseSummonSpa,
         effSpa: sEffSpa,
         avgHitDamage: sAvgHit,
         directDps: sSinglePlacementDps,
         dotDps: sDoTDps,
+        dotScale: sDotScale,
+        dotDamage: sDotDmg,
+        dotIntervalSPA: dotIntervalSPA || 9.1,
+        dotName: base.dotName || "Bleed",
         dps: sTotalDps,
         passiveNote: sData.passive || ""
       });

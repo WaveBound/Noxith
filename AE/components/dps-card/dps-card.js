@@ -205,6 +205,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
 
   const rawBase = breakdown.base;
   const hasAscend = breakdown.hasAscend;
+  const summonsData = getSummonsData(unit) || {};
 
   const baseDmg = breakdown.scaledBaseDamage;
   const traitDmgBonus = breakdown.trait.damageBonus || 0;
@@ -397,16 +398,48 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           <div class="dps-section section-summons" style="margin-top:0;">
             <div class="dps-section-hd color-summons">1. Summon Damage</div>
             <div class="dps-table">
-              <div class="dps-table-row">
-                <span class="dps-table-lbl">Effective Unit DMG (pre-crit)</span>
-                <span class="dps-table-val font-mono">${Math.round(breakdown.effDamage).toLocaleString()}</span>
-              </div>
-              <div class="dps-table-row indented">
-                <span class="dps-table-lbl">&mdash; Summon Scale</span>
-                <span class="dps-table-val font-mono"><span class="faint-mult">&times;${scaleMult.toFixed(2)}</span>${Math.round(s.effDamage).toLocaleString()}</span>
-              </div>
+              ${s.hasOwnUpgrades ? `
+                <div class="dps-table-row">
+                  <span class="dps-table-lbl">Base Max Upgrade DMG (Lv. 1)</span>
+                  <span class="dps-table-val font-mono">${Math.round(s.rawMaxDamage).toLocaleString()}</span>
+                </div>
+                ${s.levelMult > 1 ? `
+                  <div class="dps-table-row indented">
+                    <span class="dps-table-lbl">&mdash; Level 50 scaling</span>
+                    <span class="dps-table-val font-mono"><span class="faint-mult">x${s.levelMult.toFixed(2)}</span>${Math.round(s.baseDamage).toLocaleString()}</span>
+                  </div>` : ""}
+                ${s.traitDmgBonus > 0 ? `
+                  <div class="dps-table-row indented">
+                    <span class="dps-table-lbl">&mdash; Trait DMG multiplier</span>
+                    <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + s.traitDmgBonus).toFixed(2)}</span>${Math.round(s.baseDamage * (1 + s.traitDmgBonus)).toLocaleString()}</span>
+                  </div>` : ""}
+                ${s.relicTotalDmgMult > 0 ? `
+                  <div class="dps-table-row indented">
+                    <span class="dps-table-lbl">&mdash; Relic DMG multiplier</span>
+                    <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + s.relicTotalDmgMult).toFixed(2)}</span>${Math.round(s.baseDamage * (1 + s.traitDmgBonus) * (1 + s.relicTotalDmgMult)).toLocaleString()}</span>
+                  </div>` : ""}
+                ${s.isZStat ? `
+                  <div class="dps-table-row indented">
+                    <span class="dps-table-lbl">&mdash; Z Stat multiplier</span>
+                    <span class="dps-table-val font-mono"><span class="faint-mult">x1.20</span>${Math.round(s.baseDamage * (1 + s.traitDmgBonus) * (1 + s.relicTotalDmgMult) * 1.20).toLocaleString()}</span>
+                  </div>` : ""}
+                ${s.hasAscend ? `
+                  <div class="dps-table-row indented">
+                    <span class="dps-table-lbl">&mdash; Ascension III multiplier</span>
+                    <span class="dps-table-val font-mono"><span class="faint-mult">x1.15</span>${Math.round(s.effDamage).toLocaleString()}</span>
+                  </div>` : ""}
+              ` : `
+                <div class="dps-table-row">
+                  <span class="dps-table-lbl">Effective Unit DMG (pre-crit)</span>
+                  <span class="dps-table-val font-mono">${Math.round(breakdown.effDamage).toLocaleString()}</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Summon Scale</span>
+                  <span class="dps-table-val font-mono"><span class="faint-mult">&times;${scaleMult.toFixed(2)}</span>${Math.round(s.effDamage).toLocaleString()}</span>
+                </div>
+              `}
               <div class="dps-table-row primary">
-                <span class="dps-table-lbl summons-highlight">Damage</span>
+                <span class="dps-table-lbl summons-highlight">Effective Summon DMG</span>
                 <span class="dps-table-val font-mono summons-highlight">${Math.round(s.effDamage).toLocaleString()}</span>
               </div>
             </div>
@@ -416,23 +449,19 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
             <div class="dps-section-hd color-summons">2. Output &amp; Direct DPS</div>
             <div class="dps-table">
               <div class="dps-table-row">
-                <span class="dps-table-lbl">Summon Output</span>
+                <span class="dps-table-lbl">Summon Output (${s.activeCount} active)</span>
                 <span class="dps-table-val font-mono">${Math.round(s.effDamage).toLocaleString()} &times; ${s.activeCount} = ${Math.round(s.effDamage * s.activeCount).toLocaleString()}</span>
               </div>
               <div class="dps-table-row indented">
                 <span class="dps-table-lbl">&mdash; Crit average multiplier</span>
-                <span class="dps-table-val font-mono">&times;${breakdown.critAvgMult.toFixed(2)}</span>
-              </div>
-              <div class="dps-table-row indented">
-                <span class="dps-table-lbl">&mdash; Avg hit incl. crits</span>
-                <span class="dps-table-val font-mono">${Math.round(s.avgHitDamage).toLocaleString()}</span>
+                <span class="dps-table-val font-mono">&times;${breakdown.critAvgMult.toFixed(2)} (${Math.round(s.avgHitDamage).toLocaleString()} avg hit)</span>
               </div>
               <div class="dps-table-row indented">
                 <span class="dps-table-lbl">&mdash; Summon SPA</span>
                 <span class="dps-table-val font-mono">${s.effSpa.toFixed(2)}s</span>
               </div>
               <div class="dps-table-row primary">
-                <span class="dps-table-lbl summons-highlight">Direct DPS</span>
+                <span class="dps-table-lbl summons-highlight">Direct DPS (${Math.round(s.avgHitDamage * s.activeCount).toLocaleString()} &divide; ${s.effSpa.toFixed(2)}s)</span>
                 <span class="dps-table-val font-mono summons-highlight">+${formatFullDPS(s.directDps)} DPS</span>
               </div>
             </div>
@@ -440,10 +469,22 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
 
           ${s.dotDps > 0 ? `
           <div class="dps-section section-summons">
-            <div class="dps-section-hd color-summons">3. DoT DPS</div>
+            <div class="dps-section-hd color-summons">3. DoT DPS (${s.dotName || "Bleed"})</div>
             <div class="dps-table">
+              <div class="dps-table-row">
+                <span class="dps-table-lbl">Summon Base Hit</span>
+                <span class="dps-table-val font-mono">${Math.round(s.effDamage).toLocaleString()}</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">&mdash; ${s.dotName || "DoT"} Multiplier</span>
+                <span class="dps-table-val font-mono"><span class="faint-mult">x${(s.dotScale || 0.65).toFixed(2)}</span>${Math.round(s.dotDamage || (s.effDamage * 0.65)).toLocaleString()} DMG</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">&mdash; Re-proc Interval SPA</span>
+                <span class="dps-table-val font-mono">${(s.dotIntervalSPA || 9.1).toFixed(2)}s</span>
+              </div>
               <div class="dps-table-row primary">
-                <span class="dps-table-lbl dot-highlight">DoT DPS</span>
+                <span class="dps-table-lbl dot-highlight">DoT DPS (${Math.round(s.dotDamage || (s.effDamage * 0.65)).toLocaleString()} &divide; ${(s.dotIntervalSPA || 9.1).toFixed(2)}s)</span>
                 <span class="dps-table-val font-mono dot-highlight">+${formatFullDPS(s.dotDps)} DPS</span>
               </div>
             </div>
@@ -475,7 +516,6 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
         </div>
       `;
 
-      // Wire up tab buttons after render
       summonsPanel.querySelectorAll(".dps-summon-tab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
           activeSummonIdx = parseInt(btn.dataset.idx, 10);
@@ -489,9 +529,6 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
 
   const mainPanel = document.createElement("div");
   mainPanel.className = "dps-panel main-panel mobile-active";
-
-  const traitDotMult = 1 + (breakdown.trait.dotBonus || 0);
-  const relicDotMult = 1 + (breakdown.relicDotBonus || 0);
 
   mainPanel.innerHTML = `
     <div class="dps-panel-header">
