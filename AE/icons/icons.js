@@ -1,4 +1,3 @@
-// Base URL resolution derived from where icons.js is hosted on the server
 const BASE_URL = new URL('../', import.meta.url).href;
 
 export function toAbsoluteUrl(relativePath) {
@@ -11,46 +10,44 @@ export function toAbsoluteUrl(relativePath) {
 }
 
 export const UNIT_INFO_ICONS = {
-    totalCost: toAbsoluteUrl("icons/unit-info/Yen.png"),
-    yen: toAbsoluteUrl("icons/unit-info/Yen.png"),
-    damage: toAbsoluteUrl("icons/unit-info/Damage.png"),
-    spa: toAbsoluteUrl("icons/unit-info/Spa.png"),
-    range: toAbsoluteUrl("icons/unit-info/Range.png"),
-    critChance: toAbsoluteUrl("icons/unit-info/CritRate.png"),
-    critDamage: toAbsoluteUrl("icons/unit-info/CritDamage.png"),
+    totalCost: toAbsoluteUrl("icons/unit-info/yen.png"),
+    yen: toAbsoluteUrl("icons/unit-info/yen.png"),
+    damage: toAbsoluteUrl("icons/unit-info/damage.png"),
+    spa: toAbsoluteUrl("icons/unit-info/spa.png"),
+    range: toAbsoluteUrl("icons/unit-info/range.png"),
+    critChance: toAbsoluteUrl("icons/unit-info/critrate.png"),
+    critDamage: toAbsoluteUrl("icons/unit-info/critdamage.png"),
 };
 
-// ── Element / Archetype / Status PNG icons ──────────────────────────────────
 export const ELEMENT_ICONS = {
-    hydro: toAbsoluteUrl("icons/elements/Hydro.png"),
-    flame: toAbsoluteUrl("icons/elements/Flame.png"),
-    terra: toAbsoluteUrl("icons/elements/Terra.png"),
-    gale: toAbsoluteUrl("icons/elements/Gale.png"),
-    storm: toAbsoluteUrl("icons/elements/Storm.png"),
-    light: toAbsoluteUrl("icons/elements/Light.png"),
-    dark: toAbsoluteUrl("icons/elements/Dark.png"),
-    neutral: toAbsoluteUrl("icons/elements/Neutral.png"),
+    hydro: toAbsoluteUrl("icons/elements/hydro.png"),
+    flame: toAbsoluteUrl("icons/elements/flame.png"),
+    terra: toAbsoluteUrl("icons/elements/terra.png"),
+    gale: toAbsoluteUrl("icons/elements/gale.png"),
+    storm: toAbsoluteUrl("icons/elements/storm.png"),
+    light: toAbsoluteUrl("icons/elements/light.png"),
+    dark: toAbsoluteUrl("icons/elements/dark.png"),
+    neutral: toAbsoluteUrl("icons/elements/neutral.png"),
 };
 
 export const ARCHETYPE_ICONS = {
-    magical: toAbsoluteUrl("icons/archetypes/Magical.png"),
-    physical: toAbsoluteUrl("icons/archetypes/Physical.png"),
-    psychic: toAbsoluteUrl("icons/archetypes/Psychic.png"),
+    magical: toAbsoluteUrl("icons/archetypes/magical.png"),
+    physical: toAbsoluteUrl("icons/archetypes/physical.png"),
+    psychic: toAbsoluteUrl("icons/archetypes/psychic.png"),
 };
 
 export const STATUS_ICONS = {
     bleed: toAbsoluteUrl("icons/status/bleed.png"),
-    burn: toAbsoluteUrl("icons/status/Burn.png"),
+    burn: toAbsoluteUrl("icons/status/burn.png"),
     austereflames: toAbsoluteUrl("icons/status/AustereFlames.png"),
     manaburn: toAbsoluteUrl("icons/status/ManaBurn.png"),
     freeze: toAbsoluteUrl("icons/status/freeze.png"),
-    slow: toAbsoluteUrl("icons/status/Slow.png"),
-    stun: toAbsoluteUrl("icons/status/Stun.png"),
+    slow: toAbsoluteUrl("icons/status/slow.png"),
+    stun: toAbsoluteUrl("icons/status/stun.png"),
     puppetmark: toAbsoluteUrl("icons/status/PuppetMark.png"),
     dismembered: toAbsoluteUrl("icons/status/Dismembered.png"),
 };
 
-// ── Relic artwork (PNG) ────────────────────────────────────────────────────
 export const RELIC_ICONS = {
     "relic-promise-ring": toAbsoluteUrl("icons/relics/PromiseRing.png"),
     "relic-elven-battle-staff": toAbsoluteUrl("icons/relics/ElvenBattleStaff.png"),
@@ -133,13 +130,20 @@ export function formatPassiveText(text) {
     out = out.replace(/<br\s*\/?>/gi, "__BR__");
 
     // Phase 1: Tokenize keywords
+    out = out.replace(/Shadow[\s\xA0]+Realm/gi, "@@SRM@@");
+    out = out.replace(/Shadow[\s\xA0]+Rewind/gi, "@@SRW@@");
+    out = out.replace(/Divine[\s\xA0]+Spirit/gi, "@@DS@@");
+    out = out.replace(/Spirit[\s\xA0]+Wolf/gi, "@@SWF@@");
+    out = out.replace(/Winged[\s\xA0]+Spirit/gi, "@@WS@@");
+    out = out.replace(/Takedowns?|Takedown/gi, "@@TKD@@");
+    out = out.replace(/Magical/gi, "@@MGC@@");
+
     out = out.replace(/Thunderclap[\s\xA0]+Cut/gi, "@@TC@@");
     out = out.replace(/Unrestrained[\s\xA0]+Rampage/gi, "@@UR@@");
     out = out.replace(/Skyward[\s\xA0]+Slash/gi, "@@SS@@");
     out = out.replace(/Way[\s\xA0]+of[\s\xA0]+the[\s\xA0]+Sword/gi, "@@WSW@@");
 
     out = out.replace(/Austere[\s\xA0]+Flames/gi, "@@AF@@");
-    out = out.replace(/Winged[\s\xA0]+Spirit/gi, "@@WS@@");
     out = out.replace(/Puppet[\s\xA0]+Mark/gi, "@@PM@@");
     out = out.replace(/Stone[\s\xA0]+Wall/gi, "@@SW@@");
     out = out.replace(/Rock[\s\xA0]+Chunks?/gi, "@@RC@@");
@@ -184,13 +188,20 @@ export function formatPassiveText(text) {
     // Phase 3: Inject clean HTML markup
     const iconImgTag = (src) => src ? `<img src="${toAbsoluteUrl(src)}" class="p-kw-icon" alt="" />` : "";
 
+    out = out.replace(/@@SRM@@/g, `<span class="p-kw p-shadow-realm"><span>Shadow Realm</span></span>`);
+    out = out.replace(/@@SRW@@/g, `<span class="p-kw p-shadow-rewind"><span>Shadow Rewind</span></span>`);
+    out = out.replace(/@@DS@@/g, `<span class="p-kw p-divine-spirit"><span>Divine Spirit</span></span>`);
+    out = out.replace(/@@SWF@@/g, `<span class="p-kw p-spirit-wolf"><span>Spirit Wolf</span></span>`);
+    out = out.replace(/@@WS@@/g, `<span class="p-kw p-winged-spirit"><span>Winged Spirit</span></span>`);
+    out = out.replace(/@@TKD@@/g, `<span class="p-kw p-takedown"><span>Takedown</span></span>`);
+    out = out.replace(/@@MGC@@/g, `<span class="p-kw p-magical"><span>Magical</span></span>`);
+
     out = out.replace(/@@TC@@/g, `<span class="p-kw p-atk-name"><span>Thunderclap Cut</span></span>`);
     out = out.replace(/@@UR@@/g, `<span class="p-kw p-atk-name"><span>Unrestrained Rampage</span></span>`);
     out = out.replace(/@@SS@@/g, `<span class="p-kw p-atk-name"><span>Skyward Slash</span></span>`);
     out = out.replace(/@@WSW@@/g, `<span class="p-kw p-atk-name"><span>Way of the Sword</span></span>`);
 
     out = out.replace(/@@AF@@/g, `<span class="p-kw p-austere-flames">${iconImgTag(STATUS_ICONS.burn)}<span>Austere Flames</span></span>`);
-    out = out.replace(/@@WS@@/g, `<span class="p-kw p-winged-spirit"><span>Winged Spirit</span></span>`);
     out = out.replace(/@@PM@@/g, `<span class="p-kw p-puppet-mark">${iconImgTag(STATUS_ICONS.puppetmark)}<span>Puppet Mark</span></span>`);
     out = out.replace(/@@SW@@/g, `<span class="p-kw p-stone-wall"><span>Stone Wall</span></span>`);
     out = out.replace(/@@RC@@/g, `<span class="p-kw p-rock-chunk"><span>Rock Chunks</span></span>`);
@@ -258,6 +269,14 @@ if (typeof window !== "undefined") {
 
     function getTooltipImage(target) {
         if (!target) return "";
+        if (target.classList.contains("p-shadow-realm")) return toAbsoluteUrl("icons/info/ShadowRealmInfo.png");
+        if (target.classList.contains("p-shadow-rewind")) return toAbsoluteUrl("icons/info/ShadowRewindInfo.png");
+        if (target.classList.contains("p-spirit-wolf")) return toAbsoluteUrl("icons/info/SpiritWolfInfo.png");
+        if (target.classList.contains("p-divine-spirit")) return toAbsoluteUrl("icons/info/DivineSpiritInfo.png");
+        if (target.classList.contains("p-winged-spirit")) return toAbsoluteUrl("icons/info/WingedSpiritInfo.png");
+        if (target.classList.contains("p-takedown")) return toAbsoluteUrl("icons/info/TakeDownInfo.png");
+        if (target.classList.contains("p-magical")) return toAbsoluteUrl("icons/info/MagicalInfo.png");
+
         if (target.classList.contains("p-mana-burn")) return toAbsoluteUrl("icons/info/ManaBurnInfo.png");
         if (target.classList.contains("p-bleed")) return toAbsoluteUrl("icons/info/bleedinfo.png");
         if (target.classList.contains("p-ent")) return toAbsoluteUrl("icons/info/batinfo.png");

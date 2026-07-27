@@ -9,13 +9,32 @@
 html {
   color-scheme: dark;
   scroll-behavior: smooth;
+  font-size: 14px;
+  /* Scaled up base font size */
+}
+
+/* ─── Widescreen / High-DPI Uniform Scaling ─────────────────────────────── */
+/* Only triggers above 1920px so 1080p monitors are NOT affected            */
+/* 1440p at 100% OS scale = 2560px viewport → gets zoom                    */
+/* 1080p at 100% OS scale = 1920px viewport → NO zoom (below 2000px)       */
+@media (min-width: 2000px) {
+  body {
+    zoom: 1.2;
+  }
+}
+
+/* 4K / very large monitors */
+@media (min-width: 2560px) {
+  body {
+    zoom: 1.35;
+  }
 }
 
 body {
   background: var(--background);
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 1rem;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -123,100 +142,6 @@ img {
   box-shadow: none !important;
 }
 
-@media (prefers-reduced-motion: reduce) {
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* ── Universal Element & Archetype Badge Styling ───────────────────────────── */
-.dps-portrait-badge img,
-.dps-portrait-badge svg,
-.unit-card-element img,
-.unit-card-archetype img,
-.badge-element img,
-.badge-archetype img {
-  width: 12px !important;
-  height: 12px !important;
-  max-width: 12px !important;
-  max-height: 12px !important;
-  flex-shrink: 0 !important;
-  object-fit: contain !important;
-  display: inline-block !important;
-}
-
-.element-hydro {
-  background: rgba(56, 189, 248, 0.12) !important;
-  color: #38bdf8 !important;
-  border-color: rgba(56, 189, 248, 0.28) !important;
-}
-
-.element-flame {
-  background: rgba(249, 115, 22, 0.12) !important;
-  color: #f97316 !important;
-  border-color: rgba(249, 115, 22, 0.28) !important;
-}
-
-.element-terra {
-  background: rgba(234, 179, 8, 0.12) !important;
-  color: #eab308 !important;
-  border-color: rgba(234, 179, 8, 0.28) !important;
-}
-
-.element-gale {
-  background: rgba(34, 197, 94, 0.12) !important;
-  color: #4ade80 !important;
-  border-color: rgba(34, 197, 94, 0.28) !important;
-}
-
-.element-storm {
-  background: rgba(20, 184, 166, 0.12) !important;
-  color: #2dd4bf !important;
-  border-color: rgba(20, 184, 166, 0.28) !important;
-}
-
-.element-light {
-  background: rgba(250, 204, 21, 0.12) !important;
-  color: #facc15 !important;
-  border-color: rgba(250, 204, 21, 0.28) !important;
-}
-
-.element-dark {
-  background: rgba(168, 85, 247, 0.12) !important;
-  color: #c084fc !important;
-  border-color: rgba(168, 85, 247, 0.28) !important;
-}
-
-.element-neutral {
-  background: rgba(148, 163, 184, 0.12) !important;
-  color: #94a3b8 !important;
-  border-color: rgba(148, 163, 184, 0.28) !important;
-}
-
-.archetype-physical {
-  background: rgba(239, 68, 68, 0.12) !important;
-  color: #f87171 !important;
-  border-color: rgba(239, 68, 68, 0.28) !important;
-}
-
-.archetype-magical,
-.archetype-magic {
-  background: rgba(56, 189, 248, 0.12) !important;
-  color: #38bdf8 !important;
-  border-color: rgba(56, 189, 248, 0.28) !important;
-}
-
-.archetype-psychic {
-  background: rgba(244, 114, 182, 0.12) !important;
-  color: #f472b6 !important;
-  border-color: rgba(244, 114, 182, 0.28) !important;
-}
-
 /* ── Universal Keyword Highlights ─────────────────────────────────────────── */
 :root {
   --kw-darkness: 25%;
@@ -254,14 +179,13 @@ img {
   line-height: inherit !important;
 }
 
-/* Numbers inside status/passive descriptions */
 .p-num {
   font-family: var(--font-mono) !important;
   font-weight: 800 !important;
   color: #ffffff !important;
 }
 
-/* Cleanse & Attack Names -> White Text with White Underline */
+/* Cleanse & Attack Names */
 .p-kw.p-cleanse>span,
 .p-kw.p-atk-name>span {
   --kw-color: #ffffff;
@@ -273,7 +197,6 @@ img {
   text-underline-offset: 2px !important;
 }
 
-/* Keyword Colors */
 .p-kw.p-reg-attack>span {
   --kw-color: #dadada;
   color: #dadada !important;
@@ -285,10 +208,7 @@ img {
 }
 
 .p-kw.p-frostbite>span,
-.p-kw.p-freeze>span {
-  --kw-color: #38bdf8;
-}
-
+.p-kw.p-freeze>span,
 .p-spell,
 .p-spell-text,
 .p-mana-burn,
@@ -299,14 +219,6 @@ img {
 .p-kw.p-fua>span,
 .p-fua-text {
   --kw-color: #fde047;
-  background: linear-gradient(180deg, color-mix(in srgb, #fde047 88%, #000) 0%, #fde047 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  background-clip: text !important;
-  font-weight: 700 !important;
-  text-decoration: underline !important;
-  text-decoration-color: #fde047 !important;
-  text-underline-offset: 2px !important;
 }
 
 .p-ent,
@@ -340,12 +252,21 @@ img {
 .p-kw.p-rewind>span,
 .p-kw.p-cocoon>span,
 .p-kw.p-puppet-mark>span,
-.p-kw.p-dismembered>span {
+.p-kw.p-dismembered>span,
+.p-kw.p-winged-spirit>span,
+.p-kw.p-shadow-rewind>span {
   --kw-color: #9900ff;
 }
 
-.p-kw.p-winged-spirit>span {
-  --kw-color: #8f43ff;
+.p-kw.p-magical>span {
+  --kw-color: #1595ed;
+}
+
+.p-kw.p-shadow-realm>span,
+.p-kw.p-spirit-wolf>span,
+.p-kw.p-divine-spirit>span,
+.p-kw.p-takedown>span {
+  --kw-color: #7e7e7e;
 }
 
 .p-kw.p-buffs>span {
@@ -377,6 +298,12 @@ img {
 .p-kw.p-puppet-mark>span,
 .p-kw.p-dismembered>span,
 .p-kw.p-winged-spirit>span,
+.p-kw.p-shadow-rewind>span,
+.p-kw.p-magical>span,
+.p-kw.p-shadow-realm>span,
+.p-kw.p-spirit-wolf>span,
+.p-kw.p-divine-spirit>span,
+.p-kw.p-takedown>span,
 .p-kw.p-buffs>span {
   background: linear-gradient(180deg, color-mix(in srgb, var(--kw-color) calc(100% - var(--kw-darkness)), #000) 0%, var(--kw-color) 100%) !important;
   -webkit-background-clip: text !important;
@@ -388,43 +315,9 @@ img {
   text-underline-offset: 2px !important;
 }
 
-/* Doll / Dolls -> Custom Gradient */
-.p-kw.p-doll {
-  position: relative;
-  display: inline-block;
-  vertical-align: baseline;
-  filter: drop-shadow(0px 0.75px 1px #000000);
-}
-
-.p-doll-text {
-  background: linear-gradient(180deg, #c3e6ff 0%, #d4c7ff 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  font-weight: 700 !important;
-  text-decoration: underline !important;
-  text-decoration-color: #d4c7ff !important;
-  text-underline-offset: 2px !important;
-  display: inline !important;
-}
-
-/* Disable duplicate tooltips */
-.p-kw.p-bleed::after,
-.p-ent::after,
-.p-kw.p-fua::after,
-.p-kw.p-mana-burn::after {
-  display: none !important;
-  content: none !important;
-}
-
 .floating-status-tooltip {
   box-shadow: none !important;
   filter: none !important;
-}
-
-@media (min-width: 2500px) {
-  html {
-    zoom: 1.25;
-  }
 }
 
 /* Text sizes for descriptions */

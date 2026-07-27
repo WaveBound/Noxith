@@ -90,6 +90,7 @@ export const unit = {
     ],
 
     summons: {
+        id: "batspirits",
         name: "Bat Spirits",
         countPerPlacement: 3,
         baseDamageMultiplier: 0.15,

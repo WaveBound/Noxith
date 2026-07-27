@@ -4,8 +4,10 @@ import { getTraitBreakdown, formatDPS } from "../../pages/dps-math.js";
 import { relicStats } from "../../data/relicstats.js";
 import { relics as allRelicsCatalog } from "../../data/relics.js";
 
-// Local state storage to prevent module resolution errors
 const unitSubTabMap = new Map();
+const activeSummonViewMap = new Map();
+const activeRightPanelTabMap = new Map();
+const activeDpsSubtabSummonMap = new Map();
 
 function getUnitSubTab(unitId) {
   return unitSubTabMap.get(unitId) || "info";
@@ -40,8 +42,8 @@ function renderHeaderDpsSummary(unit, bd, placementCount) {
       </div>` : ""}
       ${unit.summons ? `
       <div class="uip-header-dps-card card-summons">
-        <span class="uip-header-dps-val summons-highlight">${formatDPS(totalSummonDPS * placementCount)}</span>
-        <span class="uip-header-dps-lbl">Summons x${placementCount}</span>
+        <span class="uip-header-dps-val summons-highlight">${formatDPS(totalSummonDPS)}</span>
+        <span class="uip-header-dps-lbl">Summons Field</span>
       </div>` : ""}
       ${fuaDps > 0 ? `
       <div class="uip-header-dps-card card-fua">
@@ -164,7 +166,7 @@ function buildLoadoutPanel(unit) {
   return panel;
 }
 
-function buildUpgradesPanel(unit) {
+function buildUpgradesPanel(unit, activeSummonData = null) {
   const panel = document.createElement("div");
   panel.className = "upgrades-table glass-card";
 
@@ -178,11 +180,86 @@ function buildUpgradesPanel(unit) {
   };
 
   const formatNum = (n) => Math.round(n).toLocaleString("en-US");
-  const upgrades = (unit.placement || []);
+
+  if (activeSummonData && !activeSummonData.hasOwnUpgrades) {
+    const unlockText = activeSummonData.id === "wingedspirit"
+      ? "Unlocked on Main Unit Upgrade 3"
+      : activeSummonData.id === "spiritgeneral"
+        ? "Unlocked on Main Unit Upgrade 10 (Divine Spirit Ability)"
+        : "Unit Summon";
+
+    const dmgText = activeSummonData.id === "wingedspirit"
+      ? "50% of Unit DMG"
+      : activeSummonData.id === "spiritgeneral"
+        ? "100% Base DMG (+100% Execution Cycle Passive Cap)"
+      : activeSummonData.id === "batspirits"
+        ? "15% of Unit DMG — Despawns after 3 attacks"
+      : activeSummonData.id === "mirageclone"
+        ? "50% of Unit DMG"
+      : activeSummonData.baseDamageMultiplier != null
+        ? `${Math.round(activeSummonData.baseDamageMultiplier * 100)}% of Unit DMG`
+        : "100% Unit DMG";
+
+    const spaText = activeSummonData.id === "mirageclone"
+      ? `Same as Unit (${unit.stats?.spa || "?"}s)`
+      : activeSummonData.intervalSPA
+        ? `${activeSummonData.intervalSPA}s`
+        : activeSummonData.baseSpa
+          ? `${activeSummonData.baseSpa}s`
+          : `${unit.stats?.spa || "6s"}`;
+
+    const rangeText = activeSummonData.id === "mirageclone"
+      ? `Same as Unit (${unit.stats?.range || "?"})`
+      : activeSummonData.range
+        ? (typeof activeSummonData.range === "number" ? `${activeSummonData.range}` : activeSummonData.range)
+        : "50% of Unit Range";
+
+
+    panel.innerHTML = `
+      <div class="upgrades-box">
+        <div class="panel-heading">
+          <span class="panel-title">${activeSummonData.name} Overview</span>
+        </div>
+        <div class="upgrade-row upgrade-row-placement" style="margin-top: 8px;">
+          <div class="upgrade-header">
+            <span class="upgrade-number">${unlockText}</span>
+            <span class="upgrade-cost">Ability Summon</span>
+          </div>
+          ${activeSummonData.attackName ? `
+            <div class="upgrade-attack">
+              <span class="upgrade-attack-label">Attack:</span>
+              <span class="upgrade-attack-name">${activeSummonData.attackName}</span>
+            </div>` : ""}
+          <div class="upgrade-stats">
+            <div class="upgrade-stat">
+              <span class="upgrade-stat-icon">${iconImg(UNIT_INFO_ICONS.damage, "Damage")}</span>
+              <span class="upgrade-stat-label">Dmg Scale:</span>
+              <span class="upgrade-stat-value">${dmgText}</span>
+            </div>
+            <div class="upgrade-stat">
+              <span class="upgrade-stat-icon">${iconImg(UNIT_INFO_ICONS.spa, "SPA")}</span>
+              <span class="upgrade-stat-label">SPA:</span>
+              <span class="upgrade-stat-value">${spaText}</span>
+            </div>
+            <div class="upgrade-stat">
+              <span class="upgrade-stat-icon">${iconImg(UNIT_INFO_ICONS.range, "Range")}</span>
+              <span class="upgrade-stat-label">Range:</span>
+              <span class="upgrade-stat-value">${rangeText}</span>
+            </div>
+          </div>
+          ${activeSummonData.aoe ? `<div class="upgrade-meta"><span class="upgrade-meta-label">AoE Type:</span> <span class="upgrade-meta-value">${activeSummonData.aoe}</span></div>` : ""}
+          ${activeSummonData.attackTime ? `<div class="upgrade-meta"><span class="upgrade-meta-label">Attack Time:</span> <span class="upgrade-meta-value">${activeSummonData.attackTime}</span></div>` : ""}
+          ${activeSummonData.passive ? `<div class="upgrade-desc">${formatPassiveText(activeSummonData.passive)}</div>` : ""}
+        </div>
+      </div>`;
+    return panel;
+  }
+
+  const upgrades = activeSummonData?.upgrades || (unit.placement || []);
 
   const rowsHtml = upgrades.map((u, i) => {
     const isPlacement = u.upgrade === 0;
-    const isMax = (i === upgrades.length - 1) || (u.cost === "$0" || u.cost === "0");
+    const isMax = (i === upgrades.length - 1) || (u.cost === "$0" || u.cost === "0" || u.cost === "Maxed");
     const numberLabel = isPlacement ? "Placement" : `Upgrade: ${u.upgrade}`;
     const costHtml = isMax
       ? "Max Level"
@@ -206,10 +283,11 @@ function buildUpgradesPanel(unit) {
           <span class="upgrade-number">${numberLabel}</span>
           <span class="upgrade-cost">${costHtml}</span>
         </div>
-        <div class="upgrade-attack">
-          <span class="upgrade-attack-label">Attack:</span>
-          <span class="upgrade-attack-name">${u.attackName || ""}</span>
-        </div>
+        ${u.attackName ? `
+          <div class="upgrade-attack">
+            <span class="upgrade-attack-label">Attack:</span>
+            <span class="upgrade-attack-name">${u.attackName}</span>
+          </div>` : ""}
         <div class="upgrade-stats">
           <div class="upgrade-stat">
             <span class="upgrade-stat-icon">${iconImg(UNIT_INFO_ICONS.damage, "Damage")}</span>
@@ -229,16 +307,16 @@ function buildUpgradesPanel(unit) {
         </div>
         ${aoeHtml}
         ${atkTimeHtml}
-        <div class="upgrade-desc">
-          ${formatPassiveText(u.description || "")}
-        </div>
+        ${u.description ? `<div class="upgrade-desc">${formatPassiveText(u.description)}</div>` : ""}
       </div>`;
   }).join("");
+
+  const headerTitle = activeSummonData ? `${activeSummonData.name} Stats` : "Stats";
 
   panel.innerHTML = `
     <div class="upgrades-box">
       <div class="panel-heading">
-        <span class="panel-title">Stats</span>
+        <span class="panel-title">${headerTitle}</span>
         <div class="level-toggle" role="group" aria-label="Stat level">
           <button type="button" class="level-btn active" data-level="1">Lv 1</button>
           <button type="button" class="level-btn" data-level="50">Lv 50</button>
@@ -264,51 +342,135 @@ function buildUpgradesPanel(unit) {
     });
   });
 
-  panel._upgradesRows = panel.querySelector(".upgrades-rows");
-  return panel;
-}
-
-export function fitUpgradesToFour(panel) {
-  const container = panel._upgradesRows;
-  if (!container) return;
-  const rows = Array.from(container.querySelectorAll(".upgrade-row"));
-  if (rows.length <= 4) return;
-
+  // Dynamically size the scroll container to show exactly 3 rows
+  // Uses requestAnimationFrame so rows are in DOM and measurable
   requestAnimationFrame(() => {
-    const visibleRows = rows.slice(0, 4);
-    const computedHeight = visibleRows.reduce((sum, row) => sum + (row.offsetHeight || 90), 0) + 24;
-    if (computedHeight > 0) {
-      container.style.maxHeight = `${computedHeight}px`;
+    const rowsContainer = panel.querySelector(".upgrades-rows");
+    if (!rowsContainer) return;
+    const rows = rowsContainer.querySelectorAll(".upgrade-row");
+    const VISIBLE_ROWS = 3;
+    const GAP = 8; // matches CSS gap: 8px
+
+    // getBoundingClientRect returns VISUAL (zoomed) pixels.
+    // CSS max-height is in LAYOUT pixels (before zoom).
+    // Divide by zoom factor to get the correct CSS pixel value.
+    const bodyZoom = parseFloat(getComputedStyle(document.body).zoom) || 1;
+
+    if (rows.length <= VISIBLE_ROWS) {
+      rowsContainer.style.maxHeight = "none";
+      rowsContainer.style.overflowY = "visible";
+    } else {
+      let totalH = 0;
+      for (let i = 0; i < VISIBLE_ROWS; i++) {
+        totalH += rows[i].getBoundingClientRect().height;
+        if (i < VISIBLE_ROWS - 1) totalH += GAP * bodyZoom; // gap also needs zoom correction
+      }
+      rowsContainer.style.maxHeight = Math.ceil(totalH / bodyZoom) + "px";
+      rowsContainer.style.overflowY = "auto";
     }
   });
-}
-
-function buildPassivesPanel(unit) {
-  const panel = document.createElement("div");
-  panel.className = "passives-table glass-card";
-
-  const passives = unit.passives || [];
-  const rowsHtml = passives.map(p => `
-    <div class="passive-row">
-      <div class="passive-info">
-        <span class="passive-name"><span class="passive-label">Passive:</span> <span class="passive-title-text">${p.name}</span></span>
-        <span class="passive-effect">${formatPassiveText(p.effect)}</span>
-      </div>
-    </div>`).join("");
-
-  panel.innerHTML = `
-    <div class="panel-heading">
-      <span class="panel-title">Passives</span>
-    </div>
-    <div class="passives-rows">
-      ${rowsHtml || `<div class="traits-empty">No passive data</div>`}
-    </div>`;
 
   return panel;
 }
 
-function buildStatusEffectsPanel(unit) {
-  const effects = unit.statusEffects || [];
+function buildRightPanel(unit, activeSummonData = null) {
+  const panel = document.createElement("div");
+  panel.className = "uip-col";
+
+  const hasAbilities = unit.abilities && unit.abilities.length > 0 && !activeSummonData;
+  let activeTab = activeRightPanelTabMap.get(unit.id) || "passives";
+
+  function render() {
+    panel.innerHTML = "";
+
+    let passives = unit.passives || [];
+    if (activeSummonData) {
+      passives = [];
+      if (activeSummonData.passive) {
+        passives.push({ name: activeSummonData.name, effect: activeSummonData.passive });
+      }
+    }
+
+    const passivesHtml = passives.map(p => `
+      <div class="passive-row">
+        <div class="passive-info">
+          <span class="passive-name"><span class="passive-label">Passive:</span> <span class="passive-title-text">${p.name}</span></span>
+          <span class="passive-effect">${formatPassiveText(p.effect || p.desc || "")}</span>
+        </div>
+      </div>`).join("");
+
+    const abilitiesHtml = (unit.abilities || []).map(a => `
+      <div class="passive-row">
+        <div class="passive-info">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 2px;">
+            <span class="passive-name"><span class="passive-label" style="background: linear-gradient(90deg, #3b82f6, #60a5fa); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Ability:</span> <span class="passive-title-text">${a.name}</span></span>
+            <span style="font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: #a78bfa; background: rgba(167, 139, 250, 0.12); border: 1px solid rgba(167, 139, 250, 0.25); padding: 1px 6px; border-radius: 4px;">${a.cooldown || ""}</span>
+          </div>
+          <span class="passive-effect">${formatPassiveText(a.desc || a.effect || "")}</span>
+        </div>
+      </div>`).join("");
+
+    const rightTable = document.createElement("div");
+    rightTable.className = "passives-table glass-card";
+
+    let headerHtml = "";
+    if (hasAbilities) {
+      headerHtml = `
+        <div class="panel-heading">
+          <span class="panel-title">${activeTab === "passives" ? "Passives" : "Abilities"}</span>
+          <div class="right-panel-switcher">
+            <button type="button" class="right-panel-tab${activeTab === "passives" ? " active" : ""}" data-tab="passives">Passives</button>
+            <button type="button" class="right-panel-tab${activeTab === "abilities" ? " active" : ""}" data-tab="abilities">Abilities</button>
+          </div>
+        </div>`;
+    } else {
+      headerHtml = `
+        <div class="panel-heading">
+          <span class="panel-title">${activeSummonData ? `${activeSummonData.name} Passives` : "Passives"}</span>
+        </div>`;
+    }
+
+    const contentRows = (hasAbilities && activeTab === "abilities") ? abilitiesHtml : passivesHtml;
+
+    rightTable.innerHTML = `
+      ${headerHtml}
+      <div class="passives-rows">
+        ${contentRows || `<div class="traits-empty">No data</div>`}
+      </div>`;
+
+    panel.appendChild(rightTable);
+
+    if (hasAbilities) {
+      rightTable.querySelectorAll(".right-panel-tab").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeTab = btn.dataset.tab;
+          activeRightPanelTabMap.set(unit.id, activeTab);
+          render();
+        });
+      });
+    }
+
+    // Status Effects Panel
+    const statusPanel = buildStatusEffectsPanel(unit, activeSummonData);
+    if (statusPanel) {
+      panel.appendChild(statusPanel);
+    }
+  }
+
+  render();
+  return panel;
+}
+
+function buildStatusEffectsPanel(unit, activeSummonData = null) {
+  let effects = [];
+  if (activeSummonData) {
+    if (activeSummonData.statusEffect) {
+      effects = [activeSummonData.statusEffect];
+    }
+  } else {
+    effects = unit.statusEffects || [];
+  }
+
   if (!effects || effects.length === 0) {
     return null;
   }
@@ -349,7 +511,7 @@ function buildStatusEffectsPanel(unit) {
   return panel;
 }
 
-function buildInspector(unit) {
+function buildInspector(unit, activeSummonData = null) {
   const panel = document.createElement("div");
   panel.className = "inspector glass-card";
 
@@ -367,10 +529,20 @@ function buildInspector(unit) {
   ];
 
   const statRow = ({ key, label, icon, color }) => {
-    const val =
-      key === "totalCost" ? unit.totalCost :
+    let val = "";
+    if (activeSummonData) {
+      if (key === "damage") val = activeSummonData.maxDamage ? `${activeSummonData.maxDamage}` : "50% Unit DMG";
+      else if (key === "spa") val = activeSummonData.maxSpa ? `${activeSummonData.maxSpa}s` : (activeSummonData.intervalSPA ? `${activeSummonData.intervalSPA}s` : unit.stats?.spa || "");
+      else if (key === "range") val = activeSummonData.range || unit.stats?.range || "";
+      else if (key === "placement") val = activeSummonData.globalMax ? `${activeSummonData.globalMax} Max` : `${activeSummonData.countPerPlacement || 1}/Placement`;
+      else if (key === "attackType") val = activeSummonData.aoe || unit.stats?.attackType || "";
+      else val = unit.stats?.[key] || "";
+    } else {
+      val = key === "totalCost" ? unit.totalCost :
         key === "placement" ? unit.placementCount :
           unit.stats?.[key] || "";
+    }
+
     return `
       <div class="inspector-row">
         <span class="inspector-icon">${iconHtml(key, val, icon, color)}</span>
@@ -405,7 +577,7 @@ function buildInspector(unit) {
       <img src="${toAbsoluteUrl(unit.image || "assets/placeholder.svg")}" alt="${unit.name}" />
     </div>
     <div class="inspector-identity">
-      <div class="inspector-name">${unit.name || ""}</div>
+      <div class="inspector-name">${activeSummonData ? activeSummonData.name : (unit.name || "")}</div>
       <div class="inspector-tiers">${tiersHtml}</div>
     </div>
     <div class="inspector-preferred">
@@ -425,18 +597,10 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
   let currentLevel = 1;
   let currentStatMode = "0%";
   const isDarkMage = unit.id === "darkmagesovereign" || (unit.name && unit.name.includes("Dark Mage"));
-  const isLadyGiant = unit.id === "ladygiantenvy" || (unit.name && unit.name.includes("Lady Giant"));
-  const isEighthSword = unit.id === "8thswordberserk" || (unit.name && unit.name.includes("8th Sword"));
+  let activeDpsSummonId = activeDpsSubtabSummonMap.get(unit.id) || "main";
 
   if (isDarkMage && !unit.darkMageMode) {
     unit.darkMageMode = "lightning";
-  }
-  if (isLadyGiant && unit.giantForm === undefined) {
-    unit.giantForm = false;
-  }
-  if (isEighthSword) {
-    if (unit.demonicPresence === undefined) unit.demonicPresence = false;
-    if (unit.berserkState === undefined) unit.berserkState = false;
   }
 
   const container = document.createElement("div");
@@ -457,155 +621,85 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
     const { base, effDamage, effSpa, effRange,
       effCritChance, effCritDamage, critAvgMult, avgHitDamage, effDotMult,
       unitDirectDPS, unitDoTDPS, totalSummonDPS, fuaDps, scaledBaseDamage,
-      summonCount, summonDamageMult, summonDamage, summonDirectDPS, summonDoTDPS,
-      dotIntervalSPA, isElfMage, fuaBreakdowns, isReaper, giantForm, berserkState, demonicPresence, darkMageMode } = bd;
+      dotIntervalSPA, darkMageMode, levelMult, summonBreakdowns } = bd;
 
+    const lvlMult = levelMult || 1;
     const placementCount = parseInt(String(unit.placementCount || unit.stats?.placementCount || "1").replace(/[^0-9]/g, ""), 10) || 1;
-    const isCursedStudent = unit.id === "cursestudenttruelove" || (unit.name && unit.name.includes("Cursed Student"));
 
     if (loadoutContainer) {
       loadoutContainer.innerHTML = renderHeaderDpsSummary(unit, bd, placementCount);
     }
 
-    const cycleDuration = 7 * effSpa;
-    let followupSectionHtml = "";
+    const rawSummons = unit.summons ? (Array.isArray(unit.summons) ? unit.summons : [unit.summons]) : null;
 
-    if (isCursedStudent) {
-      let totalFollowUpDPS = 0;
-      const individualRows = [];
-      unit.followUpInputs.forEach((val, idx) => {
-        if (val > 0) {
-          const fuAvgHit = (val * critAvgMult) + avgHitDamage;
-          const fuDpsVal = fuAvgHit / (effSpa * 3);
-          totalFollowUpDPS += fuDpsVal;
-          individualRows.push(`<div class="dps-kv followup-result-row"><span class="dps-kv-lbl">P${idx + 1} <span class="faint-mult">(${val.toLocaleString()} + ${Math.round(avgHitDamage).toLocaleString()}) × crit / ${(effSpa * 3).toFixed(2)}s</span></span><span class="dps-kv-val font-mono crit-highlight">+${formatDPS(fuDpsVal)}</span></div>`);
-        }
-      });
-
-      followupSectionHtml = `
-        <div class="dps-section section-followup">
-          <div class="dps-section-hd">Follow-Up Mimicry</div>
-          <div class="dps-kv-list">
-            <div class="followup-inputs">
-              <input type="text" inputmode="numeric" pattern="[0-9]*" class="uip-followup-input" data-idx="0" placeholder="P1 Copied DMG" value="${unit.followUpInputsRaw[0]}" />
-              <input type="text" inputmode="numeric" pattern="[0-9]*" class="uip-followup-input" data-idx="1" placeholder="P2 Copied DMG" value="${unit.followUpInputsRaw[1]}" />
-              <input type="text" inputmode="numeric" pattern="[0-9]*" class="uip-followup-input" data-idx="2" placeholder="P3 Copied DMG" value="${unit.followUpInputsRaw[2]}" />
-            </div>
-            ${individualRows.join("")}
-            <div class="dps-kv primary"><span class="dps-kv-lbl crit-highlight">Total Follow-Up DPS</span><span class="dps-kv-val font-mono crit-highlight">+${formatDPS(totalFollowUpDPS)}</span></div>
-          </div>
-        </div>`;
-    } else if (isElfMage && fuaBreakdowns && fuaBreakdowns.length > 0) {
-      const spellRows = fuaBreakdowns.map(b => {
-        const rawSpellDmg = Math.round(b.effectiveFollowUpDamage);
-        const formattedSpellName = formatPassiveText(b.name);
-        const note = b.name.includes("Eruption") ? ` &middot; ${formatPassiveText("Mana Burn")}` : "";
-        return `
-          <div class="uip-spell-row">
-            <div class="uip-spell-main">
-              <span class="uip-spell-name">${formattedSpellName}</span>
-              <span class="uip-spell-dps font-mono crit-highlight">+${formatDPS(b.dps)} DPS</span>
-            </div>
-            <div class="uip-spell-meta">
-              <span><b>100% Base &times; 1.25 (Overcharge) = 125% DMG</b> (${rawSpellDmg.toLocaleString()} DMG${note})</span>
-              <span>&bull;</span>
-              <span>Every ${(7 * effSpa).toFixed(1)}s</span>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      followupSectionHtml = `
-        <div class="dps-section section-followup">
-          <div class="dps-section-hd color-crit">Arcane Spells (Follow-Up Attacks)</div>
-          <div class="uip-spells-container">
-            ${spellRows}
-            <div class="dps-kv primary" style="margin-top: 4px;"><span class="dps-kv-lbl crit-highlight">Total Arcane Spells DPS</span><span class="dps-kv-val font-mono crit-highlight">+${formatDPS(fuaDps)} DPS</span></div>
-          </div>
-        </div>`;
-    } else if (isLadyGiant && fuaBreakdowns && fuaBreakdowns.length > 0) {
-      const rockEntry = fuaBreakdowns[0];
-      followupSectionHtml = `
-        <div class="dps-section section-followup">
-          <div class="dps-section-hd color-crit">Rock Storm (Follow-Up Attack)</div>
-          <div class="dps-kv-list">
-            <div class="dps-kv"><span class="dps-kv-lbl">Frequency</span><span class="dps-kv-val font-mono">1 Rock / 4 Regular Attacks (${(4 * effSpa).toFixed(2)}s)</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— ${formatPassiveText("Rock")} Scale</span><span class="dps-kv-val font-mono">${giantForm ? "125% DMG (Giant Form)" : "100% DMG (Base Form)"}</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Rock Hit DMG</span><span class="dps-kv-val font-mono">${Math.round(rockEntry.averageFollowUpHit).toLocaleString()} DMG</span></div>
-            <div class="dps-kv primary"><span class="dps-kv-lbl crit-highlight">Rock Storm DPS</span><span class="dps-kv-val font-mono crit-highlight">+${formatDPS(fuaDps)} DPS</span></div>
-          </div>
+    let dpsSummonBarHtml = "";
+    if (rawSummons && rawSummons.length > 0) {
+      dpsSummonBarHtml = `
+        <div class="uip-summon-selector-bar">
+          <button type="button" class="uip-summon-btn main-btn${activeDpsSummonId === "main" ? " active" : ""}" data-dps-summon="main">Main Unit</button>
+          ${rawSummons.map(s => `
+            <button type="button" class="uip-summon-btn${activeDpsSummonId === s.id ? " active" : ""}" data-dps-summon="${s.id}">${s.name}</button>
+          `).join("")}
         </div>`;
     }
+
+    const summonsColumn = rawSummons ? `
+      <div class="uip-dps-column summons-col">
+        <div class="uip-dps-col-title color-summons">
+          <span>Spirits &amp; Summons</span>
+          <span class="uip-dps-badge summons-highlight">+${formatDPS(totalSummonDPS)} DPS</span>
+        </div>
+        ${(summonBreakdowns || []).map((s, idx) => {
+      let calcNote = "";
+      if (s.id === "spiritgeneral") {
+        calcNote = "100% Base DMG × 2.00 (+100% Execution Cycle)";
+      } else if (s.id === "wingedspirit") {
+        calcNote = "50% Unit DMG (75% with Hexed Blade)";
+      } else if (s.id === "spiritwolf") {
+        calcNote = "Max Upgrade DMG (1088 base × Lvl)";
+      }
+
+      return `
+            <div class="dps-section section-summons">
+              <div class="dps-section-hd color-summons">${idx + 1}. ${s.name}</div>
+              <div class="dps-kv-list">
+                <div class="dps-kv"><span class="dps-kv-lbl">Active Field Count</span><span class="dps-kv-val font-mono">${s.activeCount} on field</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Hit Damage</span><span class="dps-kv-val font-mono">${Math.round(s.effDamage).toLocaleString()} DMG</span></div>
+                ${calcNote ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Scale Rule</span><span class="dps-kv-val font-mono" style="font-size:9.5px;">${calcNote}</span></div>` : ""}
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Crit Avg Hit</span><span class="dps-kv-val font-mono">${Math.round(s.avgHitDamage).toLocaleString()} DMG</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Effective SPA</span><span class="dps-kv-val font-mono">${s.effSpa.toFixed(1)}s</span></div>
+                <div class="dps-kv primary"><span class="dps-kv-lbl summons-highlight">${s.name} DPS</span><span class="dps-kv-val font-mono summons-highlight">+${formatDPS(s.dps)}</span></div>
+              </div>
+            </div>`;
+    }).join("")}
+      </div>` : "";
 
     const singlePlacementDPS = unitDirectDPS + unitDoTDPS + totalSummonDPS + fuaDps;
     const finalCombinedDPS = singlePlacementDPS * placementCount;
 
-    const summonsColumn = unit.summons ? `
-      <div class="uip-dps-column summons-col">
-        <div class="uip-dps-col-title color-summons">
-          <span>${unit.summons.name} Breakdown</span>
-          <span class="uip-dps-badge summons-highlight">+${formatDPS(totalSummonDPS)} DPS</span>
-        </div>
-        <div class="dps-section section-summons">
-          <div class="dps-section-hd color-summons">1. Summon Damage</div>
-          <div class="dps-kv-list">
-            <div class="dps-kv"><span class="dps-kv-lbl">Base Damage</span><span class="dps-kv-val font-mono">${scaledBaseDamage.toLocaleString()}</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Summon Scale <span class="faint-mult">(x${summonDamageMult.toFixed(2)})</span></span><span class="dps-kv-val font-mono">${Math.round(summonDamage).toLocaleString()}</span></div>
-            <div class="dps-kv primary"><span class="dps-kv-lbl summons-highlight">Damage</span><span class="dps-kv-val font-mono summons-highlight">${Math.round(summonDamage).toLocaleString()}</span></div>
-          </div>
-        </div>
-        <div class="dps-section section-summons">
-          <div class="dps-section-hd color-summons">2. Output &amp; Direct DPS</div>
-          <div class="dps-kv-list">
-            <div class="dps-kv"><span class="dps-kv-lbl">Summon Output</span><span class="dps-kv-val font-mono">${Math.round(summonDamage).toLocaleString()} &times; ${summonCount} = ${Math.round(summonDamage * summonCount).toLocaleString()}</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Unit SPA</span><span class="dps-kv-val font-mono">${effSpa.toFixed(2)}s</span></div>
-            <div class="dps-kv primary"><span class="dps-kv-lbl summons-highlight">Direct DPS <span class="faint-mult">(${Math.round(summonDamage * summonCount).toLocaleString()} / ${effSpa.toFixed(2)}s)</span></span><span class="dps-kv-val font-mono summons-highlight">+${formatDPS(summonDirectDPS)}</span></div>
-          </div>
-        </div>
-        ${base.dotMultiplier > 0 ? `
-        <div class="dps-section section-summons">
-          <div class="dps-section-hd color-summons">3. Summons DoT (${formatPassiveText(base.dotName || "Status")})</div>
-          <div class="dps-kv-list">
-            <div class="dps-kv"><span class="dps-kv-lbl">Status</span><span class="dps-kv-val">${formatPassiveText(base.dotName)}</span></div>
-            <div class="dps-kv"><span class="dps-kv-lbl">Summon Output</span><span class="dps-kv-val font-mono">${Math.round(summonDamage * summonCount).toLocaleString()}</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— ${formatPassiveText(base.dotName || "Status")} Scale <span class="faint-mult">(x${effDotMult.toFixed(2)})</span></span><span class="dps-kv-val font-mono">${Math.round(summonDamage * summonCount * effDotMult).toLocaleString()} DMG</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— ${formatPassiveText(base.dotName || "Status")} SPA</span><span class="dps-kv-val font-mono">${dotIntervalSPA.toFixed(2)}s</span></div>
-            <div class="dps-kv primary"><span class="dps-kv-lbl dot-highlight">DoT DPS <span class="faint-mult">(${Math.round(summonDamage * summonCount * effDotMult).toLocaleString()} / ${dotIntervalSPA.toFixed(2)}s)</span></span><span class="dps-kv-val font-mono dot-highlight">+${formatDPS(summonDoTDPS)}</span></div>
-          </div>
-        </div>` : ""}
-      </div>` : "";
+    // Render active inspection target (Main Unit or active summon)
+    const inspectedSummon = (activeDpsSummonId !== "main" && summonBreakdowns)
+      ? summonBreakdowns.find(sb => sb.id === activeDpsSummonId)
+      : null;
 
-    const intermediateBaseDmg = currentStatMode === "Z" ? scaledBaseDamage * 1.2 : scaledBaseDamage;
-    const intermediateSpa = currentStatMode === "Z" ? base.spa * 0.85 : base.spa;
+    const inspectedDmg = inspectedSummon ? inspectedSummon.effDamage : effDamage;
+    const inspectedSpa = inspectedSummon ? inspectedSummon.effSpa : effSpa;
+    const inspectedBaseDmg = inspectedSummon ? inspectedSummon.baseDamage : base.damage;
+    const inspectedBaseSpa = inspectedSummon ? inspectedSummon.baseSpa : base.spa;
 
     container.innerHTML = `
+      ${dpsSummonBarHtml}
       <div class="uip-dps-main-grid${unit.summons ? " has-summons" : " no-summons"}">
         ${summonsColumn}
         <div class="uip-dps-column main-col">
           <div class="uip-dps-col-title">
-            <span>Unit Combat Calculations</span>
+            <span>${inspectedSummon ? `${inspectedSummon.name} Calculations` : "Unit Combat Calculations"}</span>
             <div class="uip-dps-col-title-controls">
               ${isDarkMage ? `
                 <div class="uip-dps-stat-mode-picker">
                   <button type="button" class="uip-dps-lvl-btn${(unit.darkMageMode || "lightning") === "lightning" ? " active" : ""}" data-darkmage-mode="lightning">Lightning Only</button>
-                  <button type="button" class="uip-dps-lvl-btn${unit.darkMageMode === "both" ? " active" : ""}" data-darkmage-mode="both">Attack + Lightning</button>
-                  <button type="button" class="uip-dps-lvl-btn${unit.darkMageMode === "normal" ? " active" : ""}" data-darkmage-mode="normal">Attack Only</button>
-                </div>
-              ` : ""}
-              ${isLadyGiant ? `
-                <div class="uip-dps-stat-mode-picker">
-                  <button type="button" class="uip-dps-lvl-btn${unit.giantForm ? " active" : ""}" data-giant-mode="on">Giant Form: On</button>
-                  <button type="button" class="uip-dps-lvl-btn${!unit.giantForm ? " active" : ""}" data-giant-mode="off">Giant Form: Off</button>
-                </div>
-              ` : ""}
-              ${isEighthSword ? `
-                <div class="uip-dps-stat-mode-picker">
-                  <button type="button" class="uip-dps-lvl-btn${unit.demonicPresence ? " active" : ""}" data-demonic-mode="on">Demonic Presence: On</button>
-                  <button type="button" class="uip-dps-lvl-btn${!unit.demonicPresence ? " active" : ""}" data-demonic-mode="off">Off</button>
-                </div>
-                <div class="uip-dps-stat-mode-picker">
-                  <button type="button" class="uip-dps-lvl-btn${unit.berserkState ? " active" : ""}" data-berserk-mode="on">Berserk: On</button>
-                  <button type="button" class="uip-dps-lvl-btn${!unit.berserkState ? " active" : ""}" data-berserk-mode="off">Off</button>
+                  <button type="button" class="uip-dps-lvl-btn${unit.darkMageMode === "both" ? " active" : ""}" data-darkmage-mode="both">Normal + Lightning</button>
+                  <button type="button" class="uip-dps-lvl-btn${unit.darkMageMode === "normal" ? " active" : ""}" data-darkmage-mode="normal">Normal Only</button>
                 </div>
               ` : ""}
               <div class="uip-dps-level-picker">
@@ -625,24 +719,18 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
                 <div class="dps-section section-damage">
                   <div class="dps-section-hd">Damage</div>
                   <div class="dps-kv-list">
-                    <div class="dps-kv"><span class="dps-kv-lbl">Base Hit</span><span class="dps-kv-val font-mono">${base.damage.toLocaleString()}</span></div>
-                    ${currentLevel > 1 ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Lvl 50 <span class="faint-mult">(${bd.levelMult.toFixed(2)}x)</span></span><span class="dps-kv-val font-mono">${scaledBaseDamage.toLocaleString()}</span></div>` : ""}
-                    ${currentStatMode === "Z" ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Z Stat <span class="faint-mult">(x1.20)</span></span><span class="dps-kv-val font-mono">${Math.round(scaledBaseDamage * 1.2).toLocaleString()}</span></div>` : ""}
-                    ${isReaper ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Adaptation <span class="faint-mult">(+40% DMG)</span></span><span class="dps-kv-val font-mono">${Math.round(intermediateBaseDmg * 1.40).toLocaleString()}</span></div>` : ""}
-                    ${isLadyGiant && giantForm ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Giant Form <span class="faint-mult">(+125% DMG)</span></span><span class="dps-kv-val font-mono">${Math.round(intermediateBaseDmg * 2.25).toLocaleString()}</span></div>` : ""}
-                    ${isEighthSword && berserkState ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Berserk State <span class="faint-mult">(+20% DMG)</span></span><span class="dps-kv-val font-mono">${Math.round(intermediateBaseDmg * 1.20).toLocaleString()}</span></div>` : ""}
-                    <div class="dps-kv primary"><span class="dps-kv-lbl damage-highlight">Effective DMG</span><span class="dps-kv-val font-mono damage-highlight">${Math.round(effDamage).toLocaleString()}</span></div>
+                    <div class="dps-kv"><span class="dps-kv-lbl">Base Hit</span><span class="dps-kv-val font-mono">${Math.round(inspectedBaseDmg).toLocaleString()}</span></div>
+                    ${currentLevel > 1 ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Lvl 50 <span class="faint-mult">(${lvlMult.toFixed(2)}x)</span></span><span class="dps-kv-val font-mono">${Math.round(scaledBaseDamage).toLocaleString()}</span></div>` : ""}
+                    ${currentStatMode === "Z" ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Z Stat <span class="faint-mult">(x1.20)</span></span><span class="dps-kv-val font-mono">${Math.round(inspectedDmg).toLocaleString()}</span></div>` : ""}
+                    <div class="dps-kv primary"><span class="dps-kv-lbl damage-highlight">Effective DMG</span><span class="dps-kv-val font-mono damage-highlight">${Math.round(inspectedDmg).toLocaleString()}</span></div>
                   </div>
                 </div>
                 <div class="dps-section section-spa">
                   <div class="dps-section-hd">SPA</div>
                   <div class="dps-kv-list">
-                    <div class="dps-kv"><span class="dps-kv-lbl">Base</span><span class="dps-kv-val font-mono">${base.spa.toFixed(2)}s</span></div>
-                    ${currentStatMode === "Z" ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Z Stat <span class="faint-mult">(x0.85)</span></span><span class="dps-kv-val font-mono">${(base.spa * 0.85).toFixed(2)}s</span></div>` : ""}
-                    ${isReaper ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Critical Tempo <span class="faint-mult">(-10% SPA)</span></span><span class="dps-kv-val font-mono">${(intermediateSpa * 0.90).toFixed(2)}s</span></div>` : ""}
-                    ${isLadyGiant && giantForm ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Giant Form <span class="faint-mult">(+25% SPA time)</span></span><span class="dps-kv-val font-mono">${(intermediateSpa * 1.25).toFixed(2)}s</span></div>` : ""}
-                    ${isEighthSword && berserkState ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Berserk State <span class="faint-mult">(-10% SPA)</span></span><span class="dps-kv-val font-mono">${(intermediateSpa * 0.90).toFixed(2)}s</span></div>` : ""}
-                    <div class="dps-kv primary"><span class="dps-kv-lbl spa-highlight">${isDarkMage && darkMageMode === "lightning" ? "Disabled in Lightning Mode" : "Final"}</span><span class="dps-kv-val font-mono spa-highlight">${isDarkMage && darkMageMode === "lightning" ? "1.0s Ticks" : effSpa.toFixed(2) + "s"}</span></div>
+                    <div class="dps-kv"><span class="dps-kv-lbl">Base</span><span class="dps-kv-val font-mono">${inspectedBaseSpa.toFixed(1)}s</span></div>
+                    ${currentStatMode === "Z" ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Z Stat <span class="faint-mult">(x0.85)</span></span><span class="dps-kv-val font-mono">${inspectedSpa.toFixed(2)}s</span></div>` : ""}
+                    <div class="dps-kv primary"><span class="dps-kv-lbl spa-highlight">Final SPA</span><span class="dps-kv-val font-mono spa-highlight">${inspectedSpa.toFixed(2)}s</span></div>
                   </div>
                 </div>
                 <div class="dps-section section-range">
@@ -650,56 +738,30 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
                   <div class="dps-kv-list">
                     <div class="dps-kv"><span class="dps-kv-lbl">Base</span><span class="dps-kv-val font-mono">${base.range.toFixed(1)}</span></div>
                     ${currentStatMode === "Z" ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Z Stat <span class="faint-mult">(x1.15)</span></span><span class="dps-kv-val font-mono">${(base.range * 1.15).toFixed(1)}</span></div>` : ""}
-                    ${isLadyGiant && giantForm ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Giant Form <span class="faint-mult">(+50% Range)</span></span><span class="dps-kv-val font-mono">${((currentStatMode === "Z" ? base.range * 1.15 : base.range) * 1.50).toFixed(1)}</span></div>` : ""}
                     <div class="dps-kv primary"><span class="dps-kv-lbl range-highlight">Final</span><span class="dps-kv-val font-mono range-highlight">${effRange.toFixed(1)}</span></div>
                   </div>
                 </div>
               </div>
 
-              <div class="uip-dps-cards-row secondary-stats-row${(base.dotMultiplier > 0 || demonicPresence) ? " has-dot" : " single-card"}">
+              <div class="uip-dps-cards-row secondary-stats-row single-card">
                 <div class="dps-section section-crit">
                   <div class="dps-section-hd">Crit Averaging</div>
                   <div class="dps-kv-list">
                     <div class="dps-kv"><span class="dps-kv-lbl">Base Rate / Mult</span><span class="dps-kv-val font-mono">${base.critChancePercent}% / ${base.critDamagePercent}%</span></div>
-                    ${isReaper ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Adaptation <span class="faint-mult">(+40% Crit Rate)</span></span><span class="dps-kv-val font-mono">+40% Rate</span></div>` : ""}
                     <div class="dps-kv"><span class="dps-kv-lbl">Final Rate / Mult</span><span class="dps-kv-val font-mono">${Math.min(100, (effCritChance * 100)).toFixed(0)}% / ${(effCritDamage * 100).toFixed(0)}% <span class="faint-mult">→ x${critAvgMult.toFixed(2)} avg</span></span></div>
-                    <div class="dps-kv primary"><span class="dps-kv-lbl crit-highlight">Avg Hit DMG</span><span class="dps-kv-val font-mono crit-highlight">${Math.round(avgHitDamage).toLocaleString()}</span></div>
+                    <div class="dps-kv primary"><span class="dps-kv-lbl crit-highlight">Avg Hit DMG</span><span class="dps-kv-val font-mono crit-highlight">${Math.round(inspectedSummon ? inspectedSummon.avgHitDamage : avgHitDamage).toLocaleString()}</span></div>
                   </div>
                 </div>
-                ${(base.dotMultiplier > 0 || demonicPresence) ? `
-                <div class="dps-section section-dot">
-                  <div class="dps-section-hd">${isDarkMage ? "Passive Damage Calculation" : isEighthSword ? "Demonic Presence Calculation" : `DoT Calculation (${formatPassiveText(base.dotName || "Status")})`}</div>
-                  <div class="dps-kv-list">
-                    <div class="dps-kv"><span class="dps-kv-lbl">Effect</span><span class="dps-kv-val">${formatPassiveText(base.dotName)}</span></div>
-                    <div class="dps-kv"><span class="dps-kv-lbl">Effective DMG</span><span class="dps-kv-val font-mono">${Math.round(effDamage).toLocaleString()}</span></div>
-                    ${isElfMage ? `
-                      <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Inflicted By</span><span class="dps-kv-val font-mono">${formatPassiveText("Eruption")} (1 cast / 7 attacks)</span></div>
-                      <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— ${formatPassiveText("Mana Burn")} DMG <span class="faint-mult">(50% over 8s)</span></span><span class="dps-kv-val font-mono dot-highlight">${Math.round(effDamage * effDotMult).toLocaleString()} DMG</span></div>
-                      <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Cycle Duration</span><span class="dps-kv-val font-mono"><span class="faint-mult">7 &times; ${effSpa.toFixed(2)}s =</span> ${cycleDuration.toFixed(2)}s</span></div>
-                    ` : isEighthSword ? `
-                      <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Demonic Presence <span class="faint-mult">(15% Avg Hit/s)</span></span><span class="dps-kv-val font-mono dot-highlight">${Math.round(avgHitDamage * 0.15).toLocaleString()} DMG</span></div>
-                      <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Interval</span><span class="dps-kv-val font-mono">1.0s</span></div>
-                    ` : `
-                      <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Scale <span class="faint-mult">(x${effDotMult.toFixed(2)})</span></span><span class="dps-kv-val font-mono">${Math.round(effDamage * effDotMult).toLocaleString()} DMG</span></div>
-                      <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Interval</span><span class="dps-kv-val font-mono">${dotIntervalSPA.toFixed(2)}s</span></div>
-                    `}
-                    <div class="dps-kv primary"><span class="dps-kv-lbl dot-highlight">${isDarkMage || isEighthSword ? "Passive DPS" : "DoT DPS"}</span><span class="dps-kv-val font-mono dot-highlight">+${formatDPS(unitDoTDPS)}</span></div>
-                  </div>
-                </div>` : ""}
               </div>
             </div>
 
             <div class="uip-dps-subcol">
-              ${followupSectionHtml}
-
               <div class="dps-section section-damage placement-total-card">
                 <div class="dps-section-hd">Placement DPS Total</div>
                 <div class="dps-kv-list">
                   <div class="dps-kv"><span class="dps-kv-lbl">Single Placement DPS</span><span class="dps-kv-val font-mono">${Math.round(singlePlacementDPS).toLocaleString()} DPS</span></div>
                   <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Unit Direct DPS x placements</span><span class="dps-kv-val font-mono">${Math.round(unitDirectDPS).toLocaleString()} x ${placementCount} = ${Math.round(unitDirectDPS * placementCount).toLocaleString()}</span></div>
-                  <div class="dps-kv faint-nested"><span class="dps-kv-lbl">${isDarkMage || isEighthSword ? "Passive DPS x placements" : "DoT DPS x placements"}</span><span class="dps-kv-val font-mono">${Math.round(unitDoTDPS).toLocaleString()} x ${placementCount} = ${Math.round(unitDoTDPS * placementCount).toLocaleString()}</span></div>
-                  ${unit.summons ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">Summons DPS x placements</span><span class="dps-kv-val font-mono">${Math.round(totalSummonDPS).toLocaleString()} x ${placementCount} = ${Math.round(totalSummonDPS * placementCount).toLocaleString()}</span></div>` : ""}
-                  ${fuaDps > 0 ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">Follow-Up DPS x placements</span><span class="dps-kv-val font-mono">${Math.round(fuaDps).toLocaleString()} x ${placementCount} = ${Math.round(fuaDps * placementCount).toLocaleString()}</span></div>` : ""}
+                  ${unit.summons ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">Summons Total Field DPS</span><span class="dps-kv-val font-mono">+${Math.round(totalSummonDPS).toLocaleString()} DPS</span></div>` : ""}
                   <div class="dps-kv primary"><span class="dps-kv-lbl combined-highlight">Total Field DPS</span><span class="dps-kv-val font-mono combined-highlight">${Math.round(finalCombinedDPS).toLocaleString()} DPS</span></div>
                 </div>
               </div>
@@ -709,58 +771,28 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
       </div>
     `;
 
+    container.querySelectorAll(".uip-summon-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeDpsSummonId = btn.dataset.dpsSummon;
+        activeDpsSubtabSummonMap.set(unit.id, activeDpsSummonId);
+        render();
+      });
+    });
+
     container.querySelectorAll(".uip-dps-lvl-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         if (btn.dataset.lvl) {
-          const lvl = parseInt(btn.dataset.lvl, 10);
-          if (lvl !== currentLevel) {
-            currentLevel = lvl;
-            render();
-          }
+          currentLevel = parseInt(btn.dataset.lvl, 10);
+          render();
         } else if (btn.dataset.statMode) {
-          const mode = btn.dataset.statMode;
-          if (mode !== currentStatMode) {
-            currentStatMode = mode;
-            render();
-          }
+          currentStatMode = btn.dataset.statMode;
+          render();
         } else if (btn.dataset.darkmageMode) {
           unit.darkMageMode = btn.dataset.darkmageMode;
-          render();
-        } else if (btn.dataset.giantMode) {
-          unit.giantForm = btn.dataset.giantMode === "on";
-          render();
-        } else if (btn.dataset.demonicMode) {
-          unit.demonicPresence = btn.dataset.demonicMode === "on";
-          render();
-        } else if (btn.dataset.berserkMode) {
-          unit.berserkState = btn.dataset.berserkMode === "on";
           render();
         }
       });
     });
-
-    if (isCursedStudent) {
-      container.querySelectorAll(".uip-followup-input").forEach(input => {
-        input.addEventListener("input", () => {
-          const idx = parseInt(input.dataset.idx, 10);
-          const caretStart = input.selectionStart;
-          const caretEnd = input.selectionEnd;
-
-          unit.followUpInputsRaw[idx] = input.value;
-          unit.followUpInputs[idx] = parseFloat(input.value) || 0;
-
-          render();
-
-          const nextInput = container.querySelector(`.uip-followup-input[data-idx="${idx}"]`);
-          if (nextInput) {
-            nextInput.focus();
-            try {
-              nextInput.setSelectionRange(caretStart, caretEnd);
-            } catch (e) { }
-          }
-        });
-      });
-    }
   }
 
   render();
@@ -770,6 +802,8 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
 export async function UnitInfoPage(unit, overrideSubTab = null) {
   let activeSubTab = overrideSubTab || "info";
   setUnitSubTab(unit.id, activeSubTab);
+
+  let activeSummonView = activeSummonViewMap.get(unit.id) || "main";
 
   const wrap = document.createElement("div");
   wrap.className = "page unit-info-page";
@@ -825,6 +859,56 @@ export async function UnitInfoPage(unit, overrideSubTab = null) {
   contentArea.className = "uip-content-area";
   wrap.appendChild(contentArea);
 
+  function renderUnitInfoView() {
+    contentArea.innerHTML = "";
+
+    const rawSummons = unit.summons ? (Array.isArray(unit.summons) ? unit.summons : [unit.summons]) : [];
+
+    let selectorBarHtml = "";
+    if (rawSummons.length > 0) {
+      selectorBarHtml = `
+        <div class="uip-summon-selector-bar">
+          <button type="button" class="uip-summon-btn main-btn${activeSummonView === "main" ? " active" : ""}" data-summon-id="main">Main Unit</button>
+          ${rawSummons.map(s => `
+            <button type="button" class="uip-summon-btn${activeSummonView === s.id ? " active" : ""}" data-summon-id="${s.id}">${s.name}</button>
+          `).join("")}
+        </div>`;
+    }
+
+    const activeSummonData = activeSummonView !== "main" ? rawSummons.find(s => s.id === activeSummonView) : null;
+
+    const body = document.createElement("div");
+    body.className = "uip-body";
+
+    const main = document.createElement("div");
+    main.className = "uip-main-side-by-side";
+
+    const rightCol = buildRightPanel(unit, activeSummonData);
+
+    const upgradesPanel = buildUpgradesPanel(unit, activeSummonData);
+    main.appendChild(upgradesPanel);
+    main.appendChild(rightCol);
+
+    body.appendChild(main);
+    body.appendChild(buildInspector(unit, activeSummonData));
+
+    if (selectorBarHtml) {
+      const wrapDiv = document.createElement("div");
+      wrapDiv.innerHTML = selectorBarHtml;
+      contentArea.appendChild(wrapDiv.firstElementChild);
+
+      contentArea.querySelectorAll(".uip-summon-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeSummonView = btn.dataset.summonId;
+          activeSummonViewMap.set(unit.id, activeSummonView);
+          renderUnitInfoView();
+        });
+      });
+    }
+
+    contentArea.appendChild(body);
+  }
+
   function switchTab(target) {
     activeSubTab = target;
     setUnitSubTab(unit.id, activeSubTab);
@@ -834,38 +918,14 @@ export async function UnitInfoPage(unit, overrideSubTab = null) {
     });
 
     loadoutContainer.innerHTML = "";
-    contentArea.innerHTML = "";
 
     if (activeSubTab === "dps") {
+      contentArea.innerHTML = "";
       const dpsBody = buildDPSBreakdownSubtab(unit, loadoutContainer);
       contentArea.appendChild(dpsBody);
     } else {
       loadoutContainer.appendChild(buildLoadoutPanel(unit));
-
-      const body = document.createElement("div");
-      body.className = "uip-body";
-
-      const main = document.createElement("div");
-      main.className = "uip-main-side-by-side";
-
-      const rightCol = document.createElement("div");
-      rightCol.className = "uip-col";
-      rightCol.appendChild(buildPassivesPanel(unit));
-
-      const statusPanel = buildStatusEffectsPanel(unit);
-      if (statusPanel) {
-        rightCol.appendChild(statusPanel);
-      }
-
-      const upgradesPanel = buildUpgradesPanel(unit);
-      main.appendChild(upgradesPanel);
-      main.appendChild(rightCol);
-
-      body.appendChild(main);
-      body.appendChild(buildInspector(unit));
-      contentArea.appendChild(body);
-
-      fitUpgradesToFour(upgradesPanel);
+      renderUnitInfoView();
     }
   }
 

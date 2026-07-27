@@ -16,7 +16,20 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 12px 24px 48px;
+  padding: 10px 16px 40px;
+}
+
+/* ── Scale padding on wider viewports (above 1080p) ──────────────────── */
+@media (min-width: 2000px) {
+  #page-container {
+    padding: 12px 28px 52px;
+  }
+}
+
+@media (min-width: 2560px) {
+  #page-container {
+    padding: 16px 36px 64px;
+  }
 }
 
 .page {

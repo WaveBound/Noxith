@@ -191,10 +191,6 @@ export function getSummonsData(unit) {
     data = unit.relic.summon || unit.relic.summons || unit.relic.summonInfo || unit.relic.summonStats;
   }
 
-  if (Array.isArray(data)) {
-    data = data[0];
-  }
-
   return data;
 }
 
@@ -228,7 +224,6 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isLadyGiant = unit && (unit.id === "ladygiantenvy" || (unit.name && unit.name.includes("Lady Giant")));
   const isEighthSword = unit && (unit.id === "8thswordberserk" || (unit.name && unit.name.includes("8th Sword")));
 
-  // Dark Mage mode: "lightning" | "both" | "normal"
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
     : "lightning";
@@ -337,7 +332,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     effDamage = effDamage * 1.15;
   }
 
-  // Step 3: Shinigami + Unit Passives applied together AFTER Traits & Z Stats
+  // Step 3: Shinigami + Unit Passives
   let totalPassiveDamageBonus = (shinigamiActive ? 0.15 : 0) + passiveDamageMult;
   if (totalPassiveDamageBonus > 0) {
     effDamage = effDamage * (1 + totalPassiveDamageBonus);
@@ -351,7 +346,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     effSpa = effSpa * 0.85;
   }
 
-  // Step 3: Passives Applied AFTER Trait & Z Stats
+  // Step 3: Passives
   if (passiveSpaMult !== 0) {
     effSpa = effSpa * (1 + passiveSpaMult);
   }
@@ -378,8 +373,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
 
   const avgHitDamage = effDamage * critAvgMult;
 
-  // Dark Mage's Lightning Arc is a passive field aura, NOT a DoT status effect.
-  // Therefore, Trait DoT bonus (Draconic) and Relic DoT bonus do NOT apply.
+  // Dark Mage's Lightning Arc is a passive field tick, NOT a DoT status effect.
   const effDotMult = isDarkMage
     ? (base.dotMultiplier || 0)
     : (base.dotMultiplier || 0) * (1 + (trait.dotBonus || 0)) * (1 + relicDotBonus);
@@ -396,6 +390,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   let singleFuaDmg = 0;
   let hasElfRelicOverride = false;
 
+  // ── Elf Mage Arcane Spells Calculation ──
   if (isElfMage) {
     let activeUnitEquip = "";
     if (unit.selectedDpsRelic !== undefined && unit.selectedDpsRelic !== null && unit.selectedDpsRelic !== "") {
@@ -455,7 +450,6 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     dotIntervalMultiplier = 1;
     dotIntervalSPA = 1.0;
 
-    // Lightning Arc deals a fixed % of Base Hit Damage (effDamage) per second and cannot crit
     const lightningDpsVal = effDamage * effDotMult;
 
     if (darkMageMode === "normal") {
@@ -523,48 +517,106 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     singleFuaDmg = fuaBreakdowns.reduce((total, entry) => total + entry.averageFollowUpHit, 0);
   }
 
+  // ── Multi-Summon Calculation Engine (Direct DPS + DoT DPS) ──
+  let totalSummonDPS = 0;
+  let totalSummonDmg = 0;
   let summonCount = 0;
   let summonDamageMult = 0;
   let summonDamage = 0;
   let summonAvgHitDamage = 0;
   let summonDirectDPS = 0;
   let summonDoTDPS = 0;
-  let totalSummonDPS = 0;
-  let totalSummonDmg = 0;
   let hasSummonRelicOverride = false;
 
-  const summonsData = getSummonsData(unit);
+  const rawSummons = getSummonsData(unit);
+  const summonBreakdowns = [];
 
-  if (summonsData) {
-    summonCount = parseNumber(
-      summonsData.countPerPlacement || summonsData.count || summonsData.spawnCount || summonsData.amount || summonsData.quantity || summonsData.limit,
-      1
-    );
-    summonDamageMult = parseNumber(
-      summonsData.baseDamageMultiplier || summonsData.damageMultiplier || summonsData.multiplier || summonsData.damage || summonsData.damageMultiplierOverride,
-      1
-    );
+  if (rawSummons) {
+    const list = Array.isArray(rawSummons) ? rawSummons : [rawSummons];
 
-    if (summonsData.relicModifiers) {
-      const activeUnitEquip = unit.selectedDpsRelic !== undefined
-        ? unit.selectedDpsRelic
-        : (unit.relic?.name || unit.recommendedEquips?.unitEquip);
-      const match = summonsData.relicModifiers.find(m => m.relicName === activeUnitEquip);
-      if (match) {
-        summonDamageMult = parseNumber(match.damageMultiplierOverride || match.multiplier || match.damage, summonDamageMult);
-        hasSummonRelicOverride = true;
+    list.forEach((sData, sIndex) => {
+      let singlePlacementCount = sData.countPerPlacement || 1;
+
+      let mult = sData.baseDamageMultiplier || 1.0;
+
+      if (sData.relicModifiers) {
+        const activeUnitEquip = unit.selectedDpsRelic !== undefined
+          ? unit.selectedDpsRelic
+          : (unit.relic?.name || unit.recommendedEquips?.unitEquip);
+        const match = sData.relicModifiers.find(m => m.relicName === activeUnitEquip);
+        if (match) {
+          mult = match.damageMultiplierOverride || match.multiplier || mult;
+          hasSummonRelicOverride = true;
+        }
       }
-    }
 
-    summonDamage = effDamage * summonDamageMult;
-    summonAvgHitDamage = summonDamage * critAvgMult;
-    summonDirectDPS = (summonAvgHitDamage * summonCount) / effSpa;
+      if (sData.passiveDamageBonus) {
+        mult *= (1 + sData.passiveDamageBonus);
+      }
 
-    const totalSummonDamage = summonDamage * summonCount;
-    const summonsDoTDamage = totalSummonDamage * effDotMult;
-    summonDoTDPS = (base.dotMultiplier || 0) > 0 ? (summonsDoTDamage / dotIntervalSPA) : 0;
-    totalSummonDPS = summonDirectDPS + summonDoTDPS;
-    totalSummonDmg = (summonAvgHitDamage * summonCount) + ((base.dotMultiplier || 0) > 0 ? summonsDoTDamage : 0);
+      let sEffDmg = 0;
+      let baseSummonDmg = 0;
+
+      if (sData.hasOwnUpgrades && sData.maxDamage) {
+        baseSummonDmg = sData.maxDamage * levelMult;
+        sEffDmg = baseSummonDmg * (1 + (trait.damageBonus || 0)) * (1 + relicDamageMult + relicArchetypeDamageMult);
+        if (statMode === "Z") sEffDmg *= 1.20;
+        if (hasAscend) sEffDmg *= 1.15;
+      } else {
+        baseSummonDmg = scaledBaseDamage * mult;
+        sEffDmg = effDamage * mult;
+      }
+
+      let baseSummonSpa = sData.intervalSPA || sData.maxSpa || sData.baseSpa || (base.spa || 6);
+      let sEffSpa = baseSummonSpa * (1 + (trait.spaBonus || 0)) * (1 + relicSpaMult);
+      if (statMode === "Z") sEffSpa *= 0.85;
+      sEffSpa = Math.max(0.1, sEffSpa);
+
+      const sAvgHit = sEffDmg * critAvgMult;
+      const sSinglePlacementDps = (sAvgHit * singlePlacementCount) / sEffSpa;
+
+      // Calculate Summon DoT DPS (Bleed from Spirit Wolf or Bat Spirits)
+      const appliesBleed = (sData.status && sData.status.toLowerCase().includes("bleed")) ||
+        (sData.statusEffect && sData.statusEffect.name && sData.statusEffect.name.toLowerCase().includes("bleed")) ||
+        (base.dotName && base.dotName.toLowerCase().includes("bleed"));
+
+      let sDoTDps = 0;
+      if (appliesBleed) {
+        const baseBleedScale = base.dotMultiplier || 0.65;
+        const sDotMult = baseBleedScale * (1 + (trait.dotBonus || 0)) * (1 + relicDotBonus);
+        const sDotDmg = sEffDmg * sDotMult;
+        sDoTDps = (sDotDmg * singlePlacementCount) / (dotIntervalSPA || 9.1);
+      }
+
+      const sTotalDps = sSinglePlacementDps + sDoTDps;
+
+      totalSummonDPS += sTotalDps;
+      totalSummonDmg += sAvgHit * singlePlacementCount;
+
+      if (sIndex === 0) {
+        summonCount = singlePlacementCount;
+        summonDamageMult = mult;
+        summonDamage = sEffDmg;
+        summonAvgHitDamage = sAvgHit;
+        summonDirectDPS = sSinglePlacementDps;
+        summonDoTDPS = sDoTDps;
+      }
+
+      summonBreakdowns.push({
+        id: sData.id,
+        name: sData.name,
+        activeCount: singlePlacementCount,
+        baseDamage: baseSummonDmg,
+        effDamage: sEffDmg,
+        baseSpa: baseSummonSpa,
+        effSpa: sEffSpa,
+        avgHitDamage: sAvgHit,
+        directDps: sSinglePlacementDps,
+        dotDps: sDoTDps,
+        dps: sTotalDps,
+        passiveNote: sData.passive || ""
+      });
+    });
   }
 
   const combinedDPS = unitDirectDPS + unitDoTDPS + totalSummonDPS + fuaDps;
@@ -615,6 +667,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     summonDirectDPS,
     summonDoTDPS,
     totalSummonDPS,
+    summonBreakdowns,
     isElfMage,
     isDarkMage,
     darkMageMode,
@@ -624,13 +677,6 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     isEighthSword,
     berserkState,
     demonicPresence,
-    passiveSpaMult,
-    passiveCritChanceAdd,
-    passiveCritDamageAdd,
-    passiveDamageMult,
-    passiveRangeMult,
-    totalPassiveDamageBonus,
-    hasElfRelicOverride,
     fuaDps,
     fuaDamages: unit.fuaDamages || [],
     fuaBreakdowns,

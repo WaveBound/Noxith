@@ -1,10 +1,13 @@
 .unit-info-page {
   width: 100%;
   max-width: 100%;
-  height: calc(100vh - var(--header-height, 48px));
-  overflow: hidden;
+  margin: 0;
+  height: auto;
+  overflow: visible;
   display: flex;
   flex-direction: column;
+  /* Slightly larger text scale vs rest of site */
+  font-size: 1.04em;
 }
 
 .panel-heading {
@@ -16,15 +19,15 @@
 }
 
 .panel-title {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   color: var(--text);
   letter-spacing: -0.01em;
   margin-bottom: 2px;
 }
 
 .panel-sub {
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--muted);
 }
 
@@ -35,7 +38,7 @@
   background: var(--background);
   padding-top: 12px;
   margin-top: -12px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .uip-header {
@@ -62,6 +65,83 @@
   align-items: center;
   min-width: 0;
   max-width: 100%;
+}
+
+.uip-subnav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.uip-subtab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border, #1e1e22);
+  color: var(--muted, #71717a);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.uip-subtab-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary, #a1a1aa);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.uip-subtab-btn.active {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: var(--purple-strong, #818cf8);
+  color: var(--text, #fafafa);
+}
+
+/* ── Summon View Selector Bar ── */
+.uip-summon-selector-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border, #16161a);
+  border-radius: 6px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.uip-summon-btn {
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.uip-summon-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.uip-summon-btn.active {
+  color: #2dd4bf;
+  background: rgba(45, 212, 191, 0.12);
+  border-color: rgba(45, 212, 191, 0.3);
+}
+
+.uip-summon-btn.main-btn.active {
+  color: #ffffff;
+  background: rgba(99, 102, 241, 0.22);
+  border-color: rgba(99, 102, 241, 0.45);
 }
 
 /* ── Top Right Header DPS Summary Grid ── */
@@ -96,13 +176,13 @@
 
 .uip-header-dps-val {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 800;
   line-height: 1.1;
 }
 
 .uip-header-dps-lbl {
-  font-size: 8px;
+  font-size: 8.5px;
   font-weight: 700;
   color: var(--muted);
   text-transform: uppercase;
@@ -135,7 +215,7 @@
 }
 
 .uip-name {
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--text);
@@ -150,8 +230,8 @@
 }
 
 .uip-tier {
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 10.5px;
+  font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   padding: 2px 7px;
@@ -162,8 +242,8 @@
 }
 
 .uip-trait-tag {
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 10.5px;
+  font-weight: 600;
   padding: 2px 7px;
   border-radius: 3px;
   background: #10b9810d;
@@ -173,20 +253,32 @@
 
 .uip-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  gap: 12px;
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr) 270px;
+  gap: 14px;
+  align-items: stretch;
   width: 100%;
   flex: 1;
-  overflow-y: auto;
-  min-height: 0;
+  overflow: visible;
   padding-bottom: 24px;
+}
+
+/* Scale inspector column only above 1080p (matches zoom breakpoints) */
+@media (min-width: 2000px) {
+  .uip-body {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+}
+
+@media (min-width: 2560px) {
+  .uip-body {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
 }
 
 .uip-main-side-by-side {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 16px;
   align-items: start;
   min-width: 0;
 }
@@ -194,7 +286,7 @@
 .uip-col {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   min-width: 0;
 }
 
@@ -276,7 +368,7 @@
 }
 
 .loadout-slot {
-  font-size: 8px;
+  font-size: 8.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -284,7 +376,7 @@
 }
 
 .loadout-name {
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
   color: var(--text);
   white-space: nowrap;
@@ -299,7 +391,7 @@
   gap: 4px;
   width: 100%;
   font-family: inherit;
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 600;
   color: var(--purple-strong);
   background: rgba(99, 102, 241, 0.08);
@@ -395,73 +487,28 @@
   color: #ffffff;
 }
 
-/* ── Loadout Dropdown Passive Block ──────────────────────────────────────── */
-.loadout-dropdown-passive {
-  margin-top: 8px;
-  width: 100%;
-}
-
-.loadout-dropdown-passive-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 5px;
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.loadout-dropdown-passive-glow {
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #0a0a10;
-  background: linear-gradient(90deg, #22d3ee, #38bdf8);
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.loadout-dropdown-passive-title {
-  font-size: 10px;
-  font-weight: 700;
-  color: #e2e8f0;
-}
-
-.loadout-passive-text {
-  font-family: "Montserrat", sans-serif;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #9ca3af;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(99, 102, 241, 0.12);
-  border-radius: 6px;
-  padding: 8px 10px;
-  box-sizing: border-box;
-}
-
 .upgrades-table {
-  padding: 10px 12px;
+  padding: 12px 14px;
   box-sizing: border-box;
   box-shadow: none !important;
 }
 
+/* Height is set dynamically by JS to show exactly 3 rows */
 .upgrades-rows {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 4px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  margin-top: 6px;
   padding-right: 4px;
-  padding-bottom: 0px;
   box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .upgrade-row {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 8px 12px;
+  gap: 5px;
+  padding: 10px 12px;
   background: var(--background-elevated, #0a0a0c);
   border: 1px solid rgba(99, 102, 241, 0.22);
   border-radius: 6px;
@@ -475,23 +522,23 @@
   justify-content: space-between;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding-bottom: 4px;
-  margin-bottom: 1px;
+  margin-bottom: 2px;
 }
 
 .upgrade-number {
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 14.5px;
+  font-weight: 800;
   color: var(--purple-strong);
 }
 
 .upgrade-cost {
   font-family: var(--font-mono);
-  font-size: 10.5px;
-  font-weight: 600;
+  font-size: 11.5px;
+  font-weight: 700;
   color: var(--positive);
   background: rgba(16, 185, 129, 0.08);
   border: 1px solid rgba(16, 185, 129, 0.2);
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
@@ -499,53 +546,54 @@
 }
 
 .upgrade-cost img {
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
   object-fit: contain;
 }
 
 .upgrade-attack {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11px;
+  gap: 6px;
+  font-size: 13px;
 }
 
 .upgrade-attack-label {
   color: #facc15;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .upgrade-attack-name {
   color: var(--text);
-  font-weight: 600;
+  font-weight: 700;
   background: transparent;
-  padding: 0 4px;
+  padding: 0 5px;
   border-radius: 3px;
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
+/* Bold Upgrade Stats */
 .upgrade-stats {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 4px 6px;
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  gap: 14px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 6px 8px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
   box-shadow: none !important;
 }
 
 .upgrade-stat {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 10.5px;
+  gap: 5px;
+  font-size: 11.5px;
 }
 
 .upgrade-stat-icon {
-  width: 12px !important;
-  height: 12px !important;
+  width: 13px !important;
+  height: 13px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -554,41 +602,71 @@
 
 .upgrade-stat-icon img,
 .upgrade-stat-icon svg {
-  width: 12px !important;
-  height: 12px !important;
-  max-width: 12px !important;
-  max-height: 12px !important;
+  width: 13px !important;
+  height: 13px !important;
+  max-width: 13px !important;
+  max-height: 13px !important;
   object-fit: contain !important;
   display: block !important;
 }
 
 .upgrade-stat-label {
-  color: var(--muted);
+  color: #a1a1aa;
+  font-weight: 700 !important;
 }
 
 .upgrade-stat-value {
   font-family: var(--font-mono);
-  font-weight: 600;
-  color: var(--text);
+  font-weight: 800 !important;
+  color: #ffffff;
 }
 
 .upgrade-desc,
 .upgrade-meta {
-  font-size: 10.5px;
-  line-height: 1.35;
+  font-size: 12.5px;
+  line-height: 1.4;
   color: #e2e8f0;
 }
 
 .upgrade-meta-label {
   color: #64748b;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .upgrade-meta-value {
   color: #ffffff;
+  font-weight: 700;
 }
 
-/* ── Passives Panel ── */
+/* ── Right Panel Tab Switcher (Passives / Abilities) ── */
+.right-panel-switcher {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2px;
+  border-radius: 5px;
+}
+
+.right-panel-tab {
+  padding: 3px 9px;
+  border-radius: 3px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--muted);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.right-panel-tab.active {
+  color: #ffffff;
+  background: rgba(99, 102, 241, 0.25);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+}
+
 .passives-table {
   padding: 10px 12px;
   box-sizing: border-box;
@@ -622,7 +700,7 @@
 }
 
 .passive-name {
-  font-size: 13.5px;
+  font-size: 15.5px;
   font-weight: 700;
   color: #ffffff !important;
 }
@@ -644,12 +722,27 @@
 }
 
 .passive-effect {
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--text-secondary);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
-/* ── Status Effect Box Styling (Bleed Theme) ── */
+/* ── Status Effects Container & Gap ── */
+.status-effects-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.status-effects-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 0;
+  width: 100%;
+}
+
 .status-effect-box,
 .status-effect-box.status-card-bleed {
   position: relative;
@@ -746,7 +839,6 @@
   background: #0a0a0d;
 }
 
-/* ── Stun / Slow / Stagger / Dismembered Box (Subtle Purple Theme) ── */
 .status-effect-box.status-card-stun,
 .status-effect-box.status-card-dismembered {
   position: relative;
@@ -833,7 +925,6 @@
   background: #0a0a0d;
 }
 
-/* ── Freeze Status Box (Subtle Ice Blue Theme) ── */
 .status-effect-box.status-card-freeze {
   background-color: #000000;
   background-image: url('icons/status/FreezeInfo.png');
@@ -937,14 +1028,15 @@
   gap: 0;
   position: sticky;
   top: 0;
-  max-height: calc(100vh - 120px);
+  max-height: calc(100vh - 195px);
   overflow-y: auto;
   box-shadow: none !important;
 }
 
+/* Scale inspector portrait on wider viewports */
 .inspector-portrait {
   width: 100%;
-  height: 180px;
+  height: 200px;
   border-radius: var(--radius-sm);
   overflow: hidden;
   background: var(--background-elevated);
@@ -960,6 +1052,13 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center top;
+}
+
+@media (min-width: 2000px) {
+  .inspector-portrait {
+    height: 260px;
+  }
 }
 
 .inspector-identity {
@@ -1117,63 +1216,6 @@
   font-size: 11.5px;
   font-weight: 600;
   color: var(--text);
-}
-
-@media (max-width: 1024px) {
-  .uip-body {
-    grid-template-columns: 1fr;
-  }
-
-  .inspector {
-    position: static;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 16px;
-    max-height: none;
-  }
-
-  .inspector-portrait {
-    width: 120px;
-    height: 120px;
-    flex-shrink: 0;
-    margin-bottom: 0;
-  }
-}
-
-.uip-subnav {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 0;
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.uip-subtab-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border, #1e1e22);
-  color: var(--muted, #71717a);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 120ms ease;
-}
-
-.uip-subtab-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text-secondary, #a1a1aa);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
-.uip-subtab-btn.active {
-  background: rgba(99, 102, 241, 0.15);
-  border-color: var(--purple-strong, #818cf8);
-  color: var(--text, #fafafa);
 }
 
 /* ── DPS Breakdown Subtab Layout ── */
@@ -1404,125 +1446,11 @@
     margin-top: 0 !important;
   }
 
-  .uip-sticky-header {
-    position: sticky !important;
-    top: -10px !important;
-    z-index: 100 !important;
-    background: #060608 !important;
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
-    margin-top: -10px !important;
-    margin-left: -14px !important;
-    margin-right: -14px !important;
-    padding-left: 14px !important;
-    padding-right: 14px !important;
-    margin-bottom: 8px !important;
-    border-bottom: 1px solid var(--border);
-    overflow: visible !important;
-  }
-
   .uip-body {
     grid-template-columns: 1fr !important;
-    overflow: visible !important;
-    height: auto !important;
   }
 
   .uip-main-side-by-side {
     grid-template-columns: 1fr !important;
-  }
-
-  .uip-header {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 10px !important;
-  }
-
-  .uip-header-right {
-    width: 100% !important;
-    overflow: visible !important;
-  }
-
-  .loadout-panel {
-    width: 100% !important;
-    overflow: visible !important;
-  }
-
-  .loadout-items {
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 4px !important;
-    width: 100% !important;
-    overflow: visible !important;
-  }
-
-  .loadout-item {
-    position: relative !important;
-    width: 100% !important;
-    min-height: 44px !important;
-    padding: 3px 4px !important;
-    flex-direction: row !important;
-    gap: 4px !important;
-    overflow: visible !important;
-  }
-
-  .loadout-img-wrap {
-    width: 26px !important;
-    height: 26px !important;
-  }
-
-  .loadout-slot {
-    font-size: 7px !important;
-  }
-
-  .loadout-name {
-    font-size: 9.5px !important;
-  }
-
-  .loadout-info-btn {
-    font-size: 8px !important;
-    padding: 1px 3px !important;
-  }
-
-  .loadout-dropdown {
-    position: absolute !important;
-    top: calc(100% + 4px) !important;
-    left: 0 !important;
-    right: auto !important;
-    width: min(280px, 88vw) !important;
-    min-width: unset !important;
-    z-index: 2000 !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.95) !important;
-  }
-
-  .loadout-item:last-child .loadout-dropdown {
-    left: auto !important;
-    right: 0 !important;
-  }
-
-  .uip-dps-compact-wrapper {
-    overflow: visible !important;
-    height: auto !important;
-  }
-
-  .uip-dps-main-grid.has-summons {
-    grid-template-columns: 1fr !important;
-  }
-
-  .uip-dps-split-columns {
-    grid-template-columns: 1fr !important;
-  }
-
-  .primary-stats-row {
-    grid-template-columns: 1fr !important;
-  }
-
-  .secondary-stats-row {
-    grid-template-columns: 1fr !important;
-  }
-
-  .inspector {
-    position: static !important;
-    flex-direction: column !important;
-    max-height: none !important;
   }
 }

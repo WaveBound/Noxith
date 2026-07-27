@@ -361,135 +361,130 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   const container = document.createElement("div");
   container.className = "dps-modal-container";
 
-  const summonsData = getSummonsData(unit);
+  const summonBreakdowns = breakdown.summonBreakdowns || [];
 
   let summonsPanel = null;
-  if (summonsData) {
+  if (summonBreakdowns.length > 0) {
     summonsPanel = document.createElement("div");
     summonsPanel.className = "dps-panel summons-panel";
 
-    const traitDotMult = 1 + (breakdown.trait.dotBonus || 0);
-    const relicDotMult = 1 + (breakdown.relicDotBonus || 0);
+    let activeSummonIdx = 0;
 
-    summonsPanel.innerHTML = `
-      <div class="dps-panel-header">
-        <div class="dps-panel-header-text">
-          <div class="dps-panel-title color-summons">${summonsData.name || "Summons"} Breakdown</div>
-          <div class="dps-panel-sub">Step-by-Step Calculations</div>
+    function renderSummonsPanel() {
+      const s = summonBreakdowns[activeSummonIdx];
+      const hasMultiple = summonBreakdowns.length > 1;
+      const scaleMult = breakdown.effDamage > 0 ? (s.effDamage / breakdown.effDamage) : 0;
+
+      const tabBarHtml = hasMultiple ? `
+        <div class="dps-summon-tab-bar">
+          ${summonBreakdowns.map((sb, i) => `
+            <button type="button" class="dps-summon-tab-btn${i === activeSummonIdx ? " active" : ""}" data-idx="${i}">
+              ${sb.name}
+            </button>
+          `).join("")}
         </div>
-      </div>
-      <div class="dps-panel-body">
-        <div class="dps-section section-summons" style="margin-top:0;">
-          <div class="dps-section-hd color-summons">1. Summon Damage</div>
-          <div class="dps-table">
-            <div class="dps-table-row">
-              <span class="dps-table-lbl">Effective Unit DMG (pre-crit)</span>
-              <span class="dps-table-val font-mono">${Math.round(breakdown.effDamage).toLocaleString()}</span>
-            </div>
-            ${breakdown.hasSummonRelicOverride ? `
-              <div class="dps-table-row indented">
-                <span class="dps-table-lbl">&mdash; Relic Override</span>
-                <span class="dps-table-val font-mono summons-highlight"><span class="faint-mult">x${breakdown.summonDamageMult.toFixed(2)}</span>${Math.round(breakdown.summonDamage).toLocaleString()}</span>
+      ` : "";
+
+      summonsPanel.innerHTML = `
+        <div class="dps-panel-header">
+          <div class="dps-panel-header-text">
+            <div class="dps-panel-title color-summons">${s.name} Breakdown</div>
+            <div class="dps-panel-sub">Step-by-Step Calculations</div>
+          </div>
+        </div>
+        ${tabBarHtml}
+        <div class="dps-panel-body">
+          <div class="dps-section section-summons" style="margin-top:0;">
+            <div class="dps-section-hd color-summons">1. Summon Damage</div>
+            <div class="dps-table">
+              <div class="dps-table-row">
+                <span class="dps-table-lbl">Effective Unit DMG (pre-crit)</span>
+                <span class="dps-table-val font-mono">${Math.round(breakdown.effDamage).toLocaleString()}</span>
               </div>
-            ` : `
               <div class="dps-table-row indented">
                 <span class="dps-table-lbl">&mdash; Summon Scale</span>
-                <span class="dps-table-val font-mono"><span class="faint-mult">x${breakdown.summonDamageMult.toFixed(2)}</span>${Math.round(breakdown.summonDamage).toLocaleString()}</span>
+                <span class="dps-table-val font-mono"><span class="faint-mult">&times;${scaleMult.toFixed(2)}</span>${Math.round(s.effDamage).toLocaleString()}</span>
               </div>
-            `}
+              <div class="dps-table-row primary">
+                <span class="dps-table-lbl summons-highlight">Damage</span>
+                <span class="dps-table-val font-mono summons-highlight">${Math.round(s.effDamage).toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dps-section section-summons">
+            <div class="dps-section-hd color-summons">2. Output &amp; Direct DPS</div>
+            <div class="dps-table">
+              <div class="dps-table-row">
+                <span class="dps-table-lbl">Summon Output</span>
+                <span class="dps-table-val font-mono">${Math.round(s.effDamage).toLocaleString()} &times; ${s.activeCount} = ${Math.round(s.effDamage * s.activeCount).toLocaleString()}</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">&mdash; Crit average multiplier</span>
+                <span class="dps-table-val font-mono">&times;${breakdown.critAvgMult.toFixed(2)}</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">&mdash; Avg hit incl. crits</span>
+                <span class="dps-table-val font-mono">${Math.round(s.avgHitDamage).toLocaleString()}</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">&mdash; Summon SPA</span>
+                <span class="dps-table-val font-mono">${s.effSpa.toFixed(2)}s</span>
+              </div>
+              <div class="dps-table-row primary">
+                <span class="dps-table-lbl summons-highlight">Direct DPS</span>
+                <span class="dps-table-val font-mono summons-highlight">+${formatFullDPS(s.directDps)} DPS</span>
+              </div>
+            </div>
+          </div>
+
+          ${s.dotDps > 0 ? `
+          <div class="dps-section section-summons">
+            <div class="dps-section-hd color-summons">3. DoT DPS</div>
+            <div class="dps-table">
+              <div class="dps-table-row primary">
+                <span class="dps-table-lbl dot-highlight">DoT DPS</span>
+                <span class="dps-table-val font-mono dot-highlight">+${formatFullDPS(s.dotDps)} DPS</span>
+              </div>
+            </div>
+          </div>` : ""}
+
+          ${s.passiveNote ? `
+          <div class="dps-section section-summons">
+            <div class="dps-section-hd color-summons">Note</div>
+            <div class="dps-table">
+              <div class="dps-table-row">
+                <span class="dps-table-lbl" style="font-size:10px; opacity:0.85;">${s.passiveNote}</span>
+              </div>
+            </div>
+          </div>` : ""}
+        </div>
+
+        <div class="dps-panel-footer summons-footer">
+          <div class="dps-summary-block" style="border-color: rgba(45, 212, 191, 0.25); background: rgba(45, 212, 191, 0.05); margin: 0;">
+            <div class="dps-table-row">
+              <span class="dps-table-lbl color-summons">${s.name} DPS</span>
+              <span class="dps-table-val font-mono summons-highlight">${formatFullDPS(s.dps)} DPS</span>
+            </div>
+            <div class="dps-table-row divider"></div>
             <div class="dps-table-row primary">
-              <span class="dps-table-lbl summons-highlight">Damage</span>
-              <span class="dps-table-val font-mono summons-highlight">${Math.round(breakdown.summonDamage).toLocaleString()}</span>
+              <span class="dps-table-lbl combined-highlight">All Summons Total</span>
+              <span class="dps-table-val font-mono combined-highlight">${formatFullDPS(breakdown.totalSummonDPS * breakdown.placements)} DPS</span>
             </div>
           </div>
         </div>
+      `;
 
-        <div class="dps-section section-summons">
-          <div class="dps-section-hd color-summons">2. Output &amp; Direct DPS</div>
-          <div class="dps-table">
-            <div class="dps-table-row">
-              <span class="dps-table-lbl">Summon Output</span>
-              <span class="dps-table-val font-mono">${Math.round(breakdown.summonDamage).toLocaleString()} &times; ${breakdown.summonCount} = ${Math.round(breakdown.summonDamage * breakdown.summonCount).toLocaleString()}</span>
-            </div>
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Crit average multiplier</span>
-              <span class="dps-table-val font-mono">x${breakdown.critAvgMult.toFixed(2)}</span>
-            </div>
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Average hit incl. crits</span>
-              <span class="dps-table-val font-mono">${Math.round(breakdown.summonAvgHitDamage || breakdown.summonDamage).toLocaleString()}</span>
-            </div>
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Unit SPA</span>
-              <span class="dps-table-val font-mono">${breakdown.effSpa.toFixed(2)}s</span>
-            </div>
-            <div class="dps-table-row primary">
-              <span class="dps-table-lbl summons-highlight">Direct DPS</span>
-              <span class="dps-table-val font-mono summons-highlight">+${formatFullDPS(breakdown.summonDirectDPS)} DPS</span>
-            </div>
-          </div>
-        </div>
+      // Wire up tab buttons after render
+      summonsPanel.querySelectorAll(".dps-summon-tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeSummonIdx = parseInt(btn.dataset.idx, 10);
+          renderSummonsPanel();
+        });
+      });
+    }
 
-        ${rawBase.dotMultiplier > 0 ? `
-        <div class="dps-section section-summons">
-          <div class="dps-section-hd color-summons">3. Summons DoT (${formatPassiveText(rawBase.dotName || "Status")})</div>
-          <div class="dps-table">
-            <div class="dps-table-row">
-              <span class="dps-table-lbl">Status</span>
-              <span class="dps-table-val font-mono">${formatPassiveText(rawBase.dotName)}</span>
-            </div>
-            <div class="dps-table-row">
-              <span class="dps-table-lbl">Summon Output</span>
-              <span class="dps-table-val font-mono">${Math.round(breakdown.summonDamage * breakdown.summonCount).toLocaleString()}</span>
-            </div>
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Base ${formatPassiveText(rawBase.dotName || "DoT")} Scale</span>
-              <span class="dps-table-val font-mono">${rawBase.dotMultiplier.toFixed(2)}x</span>
-            </div>
-            ${breakdown.trait.dotBonus > 0 ? `
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Trait DoT Multiplier (${breakdown.trait.name})</span>
-              <span class="dps-table-val font-mono">x${traitDotMult.toFixed(2)}</span>
-            </div>` : ""}
-            ${breakdown.relicDotBonus > 0 ? `
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Relic DoT Multiplier</span>
-              <span class="dps-table-val font-mono">x${relicDotMult.toFixed(2)}</span>
-            </div>` : ""}
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Total DoT Scale (${rawBase.dotMultiplier.toFixed(2)} &times; ${traitDotMult.toFixed(2)} &times; ${relicDotMult.toFixed(2)})</span>
-              <span class="dps-table-val font-mono dot-highlight">x${breakdown.effDotMult.toFixed(2)} &rarr; ${Math.round(breakdown.summonDamage * breakdown.summonCount * breakdown.effDotMult).toLocaleString()} DMG</span>
-            </div>
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; ${formatPassiveText(rawBase.dotName || "DoT")} SPA</span>
-              <span class="dps-table-val font-mono">${breakdown.dotIntervalSPA.toFixed(2)}s</span>
-            </div>
-            <div class="dps-table-row primary">
-              <span class="dps-table-lbl dot-highlight">DoT DPS</span>
-              <span class="dps-table-val font-mono dot-highlight">+${formatFullDPS(breakdown.summonDoTDPS)} DPS</span>
-            </div>
-          </div>
-        </div>` : ""}
-      </div>
-
-      <div class="dps-panel-footer summons-footer">
-        <div class="dps-summary-block" style="border-color: rgba(45, 212, 191, 0.25); background: rgba(45, 212, 191, 0.05); margin: 0;">
-          <div class="dps-table-row">
-            <span class="dps-table-lbl color-summons">Single Summon DPS</span>
-            <span class="dps-table-val font-mono summons-highlight">${formatFullDPS(breakdown.totalSummonDPS)} DPS</span>
-          </div>
-          <div class="dps-table-row indented">
-            <span class="dps-table-lbl">&mdash; Placement multiplier</span>
-            <span class="dps-table-val font-mono"><span class="faint-mult">x${breakdown.placements}</span>${formatFullDPS(breakdown.totalSummonDPS * breakdown.placements)} DPS</span>
-          </div>
-          <div class="dps-table-row divider"></div>
-          <div class="dps-table-row primary">
-            <span class="dps-table-lbl combined-highlight">Total Summons DPS</span>
-            <span class="dps-table-val font-mono combined-highlight">${formatFullDPS(breakdown.totalSummonDPS * breakdown.placements)} DPS</span>
-          </div>
-        </div>
-      </div>
-    `;
+    renderSummonsPanel();
   }
 
   const mainPanel = document.createElement("div");

@@ -108,9 +108,11 @@ export const unit = {
     ],
 
     summons: {
+        id: "mirageclone",
         name: "Mirage Clone",
         countPerPlacement: 1,
         baseDamageMultiplier: 0.50,
+        passive: "Mirage Clone attacks at the same SPA and range as the main unit, dealing 50% of this unit's base damage.",
     },
 
     recommendedEquips: {
