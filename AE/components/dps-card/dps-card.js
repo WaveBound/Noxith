@@ -25,7 +25,9 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
   const candidates = globalRelics.map(r => r.name);
   const targetLevel = 50;
   const statMode = "Z";
-  const simulateShinigamiPassive = options.simulateShinigamiPassive !== undefined ? options.simulateShinigamiPassive : !!unit.simulateShinigamiPassive;
+  const simulateShinigamiPassive = options.simulateShinigamiPassive !== undefined
+    ? options.simulateShinigamiPassive
+    : !!unit.simulateShinigamiPassive;
   const mode = options.mode || "dps";
 
   const defaultPlacements = parseInt(String(unit.placementCount || unit.stats?.placementCount || "1").replace(/[^0-9]/g, "")) || 1;
@@ -253,7 +255,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   dmgAccum = dmgAfterAscension;
 
   let combinedPassiveRowHtml = "";
-  if (breakdown.totalPassiveDamageBonus > 0) {
+  if ((breakdown.totalPassiveDamageBonus || 0) > 0) {
     dmgAccum = Math.round(dmgAccum * (1 + breakdown.totalPassiveDamageBonus));
     const parts = [];
     if (breakdown.shinigamiActive) parts.push("Shinigami +15%");
@@ -607,9 +609,26 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           </div>
           <div class="dps-table-row">
             <span class="dps-table-lbl">Base Multiplier</span>
-            <span class="dps-table-val font-mono">${breakdown.isEighthSword ? "15% Avg Hit" : breakdown.isCrow ? "2.00x Base Hit in 12 ticks over 12s" : (rawBase.dotMultiplier || 0).toFixed(2) + "x Base Hit"}</span>
+            <span class="dps-table-val font-mono">${breakdown.isEighthSword ? "15% Current DMG (Can Crit)" : breakdown.isCrow ? "2.00x Base Hit in 12 ticks over 12s" : (rawBase.dotMultiplier || 0).toFixed(2) + "x Base Hit"}</span>
           </div>
-          ${breakdown.isCrow ? `
+          ${breakdown.isEighthSword ? `
+            <div class="dps-table-row indented">
+              <span class="dps-table-lbl">&mdash; Base Tick DMG (15% Current DMG)</span>
+              <span class="dps-table-val font-mono">${Math.round(breakdown.effDamage * 0.15).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-table-row indented">
+              <span class="dps-table-lbl">&mdash; Avg Tick DMG with Crit (x${(breakdown.critAvgMult || 1).toFixed(2)})</span>
+              <span class="dps-table-val font-mono dot-highlight">${Math.round(breakdown.avgHitDamage * 0.15).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-table-row indented">
+              <span class="dps-table-lbl">&mdash; Interval SPA</span>
+              <span class="dps-table-val font-mono">1.00s</span>
+            </div>
+            <div class="dps-table-row primary">
+              <span class="dps-table-lbl dot-highlight">Unit Passive DPS</span>
+              <span class="dps-table-val font-mono dot-highlight">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
+            </div>
+          ` : breakdown.isCrow ? `
             <div class="dps-table-row indented">
               <span class="dps-table-lbl">&mdash; Total Black Fire DMG per unit</span>
               <span class="dps-table-val font-mono dot-highlight">${blackFireDotDmg.toLocaleString()} DMG</span>
@@ -628,7 +647,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
               <span class="dps-table-val font-mono">${(breakdown.dotIntervalSPA || 1).toFixed(2)}s</span>
             </div>
             <div class="dps-table-row primary">
-              <span class="dps-table-lbl dot-highlight">${breakdown.isDarkMage || breakdown.isEighthSword ? "Unit Passive DPS" : "Unit DoT DPS"}</span>
+              <span class="dps-table-lbl dot-highlight">${breakdown.isDarkMage ? "Unit Passive DPS" : "Unit DoT DPS"}</span>
               <span class="dps-table-val font-mono dot-highlight">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
             </div>
           `}
@@ -812,7 +831,8 @@ function getDarkMageLabel(mode) {
 export async function DpsCard(unit, options = {}) {
   const card = document.createElement("div");
   card.className = "dps-calculator-card glass-card";
-  let shinigamiPassiveActive = false;
+
+  let shinigamiPassiveActive = !!unit.simulateShinigamiPassive;
   const isDarkMage = unit.id === "darkmagesovereign" || (unit.name && unit.name.includes("Dark Mage"));
   const isLadyGiant = unit.id === "ladygiantenvy" || (unit.name && unit.name.includes("Lady Giant"));
   const isEighthSword = unit.id === "8thswordberserk" || (unit.name && unit.name.includes("8th Sword"));
@@ -827,7 +847,8 @@ export async function DpsCard(unit, options = {}) {
   const mode = options.mode || "dps";
   const rank = options.rank || null;
   const isCursedStudent = unit.id === "cursestudenttruelove" || (unit.name && unit.name.includes("Cursed Student"));
-  const fuaDamages = [0, 0, 0];
+  const fuaDamages = unit.fuaDamages || [0, 0, 0];
+  unit.fuaDamages = fuaDamages;
 
   const baseStats = unit.stats || {};
   const elementClass = (baseStats.element || "neutral").toLowerCase();
@@ -887,11 +908,11 @@ export async function DpsCard(unit, options = {}) {
         ${isCursedStudent ? `
           <button type="button" class="dps-fua-toggle" aria-expanded="false">
             <span class="dps-fua-label">FUA</span>
-            <span class="dps-fua-summary">0 / 0 / 0</span>
+            <span class="dps-fua-summary">${fuaDamages.map(formatCompactNumber).join(" / ")}</span>
           </button>
         ` : ""}
-        <button type="button" class="dps-shinigami-toggle" aria-pressed="false">
-          Shinigami Passive: Off
+        <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}">
+          Shinigami Passive: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
         </button>
       </div>
       <div class="dps-trait-stack" id="trait-stack-${unit.id}"></div>
@@ -964,6 +985,7 @@ export async function DpsCard(unit, options = {}) {
 
   shinigamiToggle?.addEventListener("click", () => {
     shinigamiPassiveActive = !shinigamiPassiveActive;
+    unit.simulateShinigamiPassive = shinigamiPassiveActive;
     shinigamiToggle.classList.toggle("active", shinigamiPassiveActive);
     shinigamiToggle.setAttribute("aria-pressed", String(shinigamiPassiveActive));
     shinigamiToggle.textContent = `Shinigami Passive: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}`;
@@ -1006,7 +1028,15 @@ export async function DpsCard(unit, options = {}) {
     `;
 
     const rect = fuaToggle.getBoundingClientRect();
-    fuaEditor.style.left = `${Math.max(8, rect.left)}px`;
+    const editorWidth = 200;
+    let left = rect.left;
+    if (left + editorWidth > window.innerWidth - 12) {
+      left = window.innerWidth - editorWidth - 12;
+    }
+    left = Math.max(8, left);
+
+    fuaEditor.style.position = "fixed";
+    fuaEditor.style.left = `${left}px`;
     fuaEditor.style.top = `${rect.bottom + 6}px`;
     document.body.appendChild(fuaEditor);
     fuaToggle.setAttribute("aria-expanded", "true");
@@ -1014,7 +1044,9 @@ export async function DpsCard(unit, options = {}) {
     fuaEditor.querySelectorAll(".dps-fua-editor-input").forEach(input => {
       input.addEventListener("input", () => {
         input.value = input.value.replace(/[^\d]/g, "");
-        fuaDamages[Number(input.dataset.fuaIndex)] = Math.max(0, Number(input.value) || 0);
+        const idx = Number(input.dataset.fuaIndex);
+        fuaDamages[idx] = Math.max(0, Number(input.value) || 0);
+        unit.fuaDamages = fuaDamages;
         updateFuaSummary();
         window.dispatchEvent(new CustomEvent("dps-value-changed"));
         renderCalculations();
