@@ -6,7 +6,7 @@ import { TraitsPage } from "../pages/traits-page.js";
 import { RelicsPage } from "../pages/relics-page.js";
 import { ModesPage } from "../pages/modes-page.js";
 import { HomePage } from "../pages/home-page.js";
-import { DpsPage } from "../pages/dps-page.js"; // Loads the DPS page module
+import { DpsPage } from "../pages/dps-page.js";
 import { UnitInfoPage } from "../components/unit-info/unit-info-page.js";
 import { getUnitById } from "../data/units.js";
 import { getItem, setItem } from "./store.js";
@@ -14,13 +14,14 @@ import { getItem, setItem } from "./store.js";
 const SECTION_KEY = "active-section";
 
 const state = {
-  section: getItem(SECTION_KEY, "home"), // home | units | dps | traits | relics | modes
+  section: getItem(SECTION_KEY, "home"),
   query: "",
 };
 
 const els = {
   sidebarMount: document.getElementById("sidebar-mount"),
   headerMount: document.getElementById("header-mount"),
+  subHeaderMount: document.getElementById("sub-header-mount"), // Dedicated sub-header mount
   pageContainer: document.getElementById("page-container"),
 };
 
@@ -28,6 +29,9 @@ let renderToken = 0;
 
 async function renderContent() {
   const myToken = ++renderToken;
+
+  // Clear sub-header mount when navigating pages
+  if (els.subHeaderMount) els.subHeaderMount.innerHTML = "";
 
   let content;
   if (state.section === "units") {
@@ -38,13 +42,13 @@ async function renderContent() {
     } else {
       const unit = getUnitById(activeTab);
       setBreadcrumb("units", unit.name);
-      content = await UnitInfoPage(unit);
+      // Pass subHeaderMount to UnitInfoPage
+      content = await UnitInfoPage(unit, null, els.subHeaderMount);
     }
   } else if (state.section === "home") {
     setBreadcrumb("home");
     content = await HomePage();
   } else if (state.section === "dps") {
-    // Route handler for loading the DPS Page
     setBreadcrumb("dps");
     content = await DpsPage(state.query);
   } else {
@@ -59,7 +63,7 @@ async function renderContent() {
     }
   }
 
-  if (myToken !== renderToken) return; // a newer render superseded this one
+  if (myToken !== renderToken) return;
 
   els.pageContainer.innerHTML = "";
   els.pageContainer.appendChild(content);

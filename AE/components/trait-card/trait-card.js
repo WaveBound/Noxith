@@ -26,7 +26,6 @@ async function loadTemplate() {
   return templatePromise;
 }
 
-// Strictly filters units where preferredTrait (recommendedTrait in unit JS file) matches this trait
 function getSynergizedUnitsForTrait(trait) {
   const traitNameLower = (trait.name || trait.id || "").trim().toLowerCase();
 
@@ -54,6 +53,7 @@ function openTraitModal(trait) {
   });
 
   const synergizedUnits = getSynergizedUnitsForTrait(trait);
+  const rarityKey = (trait.rarity || "Mythic").toLowerCase();
 
   const bestUnitsHtml = synergizedUnits.length > 0
     ? synergizedUnits.map((u) => `
@@ -65,18 +65,19 @@ function openTraitModal(trait) {
     : `<span class="trait-synergy-none">No units currently list this trait as their recommended trait.</span>`;
 
   const modal = document.createElement("div");
-  modal.className = "trait-detail-modal glass-card";
+  // Removed "glass-card" class to prevent background transition & translucency bugs on hover-out
+  modal.className = "trait-detail-modal";
   modal.innerHTML = `
     <div class="trait-modal-header">
-      <div class="trait-modal-icon-box" style="--accent: ${trait.rarityColor || '#a855f7'}">
+      <div class="trait-modal-icon-box">
         <img src="${toAbsoluteUrl(trait.image)}" alt="${trait.name}" />
       </div>
       <div class="trait-modal-meta">
         <div class="trait-modal-title-row">
           <h2>${trait.name} Trait</h2>
-          <span class="trait-modal-rarity-badge">${trait.rarity}</span>
+          <span class="trait-modal-rarity-badge" data-rarity="${rarityKey}">${trait.rarity}</span>
         </div>
-        <div class="trait-modal-sub">${trait.tag || "Stat Modifier Trait"} &middot; ${trait.dropRate || "0.1%"} Roll Odds &middot; Pity: ${trait.pity ? trait.pity.toLocaleString() : "---"}</div>
+        <div class="trait-modal-sub">${trait.tag || "Stat Modifier Trait"} &middot; ${trait.dropRate || "0.1%"} Rate &middot; Pity: ${trait.pity ? trait.pity.toLocaleString() : "---"}</div>
       </div>
       <button type="button" class="dps-panel-close trait-modal-close">&times;</button>
     </div>
@@ -112,7 +113,6 @@ function openTraitModal(trait) {
 
   modal.querySelector(".trait-modal-close").addEventListener("click", close);
 
-  // Bind click listeners to navigate to unit page when clicking unit chip
   modal.querySelectorAll(".trait-synergy-chip").forEach((btn) => {
     btn.addEventListener("click", () => {
       const unitId = btn.dataset.unitId;
@@ -131,17 +131,18 @@ export async function TraitCard(data) {
   const node = template.content.cloneNode(true);
   const card = node.querySelector(".trait-card");
 
-  if (data.rarityColor) {
-    card.style.setProperty("--trait-accent", data.rarityColor);
-  }
-
   const img = card.querySelector('[data-role="image"]');
   img.src = toAbsoluteUrl(data.image || "assets/placeholder.svg");
   img.alt = data.name || "Trait";
 
   card.querySelector('[data-role="name"]').textContent = data.name || "---";
   card.querySelector('[data-role="tag"]').textContent = data.tag || `${data.rarity || "Mythic"} Trait`;
-  card.querySelector('[data-role="rarity"]').textContent = data.rarity || "Mythic";
+
+  const rarityKey = (data.rarity || "Mythic").toLowerCase();
+  const rarityChip = card.querySelector('[data-role="rarity"]');
+  rarityChip.textContent = data.rarity || "Mythic";
+  rarityChip.setAttribute("data-rarity", rarityKey);
+
   card.querySelector('[data-role="drop"]').textContent = `${data.dropRate || "0.1%"}`;
 
   const statsList = card.querySelector('[data-role="stats-list"]');

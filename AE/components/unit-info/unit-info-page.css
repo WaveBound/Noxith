@@ -30,14 +30,13 @@
   color: var(--muted);
 }
 
+/* ── Top-Level Unit Header (Fluid Padding) ──────────────────────────────── */
 .uip-sticky-header {
-  position: sticky;
-  top: -12px;
-  z-index: 50;
-  background: var(--background);
-  padding-top: 12px;
-  margin-top: -12px;
-  margin-bottom: 12px;
+  width: 100% !important;
+  background: var(--background, #060608) !important;
+  border-bottom: 1px solid var(--border, #16161a) !important;
+  padding: clamp(8px, 1vw, 12px) clamp(12px, 1.2vw, 16px) 4px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
 
 .uip-header {
@@ -152,7 +151,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   padding: 4px;
-  box-shadow: none !important;
+  flex-wrap: wrap;
 }
 
 .uip-header-dps-card {
@@ -165,7 +164,6 @@
   border-radius: 5px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.04);
-  box-shadow: none !important;
 }
 
 .uip-header-dps-card.card-total {
@@ -197,7 +195,6 @@
   border: 1px solid var(--border);
   background: var(--background-elevated);
   flex-shrink: 0;
-  box-shadow: none !important;
 }
 
 .uip-avatar img {
@@ -250,9 +247,10 @@
   color: #10b981;
 }
 
+/* ── Fluid Main Layout Grids (Self-Wrapping) ───────────────────────── */
 .uip-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 270px;
+  grid-template-columns: minmax(0, 1fr) clamp(250px, 22vw, 320px);
   gap: 14px;
   align-items: stretch;
   width: 100%;
@@ -261,21 +259,9 @@
   padding-bottom: 24px;
 }
 
-@media (min-width: 2000px) {
-  .uip-body {
-    grid-template-columns: minmax(0, 1fr) 300px;
-  }
-}
-
-@media (min-width: 2560px) {
-  .uip-body {
-    grid-template-columns: minmax(0, 1fr) 340px;
-  }
-}
-
 .uip-main-side-by-side {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
   gap: 16px;
   align-items: start;
   min-width: 0;
@@ -292,7 +278,6 @@
 .loadout-panel {
   background: transparent;
   border: none;
-  box-shadow: none !important;
   padding: 0;
 }
 
@@ -321,7 +306,6 @@
   border-radius: var(--radius-md);
   padding: 6px 8px;
   box-sizing: border-box;
-  box-shadow: none !important;
 }
 
 .loadout-item:hover {
@@ -331,8 +315,6 @@
 .loadout-img-wrap {
   width: 36px;
   height: 36px;
-  border: none !important;
-  background-color: transparent !important;
   background-image: url("../../icons/relics/RelicBackground.png") !important;
   background-size: cover !important;
   background-position: center !important;
@@ -343,16 +325,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 !important;
-  box-shadow: none !important;
 }
 
 .loadout-img-wrap img {
   width: 86% !important;
   height: 86% !important;
   object-fit: contain !important;
-  border: none !important;
-  background: transparent !important;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) !important;
 }
 
@@ -403,15 +381,13 @@
 .loadout-dropdown {
   position: absolute;
   top: calc(100% + 6px);
-  right: 0;
   width: 280px;
-  min-width: 280px;
+  max-width: calc(100vw - 28px);
   box-sizing: border-box;
   z-index: 1000;
   background: linear-gradient(135deg, #0d0d15 0%, #06060a 100%);
   border: 1px solid rgba(99, 102, 241, 0.4);
   border-radius: var(--radius-md);
-  box-shadow: none !important;
   padding: 10px;
   opacity: 1;
   transform: translateY(0) scale(1);
@@ -465,10 +441,7 @@
 .loadout-mod-icon svg {
   width: 15px !important;
   height: 15px !important;
-  max-width: 15px !important;
-  max-height: 15px !important;
   object-fit: contain !important;
-  display: block !important;
 }
 
 .loadout-mod-label {
@@ -488,7 +461,6 @@
 .upgrades-table {
   padding: 12px 14px;
   box-sizing: border-box;
-  box-shadow: none !important;
 }
 
 .upgrades-rows {
@@ -509,8 +481,6 @@
   background: var(--background-elevated, #0a0a0c);
   border: 1px solid rgba(99, 102, 241, 0.22);
   border-radius: 6px;
-  transition: border-color var(--t-fast) var(--ease);
-  box-shadow: none !important;
 }
 
 .upgrade-header {
@@ -563,21 +533,21 @@
 .upgrade-attack-name {
   color: var(--text);
   font-weight: 700;
-  background: transparent;
   padding: 0 5px;
   border-radius: 3px;
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
+/* Upgrade stats chips wrap naturally so Range is never cut off */
 .upgrade-stats {
   display: flex;
   align-items: center;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 6px 14px;
   background: rgba(0, 0, 0, 0.25);
   padding: 6px 8px;
   border-radius: 5px;
   border: 1px solid rgba(255, 255, 255, 0.04);
-  box-shadow: none !important;
 }
 
 .upgrade-stat {
@@ -600,10 +570,7 @@
 .upgrade-stat-icon svg {
   width: 13px !important;
   height: 13px !important;
-  max-width: 13px !important;
-  max-height: 13px !important;
   object-fit: contain !important;
-  display: block !important;
 }
 
 .upgrade-stat-label {
@@ -665,7 +632,6 @@
 .passives-table {
   padding: 10px 12px;
   box-sizing: border-box;
-  box-shadow: none !important;
 }
 
 .passives-rows {
@@ -683,7 +649,6 @@
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(99, 102, 241, 0.22);
   border-radius: var(--radius-md);
-  box-shadow: none !important;
 }
 
 .passive-info {
@@ -722,7 +687,7 @@
   line-height: 1.45;
 }
 
-/* ── Status Effects Custom Boxes with Flow Gradients ── */
+/* ── Status Effects Custom Boxes ── */
 .status-effects-table {
   display: flex;
   flex-direction: column;
@@ -753,7 +718,6 @@
   background-size: cover;
   border: 1px solid #300000;
   border-radius: 12px;
-  box-shadow: none !important;
 }
 
 .status-effect-box::before,
@@ -791,14 +755,8 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background-image: linear-gradient(135deg,
-      #d20000 0%,
-      #d20000 38%,
-      rgba(138, 0, 0, 0.55) 50%,
-      #d20000 62%,
-      #d20000 100%);
+  background-image: linear-gradient(135deg, #d20000 0%, #d20000 38%, rgba(138, 0, 0, 0.55) 50%, #d20000 62%, #d20000 100%);
   background-size: 500% 500%;
-  background-repeat: no-repeat;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -943,7 +901,6 @@
   background-size: cover;
   border: 1px solid #3b0764;
   border-radius: 12px;
-  box-shadow: none !important;
 }
 
 .status-effect-box.status-card-stun::before,
@@ -1040,14 +997,8 @@
 }
 
 .status-effect-box.status-card-freeze .status-effect-tag {
-  background-image: linear-gradient(135deg,
-      #38bdf8 0%,
-      #38bdf8 38%,
-      rgba(2, 132, 199, 0.65) 50%,
-      #38bdf8 62%,
-      #38bdf8 100%);
+  background-image: linear-gradient(135deg, #38bdf8 0%, #38bdf8 38%, rgba(2, 132, 199, 0.65) 50%, #38bdf8 62%, #38bdf8 100%);
   background-size: 500% 500%;
-  background-repeat: no-repeat;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1094,7 +1045,7 @@
   overflow: hidden;
 }
 
-/* ── Inspector Right Sidebar ── */
+/* ── Inspector Right Sidebar (Fluid Height Scaling) ─────────────────────── */
 .inspector {
   padding: 12px;
   display: flex;
@@ -1104,12 +1055,11 @@
   top: 0;
   max-height: calc(100vh - 195px);
   overflow-y: auto;
-  box-shadow: none !important;
 }
 
 .inspector-portrait {
   width: 100%;
-  height: 200px;
+  height: clamp(180px, 18vw, 260px);
   border-radius: var(--radius-sm);
   overflow: hidden;
   background: var(--background-elevated);
@@ -1118,7 +1068,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: none !important;
 }
 
 .inspector-portrait img {
@@ -1126,12 +1075,6 @@
   height: 100%;
   object-fit: cover;
   object-position: center top;
-}
-
-@media (min-width: 2000px) {
-  .inspector-portrait {
-    height: 260px;
-  }
 }
 
 .inspector-identity {
@@ -1258,7 +1201,6 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: var(--radius-sm);
   font-size: 11px;
-  box-shadow: none !important;
 }
 
 .inspector-icon {
@@ -1291,7 +1233,7 @@
   color: var(--text);
 }
 
-/* ── DPS Breakdown Subtab Layout ── */
+/* ── Fluid DPS Breakdown Subtab Layout ─────────────────────────────────── */
 .uip-dps-compact-wrapper {
   display: flex;
   flex-direction: column;
@@ -1303,6 +1245,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .uip-dps-level-picker,
@@ -1347,12 +1290,12 @@
 }
 
 .uip-dps-main-grid.has-summons {
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 
 .uip-dps-split-columns {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
   gap: 12px;
   width: 100%;
   align-items: start;
@@ -1379,7 +1322,6 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  box-shadow: none !important;
   transition: border-color var(--t-fast) var(--ease);
 }
 
@@ -1485,6 +1427,7 @@
   gap: 16px;
   padding-bottom: 4px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-wrap: wrap;
 }
 
 .uip-dps-badge {
@@ -1499,12 +1442,16 @@
 }
 
 .primary-stats-row {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
   margin-bottom: 4px;
 }
 
 .secondary-stats-row {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
   margin-bottom: 4px;
 }
 
@@ -1512,18 +1459,68 @@
   grid-template-columns: 1fr;
 }
 
-@media (max-width: 850px) {
-  .unit-info-page {
-    height: auto !important;
-    overflow: visible !important;
-    margin-top: 0 !important;
-  }
-
+/* ── Single Mobile Query (UI Functional Shifts) ───────────────────────── */
+@media (max-width: 900px) {
   .uip-body {
     grid-template-columns: 1fr !important;
   }
 
-  .uip-main-side-by-side {
-    grid-template-columns: 1fr !important;
+  /* ── Compact Mobile Loadout Icons ── */
+  .loadout-items {
+    gap: 10px !important;
+  }
+
+  .loadout-item {
+    width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    justify-content: center !important;
+  }
+
+  .loadout-item-right {
+    display: none !important;
+  }
+
+  .loadout-img-wrap {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .loadout-img-wrap img {
+    width: 86% !important;
+    height: 86% !important;
+    object-fit: contain !important;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) !important;
+  }
+
+  /* ── Smaller Mobile Dropdown ── */
+  .loadout-dropdown {
+    top: calc(100% + 6px) !important;
+    width: min(230px, 75vw) !important;
+    max-width: calc(100vw - 24px) !important;
+    min-width: unset !important;
+    padding: 8px !important;
+  }
+
+  .loadout-dropdown-inner {
+    gap: 6px !important;
+  }
+
+  .loadout-mod {
+    padding: 3px 6px !important;
+  }
+
+  .loadout-mod-label,
+  .loadout-mod-value,
+  .loadout-dropdown-passive-label {
+    font-size: 10px !important;
+  }
+
+  .loadout-passive-text {
+    font-size: 11px !important;
+    line-height: 1.35 !important;
   }
 }

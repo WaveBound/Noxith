@@ -1,23 +1,34 @@
 <template id="tpl-trait-card">
   <div class="trait-card glass-card">
-    <!-- Emblem Banner Header -->
+    <!-- Media Header Banner -->
     <div class="trait-card-media">
-      <div class="trait-media-aura"></div>
-      <img data-role="image" src="" alt="" />
-      <span class="trait-badge-rarity" data-role="rarity">Mythic</span>
-      <span class="trait-badge-rate" data-role="drop">0.1% Rate</span>
+      <!-- Top Left Rarity Badge -->
+      <div class="trait-card-top-left">
+        <span class="trait-card-rarity-chip" data-role="rarity">Mythic</span>
+      </div>
+
+      <!-- Top Right Roll Rate Badge -->
+      <div class="trait-card-top-right">
+        <span class="trait-card-rate-chip" data-role="drop">0.1%</span>
+      </div>
+
+      <!-- Centered Trait Emblem -->
+      <div class="trait-card-icon-wrap">
+        <img data-role="image" src="" alt="" />
+      </div>
     </div>
 
-    <!-- Card Body & Stats -->
+    <!-- Body Section -->
     <div class="trait-card-body">
-      <div class="trait-title-block">
-        <h3 class="trait-name" data-role="name">---</h3>
-        <span class="trait-tag" data-role="tag">---</span>
+      <!-- Title & Tag Block -->
+      <div class="trait-card-header">
+        <h3 class="trait-card-name" data-role="name">---</h3>
+        <span class="trait-card-tag" data-role="tag">---</span>
       </div>
 
       <!-- Stat Modifiers Grid -->
-      <div class="trait-stats-grid" data-role="stats-list">
-        <!-- Rendered stat chips -->
+      <div class="trait-card-stats-grid" data-role="stats-list">
+        <!-- Rendered stat boxes via JS -->
       </div>
     </div>
   </div>

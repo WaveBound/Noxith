@@ -1,15 +1,21 @@
 #app {
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;
-  grid-template-rows: 100vh;
+  grid-template-rows: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 #main {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
+}
+
+#header-mount {
+  flex-shrink: 0;
 }
 
 #page-container {
@@ -17,6 +23,8 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: 10px 16px 40px;
+  overscroll-behavior-y: contain;
+  /* Prevents mobile overscroll from shifting the header */
 }
 
 /* ── Scale padding on wider viewports (above 1080p) ──────────────────── */
@@ -110,18 +118,24 @@
     display: flex !important;
     flex-direction: column !important;
     width: 100vw !important;
-    height: 100vh !important;
+    height: 100dvh !important;
     overflow: hidden !important;
   }
 
   #main {
     width: 100vw !important;
-    height: 100vh !important;
+    height: 100dvh !important;
     flex: 1 !important;
     min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #header-mount {
+    flex-shrink: 0 !important;
   }
 
   #page-container {
     padding: 10px 14px 32px !important;
+    overscroll-behavior-y: contain !important;
   }
 }

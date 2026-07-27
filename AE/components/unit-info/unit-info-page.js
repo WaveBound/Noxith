@@ -126,20 +126,45 @@ function buildLoadoutPanel(unit) {
 
   panel.innerHTML = `<div class="loadout-items">${itemsHtml}</div>`;
 
-  panel.querySelectorAll(".loadout-info-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
+  panel.querySelectorAll(".loadout-item").forEach(item => {
+    item.addEventListener("click", (e) => {
+      if (e.target.closest(".loadout-dropdown")) return;
       e.stopPropagation();
-      const item = btn.closest(".loadout-item");
+
       const dropdown = item.querySelector(".loadout-dropdown");
+      const btn = item.querySelector(".loadout-info-btn");
+
       panel.querySelectorAll(".loadout-item").forEach(other => {
         if (other === item) return;
         const od = other.querySelector(".loadout-dropdown");
         const ob = other.querySelector(".loadout-info-btn");
         if (od) od.classList.add("collapsed");
         if (ob) ob.classList.remove("active");
+        other.classList.remove("active");
       });
+
       const isCollapsed = dropdown.classList.toggle("collapsed");
-      btn.classList.toggle("active", !isCollapsed);
+      item.classList.toggle("active", !isCollapsed);
+      if (btn) btn.classList.toggle("active", !isCollapsed);
+
+      // Smart edge detection: prevents overflowing off both left AND right screen edges
+      if (!isCollapsed && dropdown) {
+        const rect = item.getBoundingClientRect();
+        const screenWidth = window.innerWidth;
+        const dropdownWidth = dropdown.offsetWidth || 230;
+
+        const overflowRight = (rect.left + dropdownWidth) > (screenWidth - 16);
+        const overflowLeft = (rect.right - dropdownWidth) < 16;
+
+        // Only open to the left if it overflows on the right AND has room on the left
+        if (overflowRight && !overflowLeft) {
+          dropdown.style.left = "auto";
+          dropdown.style.right = "0";
+        } else {
+          dropdown.style.left = "0";
+          dropdown.style.right = "auto";
+        }
+      }
     });
   });
 
@@ -341,7 +366,6 @@ function buildUpgradesPanel(unit, activeSummonData = null) {
     });
   });
 
-  // Calculate layout height cleanly for 3 rows
   requestAnimationFrame(() => {
     const rowsContainer = panel.querySelector(".upgrades-rows");
     if (!rowsContainer) return;
@@ -941,7 +965,7 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
   return container;
 }
 
-export async function UnitInfoPage(unit, overrideSubTab = null) {
+export async function UnitInfoPage(unit, overrideSubTab = null, subHeaderMount = null) {
   let activeSubTab = overrideSubTab || "info";
   setUnitSubTab(unit.id, activeSubTab);
 
@@ -995,7 +1019,13 @@ export async function UnitInfoPage(unit, overrideSubTab = null) {
   stickyHeader.appendChild(header);
   stickyHeader.appendChild(subnav);
 
-  wrap.appendChild(stickyHeader);
+  // Mount header directly into subHeaderMount if provided, otherwise append to page wrap
+  if (subHeaderMount) {
+    subHeaderMount.innerHTML = "";
+    subHeaderMount.appendChild(stickyHeader);
+  } else {
+    wrap.appendChild(stickyHeader);
+  }
 
   const contentArea = document.createElement("div");
   contentArea.className = "uip-content-area";
