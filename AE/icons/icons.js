@@ -10,40 +10,40 @@ export function toAbsoluteUrl(relativePath) {
 }
 
 export const UNIT_INFO_ICONS = {
-    totalCost: toAbsoluteUrl("icons/unit-info/yen.png"),
-    yen: toAbsoluteUrl("icons/unit-info/yen.png"),
-    damage: toAbsoluteUrl("icons/unit-info/damage.png"),
-    spa: toAbsoluteUrl("icons/unit-info/spa.png"),
-    range: toAbsoluteUrl("icons/unit-info/range.png"),
-    critChance: toAbsoluteUrl("icons/unit-info/critrate.png"),
-    critDamage: toAbsoluteUrl("icons/unit-info/critdamage.png"),
+    totalCost: toAbsoluteUrl("icons/unit-info/Yen.png"),
+    yen: toAbsoluteUrl("icons/unit-info/Yen.png"),
+    damage: toAbsoluteUrl("icons/unit-info/Damage.png"),
+    spa: toAbsoluteUrl("icons/unit-info/Spa.png"),
+    range: toAbsoluteUrl("icons/unit-info/Range.png"),
+    critChance: toAbsoluteUrl("icons/unit-info/CritRate.png"),
+    critDamage: toAbsoluteUrl("icons/unit-info/CritDamage.png"),
 };
 
 export const ELEMENT_ICONS = {
-    hydro: toAbsoluteUrl("icons/elements/hydro.png"),
-    flame: toAbsoluteUrl("icons/elements/flame.png"),
-    terra: toAbsoluteUrl("icons/elements/terra.png"),
-    gale: toAbsoluteUrl("icons/elements/gale.png"),
-    storm: toAbsoluteUrl("icons/elements/storm.png"),
-    light: toAbsoluteUrl("icons/elements/light.png"),
-    dark: toAbsoluteUrl("icons/elements/dark.png"),
-    neutral: toAbsoluteUrl("icons/elements/neutral.png"),
+    hydro: toAbsoluteUrl("icons/elements/Hydro.png"),
+    flame: toAbsoluteUrl("icons/elements/Flame.png"),
+    terra: toAbsoluteUrl("icons/elements/Terra.png"),
+    gale: toAbsoluteUrl("icons/elements/Gale.png"),
+    storm: toAbsoluteUrl("icons/elements/Storm.png"),
+    light: toAbsoluteUrl("icons/elements/Light.png"),
+    dark: toAbsoluteUrl("icons/elements/Dark.png"),
+    neutral: toAbsoluteUrl("icons/elements/Neutral.png"),
 };
 
 export const ARCHETYPE_ICONS = {
-    magical: toAbsoluteUrl("icons/archetypes/magical.png"),
-    physical: toAbsoluteUrl("icons/archetypes/physical.png"),
-    psychic: toAbsoluteUrl("icons/archetypes/psychic.png"),
+    magical: toAbsoluteUrl("icons/archetypes/Magical.png"),
+    physical: toAbsoluteUrl("icons/archetypes/Physical.png"),
+    psychic: toAbsoluteUrl("icons/archetypes/Psychic.png"),
 };
 
 export const STATUS_ICONS = {
-    bleed: toAbsoluteUrl("icons/status/bleed.png"),
-    burn: toAbsoluteUrl("icons/status/burn.png"),
+    bleed: toAbsoluteUrl("icons/status/Bleed.png"),
+    burn: toAbsoluteUrl("icons/status/Burn.png"),
     austereflames: toAbsoluteUrl("icons/status/AustereFlames.png"),
     manaburn: toAbsoluteUrl("icons/status/ManaBurn.png"),
-    freeze: toAbsoluteUrl("icons/status/freeze.png"),
-    slow: toAbsoluteUrl("icons/status/slow.png"),
-    stun: toAbsoluteUrl("icons/status/stun.png"),
+    freeze: toAbsoluteUrl("icons/status/Freeze.png"),
+    slow: toAbsoluteUrl("icons/status/Slow.png"),
+    stun: toAbsoluteUrl("icons/status/Stun.png"),
     puppetmark: toAbsoluteUrl("icons/status/PuppetMark.png"),
     dismembered: toAbsoluteUrl("icons/status/Dismembered.png"),
 };
