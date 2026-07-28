@@ -305,9 +305,11 @@ if (typeof window !== "undefined") {
             floatingTooltip.style.boxShadow = "none";
             floatingTooltip.style.borderRadius = "10px";
             floatingTooltip.style.width = "280px";
-            floatingTooltip.style.height = "140px";
+            floatingTooltip.style.height = "auto";
+            floatingTooltip.style.maxHeight = "140px";
             floatingTooltip.style.maxWidth = "none";
             floatingTooltip.style.objectFit = "contain";
+            floatingTooltip.style.objectPosition = "top left";
             floatingTooltip.style.transform = "none";
             floatingTooltip.style.margin = "0";
             floatingTooltip.style.padding = "0";
@@ -323,8 +325,8 @@ if (typeof window !== "undefined") {
         const tooltipHeight = 140;
 
         // Position top-left corner 16px to the RIGHT and 16px BELOW the mouse cursor tip
-        let targetX = e.clientX + 16;
-        let targetY = e.clientY + 16;
+        let targetX = e.clientX + 5;
+        let targetY = e.clientY + 15;
 
         // Screen boundary check: flip left of cursor if overflowing right edge
         if (targetX + tooltipWidth > window.innerWidth - 10) {

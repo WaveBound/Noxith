@@ -473,3 +473,13 @@ img {
   font-size: 14px !important;
   line-height: 1.5 !important;
 }
+
+/* Keep default arrow cursor on tooltip keywords */
+.p-kw,
+.p-kw *,
+.p-ent,
+.p-ent *,
+.p-spell,
+.p-spell * {
+  cursor: default !important;
+}
