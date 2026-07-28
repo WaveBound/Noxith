@@ -6,7 +6,11 @@ export function toAbsoluteUrl(relativePath) {
         return relativePath;
     }
     const clean = relativePath.replace(/^(\.\/|\/)+/, "");
-    return new URL(clean, BASE_URL).href;
+    try {
+        return new URL(clean, BASE_URL).href;
+    } catch (e) {
+        return clean;
+    }
 }
 
 export const UNIT_INFO_ICONS = {
@@ -264,7 +268,7 @@ if (typeof window !== "undefined") {
         if (target.classList.contains("p-black-magic")) return toAbsoluteUrl("icons/info/BlackMagicInfo.png");
         if (target.classList.contains("p-illusion")) return toAbsoluteUrl("icons/info/IllusionInfo.png");
         if (target.classList.contains("p-mana-burn")) return toAbsoluteUrl("icons/info/ManaBurnInfo.png");
-        if (target.classList.contains("p-bleed")) return toAbsoluteUrl("icons/info/bleedinfo.png");
+        if (target.classList.contains("p-bleed")) return toAbsoluteUrl("icons/info/BleedInfo.png");
         if (target.classList.contains("p-ent")) return toAbsoluteUrl("icons/info/batinfo.png");
         if (target.classList.contains("p-fua")) return toAbsoluteUrl("icons/info/followupinfo.png");
         if (target.classList.contains("p-stun")) return toAbsoluteUrl("icons/info/StunInfo.png");
@@ -300,25 +304,41 @@ if (typeof window !== "undefined") {
             floatingTooltip.className = "floating-status-tooltip";
             floatingTooltip.alt = "";
 
-            // Multi-variant asset resolver across folders (info & status)
+            // Robust multi-variant info card resolver (never falls back to small icons)
             floatingTooltip.onerror = () => {
                 const currentTry = floatingTooltip.getAttribute("data-try-idx") ? parseInt(floatingTooltip.getAttribute("data-try-idx"), 10) : 0;
                 const baseSrc = floatingTooltip.getAttribute("data-original-src") || floatingTooltip.src;
 
+                let candidates = [];
                 if (baseSrc.toLowerCase().includes("bleed")) {
-                    const variants = [
+                    candidates = [
                         toAbsoluteUrl("icons/info/BleedInfo.png"),
-                        toAbsoluteUrl("icons/status/BleedInfo.png"),
                         toAbsoluteUrl("icons/info/bleedinfo.png"),
-                        toAbsoluteUrl("icons/status/bleedinfo.png"),
+                        toAbsoluteUrl("icons/info/Bleedinfo.png"),
                         toAbsoluteUrl("icons/info/Bleed_Info.png"),
+                        toAbsoluteUrl("icons/status/BleedInfo.png"),
+                        toAbsoluteUrl("icons/status/bleedinfo.png"),
+                        toAbsoluteUrl("icons/status/Bleedinfo.png"),
                         toAbsoluteUrl("icons/status/Bleed_Info.png")
                     ];
-                    const nextIdx = currentTry + 1;
-                    if (nextIdx < variants.length) {
-                        floatingTooltip.setAttribute("data-try-idx", String(nextIdx));
-                        floatingTooltip.src = variants[nextIdx];
-                    }
+                } else {
+                    const filename = baseSrc.split('/').pop().split('?')[0];
+                    candidates = [
+                        toAbsoluteUrl(`icons/info/${filename}`),
+                        toAbsoluteUrl(`icons/status/${filename}`),
+                        toAbsoluteUrl(`icons/info/${filename.toLowerCase()}`),
+                        toAbsoluteUrl(`icons/status/${filename.toLowerCase()}`)
+                    ];
+                }
+
+                const nextIdx = currentTry + 1;
+                if (nextIdx < candidates.length) {
+                    console.warn(`[Tooltip] Failed loading ${floatingTooltip.src}. Trying fallback variant: ${candidates[nextIdx]}`);
+                    floatingTooltip.setAttribute("data-try-idx", String(nextIdx));
+                    floatingTooltip.src = candidates[nextIdx];
+                } else {
+                    console.error(`[Tooltip] Could not find any valid image card for ${baseSrc}. Please check file casing on GitHub.`);
+                    hideFloatingTooltip();
                 }
             };
 
