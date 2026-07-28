@@ -305,15 +305,13 @@ if (typeof window !== "undefined") {
             floatingTooltip.style.boxShadow = "none";
             floatingTooltip.style.borderRadius = "10px";
             floatingTooltip.style.width = "280px";
-            floatingTooltip.style.height = "auto";
-            floatingTooltip.style.maxHeight = "140px";
+            floatingTooltip.style.height = "140px";
             floatingTooltip.style.maxWidth = "none";
             floatingTooltip.style.objectFit = "contain";
-            floatingTooltip.style.objectPosition = "top left";
             floatingTooltip.style.transform = "none";
             floatingTooltip.style.margin = "0";
             floatingTooltip.style.padding = "0";
-            document.documentElement.appendChild(floatingTooltip);
+            document.body.appendChild(floatingTooltip);
         }
 
         if (floatingTooltip.src !== src) {
@@ -321,40 +319,36 @@ if (typeof window !== "undefined") {
         }
         floatingTooltip.style.display = "block";
 
+        // Read CSS zoom factor (e.g. 1.25x on 1440p/4K or Windows scaled displays)
+        const htmlZoom = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+        const bodyZoom = parseFloat(getComputedStyle(document.body).zoom) || 1;
+        const zoom = htmlZoom * bodyZoom;
+
         const tooltipWidth = 280;
         const tooltipHeight = 140;
 
-        // Position top-left corner 16px to the RIGHT and 16px BELOW the mouse cursor tip
-        let targetX = e.clientX + 5;
-        let targetY = e.clientY + 15;
+        // Position top-left corner 2px right and 2px below mouse cursor tip
+        let rawX = e.clientX;
+        let rawY = e.clientY;
 
-        // Screen boundary check: flip left of cursor if overflowing right edge
-        if (targetX + tooltipWidth > window.innerWidth - 10) {
-            targetX = e.clientX - tooltipWidth - 12;
+        // Viewport edge checks
+        if (rawX + tooltipWidth > window.innerWidth - 10) {
+            rawX = e.clientX - tooltipWidth - 6;
         }
 
-        // Screen boundary check: flip above cursor if overflowing bottom edge
-        if (targetY + tooltipHeight > window.innerHeight - 10) {
-            targetY = e.clientY - tooltipHeight - 12;
+        if (rawY + tooltipHeight > window.innerHeight - 10) {
+            rawY = e.clientY - tooltipHeight - 6;
         }
 
-        targetX = Math.max(8, targetX);
-        targetY = Math.max(8, targetY);
+        rawX = Math.max(4, rawX);
+        rawY = Math.max(4, rawY);
 
-        // 1. Set initial target position
-        floatingTooltip.style.left = `${targetX}px`;
-        floatingTooltip.style.top = `${targetY}px`;
+        // Cancel out zoom scale so actual rendered top-left lands 1:1 at cursor tip
+        const finalX = rawX / zoom;
+        const finalY = rawY / zoom;
 
-        // 2. Measure actual rendered viewport location
-        const rect = floatingTooltip.getBoundingClientRect();
-        const offsetX = rect.left - targetX;
-        const offsetY = rect.top - targetY;
-
-        // 3. Subtract parent container transform or zoom offset to lock exactly at (targetX, targetY)
-        if (Math.abs(offsetX) > 0.5 || Math.abs(offsetY) > 0.5) {
-            floatingTooltip.style.left = `${targetX - offsetX}px`;
-            floatingTooltip.style.top = `${targetY - offsetY}px`;
-        }
+        floatingTooltip.style.left = `${finalX}px`;
+        floatingTooltip.style.top = `${finalY}px`;
     }
 
     function hideFloatingTooltip() {
