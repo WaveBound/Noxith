@@ -940,7 +940,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                   <span class="dps-table-lbl">&mdash; Total Cycle Window</span>
                   <span class="dps-table-val font-mono">roundup(22 / ${effSpaVal.toFixed(2)}s) &times; ${effSpaVal.toFixed(2)}s = ${cycleTime.toFixed(1)}s</span>
                 </div>
-                <div class="dps-table-row primary" style="margin-bottom: 8px;">
+                <div class="dps-table-row primary" style="margin-bottom: 4px;">
                   <span class="dps-table-lbl damage-highlight">Illusion Field DPS (${Math.round(fieldExplosionDmg).toLocaleString()} &divide; ${cycleTime.toFixed(1)}s)</span>
                   <span class="dps-table-val font-mono damage-highlight">+${formatFullDPS(fieldDps)} DPS</span>
                 </div>
@@ -1023,11 +1023,12 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
               </div>
             `;
   }).join("")}
+          ${!breakdown.isCrow ? `
           <div class="dps-table-row divider"></div>
           <div class="dps-table-row primary">
             <span class="dps-table-lbl combined-highlight">Total FUA DPS</span>
             <span class="dps-table-val font-mono combined-highlight">+${formatFullDPS(breakdown.totalFuaDps)} DPS</span>
-          </div>
+          </div>` : ""}
         </div>
       </div>` : ""}
     </div>
