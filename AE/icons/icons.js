@@ -311,8 +311,6 @@ if (typeof window !== "undefined") {
                         toAbsoluteUrl("icons/status/BleedInfo.png"),
                         toAbsoluteUrl("icons/info/bleedinfo.png"),
                         toAbsoluteUrl("icons/status/bleedinfo.png"),
-                        toAbsoluteUrl("icons/info/bleed.png"),
-                        toAbsoluteUrl("icons/status/bleed.png"),
                         toAbsoluteUrl("icons/info/Bleed_Info.png"),
                         toAbsoluteUrl("icons/status/Bleed_Info.png")
                     ];
