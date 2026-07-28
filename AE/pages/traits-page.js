@@ -1,140 +1,247 @@
-import { traits, IS_TRAITS_PUBLISHED } from "../data/traits.js";
-import { TraitCard } from "../components/trait-card/trait-card.js";
-import { renderGrid } from "../components/grid/grid.js";
+import { traits } from "../data/traits.js";
+import { units } from "../data/units.js";
+import { toAbsoluteUrl } from "../icons/icons.js";
 
-export async function TraitsPage(filter = "") {
+export async function TraitsPage() {
   const page = document.createElement("div");
-  page.className = "page traits-page";
+  page.className = "page trait-reroll-page";
 
-  // Self-contained, zero-dependency "Not Added Yet" screen
-  if (!IS_TRAITS_PUBLISHED) {
-    page.innerHTML = `
-      <div class="page-title-row">
-        <div>
-          <h1 style="font-size:20px; font-weight:700; margin:0; color:#ffffff;">Traits</h1>
-          <div class="page-subtitle" style="color:#71717a; font-size:12px; margin-top:2px;">Database under construction</div>
-        </div>
-      </div>
+  let selectedUnit = null;
+  let isIndexOpen = true;
+  let rollCount = 0;
+  let pityTracker = { unbound: 0, primordial: 0, forsaken: 0, draconic: 0 };
 
-      <div style="
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 52px 24px;
-        margin: 30px auto;
-        max-width: 500px;
-        width: 100%;
-        box-sizing: border-box;
-        border-radius: 12px;
-        background: linear-gradient(165deg, #0d0d14 0%, #050508 100%);
-        border: 1px solid rgba(168, 85, 247, 0.3);
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-      ">
-        <div style="
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 64px;
-          height: 64px;
-          border-radius: 50%;
-          background: rgba(168, 85, 247, 0.12);
-          border: 1px solid rgba(168, 85, 247, 0.35);
-          color: #c084fc;
-          margin-bottom: 18px;
-        ">
-          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-        </div>
-        <h2 style="
-          font-family: 'Montserrat', sans-serif !important;
-          font-size: 20px !important;
-          font-weight: 700 !important;
-          color: #ffffff !important;
-          margin: 0 0 8px 0 !important;
-          letter-spacing: -0.01em;
-        ">Not Added Yet</h2>
-        <p style="
-          font-family: 'Montserrat', sans-serif !important;
-          font-size: 13px !important;
-          color: #a1a1aa !important;
-          max-width: 380px;
-          margin: 0 !important;
-          line-height: 1.5 !important;
-        ">
-          The Traits database is currently under construction and will be published in a future update.
-        </p>
-      </div>
-    `;
-    return page;
-  }
-
-  let currentRarityFilter = "all";
-  let searchFilter = filter.toLowerCase().trim();
+  const bgFrameUrl = toAbsoluteUrl("assets/Traits Roll Ui/Trait_Roll_Bg.png");
+  const rollBtnUrl = toAbsoluteUrl("assets/Traits Roll Ui/Trait_Roll_Button.png");
+  const indexBtnUrl = toAbsoluteUrl("assets/Traits Roll Ui/Trait_Index_Button.png");
+  const filtersBtnUrl = toAbsoluteUrl("assets/Traits Roll Ui/Trait_Filters_Button.png");
 
   page.innerHTML = `
-    <!-- Standard Page Header -->
-    <div class="page-title-row">
-      <div>
-        <h1>Traits</h1>
-        <div class="page-subtitle">${traits.length} traits &middot; click a trait to view details &amp; unit synergies</div>
+    <div class="tr-wrapper">
+      
+      <!-- LEFT SIDE: Borderless Scrollable Trait Index -->
+      <div class="tr-index-sidebar ${isIndexOpen ? '' : 'closed'}" id="index-sidebar">
+        <div class="tr-sidebar-scroll">
+          ${traits.map(renderIndexCard).join("")}
+        </div>
+      </div>
+
+      <!-- RIGHT SIDE: Trait Reroll UI Frame -->
+      <div class="tr-game-frame-container">
+        <!-- Main UI Background Frame Image -->
+        <img class="tr-bg-frame-img" src="${bgFrameUrl}" alt="Trait Reroll UI" />
+
+        <!-- Central Unit Slot Overlay -->
+        <div class="tr-overlay-unit-slot" id="unit-slot-trigger">
+          <div class="tr-slot-content">
+            <!-- Prompt Pill (Shown when NO unit is selected) -->
+            <span class="tr-prompt-pill" id="prompt-pill">Select a unit to begin rerolling</span>
+            
+            <!-- Unit Preview Box -->
+            <div class="tr-unit-preview-box">
+              <img id="unit-avatar-img" src="" alt="" class="tr-unit-avatar hidden" />
+            </div>
+
+            <!-- Static Size Equipped Trait Badge (No Description) -->
+            <div class="tr-equipped-trait-badge hidden" id="equipped-trait-badge">
+              <span class="tr-eq-name" id="eq-name">No Trait</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Toolbar Buttons -->
+        <div class="tr-bottom-btn-group">
+          <button type="button" class="tr-img-btn tr-btn-index" id="btn-toggle-index" title="Toggle Index List">
+            <img src="${indexBtnUrl}" alt="Index" />
+          </button>
+
+          <button type="button" class="tr-img-btn tr-btn-reroll" id="btn-do-reroll" title="Reroll Trait">
+            <img src="${rollBtnUrl}" alt="Reroll" />
+          </button>
+
+          <button type="button" class="tr-img-btn tr-btn-filters" id="btn-open-filters" title="Filters">
+            <img src="${filtersBtnUrl}" alt="Filters" />
+          </button>
+        </div>
+
       </div>
     </div>
 
-    <!-- Filter Bar -->
-    <div class="traits-filter-bar">
-      <div class="traits-rarity-chips" id="traits-rarity-filter">
-        <button type="button" class="trait-filter-btn active" data-rarity="all">All Traits</button>
-        <button type="button" class="trait-filter-btn" data-rarity="Mythic">Mythic</button>
-        <button type="button" class="trait-filter-btn" data-rarity="Legendary">Legendary</button>
-        <button type="button" class="trait-filter-btn" data-rarity="Epic">Epic</button>
+    <!-- Unit Picker Modal -->
+    <div class="tr-modal-overlay hidden" id="unit-picker-modal">
+      <div class="tr-modal-box">
+        <div class="tr-modal-header">
+          <span>Select Unit to Reroll</span>
+          <button type="button" class="tr-modal-close-btn" id="close-picker">&times;</button>
+        </div>
+        <div class="tr-unit-grid">
+          ${units.map(u => `
+            <button type="button" class="tr-unit-card-btn" data-unit-id="${u.id}">
+              <img src="${toAbsoluteUrl(u.image || 'assets/placeholder.svg')}" alt="${u.name}" onerror="this.src='assets/placeholder.svg'" />
+              <span>${u.name}</span>
+            </button>
+          `).join("")}
+        </div>
       </div>
     </div>
-
-    <!-- Cards Grid -->
-    <div class="traits-grid-container" id="traits-grid-container"></div>
   `;
 
-  const container = page.querySelector("#traits-grid-container");
+  // Refs
+  const sidebar = page.querySelector("#index-sidebar");
+  const promptPill = page.querySelector("#prompt-pill");
+  const unitAvatarImg = page.querySelector("#unit-avatar-img");
+  const equippedBadge = page.querySelector("#equipped-trait-badge");
+  const eqName = page.querySelector("#eq-name");
+  const btnReroll = page.querySelector("#btn-do-reroll");
+  const btnToggleIndex = page.querySelector("#btn-toggle-index");
+  const unitPickerModal = page.querySelector("#unit-picker-modal");
 
-  async function renderFilteredGrid() {
-    container.innerHTML = "";
+  function renderIndexCard(t) {
+    const titleClass = t.rainbowClass ? t.rainbowClass : "";
+    const styleAttr = t.color ? `style="color:${t.color};"` : "";
 
-    const filteredTraits = traits.filter((t) => {
-      const matchesSearch = !searchFilter ||
-        t.name.toLowerCase().includes(searchFilter) ||
-        (t.tag && t.tag.toLowerCase().includes(searchFilter)) ||
-        (t.description && t.description.toLowerCase().includes(searchFilter)) ||
-        (t.stats && t.stats.some(s => (s.label || "").toLowerCase().includes(searchFilter) || (s.value || "").toLowerCase().includes(searchFilter)));
+    const pityHtml = t.pity
+      ? `<div class="tr-pity-row">
+           <span class="tr-pity-lbl">Pity</span>
+           <div class="tr-pity-track"><div class="tr-pity-bar-fill" id="pity-fill-${t.id}" style="width:0%"></div></div>
+           <span class="tr-pity-val"><span id="pity-num-${t.id}">0</span>/${t.pity.toLocaleString()}</span>
+         </div>`
+      : "";
 
-      const matchesRarity = currentRarityFilter === "all" || t.rarity.toLowerCase() === currentRarityFilter.toLowerCase();
+    return `
+      <div class="tr-index-card">
+        <div class="tr-card-icon-area">
+          <div class="tr-card-icon-blank">
+            ${t.image && t.image !== 'assets/placeholder.svg' ? `<img src="${toAbsoluteUrl(t.image)}" alt="" />` : ''}
+          </div>
+          <span class="tr-card-rate-lbl">${t.dropRate}</span>
+        </div>
+        <div class="tr-card-body">
+          <div class="tr-card-title ${titleClass}" ${styleAttr}>${t.name}</div>
+          <div class="tr-card-desc">${t.description}</div>
+          ${pityHtml}
+        </div>
+      </div>
+    `;
+  }
 
-      return matchesSearch && matchesRarity;
+  function updatePityUI() {
+    traits.forEach(t => {
+      if (t.pity) {
+        const currentPity = pityTracker[t.id] || 0;
+        const pct = Math.min(100, (currentPity / t.pity) * 100);
+        const numEl = page.querySelector(`#pity-num-${t.id}`);
+        const fillEl = page.querySelector(`#pity-fill-${t.id}`);
+        if (numEl) numEl.textContent = currentPity.toLocaleString();
+        if (fillEl) fillEl.style.width = `${pct}%`;
+      }
     });
+  }
 
-    if (filteredTraits.length === 0) {
-      container.innerHTML = `<div class="traits-empty-state">No traits match your current search/filter.</div>`;
+  function applyEquippedTraitUI(trait) {
+    promptPill.classList.add("hidden");
+    equippedBadge.classList.remove("hidden");
+    eqName.textContent = trait.name;
+    eqName.className = "tr-eq-name " + (trait.rainbowClass || "");
+    eqName.style.color = trait.color || "";
+  }
+
+  function selectUnit(unit) {
+    selectedUnit = unit;
+    unitAvatarImg.src = toAbsoluteUrl(unit.image || "assets/placeholder.svg");
+    unitAvatarImg.classList.remove("hidden");
+
+    if (unit.equippedTrait) {
+      applyEquippedTraitUI(unit.equippedTrait);
+    } else {
+      promptPill.classList.add("hidden");
+      equippedBadge.classList.remove("hidden");
+      eqName.textContent = "No Trait";
+      eqName.className = "tr-eq-name";
+      eqName.style.color = "#a1a1aa";
+    }
+
+    unitPickerModal.classList.add("hidden");
+  }
+
+  function performRoll() {
+    rollCount++;
+
+    for (const t of traits) {
+      if (t.pity) pityTracker[t.id] = (pityTracker[t.id] || 0) + 1;
+    }
+
+    let wonTrait = null;
+
+    if (pityTracker.unbound >= 1500) wonTrait = traits.find(t => t.id === "unbound");
+    else if (pityTracker.primordial >= 750) wonTrait = traits.find(t => t.id === "primordial");
+    else if (pityTracker.forsaken >= 500) wonTrait = traits.find(t => t.id === "forsaken");
+    else if (pityTracker.draconic >= 300) wonTrait = traits.find(t => t.id === "draconic");
+
+    if (!wonTrait) {
+      const rand = Math.random() * 100;
+      let cumulative = 0;
+      for (const t of traits) {
+        cumulative += t.rateNum;
+        if (rand <= cumulative) {
+          wonTrait = t;
+          break;
+        }
+      }
+    }
+
+    if (!wonTrait) wonTrait = traits[traits.length - 1];
+
+    if (wonTrait.rarity === "Mythic") {
+      pityTracker[wonTrait.id] = 0;
+    }
+
+    updatePityUI();
+    return wonTrait;
+  }
+
+  // Instant Roll
+  function triggerReroll() {
+    if (!selectedUnit) {
+      unitPickerModal.classList.remove("hidden");
       return;
     }
 
-    const grid = await renderGrid(filteredTraits, TraitCard);
-    grid.classList.add("traits-grid");
-    container.appendChild(grid);
+    promptPill.classList.add("hidden");
+    equippedBadge.classList.remove("hidden");
+
+    const result = performRoll();
+    selectedUnit.equippedTrait = result;
+    applyEquippedTraitUI(result);
   }
 
-  page.querySelectorAll(".trait-filter-btn").forEach((btn) => {
+  btnToggleIndex.addEventListener("click", () => {
+    isIndexOpen = !isIndexOpen;
+    sidebar.classList.toggle("closed", !isIndexOpen);
+  });
+
+  page.querySelector("#unit-slot-trigger").addEventListener("click", () => {
+    unitPickerModal.classList.remove("hidden");
+  });
+
+  page.querySelector("#close-picker").addEventListener("click", () => {
+    unitPickerModal.classList.add("hidden");
+  });
+
+  btnReroll.addEventListener("click", triggerReroll);
+
+  page.querySelectorAll(".tr-unit-card-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      page.querySelectorAll(".trait-filter-btn").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      currentRarityFilter = btn.dataset.rarity;
-      renderFilteredGrid();
+      const uId = btn.dataset.unitId;
+      const found = units.find(u => u.id === uId);
+      if (found) selectUnit(found);
     });
   });
 
-  await renderFilteredGrid();
+  if (units.length > 0) {
+    selectUnit(units[0]);
+  }
 
+  updatePityUI();
   return page;
 }
