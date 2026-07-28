@@ -299,19 +299,18 @@ if (typeof window !== "undefined") {
             floatingTooltip = document.createElement("img");
             floatingTooltip.className = "floating-status-tooltip";
             floatingTooltip.alt = "";
-            floatingTooltip.style.position = "fixed";
-            floatingTooltip.style.pointerEvents = "none";
-            floatingTooltip.style.zIndex = "1000000";
-            floatingTooltip.style.boxShadow = "none";
-            floatingTooltip.style.borderRadius = "10px";
-            floatingTooltip.style.width = "280px";
-            floatingTooltip.style.height = "140px";
-            floatingTooltip.style.maxWidth = "none";
-            floatingTooltip.style.objectFit = "contain";
-            floatingTooltip.style.transform = "none";
-            floatingTooltip.style.margin = "0";
-            floatingTooltip.style.padding = "0";
-            document.body.appendChild(floatingTooltip);
+
+            // Self-healing image fallback
+            floatingTooltip.onerror = () => {
+                const currentSrc = floatingTooltip.src || "";
+                if (currentSrc.includes("BleedInfo.png")) {
+                    floatingTooltip.src = toAbsoluteUrl("icons/info/bleedinfo.png");
+                } else if (currentSrc.includes("bleedinfo.png")) {
+                    floatingTooltip.src = toAbsoluteUrl("icons/status/bleed.png");
+                }
+            };
+
+            document.documentElement.appendChild(floatingTooltip);
         }
 
         if (floatingTooltip.src !== src) {
@@ -319,35 +318,36 @@ if (typeof window !== "undefined") {
         }
         floatingTooltip.style.display = "block";
 
-        // Read CSS zoom factor (e.g. 1.25x on 1440p/4K or Windows scaled displays)
+        // Read computed zoom scale factor (1440p / 4K / display scale)
         const htmlZoom = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
         const bodyZoom = parseFloat(getComputedStyle(document.body).zoom) || 1;
         const zoom = htmlZoom * bodyZoom;
 
-        const tooltipWidth = 280;
-        const tooltipHeight = 140;
+        // Dynamically measure actual rendered image size
+        const rect = floatingTooltip.getBoundingClientRect();
+        const tooltipWidth = (rect.width || floatingTooltip.naturalWidth || 280) * zoom;
+        const tooltipHeight = (rect.height || floatingTooltip.naturalHeight || 140) * zoom;
 
-        let rawX = e.clientX;
-        let rawY = e.clientY;
+        let rawX = e.clientX + 7.5;
+        let rawY = e.clientY + 7.5;
 
-        // Viewport edge checks
-        if (rawX + tooltipWidth > window.innerWidth - 10) {
-            rawX = e.clientX - tooltipWidth - 6;
+        // Boundary checks using true viewport dimensions
+        if (rawX + tooltipWidth > window.innerWidth - 8) {
+            rawX = e.clientX - tooltipWidth - 8;
         }
 
-        if (rawY + tooltipHeight > window.innerHeight - 10) {
-            rawY = e.clientY - tooltipHeight - 6;
+        if (rawY + tooltipHeight > window.innerHeight - 8) {
+            rawY = e.clientY - tooltipHeight - 8;
         }
 
         rawX = Math.max(4, rawX);
         rawY = Math.max(4, rawY);
 
-        // Cancel out zoom scale so actual rendered top-left lands 1:1 at cursor tip
+        // Apply exact 3D viewport position normalized by zoom factor
         const finalX = rawX / zoom;
         const finalY = rawY / zoom;
 
-        floatingTooltip.style.left = `${finalX}px`;
-        floatingTooltip.style.top = `${finalY}px`;
+        floatingTooltip.style.transform = `translate3d(${finalX}px, ${finalY}px, 0px)`;
     }
 
     function hideFloatingTooltip() {

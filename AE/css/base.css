@@ -437,6 +437,25 @@ img {
   display: inline !important;
 }
 
+/* Floating Status Tooltip CSS Origin Base */
+.floating-status-tooltip {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: 300px !important;
+  max-height: 160px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none !important;
+  z-index: 1000000 !important;
+  box-shadow: none !important;
+  border-radius: 10px !important;
+  object-fit: contain !important;
+  will-change: transform;
+}
+
 /* Disable duplicate tooltips */
 .p-kw.p-bleed::after,
 .p-ent::after,
@@ -444,13 +463,6 @@ img {
 .p-kw.p-mana-burn::after {
   display: none !important;
   content: none !important;
-}
-
-.floating-status-tooltip {
-  box-shadow: none !important;
-  filter: none !important;
-  border-radius: 12px !important;
-  overflow: hidden !important;
 }
 
 @media (min-width: 2500px) {
