@@ -15,7 +15,8 @@ let templatePromise = null;
 
 async function loadTemplate() {
   if (!templatePromise) {
-    templatePromise = fetch("components/trait-card/trait-card.html?v=" + Date.now())
+    const templateUrl = toAbsoluteUrl("components/trait-card/trait-card.html?v=" + Date.now());
+    templatePromise = fetch(templateUrl)
       .then((r) => r.text())
       .then((html) => {
         const wrapper = document.createElement("div");

@@ -1,27 +1,74 @@
 import { traits, IS_TRAITS_PUBLISHED } from "../data/traits.js";
 import { TraitCard } from "../components/trait-card/trait-card.js";
 import { renderGrid } from "../components/grid/grid.js";
-import { ComingSoon } from "../components/coming-soon/coming-soon.js";
 
 export async function TraitsPage(filter = "") {
   const page = document.createElement("div");
   page.className = "page traits-page";
 
+  // Self-contained, zero-dependency "Not Added Yet" screen
   if (!IS_TRAITS_PUBLISHED) {
     page.innerHTML = `
       <div class="page-title-row">
         <div>
-          <h1>Traits</h1>
-          <div class="page-subtitle">Database under construction</div>
+          <h1 style="font-size:20px; font-weight:700; margin:0; color:#ffffff;">Traits</h1>
+          <div class="page-subtitle" style="color:#71717a; font-size:12px; margin-top:2px;">Database under construction</div>
         </div>
       </div>
+
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 52px 24px;
+        margin: 30px auto;
+        max-width: 500px;
+        width: 100%;
+        box-sizing: border-box;
+        border-radius: 12px;
+        background: linear-gradient(165deg, #0d0d14 0%, #050508 100%);
+        border: 1px solid rgba(168, 85, 247, 0.3);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+      ">
+        <div style="
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 64px;
+          height: 64px;
+          border-radius: 50%;
+          background: rgba(168, 85, 247, 0.12);
+          border: 1px solid rgba(168, 85, 247, 0.35);
+          color: #c084fc;
+          margin-bottom: 18px;
+        ">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <h2 style="
+          font-family: 'Montserrat', sans-serif !important;
+          font-size: 20px !important;
+          font-weight: 700 !important;
+          color: #ffffff !important;
+          margin: 0 0 8px 0 !important;
+          letter-spacing: -0.01em;
+        ">Not Added Yet</h2>
+        <p style="
+          font-family: 'Montserrat', sans-serif !important;
+          font-size: 13px !important;
+          color: #a1a1aa !important;
+          max-width: 380px;
+          margin: 0 !important;
+          line-height: 1.5 !important;
+        ">
+          The Traits database is currently under construction and will be published in a future update.
+        </p>
+      </div>
     `;
-    page.appendChild(
-      ComingSoon({
-        title: "Not Added Yet",
-        message: "The Traits database is currently under construction and will be available soon."
-      })
-    );
     return page;
   }
 
