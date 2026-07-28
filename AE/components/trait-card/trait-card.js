@@ -65,7 +65,6 @@ function openTraitModal(trait) {
     : `<span class="trait-synergy-none">No units currently list this trait as their recommended trait.</span>`;
 
   const modal = document.createElement("div");
-  // Removed "glass-card" class to prevent background transition & translucency bugs on hover-out
   modal.className = "trait-detail-modal";
   modal.innerHTML = `
     <div class="trait-modal-header">
@@ -155,9 +154,9 @@ export async function TraitCard(data) {
       const meta = STAT_META[key] || { label: (st.label || key).toUpperCase(), cls: "" };
 
       const cell = document.createElement("div");
-      cell.className = "trait-stat-pill";
+      cell.className = `trait-stat-pill ${meta.cls}`;
       cell.innerHTML = `
-        <span class="trait-stat-label ${meta.cls}">${meta.label}</span>
+        <span class="trait-stat-label">${meta.label}</span>
         <span class="trait-stat-value">${val}</span>
       `;
       statsList.appendChild(cell);
