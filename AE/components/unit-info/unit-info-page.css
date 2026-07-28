@@ -1,4 +1,4 @@
---- START OF FILE unit-info-page.css --- .unit-info-page {
+.unit-info-page {
   width: 100%;
   max-width: 100%;
   margin: 0;
@@ -731,7 +731,7 @@
   line-height: 1.45;
 }
 
-/* ── Status Effects Custom Boxes ── */
+/* ── Status Effects Custom Boxes (FIXED RELATIVE PATHS FOR DEPLOYMENT) ── */
 .status-effects-table {
   display: flex;
   flex-direction: column;
@@ -756,7 +756,7 @@
   padding: 12px 16px;
   overflow: hidden;
   background-color: #000000;
-  background-image: url('icons/status/BleedInfo.png');
+  background-image: url('../../icons/status/BleedInfo.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -816,7 +816,7 @@
   padding: 12px 16px;
   overflow: hidden;
   background-color: #040000;
-  background-image: url('icons/status/IllusionInfo.png');
+  background-image: url('../../icons/status/IllusionInfo.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -869,7 +869,7 @@
   padding: 12px 16px;
   overflow: hidden;
   background-color: #050507;
-  background-image: url('icons/status/BlackFireInfo.png');
+  background-image: url('../../icons/status/BlackFireInfo.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -939,7 +939,7 @@
   padding: 12px 16px;
   overflow: hidden;
   background-color: #030008;
-  background-image: url('icons/status/StunInfo.png');
+  background-image: url('../../icons/status/StunInfo.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -1005,7 +1005,7 @@
 
 .status-effect-box.status-card-freeze {
   background-color: #000000;
-  background-image: url('icons/status/FreezeInfo.png');
+  background-image: url('../../icons/status/FreezeInfo.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;

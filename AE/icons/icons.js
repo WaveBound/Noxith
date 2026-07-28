@@ -300,7 +300,7 @@ if (typeof window !== "undefined") {
             floatingTooltip.className = "floating-status-tooltip";
             floatingTooltip.alt = "";
 
-            // Comprehensive multi-variant asset resolver for Linux web hosts
+            // Multi-variant asset resolver across folders (info & status)
             floatingTooltip.onerror = () => {
                 const currentTry = floatingTooltip.getAttribute("data-try-idx") ? parseInt(floatingTooltip.getAttribute("data-try-idx"), 10) : 0;
                 const baseSrc = floatingTooltip.getAttribute("data-original-src") || floatingTooltip.src;
@@ -308,13 +308,13 @@ if (typeof window !== "undefined") {
                 if (baseSrc.toLowerCase().includes("bleed")) {
                     const variants = [
                         toAbsoluteUrl("icons/info/BleedInfo.png"),
+                        toAbsoluteUrl("icons/status/BleedInfo.png"),
                         toAbsoluteUrl("icons/info/bleedinfo.png"),
-                        toAbsoluteUrl("icons/info/Bleedinfo.png"),
+                        toAbsoluteUrl("icons/status/bleedinfo.png"),
                         toAbsoluteUrl("icons/info/bleed.png"),
-                        toAbsoluteUrl("icons/info/Bleed.png"),
+                        toAbsoluteUrl("icons/status/bleed.png"),
                         toAbsoluteUrl("icons/info/Bleed_Info.png"),
-                        toAbsoluteUrl("icons/info/bleed_info.png"),
-                        toAbsoluteUrl("icons/status/bleed.png")
+                        toAbsoluteUrl("icons/status/Bleed_Info.png")
                     ];
                     const nextIdx = currentTry + 1;
                     if (nextIdx < variants.length) {
@@ -358,7 +358,7 @@ if (typeof window !== "undefined") {
         rawX = Math.max(4, rawX);
         rawY = Math.max(4, rawY);
 
-        // Cancel out zoom scale so actual rendered top-left lands 1:1 at cursor tip
+        // Integer pixel positioning normalized by zoom factor
         const finalX = Math.round(rawX / zoom);
         const finalY = Math.round(rawY / zoom);
 
