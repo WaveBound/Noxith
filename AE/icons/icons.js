@@ -311,7 +311,7 @@ if (typeof window !== "undefined") {
             floatingTooltip.style.transform = "none";
             floatingTooltip.style.margin = "0";
             floatingTooltip.style.padding = "0";
-            document.body.appendChild(floatingTooltip);
+            document.documentElement.appendChild(floatingTooltip);
         }
 
         if (floatingTooltip.src !== src) {
@@ -322,15 +322,16 @@ if (typeof window !== "undefined") {
         const tooltipWidth = 280;
         const tooltipHeight = 140;
 
-        // Target position in viewport coordinates: 16px right and 16px down from cursor tip
+        // Position top-left corner 16px to the RIGHT and 16px BELOW the mouse cursor tip
         let targetX = e.clientX + 16;
         let targetY = e.clientY + 16;
 
-        // Screen edge bounds check: flip left/up if overflowing viewport
+        // Screen boundary check: flip left of cursor if overflowing right edge
         if (targetX + tooltipWidth > window.innerWidth - 10) {
             targetX = e.clientX - tooltipWidth - 12;
         }
 
+        // Screen boundary check: flip above cursor if overflowing bottom edge
         if (targetY + tooltipHeight > window.innerHeight - 10) {
             targetY = e.clientY - tooltipHeight - 12;
         }
@@ -338,22 +339,19 @@ if (typeof window !== "undefined") {
         targetX = Math.max(8, targetX);
         targetY = Math.max(8, targetY);
 
-        // Set target coordinates directly on element
+        // 1. Set initial target position
         floatingTooltip.style.left = `${targetX}px`;
         floatingTooltip.style.top = `${targetY}px`;
 
-        // Check actual rendered viewport bounds and correct if offset by parent CSS transforms or page zoom
+        // 2. Measure actual rendered viewport location
         const rect = floatingTooltip.getBoundingClientRect();
+        const offsetX = rect.left - targetX;
+        const offsetY = rect.top - targetY;
 
-        // Only apply correction if rect yields valid non-zero rendered bounds
-        if (rect.width > 0 && rect.height > 0 && (rect.left > 0 || rect.top > 0)) {
-            const errorX = rect.left - targetX;
-            const errorY = rect.top - targetY;
-
-            if (Math.abs(errorX) > 1 || Math.abs(errorY) > 1) {
-                floatingTooltip.style.left = `${targetX - errorX}px`;
-                floatingTooltip.style.top = `${targetY - errorY}px`;
-            }
+        // 3. Subtract parent container transform or zoom offset to lock exactly at (targetX, targetY)
+        if (Math.abs(offsetX) > 0.5 || Math.abs(offsetY) > 0.5) {
+            floatingTooltip.style.left = `${targetX - offsetX}px`;
+            floatingTooltip.style.top = `${targetY - offsetY}px`;
         }
     }
 
