@@ -1030,8 +1030,11 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           </div>
         </div>
       </div>` : ""}
+    </div>
 
-      <div class="dps-section dps-formula-total">
+    <!-- ALWAYS DISPLAYED AT THE BOTTOM FOOTER -->
+    <div class="dps-panel-footer">
+      <div class="dps-section dps-formula-total" style="margin: 0;">
         <div class="dps-section-hd">Placement DPS Total</div>
         <div class="dps-table">
           <div class="dps-table-row">
