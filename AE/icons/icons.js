@@ -328,8 +328,9 @@ if (typeof window !== "undefined") {
         const tooltipWidth = (rect.width || floatingTooltip.naturalWidth || 280) * zoom;
         const tooltipHeight = (rect.height || floatingTooltip.naturalHeight || 140) * zoom;
 
-        let rawX = e.clientX + 7.5;
-        let rawY = e.clientY + 7.5;
+        // Target position: 12px right and 12px down from cursor tip
+        let rawX = e.clientX + 12;
+        let rawY = e.clientY + 12;
 
         // Boundary checks using true viewport dimensions
         if (rawX + tooltipWidth > window.innerWidth - 8) {
@@ -343,11 +344,12 @@ if (typeof window !== "undefined") {
         rawX = Math.max(4, rawX);
         rawY = Math.max(4, rawY);
 
-        // Apply exact 3D viewport position normalized by zoom factor
-        const finalX = rawX / zoom;
-        const finalY = rawY / zoom;
+        // Apply integer-pixel positioning normalized by zoom factor
+        const finalX = Math.round(rawX / zoom);
+        const finalY = Math.round(rawY / zoom);
 
-        floatingTooltip.style.transform = `translate3d(${finalX}px, ${finalY}px, 0px)`;
+        floatingTooltip.style.left = `${finalX}px`;
+        floatingTooltip.style.top = `${finalY}px`;
     }
 
     function hideFloatingTooltip() {

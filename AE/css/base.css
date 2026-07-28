@@ -437,11 +437,9 @@ img {
   display: inline !important;
 }
 
-/* Floating Status Tooltip CSS Origin Base */
+/* Floating Status Tooltip Base Styling */
 .floating-status-tooltip {
   position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
   width: auto !important;
   height: auto !important;
   max-width: 300px !important;
@@ -453,7 +451,8 @@ img {
   box-shadow: none !important;
   border-radius: 10px !important;
   object-fit: contain !important;
-  will-change: transform;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 /* Disable duplicate tooltips */
