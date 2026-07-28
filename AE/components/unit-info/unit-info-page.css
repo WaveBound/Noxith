@@ -1,4 +1,4 @@
-.unit-info-page {
+--- START OF FILE unit-info-page.css --- .unit-info-page {
   width: 100%;
   max-width: 100%;
   margin: 0;
@@ -410,6 +410,51 @@
   width: 100%;
 }
 
+/* ── Relic Passive Container & Glow inside Dropdown ── */
+.loadout-dropdown-passive {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: var(--radius-sm);
+  margin-top: 4px;
+}
+
+.loadout-dropdown-passive-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  line-height: 1.2;
+}
+
+.loadout-dropdown-passive-glow {
+  background: linear-gradient(90deg, #22d3ee, #38bdf8, #0ea5e9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.loadout-dropdown-passive-title {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.loadout-passive-text {
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+  color: var(--text-secondary, #a1a1aa);
+}
+
 .loadout-mods {
   display: flex;
   flex-direction: column;
@@ -538,7 +583,6 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* Upgrade stats chips wrap naturally so Range is never cut off */
 .upgrade-stats {
   display: flex;
   align-items: center;

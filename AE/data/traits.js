@@ -5,7 +5,6 @@ export const traits = [
   {
     id: "Unbound",
     name: "Unbound",
-    tag: "Hyper Damage Carry",
     image: "icons/traits/Unbound.png",
     rarity: "Mythic",
     rarityColor: "#a855f7",
@@ -22,7 +21,6 @@ export const traits = [
   {
     id: "Primordial",
     name: "Primordial",
-    tag: "All-Rounder Meta",
     image: "icons/traits/Primordial.png",
     rarity: "Mythic",
     rarityColor: "#a855f7",
@@ -38,7 +36,6 @@ export const traits = [
   {
     id: "Forsaken",
     name: "Forsaken",
-    tag: "Critical Strike Spec",
     image: "icons/traits/Forsaken.png",
     rarity: "Mythic",
     rarityColor: "#a855f7",
@@ -54,7 +51,6 @@ export const traits = [
   {
     id: "Draconic",
     name: "Draconic",
-    tag: "DoT & Status Specialist",
     image: "icons/traits/Draconic.png",
     rarity: "Mythic",
     rarityColor: "#a855f7",

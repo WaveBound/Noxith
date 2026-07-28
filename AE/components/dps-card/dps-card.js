@@ -97,6 +97,7 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
 
     const breakdown = {
       ...rawBreakdown,
+      statMode,
       effDamage,
       effRange,
       avgHitDamage,
@@ -212,154 +213,324 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   const isUnboundTrait = (traitName || "").toLowerCase().includes("unbound") || (breakdown.trait?.id || "").toLowerCase() === "unbound";
   const placementCount = isUnboundTrait ? 1 : (breakdown.placements || 1);
 
-  const baseDmg = breakdown.scaledBaseDamage || 0;
+  // ── 1. DAMAGE MATH ACCUMULATOR & STEP SEQUENCE ──
+  const baseDmgLv1 = rawBase.damage || 0;
+  const levelMult = breakdown.levelMult || 1;
+
   const traitDmgBonus = breakdown.trait?.damageBonus || 0;
   const relicDmgBonus = breakdown.relicDamageMult || 0;
   const relicArchetypeDmgBonus = breakdown.relicArchetypeDamageMult || 0;
+  const totalPassiveDmgBonus = breakdown.totalPassiveDamageBonus || 0;
 
-  let dmgAccum = baseDmg;
+  let dmgAccum = baseDmgLv1;
+  let dmgRowsHtml = `
+    <div class="dps-table-row">
+      <span class="dps-table-lbl">Base Hit DMG (Lv. 1)</span>
+      <span class="dps-table-val font-mono">${Math.round(baseDmgLv1).toLocaleString()}</span>
+    </div>
+  `;
 
-  let traitDmgRowHtml = "";
+  if (levelMult > 1) {
+    dmgAccum = Math.round(dmgAccum * levelMult);
+    dmgRowsHtml += `
+      <div class="dps-table-row indented">
+        <span class="dps-table-lbl">&mdash; Level 50 Scaling</span>
+        <span class="dps-table-val font-mono"><span class="faint-mult">x${levelMult.toFixed(2)}</span>${dmgAccum.toLocaleString()}</span>
+      </div>
+    `;
+  }
+
   if (traitDmgBonus > 0) {
     dmgAccum = Math.round(dmgAccum * (1 + traitDmgBonus));
-    traitDmgRowHtml = `
+    dmgRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Trait DMG multiplier</span>
+        <span class="dps-table-lbl">&mdash; Trait DMG Multiplier (${breakdown.trait?.name || "Trait"})</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + traitDmgBonus).toFixed(2)}</span>${dmgAccum.toLocaleString()}</span>
-      </div>`;
+      </div>
+    `;
   }
 
-  let relicDmgRowHtml = "";
   if (relicDmgBonus > 0) {
     dmgAccum = Math.round(dmgAccum * (1 + relicDmgBonus));
-    relicDmgRowHtml = `
+    dmgRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Relic DMG multiplier</span>
+        <span class="dps-table-lbl">&mdash; Relic DMG Multiplier</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + relicDmgBonus).toFixed(2)}</span>${dmgAccum.toLocaleString()}</span>
-      </div>`;
+      </div>
+    `;
   }
 
-  let relicArchetypeDmgRowHtml = "";
   if (relicArchetypeDmgBonus > 0) {
     dmgAccum = Math.round(dmgAccum * (1 + relicArchetypeDmgBonus));
     const archLabel = (breakdown.unitArchetype || "Archetype").charAt(0).toUpperCase() + (breakdown.unitArchetype || "Archetype").slice(1);
-    relicArchetypeDmgRowHtml = `
+    dmgRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Relic ${archLabel} DMG multiplier</span>
+        <span class="dps-table-lbl">&mdash; Relic ${archLabel} DMG Multiplier</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + relicArchetypeDmgBonus).toFixed(2)}</span>${dmgAccum.toLocaleString()}</span>
-      </div>`;
+      </div>
+    `;
   }
 
-  const dmgAfterZ = Math.round(dmgAccum * 1.2);
-  const dmgAfterAscension = hasAscend ? Math.round(dmgAfterZ * 1.15) : dmgAfterZ;
-  dmgAccum = dmgAfterAscension;
+  dmgAccum = Math.round(dmgAccum * 1.20);
+  dmgRowsHtml += `
+    <div class="dps-table-row indented">
+      <span class="dps-table-lbl">&mdash; Z Stat Multiplier</span>
+      <span class="dps-table-val font-mono"><span class="faint-mult">x1.20</span>${dmgAccum.toLocaleString()}</span>
+    </div>
+  `;
 
-  let combinedPassiveRowHtml = "";
-  if ((breakdown.totalPassiveDamageBonus || 0) > 0) {
-    dmgAccum = Math.round(dmgAccum * (1 + breakdown.totalPassiveDamageBonus));
+  if (hasAscend) {
+    dmgAccum = Math.round(dmgAccum * 1.15);
+    dmgRowsHtml += `
+      <div class="dps-table-row indented">
+        <span class="dps-table-lbl">&mdash; Ascension III Multiplier</span>
+        <span class="dps-table-val font-mono"><span class="faint-mult">x1.15</span>${dmgAccum.toLocaleString()}</span>
+      </div>
+    `;
+  }
+
+  if (totalPassiveDmgBonus > 0) {
+    dmgAccum = Math.round(dmgAccum * (1 + totalPassiveDmgBonus));
     const parts = [];
     if (breakdown.shinigamiActive) parts.push("Shinigami +15%");
     if (breakdown.isReaper) parts.push("Adaptation +40%");
     if (breakdown.isEighthSword && breakdown.berserkState) parts.push("Berserk +20%");
     if (breakdown.isLadyGiant && breakdown.giantForm) parts.push("Giant Form +125%");
-
-    const labelText = parts.length > 0 ? parts.join(" & ") : "Passives";
-    combinedPassiveRowHtml = `
+    const labelText = parts.length > 0 ? parts.join(" + ") : "Passives";
+    dmgRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Global &amp; Passives (${labelText})</span>
-        <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + breakdown.totalPassiveDamageBonus).toFixed(2)}</span>${dmgAccum.toLocaleString()}</span>
-      </div>`;
+        <span class="dps-table-lbl">&mdash; Passives &amp; Buffs (${labelText})</span>
+        <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + totalPassiveDmgBonus).toFixed(2)}</span>${dmgAccum.toLocaleString()}</span>
+      </div>
+    `;
   }
 
+  // ── 2. CRIT AVERAGING MATH & STEP SEQUENCE ──
+  const baseCritChance = rawBase.critChancePercent || 0;
+  const traitCritChance = (breakdown.trait?.critChanceBonus || 0) * 100;
+  const relicCritChance = (breakdown.relicCritChanceAdd || 0) * 100;
+  const passiveCritChance = (breakdown.passiveCritChanceAdd || (breakdown.isReaper ? 0.40 : 0)) * 100;
+  const finalCritChancePercent = Math.min(100, Math.round((breakdown.effCritChance || 0) * 100));
+
+  const baseCritDmg = rawBase.critDamagePercent || 100;
+  const traitCritDmg = (breakdown.trait?.critDamageBonus || 0) * 100;
+  const relicCritDmg = (breakdown.relicCritDamageAdd || 0) * 100;
+  const passiveCritDmg = (breakdown.passiveCritDamageAdd || 0) * 100;
+  const finalCritDmgPercent = Math.round((breakdown.effCritDamage || 1) * 100);
+
+  const critBonusVal = (breakdown.effCritChance || 0) * (breakdown.effCritDamage || 1);
+  const critAvgMult = breakdown.critAvgMult || (1 + critBonusVal);
+
+  let critRowsHtml = `
+    <div class="dps-table-row">
+      <span class="dps-table-lbl">Base Crit Chance</span>
+      <span class="dps-table-val font-mono">${Math.round(baseCritChance)}%</span>
+    </div>
+  `;
+  if (traitCritChance > 0) {
+    critRowsHtml += `
+      <div class="dps-table-row indented">
+        <span class="dps-table-lbl">&mdash; Trait Crit Chance (${breakdown.trait?.name})</span>
+        <span class="dps-table-val font-mono">+${Math.round(traitCritChance)}%</span>
+      </div>
+    `;
+  }
+  if (relicCritChance > 0) {
+    critRowsHtml += `
+      <div class="dps-table-row indented">
+        <span class="dps-table-lbl">&mdash; Relic Crit Chance</span>
+        <span class="dps-table-val font-mono">+${Math.round(relicCritChance)}%</span>
+      </div>
+    `;
+  }
+  if (passiveCritChance > 0) {
+    critRowsHtml += `
+      <div class="dps-table-row indented">
+        <span class="dps-table-lbl">&mdash; Passive Crit Chance</span>
+        <span class="dps-table-val font-mono">+${Math.round(passiveCritChance)}%</span>
+      </div>
+    `;
+  }
+  critRowsHtml += `
+    <div class="dps-table-row primary" style="margin-bottom: 6px;">
+      <span class="dps-table-lbl crit-highlight">Final Crit Rate</span>
+      <span class="dps-table-val font-mono crit-highlight">${finalCritChancePercent}%</span>
+    </div>
+
+    <div class="dps-table-row">
+      <span class="dps-table-lbl">Base Crit DMG</span>
+      <span class="dps-table-val font-mono">${Math.round(baseCritDmg)}%</span>
+    </div>
+  `;
+  if (traitCritDmg > 0) {
+    critRowsHtml += `
+      <div class="dps-table-row indented">
+        <span class="dps-table-lbl">&mdash; Trait Crit DMG (${breakdown.trait?.name})</span>
+        <span class="dps-table-val font-mono">+${Math.round(traitCritDmg)}%</span>
+      </div>
+    `;
+  }
+  if (relicCritDmg > 0) {
+    critRowsHtml += `
+      <div class="dps-table-row indented">
+        <span class="dps-table-lbl">&mdash; Relic Crit DMG</span>
+        <span class="dps-table-val font-mono">+${Math.round(relicCritDmg)}%</span>
+      </div>
+    `;
+  }
+  if (passiveCritDmg > 0) {
+    critRowsHtml += `
+      <div class="dps-table-row indented">
+        <span class="dps-table-lbl">&mdash; Passive Crit DMG</span>
+        <span class="dps-table-val font-mono">+${Math.round(passiveCritDmg)}%</span>
+      </div>
+    `;
+  }
+  critRowsHtml += `
+    <div class="dps-table-row primary" style="margin-bottom: 6px;">
+      <span class="dps-table-lbl crit-highlight">Final Crit DMG</span>
+      <span class="dps-table-val font-mono crit-highlight">${finalCritDmgPercent}%</span>
+    </div>
+
+    <div class="dps-table-row divider"></div>
+    <div class="dps-table-row indented">
+      <span class="dps-table-lbl">&mdash; Crit Bonus (Crit Rate &times; Crit DMG)</span>
+      <span class="dps-table-val font-mono">${finalCritChancePercent}% &times; ${finalCritDmgPercent}% = +${(critBonusVal * 100).toFixed(1)}%</span>
+    </div>
+    <div class="dps-table-row indented">
+      <span class="dps-table-lbl">&mdash; Average Hit Multiplier</span>
+      <span class="dps-table-val font-mono">1.00 + ${critBonusVal.toFixed(2)} = <span class="faint-mult">x${critAvgMult.toFixed(2)}</span></span>
+    </div>
+    <div class="dps-table-row primary">
+      <span class="dps-table-lbl damage-highlight">Average Hit DMG (${Math.round(breakdown.effDamage).toLocaleString()} &times; ${critAvgMult.toFixed(2)})</span>
+      <span class="dps-table-val font-mono damage-highlight">${Math.round(breakdown.avgHitDamage || 0).toLocaleString()}</span>
+    </div>
+  `;
+
+  // ── 3. SPA MATH ACCUMULATOR & STEP SEQUENCE ──
   const baseSpa = rawBase.spa || 1;
   const traitSpaBonus = breakdown.trait?.spaBonus || 0;
   const relicSpaBonus = breakdown.relicSpaMult || 0;
-
   let spaAccum = baseSpa;
 
-  let traitSpaRowHtml = "";
+  let spaRowsHtml = `
+    <div class="dps-table-row">
+      <span class="dps-table-lbl">Base SPA</span>
+      <span class="dps-table-val font-mono">${baseSpa.toFixed(2)}s</span>
+    </div>
+  `;
   if (traitSpaBonus !== 0) {
     spaAccum = spaAccum * (1 + traitSpaBonus);
-    traitSpaRowHtml = `
+    spaRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Trait SPA multiplier</span>
+        <span class="dps-table-lbl">&mdash; Trait SPA Multiplier</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + traitSpaBonus).toFixed(2)}</span>${spaAccum.toFixed(2)}s</span>
-      </div>`;
+      </div>
+    `;
   }
-
-  let relicSpaRowHtml = "";
   if (relicSpaBonus !== 0) {
     spaAccum = spaAccum * (1 + relicSpaBonus);
-    relicSpaRowHtml = `
+    spaRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Relic SPA multiplier</span>
+        <span class="dps-table-lbl">&mdash; Relic SPA Multiplier</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + relicSpaBonus).toFixed(2)}</span>${spaAccum.toFixed(2)}s</span>
-      </div>`;
+      </div>
+    `;
   }
 
-  const spaAfterZ = spaAccum * 0.85;
-  spaAccum = spaAfterZ;
+  spaAccum = spaAccum * 0.85;
+  spaRowsHtml += `
+    <div class="dps-table-row indented">
+      <span class="dps-table-lbl">&mdash; Z Stat SPA Multiplier</span>
+      <span class="dps-table-val font-mono"><span class="faint-mult">x0.85</span>${spaAccum.toFixed(2)}s</span>
+    </div>
+  `;
 
-  let reaperSpaRowHtml = "";
   if (breakdown.isReaper) {
     spaAccum = spaAccum * 0.90;
-    reaperSpaRowHtml = `
+    spaRowsHtml += `
       <div class="dps-table-row indented">
         <span class="dps-table-lbl">&mdash; Critical Tempo Passive (-10% SPA)</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x0.90</span>${spaAccum.toFixed(2)}s</span>
-      </div>`;
+      </div>
+    `;
   } else if (breakdown.isLadyGiant && breakdown.giantForm) {
     spaAccum = spaAccum * 1.25;
-    reaperSpaRowHtml = `
+    spaRowsHtml += `
       <div class="dps-table-row indented">
         <span class="dps-table-lbl">&mdash; Size Control: Giant (+25% SPA time)</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x1.25</span>${spaAccum.toFixed(2)}s</span>
-      </div>`;
+      </div>
+    `;
   } else if (breakdown.isEighthSword && breakdown.berserkState) {
     spaAccum = spaAccum * 0.90;
-    reaperSpaRowHtml = `
+    spaRowsHtml += `
       <div class="dps-table-row indented">
         <span class="dps-table-lbl">&mdash; The Nameless Demon (Berserk -10% SPA)</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x0.90</span>${spaAccum.toFixed(2)}s</span>
-      </div>`;
+      </div>
+    `;
   }
 
+  // ── 4. RANGE MATH ACCUMULATOR & STEP SEQUENCE ──
   const baseRng = rawBase.range || 0;
   const traitRngBonus = breakdown.trait?.rangeBonus || 0;
   const relicRngBonus = breakdown.relicRangeMult || 0;
-
   let rngAccum = baseRng;
 
-  let traitRngRowHtml = "";
+  let rngRowsHtml = `
+    <div class="dps-table-row">
+      <span class="dps-table-lbl">Base Range</span>
+      <span class="dps-table-val font-mono">${baseRng.toFixed(1)}</span>
+    </div>
+  `;
+
   if (traitRngBonus > 0) {
-    rngAccum = baseRng * (1 + traitRngBonus);
-    traitRngRowHtml = `
+    rngAccum = rngAccum * (1 + traitRngBonus);
+    rngRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Trait Range multiplier</span>
+        <span class="dps-table-lbl">&mdash; Trait Range Multiplier</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + traitRngBonus).toFixed(2)}</span>${rngAccum.toFixed(1)}</span>
-      </div>`;
+      </div>
+    `;
   }
 
-  let relicRngRowHtml = "";
   if (relicRngBonus > 0) {
-    relicRngRowHtml = `
+    rngAccum = rngAccum * (1 + relicRngBonus);
+    rngRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Relic Range multiplier</span>
+        <span class="dps-table-lbl">&mdash; Relic Range Multiplier</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + relicRngBonus).toFixed(2)}</span>${rngAccum.toFixed(1)}</span>
-      </div>`;
+      </div>
+    `;
   }
 
-  const rngAfterZ = rngAccum * 1.15;
-  const rngAfterAscension = rngAfterZ * 1.05;
-  let finalRng = rngAfterAscension;
-  let ladyGiantRangeRow = "";
+  rngAccum = rngAccum * 1.15;
+  rngRowsHtml += `
+    <div class="dps-table-row indented">
+      <span class="dps-table-lbl">&mdash; Z Stat Range Multiplier</span>
+      <span class="dps-table-val font-mono"><span class="faint-mult">x1.15</span>${rngAccum.toFixed(1)}</span>
+    </div>
+  `;
+
+  if (hasAscend) {
+    rngAccum = rngAccum * 1.05;
+    rngRowsHtml += `
+      <div class="dps-table-row indented">
+        <span class="dps-table-lbl">&mdash; Ascension III Range Multiplier</span>
+        <span class="dps-table-val font-mono"><span class="faint-mult">x1.05</span>${rngAccum.toFixed(1)}</span>
+      </div>
+    `;
+  }
+
   if (breakdown.isLadyGiant && breakdown.giantForm) {
-    finalRng = finalRng * 1.50;
-    ladyGiantRangeRow = `
+    rngAccum = rngAccum * 1.50;
+    rngRowsHtml += `
       <div class="dps-table-row indented">
         <span class="dps-table-lbl">&mdash; Size Control: Giant (+50% Range)</span>
-        <span class="dps-table-val font-mono"><span class="faint-mult">x1.50</span>${finalRng.toFixed(1)}</span>
-      </div>`;
+        <span class="dps-table-val font-mono"><span class="faint-mult">x1.50</span>${rngAccum.toFixed(1)}</span>
+      </div>
+    `;
   }
 
   const activeFuaBreakdowns = (breakdown.fuaBreakdowns || []).filter(entry => (Number(entry.inputDamage) || 0) > 0 || (Number(entry.dps) || 0) > 0);
@@ -382,33 +553,71 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       const scaleMult = breakdown.effDamage > 0 ? (s.effDamage / breakdown.effDamage) : 0;
       const critMult = s.critAvgMult || breakdown.critAvgMult || 1.0;
 
+      // Summon Hit DMG Breakdown
       let intermediateRowsHtml = "";
       if (s.hasOwnUpgrades) {
         let sDmgAccum = s.baseDamage || 0;
         let tRow = "", rRow = "", zRow = "", aRow = "";
         if (s.traitDmgBonus > 0) {
           sDmgAccum = Math.round(sDmgAccum * (1 + s.traitDmgBonus));
-          tRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Trait DMG multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + s.traitDmgBonus).toFixed(2)}</span>${sDmgAccum.toLocaleString()}</span></div>`;
+          tRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Trait DMG Multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + s.traitDmgBonus).toFixed(2)}</span>${sDmgAccum.toLocaleString()}</span></div>`;
         }
         if (s.relicTotalDmgMult > 0) {
           sDmgAccum = Math.round(sDmgAccum * (1 + s.relicTotalDmgMult));
-          rRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Relic DMG multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + s.relicTotalDmgMult).toFixed(2)}</span>${sDmgAccum.toLocaleString()}</span></div>`;
+          rRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Relic DMG Multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + s.relicTotalDmgMult).toFixed(2)}</span>${sDmgAccum.toLocaleString()}</span></div>`;
         }
         if (s.isZStat) {
           sDmgAccum = Math.round(sDmgAccum * 1.20);
-          zRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Z Stat multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x1.20</span>${sDmgAccum.toLocaleString()}</span></div>`;
+          zRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Z Stat Multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x1.20</span>${sDmgAccum.toLocaleString()}</span></div>`;
         }
         if (s.hasAscend) {
           sDmgAccum = Math.round(sDmgAccum * 1.15);
-          aRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Ascension III multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x1.15</span>${sDmgAccum.toLocaleString()}</span></div>`;
+          aRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Ascension III Multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x1.15</span>${sDmgAccum.toLocaleString()}</span></div>`;
         }
         intermediateRowsHtml = `${tRow}${rRow}${zRow}${aRow}`;
       } else {
         intermediateRowsHtml = `
           <div class="dps-table-row indented">
-            <span class="dps-table-lbl">&mdash; Summon Scale</span>
+            <span class="dps-table-lbl">&mdash; Summon Base Scale</span>
             <span class="dps-table-val font-mono"><span class="faint-mult">&times;${scaleMult.toFixed(2)}</span>${Math.round(s.effDamage || 0).toLocaleString()}</span>
           </div>`;
+      }
+
+      // ── SUMMON SPA MATH BREAKDOWN STEP SEQUENCE ──
+      const sBaseSpa = s.baseSpa || 1;
+      let sSpaAccum = sBaseSpa;
+      let sSpaRowsHtml = `
+        <div class="dps-table-row">
+          <span class="dps-table-lbl">Base Summon SPA</span>
+          <span class="dps-table-val font-mono">${sBaseSpa.toFixed(2)}s</span>
+        </div>
+      `;
+      if ((s.traitSpaBonus || 0) !== 0) {
+        sSpaAccum = sSpaAccum * (1 + s.traitSpaBonus);
+        sSpaRowsHtml += `
+          <div class="dps-table-row indented">
+            <span class="dps-table-lbl">&mdash; Trait SPA Multiplier</span>
+            <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + s.traitSpaBonus).toFixed(2)}</span>${sSpaAccum.toFixed(2)}s</span>
+          </div>
+        `;
+      }
+      if ((s.relicSpaMult || 0) !== 0) {
+        sSpaAccum = sSpaAccum * (1 + s.relicSpaMult);
+        sSpaRowsHtml += `
+          <div class="dps-table-row indented">
+            <span class="dps-table-lbl">&mdash; Relic SPA Multiplier</span>
+            <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + s.relicSpaMult).toFixed(2)}</span>${sSpaAccum.toFixed(2)}s</span>
+          </div>
+        `;
+      }
+      if (s.isZStat) {
+        sSpaAccum = sSpaAccum * 0.85;
+        sSpaRowsHtml += `
+          <div class="dps-table-row indented">
+            <span class="dps-table-lbl">&mdash; Z Stat SPA Multiplier</span>
+            <span class="dps-table-val font-mono"><span class="faint-mult">x0.85</span>${sSpaAccum.toFixed(2)}s</span>
+          </div>
+        `;
       }
 
       const tabBarHtml = hasMultiple ? `
@@ -476,14 +685,25 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           </div>
 
           <div class="dps-section section-summons">
-            <div class="dps-section-hd color-summons">3. Output &amp; Direct DPS</div>
+            <div class="dps-section-hd color-summons">3. Summon SPA Calculations</div>
+            <div class="dps-table">
+              ${sSpaRowsHtml}
+              <div class="dps-table-row primary">
+                <span class="dps-table-lbl summons-highlight">Final Summon SPA</span>
+                <span class="dps-table-val font-mono summons-highlight">${(s.effSpa || 1).toFixed(2)}s</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dps-section section-summons">
+            <div class="dps-section-hd color-summons">4. Direct Output &amp; DPS</div>
             <div class="dps-table">
               <div class="dps-table-row">
                 <span class="dps-table-lbl">Summon Output (${s.activeCount || 1} active)</span>
                 <span class="dps-table-val font-mono">${Math.round(s.avgHitDamage || 0).toLocaleString()} &times; ${s.activeCount || 1} = ${Math.round((s.avgHitDamage || 0) * (s.activeCount || 1)).toLocaleString()}</span>
               </div>
               <div class="dps-table-row indented">
-                <span class="dps-table-lbl">&mdash; Summon SPA</span>
+                <span class="dps-table-lbl">&mdash; Final Summon SPA</span>
                 <span class="dps-table-val font-mono">${(s.effSpa || 1).toFixed(2)}s</span>
               </div>
               <div class="dps-table-row primary">
@@ -495,7 +715,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
 
           ${(s.dotDps || 0) > 0 ? `
           <div class="dps-section section-summons">
-            <div class="dps-section-hd color-summons">4. DoT DPS (${s.dotName || "Bleed"})</div>
+            <div class="dps-section-hd color-summons">5. DoT DPS (${s.dotName || "Bleed"})</div>
             <div class="dps-table">
               <div class="dps-table-row">
                 <span class="dps-table-lbl">Summon Base Hit</span>
@@ -560,23 +780,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       <div class="dps-section section-damage">
         <div class="dps-section-hd">Damage Calculations</div>
         <div class="dps-table">
-          <div class="dps-table-row">
-            <span class="dps-table-lbl">Base scaled level 50 DMG</span>
-            <span class="dps-table-val font-mono">${Math.round(breakdown.scaledBaseDamage || 0).toLocaleString()}</span>
-          </div>
-          ${traitDmgRowHtml}
-          ${relicDmgRowHtml}
-          ${relicArchetypeDmgRowHtml}
-          <div class="dps-table-row indented">
-            <span class="dps-table-lbl">&mdash; Z Stat multiplier</span>
-            <span class="dps-table-val font-mono"><span class="faint-mult">x1.20</span>${Math.round(dmgAfterZ).toLocaleString()}</span>
-          </div>
-          ${hasAscend ? `
-          <div class="dps-table-row indented">
-            <span class="dps-table-lbl">&mdash; Ascension III multiplier</span>
-            <span class="dps-table-val font-mono"><span class="faint-mult">x1.15</span>${Math.round(dmgAfterAscension).toLocaleString()}</span>
-          </div>` : ""}
-          ${combinedPassiveRowHtml}
+          ${dmgRowsHtml}
           <div class="dps-table-row primary">
             <span class="dps-table-lbl damage-highlight">Effective Base Hit DMG</span>
             <span class="dps-table-val font-mono damage-highlight">${Math.round(breakdown.effDamage || 0).toLocaleString()}</span>
@@ -584,20 +788,17 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
         </div>
       </div>
 
+      <div class="dps-section section-crit">
+        <div class="dps-section-hd" style="color: var(--purple-strong);">Crit Averaging &amp; Multipliers</div>
+        <div class="dps-table">
+          ${critRowsHtml}
+        </div>
+      </div>
+
       <div class="dps-section section-spa">
         <div class="dps-section-hd">SPA Calculations</div>
         <div class="dps-table">
-          <div class="dps-table-row">
-            <span class="dps-table-lbl">Base SPA</span>
-            <span class="dps-table-val font-mono">${rawBase.spa || 1}s</span>
-          </div>
-          ${traitSpaRowHtml}
-          ${relicSpaRowHtml}
-          <div class="dps-table-row indented">
-            <span class="dps-table-lbl">&mdash; Z Stat SPA multiplier</span>
-            <span class="dps-table-val font-mono"><span class="faint-mult">x0.85</span>${spaAfterZ.toFixed(2)}s</span>
-          </div>
-          ${reaperSpaRowHtml}
+          ${spaRowsHtml}
           <div class="dps-table-row primary">
             <span class="dps-table-lbl spa-highlight">${breakdown.isDarkMage && breakdown.darkMageMode === "lightning" ? "Disabled in Lightning Mode" : "Final Effective SPA"}</span>
             <span class="dps-table-val font-mono spa-highlight">${breakdown.isDarkMage && breakdown.darkMageMode === "lightning" ? "1.0s Constant" : (breakdown.effSpa || 1).toFixed(2) + "s"}</span>
@@ -608,39 +809,11 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       <div class="dps-section section-range">
         <div class="dps-section-hd">Range Calculations</div>
         <div class="dps-table">
-          <div class="dps-table-row">
-            <span class="dps-table-lbl">Base Range</span>
-            <span class="dps-table-val font-mono">${rawBase.range || 0}</span>
-          </div>
-          ${traitRngRowHtml}
-          ${relicRngRowHtml}
-          <div class="dps-table-row indented">
-            <span class="dps-table-lbl">&mdash; Z Stat Range multiplier</span>
-            <span class="dps-table-val font-mono"><span class="faint-mult">x1.15</span>${rngAfterZ.toFixed(1)}</span>
-          </div>
-          ${hasAscend ? `
-          <div class="dps-table-row indented">
-            <span class="dps-table-lbl">&mdash; Ascension III Range multiplier</span>
-            <span class="dps-table-val font-mono"><span class="faint-mult">x1.05</span>${rngAfterAscension.toFixed(1)}</span>
-          </div>` : ""}
-          ${ladyGiantRangeRow}
+          ${rngRowsHtml}
           <div class="dps-table-row primary">
             <span class="dps-table-lbl range-highlight">Final Effective Range</span>
             <span class="dps-table-val font-mono range-highlight">${(breakdown.effRange || 0).toFixed(1)}</span>
           </div>
-        </div>
-      </div>
-
-      <div class="dps-section section-damage">
-        <div class="dps-section-hd" style="color: var(--purple-strong);">Crit Averaging</div>
-        <div class="dps-table">
-          <div class="dps-table-row"><span class="dps-table-lbl">Base Rate / Mult</span><span class="dps-table-val font-mono">${Math.round(breakdown.base?.critChancePercent || 0)}% / ${Math.round(breakdown.base?.critDamagePercent || 100)}%</span></div>
-          ${breakdown.isReaper ? `
-          <div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Adaptation Passive (+40% Crit Rate)</span><span class="dps-table-val font-mono">+40% Rate</span></div>` : ""}
-          <div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Trait Crit Rate / DMG</span><span class="dps-table-val font-mono">+${Math.round((breakdown.trait?.critChanceBonus || 0) * 100)}% / +${Math.round((breakdown.trait?.critDamageBonus || 0) * 100)}%</span></div>
-          <div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Relic Crit Rate / DMG</span><span class="dps-table-val font-mono">+${Math.round((breakdown.relicCritChanceAdd || 0) * 100)}% / +${Math.round((breakdown.relicCritDamageAdd || 0) * 100)}%</span></div>
-          <div class="dps-table-row"><span class="dps-table-lbl">Final Rate / Mult</span><span class="dps-table-val font-mono">${Math.round((breakdown.effCritChance || 0) * 100)}% / ${Math.round((breakdown.effCritDamage || 1) * 100)}% <span class="faint-mult">&rarr; x${(breakdown.critAvgMult || 1).toFixed(2)} avg</span></span></div>
-          <div class="dps-table-row primary"><span class="dps-table-lbl damage-highlight">Avg Hit DMG</span><span class="dps-table-val font-mono damage-highlight">${Math.round(breakdown.avgHitDamage || 0).toLocaleString()}</span></div>
         </div>
       </div>
 

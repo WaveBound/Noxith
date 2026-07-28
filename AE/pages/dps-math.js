@@ -319,7 +319,6 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     });
   });
 
-  // Strict check: Shinigami Passive ONLY applies if Shinigami Sword is equipped in this loadout
   const hasShinigami = relics.some(r => r.name === "Shinigami Sword");
   const shinigamiActive = hasShinigami && !!unit.simulateShinigamiPassive;
 
@@ -460,7 +459,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     } else if (darkMageMode === "both") {
       unitDirectDPS = avgHitDamage / effSpa;
       unitDoTDPS = lightningDpsVal;
-    } else { // "lightning"
+    } else {
       unitDirectDPS = 0;
       unitDoTDPS = lightningDpsVal;
     }
@@ -678,6 +677,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
         hasAscend,
         effDamage: sEffDmg,
         baseSpa: baseSummonSpa,
+        traitSpaBonus: trait.spaBonus || 0,
+        relicSpaMult,
         effSpa: sEffSpa,
         critAvgMult,
         effCritChance,

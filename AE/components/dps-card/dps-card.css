@@ -1185,6 +1185,15 @@
   outline: none;
 }
 
+.dps-relic-passive-glow {
+  background: linear-gradient(90deg, #22d3ee, #38bdf8, #0ea5e9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  font-weight: 800;
+}
+
 .dps-passive-toggle-arrow {
   width: 10px !important;
   height: 10px !important;
