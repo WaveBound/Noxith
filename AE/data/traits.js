@@ -1,5 +1,5 @@
 // Set to true when you want to publish the Traits tab
-export const IS_TRAITS_PUBLISHED = false;
+export const IS_TRAITS_PUBLISHED = true;
 
 export const traits = [
   {
