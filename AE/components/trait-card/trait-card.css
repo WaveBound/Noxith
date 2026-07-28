@@ -1,8 +1,8 @@
-/* ── Traits Grid Layout ─────────────────────────────────────────────────── */
+/* ── Traits Grid Layout (Compact 180px min-width) ───────────────────────── */
 .traits-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
-  gap: 16px !important;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+  gap: 12px !important;
   width: 100% !important;
 }
 
@@ -11,29 +11,29 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 14px;
 }
 
 .traits-rarity-chips {
   display: flex;
-  gap: 4px;
+  gap: 3px;
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid var(--border-strong, #24242b);
-  padding: 4px;
-  border-radius: 8px;
+  padding: 3px;
+  border-radius: 6px;
 }
 
 .trait-filter-btn {
-  padding: 5px 14px;
-  border-radius: 6px;
-  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 10.5px;
   font-weight: 700;
   color: var(--text-secondary, #a1a1aa);
   border: 1px solid transparent;
   background: transparent;
   cursor: pointer;
-  transition: all 140ms ease;
+  transition: all 120ms ease;
 }
 
 .trait-filter-btn:hover {
@@ -47,7 +47,7 @@
   border-color: rgba(168, 85, 247, 0.45);
 }
 
-/* ── Trait Card Container ────────────────────────────────────────────────── */
+/* ── Compact Trait Card Container ───────────────────────────────────────── */
 .trait-card {
   display: flex !important;
   flex-direction: column !important;
@@ -55,33 +55,33 @@
   overflow: hidden !important;
   padding: 0 !important;
   cursor: pointer !important;
-  border-radius: 12px !important;
-  background: linear-gradient(165deg, #0e0e15 0%, #06060a 100%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  border-radius: 8px !important;
+  background: linear-gradient(165deg, #0d0d14 0%, #050508 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
   position: relative !important;
-  transition: transform 180ms var(--ease), border-color 180ms var(--ease) !important;
+  transition: transform 140ms var(--ease), border-color 140ms var(--ease) !important;
   box-shadow: none !important;
 }
 
 .trait-card:hover {
-  transform: translateY(-4px) !important;
-  border-color: rgba(168, 85, 247, 0.5) !important;
+  transform: translateY(-2px) !important;
+  border-color: rgba(168, 85, 247, 0.45) !important;
 }
 
-/* ── Media Emblem Banner ─────────────────────────────────────────────────── */
+/* ── Compact Media Emblem Banner ────────────────────────────────────────── */
 .trait-card-media {
-  height: 130px !important;
-  background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.12) 0%, rgba(10, 10, 16, 0.95) 80%) !important;
+  height: 80px !important;
+  background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.12) 0%, rgba(8, 8, 12, 0.95) 80%) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   position: relative !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
 .trait-card-icon-wrap {
-  width: 64px !important;
-  height: 64px !important;
+  width: 40px !important;
+  height: 40px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -92,88 +92,87 @@
   width: 100% !important;
   height: 100% !important;
   object-fit: contain !important;
-  filter: drop-shadow(0 4px 14px rgba(168, 85, 247, 0.35)) !important;
-  transition: transform 200ms var(--ease), filter 200ms var(--ease) !important;
+  filter: drop-shadow(0 2px 8px rgba(168, 85, 247, 0.35)) !important;
+  transition: transform 160ms var(--ease) !important;
 }
 
 .trait-card:hover .trait-card-icon-wrap img {
-  transform: scale(1.12) rotate(2deg) !important;
-  filter: drop-shadow(0 6px 18px rgba(168, 85, 247, 0.55)) !important;
+  transform: scale(1.1) !important;
 }
 
-/* ── Top Badges ─────────────────────────────────────────────────────────── */
+/* ── Badges ─────────────────────────────────────────────────────────────── */
 .trait-card-top-left {
   position: absolute !important;
-  top: 8px !important;
-  left: 8px !important;
+  top: 5px !important;
+  left: 5px !important;
   z-index: 2 !important;
 }
 
 .trait-card-top-right {
   position: absolute !important;
-  top: 8px !important;
-  right: 8px !important;
+  top: 5px !important;
+  right: 5px !important;
   z-index: 2 !important;
 }
 
 .trait-card-rarity-chip {
   display: inline-flex !important;
   align-items: center !important;
-  font-size: 8.5px !important;
+  font-size: 7.5px !important;
   font-weight: 850 !important;
-  padding: 2.5px 8px !important;
-  border-radius: 5px !important;
+  padding: 1.5px 5px !important;
+  border-radius: 4px !important;
   background: rgba(168, 85, 247, 0.18) !important;
-  border: 1px solid rgba(168, 85, 247, 0.45) !important;
+  border: 1px solid rgba(168, 85, 247, 0.4) !important;
   color: #d8b4fe !important;
-  backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(6px) !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
+  letter-spacing: 0.04em !important;
 }
 
 .trait-card-rate-chip {
   display: inline-flex !important;
   align-items: center !important;
   font-family: var(--font-mono) !important;
-  font-size: 8.5px !important;
+  font-size: 7.5px !important;
   font-weight: 800 !important;
-  padding: 2.5px 8px !important;
-  border-radius: 5px !important;
-  background: rgba(0, 0, 0, 0.75) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: #f1f5f9 !important;
-  backdrop-filter: blur(8px) !important;
+  padding: 1.5px 5px !important;
+  border-radius: 4px !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #e2e8f0 !important;
+  backdrop-filter: blur(6px) !important;
 }
 
 /* ── Card Content Body ─────────────────────────────────────────────────── */
 .trait-card-body {
-  padding: 12px 14px 14px !important;
+  padding: 8px 10px 10px !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 10px !important;
-  background: #060609 !important;
+  gap: 6px !important;
+  background: #050508 !important;
 }
 
 .trait-card-header {
   display: flex !important;
   flex-direction: column !important;
-  gap: 2px !important;
+  gap: 1px !important;
 }
 
 .trait-card-name {
   font-family: var(--font-display) !important;
-  font-size: 15px !important;
-  font-weight: 850 !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
   color: #ffffff !important;
   margin: 0 !important;
-  line-height: 1.2 !important;
+  line-height: 1.15 !important;
   letter-spacing: -0.01em !important;
 }
 
 .trait-card-tag {
-  font-size: 10.5px !important;
+  font-size: 9px !important;
   font-weight: 600 !important;
-  color: #a5b4fc !important;
+  color: #818cf8 !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -183,7 +182,7 @@
 .trait-card-stats-grid {
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
-  gap: 6px !important;
+  gap: 4px !important;
   width: 100% !important;
 }
 
@@ -191,23 +190,23 @@
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  padding: 5px 8px !important;
-  border-radius: 6px !important;
+  padding: 3px 5px !important;
+  border-radius: 4px !important;
   background: rgba(0, 0, 0, 0.35) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.04) !important;
 }
 
 .trait-stat-label {
-  font-size: 8.5px !important;
+  font-size: 7.5px !important;
   font-weight: 850 !important;
-  letter-spacing: 0.05em !important;
+  letter-spacing: 0.04em !important;
   text-transform: uppercase !important;
 }
 
 /* Stat color theme highlights */
 .trait-stat-pill.stat-dmg {
-  border-color: rgba(239, 68, 68, 0.22) !important;
-  background: rgba(239, 68, 68, 0.06) !important;
+  border-color: rgba(239, 68, 68, 0.2) !important;
+  background: rgba(239, 68, 68, 0.05) !important;
 }
 
 .trait-stat-pill.stat-dmg .trait-stat-label {
@@ -215,8 +214,8 @@
 }
 
 .trait-stat-pill.stat-spa {
-  border-color: rgba(56, 189, 248, 0.22) !important;
-  background: rgba(56, 189, 248, 0.06) !important;
+  border-color: rgba(56, 189, 248, 0.2) !important;
+  background: rgba(56, 189, 248, 0.05) !important;
 }
 
 .trait-stat-pill.stat-spa .trait-stat-label {
@@ -224,8 +223,8 @@
 }
 
 .trait-stat-pill.stat-rng {
-  border-color: rgba(251, 191, 36, 0.22) !important;
-  background: rgba(251, 191, 36, 0.06) !important;
+  border-color: rgba(251, 191, 36, 0.2) !important;
+  background: rgba(251, 191, 36, 0.05) !important;
 }
 
 .trait-stat-pill.stat-rng .trait-stat-label {
@@ -233,8 +232,8 @@
 }
 
 .trait-stat-pill.stat-crit {
-  border-color: rgba(168, 85, 247, 0.22) !important;
-  background: rgba(168, 85, 247, 0.06) !important;
+  border-color: rgba(168, 85, 247, 0.2) !important;
+  background: rgba(168, 85, 247, 0.05) !important;
 }
 
 .trait-stat-pill.stat-crit .trait-stat-label {
@@ -242,8 +241,8 @@
 }
 
 .trait-stat-pill.stat-dot {
-  border-color: rgba(16, 185, 129, 0.22) !important;
-  background: rgba(16, 185, 129, 0.06) !important;
+  border-color: rgba(16, 185, 129, 0.2) !important;
+  background: rgba(16, 185, 129, 0.05) !important;
 }
 
 .trait-stat-pill.stat-dot .trait-stat-label {
@@ -251,8 +250,8 @@
 }
 
 .trait-stat-pill.stat-place {
-  border-color: rgba(45, 212, 191, 0.22) !important;
-  background: rgba(45, 212, 191, 0.06) !important;
+  border-color: rgba(45, 212, 191, 0.2) !important;
+  background: rgba(45, 212, 191, 0.05) !important;
 }
 
 .trait-stat-pill.stat-place .trait-stat-label {
@@ -261,44 +260,44 @@
 
 .trait-stat-value {
   font-family: var(--font-mono) !important;
-  font-size: 11px !important;
+  font-size: 9.5px !important;
   font-weight: 800 !important;
   color: #ffffff !important;
 }
 
 .traits-empty-state {
-  padding: 40px;
+  padding: 30px;
   text-align: center;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 /* ── Trait Detail Modal ──────────────────────────────────────────────────── */
 .trait-detail-modal {
-  width: min(520px, 92vw);
+  width: min(500px, 92vw);
   background: #08080d !important;
-  border: 1px solid rgba(168, 85, 247, 0.35) !important;
-  border-radius: 12px !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+  border-radius: 10px !important;
   box-shadow: none !important;
   overflow: hidden;
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   animation: dps-modal-in 140ms ease-out;
 }
 
 .trait-modal-header {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   position: relative;
 }
 
 .trait-modal-icon-box {
-  width: 52px;
-  height: 52px;
-  border-radius: 10px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
   background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.15) 0%, rgba(10, 10, 16, 0.95) 80%);
   border: 1px solid rgba(168, 85, 247, 0.3);
   display: flex;
@@ -308,16 +307,16 @@
 }
 
 .trait-modal-icon-box img {
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
-  filter: drop-shadow(0 2px 8px rgba(168, 85, 247, 0.4));
+  filter: drop-shadow(0 2px 6px rgba(168, 85, 247, 0.4));
 }
 
 .trait-modal-meta {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   flex: 1;
   min-width: 0;
 }
@@ -325,41 +324,41 @@
 .trait-modal-title-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .trait-modal-title-row h2 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 850;
   color: #ffffff;
   margin: 0;
 }
 
 .trait-modal-rarity-badge {
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 850;
   text-transform: uppercase;
-  padding: 2.5px 8px;
+  padding: 2px 6px;
   border-radius: 4px;
   background: rgba(168, 85, 247, 0.2);
-  border: 1px solid rgba(168, 85, 247, 0.45);
+  border: 1px solid rgba(168, 85, 247, 0.4);
   color: #c084fc;
 }
 
 .trait-modal-sub {
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--muted);
 }
 
 .trait-modal-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .trait-modal-desc-text {
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 11.5px;
+  line-height: 1.45;
   color: var(--text-secondary);
   margin: 0;
 }
@@ -367,28 +366,28 @@
 .trait-modal-stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .trait-modal-stat-pill {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 10px;
-  border-radius: 6px;
+  padding: 5px 8px;
+  border-radius: 5px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .trait-modal-stat-lbl {
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .trait-modal-stat-val {
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: 10.5px;
   font-weight: 800;
   color: #ffffff;
 }
@@ -396,17 +395,17 @@
 .trait-synergy-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .trait-synergy-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 5px;
+  font-size: 10.5px;
   font-weight: 700;
-  padding: 5px 10px 5px 6px;
-  border-radius: 6px;
+  padding: 4px 8px 4px 5px;
+  border-radius: 5px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: #fafafa;
@@ -418,17 +417,16 @@
   background: rgba(99, 102, 241, 0.18);
   border-color: rgba(99, 102, 241, 0.4);
   color: #ffffff;
-  transform: translateY(-1px);
 }
 
 .trait-synergy-img {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
   object-fit: cover;
 }
 
 .trait-synergy-none {
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--muted);
 }
