@@ -1,6 +1,7 @@
 import { traits, IS_TRAITS_PUBLISHED } from "../data/traits.js";
 import { TraitCard } from "../components/trait-card/trait-card.js";
 import { renderGrid } from "../components/grid/grid.js";
+import { ComingSoon } from "../components/coming-soon/coming-soon.js";
 
 export async function TraitsPage(filter = "") {
   const page = document.createElement("div");
@@ -8,17 +9,19 @@ export async function TraitsPage(filter = "") {
 
   if (!IS_TRAITS_PUBLISHED) {
     page.innerHTML = `
-      <div class="traits-locked-container glass-card">
-        <div class="traits-locked-icon">
-          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.8">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
+      <div class="page-title-row">
+        <div>
+          <h1>Traits</h1>
+          <div class="page-subtitle">Database under construction</div>
         </div>
-        <h1 class="traits-locked-title">Traits Database Under Construction</h1>
-        <p class="traits-locked-sub">The Trait Database is currently unpublished. Set <code>IS_TRAITS_PUBLISHED = true</code> in <code>data/traits.js</code> to publish it.</p>
       </div>
     `;
+    page.appendChild(
+      ComingSoon({
+        title: "Not Added Yet",
+        message: "The Traits database is currently under construction and will be available soon."
+      })
+    );
     return page;
   }
 
