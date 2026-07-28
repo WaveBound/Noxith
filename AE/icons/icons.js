@@ -264,7 +264,7 @@ if (typeof window !== "undefined") {
         if (target.classList.contains("p-black-magic")) return toAbsoluteUrl("icons/info/BlackMagicInfo.png");
         if (target.classList.contains("p-illusion")) return toAbsoluteUrl("icons/info/IllusionInfo.png");
         if (target.classList.contains("p-mana-burn")) return toAbsoluteUrl("icons/info/ManaBurnInfo.png");
-        if (target.classList.contains("p-bleed")) return toAbsoluteUrl("icons/info/BleedInfo.png");
+        if (target.classList.contains("p-bleed")) return toAbsoluteUrl("icons/info/bleedinfo.png");
         if (target.classList.contains("p-ent")) return toAbsoluteUrl("icons/info/batinfo.png");
         if (target.classList.contains("p-fua")) return toAbsoluteUrl("icons/info/followupinfo.png");
         if (target.classList.contains("p-stun")) return toAbsoluteUrl("icons/info/StunInfo.png");
