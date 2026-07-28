@@ -449,6 +449,8 @@ img {
 .floating-status-tooltip {
   box-shadow: none !important;
   filter: none !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
 }
 
 @media (min-width: 2500px) {

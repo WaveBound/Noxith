@@ -251,29 +251,7 @@ export function formatPassiveText(text) {
 }
 
 if (typeof window !== "undefined") {
-    let activeTooltipTarget = null;
     let floatingTooltip = null;
-
-    window.addEventListener("mouseover", (e) => {
-        const target = e.target.closest(".p-kw, .p-ent");
-        if (target) {
-            activeTooltipTarget = target;
-            updateFloatingTooltip(e);
-        }
-    }, true);
-
-    window.addEventListener("mousemove", (e) => {
-        if (activeTooltipTarget) {
-            updateFloatingTooltip(e);
-        }
-    }, true);
-
-    window.addEventListener("mouseout", (e) => {
-        if (activeTooltipTarget && !activeTooltipTarget.contains(e.relatedTarget)) {
-            activeTooltipTarget = null;
-            hideFloatingTooltip();
-        }
-    }, true);
 
     function getTooltipImage(target) {
         if (!target) return "";
@@ -305,7 +283,13 @@ if (typeof window !== "undefined") {
     }
 
     function updateFloatingTooltip(e) {
-        const src = activeTooltipTarget ? getTooltipImage(activeTooltipTarget) : "";
+        const kwTarget = e.target ? e.target.closest(".p-kw, .p-ent") : null;
+        if (!kwTarget) {
+            hideFloatingTooltip();
+            return;
+        }
+
+        const src = getTooltipImage(kwTarget);
         if (!src) {
             hideFloatingTooltip();
             return;
@@ -317,42 +301,50 @@ if (typeof window !== "undefined") {
             floatingTooltip.alt = "";
             floatingTooltip.style.position = "fixed";
             floatingTooltip.style.pointerEvents = "none";
-            floatingTooltip.style.zIndex = "100000";
+            floatingTooltip.style.zIndex = "1000000";
             floatingTooltip.style.boxShadow = "none";
-            floatingTooltip.style.borderRadius = "8px";
+            floatingTooltip.style.borderRadius = "12px";
+            floatingTooltip.style.width = "280px";
+            floatingTooltip.style.height = "140px";
             floatingTooltip.style.objectFit = "contain";
+            floatingTooltip.style.transform = "none";
             document.body.appendChild(floatingTooltip);
         }
 
-        floatingTooltip.src = src;
+        if (floatingTooltip.src !== src) {
+            floatingTooltip.src = src;
+        }
         floatingTooltip.style.display = "block";
 
-        const pageZoom = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+        const targetRect = kwTarget.getBoundingClientRect();
+        const tooltipWidth = 280;
+        const tooltipHeight = 140;
 
-        const width = 280;
-        const height = 140;
+        let desiredX = targetRect.left;
+        let desiredY = targetRect.bottom + 6;
 
-        const offsetX = 12;
-        const offsetY = 12;
-
-        let targetX = (e.clientX + offsetX) / pageZoom;
-        let targetY = (e.clientY + offsetY) / pageZoom;
-
-        if (e.clientX + offsetX + width * pageZoom > window.innerWidth - 10) {
-            targetX = (e.clientX - (width * pageZoom) - 12) / pageZoom;
+        if (desiredX + tooltipWidth > window.innerWidth - 12) {
+            desiredX = window.innerWidth - tooltipWidth - 12;
         }
 
-        if (e.clientY + offsetY + height * pageZoom > window.innerHeight - 10) {
-            targetY = (e.clientY - (height * pageZoom) - 12) / pageZoom;
+        if (desiredY + tooltipHeight > window.innerHeight - 12) {
+            desiredY = targetRect.top - tooltipHeight - 6;
         }
 
-        targetX = Math.max(5, targetX);
-        targetY = Math.max(5, targetY);
+        desiredX = Math.max(8, desiredX);
+        desiredY = Math.max(8, desiredY);
 
-        floatingTooltip.style.width = `${width}px`;
-        floatingTooltip.style.height = `${height}px`;
-        floatingTooltip.style.left = `${targetX}px`;
-        floatingTooltip.style.top = `${targetY}px`;
+        floatingTooltip.style.left = `${desiredX}px`;
+        floatingTooltip.style.top = `${desiredY}px`;
+
+        const actualRect = floatingTooltip.getBoundingClientRect();
+        const errorX = actualRect.left - desiredX;
+        const errorY = actualRect.top - desiredY;
+
+        if (Math.abs(errorX) > 0.5 || Math.abs(errorY) > 0.5) {
+            floatingTooltip.style.left = `${desiredX - errorX}px`;
+            floatingTooltip.style.top = `${desiredY - errorY}px`;
+        }
     }
 
     function hideFloatingTooltip() {
@@ -360,4 +352,7 @@ if (typeof window !== "undefined") {
             floatingTooltip.style.display = "none";
         }
     }
+
+    window.addEventListener("mousemove", updateFloatingTooltip, true);
+    window.addEventListener("scroll", updateFloatingTooltip, true);
 }
