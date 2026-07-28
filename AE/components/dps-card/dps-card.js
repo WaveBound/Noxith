@@ -170,8 +170,10 @@ function buildDetailedRelicCard(name, label, isUnitEquip) {
     passiveHtml = `
       <div class="dps-relic-passive-box collapsed">
         <button type="button" class="dps-passive-toggle-btn">
-          <span class="dps-relic-passive-glow">Passive:</span> 
-          <span class="dps-relic-passive-name">${def.passive.name}</span>
+          <div class="dps-passive-btn-header">
+            <span class="dps-relic-passive-glow">Passive:</span> 
+            <span class="dps-relic-passive-name">${def.passive.name}</span>
+          </div>
           <svg class="dps-passive-toggle-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="dps-relic-passive-desc hidden">${formattedEffect}</div>
@@ -872,83 +874,155 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
         </div>
       </div>` : ""}
 
-      ${breakdown.isCrow && activeFuaBreakdowns.length > 0 ? `
+      ${activeFuaBreakdowns.length > 0 ? `
       <div class="dps-section section-damage">
-        <div class="dps-section-hd" style="color: #e71a10;">Status Effect Calculations (Illusion)</div>
+        <div class="dps-section-hd" style="color: ${breakdown.isCrow ? '#e71a10' : 'var(--purple-strong)'};">
+          ${breakdown.isCrow ? 'Status Effect Calculations (Illusion)' : 'Follow-Up Attack Calculations (FUA)'}
+        </div>
         <div class="dps-table">
           ${activeFuaBreakdowns.map(entry => {
-    const storingAttacks = entry.storingAttacks || Math.ceil(12 / (breakdown.effSpa || 1));
-    const directStoredDmg = entry.directStoredDmg || (storingAttacks * (breakdown.avgHitDamage || 0));
-    const dotStoredDmg = entry.dotStoredDmg || blackFireDotDmg;
-    const totalStoredDmg = entry.inputDamage || (directStoredDmg + dotStoredDmg);
-    const effectiveness = entry.illusionEffectiveness || 0.25;
-    const baseExplosion = entry.baseExplosionDamage || (totalStoredDmg * effectiveness);
-    const singleExplosionWithCrit = entry.explosionDamageWithCrit || (baseExplosion * (breakdown.critAvgMult || 1));
-    const enemiesHit = entry.enemiesHit || breakdown.crowEnemiesHit || 1;
-    const totalExplosionPerUnit = singleExplosionWithCrit * enemiesHit;
-    const fieldExplosionDmg = totalExplosionPerUnit * placementCount;
-    const cycleTime = entry.cycleTimeSeconds || (Math.ceil(22 / (breakdown.effSpa || 1)) * (breakdown.effSpa || 1));
-    const singleDps = entry.dps || (totalExplosionPerUnit / cycleTime);
-    const fieldDps = singleDps * placementCount;
+    const effSpaVal = breakdown.effSpa || 1;
+    const critMult = entry.critAvgMult || breakdown.critAvgMult || 1;
+
+    if (breakdown.isCrow || entry.isStatusEffect) {
+      const storingAttacks = entry.storingAttacks || Math.ceil(12 / effSpaVal);
+      const directStoredDmg = entry.directStoredDmg || (storingAttacks * (breakdown.avgHitDamage || 0));
+      const dotStoredDmg = entry.dotStoredDmg || blackFireDotDmg;
+      const totalStoredDmg = entry.inputDamage || (directStoredDmg + dotStoredDmg);
+      const effectiveness = entry.illusionEffectiveness || 0.25;
+      const baseExplosion = entry.baseExplosionDamage || (totalStoredDmg * effectiveness);
+      const singleExplosionWithCrit = entry.explosionDamageWithCrit || (baseExplosion * critMult);
+      const enemiesHit = entry.enemiesHit || breakdown.crowEnemiesHit || 1;
+      const totalExplosionPerUnit = singleExplosionWithCrit * enemiesHit;
+      const fieldExplosionDmg = totalExplosionPerUnit * placementCount;
+      const cycleTime = entry.cycleTimeSeconds || (Math.ceil(22 / effSpaVal) * effSpaVal);
+      const singleDps = entry.dps || (totalExplosionPerUnit / cycleTime);
+      const fieldDps = singleDps * placementCount;
+
+      return `
+                <div class="dps-table-row">
+                  <span class="dps-table-lbl">Illusion Storing Window / SPA</span>
+                  <span class="dps-table-val font-mono">12.0s Storing / ${effSpaVal.toFixed(2)}s SPA</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Attacks in 12s Storing Window</span>
+                  <span class="dps-table-val font-mono">roundup(12 / ${effSpaVal.toFixed(2)}s) = ${storingAttacks} attacks</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Stored Direct DMG per unit (incl. Crits)</span>
+                  <span class="dps-table-val font-mono">${storingAttacks} &times; ${Math.round(breakdown.avgHitDamage || 0).toLocaleString()} = ${Math.round(directStoredDmg).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Stored Black Fire DoT DMG per unit</span>
+                  <span class="dps-table-val font-mono">${Math.round(dotStoredDmg).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Total Stored DMG per unit</span>
+                  <span class="dps-table-val font-mono">${Math.round(totalStoredDmg).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Base Explosion Conversion (${Math.round(effectiveness * 100)}%)</span>
+                  <span class="dps-table-val font-mono">${Math.round(baseExplosion).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Crit Multiplier</span>
+                  <span class="dps-table-val font-mono"><span class="faint-mult">x${critMult.toFixed(2)}</span>${Math.round(singleExplosionWithCrit).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Target Scaling (${enemiesHit} enemies hit)</span>
+                  <span class="dps-table-val font-mono">${Math.round(singleExplosionWithCrit).toLocaleString()} &times; ${enemiesHit} = ${Math.round(totalExplosionPerUnit).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Total Field Explosion (${placementCount} placements)</span>
+                  <span class="dps-table-val font-mono">${Math.round(totalExplosionPerUnit).toLocaleString()} &times; ${placementCount} = ${Math.round(fieldExplosionDmg).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Total Cycle Window</span>
+                  <span class="dps-table-val font-mono">roundup(22 / ${effSpaVal.toFixed(2)}s) &times; ${effSpaVal.toFixed(2)}s = ${cycleTime.toFixed(1)}s</span>
+                </div>
+                <div class="dps-table-row primary" style="margin-bottom: 8px;">
+                  <span class="dps-table-lbl damage-highlight">Illusion Field DPS (${Math.round(fieldExplosionDmg).toLocaleString()} &divide; ${cycleTime.toFixed(1)}s)</span>
+                  <span class="dps-table-val font-mono damage-highlight">+${formatFullDPS(fieldDps)} DPS</span>
+                </div>
+              `;
+    }
+
+    if (entry.isElfSpell) {
+      const spellInterval = entry.cycleInterval || (7 * effSpaVal);
+      return `
+                <div class="dps-table-row">
+                  <span class="dps-table-lbl">${formatPassiveText(entry.name)}</span>
+                  <span class="dps-table-val font-mono">${Math.round(entry.averageFollowUpHit).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Unit Effective Base DMG</span>
+                  <span class="dps-table-val font-mono">${Math.round(entry.inputDamage).toLocaleString()}</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Spell Scaling Multiplier</span>
+                  <span class="dps-table-val font-mono"><span class="faint-mult">x${entry.finalMult.toFixed(2)}</span>${Math.round(entry.effectiveFollowUpDamage).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Crit Multiplier</span>
+                  <span class="dps-table-val font-mono"><span class="faint-mult">x${critMult.toFixed(2)}</span>${Math.round(entry.averageFollowUpHit).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Spell Cycle SPA (7 attacks)</span>
+                  <span class="dps-table-val font-mono">7 &times; ${effSpaVal.toFixed(2)}s = ${spellInterval.toFixed(2)}s</span>
+                </div>
+                <div class="dps-table-row primary" style="margin-bottom: 8px;">
+                  <span class="dps-table-lbl damage-highlight">${formatPassiveText(entry.name)} DPS</span>
+                  <span class="dps-table-val font-mono damage-highlight">+${formatFullDPS(entry.dps)} DPS</span>
+                </div>
+              `;
+    }
+
+    if (entry.isMimicryFua) {
+      const fuaInterval = entry.intervalSpa || (3 * effSpaVal);
+      return `
+                <div class="dps-table-row">
+                  <span class="dps-table-lbl">${entry.name}</span>
+                  <span class="dps-table-val font-mono">${Math.round(entry.averageFollowUpHit).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Copied Unit DMG</span>
+                  <span class="dps-table-val font-mono">${Math.round(entry.inputDamage).toLocaleString()}</span>
+                </div>
+                ${(entry.relicArchetypeDamageMult || 0) > 0 ? `
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Relic Archetype DMG Multiplier</span>
+                  <span class="dps-table-val font-mono"><span class="faint-mult">x${entry.fuaDamageScale.toFixed(2)}</span>${Math.round(entry.effectiveFollowUpDamage).toLocaleString()} DMG</span>
+                </div>` : ""}
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; + Unit Base Hit DMG</span>
+                  <span class="dps-table-val font-mono">+${Math.round(entry.effDamage).toLocaleString()} = ${Math.round(entry.combinedHitDamage).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Crit Multiplier</span>
+                  <span class="dps-table-val font-mono"><span class="faint-mult">x${critMult.toFixed(2)}</span>${Math.round(entry.averageFollowUpHit).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">&mdash; Mimicry SPA Interval (3 attacks)</span>
+                  <span class="dps-table-val font-mono">3 &times; ${effSpaVal.toFixed(2)}s = ${fuaInterval.toFixed(2)}s</span>
+                </div>
+                <div class="dps-table-row primary" style="margin-bottom: 8px;">
+                  <span class="dps-table-lbl damage-highlight">${entry.name} DPS</span>
+                  <span class="dps-table-val font-mono damage-highlight">+${formatFullDPS(entry.dps)} DPS</span>
+                </div>
+              `;
+    }
 
     return `
-            <div class="dps-table-row">
-              <span class="dps-table-lbl">Illusion Storing Window / SPA</span>
-              <span class="dps-table-val font-mono">12.0s Storing / ${(breakdown.effSpa || 1).toFixed(2)}s SPA</span>
-            </div>
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Attacks in 12s Storing Window</span>
-              <span class="dps-table-val font-mono">roundup(12 / ${(breakdown.effSpa || 1).toFixed(2)}s) = ${storingAttacks} attacks</span>
-            </div>
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Stored Direct DMG per unit (incl. Crits)</span>
-              <span class="dps-table-val font-mono">${storingAttacks} &times; ${Math.round(breakdown.avgHitDamage || 0).toLocaleString()} = ${Math.round(directStoredDmg).toLocaleString()} DMG</span>
-            </div>
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Stored Black Fire DoT DMG per unit</span>
-              <span class="dps-table-val font-mono">${Math.round(dotStoredDmg).toLocaleString()} DMG</span>
-            </div>
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Total Stored DMG per unit</span>
-              <span class="dps-table-val font-mono">${Math.round(totalStoredDmg).toLocaleString()} DMG</span>
-            </div>
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Base Explosion (${Math.round(effectiveness * 100)}%) &times; Crit Mult</span>
-              <span class="dps-table-val font-mono">${Math.round(baseExplosion).toLocaleString()} &times; ${(breakdown.critAvgMult || 1).toFixed(2)} = ${Math.round(singleExplosionWithCrit).toLocaleString()} DMG</span>
-            </div>
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Target Scaling (${enemiesHit} enemies hit)</span>
-              <span class="dps-table-val font-mono">${Math.round(singleExplosionWithCrit).toLocaleString()} &times; ${enemiesHit} = ${Math.round(totalExplosionPerUnit).toLocaleString()} DMG</span>
-            </div>
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Total Field Explosion (${placementCount} placements)</span>
-              <span class="dps-table-val font-mono">${Math.round(totalExplosionPerUnit).toLocaleString()} &times; ${placementCount} = ${Math.round(fieldExplosionDmg).toLocaleString()} DMG</span>
-            </div>
-            <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Total Cycle Window</span>
-              <span class="dps-table-val font-mono">roundup(22 / ${(breakdown.effSpa || 1).toFixed(2)}s) &times; ${(breakdown.effSpa || 1).toFixed(2)}s = ${cycleTime.toFixed(1)}s</span>
-            </div>
-            <div class="dps-table-row primary">
-              <span class="dps-table-lbl damage-highlight">Illusion Field DPS (${Math.round(fieldExplosionDmg).toLocaleString()} &divide; ${cycleTime.toFixed(1)}s)</span>
-              <span class="dps-table-val font-mono damage-highlight">+${formatFullDPS(fieldDps)} DPS</span>
-            </div>
+              <div class="dps-table-row">
+                <span class="dps-table-lbl">${formatPassiveText(entry.name || `FUA ${entry.index + 1}`)}</span>
+                <span class="dps-table-val font-mono">${formatFullDPS(entry.effectiveFollowUpDamage || entry.inputDamage)}</span>
+              </div>
+              <div class="dps-table-row primary" style="margin-bottom: 8px;">
+                <span class="dps-table-lbl damage-highlight">${formatPassiveText(entry.name || `FUA ${entry.index + 1}`)} DPS</span>
+                <span class="dps-table-val font-mono damage-highlight">+${formatFullDPS(entry.dps)} DPS</span>
+              </div>
             `;
   }).join("")}
-        </div>
-      </div>` : activeFuaBreakdowns.length > 0 ? `
-      <div class="dps-section section-damage">
-        <div class="dps-section-hd" style="color: var(--purple-strong);">FUA Calculations</div>
-        <div class="dps-table">
-          ${activeFuaBreakdowns.map(entry => `
-            <div class="dps-table-row">
-              <span class="dps-table-lbl">${formatPassiveText(entry.name || `FUA ${entry.index + 1}`)}</span>
-              <span class="dps-table-val font-mono">${formatFullDPS(entry.effectiveFollowUpDamage || entry.inputDamage)}</span>
-            </div>
-            <div class="dps-table-row primary">
-              <span class="dps-table-lbl damage-highlight">${formatPassiveText(entry.name || `FUA ${entry.index + 1}`)} DPS</span>
-              <span class="dps-table-val font-mono damage-highlight">+${formatFullDPS(entry.dps)} DPS</span>
-            </div>
-          `).join("")}
           <div class="dps-table-row divider"></div>
           <div class="dps-table-row primary">
             <span class="dps-table-lbl combined-highlight">Total FUA DPS</span>
@@ -1124,10 +1198,12 @@ export async function DpsCard(unit, options = {}) {
           </button>
         ` : ""}
         ${isCursedStudent ? `
-          <button type="button" class="dps-fua-toggle" aria-expanded="false">
-            <span class="dps-fua-label">FUA</span>
-            <span class="dps-fua-summary">${fuaDamages.map(formatCompactNumber).join(" / ")}</span>
-          </button>
+          <div class="dps-fua-toggle-wrapper">
+            <button type="button" class="dps-fua-toggle" aria-expanded="false">
+              <span class="dps-fua-label">FUA</span>
+              <span class="dps-fua-summary">${fuaDamages.map(formatCompactNumber).join(" / ")}</span>
+            </button>
+          </div>
         ` : ""}
         <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}">
           Shinigami Passive: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
@@ -1149,15 +1225,33 @@ export async function DpsCard(unit, options = {}) {
   const berserkToggle = card.querySelector(`#berserk-toggle-${unit.id}`);
   const shinigamiToggle = card.querySelector(".dps-shinigami-toggle:not([id])");
   const fuaToggle = card.querySelector(".dps-fua-toggle");
+  const fuaToggleWrapper = card.querySelector(".dps-fua-toggle-wrapper");
   const crowEnemiesInput = card.querySelector(`#crow-enemies-${unit.id}`);
   let fuaEditor = null;
 
-  crowEnemiesInput?.addEventListener("input", () => {
+  const commitCrowEnemies = () => {
+    if (!crowEnemiesInput) return;
     crowEnemiesInput.value = crowEnemiesInput.value.replace(/[^\d]/g, "");
-    crowEnemiesHit = Math.max(1, parseInt(crowEnemiesInput.value || "1", 10) || 1);
-    unit.crowEnemiesHit = crowEnemiesHit;
-    window.dispatchEvent(new CustomEvent("dps-value-changed"));
-    renderCalculations();
+    const val = Math.max(1, parseInt(crowEnemiesInput.value || "1", 10) || 1);
+    crowEnemiesInput.value = String(val);
+    if (crowEnemiesHit !== val) {
+      crowEnemiesHit = val;
+      unit.crowEnemiesHit = crowEnemiesHit;
+      window.dispatchEvent(new CustomEvent("dps-value-changed"));
+      renderCalculations();
+    }
+  };
+
+  crowEnemiesInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commitCrowEnemies();
+      crowEnemiesInput.blur();
+    }
+  });
+
+  crowEnemiesInput?.addEventListener("change", () => {
+    commitCrowEnemies();
   });
 
   demonicToggle?.addEventListener("click", () => {
@@ -1225,7 +1319,7 @@ export async function DpsCard(unit, options = {}) {
   }
 
   function openFuaEditor() {
-    if (!fuaToggle) return;
+    if (!fuaToggle || !fuaToggleWrapper) return;
     if (fuaEditor) {
       closeFuaEditor();
       return;
@@ -1246,18 +1340,7 @@ export async function DpsCard(unit, options = {}) {
       <div class="dps-fua-editor-note">Unbound uses FUA 1 only</div>
     `;
 
-    const rect = fuaToggle.getBoundingClientRect();
-    const editorWidth = 200;
-    let left = rect.left;
-    if (left + editorWidth > window.innerWidth - 12) {
-      left = window.innerWidth - editorWidth - 12;
-    }
-    left = Math.max(8, left);
-
-    fuaEditor.style.position = "fixed";
-    fuaEditor.style.left = `${left}px`;
-    fuaEditor.style.top = `${rect.bottom + 6}px`;
-    document.body.appendChild(fuaEditor);
+    fuaToggleWrapper.appendChild(fuaEditor);
     fuaToggle.setAttribute("aria-expanded", "true");
 
     fuaEditor.querySelectorAll(".dps-fua-editor-input").forEach(input => {

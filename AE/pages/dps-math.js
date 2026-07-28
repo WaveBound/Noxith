@@ -223,6 +223,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isLadyGiant = unit && (unit.id === "ladygiantenvy" || (unit.name && unit.name.includes("Lady Giant")));
   const isEighthSword = unit && (unit.id === "8thswordberserk" || (unit.name && unit.name.includes("8th Sword")));
   const isCrow = unit && (unit.id === "crowblackfire" || (unit.name && unit.name.includes("Crow")));
+  const isCursedStudent = unit && (unit.id === "cursestudenttruelove" || (unit.name && unit.name.includes("Cursed Student")));
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
@@ -423,8 +424,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
       const finalSpellMult = baseM * overchargeMult;
       const effectiveFollowUpDamage = effDamage * finalSpellMult;
       const averageFollowUpHit = effectiveFollowUpDamage * critAvgMult;
-
-      const dps = averageFollowUpHit / (7 * effSpa);
+      const cycleInterval = 7 * effSpa;
+      const dps = averageFollowUpHit / cycleInterval;
 
       return {
         index,
@@ -435,7 +436,10 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
         inputDamage: effDamage,
         effectiveFollowUpDamage,
         averageFollowUpHit,
-        dps
+        cycleInterval,
+        critAvgMult,
+        dps,
+        isElfSpell: true
       };
     });
 
@@ -515,6 +519,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     const dotStoredDmg = blackFireDotDamage;
     const totalStoredDmg = directStoredDmg + dotStoredDmg;
 
+    // Illusion Explosion scales purely on stored damage & effectiveness
     const baseExplosionDamage = totalStoredDmg * illusionEffectiveness;
     const explosionDamageWithCrit = baseExplosionDamage * critAvgMult;
     const totalExplosionPerUnit = explosionDamageWithCrit * enemiesHit;
@@ -558,15 +563,23 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
         const effectiveFollowUpDamage = inputDamage * fuaDamageScale;
         const combinedHitDamage = effectiveFollowUpDamage + effDamage;
         const averageFollowUpHit = combinedHitDamage * fuaCritMultiplier;
-        const dps = inputDamage > 0 ? averageFollowUpHit / (effSpa * 3) : 0;
+        const intervalSpa = effSpa * 3;
+        const dps = inputDamage > 0 ? averageFollowUpHit / intervalSpa : 0;
 
         return {
           index,
+          name: isCursedStudent ? `Unit ${index + 1} Mimicry FUA` : `FUA ${index + 1}`,
           inputDamage,
+          fuaDamageScale,
+          relicArchetypeDamageMult,
           effectiveFollowUpDamage,
+          effDamage,
           combinedHitDamage,
           averageFollowUpHit,
-          dps
+          critAvgMult: fuaCritMultiplier,
+          intervalSpa,
+          dps,
+          isMimicryFua: isCursedStudent
         };
       })
       : [];
