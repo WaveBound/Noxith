@@ -47,7 +47,7 @@
   border-color: rgba(168, 85, 247, 0.45);
 }
 
-/* ── Compact Trait Card Container ───────────────────────────────────────── */
+/* ── Trait Card Container ────────────────────────────────────────────────── */
 .trait-card {
   display: flex !important;
   flex-direction: column !important;
@@ -68,10 +68,10 @@
   border-color: rgba(168, 85, 247, 0.45) !important;
 }
 
-/* ── Compact Media Emblem Banner ────────────────────────────────────────── */
+/* ── Enlarged Emblem Banner ─────────────────────────────────────────────── */
 .trait-card-media {
-  height: 80px !important;
-  background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.12) 0%, rgba(8, 8, 12, 0.95) 80%) !important;
+  height: 95px !important;
+  background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.16) 0%, rgba(8, 8, 12, 0.95) 80%) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -80,8 +80,8 @@
 }
 
 .trait-card-icon-wrap {
-  width: 40px !important;
-  height: 40px !important;
+  width: 58px !important;
+  height: 58px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -92,12 +92,12 @@
   width: 100% !important;
   height: 100% !important;
   object-fit: contain !important;
-  filter: drop-shadow(0 2px 8px rgba(168, 85, 247, 0.35)) !important;
+  filter: drop-shadow(0 3px 10px rgba(168, 85, 247, 0.45)) !important;
   transition: transform 160ms var(--ease) !important;
 }
 
 .trait-card:hover .trait-card-icon-wrap img {
-  transform: scale(1.1) !important;
+  transform: scale(1.12) !important;
 }
 
 /* ── Badges ─────────────────────────────────────────────────────────────── */

@@ -1,4 +1,3 @@
-// Base URL resolution derived from where icons.js is hosted on the server
 const BASE_URL = new URL('../', import.meta.url).href;
 
 export function toAbsoluteUrl(relativePath) {
@@ -20,7 +19,6 @@ export const UNIT_INFO_ICONS = {
     critDamage: toAbsoluteUrl("icons/unit-info/CritDamage.png"),
 };
 
-// ── Element / Archetype / Status PNG icons ──────────────────────────────────
 export const ELEMENT_ICONS = {
     hydro: toAbsoluteUrl("icons/elements/Hydro.png"),
     flame: toAbsoluteUrl("icons/elements/Flame.png"),
@@ -52,7 +50,6 @@ export const STATUS_ICONS = {
     illusion: toAbsoluteUrl("icons/status/Illusion.png"),
 };
 
-// ── Relic artwork (PNG) ────────────────────────────────────────────────────
 export const RELIC_ICONS = {
     "relic-promise-ring": toAbsoluteUrl("icons/relics/PromiseRing.png"),
     "relic-elven-battle-staff": toAbsoluteUrl("icons/relics/ElvenBattleStaff.png"),
@@ -85,6 +82,15 @@ const RELIC_NAME_TO_IMG = {
     "Accursed Equipment": RELIC_ICONS["relic-accursed-equipment"],
     "Red Finger": RELIC_ICONS["relic-red-finger"],
     "Magic Book": RELIC_ICONS["relic-magic-book"],
+    "Predator's Skull": toAbsoluteUrl("icons/relics/PredatorsSkull.png"),
+    "Memory Pendant": toAbsoluteUrl("icons/relics/MemoryPendant.png"),
+    "Pirate's Slingshot": toAbsoluteUrl("icons/relics/PiratesSlingshot.png"),
+    "Elf Suitcase": toAbsoluteUrl("icons/relics/ElfSuitcase.png"),
+    "Raid Cape": toAbsoluteUrl("icons/relics/RaidCape.png"),
+    "Bamboo Bottle": toAbsoluteUrl("icons/relics/BambooBottle.png"),
+    "Magic Orb": toAbsoluteUrl("icons/relics/MagicOrb.png"),
+    "Soul Splitter": toAbsoluteUrl("icons/relics/SoulSplitter.png"),
+    "Dragon Hilt": toAbsoluteUrl("icons/relics/DragonHilt.png"),
     "Hexed Blade": toAbsoluteUrl("icons/relics/HexedBlade.png"),
     "Hair Bells": toAbsoluteUrl("icons/relics/HairBells.png"),
     "Spirit of the Moonblade": toAbsoluteUrl("icons/relics/SpiritoftheMoonblade.png"),
@@ -126,16 +132,12 @@ export const STAT_ICONS = {
     passive: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/></svg>`,
 };
 
-/**
- * Tokenized keyword and status effect formatting utility.
- */
 export function formatPassiveText(text) {
     if (!text) return "";
     let out = String(text);
 
     out = out.replace(/<br\s*\/?>/gi, "__BR__");
 
-    // Phase 1: Tokenize keywords
     out = out.replace(/Thunderclap[\s\xA0]+Cut/gi, "@@TC@@");
     out = out.replace(/Unrestrained[\s\xA0]+Rampage/gi, "@@UR@@");
     out = out.replace(/Skyward[\s\xA0]+Slash/gi, "@@SS@@");
@@ -147,6 +149,7 @@ export function formatPassiveText(text) {
     out = out.replace(/Divine[\s\xA0]+Spirit/gi, "@@DVS@@");
     out = out.replace(/Puppet[\s\xA0]+Mark/gi, "@@PM@@");
     out = out.replace(/Black[\s\xA0]+Fire/gi, "@@BFI@@");
+    out = out.replace(/Black[\s\xA0]+Magic/gi, "@@BMG@@");
     out = out.replace(/Illusions/gi, "@@ILS@@");
     out = out.replace(/Illusion/gi, "@@IL@@");
     out = out.replace(/Shadow[\s\xA0]+Rewind/gi, "@@SRW@@");
@@ -186,12 +189,10 @@ export function formatPassiveText(text) {
     out = out.replace(/Dismembered/gi, "@@DM@@");
     out = out.replace(/Buffs/gi, "@@BF@@");
 
-    // Phase 2: Format numbers with bold styling
     out = out.replace(/(\$\d[\d,]*%?|\b\d+(?:,\d{3})*(?:\.\d+)?)(x|s|%)?/gi, (match, num, unit) => {
         return `<span class="p-num" style="font-weight:800;">${num}${unit || ""}</span>`;
     });
 
-    // Phase 3: Inject clean HTML markup
     const iconImgTag = (src) => src ? `<img src="${toAbsoluteUrl(src)}" class="p-kw-icon" alt="" />` : "";
 
     out = out.replace(/@@TC@@/g, `<span class="p-kw p-atk-name"><span>Thunderclap Cut</span></span>`);
@@ -205,6 +206,7 @@ export function formatPassiveText(text) {
     out = out.replace(/@@DVS@@/g, `<span class="p-kw p-divine-spirit"><span>Divine Spirit</span></span>`);
     out = out.replace(/@@PM@@/g, `<span class="p-kw p-puppet-mark">${iconImgTag(STATUS_ICONS.puppetmark)}<span>Puppet Mark</span></span>`);
     out = out.replace(/@@BFI@@/g, `<span class="p-kw p-black-fire">${iconImgTag(STATUS_ICONS.blackfire)}<span>Black Fire</span></span>`);
+    out = out.replace(/@@BMG@@/g, `<span class="p-kw p-black-magic"><span>Black Magic</span></span>`);
     out = out.replace(/@@ILS@@/g, `<span class="p-kw p-illusion"><span>Illusions</span></span>`);
     out = out.replace(/@@IL@@/g, `<span class="p-kw p-illusion"><span>Illusion</span></span>`);
     out = out.replace(/@@SRW@@/g, `<span class="p-kw p-shadow-rewind"><span>Shadow Rewind</span></span>`);
@@ -281,6 +283,7 @@ if (typeof window !== "undefined") {
         if (target.classList.contains("p-divine-spirit")) return toAbsoluteUrl("icons/info/DivineSpiritInfo.png");
         if (target.classList.contains("p-shadow-rewind")) return toAbsoluteUrl("icons/info/ShadowRewindInfo.png");
         if (target.classList.contains("p-black-fire")) return toAbsoluteUrl("icons/info/BlackFireInfo.png");
+        if (target.classList.contains("p-black-magic")) return toAbsoluteUrl("icons/info/BlackMagicInfo.png");
         if (target.classList.contains("p-illusion")) return toAbsoluteUrl("icons/info/IllusionInfo.png");
         if (target.classList.contains("p-mana-burn")) return toAbsoluteUrl("icons/info/ManaBurnInfo.png");
         if (target.classList.contains("p-bleed")) return toAbsoluteUrl("icons/info/BleedInfo.png");

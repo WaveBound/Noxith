@@ -43,6 +43,72 @@ export const relicStats = {
         },
     },
 
+    "Predator's Skull": {
+        stats: [
+            { range: { min: "+1%", max: "+5%" }, damage: { min: "+1%", max: "+10%" } },
+        ],
+        passive: {
+            name: "Roar",
+            desc: `Every 10 seconds:<br>- Unleash a Full AoE Roar attack dealing 70% of this unit's current damage and apply Stagger to enemies for 2 seconds<br>- For each enemy hit by this attack, this unit gains 1% Critical Chance (Capacity: 30%)<br><br>Overrides original passive`,
+        },
+    },
+
+    "Memory Pendant": {
+        stats: [
+            { critChance: { min: "+1%", max: "+10%" }, damage: { min: "+1%", max: "+10%" } },
+        ],
+        passive: {
+            name: "Reckless Control",
+            desc: `This unit has Black Magic meter, starting at 0.<br>- When Black Magic Meter is increasing this unit will be in "Caring State"<br>- When Black Magic Meter is decreasing this unit will be in "Cold State"<br><br><b>Caring State:</b><br>- Every 1 seconds this unit walks increases this meter by 5<br>- Deal 50% of this unit's current damage in 75% of his range<br><br><b>Cold State:</b><br>- Every 1 seconds this unit walks decreases this meter by 2<br>- Deal 150% of this unit's current damage in 25% of his range<br><br>Overrides original passive`,
+        },
+    },
+
+    "Pirate's Slingshot": {
+        stats: [
+            { range: { min: "+5%", max: "+15%" } },
+        ],
+    },
+
+    "Elf Suitcase": {
+        stats: [
+            { range: { min: "+1%", max: "+5%" }, magicdamage: { min: "+1%", max: "+10%" } },
+        ],
+    },
+
+    "Raid Cape": {
+        stats: [
+            { range: { min: "+1%", max: "+5%" }, damage: { min: "+1%", max: "+10%" } },
+        ],
+    },
+
+    "Bamboo Bottle": {
+        stats: [
+            { range: { min: "+1%", max: "+10%" } },
+        ],
+        passive: {
+            name: "Bamboo Bottle",
+            desc: `Every time this unit uses an Active Ability, reduce the Active Ability cooldown by 1 to 2% (Capacity: 10%).`,
+        },
+    },
+
+    "Magic Orb": {
+        stats: [
+            { range: { min: "+1%", max: "+10%" }, damage: { min: "+1%", max: "+5%" } },
+        ],
+    },
+
+    "Soul Splitter": {
+        stats: [
+            { range: { min: "+1%", max: "+5%" }, physicaldamage: { min: "+1%", max: "+10%" } },
+        ],
+    },
+
+    "Dragon Hilt": {
+        stats: [
+            { critDamage: { min: "+1%", max: "+10%" }, critChance: { min: "+1%", max: "+5%" } },
+        ],
+    },
+
     "Magic Book": {
         stats: [
             { magicdamage: { min: "+1%", max: "+20%" } },

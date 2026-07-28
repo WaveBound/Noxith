@@ -1,7 +1,6 @@
 import { relicStats } from "./relicstats.js";
 import { relicImgByName } from "../icons/icons.js";
 
-// Render a single stat value: string, or { min, max } range object.
 function formatStatValue(v) {
   if (v == null || v === "") return "";
   if (typeof v === "object") {
@@ -27,6 +26,10 @@ function formatStatBlock(b) {
   if (spa) parts.push(`SPA ${spa}`);
   const rng = formatStatValue(b.range);
   if (rng) parts.push(`Range ${rng}`);
+  const md = formatStatValue(b.magicdamage);
+  if (md) parts.push(`Magic DMG ${md}`);
+  const pd = formatStatValue(b.physicaldamage);
+  if (pd) parts.push(`Phys DMG ${pd}`);
   return parts.join(" / ");
 }
 
@@ -53,9 +56,23 @@ const UNIT_NAME_MAP = {
   "SalmonSorcerer": "Salmon Sorcerer",
   "DarkMage": "Dark Mage (Sovereign)",
   "Crow": "Crow (Black Fire)",
+  "Razorjaw": "Razorjaw (Hunter)",
+  "CursedImmortal": "Cursed Immortal (Black Sun)",
 };
 
 const rawRelics = [
+  {
+    id: "relic-predators-skull",
+    name: "Predator's Skull",
+    image: relicImgByName("Predator's Skull"),
+    unitEquip: "Razorjaw (Hunter)",
+  },
+  {
+    id: "relic-memory-pendant",
+    name: "Memory Pendant",
+    image: relicImgByName("Memory Pendant"),
+    unitEquip: "Cursed Immortal (Black Sun)",
+  },
   {
     id: "relic-illusion-crow",
     name: "Illusion Crow",
@@ -79,6 +96,41 @@ const rawRelics = [
     name: "Elven Battle Staff",
     image: relicImgByName("Elven Battle Staff"),
     unitEquip: "Elf Mage (Unleashed)",
+  },
+  {
+    id: "relic-pirates-slingshot",
+    name: "Pirate's Slingshot",
+    image: relicImgByName("Pirate's Slingshot"),
+  },
+  {
+    id: "relic-elf-suitcase",
+    name: "Elf Suitcase",
+    image: relicImgByName("Elf Suitcase"),
+  },
+  {
+    id: "relic-raid-cape",
+    name: "Raid Cape",
+    image: relicImgByName("Raid Cape"),
+  },
+  {
+    id: "relic-bamboo-bottle",
+    name: "Bamboo Bottle",
+    image: relicImgByName("Bamboo Bottle"),
+  },
+  {
+    id: "relic-magic-orb",
+    name: "Magic Orb",
+    image: relicImgByName("Magic Orb"),
+  },
+  {
+    id: "relic-soul-splitter",
+    name: "Soul Splitter",
+    image: relicImgByName("Soul Splitter"),
+  },
+  {
+    id: "relic-dragon-hilt",
+    name: "Dragon Hilt",
+    image: relicImgByName("Dragon Hilt"),
   },
   {
     id: "relic-kunai",
@@ -186,7 +238,6 @@ const rawRelics = [
   },
 ];
 
-// Merge stat/passive definitions from data/relicstats.js by relic name.
 rawRelics.forEach((r) => {
   const def = relicStats[r.name];
   if (def) {
