@@ -300,51 +300,62 @@ if (typeof window !== "undefined") {
             floatingTooltip.className = "floating-status-tooltip";
             floatingTooltip.alt = "";
 
-            // Self-healing image fallback
+            // Case-insensitive asset resolver for info cards across Linux web hosts
             floatingTooltip.onerror = () => {
-                const currentSrc = floatingTooltip.src || "";
-                if (currentSrc.includes("BleedInfo.png")) {
-                    floatingTooltip.src = toAbsoluteUrl("icons/info/bleedinfo.png");
-                } else if (currentSrc.includes("bleedinfo.png")) {
-                    floatingTooltip.src = toAbsoluteUrl("icons/status/bleed.png");
+                const currentTry = floatingTooltip.getAttribute("data-try-idx") ? parseInt(floatingTooltip.getAttribute("data-try-idx"), 10) : 0;
+                const baseSrc = floatingTooltip.getAttribute("data-original-src") || floatingTooltip.src;
+
+                if (baseSrc.toLowerCase().includes("bleed")) {
+                    const variants = [
+                        toAbsoluteUrl("icons/info/BleedInfo.png"),
+                        toAbsoluteUrl("icons/info/bleedinfo.png"),
+                        toAbsoluteUrl("icons/info/Bleedinfo.png"),
+                        toAbsoluteUrl("icons/info/bleed.png"),
+                        toAbsoluteUrl("icons/info/Bleed.png")
+                    ];
+                    const nextIdx = currentTry + 1;
+                    if (nextIdx < variants.length) {
+                        floatingTooltip.setAttribute("data-try-idx", String(nextIdx));
+                        floatingTooltip.src = variants[nextIdx];
+                    }
                 }
             };
 
-            document.documentElement.appendChild(floatingTooltip);
+            document.body.appendChild(floatingTooltip);
         }
 
-        if (floatingTooltip.src !== src) {
+        if (floatingTooltip.getAttribute("data-original-src") !== src) {
+            floatingTooltip.setAttribute("data-original-src", src);
+            floatingTooltip.removeAttribute("data-try-idx");
             floatingTooltip.src = src;
         }
         floatingTooltip.style.display = "block";
 
-        // Read computed zoom scale factor (1440p / 4K / display scale)
+        // Read CSS zoom factor (e.g. 1.25x on 1440p/4K or Windows scaled displays)
         const htmlZoom = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
         const bodyZoom = parseFloat(getComputedStyle(document.body).zoom) || 1;
         const zoom = htmlZoom * bodyZoom;
 
-        // Dynamically measure actual rendered image size
-        const rect = floatingTooltip.getBoundingClientRect();
-        const tooltipWidth = (rect.width || floatingTooltip.naturalWidth || 280) * zoom;
-        const tooltipHeight = (rect.height || floatingTooltip.naturalHeight || 140) * zoom;
+        const tooltipWidth = 280;
+        const tooltipHeight = 140;
 
-        // Target position: 12px right and 12px down from cursor tip
-        let rawX = e.clientX + 12;
-        let rawY = e.clientY + 12;
+        // Position top-left corner 2px right and 2px below mouse cursor tip
+        let rawX = e.clientX + 2;
+        let rawY = e.clientY + 2;
 
-        // Boundary checks using true viewport dimensions
-        if (rawX + tooltipWidth > window.innerWidth - 8) {
-            rawX = e.clientX - tooltipWidth - 8;
+        // Viewport edge checks
+        if (rawX + tooltipWidth > window.innerWidth - 10) {
+            rawX = e.clientX - tooltipWidth - 6;
         }
 
-        if (rawY + tooltipHeight > window.innerHeight - 8) {
-            rawY = e.clientY - tooltipHeight - 8;
+        if (rawY + tooltipHeight > window.innerHeight - 10) {
+            rawY = e.clientY - tooltipHeight - 6;
         }
 
         rawX = Math.max(4, rawX);
         rawY = Math.max(4, rawY);
 
-        // Apply integer-pixel positioning normalized by zoom factor
+        // Cancel out zoom scale so actual rendered top-left lands 1:1 at cursor tip
         const finalX = Math.round(rawX / zoom);
         const finalY = Math.round(rawY / zoom);
 
