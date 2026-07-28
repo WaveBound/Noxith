@@ -300,7 +300,7 @@ if (typeof window !== "undefined") {
             floatingTooltip.className = "floating-status-tooltip";
             floatingTooltip.alt = "";
 
-            // Case-insensitive asset resolver for info cards across Linux web hosts
+            // Comprehensive multi-variant asset resolver for Linux web hosts
             floatingTooltip.onerror = () => {
                 const currentTry = floatingTooltip.getAttribute("data-try-idx") ? parseInt(floatingTooltip.getAttribute("data-try-idx"), 10) : 0;
                 const baseSrc = floatingTooltip.getAttribute("data-original-src") || floatingTooltip.src;
@@ -311,7 +311,10 @@ if (typeof window !== "undefined") {
                         toAbsoluteUrl("icons/info/bleedinfo.png"),
                         toAbsoluteUrl("icons/info/Bleedinfo.png"),
                         toAbsoluteUrl("icons/info/bleed.png"),
-                        toAbsoluteUrl("icons/info/Bleed.png")
+                        toAbsoluteUrl("icons/info/Bleed.png"),
+                        toAbsoluteUrl("icons/info/Bleed_Info.png"),
+                        toAbsoluteUrl("icons/info/bleed_info.png"),
+                        toAbsoluteUrl("icons/status/bleed.png")
                     ];
                     const nextIdx = currentTry + 1;
                     if (nextIdx < variants.length) {
@@ -331,7 +334,7 @@ if (typeof window !== "undefined") {
         }
         floatingTooltip.style.display = "block";
 
-        // Read CSS zoom factor (e.g. 1.25x on 1440p/4K or Windows scaled displays)
+        // Read CSS zoom scale factor
         const htmlZoom = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
         const bodyZoom = parseFloat(getComputedStyle(document.body).zoom) || 1;
         const zoom = htmlZoom * bodyZoom;
@@ -339,11 +342,11 @@ if (typeof window !== "undefined") {
         const tooltipWidth = 280;
         const tooltipHeight = 140;
 
-        // Position top-left corner 2px right and 2px below mouse cursor tip
-        let rawX = e.clientX + 2;
-        let rawY = e.clientY + 2;
+        // Position top-left corner 4px right and 4px below mouse cursor tip
+        let rawX = e.clientX + 4;
+        let rawY = e.clientY + 4;
 
-        // Viewport edge checks
+        // Viewport boundary checks
         if (rawX + tooltipWidth > window.innerWidth - 10) {
             rawX = e.clientX - tooltipWidth - 6;
         }
