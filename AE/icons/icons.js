@@ -303,12 +303,15 @@ if (typeof window !== "undefined") {
             floatingTooltip.style.pointerEvents = "none";
             floatingTooltip.style.zIndex = "1000000";
             floatingTooltip.style.boxShadow = "none";
-            floatingTooltip.style.borderRadius = "12px";
+            floatingTooltip.style.borderRadius = "10px";
             floatingTooltip.style.width = "280px";
             floatingTooltip.style.height = "140px";
+            floatingTooltip.style.maxWidth = "none";
             floatingTooltip.style.objectFit = "contain";
             floatingTooltip.style.transform = "none";
-            document.body.appendChild(floatingTooltip);
+            floatingTooltip.style.margin = "0";
+            floatingTooltip.style.padding = "0";
+            document.documentElement.appendChild(floatingTooltip);
         }
 
         if (floatingTooltip.src !== src) {
@@ -316,34 +319,39 @@ if (typeof window !== "undefined") {
         }
         floatingTooltip.style.display = "block";
 
-        const targetRect = kwTarget.getBoundingClientRect();
         const tooltipWidth = 280;
         const tooltipHeight = 140;
 
-        let desiredX = targetRect.left;
-        let desiredY = targetRect.bottom + 6;
+        // Position top-left corner 16px to the RIGHT and 16px BELOW the mouse cursor tip
+        let targetX = e.clientX + 16;
+        let targetY = e.clientY + 16;
 
-        if (desiredX + tooltipWidth > window.innerWidth - 12) {
-            desiredX = window.innerWidth - tooltipWidth - 12;
+        // Screen boundary check: flip left of cursor if overflowing right edge
+        if (targetX + tooltipWidth > window.innerWidth - 10) {
+            targetX = e.clientX - tooltipWidth - 12;
         }
 
-        if (desiredY + tooltipHeight > window.innerHeight - 12) {
-            desiredY = targetRect.top - tooltipHeight - 6;
+        // Screen boundary check: flip above cursor if overflowing bottom edge
+        if (targetY + tooltipHeight > window.innerHeight - 10) {
+            targetY = e.clientY - tooltipHeight - 12;
         }
 
-        desiredX = Math.max(8, desiredX);
-        desiredY = Math.max(8, desiredY);
+        targetX = Math.max(8, targetX);
+        targetY = Math.max(8, targetY);
 
-        floatingTooltip.style.left = `${desiredX}px`;
-        floatingTooltip.style.top = `${desiredY}px`;
+        // 1. Set initial target position
+        floatingTooltip.style.left = `${targetX}px`;
+        floatingTooltip.style.top = `${targetY}px`;
 
-        const actualRect = floatingTooltip.getBoundingClientRect();
-        const errorX = actualRect.left - desiredX;
-        const errorY = actualRect.top - desiredY;
+        // 2. Measure actual rendered viewport location
+        const rect = floatingTooltip.getBoundingClientRect();
+        const offsetX = rect.left - targetX;
+        const offsetY = rect.top - targetY;
 
-        if (Math.abs(errorX) > 0.5 || Math.abs(errorY) > 0.5) {
-            floatingTooltip.style.left = `${desiredX - errorX}px`;
-            floatingTooltip.style.top = `${desiredY - errorY}px`;
+        // 3. Subtract parent container transform or zoom offset to lock exactly at (targetX, targetY)
+        if (Math.abs(offsetX) > 0.5 || Math.abs(offsetY) > 0.5) {
+            floatingTooltip.style.left = `${targetX - offsetX}px`;
+            floatingTooltip.style.top = `${targetY - offsetY}px`;
         }
     }
 
@@ -354,5 +362,4 @@ if (typeof window !== "undefined") {
     }
 
     window.addEventListener("mousemove", updateFloatingTooltip, true);
-    window.addEventListener("scroll", updateFloatingTooltip, true);
 }
