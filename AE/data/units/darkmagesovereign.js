@@ -68,7 +68,7 @@ export const unit = {
             attackTime: "2.5",
         },
         {
-            upgrade: 8, damage: "1,622", spa: "5.4", range: "26", cost: "13,750",
+            upgrade: 8, damage: "1,822", spa: "5.4", range: "26", cost: "13,750",
             attackName: "Elemental Weapons",
             aoe: "Circle 12",
             attackTime: "2.5",
