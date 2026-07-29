@@ -1334,7 +1334,12 @@
 }
 
 .uip-dps-main-grid.has-summons {
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 1fr 1.6fr;
+}
+@media (max-width: 900px) {
+  .uip-dps-main-grid.has-summons {
+    grid-template-columns: 1fr;
+  }
 }
 
 .uip-dps-split-columns {
@@ -1487,7 +1492,7 @@
 
 .primary-stats-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 8px;
   margin-bottom: 4px;
 }
@@ -1567,4 +1572,47 @@
     font-size: 11px !important;
     line-height: 1.35 !important;
   }
+}
+
+/* Custom Follow-Up Mimicry Input Styling */
+.followup-inputs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.uip-followup-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border, #16161a);
+  border-radius: 6px;
+  color: #ffffff;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-family: var(--font-mono, monospace);
+  text-align: center;
+  transition: all 0.2s ease;
+  min-width: 0;
+}
+
+.uip-followup-input:focus {
+  outline: none;
+  border-color: var(--purple, #6366f1);
+  background: rgba(99, 102, 241, 0.05);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.uip-followup-input::placeholder {
+  color: var(--text-muted, #71717a);
+  font-family: var(--font-sans, sans-serif);
+}
+
+/* Compact styles for summons cards in unit info page */
+.uip-dps-column.summons-col .dps-section {
+  padding: 8px 12px;
+  gap: 4px;
+}
+
+.uip-dps-column.summons-col .dps-kv {
+  padding: 3px 6px;
 }

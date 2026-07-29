@@ -236,7 +236,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     dmgAccum = Math.round(dmgAccum * levelMult);
     dmgRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Level 50 Scaling</span>
+        <span class="dps-table-lbl">Level 50 Scaling</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${levelMult.toFixed(2)}</span>${dmgAccum.toLocaleString()}</span>
       </div>
     `;
@@ -246,7 +246,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     dmgAccum = Math.round(dmgAccum * (1 + traitDmgBonus));
     dmgRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Trait DMG Multiplier (${breakdown.trait?.name || "Trait"})</span>
+        <span class="dps-table-lbl">Trait DMG Multiplier (${breakdown.trait?.name || "Trait"})</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + traitDmgBonus).toFixed(2)}</span>${dmgAccum.toLocaleString()}</span>
       </div>
     `;
@@ -256,7 +256,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     dmgAccum = Math.round(dmgAccum * (1 + relicDmgBonus));
     dmgRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Relic DMG Multiplier</span>
+        <span class="dps-table-lbl">Relic DMG Multiplier</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + relicDmgBonus).toFixed(2)}</span>${dmgAccum.toLocaleString()}</span>
       </div>
     `;
@@ -267,7 +267,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     const archLabel = (breakdown.unitArchetype || "Archetype").charAt(0).toUpperCase() + (breakdown.unitArchetype || "Archetype").slice(1);
     dmgRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Relic ${archLabel} DMG Multiplier</span>
+        <span class="dps-table-lbl">Relic ${archLabel} DMG Multiplier</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + relicArchetypeDmgBonus).toFixed(2)}</span>${dmgAccum.toLocaleString()}</span>
       </div>
     `;
@@ -276,7 +276,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   dmgAccum = Math.round(dmgAccum * 1.20);
   dmgRowsHtml += `
     <div class="dps-table-row indented">
-      <span class="dps-table-lbl">&mdash; Z Stat Multiplier</span>
+      <span class="dps-table-lbl">Z Stat Multiplier</span>
       <span class="dps-table-val font-mono"><span class="faint-mult">x1.20</span>${dmgAccum.toLocaleString()}</span>
     </div>
   `;
@@ -285,7 +285,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     dmgAccum = Math.round(dmgAccum * 1.15);
     dmgRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Ascension III Multiplier</span>
+        <span class="dps-table-lbl">Ascension III Multiplier</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x1.15</span>${dmgAccum.toLocaleString()}</span>
       </div>
     `;
@@ -301,7 +301,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     const labelText = parts.length > 0 ? parts.join(" + ") : "Passives";
     dmgRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Passives &amp; Buffs (${labelText})</span>
+        <span class="dps-table-lbl">Passives &amp; Buffs (${labelText})</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + totalPassiveDmgBonus).toFixed(2)}</span>${dmgAccum.toLocaleString()}</span>
       </div>
     `;
@@ -332,7 +332,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   if (traitCritChance > 0) {
     critRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Trait Crit Chance (${breakdown.trait?.name})</span>
+        <span class="dps-table-lbl">Trait Crit Chance (${breakdown.trait?.name})</span>
         <span class="dps-table-val font-mono">+${Math.round(traitCritChance)}%</span>
       </div>
     `;
@@ -340,7 +340,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   if (relicCritChance > 0) {
     critRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Relic Crit Chance</span>
+        <span class="dps-table-lbl">Relic Crit Chance</span>
         <span class="dps-table-val font-mono">+${Math.round(relicCritChance)}%</span>
       </div>
     `;
@@ -348,7 +348,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   if (passiveCritChance > 0) {
     critRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Passive Crit Chance</span>
+        <span class="dps-table-lbl">Passive Crit Chance</span>
         <span class="dps-table-val font-mono">+${Math.round(passiveCritChance)}%</span>
       </div>
     `;
@@ -367,7 +367,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   if (traitCritDmg > 0) {
     critRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Trait Crit DMG (${breakdown.trait?.name})</span>
+        <span class="dps-table-lbl">Trait Crit DMG (${breakdown.trait?.name})</span>
         <span class="dps-table-val font-mono">+${Math.round(traitCritDmg)}%</span>
       </div>
     `;
@@ -375,7 +375,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   if (relicCritDmg > 0) {
     critRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Relic Crit DMG</span>
+        <span class="dps-table-lbl">Relic Crit DMG</span>
         <span class="dps-table-val font-mono">+${Math.round(relicCritDmg)}%</span>
       </div>
     `;
@@ -383,7 +383,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   if (passiveCritDmg > 0) {
     critRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Passive Crit DMG</span>
+        <span class="dps-table-lbl">Passive Crit DMG</span>
         <span class="dps-table-val font-mono">+${Math.round(passiveCritDmg)}%</span>
       </div>
     `;
@@ -396,16 +396,16 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
 
     <div class="dps-table-row divider"></div>
     <div class="dps-table-row indented">
-      <span class="dps-table-lbl">&mdash; Crit Bonus (Crit Rate &times; Crit DMG)</span>
+      <span class="dps-table-lbl">Crit Bonus (Crit Rate &times; Crit DMG)</span>
       <span class="dps-table-val font-mono">${finalCritChancePercent}% &times; ${finalCritDmgPercent}% = +${(critBonusVal * 100).toFixed(1)}%</span>
     </div>
     <div class="dps-table-row indented">
-      <span class="dps-table-lbl">&mdash; Average Hit Multiplier</span>
+      <span class="dps-table-lbl">Average Hit Multiplier</span>
       <span class="dps-table-val font-mono">1.00 + ${critBonusVal.toFixed(2)} = <span class="faint-mult">x${critAvgMult.toFixed(2)}</span></span>
     </div>
     <div class="dps-table-row primary">
-      <span class="dps-table-lbl damage-highlight">Average Hit DMG (${Math.round(breakdown.effDamage).toLocaleString()} &times; ${critAvgMult.toFixed(2)})</span>
-      <span class="dps-table-val font-mono damage-highlight">${Math.round(breakdown.avgHitDamage || 0).toLocaleString()}</span>
+      <span class="dps-table-lbl crit-highlight">Average Hit DMG (${Math.round(breakdown.effDamage).toLocaleString()} &times; ${critAvgMult.toFixed(2)})</span>
+      <span class="dps-table-val font-mono crit-highlight">${Math.round(breakdown.avgHitDamage || 0).toLocaleString()}</span>
     </div>
   `;
 
@@ -425,7 +425,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     spaAccum = spaAccum * (1 + traitSpaBonus);
     spaRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Trait SPA Multiplier</span>
+        <span class="dps-table-lbl">Trait SPA Multiplier</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + traitSpaBonus).toFixed(2)}</span>${spaAccum.toFixed(2)}s</span>
       </div>
     `;
@@ -434,7 +434,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     spaAccum = spaAccum * (1 + relicSpaBonus);
     spaRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Relic SPA Multiplier</span>
+        <span class="dps-table-lbl">Relic SPA Multiplier</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + relicSpaBonus).toFixed(2)}</span>${spaAccum.toFixed(2)}s</span>
       </div>
     `;
@@ -443,7 +443,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   spaAccum = spaAccum * 0.85;
   spaRowsHtml += `
     <div class="dps-table-row indented">
-      <span class="dps-table-lbl">&mdash; Z Stat SPA Multiplier</span>
+      <span class="dps-table-lbl">Z Stat SPA Multiplier</span>
       <span class="dps-table-val font-mono"><span class="faint-mult">x0.85</span>${spaAccum.toFixed(2)}s</span>
     </div>
   `;
@@ -452,7 +452,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     spaAccum = spaAccum * 0.90;
     spaRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Critical Tempo Passive (-10% SPA)</span>
+        <span class="dps-table-lbl">Critical Tempo Passive (-10% SPA)</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x0.90</span>${spaAccum.toFixed(2)}s</span>
       </div>
     `;
@@ -460,7 +460,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     spaAccum = spaAccum * 1.25;
     spaRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Size Control: Giant (+25% SPA time)</span>
+        <span class="dps-table-lbl">Size Control: Giant (+25% SPA time)</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x1.25</span>${spaAccum.toFixed(2)}s</span>
       </div>
     `;
@@ -468,7 +468,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     spaAccum = spaAccum * 0.90;
     spaRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; The Nameless Demon (Berserk -10% SPA)</span>
+        <span class="dps-table-lbl">The Nameless Demon (Berserk -10% SPA)</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x0.90</span>${spaAccum.toFixed(2)}s</span>
       </div>
     `;
@@ -491,7 +491,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     rngAccum = rngAccum * (1 + traitRngBonus);
     rngRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Trait Range Multiplier</span>
+        <span class="dps-table-lbl">Trait Range Multiplier</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + traitRngBonus).toFixed(2)}</span>${rngAccum.toFixed(1)}</span>
       </div>
     `;
@@ -501,7 +501,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     rngAccum = rngAccum * (1 + relicRngBonus);
     rngRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Relic Range Multiplier</span>
+        <span class="dps-table-lbl">Relic Range Multiplier</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + relicRngBonus).toFixed(2)}</span>${rngAccum.toFixed(1)}</span>
       </div>
     `;
@@ -510,7 +510,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   rngAccum = rngAccum * 1.15;
   rngRowsHtml += `
     <div class="dps-table-row indented">
-      <span class="dps-table-lbl">&mdash; Z Stat Range Multiplier</span>
+      <span class="dps-table-lbl">Z Stat Range Multiplier</span>
       <span class="dps-table-val font-mono"><span class="faint-mult">x1.15</span>${rngAccum.toFixed(1)}</span>
     </div>
   `;
@@ -519,7 +519,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     rngAccum = rngAccum * 1.05;
     rngRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Ascension III Range Multiplier</span>
+        <span class="dps-table-lbl">Ascension III Range Multiplier</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x1.05</span>${rngAccum.toFixed(1)}</span>
       </div>
     `;
@@ -529,7 +529,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     rngAccum = rngAccum * 1.50;
     rngRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">&mdash; Size Control: Giant (+50% Range)</span>
+        <span class="dps-table-lbl">Size Control: Giant (+50% Range)</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x1.50</span>${rngAccum.toFixed(1)}</span>
       </div>
     `;
@@ -562,25 +562,25 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
         let tRow = "", rRow = "", zRow = "", aRow = "";
         if (s.traitDmgBonus > 0) {
           sDmgAccum = Math.round(sDmgAccum * (1 + s.traitDmgBonus));
-          tRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Trait DMG Multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + s.traitDmgBonus).toFixed(2)}</span>${sDmgAccum.toLocaleString()}</span></div>`;
+          tRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">Trait DMG Multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + s.traitDmgBonus).toFixed(2)}</span>${sDmgAccum.toLocaleString()}</span></div>`;
         }
         if (s.relicTotalDmgMult > 0) {
           sDmgAccum = Math.round(sDmgAccum * (1 + s.relicTotalDmgMult));
-          rRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Relic DMG Multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + s.relicTotalDmgMult).toFixed(2)}</span>${sDmgAccum.toLocaleString()}</span></div>`;
+          rRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">Relic DMG Multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + s.relicTotalDmgMult).toFixed(2)}</span>${sDmgAccum.toLocaleString()}</span></div>`;
         }
         if (s.isZStat) {
           sDmgAccum = Math.round(sDmgAccum * 1.20);
-          zRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Z Stat Multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x1.20</span>${sDmgAccum.toLocaleString()}</span></div>`;
+          zRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">Z Stat Multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x1.20</span>${sDmgAccum.toLocaleString()}</span></div>`;
         }
         if (s.hasAscend) {
           sDmgAccum = Math.round(sDmgAccum * 1.15);
-          aRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">&mdash; Ascension III Multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x1.15</span>${sDmgAccum.toLocaleString()}</span></div>`;
+          aRow = `<div class="dps-table-row indented"><span class="dps-table-lbl">Ascension III Multiplier</span><span class="dps-table-val font-mono"><span class="faint-mult">x1.15</span>${sDmgAccum.toLocaleString()}</span></div>`;
         }
         intermediateRowsHtml = `${tRow}${rRow}${zRow}${aRow}`;
       } else {
         intermediateRowsHtml = `
           <div class="dps-table-row indented">
-            <span class="dps-table-lbl">&mdash; Summon Base Scale</span>
+            <span class="dps-table-lbl">Summon Base Scale</span>
             <span class="dps-table-val font-mono"><span class="faint-mult">&times;${scaleMult.toFixed(2)}</span>${Math.round(s.effDamage || 0).toLocaleString()}</span>
           </div>`;
       }
@@ -598,7 +598,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
         sSpaAccum = sSpaAccum * (1 + s.traitSpaBonus);
         sSpaRowsHtml += `
           <div class="dps-table-row indented">
-            <span class="dps-table-lbl">&mdash; Trait SPA Multiplier</span>
+            <span class="dps-table-lbl">Trait SPA Multiplier</span>
             <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + s.traitSpaBonus).toFixed(2)}</span>${sSpaAccum.toFixed(2)}s</span>
           </div>
         `;
@@ -607,7 +607,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
         sSpaAccum = sSpaAccum * (1 + s.relicSpaMult);
         sSpaRowsHtml += `
           <div class="dps-table-row indented">
-            <span class="dps-table-lbl">&mdash; Relic SPA Multiplier</span>
+            <span class="dps-table-lbl">Relic SPA Multiplier</span>
             <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + s.relicSpaMult).toFixed(2)}</span>${sSpaAccum.toFixed(2)}s</span>
           </div>
         `;
@@ -616,7 +616,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
         sSpaAccum = sSpaAccum * 0.85;
         sSpaRowsHtml += `
           <div class="dps-table-row indented">
-            <span class="dps-table-lbl">&mdash; Z Stat SPA Multiplier</span>
+            <span class="dps-table-lbl">Z Stat SPA Multiplier</span>
             <span class="dps-table-val font-mono"><span class="faint-mult">x0.85</span>${sSpaAccum.toFixed(2)}s</span>
           </div>
         `;
@@ -651,7 +651,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                 </div>
                 ${s.levelMult > 1 ? `
                   <div class="dps-table-row indented">
-                    <span class="dps-table-lbl">&mdash; Level 50 scaling</span>
+                    <span class="dps-table-lbl">Level 50 scaling</span>
                     <span class="dps-table-val font-mono"><span class="faint-mult">x${s.levelMult.toFixed(2)}</span>${Math.round(s.baseDamage || 0).toLocaleString()}</span>
                   </div>` : ""}
               ` : `
@@ -676,7 +676,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                 <span class="dps-table-val font-mono">${Math.round(s.effDamage || 0).toLocaleString()}</span>
               </div>
               <div class="dps-table-row indented">
-                <span class="dps-table-lbl">&mdash; Crit Multiplier</span>
+                <span class="dps-table-lbl">Crit Multiplier</span>
                 <span class="dps-table-val font-mono"><span class="faint-mult">x${critMult.toFixed(2)}</span>${Math.round(s.avgHitDamage || 0).toLocaleString()}</span>
               </div>
               <div class="dps-table-row primary">
@@ -705,7 +705,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                 <span class="dps-table-val font-mono">${Math.round(s.avgHitDamage || 0).toLocaleString()} &times; ${s.activeCount || 1} = ${Math.round((s.avgHitDamage || 0) * (s.activeCount || 1)).toLocaleString()}</span>
               </div>
               <div class="dps-table-row indented">
-                <span class="dps-table-lbl">&mdash; Final Summon SPA</span>
+                <span class="dps-table-lbl">Final Summon SPA</span>
                 <span class="dps-table-val font-mono">${(s.effSpa || 1).toFixed(2)}s</span>
               </div>
               <div class="dps-table-row primary">
@@ -833,15 +833,15 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           </div>
           ${breakdown.isEighthSword ? `
             <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Base Tick DMG (15% Current DMG)</span>
+              <span class="dps-table-lbl">Base Tick DMG (15% Current DMG)</span>
               <span class="dps-table-val font-mono">${Math.round(breakdown.effDamage * 0.15).toLocaleString()} DMG</span>
             </div>
             <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Avg Tick DMG with Crit (x${(breakdown.critAvgMult || 1).toFixed(2)})</span>
+              <span class="dps-table-lbl">Avg Tick DMG with Crit (x${(breakdown.critAvgMult || 1).toFixed(2)})</span>
               <span class="dps-table-val font-mono dot-highlight">${Math.round(breakdown.avgHitDamage * 0.15).toLocaleString()} DMG</span>
             </div>
             <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Interval SPA</span>
+              <span class="dps-table-lbl">Interval SPA</span>
               <span class="dps-table-val font-mono">1.00s</span>
             </div>
             <div class="dps-table-row primary">
@@ -850,11 +850,11 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
             </div>
           ` : breakdown.isCrow ? `
             <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Total Black Fire DMG per unit</span>
+              <span class="dps-table-lbl">Total Black Fire DMG per unit</span>
               <span class="dps-table-val font-mono dot-highlight">${blackFireDotDmg.toLocaleString()} DMG</span>
             </div>
             <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Re-proc Interval SPA</span>
+              <span class="dps-table-lbl">Re-proc Interval SPA</span>
               <span class="dps-table-val font-mono">roundup(12 / ${(breakdown.effSpa || 1).toFixed(2)}s) &times; ${(breakdown.effSpa || 1).toFixed(2)}s = ${(breakdown.dotIntervalSPA || 12).toFixed(2)}s</span>
             </div>
             <div class="dps-table-row primary">
@@ -863,7 +863,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
             </div>
           ` : `
             <div class="dps-table-row indented">
-              <span class="dps-table-lbl">&mdash; Interval SPA</span>
+              <span class="dps-table-lbl">Interval SPA</span>
               <span class="dps-table-val font-mono">${(breakdown.dotIntervalSPA || 1).toFixed(2)}s</span>
             </div>
             <div class="dps-table-row primary">
@@ -905,39 +905,39 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                   <span class="dps-table-val font-mono">12.0s Storing / ${effSpaVal.toFixed(2)}s SPA</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Attacks in 12s Storing Window</span>
+                  <span class="dps-table-lbl">Attacks in 12s Storing Window</span>
                   <span class="dps-table-val font-mono">roundup(12 / ${effSpaVal.toFixed(2)}s) = ${storingAttacks} attacks</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Stored Direct DMG per unit (incl. Crits)</span>
+                  <span class="dps-table-lbl">Stored Direct DMG per unit (incl. Crits)</span>
                   <span class="dps-table-val font-mono">${storingAttacks} &times; ${Math.round(breakdown.avgHitDamage || 0).toLocaleString()} = ${Math.round(directStoredDmg).toLocaleString()} DMG</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Stored Black Fire DoT DMG per unit</span>
+                  <span class="dps-table-lbl">Stored Black Fire DoT DMG per unit</span>
                   <span class="dps-table-val font-mono">${Math.round(dotStoredDmg).toLocaleString()} DMG</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Total Stored DMG per unit</span>
+                  <span class="dps-table-lbl">Total Stored DMG per unit</span>
                   <span class="dps-table-val font-mono">${Math.round(totalStoredDmg).toLocaleString()} DMG</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Base Explosion Conversion (${Math.round(effectiveness * 100)}%)</span>
+                  <span class="dps-table-lbl">Base Explosion Conversion (${Math.round(effectiveness * 100)}%)</span>
                   <span class="dps-table-val font-mono">${Math.round(baseExplosion).toLocaleString()} DMG</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Crit Multiplier</span>
+                  <span class="dps-table-lbl">Crit Multiplier</span>
                   <span class="dps-table-val font-mono"><span class="faint-mult">x${critMult.toFixed(2)}</span>${Math.round(singleExplosionWithCrit).toLocaleString()} DMG</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Target Scaling (${enemiesHit} enemies hit)</span>
+                  <span class="dps-table-lbl">Target Scaling (${enemiesHit} enemies hit)</span>
                   <span class="dps-table-val font-mono">${Math.round(singleExplosionWithCrit).toLocaleString()} &times; ${enemiesHit} = ${Math.round(totalExplosionPerUnit).toLocaleString()} DMG</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Total Field Explosion (${placementCount} placements)</span>
+                  <span class="dps-table-lbl">Total Field Explosion (${placementCount} placements)</span>
                   <span class="dps-table-val font-mono">${Math.round(totalExplosionPerUnit).toLocaleString()} &times; ${placementCount} = ${Math.round(fieldExplosionDmg).toLocaleString()} DMG</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Total Cycle Window</span>
+                  <span class="dps-table-lbl">Total Cycle Window</span>
                   <span class="dps-table-val font-mono">roundup(22 / ${effSpaVal.toFixed(2)}s) &times; ${effSpaVal.toFixed(2)}s = ${cycleTime.toFixed(1)}s</span>
                 </div>
                 <div class="dps-table-row primary" style="margin-bottom: 4px;">
@@ -955,19 +955,19 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                   <span class="dps-table-val font-mono">${Math.round(entry.averageFollowUpHit).toLocaleString()} DMG</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Unit Effective Base DMG</span>
+                  <span class="dps-table-lbl">Unit Effective Base DMG</span>
                   <span class="dps-table-val font-mono">${Math.round(entry.inputDamage).toLocaleString()}</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Spell Scaling Multiplier</span>
+                  <span class="dps-table-lbl">Spell Scaling Multiplier</span>
                   <span class="dps-table-val font-mono"><span class="faint-mult">x${entry.finalMult.toFixed(2)}</span>${Math.round(entry.effectiveFollowUpDamage).toLocaleString()} DMG</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Crit Multiplier</span>
+                  <span class="dps-table-lbl">Crit Multiplier</span>
                   <span class="dps-table-val font-mono"><span class="faint-mult">x${critMult.toFixed(2)}</span>${Math.round(entry.averageFollowUpHit).toLocaleString()} DMG</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Spell Cycle SPA (7 attacks)</span>
+                  <span class="dps-table-lbl">Spell Cycle SPA (7 attacks)</span>
                   <span class="dps-table-val font-mono">7 &times; ${effSpaVal.toFixed(2)}s = ${spellInterval.toFixed(2)}s</span>
                 </div>
                 <div class="dps-table-row primary" style="margin-bottom: 8px;">
@@ -985,24 +985,24 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                   <span class="dps-table-val font-mono">${Math.round(entry.averageFollowUpHit).toLocaleString()} DMG</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Copied Unit DMG</span>
+                  <span class="dps-table-lbl">Copied Unit DMG</span>
                   <span class="dps-table-val font-mono">${Math.round(entry.inputDamage).toLocaleString()}</span>
                 </div>
                 ${(entry.relicArchetypeDamageMult || 0) > 0 ? `
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Relic Archetype DMG Multiplier</span>
+                  <span class="dps-table-lbl">Relic Archetype DMG Multiplier</span>
                   <span class="dps-table-val font-mono"><span class="faint-mult">x${entry.fuaDamageScale.toFixed(2)}</span>${Math.round(entry.effectiveFollowUpDamage).toLocaleString()} DMG</span>
                 </div>` : ""}
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; + Unit Base Hit DMG</span>
+                  <span class="dps-table-lbl">+ Unit Base Hit DMG</span>
                   <span class="dps-table-val font-mono">+${Math.round(entry.effDamage).toLocaleString()} = ${Math.round(entry.combinedHitDamage).toLocaleString()} DMG</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Crit Multiplier</span>
+                  <span class="dps-table-lbl">Crit Multiplier</span>
                   <span class="dps-table-val font-mono"><span class="faint-mult">x${critMult.toFixed(2)}</span>${Math.round(entry.averageFollowUpHit).toLocaleString()} DMG</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">&mdash; Mimicry SPA Interval (3 attacks)</span>
+                  <span class="dps-table-lbl">Mimicry SPA Interval (3 attacks)</span>
                   <span class="dps-table-val font-mono">3 &times; ${effSpaVal.toFixed(2)}s = ${fuaInterval.toFixed(2)}s</span>
                 </div>
                 <div class="dps-table-row primary" style="margin-bottom: 8px;">

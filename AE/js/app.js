@@ -10,11 +10,13 @@ import { DpsPage } from "../pages/dps-page.js";
 import { UnitInfoPage } from "../components/unit-info/unit-info-page.js";
 import { getUnitById } from "../data/units.js";
 import { getItem, setItem } from "./store.js";
+import { IS_TRAITS_PUBLISHED } from "../data/traits.js";
 
 const SECTION_KEY = "active-section";
 
+const initialSection = getItem(SECTION_KEY, "home");
 const state = {
-  section: getItem(SECTION_KEY, "home"),
+  section: (initialSection === "traits" && !IS_TRAITS_PUBLISHED) ? "home" : initialSection,
   query: "",
 };
 
@@ -79,7 +81,10 @@ function goToSection(id) {
   renderContent();
 }
 
-window.addEventListener("navigate", (e) => goToSection(e.detail.id));
+window.addEventListener("navigate", (e) => {
+  if (e.detail.id === "traits" && !IS_TRAITS_PUBLISHED) return;
+  goToSection(e.detail.id);
+});
 
 window.addEventListener("open-unit", (e) => {
   openTab(e.detail.id, e.detail.activeSubTab);

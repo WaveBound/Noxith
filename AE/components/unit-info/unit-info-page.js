@@ -645,7 +645,9 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
     const { base, effDamage, effSpa, effRange,
       effCritChance, effCritDamage, critAvgMult, avgHitDamage, effDotMult,
       unitDirectDPS, unitDoTDPS, totalSummonDPS, fuaDps, scaledBaseDamage,
-      dotIntervalSPA, darkMageMode, levelMult, summonBreakdowns, fuaBreakdowns, giantForm, berserkState, demonicPresence } = bd;
+      dotIntervalSPA, darkMageMode, levelMult, summonBreakdowns, fuaBreakdowns, giantForm, berserkState, demonicPresence,
+      relicDamageMult, relicArchetypeDamageMult, relicSpaMult, relicRangeMult,
+      totalPassiveDamageBonus, passiveSpaMult, passiveRangeMult, shinigamiActive, hasAscend, unitArchetype } = bd;
 
     const lvlMult = levelMult || 1;
     const placementCount = parseInt(String(unit.placementCount || unit.stats?.placementCount || "1").replace(/[^0-9]/g, ""), 10) || 1;
@@ -768,9 +770,9 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
               <div class="dps-section-hd color-summons">${idx + 1}. ${s.name}</div>
               <div class="dps-kv-list">
                 <div class="dps-kv"><span class="dps-kv-lbl">Active Field Count</span><span class="dps-kv-val font-mono">${s.activeCount} on field</span></div>
-                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Hit Damage</span><span class="dps-kv-val font-mono">${Math.round(s.effDamage).toLocaleString()} DMG</span></div>
-                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Crit Avg Hit</span><span class="dps-kv-val font-mono">${Math.round(s.avgHitDamage).toLocaleString()} DMG</span></div>
-                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Effective SPA</span><span class="dps-kv-val font-mono">${(s.effSpa || 1).toFixed(1)}s</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Hit Damage</span><span class="dps-kv-val font-mono">${Math.round(s.effDamage).toLocaleString()} DMG</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Crit Avg Hit</span><span class="dps-kv-val font-mono">${Math.round(s.avgHitDamage).toLocaleString()} DMG</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Effective SPA</span><span class="dps-kv-val font-mono">${(s.effSpa || 1).toFixed(1)}s</span></div>
                 <div class="dps-kv primary"><span class="dps-kv-lbl summons-highlight">${s.name} DPS</span><span class="dps-kv-val font-mono summons-highlight">+${formatDPS(s.dps)}</span></div>
               </div>
             </div>`;
@@ -788,6 +790,213 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
     const inspectedSpa = inspectedSummon ? inspectedSummon.effSpa : effSpa;
     const inspectedBaseDmg = inspectedSummon ? inspectedSummon.baseDamage : base.damage;
     const inspectedBaseSpa = inspectedSummon ? (inspectedSummon.baseSpa || 1) : (base.spa || 1);
+
+    // ── DYNAMIC MATH STEPS ACCUMULATION ──
+    let dmgRowsHtml = "";
+    if (inspectedSummon) {
+      if (inspectedSummon.hasOwnUpgrades) {
+        let sDmgAccum = inspectedSummon.rawMaxDamage || 0;
+        dmgRowsHtml += `
+          <div class="dps-kv"><span class="dps-kv-lbl">Base Max Upgrade DMG (Lv. 1)</span><span class="dps-kv-val font-mono">${Math.round(sDmgAccum).toLocaleString()}</span></div>
+        `;
+        if (inspectedSummon.levelMult > 1) {
+          sDmgAccum = Math.round(sDmgAccum * inspectedSummon.levelMult);
+          dmgRowsHtml += `
+            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Level Scaling</span><span class="dps-kv-val font-mono"><span class="faint-mult">x${inspectedSummon.levelMult.toFixed(2)}</span>${Math.round(sDmgAccum).toLocaleString()}</span></div>
+          `;
+        }
+        if (inspectedSummon.traitDmgBonus > 0) {
+          sDmgAccum = Math.round(sDmgAccum * (1 + inspectedSummon.traitDmgBonus));
+          dmgRowsHtml += `
+            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Trait DMG Multiplier</span><span class="dps-kv-val font-mono"><span class="faint-mult">x${(1 + inspectedSummon.traitDmgBonus).toFixed(2)}</span>${Math.round(sDmgAccum).toLocaleString()}</span></div>
+          `;
+        }
+        if (inspectedSummon.relicTotalDmgMult > 0) {
+          sDmgAccum = Math.round(sDmgAccum * (1 + inspectedSummon.relicTotalDmgMult));
+          dmgRowsHtml += `
+            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Relic DMG Multiplier</span><span class="dps-kv-val font-mono"><span class="faint-mult">x${(1 + inspectedSummon.relicTotalDmgMult).toFixed(2)}</span>${Math.round(sDmgAccum).toLocaleString()}</span></div>
+          `;
+        }
+        if (inspectedSummon.isZStat) {
+          sDmgAccum = Math.round(sDmgAccum * 1.20);
+          dmgRowsHtml += `
+            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Z Stat Multiplier</span><span class="dps-kv-val font-mono"><span class="faint-mult">x1.20</span>${Math.round(sDmgAccum).toLocaleString()}</span></div>
+          `;
+        }
+        if (inspectedSummon.hasAscend) {
+          sDmgAccum = Math.round(sDmgAccum * 1.15);
+          dmgRowsHtml += `
+            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Ascension III Multiplier</span><span class="dps-kv-val font-mono"><span class="faint-mult">x1.15</span>${Math.round(sDmgAccum).toLocaleString()}</span></div>
+          `;
+        }
+      } else {
+        const scaleMult = effDamage > 0 ? (inspectedSummon.effDamage / effDamage) : 0;
+        dmgRowsHtml += `
+          <div class="dps-kv"><span class="dps-kv-lbl">Main Unit DMG</span><span class="dps-kv-val font-mono">${Math.round(effDamage).toLocaleString()}</span></div>
+          <div class="dps-kv faint-nested">
+            <span class="dps-kv-lbl">Summon Base Scale</span>
+            <span class="dps-kv-val font-mono"><span class="faint-mult">&times;${scaleMult.toFixed(2)}</span>${Math.round(inspectedSummon.effDamage || 0).toLocaleString()}</span>
+          </div>
+        `;
+      }
+      dmgRowsHtml += `
+        <div class="dps-kv primary"><span class="dps-kv-lbl damage-highlight">Effective DMG</span><span class="dps-kv-val font-mono damage-highlight">${Math.round(inspectedSummon.effDamage || 0).toLocaleString()}</span></div>
+      `;
+    } else {
+      let dmgAccum = base.damage || 0;
+      dmgRowsHtml += `
+        <div class="dps-kv"><span class="dps-kv-lbl">Base Hit</span><span class="dps-kv-val font-mono">${Math.round(base.damage || 0).toLocaleString()}</span></div>
+      `;
+      if (lvlMult > 1) {
+        dmgAccum = Math.round(dmgAccum * lvlMult);
+        dmgRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Lvl 50 <span class="faint-mult">(${lvlMult.toFixed(2)}x)</span></span><span class="dps-kv-val font-mono">${dmgAccum.toLocaleString()}</span></div>
+        `;
+      }
+      if (relicDamageMult > 0) {
+        dmgAccum = Math.round(dmgAccum * (1 + relicDamageMult));
+        dmgRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Relic DMG Multiplier</span><span class="dps-kv-val font-mono"><span class="faint-mult">x${(1 + relicDamageMult).toFixed(2)}</span>${dmgAccum.toLocaleString()}</span></div>
+        `;
+      }
+      if (relicArchetypeDamageMult > 0) {
+        dmgAccum = Math.round(dmgAccum * (1 + relicArchetypeDamageMult));
+        const archLabel = (unitArchetype || "Archetype").charAt(0).toUpperCase() + (unitArchetype || "Archetype").slice(1);
+        dmgRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Relic ${archLabel} DMG Multiplier</span><span class="dps-kv-val font-mono"><span class="faint-mult">x${(1 + relicArchetypeDamageMult).toFixed(2)}</span>${dmgAccum.toLocaleString()}</span></div>
+        `;
+      }
+      if (currentStatMode === "Z") {
+        dmgAccum = Math.round(dmgAccum * 1.20);
+        dmgRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Z Stat <span class="faint-mult">(x1.20)</span></span><span class="dps-kv-val font-mono">${dmgAccum.toLocaleString()}</span></div>
+        `;
+      }
+      if (hasAscend) {
+        dmgAccum = Math.round(dmgAccum * 1.15);
+        dmgRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Ascension III <span class="faint-mult">(x1.15)</span></span><span class="dps-kv-val font-mono">${dmgAccum.toLocaleString()}</span></div>
+        `;
+      }
+      if (totalPassiveDamageBonus > 0) {
+        dmgAccum = Math.round(dmgAccum * (1 + totalPassiveDamageBonus));
+        const parts = [];
+        if (shinigamiActive) parts.push("Shinigami +15%");
+        if (bd.isReaper) parts.push("Adaptation +40%");
+        if (bd.isEighthSword && berserkState) parts.push("Berserk +20%");
+        if (bd.isLadyGiant && giantForm) parts.push("Giant Form +125%");
+        const labelText = parts.length > 0 ? parts.join(" + ") : "Passives";
+        dmgRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Passives (${labelText})</span><span class="dps-kv-val font-mono"><span class="faint-mult">x${(1 + totalPassiveDamageBonus).toFixed(2)}</span>${dmgAccum.toLocaleString()}</span></div>
+        `;
+      }
+      dmgRowsHtml += `
+        <div class="dps-kv primary"><span class="dps-kv-lbl damage-highlight">Effective DMG</span><span class="dps-kv-val font-mono damage-highlight">${Math.round(effDamage || 0).toLocaleString()}</span></div>
+      `;
+    }
+
+    let spaRowsHtml = "";
+    if (inspectedSummon) {
+      let sSpaAccum = inspectedSummon.baseSpa || 1;
+      spaRowsHtml += `
+        <div class="dps-kv"><span class="dps-kv-lbl">Base Summon SPA</span><span class="dps-kv-val font-mono">${sSpaAccum.toFixed(2)}s</span></div>
+      `;
+      if ((inspectedSummon.traitSpaBonus || 0) !== 0) {
+        sSpaAccum = sSpaAccum * (1 + inspectedSummon.traitSpaBonus);
+        spaRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Trait SPA Multiplier</span><span class="dps-kv-val font-mono"><span class="faint-mult">x${(1 + inspectedSummon.traitSpaBonus).toFixed(2)}</span>${sSpaAccum.toFixed(2)}s</span></div>
+        `;
+      }
+      if ((inspectedSummon.relicSpaMult || 0) !== 0) {
+        sSpaAccum = sSpaAccum * (1 + inspectedSummon.relicSpaMult);
+        spaRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Relic SPA Multiplier</span><span class="dps-kv-val font-mono"><span class="faint-mult">x${(1 + inspectedSummon.relicSpaMult).toFixed(2)}</span>${sSpaAccum.toFixed(2)}s</span></div>
+        `;
+      }
+      if (inspectedSummon.isZStat) {
+        sSpaAccum = sSpaAccum * 0.85;
+        spaRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Z Stat SPA Multiplier</span><span class="dps-kv-val font-mono"><span class="faint-mult">x0.85</span>${sSpaAccum.toFixed(2)}s</span></div>
+        `;
+      }
+      spaRowsHtml += `
+        <div class="dps-kv primary"><span class="dps-kv-lbl spa-highlight">Final SPA</span><span class="dps-kv-val font-mono spa-highlight">${(inspectedSummon.effSpa || 1).toFixed(2)}s</span></div>
+      `;
+    } else {
+      let spaAccum = base.spa || 1;
+      spaRowsHtml += `
+        <div class="dps-kv"><span class="dps-kv-lbl">Base SPA</span><span class="dps-kv-val font-mono">${spaAccum.toFixed(2)}s</span></div>
+      `;
+      if (relicSpaMult !== 0) {
+        spaAccum = spaAccum * (1 + relicSpaMult);
+        spaRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Relic SPA Multiplier</span><span class="dps-kv-val font-mono"><span class="faint-mult">x${(1 + relicSpaMult).toFixed(2)}</span>${spaAccum.toFixed(2)}s</span></div>
+        `;
+      }
+      if (currentStatMode === "Z") {
+        spaAccum = spaAccum * 0.85;
+        spaRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Z Stat <span class="faint-mult">(x0.85)</span></span><span class="dps-kv-val font-mono">${spaAccum.toFixed(2)}s</span></div>
+        `;
+      }
+      if (passiveSpaMult !== 0) {
+        spaAccum = spaAccum * (1 + passiveSpaMult);
+        const parts = [];
+        if (bd.isReaper) parts.push("Reaper -10%");
+        if (bd.isLadyGiant && giantForm) parts.push("Giant Form +25%");
+        if (bd.isEighthSword && berserkState) parts.push("Berserk -10%");
+        const labelText = parts.length > 0 ? parts.join(" + ") : "Passives";
+        spaRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Passives (${labelText})</span><span class="dps-kv-val font-mono"><span class="faint-mult">x${(1 + passiveSpaMult).toFixed(2)}</span>${spaAccum.toFixed(2)}s</span></div>
+        `;
+      }
+      spaRowsHtml += `
+        <div class="dps-kv primary"><span class="dps-kv-lbl spa-highlight">Final SPA</span><span class="dps-kv-val font-mono spa-highlight">${Math.max(0.1, effSpa).toFixed(2)}s</span></div>
+      `;
+    }
+
+    let rangeRowsHtml = "";
+    if (inspectedSummon) {
+      rangeRowsHtml += `
+        <div class="dps-kv"><span class="dps-kv-lbl">Base Range</span><span class="dps-kv-val font-mono">${(base.range || 0).toFixed(1)}</span></div>
+        <div class="dps-kv primary"><span class="dps-kv-lbl range-highlight">Final Range</span><span class="dps-kv-val font-mono range-highlight">${(effRange || 0).toFixed(1)}</span></div>
+      `;
+    } else {
+      let rangeAccum = base.range || 0;
+      rangeRowsHtml += `
+        <div class="dps-kv"><span class="dps-kv-lbl">Base Range</span><span class="dps-kv-val font-mono">${rangeAccum.toFixed(1)}</span></div>
+      `;
+      if (relicRangeMult !== 0) {
+        rangeAccum = rangeAccum * (1 + relicRangeMult);
+        rangeRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Relic Range Multiplier</span><span class="dps-kv-val font-mono"><span class="faint-mult">x${(1 + relicRangeMult).toFixed(2)}</span>${rangeAccum.toFixed(1)}</span></div>
+        `;
+      }
+      if (currentStatMode === "Z") {
+        rangeAccum = rangeAccum * 1.15;
+        rangeRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Z Stat <span class="faint-mult">(x1.15)</span></span><span class="dps-kv-val font-mono">${rangeAccum.toFixed(1)}</span></div>
+        `;
+      }
+      if (hasAscend) {
+        rangeAccum = rangeAccum * 1.05;
+        rangeRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Ascension III <span class="faint-mult">(x1.05)</span></span><span class="dps-kv-val font-mono">${rangeAccum.toFixed(1)}</span></div>
+        `;
+      }
+      if (passiveRangeMult !== 0) {
+        rangeAccum = rangeAccum * (1 + passiveRangeMult);
+        const parts = [];
+        if (bd.isLadyGiant && giantForm) parts.push("Giant Form +50%");
+        const labelText = parts.length > 0 ? parts.join(" + ") : "Passives";
+        rangeRowsHtml += `
+          <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Passives (${labelText})</span><span class="dps-kv-val font-mono"><span class="faint-mult">x${(1 + passiveRangeMult).toFixed(2)}</span>${rangeAccum.toFixed(1)}</span></div>
+        `;
+      }
+      rangeRowsHtml += `
+        <div class="dps-kv primary"><span class="dps-kv-lbl range-highlight">Final Range</span><span class="dps-kv-val font-mono range-highlight">${(effRange || 0).toFixed(1)}</span></div>
+      `;
+    }
 
     container.innerHTML = `
       ${dpsSummonBarHtml}
@@ -830,33 +1039,26 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
               </div>
             </div>
           </div>
-
+ 
           <div class="uip-dps-split-columns">
             <div class="uip-dps-subcol">
               <div class="uip-dps-cards-row primary-stats-row">
                 <div class="dps-section section-damage">
                   <div class="dps-section-hd">Damage</div>
                   <div class="dps-kv-list">
-                    <div class="dps-kv"><span class="dps-kv-lbl">Base Hit</span><span class="dps-kv-val font-mono">${Math.round(inspectedBaseDmg || 0).toLocaleString()}</span></div>
-                    ${currentLevel > 1 ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Lvl 50 <span class="faint-mult">(${lvlMult.toFixed(2)}x)</span></span><span class="dps-kv-val font-mono">${Math.round(scaledBaseDamage || 0).toLocaleString()}</span></div>` : ""}
-                    ${currentStatMode === "Z" ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Z Stat <span class="faint-mult">(x1.20)</span></span><span class="dps-kv-val font-mono">${Math.round(inspectedDmg || 0).toLocaleString()}</span></div>` : ""}
-                    <div class="dps-kv primary"><span class="dps-kv-lbl damage-highlight">Effective DMG</span><span class="dps-kv-val font-mono damage-highlight">${Math.round(inspectedDmg || 0).toLocaleString()}</span></div>
+                    ${dmgRowsHtml}
                   </div>
                 </div>
                 <div class="dps-section section-spa">
                   <div class="dps-section-hd">SPA</div>
                   <div class="dps-kv-list">
-                    <div class="dps-kv"><span class="dps-kv-lbl">Base</span><span class="dps-kv-val font-mono">${(Number(inspectedBaseSpa) || 1).toFixed(1)}s</span></div>
-                    ${currentStatMode === "Z" ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Z Stat <span class="faint-mult">(x0.85)</span></span><span class="dps-kv-val font-mono">${(inspectedSpa || 1).toFixed(2)}s</span></div>` : ""}
-                    <div class="dps-kv primary"><span class="dps-kv-lbl spa-highlight">Final SPA</span><span class="dps-kv-val font-mono spa-highlight">${(inspectedSpa || 1).toFixed(2)}s</span></div>
+                    ${spaRowsHtml}
                   </div>
                 </div>
                 <div class="dps-section section-range">
                   <div class="dps-section-hd">Range</div>
                   <div class="dps-kv-list">
-                    <div class="dps-kv"><span class="dps-kv-lbl">Base</span><span class="dps-kv-val font-mono">${(base.range || 0).toFixed(1)}</span></div>
-                    ${currentStatMode === "Z" ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Z Stat <span class="faint-mult">(x1.15)</span></span><span class="dps-kv-val font-mono">${((base.range || 0) * 1.15).toFixed(1)}</span></div>` : ""}
-                    <div class="dps-kv primary"><span class="dps-kv-lbl range-highlight">Final</span><span class="dps-kv-val font-mono range-highlight">${(effRange || 0).toFixed(1)}</span></div>
+                    ${rangeRowsHtml}
                   </div>
                 </div>
               </div>

@@ -3,6 +3,7 @@
 // Emits a "navigate" CustomEvent on window with { detail: { id } } when a tab is clicked.
 
 import { getOpenTabs, getActiveTab, setActiveTab, closeTab } from "../tabs/tabs.js";
+import { IS_TRAITS_PUBLISHED } from "../../data/traits.js";
 
 const NAV_ITEMS = [
   {
@@ -52,7 +53,8 @@ export async function initSidebar({ mountEl, activeId = "units", getUnitById }) 
   const node = template.content.cloneNode(true);
 
   const nav = node.querySelector("#sidebar-nav");
-  NAV_ITEMS.forEach((item) => {
+  const visibleNavItems = NAV_ITEMS.filter(item => item.id !== "traits" || IS_TRAITS_PUBLISHED);
+  visibleNavItems.forEach((item) => {
     const el = document.createElement("button");
     el.className = "nav-item";
     el.dataset.navId = item.id;
