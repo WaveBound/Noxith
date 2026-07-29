@@ -783,7 +783,7 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
     const finalCombinedDPS = singlePlacementDPS * placementCount;
 
     const inspectedSummon = (activeDpsSummonId !== "main" && summonBreakdowns)
-      ? summonBreakdowns.find(sb => sb.id === activeDpsSummonId)
+      ? summonBreakdowns.find(sb => sb.id === activeDpsSummonId || sb.name === activeDpsSummonId || String(sb.id).toLowerCase() === String(activeDpsSummonId).toLowerCase())
       : null;
 
     const inspectedDmg = inspectedSummon ? inspectedSummon.effDamage : effDamage;
@@ -998,6 +998,132 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
       `;
     }
 
+    let splitColumnsHtml = "";
+    if (inspectedSummon) {
+      splitColumnsHtml = `
+        <div class="uip-dps-split-columns">
+          <div class="uip-dps-subcol">
+            <div class="uip-dps-cards-row primary-stats-row">
+              <div class="dps-section section-damage">
+                <div class="dps-section-hd">Damage</div>
+                <div class="dps-kv-list">
+                  ${dmgRowsHtml}
+                </div>
+              </div>
+              <div class="dps-section section-spa">
+                <div class="dps-section-hd">SPA</div>
+                <div class="dps-kv-list">
+                  ${spaRowsHtml}
+                </div>
+              </div>
+            </div>
+            <div class="uip-dps-cards-row secondary-stats-row${(inspectedSummon.dotDps || 0) > 0 ? " has-dot" : " single-card"}">
+              <div class="dps-section section-crit">
+                <div class="dps-section-hd">Crit Averaging</div>
+                <div class="dps-kv-list">
+                  <div class="dps-kv"><span class="dps-kv-lbl">Base Hit DMG</span><span class="dps-kv-val font-mono">${Math.round(inspectedSummon.effDamage || 0).toLocaleString()}</span></div>
+                  <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Crit Multiplier</span><span class="dps-kv-val font-mono"><span class="faint-mult">x${(inspectedSummon.critAvgMult || critAvgMult || 1.0).toFixed(2)}</span>${Math.round(inspectedSummon.avgHitDamage || 0).toLocaleString()}</span></div>
+                  <div class="dps-kv primary"><span class="dps-kv-lbl summons-highlight">Avg Hit DMG (with Crit)</span><span class="dps-kv-val font-mono summons-highlight">${Math.round(inspectedSummon.avgHitDamage || 0).toLocaleString()}</span></div>
+                </div>
+              </div>
+              ${(inspectedSummon.dotDps || 0) > 0 ? `
+              <div class="dps-section section-dot">
+                <div class="dps-section-hd">DoT Calculation (${inspectedSummon.dotName || "Bleed"})</div>
+                <div class="dps-kv-list">
+                  <div class="dps-kv"><span class="dps-kv-lbl">Summon Base Hit</span><span class="dps-kv-val font-mono">${Math.round(inspectedSummon.effDamage || 0).toLocaleString()}</span></div>
+                  <div class="dps-kv primary"><span class="dps-kv-lbl dot-highlight">DoT DPS</span><span class="dps-kv-val font-mono dot-highlight">+${formatDPS(inspectedSummon.dotDps)} DPS</span></div>
+                </div>
+              </div>` : ""}
+            </div>
+          </div>
+          <div class="uip-dps-subcol">
+            <div class="dps-section section-damage">
+              <div class="dps-section-hd">Direct Output &amp; DPS</div>
+              <div class="dps-kv-list">
+                <div class="dps-kv"><span class="dps-kv-lbl">Summon Output (${inspectedSummon.activeCount || 1} active)</span><span class="dps-kv-val font-mono">${Math.round(inspectedSummon.avgHitDamage || 0).toLocaleString()} &times; ${inspectedSummon.activeCount || 1} = ${Math.round((inspectedSummon.avgHitDamage || 0) * (inspectedSummon.activeCount || 1)).toLocaleString()}</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Final Summon SPA</span><span class="dps-kv-val font-mono">${(inspectedSummon.effSpa || 1).toFixed(2)}s</span></div>
+                <div class="dps-kv primary"><span class="dps-kv-lbl summons-highlight">Direct DPS</span><span class="dps-kv-val font-mono summons-highlight">+${formatDPS(inspectedSummon.directDps)} DPS</span></div>
+              </div>
+            </div>
+
+            <div class="dps-section section-damage placement-total-card">
+              <div class="dps-section-hd">${inspectedSummon.name || "Summon"} DPS Total</div>
+              <div class="dps-kv-list">
+                <div class="dps-kv"><span class="dps-kv-lbl">Single Placement Summon DPS</span><span class="dps-kv-val font-mono">${formatDPS(inspectedSummon.dps)} DPS</span></div>
+                <div class="dps-kv primary"><span class="dps-kv-lbl combined-highlight">All Summons Total (${placementCount} placements)</span><span class="dps-kv-val font-mono combined-highlight">+${formatDPS(inspectedSummon.dps * placementCount)} DPS</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      splitColumnsHtml = `
+        <div class="uip-dps-split-columns">
+          <div class="uip-dps-subcol">
+            <div class="uip-dps-cards-row primary-stats-row">
+              <div class="dps-section section-damage">
+                <div class="dps-section-hd">Damage</div>
+                <div class="dps-kv-list">
+                  ${dmgRowsHtml}
+                </div>
+              </div>
+              <div class="dps-section section-spa">
+                <div class="dps-section-hd">SPA</div>
+                <div class="dps-kv-list">
+                  ${spaRowsHtml}
+                </div>
+              </div>
+              <div class="dps-section section-range">
+                <div class="dps-section-hd">Range</div>
+                <div class="dps-kv-list">
+                  ${rangeRowsHtml}
+                </div>
+              </div>
+            </div>
+
+            <div class="uip-dps-cards-row secondary-stats-row${(unitDoTDPS || 0) > 0 ? " has-dot" : " single-card"}">
+              <div class="dps-section section-crit">
+                <div class="dps-section-hd">Crit Averaging</div>
+                <div class="dps-kv-list">
+                  <div class="dps-kv"><span class="dps-kv-lbl">Base Rate / Mult</span><span class="dps-kv-val font-mono">${base.critChancePercent}% / ${base.critDamagePercent}%</span></div>
+                  <div class="dps-kv"><span class="dps-kv-lbl">Final Rate / Mult</span><span class="dps-kv-val font-mono">${Math.min(100, ((effCritChance || 0) * 100)).toFixed(0)}% / ${((effCritDamage || 1) * 100).toFixed(0)}% <span class="faint-mult">→ x${(critAvgMult || 1).toFixed(2)} avg</span></span></div>
+                  <div class="dps-kv primary"><span class="dps-kv-lbl crit-highlight">Avg Hit DMG</span><span class="dps-kv-val font-mono crit-highlight">${Math.round(inspectedSummon ? inspectedSummon.avgHitDamage : avgHitDamage).toLocaleString()}</span></div>
+                </div>
+              </div>
+
+              ${(unitDoTDPS || 0) > 0 ? `
+              <div class="dps-section section-dot">
+                <div class="dps-section-hd">${isCrow ? "Black Fire Calculation" : "DoT Calculation"}</div>
+                <div class="dps-kv-list">
+                  <div class="dps-kv"><span class="dps-kv-lbl">Effect</span><span class="dps-kv-val">${formatPassiveText(base.dotName)}</span></div>
+                  <div class="dps-kv"><span class="dps-kv-lbl">Total DoT Scale</span><span class="dps-kv-val font-mono">${isCrow ? "2.00x Base Hit" : (effDotMult || 0).toFixed(2) + "x"}</span></div>
+                  <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Total DoT DMG</span><span class="dps-kv-val font-mono dot-highlight">${Math.round(effDamage * (isCrow ? 2.0 : (effDotMult || 0))).toLocaleString()} DMG</span></div>
+                  <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Duration &amp; Interval</span><span class="dps-kv-val font-mono">${isCrow ? `12s / ${(dotIntervalSPA || 12).toFixed(2)}s re-proc` : `${(bd.dotDuration || 8).toFixed(1)}s / ${(dotIntervalSPA || 1).toFixed(2)}s`}</span></div>
+                  <div class="dps-kv primary"><span class="dps-kv-lbl dot-highlight">DoT DPS</span><span class="dps-kv-val font-mono dot-highlight">+${formatDPS(unitDoTDPS)} DPS</span></div>
+                </div>
+              </div>` : ""}
+            </div>
+          </div>
+
+          <div class="uip-dps-subcol">
+            ${followupSectionHtml}
+
+            <div class="dps-section section-damage placement-total-card">
+              <div class="dps-section-hd">Placement DPS Total</div>
+              <div class="dps-kv-list">
+                <div class="dps-kv"><span class="dps-kv-lbl">Single Placement DPS</span><span class="dps-kv-val font-mono">${Math.round(singlePlacementDPS).toLocaleString()} DPS</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Unit Direct DPS x placements</span><span class="dps-kv-val font-mono">${Math.round(unitDirectDPS || 0).toLocaleString()} x ${placementCount} = ${Math.round((unitDirectDPS || 0) * placementCount).toLocaleString()}</span></div>
+                ${(unitDoTDPS || 0) > 0 ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">${isCrow ? "Black Fire DoT x placements" : "DoT DPS x placements"}</span><span class="dps-kv-val font-mono">${Math.round(unitDoTDPS).toLocaleString()} x ${placementCount} = ${Math.round(unitDoTDPS * placementCount).toLocaleString()}</span></div>` : ""}
+                ${(fuaDps || 0) > 0 ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">${isCrow ? "Illusion DPS x placements" : "Follow-Up DPS x placements"}</span><span class="dps-kv-val font-mono">${Math.round(fuaDps).toLocaleString()} x ${placementCount} = ${Math.round(fuaDps * placementCount).toLocaleString()}</span></div>` : ""}
+                ${unit.summons ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">Summons Total Field DPS</span><span class="dps-kv-val font-mono">+${Math.round(totalSummonDPS || 0).toLocaleString()} DPS</span></div>` : ""}
+                <div class="dps-kv primary"><span class="dps-kv-lbl combined-highlight">Total Field DPS</span><span class="dps-kv-val font-mono combined-highlight">${Math.round(finalCombinedDPS).toLocaleString()} DPS</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     container.innerHTML = `
       ${dpsSummonBarHtml}
       <div class="uip-dps-main-grid${unit.summons ? " has-summons" : " no-summons"}">
@@ -1040,69 +1166,7 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
             </div>
           </div>
  
-          <div class="uip-dps-split-columns">
-            <div class="uip-dps-subcol">
-              <div class="uip-dps-cards-row primary-stats-row">
-                <div class="dps-section section-damage">
-                  <div class="dps-section-hd">Damage</div>
-                  <div class="dps-kv-list">
-                    ${dmgRowsHtml}
-                  </div>
-                </div>
-                <div class="dps-section section-spa">
-                  <div class="dps-section-hd">SPA</div>
-                  <div class="dps-kv-list">
-                    ${spaRowsHtml}
-                  </div>
-                </div>
-                <div class="dps-section section-range">
-                  <div class="dps-section-hd">Range</div>
-                  <div class="dps-kv-list">
-                    ${rangeRowsHtml}
-                  </div>
-                </div>
-              </div>
-
-              <div class="uip-dps-cards-row secondary-stats-row${(unitDoTDPS || 0) > 0 ? " has-dot" : " single-card"}">
-                <div class="dps-section section-crit">
-                  <div class="dps-section-hd">Crit Averaging</div>
-                  <div class="dps-kv-list">
-                    <div class="dps-kv"><span class="dps-kv-lbl">Base Rate / Mult</span><span class="dps-kv-val font-mono">${base.critChancePercent}% / ${base.critDamagePercent}%</span></div>
-                    <div class="dps-kv"><span class="dps-kv-lbl">Final Rate / Mult</span><span class="dps-kv-val font-mono">${Math.min(100, ((effCritChance || 0) * 100)).toFixed(0)}% / ${((effCritDamage || 1) * 100).toFixed(0)}% <span class="faint-mult">→ x${(critAvgMult || 1).toFixed(2)} avg</span></span></div>
-                    <div class="dps-kv primary"><span class="dps-kv-lbl crit-highlight">Avg Hit DMG</span><span class="dps-kv-val font-mono crit-highlight">${Math.round(inspectedSummon ? inspectedSummon.avgHitDamage : avgHitDamage).toLocaleString()}</span></div>
-                  </div>
-                </div>
-
-                ${(unitDoTDPS || 0) > 0 ? `
-                <div class="dps-section section-dot">
-                  <div class="dps-section-hd">${isCrow ? "Black Fire Calculation" : "DoT Calculation"}</div>
-                  <div class="dps-kv-list">
-                    <div class="dps-kv"><span class="dps-kv-lbl">Effect</span><span class="dps-kv-val">${formatPassiveText(base.dotName)}</span></div>
-                    <div class="dps-kv"><span class="dps-kv-lbl">Total DoT Scale</span><span class="dps-kv-val font-mono">${isCrow ? "2.00x Base Hit" : (effDotMult || 0).toFixed(2) + "x"}</span></div>
-                    <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Total DoT DMG</span><span class="dps-kv-val font-mono dot-highlight">${Math.round(effDamage * (isCrow ? 2.0 : (effDotMult || 0))).toLocaleString()} DMG</span></div>
-                    <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Duration &amp; Interval</span><span class="dps-kv-val font-mono">${isCrow ? `12s / ${(dotIntervalSPA || 12).toFixed(2)}s re-proc` : `${(bd.dotDuration || 8).toFixed(1)}s / ${(dotIntervalSPA || 1).toFixed(2)}s`}</span></div>
-                    <div class="dps-kv primary"><span class="dps-kv-lbl dot-highlight">DoT DPS</span><span class="dps-kv-val font-mono dot-highlight">+${formatDPS(unitDoTDPS)} DPS</span></div>
-                  </div>
-                </div>` : ""}
-              </div>
-            </div>
-
-            <div class="uip-dps-subcol">
-              ${followupSectionHtml}
-
-              <div class="dps-section section-damage placement-total-card">
-                <div class="dps-section-hd">Placement DPS Total</div>
-                <div class="dps-kv-list">
-                  <div class="dps-kv"><span class="dps-kv-lbl">Single Placement DPS</span><span class="dps-kv-val font-mono">${Math.round(singlePlacementDPS).toLocaleString()} DPS</span></div>
-                  <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Unit Direct DPS x placements</span><span class="dps-kv-val font-mono">${Math.round(unitDirectDPS || 0).toLocaleString()} x ${placementCount} = ${Math.round((unitDirectDPS || 0) * placementCount).toLocaleString()}</span></div>
-                  ${(unitDoTDPS || 0) > 0 ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">${isCrow ? "Black Fire DoT x placements" : "DoT DPS x placements"}</span><span class="dps-kv-val font-mono">${Math.round(unitDoTDPS).toLocaleString()} x ${placementCount} = ${Math.round(unitDoTDPS * placementCount).toLocaleString()}</span></div>` : ""}
-                  ${(fuaDps || 0) > 0 ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">${isCrow ? "Illusion DPS x placements" : "Follow-Up DPS x placements"}</span><span class="dps-kv-val font-mono">${Math.round(fuaDps).toLocaleString()} x ${placementCount} = ${Math.round(fuaDps * placementCount).toLocaleString()}</span></div>` : ""}
-                  ${unit.summons ? `<div class="dps-kv faint-nested"><span class="dps-kv-lbl">Summons Total Field DPS</span><span class="dps-kv-val font-mono">+${Math.round(totalSummonDPS || 0).toLocaleString()} DPS</span></div>` : ""}
-                  <div class="dps-kv primary"><span class="dps-kv-lbl combined-highlight">Total Field DPS</span><span class="dps-kv-val font-mono combined-highlight">${Math.round(finalCombinedDPS).toLocaleString()} DPS</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
+          ${splitColumnsHtml}
         </div>
       </div>
     `;

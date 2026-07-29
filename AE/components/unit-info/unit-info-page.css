@@ -1334,7 +1334,7 @@
 }
 
 .uip-dps-main-grid.has-summons {
-  grid-template-columns: 1fr 1.6fr;
+  grid-template-columns: 260px 1fr;
 }
 @media (max-width: 900px) {
   .uip-dps-main-grid.has-summons {
@@ -1492,7 +1492,7 @@
 
 .primary-stats-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 8px;
   margin-bottom: 4px;
 }
