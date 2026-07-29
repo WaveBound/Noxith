@@ -834,7 +834,7 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
         dmgRowsHtml += `
           <div class="dps-kv"><span class="dps-kv-lbl">Main Unit DMG</span><span class="dps-kv-val font-mono">${Math.round(effDamage).toLocaleString()}</span></div>
           <div class="dps-kv faint-nested">
-            <span class="dps-kv-lbl">Summon Base Scale</span>
+            <span class="dps-kv-lbl">Summon Scale Multiplier</span>
             <span class="dps-kv-val font-mono"><span class="faint-mult">&times;${scaleMult.toFixed(2)}</span>${Math.round(inspectedSummon.effDamage || 0).toLocaleString()}</span>
           </div>
         `;
