@@ -1,11 +1,11 @@
 // Enable the Traits page
-export const IS_TRAITS_PUBLISHED = true;
+export const IS_TRAITS_PUBLISHED = false;
 
 export const traits = [
   {
     id: "unbound",
     name: "Unbound",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Unbound.png",
     rarity: "Mythic",
     rainbowClass: "tr-rainbow-unbound",
     dropRate: "0.1%",
@@ -16,7 +16,7 @@ export const traits = [
   {
     id: "primordial",
     name: "Primordial",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Primordial.png",
     rarity: "Mythic",
     rainbowClass: "tr-rainbow-primordial",
     dropRate: "0.2%",
@@ -27,7 +27,7 @@ export const traits = [
   {
     id: "forsaken",
     name: "Forsaken",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Forsaken.png",
     rarity: "Mythic",
     rainbowClass: "tr-rainbow-forsaken",
     dropRate: "0.3%",
@@ -38,7 +38,7 @@ export const traits = [
   {
     id: "draconic",
     name: "Draconic",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Draconic.png",
     rarity: "Mythic",
     rainbowClass: "tr-rainbow-draconic",
     dropRate: "0.5%",
@@ -49,7 +49,7 @@ export const traits = [
   {
     id: "investor",
     name: "Investor",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Investor.png",
     rarity: "Legendary",
     color: "#f59e0b",
     dropRate: "2%",
@@ -60,7 +60,7 @@ export const traits = [
   {
     id: "optics",
     name: "Optics",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Optics.png",
     rarity: "Legendary",
     color: "#f59e0b",
     dropRate: "3%",
@@ -71,7 +71,7 @@ export const traits = [
   {
     id: "bolt",
     name: "Bolt",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Bolt.png",
     rarity: "Legendary",
     color: "#f59e0b",
     dropRate: "4%",
@@ -82,7 +82,7 @@ export const traits = [
   {
     id: "precision2",
     name: "Precision 2",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Precision2.png",
     rarity: "Legendary",
     color: "#f59e0b",
     dropRate: "4%",
@@ -93,7 +93,7 @@ export const traits = [
   {
     id: "precision1",
     name: "Precision 1",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Precision1.png",
     rarity: "Epic",
     color: "#f59e0b",
     dropRate: "6%",
@@ -104,7 +104,7 @@ export const traits = [
   {
     id: "limitbreaker",
     name: "Limit Breaker",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/LimitBreaker.png",
     rarity: "Epic",
     color: "#f59e0b",
     dropRate: "6%",
@@ -115,7 +115,7 @@ export const traits = [
   {
     id: "range2",
     name: "Range 2",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Range2.png",
     rarity: "Rare",
     color: "#38bdf8",
     dropRate: "7%",
@@ -126,7 +126,7 @@ export const traits = [
   {
     id: "speed2",
     name: "Speed 2",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Speed2.png",
     rarity: "Rare",
     color: "#38bdf8",
     dropRate: "7%",
@@ -137,7 +137,7 @@ export const traits = [
   {
     id: "strength2",
     name: "Strength 2",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Strength2.png",
     rarity: "Rare",
     color: "#38bdf8",
     dropRate: "7%",
@@ -148,7 +148,7 @@ export const traits = [
   {
     id: "enlightenment",
     name: "Enlightenment",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Enlightenment.png",
     rarity: "Rare",
     color: "#38bdf8",
     dropRate: "9%",
@@ -159,7 +159,7 @@ export const traits = [
   {
     id: "range1",
     name: "Range 1",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Range1.png",
     rarity: "Common",
     color: "#38bdf8",
     dropRate: "14.63%",
@@ -170,7 +170,7 @@ export const traits = [
   {
     id: "speed1",
     name: "Speed 1",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Speed1.png",
     rarity: "Common",
     color: "#38bdf8",
     dropRate: "14.63%",
@@ -181,7 +181,7 @@ export const traits = [
   {
     id: "strength1",
     name: "Strength 1",
-    image: "assets/placeholder.svg",
+    image: "icons/traits/Strength1.png",
     rarity: "Common",
     color: "#38bdf8",
     dropRate: "14.64%",
