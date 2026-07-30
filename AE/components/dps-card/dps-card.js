@@ -901,7 +901,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
               </div>
               <div class="dps-table-row indented">
                 <span class="dps-table-lbl">Cycle Interval (5s mark + 10s CD = 15s)</span>
-                <span class="dps-table-val font-mono">${cExplodeInterval.toFixed(2)}s</span>
+                <span class="dps-table-val font-mono">roundup(15 / ${effSpaVal.toFixed(2)}s) &times; ${effSpaVal.toFixed(2)}s = ${cExplodeInterval.toFixed(2)}s</span>
               </div>
               <div class="dps-table-row">
                 <span class="dps-table-lbl" style="color:#c52525;">Crimson Explode DPS (${Math.round(cExplodeDmg).toLocaleString()} &divide; ${cExplodeInterval.toFixed(2)}s)</span>
@@ -911,8 +911,8 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                 <span class="dps-table-lbl" style="color:#c52525; font-weight:700;">── Crimson Pool (${poolCount}/3 active) ──</span>
               </div>
               <div class="dps-table-row indented">
-                <span class="dps-table-lbl">Per-pool DMG (10%/2s &times; 3 ticks = 30% over 6s)</span>
-                <span class="dps-table-val font-mono">${poolCount} &times; 0.30 &times; ${Math.round(effDmg).toLocaleString()} &times; ${critM.toFixed(2)}</span>
+                <span class="dps-table-lbl">Pool DMG (30% per pool over 6s | Affected by Crits)</span>
+                <span class="dps-table-val font-mono">${poolCount} &times; 0.30 &times; ${Math.round(effDmg).toLocaleString()} &times; ${critM.toFixed(2)} = ${Math.round(poolCount * 0.30 * effDmg * critM).toLocaleString()} DMG</span>
               </div>
               <div class="dps-table-row">
                 <span class="dps-table-lbl" style="color:#c52525;">Crimson Pool DPS (over 6s window)</span>
