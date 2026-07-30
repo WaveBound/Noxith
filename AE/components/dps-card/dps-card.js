@@ -865,60 +865,89 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
             const effDmg = breakdown.effDamage || 0;
             const critM = breakdown.critAvgMult || 1;
             const effSpaVal = breakdown.effSpa || 1;
+            
             // Bleed
             const bleedDmg = effDmg * 0.65;
-            const bleedInterval = Math.max(1, Math.ceil(6.0 / effSpaVal) * effSpaVal);
+            const bleedIntervalMultiplier = Math.max(1, Math.ceil(6.0 / effSpaVal));
+            const bleedInterval = bleedIntervalMultiplier * effSpaVal;
             const bleedDps = bleedDmg / bleedInterval;
+            
             // Crimson Explode
-            const cExplodeDmg = effDmg * 0.15 * critM;
-            const cExplodeInterval = Math.max(1, Math.ceil(15.0 / effSpaVal) * effSpaVal);
+            const cExplodeBase = effDmg * 0.15;
+            const cExplodeDmg = cExplodeBase * critM;
+            const cExplodeIntervalMultiplier = Math.max(1, Math.ceil(15.0 / effSpaVal));
+            const cExplodeInterval = cExplodeIntervalMultiplier * effSpaVal;
             const cExplodeDps = cExplodeDmg / cExplodeInterval;
+            
             // Crimson Pool
             const poolCount = breakdown.crimsonPoolCount || 0;
-            const poolDps = (poolCount * 0.30 * effDmg * critM) / 6.0;
+            const poolBasePerPool = effDmg * 0.30;
+            const poolDmgPerPool = poolBasePerPool * critM;
+            const poolTotalDmg = poolCount * poolDmgPerPool;
+            const poolDps = poolTotalDmg / 6.0;
+            
             return `
-              <div class="dps-table-row" style="margin-top:4px; border-top:1px solid rgba(197,37,37,0.25); padding-top:4px;">
-                <span class="dps-table-lbl" style="color:#c52525; font-weight:700;">── Bleed DoT ──</span>
+              <div class="dps-table-row" style="margin-top: 6px; border-top: 1px solid rgba(197,37,37,0.25); padding-top: 6px;">
+                <span class="dps-table-lbl" style="color:#c52525; font-weight:700;">Bleed DoT</span>
               </div>
               <div class="dps-table-row indented">
-                <span class="dps-table-lbl">Bleed DMG (0.65x base hit)</span>
+                <span class="dps-table-lbl">Base Bleed (65% DMG)</span>
                 <span class="dps-table-val font-mono">${Math.round(bleedDmg).toLocaleString()} DMG</span>
               </div>
               <div class="dps-table-row indented">
-                <span class="dps-table-lbl">Interval (roundup(6 / ${effSpaVal.toFixed(2)}s) &times; ${effSpaVal.toFixed(2)}s)</span>
+                <span class="dps-table-lbl">Interval (${bleedIntervalMultiplier} hits &times; ${effSpaVal.toFixed(2)}s)</span>
                 <span class="dps-table-val font-mono">${bleedInterval.toFixed(2)}s</span>
               </div>
-              <div class="dps-table-row">
-                <span class="dps-table-lbl dot-highlight">Bleed DPS (${Math.round(bleedDmg).toLocaleString()} &divide; ${bleedInterval.toFixed(2)}s)</span>
+              <div class="dps-table-row primary" style="margin-bottom: 6px;">
+                <span class="dps-table-lbl dot-highlight">Bleed DPS</span>
                 <span class="dps-table-val font-mono dot-highlight">+${formatFullDPS(bleedDps)} DPS</span>
               </div>
-              <div class="dps-table-row" style="margin-top:4px; border-top:1px solid rgba(197,37,37,0.25); padding-top:4px;">
-                <span class="dps-table-lbl" style="color:#c52525; font-weight:700;">── Crimson Explode ──</span>
+
+              <div class="dps-table-row" style="margin-top: 6px; border-top: 1px solid rgba(197,37,37,0.25); padding-top: 6px;">
+                <span class="dps-table-lbl" style="color:#c52525; font-weight:700;">Crimson Explode</span>
               </div>
               <div class="dps-table-row indented">
-                <span class="dps-table-lbl">Explosion DMG (15% &times; effDMG &times; critAvg)</span>
-                <span class="dps-table-val font-mono">${Math.round(effDmg * 0.15).toLocaleString()} &times; ${critM.toFixed(2)} = ${Math.round(cExplodeDmg).toLocaleString()} DMG</span>
+                <span class="dps-table-lbl">Base Explosion (15% DMG)</span>
+                <span class="dps-table-val font-mono">${Math.round(cExplodeBase).toLocaleString()} DMG</span>
               </div>
               <div class="dps-table-row indented">
-                <span class="dps-table-lbl">Cycle Interval (5s mark + 10s CD = 15s)</span>
-                <span class="dps-table-val font-mono">roundup(15 / ${effSpaVal.toFixed(2)}s) &times; ${effSpaVal.toFixed(2)}s = ${cExplodeInterval.toFixed(2)}s</span>
-              </div>
-              <div class="dps-table-row">
-                <span class="dps-table-lbl" style="color:#c52525;">Crimson Explode DPS (${Math.round(cExplodeDmg).toLocaleString()} &divide; ${cExplodeInterval.toFixed(2)}s)</span>
-                <span class="dps-table-val font-mono" style="color:#c52525;">+${formatFullDPS(cExplodeDps)} DPS</span>
-              </div>
-              <div class="dps-table-row" style="margin-top:4px; border-top:1px solid rgba(197,37,37,0.25); padding-top:4px;">
-                <span class="dps-table-lbl" style="color:#c52525; font-weight:700;">── Crimson Pool (${poolCount}/3 active) ──</span>
+                <span class="dps-table-lbl">Crit Multiplier</span>
+                <span class="dps-table-val font-mono"><span class="faint-mult">x${critM.toFixed(2)}</span>${Math.round(cExplodeDmg).toLocaleString()} DMG</span>
               </div>
               <div class="dps-table-row indented">
-                <span class="dps-table-lbl">Pool DMG (30% per pool over 6s | Affected by Crits)</span>
-                <span class="dps-table-val font-mono">${poolCount} &times; 0.30 &times; ${Math.round(effDmg).toLocaleString()} &times; ${critM.toFixed(2)} = ${Math.round(poolCount * 0.30 * effDmg * critM).toLocaleString()} DMG</span>
+                <span class="dps-table-lbl">Cycle Interval (${cExplodeIntervalMultiplier} hits &times; ${effSpaVal.toFixed(2)}s)</span>
+                <span class="dps-table-val font-mono">${cExplodeInterval.toFixed(2)}s</span>
               </div>
-              <div class="dps-table-row">
-                <span class="dps-table-lbl" style="color:#c52525;">Crimson Pool DPS (over 6s window)</span>
-                <span class="dps-table-val font-mono" style="color:#c52525;">+${formatFullDPS(poolDps)} DPS</span>
+              <div class="dps-table-row primary" style="margin-bottom: 6px;">
+                <span class="dps-table-lbl" style="color:#c52525; font-weight:700;">Crimson Explode DPS</span>
+                <span class="dps-table-val font-mono" style="color:#c52525; font-weight:700;">+${formatFullDPS(cExplodeDps)} DPS</span>
               </div>
-              <div class="dps-table-row primary" style="margin-top:4px; border-top:1px solid rgba(197,37,37,0.4); padding-top:4px;">
+
+              <div class="dps-table-row" style="margin-top: 6px; border-top: 1px solid rgba(197,37,37,0.25); padding-top: 6px;">
+                <span class="dps-table-lbl" style="color:#c52525; font-weight:700;">Crimson Pool (${poolCount}/3 active)</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">Base Pool DMG (30% DMG)</span>
+                <span class="dps-table-val font-mono">${Math.round(poolBasePerPool).toLocaleString()} DMG</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">Crit Multiplier</span>
+                <span class="dps-table-val font-mono"><span class="faint-mult">x${critM.toFixed(2)}</span>${Math.round(poolDmgPerPool).toLocaleString()} DMG</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">Total Pools DMG (${poolCount} active)</span>
+                <span class="dps-table-val font-mono">${Math.round(poolTotalDmg).toLocaleString()} DMG</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">Pool Window Duration</span>
+                <span class="dps-table-val font-mono">6.00s</span>
+              </div>
+              <div class="dps-table-row primary" style="margin-bottom: 6px;">
+                <span class="dps-table-lbl" style="color:#c52525; font-weight:700;">Crimson Pool DPS</span>
+                <span class="dps-table-val font-mono" style="color:#c52525; font-weight:700;">+${formatFullDPS(poolDps)} DPS</span>
+              </div>
+
+              <div class="dps-table-row primary" style="margin-top: 8px; border-top: 1px solid rgba(197,37,37,0.4); padding-top: 8px;">
                 <span class="dps-table-lbl dot-highlight">Total Status Effect DPS</span>
                 <span class="dps-table-val font-mono dot-highlight">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
               </div>
