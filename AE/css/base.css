@@ -10,6 +10,8 @@
 html {
   color-scheme: dark;
   scroll-behavior: smooth;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -19,7 +21,8 @@ body {
   font-size: 13px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  height: 100%;
+  overflow: hidden;
 }
 
 * {
@@ -87,21 +90,21 @@ img {
 }
 
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--purple-dim);
+  background: rgba(255, 255, 255, 0.4);
 }
 
 :focus-visible {

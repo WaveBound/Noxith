@@ -6,7 +6,7 @@ export const unit = {
 
     stats: {
         recommendedTrait: "Unbound",
-        element: "Dark",
+        element: "Flame",
         archetype: "Magical",
         damage: "1,800",
         spa: "5.7",

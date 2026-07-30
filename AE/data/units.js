@@ -7,7 +7,9 @@ import ladygiantenvy from "./units/ladygiantenvy.js";
 import eighthswordberserk from "./units/8thswordberserk.js";
 import shadowdivine from "./units/shadowdivine.js";
 import crowblackfire from "./units/crowblackfire.js";
+import razorjawhunter from "./units/razorjawhunter.js";
 import crimsonbrother from "./units/crimsonbrother.js";
+import cursedimmortalblacksun from "./units/cursedimmortalblacksun.js";
 
 import { getRelicStatsByName } from "./relicstats.js";
 import { relicImgByName } from "../icons/icons.js";
@@ -22,7 +24,9 @@ const rawUnits = [
   eighthswordberserk,
   shadowdivine,
   crowblackfire,
+  razorjawhunter,
   crimsonbrother,
+  cursedimmortalblacksun,
 ];
 
 function formatRange(v) {

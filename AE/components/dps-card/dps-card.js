@@ -58,6 +58,8 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       berserkState: unit.berserkState !== undefined ? unit.berserkState : !!options.berserkState,
       demonicPresence: unit.demonicPresence !== undefined ? unit.demonicPresence : !!options.demonicPresence,
       crowEnemiesHit: options.crowEnemiesHit !== undefined ? options.crowEnemiesHit : (unit.crowEnemiesHit || 1),
+      caringState: (unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"))) ? !(options.coldState !== undefined ? !!options.coldState : !!unit.coldState) : (options.caringState !== undefined ? !!options.caringState : !!unit.caringState),
+      coldState: (unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"))) ? (options.coldState !== undefined ? !!options.coldState : !!unit.coldState) : false,
       fuaDamages: options.fuaDamages || unit.fuaDamages || []
     };
 
@@ -802,8 +804,8 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
         <div class="dps-table">
           ${spaRowsHtml}
           <div class="dps-table-row primary">
-            <span class="dps-table-lbl spa-highlight">${breakdown.isDarkMage && breakdown.darkMageMode === "lightning" ? "Disabled in Lightning Mode" : "Final Effective SPA"}</span>
-            <span class="dps-table-val font-mono spa-highlight">${breakdown.isDarkMage && breakdown.darkMageMode === "lightning" ? "1.0s Constant" : (breakdown.effSpa || 1).toFixed(2) + "s"}</span>
+            <span class="dps-table-lbl spa-highlight">${(breakdown.isDarkMage && breakdown.darkMageMode === "lightning") || (breakdown.isCursedImmortal && (breakdown.caringState || breakdown.coldState)) ? "Disabled/Aura Mode" : "Final Effective SPA"}</span>
+            <span class="dps-table-val font-mono spa-highlight">${(breakdown.isDarkMage && breakdown.darkMageMode === "lightning") || (breakdown.isCursedImmortal && (breakdown.caringState || breakdown.coldState)) ? "1.0s Constant" : (breakdown.effSpa || 1).toFixed(2) + "s"}</span>
           </div>
         </div>
       </div>
@@ -1248,6 +1250,7 @@ export async function DpsCard(unit, options = {}) {
   const isEighthSword = unit.id === "8thswordberserk" || (unit.name && unit.name.includes("8th Sword"));
   const isCrow = unit.id === "crowblackfire" || (unit.name && unit.name.includes("Crow"));
   const isCrimson = unit.id === "crimsonbrother" || (unit.name && unit.name.includes("Crimson"));
+  const isCursedImmortal = unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"));
 
   let darkMageMode = unit.darkMageMode || "lightning";
   let giantForm = unit.giantForm !== undefined ? unit.giantForm : false;
@@ -1256,6 +1259,12 @@ export async function DpsCard(unit, options = {}) {
   let crowEnemiesHit = unit.crowEnemiesHit || 1;
   let crimsonAbilityActive = unit.crimsonAbilityActive !== undefined ? unit.crimsonAbilityActive : false;
   let crimsonPoolCount = unit.crimsonPoolCount !== undefined ? Math.max(0, Math.min(3, parseInt(unit.crimsonPoolCount, 10) || 0)) : 3;
+  let coldState = isCursedImmortal ? !!unit.coldState : false;
+  let caringState = isCursedImmortal ? !coldState : false;
+  if (isCursedImmortal) {
+    unit.coldState = coldState;
+    unit.caringState = caringState;
+  }
 
   const mode = options.mode || "dps";
   const rank = options.rank || null;
@@ -1334,6 +1343,14 @@ export async function DpsCard(unit, options = {}) {
             Pools: ${crimsonPoolCount}/3
           </button>
         ` : ""}
+        ${isCursedImmortal ? `
+          <button type="button" class="dps-shinigami-toggle ${caringState ? 'active' : ''}" id="caring-toggle-${unit.id}" aria-pressed="${caringState}">
+            Caring State (50%): ${caringState ? "On" : "Off"}
+          </button>
+          <button type="button" class="dps-shinigami-toggle ${coldState ? 'active' : ''}" id="cold-toggle-${unit.id}" aria-pressed="${coldState}">
+            Cold State (125%): ${coldState ? "On" : "Off"}
+          </button>
+        ` : ""}
         <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}">
           Shinigami Passive: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
         </button>
@@ -1358,6 +1375,8 @@ export async function DpsCard(unit, options = {}) {
   const crowEnemiesInput = card.querySelector(`#crow-enemies-${unit.id}`);
   const crimsonAbilityToggle = card.querySelector(`#crimson-ability-toggle-${unit.id}`);
   const crimsonPoolToggle = card.querySelector(`#crimson-pool-toggle-${unit.id}`);
+  const caringToggle = card.querySelector(`#caring-toggle-${unit.id}`);
+  const coldToggle = card.querySelector(`#cold-toggle-${unit.id}`);
   let fuaEditor = null;
 
   const commitCrowEnemies = () => {
@@ -1442,6 +1461,48 @@ export async function DpsCard(unit, options = {}) {
     crimsonAbilityToggle.classList.toggle("active", crimsonAbilityActive);
     crimsonAbilityToggle.setAttribute("aria-pressed", String(crimsonAbilityActive));
     crimsonAbilityToggle.textContent = `Piercing Crimson: ${crimsonAbilityActive ? "On" : "Off"}`;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
+  caringToggle?.addEventListener("click", () => {
+    if (caringState) return;
+    caringState = true;
+    coldState = false;
+    unit.caringState = true;
+    unit.coldState = false;
+
+    caringToggle.classList.add("active");
+    caringToggle.setAttribute("aria-pressed", "true");
+    caringToggle.textContent = `Caring State (50%): On`;
+
+    if (coldToggle) {
+      coldToggle.classList.remove("active");
+      coldToggle.setAttribute("aria-pressed", "false");
+      coldToggle.textContent = `Cold State (125%): Off`;
+    }
+
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
+  coldToggle?.addEventListener("click", () => {
+    if (coldState) return;
+    coldState = true;
+    caringState = false;
+    unit.coldState = true;
+    unit.caringState = false;
+
+    coldToggle.classList.add("active");
+    coldToggle.setAttribute("aria-pressed", "true");
+    coldToggle.textContent = `Cold State (125%): On`;
+
+    if (caringToggle) {
+      caringToggle.classList.remove("active");
+      caringToggle.setAttribute("aria-pressed", "false");
+      caringToggle.textContent = `Caring State (50%): Off`;
+    }
+
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
     renderCalculations();
   });
@@ -1645,6 +1706,8 @@ export async function DpsCard(unit, options = {}) {
         berserkState,
         demonicPresence,
         crowEnemiesHit,
+        caringState,
+        coldState,
         fuaDamages: getFuaDamagesForTrait(traitKey),
         mode
       });

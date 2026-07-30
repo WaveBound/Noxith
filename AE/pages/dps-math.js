@@ -225,6 +225,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isCrow = unit && (unit.id === "crowblackfire" || (unit.name && unit.name.includes("Crow")));
   const isCursedStudent = unit && (unit.id === "cursestudenttruelove" || (unit.name && unit.name.includes("Cursed Student")));
   const isCrimson = unit && (unit.id === "crimsonbrother" || (unit.name && unit.name.includes("Crimson")));
+  const isCursedImmortal = unit && (unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal")));
+  const isRazorjaw = unit && (unit.id === "razorjawhunter" || (unit.name && unit.name.includes("Razorjaw")));
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
@@ -235,12 +237,14 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const demonicPresence = unit && !!unit.demonicPresence;
   const crimsonAbilityActive = unit && !!unit.crimsonAbilityActive;
   const crimsonPoolCount = unit ? (unit.crimsonPoolCount !== undefined ? Math.max(0, Math.min(3, parseInt(unit.crimsonPoolCount, 10) || 0)) : 3) : 3;
+  const coldState = isCursedImmortal ? !!unit.coldState : false;
+  const caringState = isCursedImmortal ? !coldState : (unit && !!unit.caringState);
 
   let passiveSpaMult = isReaper ? -0.10 : (isLadyGiant && giantForm ? 0.25 : (isEighthSword && berserkState ? -0.10 : 0));
-  let passiveCritChanceAdd = isReaper ? 0.40 : 0;
+  let passiveCritChanceAdd = isReaper ? 0.40 : (isCursedImmortal ? 0.30 : (isRazorjaw ? 0.25 : 0));
   let passiveCritDamageAdd = 0;
   let passiveDamageMult = isReaper ? 0.40 : (isLadyGiant && giantForm ? 1.25 : (isEighthSword && berserkState ? 0.20 : 0));
-  let passiveRangeMult = (isLadyGiant && giantForm ? 0.50 : 0);
+  let passiveRangeMult = (isLadyGiant && giantForm ? 0.50 : (isCursedImmortal && caringState ? -0.50 : (isCursedImmortal && coldState ? -0.75 : 0)));
 
   if (isElfMage) {
     base.dotMultiplier = 0.50;
@@ -555,6 +559,16 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
       }
     ];
     singleFuaDmg = totalExplosionPerUnit;
+  } else if (isCursedImmortal) {
+    if (caringState) {
+      unitDirectDPS = (avgHitDamage * 0.50) / 1.0;
+      effSpa = 1.0;
+    } else if (coldState) {
+      unitDirectDPS = (avgHitDamage * 1.25) / 1.0;
+      effSpa = 1.0;
+    } else {
+      unitDirectDPS = avgHitDamage / effSpa;
+    }
   } else if (isCrimson) {
     if (crimsonAbilityActive) {
       unitDirectDPS = (effDamage * 0.75 * critAvgMult) / 1.0;
@@ -807,6 +821,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     isCrimson,
     crimsonAbilityActive: isCrimson ? crimsonAbilityActive : false,
     crimsonPoolCount: isCrimson ? crimsonPoolCount : 0,
+    isCursedImmortal,
+    caringState,
+    coldState,
     fuaDps,
     fuaDamages: unit.fuaDamages || [],
     fuaBreakdowns,

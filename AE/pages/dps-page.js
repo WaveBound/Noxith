@@ -4,6 +4,8 @@ import { TRAIT_DEFINITIONS } from "./dps-math.js";
 
 let currentMode = "dps"; // "dps" or "dmg"
 
+const PAGE_SIZE = 10; // Up to 2 rows of 5 cards
+
 function calculateUnitBestStanding(unit, mode) {
   let maxOutput = -1;
   Object.keys(TRAIT_DEFINITIONS).filter(k => k !== "base").forEach(traitKey => {
@@ -15,6 +17,8 @@ function calculateUnitBestStanding(unit, mode) {
       berserkState: unit.berserkState,
       demonicPresence: unit.demonicPresence,
       crowEnemiesHit: unit.crowEnemiesHit,
+      caringState: unit.caringState,
+      coldState: unit.coldState,
       fuaDamages: unit.fuaDamages
     });
     const val = mode === "dmg" ? (res.breakdown?.totalDmg || 0) : (res.breakdown?.dps || 0);
@@ -27,6 +31,7 @@ export async function DpsPage(filter = "") {
   const page = document.createElement("div");
   page.className = "page dps-page";
 
+  let currentPage = 1;
   const filtered = filter ? units.filter((u) => u.name.toLowerCase().includes(filter)) : units;
 
   page.innerHTML = `
@@ -38,6 +43,13 @@ export async function DpsPage(filter = "") {
           <button type="button" class="dps-mode-btn ${currentMode === 'dmg' ? 'active' : ''}" data-mode="dmg">DMG (Per Attack)</button>
         </div>
       </div>
+
+      <div class="dps-pagination-controls" id="dps-pagination-controls">
+        <button type="button" class="dps-page-nav-btn" id="dps-prev-page" title="Previous Page">&lt; Prev</button>
+        <span class="dps-page-info" id="dps-page-info">Page 1 of 1</span>
+        <button type="button" class="dps-page-nav-btn" id="dps-next-page" title="Next Page">Next &gt;</button>
+      </div>
+
       <button type="button" class="dps-update-rankings-btn" id="dps-update-rankings-btn" title="Re-sort cards by current DPS values">
         Update Rankings
       </button>
@@ -49,6 +61,9 @@ export async function DpsPage(filter = "") {
 
   const list = page.querySelector(".dps-page-list");
   const updateBtn = page.querySelector("#dps-update-rankings-btn");
+  const prevBtn = page.querySelector("#dps-prev-page");
+  const nextBtn = page.querySelector("#dps-next-page");
+  const pageInfo = page.querySelector("#dps-page-info");
 
   async function renderSortedCards() {
     list.innerHTML = "";
@@ -64,13 +79,40 @@ export async function DpsPage(filter = "") {
     evaluatedUnits.sort((a, b) => b.standing - a.standing);
 
     const sortedUnits = evaluatedUnits.map(item => item.unit);
+    const totalPages = Math.max(1, Math.ceil(sortedUnits.length / PAGE_SIZE));
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
 
-    // Render cards with active mode & ranking index
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    const pageUnits = sortedUnits.slice(startIndex, startIndex + PAGE_SIZE);
+
+    // Update pagination controls
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages;
+
+    // Render cards with active mode & global ranking index
     const cards = await Promise.all(
-      sortedUnits.map((u, index) => DpsCard(u, { mode: currentMode, rank: index + 1 }))
+      pageUnits.map((u, index) => DpsCard(u, { mode: currentMode, rank: startIndex + index + 1 }))
     );
     cards.forEach(card => list.appendChild(card));
   }
+
+  // Pagination button click listeners
+  prevBtn.addEventListener("click", () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderSortedCards();
+    }
+  });
+
+  nextBtn.addEventListener("click", () => {
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderSortedCards();
+    }
+  });
 
   // Mode button click listeners
   page.querySelectorAll(".dps-mode-btn").forEach(btn => {
