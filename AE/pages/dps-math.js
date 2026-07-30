@@ -224,6 +224,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isEighthSword = unit && (unit.id === "8thswordberserk" || (unit.name && unit.name.includes("8th Sword")));
   const isCrow = unit && (unit.id === "crowblackfire" || (unit.name && unit.name.includes("Crow")));
   const isCursedStudent = unit && (unit.id === "cursestudenttruelove" || (unit.name && unit.name.includes("Cursed Student")));
+  const isCrimson = unit && (unit.id === "crimsonbrother" || (unit.name && unit.name.includes("Crimson")));
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
@@ -232,6 +233,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const giantForm = unit && !!unit.giantForm;
   const berserkState = unit && !!unit.berserkState;
   const demonicPresence = unit && !!unit.demonicPresence;
+  const crimsonAbilityActive = unit && !!unit.crimsonAbilityActive;
+  const crimsonPoolCount = unit ? (unit.crimsonPoolCount !== undefined ? Math.max(0, Math.min(3, parseInt(unit.crimsonPoolCount, 10) || 0)) : 3) : 3;
 
   let passiveSpaMult = isReaper ? -0.10 : (isLadyGiant && giantForm ? 0.25 : (isEighthSword && berserkState ? -0.10 : 0));
   let passiveCritChanceAdd = isReaper ? 0.40 : 0;
@@ -335,6 +338,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   }
 
   let totalPassiveDamageBonus = (shinigamiActive ? 0.15 : 0) + passiveDamageMult;
+  const preShinigamiEffDamage = effDamage * (passiveDamageMult > 0 ? (1 + passiveDamageMult) : 1);
   if (totalPassiveDamageBonus > 0) {
     effDamage = effDamage * (1 + totalPassiveDamageBonus);
   }
@@ -551,6 +555,27 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
       }
     ];
     singleFuaDmg = totalExplosionPerUnit;
+  } else if (isCrimson) {
+    if (crimsonAbilityActive) {
+      unitDirectDPS = (effDamage * 0.75 * critAvgMult) / 1.0;
+    } else {
+      unitDirectDPS = avgHitDamage / effSpa;
+    }
+
+    const crimsonExplodeDmg = effDamage * 0.15 * critAvgMult;
+    const crimsonExplodeInterval = Math.max(1, Math.ceil(15.0 / effSpa) * effSpa);
+    const crimsonExplodeDps = crimsonExplodeDmg / crimsonExplodeInterval;
+
+    const crimsonPoolDps = (crimsonPoolCount * 0.30 * effDamage * critAvgMult) / 6.0;
+
+    const bleedScale = 0.65 * (1 + (trait.dotBonus || 0)) * (1 + relicDotBonus);
+    const bleedDmg = effDamage * bleedScale;
+    const bleedInterval = Math.max(1, Math.ceil(6.0 / effSpa) * effSpa);
+    const bleedDps = bleedDmg / bleedInterval;
+
+    unitDoTDPS = crimsonExplodeDps + crimsonPoolDps + bleedDps;
+
+    base.dotName = "Crimson & Bleed";
   } else {
     unitDirectDPS = avgHitDamage / effSpa;
     unitDoTDPS = (base.dotMultiplier || 0) > 0 ? (dotDamage / dotIntervalSPA) : 0;
@@ -632,8 +657,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
         if (statMode === "Z") sEffDmg *= 1.20;
         if (hasAscend) sEffDmg *= 1.15;
       } else {
+        const baseDmgForSummon = (sData.noShinigamiPassive && shinigamiActive) ? preShinigamiEffDamage : effDamage;
         baseSummonDmg = scaledBaseDamage * mult;
-        sEffDmg = effDamage * mult;
+        sEffDmg = baseDmgForSummon * mult;
       }
 
       let baseSummonSpa = sData.intervalSPA || sData.maxSpa || sData.baseSpa || (base.spa || 6);
@@ -778,6 +804,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     demonicPresence,
     isCrow,
     crowEnemiesHit: unit.crowEnemiesHit || 1,
+    isCrimson,
+    crimsonAbilityActive: isCrimson ? crimsonAbilityActive : false,
+    crimsonPoolCount: isCrimson ? crimsonPoolCount : 0,
     fuaDps,
     fuaDamages: unit.fuaDamages || [],
     fuaBreakdowns,

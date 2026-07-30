@@ -16,6 +16,40 @@
   border-radius: 6px;
 }
 
+.dps-update-rankings-btn {
+  margin-left: auto;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary, #a1a1aa);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-strong, #24242b);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.dps-update-rankings-btn:hover {
+  color: var(--text, #fafafa);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dps-update-rankings-btn.needs-update {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.4);
+  animation: dps-btn-glow-pulse 2s infinite alternate;
+}
+
+@keyframes dps-btn-glow-pulse {
+  0% {
+    box-shadow: 0 0 2px rgba(245, 158, 11, 0.1);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.35);
+  }
+}
+
 .dps-mode-label {
   font-size: 10px;
   font-weight: 700;

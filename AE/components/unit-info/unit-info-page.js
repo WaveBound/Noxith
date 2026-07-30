@@ -420,7 +420,7 @@ function buildRightPanel(unit, activeSummonData = null) {
       <div class="passive-row">
         <div class="passive-info">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 2px;">
-            <span class="passive-name"><span class="passive-label" style="background: linear-gradient(90deg, #3b82f6, #60a5fa); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Ability:</span> <span class="passive-title-text">${a.name}</span></span>
+            <span class="passive-name"><span class="passive-label" style="background: linear-gradient(90deg, #1d4ed8, #2563eb); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Ability:</span> <span class="passive-title-text">${a.name}</span></span>
             <span style="font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: #a78bfa; background: rgba(167, 139, 250, 0.12); border: 1px solid rgba(167, 139, 250, 0.25); padding: 1px 6px; border-radius: 4px;">${a.cooldown || ""}</span>
           </div>
           <span class="passive-effect">${formatPassiveText(a.desc || a.effect || "")}</span>

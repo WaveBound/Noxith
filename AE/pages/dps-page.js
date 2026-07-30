@@ -38,6 +38,9 @@ export async function DpsPage(filter = "") {
           <button type="button" class="dps-mode-btn ${currentMode === 'dmg' ? 'active' : ''}" data-mode="dmg">DMG (Per Attack)</button>
         </div>
       </div>
+      <button type="button" class="dps-update-rankings-btn" id="dps-update-rankings-btn" title="Re-sort cards by current DPS values">
+        Update Rankings
+      </button>
     </div>
 
     <!-- Container for sorted cards -->
@@ -45,9 +48,12 @@ export async function DpsPage(filter = "") {
   `;
 
   const list = page.querySelector(".dps-page-list");
+  const updateBtn = page.querySelector("#dps-update-rankings-btn");
 
   async function renderSortedCards() {
     list.innerHTML = "";
+    updateBtn.classList.remove("needs-update");
+    updateBtn.textContent = "Update Rankings";
 
     // Calculate best standing for each unit and sort in descending order
     const evaluatedUnits = filtered.map(unit => ({
@@ -78,12 +84,15 @@ export async function DpsPage(filter = "") {
     });
   });
 
-  // Re-sort cards dynamically when any toggle or slider changes DPS values
-  const handleReSort = () => {
-    renderSortedCards();
-  };
+  // Mark the update button as needing a re-sort when values change (but don't auto-sort)
+  window.addEventListener("dps-value-changed", () => {
+    updateBtn.classList.add("needs-update");
+    updateBtn.textContent = "Update Rankings \u25b2";
+  });
 
-  window.addEventListener("dps-value-changed", handleReSort);
+  updateBtn.addEventListener("click", () => {
+    renderSortedCards();
+  });
 
   await renderSortedCards();
 

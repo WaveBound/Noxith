@@ -52,6 +52,7 @@ export const STATUS_ICONS = {
     dismembered: toAbsoluteUrl("icons/status/Dismembered.png"),
     blackfire: toAbsoluteUrl("icons/status/BlackFire.png"),
     illusion: toAbsoluteUrl("icons/status/Illusion.png"),
+    crimsonmark: toAbsoluteUrl("icons/status/CrimsonMark.png"),
 };
 
 export const RELIC_ICONS = {
@@ -147,6 +148,12 @@ export function formatPassiveText(text) {
     out = out.replace(/Skyward[\s\xA0]+Slash/gi, "@@SS@@");
     out = out.replace(/Way[\s\xA0]+of[\s\xA0]+the[\s\xA0]+Sword/gi, "@@WSW@@");
 
+    out = out.replace(/Piercing[\s\xA0]+Crimson/gi, "@@PC@@");
+    out = out.replace(/Crimson[\s\xA0]+Marked/gi, "@@CMD@@");
+    out = out.replace(/Crimson[\s\xA0]+Mark/gi, "@@CMK@@");
+    out = out.replace(/Crimson[\s\xA0]+Pool/gi, "@@CPL@@");
+    out = out.replace(/Crimson[\s\xA0]+Explode/gi, "@@CEX@@");
+
     out = out.replace(/Austere[\s\xA0]+Flames/gi, "@@AF@@");
     out = out.replace(/Winged[\s\xA0]+Spirit/gi, "@@WS@@");
     out = out.replace(/Wolf[\s\xA0]+Spirit/gi, "@@WFS@@");
@@ -180,6 +187,8 @@ export function formatPassiveText(text) {
     out = out.replace(/Freeze/gi, "@@FZ@@");
     out = out.replace(/Regular[\s\xA0]+Attacks/gi, "@@RAS@@");
     out = out.replace(/Regular[\s\xA0]+Attack/gi, "@@RA@@");
+    out = out.replace(/\bAttacks\b/g, "@@ATKS@@");
+    out = out.replace(/\bAttack\b/g, "@@ATK@@");
 
     out = out.replace(/Rewind/gi, "@@RW@@");
     out = out.replace(/Stunned/gi, "@@SND@@");
@@ -203,6 +212,12 @@ export function formatPassiveText(text) {
     out = out.replace(/@@UR@@/g, `<span class="p-kw p-atk-name"><span>Unrestrained Rampage</span></span>`);
     out = out.replace(/@@SS@@/g, `<span class="p-kw p-atk-name"><span>Skyward Slash</span></span>`);
     out = out.replace(/@@WSW@@/g, `<span class="p-kw p-atk-name"><span>Way of the Sword</span></span>`);
+
+    out = out.replace(/@@PC@@/g, `<span class="p-kw p-piercing-crimson"><span>Piercing Crimson</span></span>`);
+    out = out.replace(/@@CMD@@/g, `<span class="p-kw p-crimson-marked">${iconImgTag(STATUS_ICONS.crimsonmark)}<span>Crimson Marked</span></span>`);
+    out = out.replace(/@@CMK@@/g, `<span class="p-kw p-crimson-mark">${iconImgTag(STATUS_ICONS.crimsonmark)}<span>Crimson Mark</span></span>`);
+    out = out.replace(/@@CPL@@/g, `<span class="p-kw p-crimson-pool"><span>Crimson Pool</span></span>`);
+    out = out.replace(/@@CEX@@/g, `<span class="p-kw p-crimson-explode"><span>Crimson Explode</span></span>`);
 
     out = out.replace(/@@AF@@/g, `<span class="p-kw p-austere-flames">${iconImgTag(STATUS_ICONS.burn)}<span>Austere Flames</span></span>`);
     out = out.replace(/@@WS@@/g, `<span class="p-kw p-winged-spirit"><span>Winged Spirit</span></span>`);
@@ -237,6 +252,8 @@ export function formatPassiveText(text) {
     out = out.replace(/@@FZ@@/g, `<span class="p-kw p-freeze">${iconImgTag(STATUS_ICONS.freeze)}<span>Freeze</span></span>`);
     out = out.replace(/@@RAS@@/g, `<span class="p-kw p-reg-attack"><span>Regular Attacks</span></span>`);
     out = out.replace(/@@RA@@/g, `<span class="p-kw p-reg-attack"><span>Regular Attack</span></span>`);
+    out = out.replace(/@@ATKS@@/g, `<span class="p-kw p-reg-attack"><span>Attacks</span></span>`);
+    out = out.replace(/@@ATK@@/g, `<span class="p-kw p-reg-attack"><span>Attack</span></span>`);
 
     out = out.replace(/@@RW@@/g, `<span class="p-kw p-rewind"><span>Rewind</span></span>`);
     out = out.replace(/@@SND@@/g, `<span class="p-kw p-stun">${iconImgTag(STATUS_ICONS.stun)}<span>Stunned</span></span>`);
@@ -259,6 +276,12 @@ if (typeof window !== "undefined") {
 
     function getTooltipImage(target) {
         if (!target) return "";
+        if (target.classList.contains("p-piercing-crimson")) return toAbsoluteUrl("icons/info/PiercingCrimsonInfo.png");
+        if (target.classList.contains("p-crimson-marked")) return toAbsoluteUrl("icons/info/CrimsonMarkedInfo.png");
+        if (target.classList.contains("p-crimson-mark")) return toAbsoluteUrl("icons/info/CrimsonMarkInfo.png");
+        if (target.classList.contains("p-crimson-pool")) return toAbsoluteUrl("icons/info/CrimsonPoolInfo.png");
+        if (target.classList.contains("p-crimson-explode")) return toAbsoluteUrl("icons/info/CrimsonExplodeInfo.png");
+        if (target.classList.contains("p-reg-attack")) return toAbsoluteUrl("icons/info/AttackInfo.png");
         if (target.classList.contains("p-winged-spirit")) return toAbsoluteUrl("icons/info/WingedSpiritInfo.png");
         if (target.classList.contains("p-magical")) return toAbsoluteUrl("icons/info/MagicalInfo.png");
         if (target.classList.contains("p-wolf-spirit")) return toAbsoluteUrl("icons/info/WolfSpiritInfo.png");

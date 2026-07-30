@@ -94,6 +94,7 @@ export const unit = {
         name: "Bat Spirits",
         countPerPlacement: 3,
         baseDamageMultiplier: 0.15,
+        noShinigamiPassive: true,
         relicModifiers: [
             {
                 relicName: "Promise Ring",

@@ -177,7 +177,6 @@ export const relicStats = {
         stats: [
             { damage: { min: "+1%", max: "+10%" } },
             { critChance: { min: "+1%", max: "+5%" } },
-            { dotbonus: { min: "+5%", max: "+20%" } },
         ],
         passive: {
             name: "Cursed Finger",

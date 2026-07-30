@@ -723,6 +723,27 @@
   color: transparent;
   font-weight: 800;
   margin-right: 4px;
+  animation: passiveLabelShimmer 3s linear infinite;
+}
+
+@keyframes passiveLabelShimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.status-effect-cooldown {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  padding: 2px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-sm);
+  background: #0a0a0d;
+  margin-top: 4px;
 }
 
 .passive-effect {

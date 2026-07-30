@@ -819,9 +819,9 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
         </div>
       </div>
 
-      ${((rawBase.dotMultiplier || 0) > 0 || breakdown.demonicPresence) ? `
+      ${((rawBase.dotMultiplier || 0) > 0 || breakdown.demonicPresence || breakdown.isCrimson) ? `
       <div class="dps-section section-dot">
-        <div class="dps-section-hd color-dot">${breakdown.isDarkMage ? "Passive Damage Calculation" : breakdown.isEighthSword ? "Demonic Presence Calculation" : breakdown.isCrow ? "Black Fire DoT Calculation" : `DoT Calculation (${formatPassiveText(rawBase.dotName || "Status")})`}</div>
+        <div class="dps-section-hd color-dot">${breakdown.isDarkMage ? "Passive Damage Calculation" : breakdown.isEighthSword ? "Demonic Presence Calculation" : breakdown.isCrow ? "Black Fire DoT Calculation" : breakdown.isCrimson ? "Crimson Status Effect & Bleed Calculations" : `DoT Calculation (${formatPassiveText(rawBase.dotName || "Status")})`}</div>
         <div class="dps-table">
           <div class="dps-table-row">
             <span class="dps-table-lbl">Effect</span>
@@ -829,7 +829,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           </div>
           <div class="dps-table-row">
             <span class="dps-table-lbl">Base Multiplier</span>
-            <span class="dps-table-val font-mono">${breakdown.isEighthSword ? "15% Current DMG (Can Crit)" : breakdown.isCrow ? "2.00x Base Hit in 12 ticks over 12s" : (rawBase.dotMultiplier || 0).toFixed(2) + "x Base Hit"}</span>
+            <span class="dps-table-val font-mono">${breakdown.isEighthSword ? "15% Current DMG (Can Crit)" : breakdown.isCrow ? "2.00x Base Hit in 12 ticks over 12s" : breakdown.isCrimson ? "Bleed: 0.65x | Crimson Explode: 15% | Pool: 10%/2s" : (rawBase.dotMultiplier || 0).toFixed(2) + "x Base Hit"}</span>
           </div>
           ${breakdown.isEighthSword ? `
             <div class="dps-table-row indented">
@@ -861,7 +861,69 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
               <span class="dps-table-lbl dot-highlight">Unit Black Fire DoT DPS (${blackFireDotDmg.toLocaleString()} &divide; ${(breakdown.dotIntervalSPA || 12).toFixed(2)}s)</span>
               <span class="dps-table-val font-mono dot-highlight">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
             </div>
-          ` : `
+          ` : breakdown.isCrimson ? (() => {
+            const effDmg = breakdown.effDamage || 0;
+            const critM = breakdown.critAvgMult || 1;
+            const effSpaVal = breakdown.effSpa || 1;
+            // Bleed
+            const bleedDmg = effDmg * 0.65;
+            const bleedInterval = Math.max(1, Math.ceil(6.0 / effSpaVal) * effSpaVal);
+            const bleedDps = bleedDmg / bleedInterval;
+            // Crimson Explode
+            const cExplodeDmg = effDmg * 0.15 * critM;
+            const cExplodeInterval = Math.max(1, Math.ceil(15.0 / effSpaVal) * effSpaVal);
+            const cExplodeDps = cExplodeDmg / cExplodeInterval;
+            // Crimson Pool
+            const poolCount = breakdown.crimsonPoolCount || 0;
+            const poolDps = (poolCount * 0.30 * effDmg * critM) / 6.0;
+            return `
+              <div class="dps-table-row" style="margin-top:4px; border-top:1px solid rgba(197,37,37,0.25); padding-top:4px;">
+                <span class="dps-table-lbl" style="color:#c52525; font-weight:700;">── Bleed DoT ──</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">Bleed DMG (0.65x base hit)</span>
+                <span class="dps-table-val font-mono">${Math.round(bleedDmg).toLocaleString()} DMG</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">Interval (roundup(6 / ${effSpaVal.toFixed(2)}s) &times; ${effSpaVal.toFixed(2)}s)</span>
+                <span class="dps-table-val font-mono">${bleedInterval.toFixed(2)}s</span>
+              </div>
+              <div class="dps-table-row">
+                <span class="dps-table-lbl dot-highlight">Bleed DPS (${Math.round(bleedDmg).toLocaleString()} &divide; ${bleedInterval.toFixed(2)}s)</span>
+                <span class="dps-table-val font-mono dot-highlight">+${formatFullDPS(bleedDps)} DPS</span>
+              </div>
+              <div class="dps-table-row" style="margin-top:4px; border-top:1px solid rgba(197,37,37,0.25); padding-top:4px;">
+                <span class="dps-table-lbl" style="color:#c52525; font-weight:700;">── Crimson Explode ──</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">Explosion DMG (15% &times; effDMG &times; critAvg)</span>
+                <span class="dps-table-val font-mono">${Math.round(effDmg * 0.15).toLocaleString()} &times; ${critM.toFixed(2)} = ${Math.round(cExplodeDmg).toLocaleString()} DMG</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">Cycle Interval (5s mark + 10s CD = 15s)</span>
+                <span class="dps-table-val font-mono">${cExplodeInterval.toFixed(2)}s</span>
+              </div>
+              <div class="dps-table-row">
+                <span class="dps-table-lbl" style="color:#c52525;">Crimson Explode DPS (${Math.round(cExplodeDmg).toLocaleString()} &divide; ${cExplodeInterval.toFixed(2)}s)</span>
+                <span class="dps-table-val font-mono" style="color:#c52525;">+${formatFullDPS(cExplodeDps)} DPS</span>
+              </div>
+              <div class="dps-table-row" style="margin-top:4px; border-top:1px solid rgba(197,37,37,0.25); padding-top:4px;">
+                <span class="dps-table-lbl" style="color:#c52525; font-weight:700;">── Crimson Pool (${poolCount}/3 active) ──</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">Per-pool DMG (10%/2s &times; 3 ticks = 30% over 6s)</span>
+                <span class="dps-table-val font-mono">${poolCount} &times; 0.30 &times; ${Math.round(effDmg).toLocaleString()} &times; ${critM.toFixed(2)}</span>
+              </div>
+              <div class="dps-table-row">
+                <span class="dps-table-lbl" style="color:#c52525;">Crimson Pool DPS (over 6s window)</span>
+                <span class="dps-table-val font-mono" style="color:#c52525;">+${formatFullDPS(poolDps)} DPS</span>
+              </div>
+              <div class="dps-table-row primary" style="margin-top:4px; border-top:1px solid rgba(197,37,37,0.4); padding-top:4px;">
+                <span class="dps-table-lbl dot-highlight">Total Status Effect DPS</span>
+                <span class="dps-table-val font-mono dot-highlight">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
+              </div>
+            `;
+          })() : `
             <div class="dps-table-row indented">
               <span class="dps-table-lbl">Interval SPA</span>
               <span class="dps-table-val font-mono">${(breakdown.dotIntervalSPA || 1).toFixed(2)}s</span>
@@ -1031,6 +1093,29 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           </div>` : ""}
         </div>
       </div>` : ""}
+
+      ${breakdown.isCrimson && breakdown.crimsonAbilityActive ? `
+      <div class="dps-section section-dot" style="border-color: rgba(13,104,245,0.3);">
+        <div class="dps-section-hd" style="color:#0d68f5;">⚡ Piercing Crimson Ability (Active)</div>
+        <div class="dps-table">
+          <div class="dps-table-row">
+            <span class="dps-table-lbl">Ability Mode</span>
+            <span class="dps-table-val" style="color:#0d68f5;">Regular attacks DISABLED — Ability only</span>
+          </div>
+          <div class="dps-table-row indented">
+            <span class="dps-table-lbl">Piercing Crimson DMG (75% &times; effDMG &times; critAvg)</span>
+            <span class="dps-table-val font-mono">${Math.round((breakdown.effDamage || 0) * 0.75).toLocaleString()} &times; ${(breakdown.critAvgMult || 1).toFixed(2)} = ${Math.round((breakdown.effDamage || 0) * 0.75 * (breakdown.critAvgMult || 1)).toLocaleString()} DMG</span>
+          </div>
+          <div class="dps-table-row indented">
+            <span class="dps-table-lbl">Interval</span>
+            <span class="dps-table-val font-mono">1.00s (continuous)</span>
+          </div>
+          <div class="dps-table-row primary">
+            <span class="dps-table-lbl" style="color:#0d68f5;">Piercing Crimson DPS</span>
+            <span class="dps-table-val font-mono" style="color:#0d68f5;">+${formatFullDPS((breakdown.effDamage || 0) * 0.75 * (breakdown.critAvgMult || 1))} DPS</span>
+          </div>
+        </div>
+      </div>` : ""}
     </div>
 
     <!-- ALWAYS DISPLAYED AT THE BOTTOM FOOTER -->
@@ -1048,7 +1133,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           </div>
           ${(breakdown.unitDoTDPS || 0) > 0 ? `
           <div class="dps-table-row indented">
-            <span class="dps-table-lbl">${breakdown.isDarkMage || breakdown.isEighthSword ? "Passive DPS" : breakdown.isCrow ? "Black Fire DoT" : "DoT DPS"} &times; ${placementCount} placements</span>
+            <span class="dps-table-lbl">${breakdown.isDarkMage || breakdown.isEighthSword ? "Passive DPS" : breakdown.isCrow ? "Black Fire DoT" : breakdown.isCrimson ? "Status Effect DPS" : "DoT DPS"} &times; ${placementCount} placements</span>
             <span class="dps-table-val font-mono">${formatFullDPS(breakdown.unitDoTDPS)} &times; ${placementCount} = ${formatFullDPS((breakdown.unitDoTDPS || 0) * placementCount)} DPS</span>
           </div>` : ""}
           ${(breakdown.singleFuaDps || 0) > 0 ? `
@@ -1133,12 +1218,15 @@ export async function DpsCard(unit, options = {}) {
   const isLadyGiant = unit.id === "ladygiantenvy" || (unit.name && unit.name.includes("Lady Giant"));
   const isEighthSword = unit.id === "8thswordberserk" || (unit.name && unit.name.includes("8th Sword"));
   const isCrow = unit.id === "crowblackfire" || (unit.name && unit.name.includes("Crow"));
+  const isCrimson = unit.id === "crimsonbrother" || (unit.name && unit.name.includes("Crimson"));
 
   let darkMageMode = unit.darkMageMode || "lightning";
   let giantForm = unit.giantForm !== undefined ? unit.giantForm : false;
   let berserkState = unit.berserkState !== undefined ? unit.berserkState : false;
   let demonicPresence = unit.demonicPresence !== undefined ? unit.demonicPresence : false;
   let crowEnemiesHit = unit.crowEnemiesHit || 1;
+  let crimsonAbilityActive = unit.crimsonAbilityActive !== undefined ? unit.crimsonAbilityActive : false;
+  let crimsonPoolCount = unit.crimsonPoolCount !== undefined ? Math.max(0, Math.min(3, parseInt(unit.crimsonPoolCount, 10) || 0)) : 3;
 
   const mode = options.mode || "dps";
   const rank = options.rank || null;
@@ -1209,6 +1297,14 @@ export async function DpsCard(unit, options = {}) {
             </button>
           </div>
         ` : ""}
+        ${isCrimson ? `
+          <button type="button" class="dps-shinigami-toggle ${crimsonAbilityActive ? 'active' : ''}" id="crimson-ability-toggle-${unit.id}" aria-pressed="${crimsonAbilityActive}">
+            Piercing Crimson: ${crimsonAbilityActive ? "On" : "Off"}
+          </button>
+          <button type="button" class="dps-shinigami-toggle active" id="crimson-pool-toggle-${unit.id}" aria-label="Crimson Pools: ${crimsonPoolCount}">
+            Pools: ${crimsonPoolCount}/3
+          </button>
+        ` : ""}
         <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}">
           Shinigami Passive: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
         </button>
@@ -1231,6 +1327,8 @@ export async function DpsCard(unit, options = {}) {
   const fuaToggle = card.querySelector(".dps-fua-toggle");
   const fuaToggleWrapper = card.querySelector(".dps-fua-toggle-wrapper");
   const crowEnemiesInput = card.querySelector(`#crow-enemies-${unit.id}`);
+  const crimsonAbilityToggle = card.querySelector(`#crimson-ability-toggle-${unit.id}`);
+  const crimsonPoolToggle = card.querySelector(`#crimson-pool-toggle-${unit.id}`);
   let fuaEditor = null;
 
   const commitCrowEnemies = () => {
@@ -1305,6 +1403,25 @@ export async function DpsCard(unit, options = {}) {
     shinigamiToggle.classList.toggle("active", shinigamiPassiveActive);
     shinigamiToggle.setAttribute("aria-pressed", String(shinigamiPassiveActive));
     shinigamiToggle.textContent = `Shinigami Passive: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}`;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
+  crimsonAbilityToggle?.addEventListener("click", () => {
+    crimsonAbilityActive = !crimsonAbilityActive;
+    unit.crimsonAbilityActive = crimsonAbilityActive;
+    crimsonAbilityToggle.classList.toggle("active", crimsonAbilityActive);
+    crimsonAbilityToggle.setAttribute("aria-pressed", String(crimsonAbilityActive));
+    crimsonAbilityToggle.textContent = `Piercing Crimson: ${crimsonAbilityActive ? "On" : "Off"}`;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
+  crimsonPoolToggle?.addEventListener("click", () => {
+    crimsonPoolCount = (crimsonPoolCount + 1) % 4;
+    unit.crimsonPoolCount = crimsonPoolCount;
+    crimsonPoolToggle.setAttribute("aria-label", `Crimson Pools: ${crimsonPoolCount}`);
+    crimsonPoolToggle.textContent = `Pools: ${crimsonPoolCount}/3`;
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
     renderCalculations();
   });

@@ -325,6 +325,17 @@ img {
   --kw-color: #d20000;
 }
 
+.p-kw.p-crimson-mark>span,
+.p-kw.p-crimson-marked>span,
+.p-kw.p-crimson-pool>span,
+.p-kw.p-crimson-explode>span {
+  --kw-color: #c52525;
+}
+
+.p-kw.p-piercing-crimson>span {
+  --kw-color: #0d68f5;
+}
+
 .p-kw.p-burn>span,
 .p-burn-text {
   --kw-color: #ff7b00;
@@ -407,6 +418,11 @@ img {
 .p-kw.p-divine-spirit>span,
 .p-kw.p-black-fire>span,
 .p-kw.p-illusion>span,
+.p-kw.p-piercing-crimson>span,
+.p-kw.p-crimson-mark>span,
+.p-kw.p-crimson-marked>span,
+.p-kw.p-crimson-pool>span,
+.p-kw.p-crimson-explode>span,
 .p-kw.p-buffs>span {
   background: linear-gradient(180deg, color-mix(in srgb, var(--kw-color) calc(100% - var(--kw-darkness)), #000) 0%, var(--kw-color) 100%) !important;
   -webkit-background-clip: text !important;
