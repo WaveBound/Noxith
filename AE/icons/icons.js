@@ -153,6 +153,7 @@ export function formatPassiveText(text) {
     out = out.replace(/Crimson[\s\xA0]+Mark/gi, "@@CMK@@");
     out = out.replace(/Crimson[\s\xA0]+Pool/gi, "@@CPL@@");
     out = out.replace(/Crimson[\s\xA0]+Explode/gi, "@@CEX@@");
+    out = out.replace(/Crimson/gi, "@@CRIMSON@@");
 
     out = out.replace(/Austere[\s\xA0]+Flames/gi, "@@AF@@");
     out = out.replace(/Winged[\s\xA0]+Spirit/gi, "@@WS@@");
@@ -218,6 +219,7 @@ export function formatPassiveText(text) {
     out = out.replace(/@@CMK@@/g, `<span class="p-kw p-crimson-mark">${iconImgTag(STATUS_ICONS.crimsonmark)}<span>Crimson Mark</span></span>`);
     out = out.replace(/@@CPL@@/g, `<span class="p-kw p-crimson-pool"><span>Crimson Pool</span></span>`);
     out = out.replace(/@@CEX@@/g, `<span class="p-kw p-crimson-explode"><span>Crimson Explode</span></span>`);
+    out = out.replace(/@@CRIMSON@@/g, `<span class="p-kw p-crimson-mark">${iconImgTag(STATUS_ICONS.crimsonmark)}<span>Crimson</span></span>`);
 
     out = out.replace(/@@AF@@/g, `<span class="p-kw p-austere-flames">${iconImgTag(STATUS_ICONS.burn)}<span>Austere Flames</span></span>`);
     out = out.replace(/@@WS@@/g, `<span class="p-kw p-winged-spirit"><span>Winged Spirit</span></span>`);

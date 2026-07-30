@@ -620,6 +620,7 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
   const isCursedStudent = unit.id === "cursestudenttruelove" || (unit.name && unit.name.includes("Cursed Student"));
   const isElfMage = unit.id === "elfmageunleashed" || (unit.name && unit.name.includes("Elf Mage"));
   const isCrow = unit.id === "crowblackfire" || (unit.name && unit.name.includes("Crow"));
+  const isCrimson = unit.id === "crimsonbrother" || (unit.name && unit.name.includes("Crimson"));
 
   let activeDpsSummonId = activeDpsSubtabSummonMap.get(unit.id) || "main";
 
@@ -1155,6 +1156,15 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
                   <button type="button" class="uip-dps-lvl-btn${!unit.berserkState ? " active" : ""}" data-berserk-mode="off">Off</button>
                 </div>
               ` : ""}
+              ${isCrimson ? `
+                <div class="uip-dps-stat-mode-picker">
+                  <button type="button" class="uip-dps-lvl-btn${unit.crimsonAbilityActive ? " active" : ""}" data-crimson-ability="on">Piercing Crimson: On</button>
+                  <button type="button" class="uip-dps-lvl-btn${!unit.crimsonAbilityActive ? " active" : ""}" data-crimson-ability="off">Off</button>
+                </div>
+                <div class="uip-dps-stat-mode-picker">
+                  <button type="button" class="uip-dps-lvl-btn active" data-crimson-pools-cycle="true">Pools: ${unit.crimsonPoolCount !== undefined ? unit.crimsonPoolCount : 3}/3</button>
+                </div>
+              ` : ""}
               <div class="uip-dps-level-picker">
                 <button type="button" class="uip-dps-lvl-btn${currentLevel === 1 ? " active" : ""}" data-lvl="1">Lv. 1</button>
                 <button type="button" class="uip-dps-lvl-btn${currentLevel === 50 ? " active" : ""}" data-lvl="50">Lv. 50</button>
@@ -1198,6 +1208,13 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
           render();
         } else if (btn.dataset.berserkMode) {
           unit.berserkState = btn.dataset.berserkMode === "on";
+          render();
+        } else if (btn.dataset.crimsonAbility) {
+          unit.crimsonAbilityActive = btn.dataset.crimsonAbility === "on";
+          render();
+        } else if (btn.dataset.crimsonPoolsCycle) {
+          const currentCount = unit.crimsonPoolCount !== undefined ? unit.crimsonPoolCount : 3;
+          unit.crimsonPoolCount = (currentCount + 1) % 4;
           render();
         }
       });
