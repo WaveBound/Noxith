@@ -29,47 +29,75 @@
   transition: all 150ms ease;
 }
 
-/* ── Pagination Bar Controls ────────────────────────────────── */
+/* ── Sleek Glass Pagination Bar Controls ───────────────────── */
 .dps-pagination-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-left: 14px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--border-strong, #24242b);
-  padding: 3px 8px;
-  border-radius: 6px;
+  gap: 4px;
+  margin-left: 12px;
+  background: rgba(12, 12, 16, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 3px 4px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
 .dps-page-nav-btn {
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   color: var(--text-secondary, #a1a1aa);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   cursor: pointer;
-  transition: all 120ms ease;
+  transition: all 150ms var(--ease, ease);
 }
 
 .dps-page-nav-btn:hover:not(:disabled) {
   color: #ffffff;
-  background: rgba(99, 102, 241, 0.22);
-  border-color: rgba(99, 102, 241, 0.45);
+  background: rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.25);
+}
+
+.dps-page-nav-btn:active:not(:disabled) {
+  transform: scale(0.94);
 }
 
 .dps-page-nav-btn:disabled {
-  opacity: 0.35;
+  opacity: 0.25;
   cursor: not-allowed;
+  border-color: transparent;
+  background: transparent;
 }
 
 .dps-page-info {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text, #fafafa);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
   font-family: var(--font-mono, monospace);
-  padding: 0 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+.dps-page-num {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.dps-page-slash {
+  color: var(--muted, #71717a);
+  font-size: 11px;
+}
+
+.dps-page-total {
+  color: var(--text-secondary, #a1a1aa);
 }
 
 .dps-update-rankings-btn:hover {

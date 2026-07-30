@@ -45,9 +45,17 @@ export async function DpsPage(filter = "") {
       </div>
 
       <div class="dps-pagination-controls" id="dps-pagination-controls">
-        <button type="button" class="dps-page-nav-btn" id="dps-prev-page" title="Previous Page">&lt; Prev</button>
-        <span class="dps-page-info" id="dps-page-info">Page 1 of 1</span>
-        <button type="button" class="dps-page-nav-btn" id="dps-next-page" title="Next Page">Next &gt;</button>
+        <button type="button" class="dps-page-nav-btn" id="dps-prev-page" title="Previous Page" aria-label="Previous Page">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <span class="dps-page-info" id="dps-page-info">
+          <span class="dps-page-num" id="dps-current-page">1</span>
+          <span class="dps-page-slash">/</span>
+          <span class="dps-page-total" id="dps-total-pages">1</span>
+        </span>
+        <button type="button" class="dps-page-nav-btn" id="dps-next-page" title="Next Page" aria-label="Next Page">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
       </div>
 
       <button type="button" class="dps-update-rankings-btn" id="dps-update-rankings-btn" title="Re-sort cards by current DPS values">
@@ -63,7 +71,8 @@ export async function DpsPage(filter = "") {
   const updateBtn = page.querySelector("#dps-update-rankings-btn");
   const prevBtn = page.querySelector("#dps-prev-page");
   const nextBtn = page.querySelector("#dps-next-page");
-  const pageInfo = page.querySelector("#dps-page-info");
+  const currentPageEl = page.querySelector("#dps-current-page");
+  const totalPagesEl = page.querySelector("#dps-total-pages");
 
   async function renderSortedCards() {
     list.innerHTML = "";
@@ -87,7 +96,8 @@ export async function DpsPage(filter = "") {
     const pageUnits = sortedUnits.slice(startIndex, startIndex + PAGE_SIZE);
 
     // Update pagination controls
-    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+    currentPageEl.textContent = String(currentPage);
+    totalPagesEl.textContent = String(totalPages);
     prevBtn.disabled = currentPage === 1;
     nextBtn.disabled = currentPage === totalPages;
 
