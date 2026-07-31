@@ -706,81 +706,6 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
             <div class="dps-kv primary"><span class="dps-kv-lbl crit-highlight">Total Follow-Up DPS</span><span class="dps-kv-val font-mono crit-highlight">+${formatDPS(totalFollowUpDPS)}</span></div>
           </div>
         </div>`;
-    } else if (isElfMage && fuaBreakdowns && fuaBreakdowns.length > 0) {
-      const spellRows = fuaBreakdowns.map(b => {
-        const rawSpellDmg = Math.round(b.effectiveFollowUpDamage);
-        const formattedSpellName = formatPassiveText(b.name);
-        const note = b.name.includes("Eruption") ? ` &middot; ${formatPassiveText("Mana Burn")}` : "";
-        return `
-          <div class="uip-spell-row">
-            <div class="uip-spell-main">
-              <span class="uip-spell-name">${formattedSpellName}</span>
-              <span class="uip-spell-dps font-mono crit-highlight">+${formatDPS(b.dps)} DPS</span>
-            </div>
-            <div class="uip-spell-meta">
-              <span><b>100% Base &times; 1.25 (Overcharge) = 125% DMG</b> (${rawSpellDmg.toLocaleString()} DMG${note})</span>
-              <span>&bull;</span>
-              <span>Every ${(7 * effSpa).toFixed(1)}s</span>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      followupSectionHtml = `
-        <div class="dps-section section-followup">
-          <div class="dps-section-hd color-crit">Arcane Spells (Follow-Up Attacks)</div>
-          <div class="uip-spells-container">
-            ${spellRows}
-            <div class="dps-kv primary" style="margin-top: 4px;"><span class="dps-kv-lbl crit-highlight">Total Arcane Spells DPS</span><span class="dps-kv-val font-mono crit-highlight">+${formatDPS(fuaDps)} DPS</span></div>
-          </div>
-        </div>`;
-    } else if (isLadyGiant && fuaBreakdowns && fuaBreakdowns.length > 0) {
-      const rockEntry = fuaBreakdowns[0];
-      followupSectionHtml = `
-        <div class="dps-section section-followup">
-          <div class="dps-section-hd color-crit">Rock Storm (Follow-Up Attack)</div>
-          <div class="dps-kv-list">
-            <div class="dps-kv"><span class="dps-kv-lbl">Frequency</span><span class="dps-kv-val font-mono">1 Rock / 4 Regular Attacks (${(4 * effSpa).toFixed(2)}s)</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— ${formatPassiveText("Rock")} Scale</span><span class="dps-kv-val font-mono">${giantForm ? "125% DMG (Giant Form)" : "100% DMG (Base Form)"}</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Rock Hit DMG</span><span class="dps-kv-val font-mono">${Math.round(rockEntry.averageFollowUpHit).toLocaleString()} DMG</span></div>
-            <div class="dps-kv primary"><span class="dps-kv-lbl crit-highlight">Rock Storm DPS</span><span class="dps-kv-val font-mono crit-highlight">+${formatDPS(fuaDps)} DPS</span></div>
-          </div>
-        </div>`;
-    } else if (isCrow && fuaBreakdowns && fuaBreakdowns.length > 0) {
-      const illusionEntry = fuaBreakdowns[0];
-      const storingAttacks = illusionEntry.storingAttacks || Math.ceil(12 / effSpa);
-      const cycleAttacks = illusionEntry.cycleAttacks || Math.ceil(22 / effSpa);
-      const cycleTime = illusionEntry.cycleTimeSeconds || (cycleAttacks * effSpa);
-
-      followupSectionHtml = `
-        <div class="dps-section section-followup">
-          <div class="dps-section-hd" style="color: #e71a10;">Status Effect Calculation (Illusion)</div>
-          <div class="dps-kv-list">
-            <div class="dps-kv"><span class="dps-kv-lbl">Illusion Storing Window / SPA</span><span class="dps-kv-val font-mono">12.0s Storing / ${effSpa.toFixed(2)}s SPA</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Attacks in 12s Window</span><span class="dps-kv-val font-mono">roundup(12 / ${effSpa.toFixed(2)}s) = ${storingAttacks} attacks</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Stored Direct DMG</span><span class="dps-kv-val font-mono">${storingAttacks} &times; ${Math.round(avgHitDamage).toLocaleString()} = ${Math.round(illusionEntry.directStoredDmg || (storingAttacks * avgHitDamage)).toLocaleString()} DMG</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Stored Black Fire DoT DMG</span><span class="dps-kv-val font-mono">${Math.round(illusionEntry.dotStoredDmg || (effDamage * 2.0)).toLocaleString()} DMG</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Total Stored DMG</span><span class="dps-kv-val font-mono">${Math.round(illusionEntry.inputDamage).toLocaleString()} DMG</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Explosion Conversion</span><span class="dps-kv-val font-mono">${Math.round(illusionEntry.effectiveFollowUpDamage).toLocaleString()} DMG (${Math.round((illusionEntry.illusionEffectiveness || 0.25) * 100)}%)</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Total Cycle Window</span><span class="dps-kv-val font-mono">roundup(22 / ${effSpa.toFixed(2)}s) &times; ${effSpa.toFixed(2)}s = ${cycleTime.toFixed(1)}s</span></div>
-            <div class="dps-kv primary"><span class="dps-kv-lbl damage-highlight">Illusion Status DPS (${Math.round(illusionEntry.effectiveFollowUpDamage).toLocaleString()} &divide; ${cycleTime.toFixed(1)}s)</span><span class="dps-kv-val font-mono damage-highlight">+${formatDPS(fuaDps)} DPS</span></div>
-          </div>
-        </div>`;
-    } else if (isRazorjaw && fuaBreakdowns && fuaBreakdowns.length > 0) {
-      const roarEntry = fuaBreakdowns[0];
-      const roarDmgRaw = Math.round(roarEntry.effectiveFollowUpDamage);
-      const roarAvgHitRaw = Math.round(roarEntry.averageFollowUpHit);
-      followupSectionHtml = `
-        <div class="dps-section section-followup">
-          <div class="dps-section-hd color-crit">Roar (Timed Follow-Up Attack)</div>
-          <div class="dps-kv-list">
-            <div class="dps-kv"><span class="dps-kv-lbl">Trigger</span><span class="dps-kv-val font-mono">Every 10 seconds (full AoE)</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Base Roar DMG (35% of ${Math.round(effDamage).toLocaleString()})</span><span class="dps-kv-val font-mono">${roarDmgRaw.toLocaleString()} DMG</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Crit Avg Hit <span class="faint-mult">(×${(roarEntry.critAvgMult || 1).toFixed(2)})</span></span><span class="dps-kv-val font-mono">${roarAvgHitRaw.toLocaleString()} DMG</span></div>
-            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Interval</span><span class="dps-kv-val font-mono">10s fixed cooldown</span></div>
-            <div class="dps-kv primary"><span class="dps-kv-lbl crit-highlight">Roar DPS (${roarAvgHitRaw.toLocaleString()} ÷ 10s)</span><span class="dps-kv-val font-mono crit-highlight">+${formatDPS(fuaDps)} DPS</span></div>
-          </div>
-        </div>`;
     } else if (isCursedImmortal) {
       const hasMemoryPendant = false; // base calc (no relic selected in this view)
       const caringScale = 0.50;
@@ -800,6 +725,33 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
             <div class="dps-kv" style="margin-top:6px;opacity:0.55;"><span class="dps-kv-lbl">${inactiveState} State (inactive)</span><span class="dps-kv-val font-mono">${(inactiveScale * 100).toFixed(0)}% DMG / 1s → ${formatDPS((effDamage * inactiveScale))} DPS</span></div>
             <div class="dps-kv" style="opacity:0.55;"><span class="dps-kv-lbl">Range Modifier</span><span class="dps-kv-val font-mono">${unit.coldState ? "-75% (Cold: 25% of range)" : "-50% (Caring: 50% of range)"}</span></div>
           </div>
+        </div>`;
+    } else if (fuaBreakdowns && fuaBreakdowns.length > 0) {
+      const fuaRowsHtml = fuaBreakdowns.map(entry => {
+        const title = formatPassiveText(entry.name || `FUA ${entry.index + 1}`);
+        const fuaBase = entry.effectiveFollowUpDamage || entry.inputDamage;
+        const avgHit = entry.averageFollowUpHit || (fuaBase * (entry.critAvgMult || critAvgMult));
+        const interval = entry.roarInterval || entry.cycleInterval || entry.intervalSpa || (effSpa * 3);
+        const calcDps = entry.dps;
+        const pct = entry.inputDamage > 0 ? Math.round((fuaBase / entry.inputDamage) * 100) : 0;
+        const formulaText = pct > 0 ? ` (${pct}% of ${Math.round(entry.inputDamage).toLocaleString()})` : "";
+
+        return `
+          <div class="dps-section section-fua-entry" style="margin-bottom: 8px;">
+            <div class="dps-section-hd color-crit">${title}</div>
+            <div class="dps-kv-list">
+              <div class="dps-kv"><span class="dps-kv-lbl">Base FUA Strike DMG${formulaText}</span><span class="dps-kv-val font-mono">${Math.round(fuaBase).toLocaleString()} DMG</span></div>
+              <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Crit Avg Hit <span class="faint-mult">(×${(entry.critAvgMult || critAvgMult).toFixed(2)})</span></span><span class="dps-kv-val font-mono">${Math.round(avgHit).toLocaleString()} DMG</span></div>
+              <div class="dps-kv faint-nested"><span class="dps-kv-lbl">FUA Cooldown / Interval</span><span class="dps-kv-val font-mono">${Number(interval).toFixed(2)}s</span></div>
+              <div class="dps-kv primary"><span class="dps-kv-lbl crit-highlight">${title} DPS (${Math.round(avgHit).toLocaleString()} &divide; ${Number(interval).toFixed(1)}s)</span><span class="dps-kv-val font-mono crit-highlight">+${formatDPS(calcDps)} DPS</span></div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      followupSectionHtml = `
+        <div class="dps-section section-followup" style="background: transparent; border: none; padding: 0; box-shadow: none;">
+          ${fuaRowsHtml}
         </div>`;
     }
 

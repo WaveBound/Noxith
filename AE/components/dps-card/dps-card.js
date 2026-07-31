@@ -1145,10 +1145,24 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
               `;
     }
 
+    const fuaBase = entry.effectiveFollowUpDamage || entry.inputDamage;
+    const avgHit = entry.averageFollowUpHit || (fuaBase * critMult);
+    const interval = entry.roarInterval || entry.cycleInterval || entry.intervalSpa || (effSpaVal * 3);
+    const pct = entry.inputDamage > 0 ? Math.round((fuaBase / entry.inputDamage) * 100) : 0;
+    const formulaText = pct > 0 ? ` (${pct}% of ${Math.round(entry.inputDamage).toLocaleString()})` : "";
+
     return `
               <div class="dps-table-row">
-                <span class="dps-table-lbl">${formatPassiveText(entry.name || `FUA ${entry.index + 1}`)}</span>
-                <span class="dps-table-val font-mono">${formatFullDPS(entry.effectiveFollowUpDamage || entry.inputDamage)}</span>
+                <span class="dps-table-lbl">${formatPassiveText(entry.name || `FUA ${entry.index + 1}`)} Base DMG${formulaText}</span>
+                <span class="dps-table-val font-mono">${Math.round(fuaBase).toLocaleString()} DMG</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">Crit Multiplier</span>
+                <span class="dps-table-val font-mono"><span class="faint-mult">x${critMult.toFixed(2)}</span>${Math.round(avgHit).toLocaleString()} DMG</span>
+              </div>
+              <div class="dps-table-row indented">
+                <span class="dps-table-lbl">Interval / Cooldown</span>
+                <span class="dps-table-val font-mono">${Number(interval).toFixed(2)}s</span>
               </div>
               <div class="dps-table-row primary" style="margin-bottom: 8px;">
                 <span class="dps-table-lbl damage-highlight">${formatPassiveText(entry.name || `FUA ${entry.index + 1}`)} DPS</span>
