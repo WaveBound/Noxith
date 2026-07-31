@@ -1,4 +1,4 @@
-import { getTraitBreakdown, formatDPS, TRAIT_DEFINITIONS, getSummonsData } from "../../pages/dps-math.js";
+import { getTraitBreakdown, formatDPS, TRAIT_DEFINITIONS, getSummonsData, getUnitRelicList } from "../../pages/dps-math.js";
 import { globalRelics } from "../../data/relics.js";
 import { getRelicStatsByName } from "../../data/relicstats.js";
 import { relicImgByName, ELEMENT_ICONS, ARCHETYPE_ICONS, iconImg, STAT_ICONS, formatPassiveText, STATUS_ICONS, toAbsoluteUrl } from "../../icons/icons.js";
@@ -1312,6 +1312,11 @@ export async function DpsCard(unit, options = {}) {
     unit.caringState = caringState;
   }
 
+  const relicsList = getUnitRelicList(unit);
+  const hasMemoryPendant = relicsList.some(r => r.name === "Memory Pendant");
+  const caringVal = hasMemoryPendant ? 75 : 50;
+  const coldVal = hasMemoryPendant ? 150 : 125;
+
   const mode = options.mode || "dps";
   const rank = options.rank || null;
   const isCursedStudent = unit.id === "cursestudenttruelove" || (unit.name && unit.name.includes("Cursed Student"));
@@ -1391,10 +1396,10 @@ export async function DpsCard(unit, options = {}) {
         ` : ""}
         ${isCursedImmortal ? `
           <button type="button" class="dps-shinigami-toggle ${caringState ? 'active' : ''}" id="caring-toggle-${unit.id}" aria-pressed="${caringState}">
-            Caring State (50%): ${caringState ? "On" : "Off"}
+            Caring State (${caringVal}%): ${caringState ? "On" : "Off"}
           </button>
           <button type="button" class="dps-shinigami-toggle ${coldState ? 'active' : ''}" id="cold-toggle-${unit.id}" aria-pressed="${coldState}">
-            Cold State (125%): ${coldState ? "On" : "Off"}
+            Cold State (${coldVal}%): ${coldState ? "On" : "Off"}
           </button>
         ` : ""}
         <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}">
@@ -1520,12 +1525,12 @@ export async function DpsCard(unit, options = {}) {
 
     caringToggle.classList.add("active");
     caringToggle.setAttribute("aria-pressed", "true");
-    caringToggle.textContent = `Caring State (50%): On`;
+    caringToggle.textContent = `Caring State (${caringVal}%): On`;
 
     if (coldToggle) {
       coldToggle.classList.remove("active");
       coldToggle.setAttribute("aria-pressed", "false");
-      coldToggle.textContent = `Cold State (125%): Off`;
+      coldToggle.textContent = `Cold State (${coldVal}%): Off`;
     }
 
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
@@ -1541,12 +1546,12 @@ export async function DpsCard(unit, options = {}) {
 
     coldToggle.classList.add("active");
     coldToggle.setAttribute("aria-pressed", "true");
-    coldToggle.textContent = `Cold State (125%): On`;
+    coldToggle.textContent = `Cold State (${coldVal}%): On`;
 
     if (caringToggle) {
       caringToggle.classList.remove("active");
       caringToggle.setAttribute("aria-pressed", "false");
-      caringToggle.textContent = `Caring State (50%): Off`;
+      caringToggle.textContent = `Caring State (${caringVal}%): Off`;
     }
 
     window.dispatchEvent(new CustomEvent("dps-value-changed"));

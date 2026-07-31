@@ -1,7 +1,7 @@
 export const unit = {
     id: "razorjawhunter",
     name: "Razorjaw (Hunter)",
-    image: "Units/Image/RazorjawHunter.png",
+    image: "Units/Image/RazorJawHunter.png",
     tiers: ["Mythic"],
     ascend: 3,
 

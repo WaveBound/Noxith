@@ -560,11 +560,14 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     ];
     singleFuaDmg = totalExplosionPerUnit;
   } else if (isCursedImmortal) {
+    const hasMemoryPendant = relics.some(r => r.name === "Memory Pendant");
+    const caringScale = hasMemoryPendant ? 0.75 : 0.50;
+    const coldScale = hasMemoryPendant ? 1.50 : 1.25;
     if (caringState) {
-      unitDirectDPS = (avgHitDamage * 0.50) / 1.0;
+      unitDirectDPS = (avgHitDamage * caringScale) / 1.0;
       effSpa = 1.0;
     } else if (coldState) {
-      unitDirectDPS = (avgHitDamage * 1.25) / 1.0;
+      unitDirectDPS = (avgHitDamage * coldScale) / 1.0;
       effSpa = 1.0;
     } else {
       unitDirectDPS = avgHitDamage / effSpa;

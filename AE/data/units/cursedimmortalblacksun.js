@@ -97,6 +97,12 @@ export const unit = {
         },
     ],
 
+    recommendedEquips: {
+        unitEquip: "Memory Pendant",
+        equip1: "Magic Book",
+        equip2: "Shinigami Sword",
+    },
+
     statusEffects: [],
 };
 
