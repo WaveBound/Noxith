@@ -98,5 +98,4 @@ export const unit = {
 
     statusEffects: [],
 };
-a
-export default unit;
+export default unit;    
