@@ -1014,6 +1014,17 @@
   flex-shrink: 0;
 }
 
+/* Flip tooltip to appear BELOW icon in the builds table to avoid overflow:hidden clip */
+.row-relics-col .dps-relic-icon-wrap::after {
+  top: calc(100% + 6px);
+  bottom: auto;
+  transform: translate(-50%, -4px);
+}
+
+.row-relics-col .dps-relic-icon-wrap:hover::after {
+  transform: translate(-50%, 0);
+}
+
 .row-dps-col {
   display: flex;
   align-items: center;
