@@ -194,6 +194,46 @@ function buildDetailedRelicCard(name, label, isUnitEquip) {
     </div>`;
 }
 
+function openRelicPassiveModal(name, descHtml) {
+  const existing = document.querySelector(".dps-passive-modal-backdrop");
+  if (existing) existing.remove();
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "dps-modal-backdrop dps-passive-modal-backdrop";
+  backdrop.style.zIndex = "100000";
+
+  const modal = document.createElement("div");
+  modal.className = "dps-passive-modal-content";
+  modal.innerHTML = `
+    <div class="dps-passive-modal-header">
+      <div class="dps-passive-modal-title">
+        <span class="dps-relic-passive-glow">Passive:</span>
+        <span class="dps-relic-passive-name-modal">${name}</span>
+      </div>
+      <button class="dps-passive-modal-close" aria-label="Close modal">&times;</button>
+    </div>
+    <div class="dps-passive-modal-body">
+      <div class="dps-relic-passive-desc-modal">${descHtml}</div>
+    </div>
+  `;
+
+  const close = () => {
+    backdrop.remove();
+  };
+
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) close();
+  });
+
+  modal.querySelector(".dps-passive-modal-close").addEventListener("click", (e) => {
+    e.stopPropagation();
+    close();
+  });
+
+  backdrop.appendChild(modal);
+  document.body.appendChild(backdrop);
+}
+
 function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic) {
   const existing = document.querySelector(".dps-modal-backdrop");
   if (existing) existing.remove();
@@ -775,7 +815,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     <div class="dps-panel-body">
       <div class="dps-section">
         <div class="dps-section-hd">Equipped Relics</div>
-        <div class="dps-relic-cards" style="display: flex; gap: 8px;">
+        <div class="dps-relic-cards">
           ${lockedRelic ? buildDetailedRelicCard(lockedRelic, "Unit Equip", true) : ""}
           ${bestEquips.map(eq => buildDetailedRelicCard(eq, "Equip Slot", false)).join("")}
         </div>
@@ -1226,10 +1266,16 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       e.stopPropagation();
       const box = btn.closest(".dps-relic-passive-box");
       const desc = box.querySelector(".dps-relic-passive-desc");
-      const arrow = btn.querySelector(".dps-passive-toggle-arrow");
+      const name = box.querySelector(".dps-relic-passive-name").textContent;
+      const descHtml = desc.innerHTML;
 
-      const isCollapsed = desc.classList.toggle("hidden");
-      arrow.classList.toggle("rotated", !isCollapsed);
+      if (window.innerWidth <= 850) {
+        openRelicPassiveModal(name, descHtml);
+      } else {
+        const arrow = btn.querySelector(".dps-passive-toggle-arrow");
+        const isCollapsed = desc.classList.toggle("hidden");
+        arrow.classList.toggle("rotated", !isCollapsed);
+      }
     });
   });
 }

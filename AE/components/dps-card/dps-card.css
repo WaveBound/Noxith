@@ -1712,4 +1712,75 @@
     max-height: 100% !important;
     flex: 1 !important;
   }
+
+  .dps-relic-cards {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+}
+
+/* ── Passive Modal Styling for Mobile ── */
+.dps-passive-modal-content {
+  width: min(420px, 90vw);
+  background: #050508;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+  animation: dps-modal-in 140ms ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.dps-passive-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.dps-passive-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary, #a1a1aa);
+}
+
+.dps-relic-passive-glow {
+  color: #818cf8;
+}
+
+.dps-relic-passive-name-modal {
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.dps-passive-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary, #a1a1aa);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.dps-passive-modal-close:hover {
+  color: #ffffff;
+}
+
+.dps-passive-modal-body {
+  padding: 16px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.dps-relic-passive-desc-modal {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary, #a1a1aa);
 }

@@ -1139,7 +1139,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: center 20%;
 }
 
 .inspector-identity {
@@ -1533,6 +1533,19 @@
 @media (max-width: 900px) {
   .uip-body {
     grid-template-columns: 1fr !important;
+  }
+
+  .primary-stats-row,
+  .secondary-stats-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .inspector-portrait {
+    height: 250px !important;
+  }
+
+  .inspector-portrait img {
+    object-position: center 20% !important;
   }
 
   /* ── Compact Mobile Loadout Icons ── */
