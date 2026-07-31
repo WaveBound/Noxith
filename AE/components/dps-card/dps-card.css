@@ -728,7 +728,7 @@
 .dps-relic-icon-wrap::after {
   content: attr(data-relic-name);
   position: absolute;
-  left: 50%;
+  left: 0;
   bottom: calc(100% + 6px);
   z-index: 999;
   width: max-content;
@@ -741,11 +741,11 @@
   font-size: 10px;
   font-weight: 700;
   line-height: 1.25;
-  text-align: center;
+  text-align: left;
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transform: translate(-50%, 4px);
+  transform: translateY(4px);
   transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
   box-shadow: none !important;
   white-space: normal;
@@ -755,7 +755,7 @@
 .dps-relic-icon-wrap:hover::after {
   opacity: 1;
   visibility: visible;
-  transform: translate(-50%, 0);
+  transform: translateY(0);
 }
 
 .dps-trait-result-col {
@@ -1018,11 +1018,11 @@
 .row-relics-col .dps-relic-icon-wrap::after {
   top: calc(100% + 6px);
   bottom: auto;
-  transform: translate(-50%, -4px);
+  transform: translateY(-4px);
 }
 
 .row-relics-col .dps-relic-icon-wrap:hover::after {
-  transform: translate(-50%, 0);
+  transform: translateY(0);
 }
 
 .row-dps-col {
