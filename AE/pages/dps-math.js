@@ -593,6 +593,31 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     unitDoTDPS = crimsonExplodeDps + crimsonPoolDps + bleedDps;
 
     base.dotName = "Crimson & Bleed";
+  } else if (isRazorjaw) {
+    // Roar: every 10s, 35% DMG AoE (crits included)
+    unitDirectDPS = avgHitDamage / effSpa;
+    unitDoTDPS = (base.dotMultiplier || 0) > 0 ? (dotDamage / dotIntervalSPA) : 0;
+
+    const roarInterval = 10;
+    const roarDmg = effDamage * 0.35;
+    const roarAvgHit = roarDmg * critAvgMult;
+    const roarDps = roarAvgHit / roarInterval;
+
+    fuaDps = roarDps;
+    fuaBreakdowns = [
+      {
+        index: 0,
+        name: "Roar (Every 10s)",
+        inputDamage: effDamage,
+        effectiveFollowUpDamage: roarDmg,
+        averageFollowUpHit: roarAvgHit,
+        roarInterval,
+        critAvgMult,
+        dps: roarDps,
+        isTimedFua: true
+      }
+    ];
+    singleFuaDmg = roarAvgHit;
   } else {
     unitDirectDPS = avgHitDamage / effSpa;
     unitDoTDPS = (base.dotMultiplier || 0) > 0 ? (dotDamage / dotIntervalSPA) : 0;
@@ -827,6 +852,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     isCursedImmortal,
     caringState,
     coldState,
+    isRazorjaw,
     fuaDps,
     fuaDamages: unit.fuaDamages || [],
     fuaBreakdowns,

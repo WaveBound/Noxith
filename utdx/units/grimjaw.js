@@ -23,7 +23,12 @@ unitDatabase.push({
         passiveSpa: 0,
         element: "Water",
         dotDuration: 10,
-        dotType: "Bleed"
+        dotType: "Bleed",
+        customFollowUp: {
+            cooldown: 10,       // fires every 10 seconds
+            dmgMult: 0.35,      // 35% of base damage per strike
+            label: "Savage Follow-Up"
+        }
     },
 
     upgrades: [
@@ -59,6 +64,10 @@ unitDatabase.push({
         {
             name: "Soul Panther",
             desc: "Requires Spirit Bar to reach 100%, then transforms into Soul Panther Mode and resets the bar.<br><br>While in Soul Panther Mode:<br>• Attacks apply Panther Mark for 15s, once per enemy.<br>• Marked enemies take +10% Damage from Grimjaw.<br>• When Panther Mark expires, it explodes in a small AOE for 5% of Grimjaw's Damage."
+        },
+        {
+            name: "Savage Follow-Up",
+            desc: "Every 10 seconds: Grimjaw unleashes a savage follow-up strike dealing <b>35% Damage</b>."
         }
     ],
 

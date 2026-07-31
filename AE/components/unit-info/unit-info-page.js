@@ -621,11 +621,17 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
   const isElfMage = unit.id === "elfmageunleashed" || (unit.name && unit.name.includes("Elf Mage"));
   const isCrow = unit.id === "crowblackfire" || (unit.name && unit.name.includes("Crow"));
   const isCrimson = unit.id === "crimsonbrother" || (unit.name && unit.name.includes("Crimson"));
+  const isCursedImmortal = unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"));
+  const isRazorjaw = unit.id === "razorjawhunter" || (unit.name && unit.name.includes("Razorjaw"));
 
   let activeDpsSummonId = activeDpsSubtabSummonMap.get(unit.id) || "main";
 
   if (isDarkMage && !unit.darkMageMode) {
     unit.darkMageMode = "lightning";
+  }
+
+  if (isCursedImmortal && unit.coldState === undefined) {
+    unit.coldState = false;  // Default: Caring State
   }
 
   const container = document.createElement("div");
@@ -640,6 +646,8 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
       selectedDpsRelic: "",
       selectedDpsEquip1: "",
       selectedDpsEquip2: "",
+      coldState: isCursedImmortal ? !!unit.coldState : false,
+      caringState: isCursedImmortal ? !unit.coldState : false,
     };
 
     const bd = getTraitBreakdown(baseUnitMock, "base", currentLevel, currentStatMode);
@@ -648,7 +656,8 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
       unitDirectDPS, unitDoTDPS, totalSummonDPS, fuaDps, scaledBaseDamage,
       dotIntervalSPA, darkMageMode, levelMult, summonBreakdowns, fuaBreakdowns, giantForm, berserkState, demonicPresence,
       relicDamageMult, relicArchetypeDamageMult, relicSpaMult, relicRangeMult,
-      totalPassiveDamageBonus, passiveSpaMult, passiveRangeMult, shinigamiActive, hasAscend, unitArchetype } = bd;
+      totalPassiveDamageBonus, passiveSpaMult, passiveRangeMult, shinigamiActive, hasAscend, unitArchetype,
+      caringState, coldState } = bd;
 
     const lvlMult = levelMult || 1;
     const placementCount = parseInt(String(unit.placementCount || unit.stats?.placementCount || "1").replace(/[^0-9]/g, ""), 10) || 1;
@@ -755,6 +764,41 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
             <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Explosion Conversion</span><span class="dps-kv-val font-mono">${Math.round(illusionEntry.effectiveFollowUpDamage).toLocaleString()} DMG (${Math.round((illusionEntry.illusionEffectiveness || 0.25) * 100)}%)</span></div>
             <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Total Cycle Window</span><span class="dps-kv-val font-mono">roundup(22 / ${effSpa.toFixed(2)}s) &times; ${effSpa.toFixed(2)}s = ${cycleTime.toFixed(1)}s</span></div>
             <div class="dps-kv primary"><span class="dps-kv-lbl damage-highlight">Illusion Status DPS (${Math.round(illusionEntry.effectiveFollowUpDamage).toLocaleString()} &divide; ${cycleTime.toFixed(1)}s)</span><span class="dps-kv-val font-mono damage-highlight">+${formatDPS(fuaDps)} DPS</span></div>
+          </div>
+        </div>`;
+    } else if (isRazorjaw && fuaBreakdowns && fuaBreakdowns.length > 0) {
+      const roarEntry = fuaBreakdowns[0];
+      const roarDmgRaw = Math.round(roarEntry.effectiveFollowUpDamage);
+      const roarAvgHitRaw = Math.round(roarEntry.averageFollowUpHit);
+      followupSectionHtml = `
+        <div class="dps-section section-followup">
+          <div class="dps-section-hd color-crit">Roar (Timed Follow-Up Attack)</div>
+          <div class="dps-kv-list">
+            <div class="dps-kv"><span class="dps-kv-lbl">Trigger</span><span class="dps-kv-val font-mono">Every 10 seconds (full AoE)</span></div>
+            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Base Roar DMG (35% of ${Math.round(effDamage).toLocaleString()})</span><span class="dps-kv-val font-mono">${roarDmgRaw.toLocaleString()} DMG</span></div>
+            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Crit Avg Hit <span class="faint-mult">(×${(roarEntry.critAvgMult || 1).toFixed(2)})</span></span><span class="dps-kv-val font-mono">${roarAvgHitRaw.toLocaleString()} DMG</span></div>
+            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">— Interval</span><span class="dps-kv-val font-mono">10s fixed cooldown</span></div>
+            <div class="dps-kv primary"><span class="dps-kv-lbl crit-highlight">Roar DPS (${roarAvgHitRaw.toLocaleString()} ÷ 10s)</span><span class="dps-kv-val font-mono crit-highlight">+${formatDPS(fuaDps)} DPS</span></div>
+          </div>
+        </div>`;
+    } else if (isCursedImmortal) {
+      const hasMemoryPendant = false; // base calc (no relic selected in this view)
+      const caringScale = 0.50;
+      const coldScale = 1.25;
+      const activeState = unit.coldState ? "Cold" : "Caring";
+      const activeScale = unit.coldState ? coldScale : caringScale;
+      const inactiveScale = unit.coldState ? caringScale : coldScale;
+      const inactiveState = unit.coldState ? "Caring" : "Cold";
+      followupSectionHtml = `
+        <div class="dps-section section-followup">
+          <div class="dps-section-hd" style="color: ${unit.coldState ? "#60a5fa" : "#f97316"}">${activeState} State (Active)</div>
+          <div class="dps-kv-list">
+            <div class="dps-kv"><span class="dps-kv-lbl">Tick Rate</span><span class="dps-kv-val font-mono">Every 1s walked</span></div>
+            <div class="dps-kv"><span class="dps-kv-lbl">${activeState} State Scale</span><span class="dps-kv-val font-mono">${(activeScale * 100).toFixed(0)}% DMG per tick (1s interval)</span></div>
+            <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Effective Tick DMG</span><span class="dps-kv-val font-mono">${Math.round(effDamage * activeScale).toLocaleString()} DMG</span></div>
+            <div class="dps-kv primary"><span class="dps-kv-lbl ${unit.coldState ? "damage-highlight" : "crit-highlight"}">${activeState} State DPS (${(activeScale * 100).toFixed(0)}% / 1s)</span><span class="dps-kv-val font-mono ${unit.coldState ? "damage-highlight" : "crit-highlight"}">${formatDPS(unitDirectDPS)} DPS</span></div>
+            <div class="dps-kv" style="margin-top:6px;opacity:0.55;"><span class="dps-kv-lbl">${inactiveState} State (inactive)</span><span class="dps-kv-val font-mono">${(inactiveScale * 100).toFixed(0)}% DMG / 1s → ${formatDPS((effDamage * inactiveScale))} DPS</span></div>
+            <div class="dps-kv" style="opacity:0.55;"><span class="dps-kv-lbl">Range Modifier</span><span class="dps-kv-val font-mono">${unit.coldState ? "-75% (Cold: 25% of range)" : "-50% (Caring: 50% of range)"}</span></div>
           </div>
         </div>`;
     }
@@ -1165,6 +1209,12 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
                   <button type="button" class="uip-dps-lvl-btn active" data-crimson-pools-cycle="true">Pools: ${unit.crimsonPoolCount !== undefined ? unit.crimsonPoolCount : 3}/3</button>
                 </div>
               ` : ""}
+              ${isCursedImmortal ? `
+                <div class="uip-dps-stat-mode-picker">
+                  <button type="button" class="uip-dps-lvl-btn${!unit.coldState ? " active" : ""}" data-cursed-state="caring">Caring State</button>
+                  <button type="button" class="uip-dps-lvl-btn${unit.coldState ? " active" : ""}" data-cursed-state="cold">Cold State</button>
+                </div>
+              ` : ""}
               <div class="uip-dps-level-picker">
                 <button type="button" class="uip-dps-lvl-btn${currentLevel === 1 ? " active" : ""}" data-lvl="1">Lv. 1</button>
                 <button type="button" class="uip-dps-lvl-btn${currentLevel === 50 ? " active" : ""}" data-lvl="50">Lv. 50</button>
@@ -1215,6 +1265,9 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
         } else if (btn.dataset.crimsonPoolsCycle) {
           const currentCount = unit.crimsonPoolCount !== undefined ? unit.crimsonPoolCount : 3;
           unit.crimsonPoolCount = (currentCount + 1) % 4;
+          render();
+        } else if (btn.dataset.cursedState) {
+          unit.coldState = btn.dataset.cursedState === "cold";
           render();
         }
       });
