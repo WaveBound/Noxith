@@ -727,8 +727,13 @@
 }
 
 @keyframes passiveLabelShimmer {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 200% 50%;
+  }
 }
 
 .status-effect-cooldown {
@@ -1125,6 +1130,8 @@
 .inspector-portrait {
   width: 100%;
   height: clamp(180px, 18vw, 260px);
+  min-height: 180px;
+  flex-shrink: 0;
   border-radius: var(--radius-sm);
   overflow: hidden;
   background: var(--background-elevated);
@@ -1138,8 +1145,8 @@
 .inspector-portrait img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center 20%;
+  object-fit: contain;
+  object-position: center;
 }
 
 .inspector-identity {
@@ -1357,6 +1364,7 @@
 .uip-dps-main-grid.has-summons {
   grid-template-columns: 260px 1fr;
 }
+
 @media (max-width: 900px) {
   .uip-dps-main-grid.has-summons {
     grid-template-columns: 1fr;
@@ -1540,12 +1548,19 @@
     grid-template-columns: 1fr !important;
   }
 
+  .inspector {
+    max-height: none !important;
+  }
+
   .inspector-portrait {
-    height: 250px !important;
+    height: 220px !important;
+    min-height: 220px !important;
+    flex-shrink: 0 !important;
   }
 
   .inspector-portrait img {
-    object-position: center 20% !important;
+    object-fit: contain !important;
+    object-position: center !important;
   }
 
   /* ── Compact Mobile Loadout Icons ── */
