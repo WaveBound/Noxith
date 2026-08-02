@@ -223,7 +223,7 @@ img {
 
 /* ── Universal Keyword Highlights ─────────────────────────────────────────── */
 :root {
-  --kw-darkness: 35%;
+  --kw-darkness: 45%;
 }
 
 .p-kw,
@@ -290,7 +290,7 @@ img {
 
 .p-kw.p-magical>span,
 .p-magical-text {
-  --kw-color: #0e86e8;
+  --kw-color: #0eaae8;
 }
 
 .p-kw.p-frostbite>span,
@@ -302,7 +302,7 @@ img {
 .p-spell-text,
 .p-mana-burn,
 .p-mana-burn-text {
-  --kw-color: #38bdf8;
+  --kw-color: #0077ff;
 }
 
 .p-kw.p-fua>span,
@@ -382,7 +382,7 @@ img {
 
 .p-kw.p-illusion>span,
 .p-illusion-text {
-  --kw-color: #e71a10;
+  --kw-color: #ff0000;
 }
 
 .p-kw.p-buffs>span {
