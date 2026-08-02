@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>noxith hub — everything lives here.</title>
   <meta name="description"
-    content="A home for tools and projects. The official website for BloxMulti, Wavebound, and UTDX Build Guide." />
+    content="A home for tools and projects. The official website for BloxMulti, Anime Expedition Wiki, Wavebound, and UTDX." />
   <!-- Preconnect to Google's servers early -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -110,7 +110,6 @@
       height: 6px;
       border-radius: 50%;
       background: var(--accent);
-      box-shadow: 0 0 8px var(--accent-glow);
       animation: pulse 2.6s ease-in-out infinite;
     }
 
@@ -232,7 +231,7 @@
       gap: 12px;
       position: relative;
       overflow: hidden;
-      transition: border-color 0.22s, transform 0.22s, box-shadow 0.22s;
+      transition: border-color 0.22s, transform 0.22s;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       text-decoration: none;
@@ -252,7 +251,6 @@
     .card:hover {
       border-color: rgba(255, 255, 255, 0.18);
       transform: translateY(-3px);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
     }
 
     .card:hover::before {
@@ -274,7 +272,6 @@
       height: 5px;
       border-radius: 50%;
       background: var(--accent);
-      box-shadow: 0 0 6px var(--accent-glow);
       animation: pulse 2.6s ease-in-out infinite;
     }
 
@@ -336,13 +333,12 @@
       font-weight: 500;
       text-decoration: none;
       cursor: pointer;
-      transition: background 0.2s, box-shadow 0.2s;
+      transition: background 0.2s;
     }
 
     .card:hover .btn-visit {
       background: #ffffff;
       color: #000;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
     }
 
     .btn-arrow {
@@ -720,10 +716,30 @@
           </div>
         </a>
 
-        <a href="/utdx/" class="card">
+        <a href="https://noxith.com/AE/" class="card">
           <div class="card-status">
             <div class="card-status-dot"></div>
             Active
+          </div>
+          <h2 class="card-title">Anime Expedition Wiki</h2>
+          <p class="card-desc">Unofficial wiki and database for Anime Expedition. View units, and
+            information.</p>
+          <div class="card-tags">
+            <span class="tag">roblox</span>
+            <span class="tag">wiki</span>
+            <span class="tag">database</span>
+          </div>
+          <div class="card-footer">
+            <span class="card-updated">Updated recently</span>
+            <div class="btn-visit">Check it out <span class="btn-arrow">→</span></div>
+          </div>
+        </a>
+
+        <a href="/utdx/" class="card">
+          <div class="card-status" style="color: #ff4444;">
+            <div class="card-status-dot" style="background: #ff4444; animation: pulse 2.6s ease-in-out infinite;">
+            </div>
+            Updates discontinued
           </div>
           <h2 class="card-title">UTDX</h2>
           <p class="card-desc">Advanced Unit Optimizer for UTDX. Optimize your units with the best traits, relics, and
@@ -733,15 +749,14 @@
             <span class="tag">optimizer</span>
           </div>
           <div class="card-footer">
-            <span class="card-updated">Updated recently</span>
+            <span class="card-updated">No longer maintained</span>
             <div class="btn-visit">Check it out <span class="btn-arrow">→</span></div>
           </div>
         </a>
 
         <a href="/wavebound/" class="card">
           <div class="card-status" style="color: #ff4444;">
-            <div class="card-status-dot"
-              style="background: #ff4444; box-shadow: 0 0 6px rgba(255,68,68,0.5); animation: pulse 2.6s ease-in-out infinite;">
+            <div class="card-status-dot" style="background: #ff4444; animation: pulse 2.6s ease-in-out infinite;">
             </div>
             Updates discontinued
           </div>
