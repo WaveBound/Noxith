@@ -1645,6 +1645,59 @@
 }
 
 @media (max-width: 850px) {
+  .dps-page-header {
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .dps-mode-toggle-group {
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+
+  .dps-mode-label {
+    font-size: 8.5px;
+    padding-left: 2px;
+  }
+
+  .dps-mode-btn {
+    padding: 3px 6px;
+    font-size: 10px;
+    border-radius: 3px;
+  }
+
+  .dps-pagination-controls {
+    margin-left: 0;
+    padding: 2px 3px;
+    border-radius: 4px;
+  }
+
+  .dps-page-nav-btn {
+    width: 20px;
+    height: 20px;
+  }
+
+  .dps-page-info {
+    font-size: 10px;
+    padding: 0 4px;
+  }
+
+  .dps-update-rankings-btn {
+    margin-left: auto;
+    padding: 5px 10px;
+    font-size: 10px;
+    border-radius: 4px;
+  }
+
+  @media (max-width: 600px) {
+    .dps-update-rankings-btn {
+      margin-left: 0;
+      width: 100%;
+      text-align: center;
+    }
+  }
+
   .dps-page-list {
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
     gap: 10px !important;
