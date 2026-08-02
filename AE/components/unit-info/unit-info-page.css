@@ -1133,6 +1133,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .inspector-portrait img {
@@ -1540,8 +1541,15 @@
     grid-template-columns: 1fr !important;
   }
 
+  .inspector {
+    position: static !important;
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+
   .inspector-portrait {
     height: 250px !important;
+    flex-shrink: 0 !important;
   }
 
   .inspector-portrait img {
