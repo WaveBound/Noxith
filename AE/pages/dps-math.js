@@ -16,7 +16,7 @@ export function parseNumber(val, defaultVal = 0) {
 
 export function getUnitBaseValues(unit) {
   if (!unit) {
-    return { damage: 0, spa: 1, range: 0, critChancePercent: 0, critDamagePercent: 100, dotMultiplier: 0, dotDescription: "", dotName: "DoT", followUpInfo: null };
+    return { damage: 0, spa: 1, range: 0, critChancePercent: 0, critDamagePercent: 50, dotMultiplier: 0, dotDescription: "", dotName: "DoT", followUpInfo: null };
   }
   let damage = 0;
   let spa = 1;
@@ -36,7 +36,7 @@ export function getUnitBaseValues(unit) {
   if (spa <= 0) spa = 1;
 
   const critChancePercent = parseNumber(unit.stats?.critChance, 0);
-  const critDamagePercent = parseNumber(unit.stats?.critDamage, 100);
+  const critDamagePercent = parseNumber(unit.stats?.critDamage, 50);
 
   let dotMultiplier = 0;
   let dotDescription = "";
@@ -373,8 +373,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     effRange = effRange * (1 + passiveRangeMult);
   }
 
-  const effCritChance = Math.min(1.0, ((base.critChancePercent || 0) / 100) + (trait.critChanceBonus || 0) + relicCritChanceAdd + passiveCritChanceAdd);
-  const effCritDamage = ((base.critDamagePercent || 100) / 100) + (trait.critDamageBonus || 0) + relicCritDamageAdd + passiveCritDamageAdd;
+  const rawCritChance = Math.min(1.0, ((base.critChancePercent || 0) / 100) + (trait.critChanceBonus || 0) + relicCritChanceAdd + passiveCritChanceAdd);
+  const effCritChance = rawCritChance > 0.25 ? rawCritChance : 0;
+  const effCritDamage = ((base.critDamagePercent ?? 50) / 100) + (trait.critDamageBonus || 0) + relicCritDamageAdd + passiveCritDamageAdd;
   const critAvgMult = 1 + effCritChance * effCritDamage;
 
   const avgHitDamage = effDamage * critAvgMult;
@@ -803,6 +804,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     effDamage,
     effSpa,
     effRange,
+    rawCritChance,
     effCritChance,
     effCritDamage,
     critAvgMult,

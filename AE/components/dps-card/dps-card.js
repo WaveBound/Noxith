@@ -356,7 +356,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   const passiveCritChance = (breakdown.passiveCritChanceAdd || (breakdown.isReaper ? 0.40 : 0)) * 100;
   const finalCritChancePercent = Math.min(100, Math.round((breakdown.effCritChance || 0) * 100));
 
-  const baseCritDmg = rawBase.critDamagePercent || 100;
+  const baseCritDmg = rawBase.critDamagePercent ?? 50;
   const traitCritDmg = (breakdown.trait?.critDamageBonus || 0) * 100;
   const relicCritDmg = (breakdown.relicCritDamageAdd || 0) * 100;
   const passiveCritDmg = (breakdown.passiveCritDamageAdd || 0) * 100;

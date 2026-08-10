@@ -12,7 +12,7 @@ export const unit = {
         spa: "6",
         range: "21",
         critChance: "0%",
-        critDamage: "100%",
+        critDamage: "50%",
         placementCount: "3",
         totalCost: "$35,600",
     },
