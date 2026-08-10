@@ -5,7 +5,7 @@ export const unit = {
     tiers: ["Secret"],
 
     stats: {
-        recommendedTrait: "Forsaken",
+        recommendedTrait: "Unbound",
         element: "Flame",
         archetype: "Magical",
         damage: "1,800",
