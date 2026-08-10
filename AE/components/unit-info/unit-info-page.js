@@ -554,10 +554,12 @@ function buildInspector(unit, activeSummonData = null) {
       else if (key === "range") val = activeSummonData.range || unit.stats?.range || "";
       else if (key === "placement") val = activeSummonData.globalMax ? `${activeSummonData.globalMax} Max` : `${activeSummonData.countPerPlacement || 1}/Placement`;
       else if (key === "attackType") val = activeSummonData.aoe || unit.stats?.attackType || "";
+      else if (key === "critDamage") val = "100%";
       else val = unit.stats?.[key] || "";
     } else {
       val = key === "totalCost" ? unit.totalCost :
         key === "placement" ? unit.placementCount :
+        key === "critDamage" ? "100%" :
           unit.stats?.[key] || "";
     }
 

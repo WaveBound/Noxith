@@ -16,7 +16,7 @@ export function parseNumber(val, defaultVal = 0) {
 
 export function getUnitBaseValues(unit) {
   if (!unit) {
-    return { damage: 0, spa: 1, range: 0, critChancePercent: 0, critDamagePercent: 50, dotMultiplier: 0, dotDescription: "", dotName: "DoT", followUpInfo: null };
+    return { damage: 0, spa: 1, range: 0, critChancePercent: 0, critDamagePercent: 100, dotMultiplier: 0, dotDescription: "", dotName: "DoT", followUpInfo: null };
   }
   let damage = 0;
   let spa = 1;
@@ -36,7 +36,7 @@ export function getUnitBaseValues(unit) {
   if (spa <= 0) spa = 1;
 
   const critChancePercent = parseNumber(unit.stats?.critChance, 0);
-  const critDamagePercent = parseNumber(unit.stats?.critDamage, 50);
+  const critDamagePercent = parseNumber(unit.stats?.critDamage, 100);
 
   let dotMultiplier = 0;
   let dotDescription = "";
@@ -227,6 +227,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isCrimson = unit && (unit.id === "crimsonbrother" || (unit.name && unit.name.includes("Crimson")));
   const isCursedImmortal = unit && (unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal")));
   const isRazorjaw = unit && (unit.id === "razorjawhunter" || (unit.name && unit.name.includes("Razorjaw")));
+  const isVegetable = unit && (unit.id === "vegetableprince" || (unit.name && unit.name.includes("Vegetable")));
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
@@ -239,12 +240,28 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const crimsonPoolCount = unit ? (unit.crimsonPoolCount !== undefined ? Math.max(0, Math.min(3, parseInt(unit.crimsonPoolCount, 10) || 0)) : 3) : 3;
   const coldState = isCursedImmortal ? !!unit.coldState : false;
   const caringState = isCursedImmortal ? !coldState : (unit && !!unit.caringState);
+  const royalRivalry = isVegetable ? (unit.royalRivalry !== undefined ? !!unit.royalRivalry : true) : false;
+  const awakenedPride = isVegetable ? !!unit.awakenedPride : false;
+  const isCompMode = unit ? !!unit.isCompMode : false;
 
   let passiveSpaMult = isReaper ? -0.10 : (isLadyGiant && giantForm ? 0.25 : (isEighthSword && berserkState ? -0.10 : 0));
   let passiveCritChanceAdd = isReaper ? 0.40 : (isCursedImmortal ? 0.30 : (isRazorjaw ? 0.25 : 0));
   let passiveCritDamageAdd = 0;
   let passiveDamageMult = isReaper ? 0.40 : (isLadyGiant && giantForm ? 1.25 : (isEighthSword && berserkState ? 0.20 : 0));
   let passiveRangeMult = (isLadyGiant && giantForm ? 0.50 : (isCursedImmortal && caringState ? -0.50 : (isCursedImmortal && coldState ? -0.75 : 0)));
+
+  if (isVegetable) {
+    if (royalRivalry) {
+      passiveDamageMult += 0.50;
+      passiveCritChanceAdd += 0.50;
+      passiveCritDamageAdd += 0.30;
+    }
+    if (awakenedPride) {
+      passiveDamageMult += 0.15;
+      passiveCritChanceAdd += 0.20;
+      passiveCritDamageAdd += 0.35;
+    }
+  }
 
   if (isElfMage) {
     base.dotMultiplier = 0.50;
@@ -373,9 +390,11 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     effRange = effRange * (1 + passiveRangeMult);
   }
 
-  const rawCritChance = Math.min(1.0, ((base.critChancePercent || 0) / 100) + (trait.critChanceBonus || 0) + relicCritChanceAdd + passiveCritChanceAdd);
-  const effCritChance = rawCritChance > 0.25 ? rawCritChance : 0;
-  const effCritDamage = ((base.critDamagePercent ?? 50) / 100) + (trait.critDamageBonus || 0) + relicCritDamageAdd + passiveCritDamageAdd;
+  const baseCritRate = ((base.critChancePercent || 0) / 100);
+  const baseCritDamage = isCompMode ? 0.50 : 1.00;
+  const rawCritChance = Math.min(1.0, baseCritRate + (trait.critChanceBonus || 0) + relicCritChanceAdd + passiveCritChanceAdd);
+  const effCritChance = isCompMode ? (rawCritChance >= 0.25 ? rawCritChance : 0) : rawCritChance;
+  const effCritDamage = baseCritDamage + (trait.critDamageBonus || 0) + relicCritDamageAdd + passiveCritDamageAdd;
   const critAvgMult = 1 + effCritChance * effCritDamage;
 
   const avgHitDamage = effDamage * critAvgMult;

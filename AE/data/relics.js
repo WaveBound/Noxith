@@ -58,6 +58,7 @@ const UNIT_NAME_MAP = {
   "Crow": "Crow (Black Fire)",
   "Razorjaw": "Razorjaw (Hunter)",
   "CursedImmortal": "Cursed Immortal (Black Sun)",
+  "VegetablePrince": "Vegetable (Prince)",
 };
 
 const rawRelics = [
@@ -235,6 +236,12 @@ const rawRelics = [
     name: "Technique Amplifier",
     image: relicImgByName("Technique Amplifier"),
     unitEquip: "Salmon Sorcerer",
+  },
+  {
+    id: "relic-royal-gi",
+    name: "Royal Gi",
+    image: relicImgByName("Royal Gi"),
+    unitEquip: "Vegetable (Prince)",
   },
 ];
 

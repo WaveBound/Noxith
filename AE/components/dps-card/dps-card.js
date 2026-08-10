@@ -60,7 +60,8 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       crowEnemiesHit: options.crowEnemiesHit !== undefined ? options.crowEnemiesHit : (unit.crowEnemiesHit || 1),
       caringState: (unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"))) ? !(options.coldState !== undefined ? !!options.coldState : !!unit.coldState) : (options.caringState !== undefined ? !!options.caringState : !!unit.caringState),
       coldState: (unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"))) ? (options.coldState !== undefined ? !!options.coldState : !!unit.coldState) : false,
-      fuaDamages: options.fuaDamages || unit.fuaDamages || []
+      fuaDamages: options.fuaDamages || unit.fuaDamages || [],
+      isCompMode: options.isCompMode !== undefined ? !!options.isCompMode : !!unit.isCompMode,
     };
 
     const rawBreakdown = getTraitBreakdown(mockUnit, traitKey, targetLevel, statMode);
@@ -1311,12 +1312,16 @@ export async function DpsCard(unit, options = {}) {
   const isCrow = unit.id === "crowblackfire" || (unit.name && unit.name.includes("Crow"));
   const isCrimson = unit.id === "crimsonbrother" || (unit.name && unit.name.includes("Crimson"));
   const isCursedImmortal = unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"));
+  const isVegetable = unit.id === "vegetableprince" || (unit.name && unit.name.includes("Vegetable"));
 
   let darkMageMode = unit.darkMageMode || "lightning";
   let giantForm = unit.giantForm !== undefined ? unit.giantForm : false;
   let berserkState = unit.berserkState !== undefined ? unit.berserkState : false;
   let demonicPresence = unit.demonicPresence !== undefined ? unit.demonicPresence : false;
   let crowEnemiesHit = unit.crowEnemiesHit || 1;
+  let royalRivalry = isVegetable ? (unit.royalRivalry !== undefined ? !!unit.royalRivalry : true) : false;
+  let awakenedPride = isVegetable ? !!unit.awakenedPride : false;
+  let isCompMode = options.isCompMode !== undefined ? !!options.isCompMode : (unit.isCompMode !== undefined ? !!unit.isCompMode : false);
   let crimsonAbilityActive = unit.crimsonAbilityActive !== undefined ? unit.crimsonAbilityActive : false;
   let crimsonPoolCount = unit.crimsonPoolCount !== undefined ? Math.max(0, Math.min(3, parseInt(unit.crimsonPoolCount, 10) || 0)) : 3;
   let coldState = isCursedImmortal ? !!unit.coldState : false;
@@ -1416,6 +1421,14 @@ export async function DpsCard(unit, options = {}) {
             Cold State (${coldVal}%): ${coldState ? "On" : "Off"}
           </button>
         ` : ""}
+        ${isVegetable ? `
+          <button type="button" class="dps-shinigami-toggle ${royalRivalry ? 'active' : ''}" id="royal-rivalry-toggle-${unit.id}" aria-pressed="${royalRivalry}">
+            Royal Rivalry: ${royalRivalry ? "On" : "Off"}
+          </button>
+          <button type="button" class="dps-shinigami-toggle ${awakenedPride ? 'active' : ''}" id="awakened-pride-toggle-${unit.id}" aria-pressed="${awakenedPride}">
+            Awakened Pride: ${awakenedPride ? "On" : "Off"}
+          </button>
+        ` : ""}
         <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}">
           Shinigami Passive: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
         </button>
@@ -1442,6 +1455,8 @@ export async function DpsCard(unit, options = {}) {
   const crimsonPoolToggle = card.querySelector(`#crimson-pool-toggle-${unit.id}`);
   const caringToggle = card.querySelector(`#caring-toggle-${unit.id}`);
   const coldToggle = card.querySelector(`#cold-toggle-${unit.id}`);
+  const royalRivalryToggle = card.querySelector(`#royal-rivalry-toggle-${unit.id}`);
+  const awakenedPrideToggle = card.querySelector(`#awakened-pride-toggle-${unit.id}`);
   let fuaEditor = null;
 
   const commitCrowEnemies = () => {
@@ -1568,6 +1583,26 @@ export async function DpsCard(unit, options = {}) {
       caringToggle.textContent = `Caring State (${caringVal}%): Off`;
     }
 
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
+  royalRivalryToggle?.addEventListener("click", () => {
+    royalRivalry = !royalRivalry;
+    unit.royalRivalry = royalRivalry;
+    royalRivalryToggle.classList.toggle("active", royalRivalry);
+    royalRivalryToggle.setAttribute("aria-pressed", String(royalRivalry));
+    royalRivalryToggle.textContent = `Royal Rivalry: ${royalRivalry ? "On" : "Off"}`;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
+  awakenedPrideToggle?.addEventListener("click", () => {
+    awakenedPride = !awakenedPride;
+    unit.awakenedPride = awakenedPride;
+    awakenedPrideToggle.classList.toggle("active", awakenedPride);
+    awakenedPrideToggle.setAttribute("aria-pressed", String(awakenedPride));
+    awakenedPrideToggle.textContent = `Awakened Pride: ${awakenedPride ? "On" : "Off"}`;
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
     renderCalculations();
   });
@@ -1774,7 +1809,10 @@ export async function DpsCard(unit, options = {}) {
         caringState,
         coldState,
         fuaDamages: getFuaDamagesForTrait(traitKey),
-        mode
+        mode,
+        isCompMode,
+        royalRivalry,
+        awakenedPride,
       });
       return { traitKey, ...result };
     }).sort((a, b) => (Number(b.breakdown.displayVal) || 0) - (Number(a.breakdown.displayVal) || 0));

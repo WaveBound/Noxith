@@ -3,14 +3,16 @@ import { DpsCard, optimizeRelicsForTrait } from "../components/dps-card/dps-card
 import { TRAIT_DEFINITIONS } from "./dps-math.js";
 
 let currentMode = "dps"; // "dps" or "dmg"
+let globalCompMode = false; // false = Non-Comp (100% Crit), true = Comp (50% Crit)
 
 const PAGE_SIZE = 10; // Up to 2 rows of 5 cards
 
-function calculateUnitBestStanding(unit, mode) {
+function calculateUnitBestStanding(unit, mode, isCompMode) {
   let maxOutput = -1;
   Object.keys(TRAIT_DEFINITIONS).filter(k => k !== "base").forEach(traitKey => {
     const res = optimizeRelicsForTrait(unit, traitKey, {
       mode,
+      isCompMode,
       simulateShinigamiPassive: unit.simulateShinigamiPassive,
       darkMageMode: unit.darkMageMode,
       giantForm: unit.giantForm,
@@ -41,6 +43,14 @@ export async function DpsPage(filter = "") {
         <div class="dps-mode-selector">
           <button type="button" class="dps-mode-btn ${currentMode === 'dps' ? 'active' : ''}" data-mode="dps">DPS</button>
           <button type="button" class="dps-mode-btn ${currentMode === 'dmg' ? 'active' : ''}" data-mode="dmg">DMG (Per Attack)</button>
+        </div>
+      </div>
+
+      <div class="dps-mode-toggle-group">
+        <span class="dps-mode-label">Crit Mode:</span>
+        <div class="dps-mode-selector">
+          <button type="button" class="dps-mode-btn dps-comp-btn ${!globalCompMode ? 'active' : ''}" data-comp="non-comp">Non-Comp</button>
+          <button type="button" class="dps-mode-btn dps-comp-btn ${globalCompMode ? 'active' : ''}" data-comp="comp">Comp Mode</button>
         </div>
       </div>
 
@@ -82,7 +92,7 @@ export async function DpsPage(filter = "") {
     // Calculate best standing for each unit and sort in descending order
     const evaluatedUnits = filtered.map(unit => ({
       unit,
-      standing: calculateUnitBestStanding(unit, currentMode)
+      standing: calculateUnitBestStanding(unit, currentMode, globalCompMode)
     }));
 
     evaluatedUnits.sort((a, b) => b.standing - a.standing);
@@ -103,7 +113,7 @@ export async function DpsPage(filter = "") {
 
     // Render cards with active mode & global ranking index
     const cards = await Promise.all(
-      pageUnits.map((u, index) => DpsCard(u, { mode: currentMode, rank: startIndex + index + 1 }))
+      pageUnits.map((u, index) => DpsCard(u, { mode: currentMode, rank: startIndex + index + 1, isCompMode: globalCompMode }))
     );
     cards.forEach(card => list.appendChild(card));
   }
@@ -132,6 +142,18 @@ export async function DpsPage(filter = "") {
       currentMode = mode;
 
       page.querySelectorAll(".dps-mode-btn").forEach(b => b.classList.toggle("active", b.dataset.mode === currentMode));
+      renderSortedCards();
+    });
+  });
+
+  // Comp Mode button click listeners
+  page.querySelectorAll(".dps-comp-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const compVal = btn.dataset.comp === "comp";
+      if (compVal === globalCompMode) return;
+      globalCompMode = compVal;
+
+      page.querySelectorAll(".dps-comp-btn").forEach(b => b.classList.toggle("active", (b.dataset.comp === "comp") === globalCompMode));
       renderSortedCards();
     });
   });

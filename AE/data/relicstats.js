@@ -282,6 +282,17 @@ export const relicStats = {
             desc: `Apply Slow based on current attack:<br>Explode - 20%<br>Blast Away - 35%<br>Twist - 50%<br>Crush - 65%<br><br>Overrides original passive`,
         },
     },
+
+    "Royal Gi": {
+        stats: [
+            { damage: { min: "+10%", max: "+10%" } },
+            { range: { min: "+5%", max: "+5%" } },
+        ],
+        passive: {
+            name: "Royal Rivalry",
+            desc: `For every Regular Attack from another unit in this unit's range:<br>- Increase this unit's damage by 5% (Capacity: 50%)<br>For every Critical Attack from another unit in this unit's range:<br>- Increase this unit's critical chance by 10% (Capacity: 50%)<br>For every Follow-Up Attack from another unit in this unit's range:<br>- Increase this unit's critical damage by 10% (Capacity: 30%)`,
+        },
+    },
 };
 
 export function getRelicStatsByName(name) {
