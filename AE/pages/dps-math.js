@@ -1,5 +1,6 @@
 import { relicImgByName } from "../icons/icons.js";
 import { getRelicStatsByName } from "../data/relicstats.js";
+import { units as allUnits } from "../data/units.js";
 
 export function parseNumber(val, defaultVal = 0) {
   if (val == null) return defaultVal;
@@ -171,6 +172,9 @@ export const TRAIT_DEFINITIONS = {
 export function getSummonsData(unit) {
   if (!unit) return null;
 
+  // Bioinsect base form has no summons
+  if (unit._bioinsectSuppressSummon) return null;
+
   let data = unit.summons ||
     unit.summon ||
     unit.stats?.summons ||
@@ -228,6 +232,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isCursedImmortal = unit && (unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal")));
   const isRazorjaw = unit && (unit.id === "razorjawhunter" || (unit.name && unit.name.includes("Razorjaw")));
   const isVegetable = unit && (unit.id === "vegetableprince" || (unit.name && unit.name.includes("Vegetable")));
+  const isBioinsect = unit && (unit.id === "bioinsectfinal" || !!unit.isBioinsectUnit);
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
@@ -243,12 +248,19 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const royalRivalry = isVegetable ? (unit.royalRivalry !== undefined ? !!unit.royalRivalry : true) : false;
   const awakenedPride = isVegetable ? !!unit.awakenedPride : false;
   const isCompMode = unit ? !!unit.isCompMode : false;
+  const bioinsectForm = isBioinsect ? (unit.bioinsectForm || "imperfect") : "base";
+  const bioinsectResetStacks = isBioinsect ? Math.max(0, Math.min(15, parseInt(unit.bioinsectResetStacks || 0, 10) || 0)) : 0;
 
   let passiveSpaMult = isReaper ? -0.10 : (isLadyGiant && giantForm ? 0.25 : (isEighthSword && berserkState ? -0.10 : 0));
   let passiveCritChanceAdd = isReaper ? 0.40 : (isCursedImmortal ? 0.30 : (isRazorjaw ? 0.25 : 0));
   let passiveCritDamageAdd = 0;
   let passiveDamageMult = isReaper ? 0.40 : (isLadyGiant && giantForm ? 1.25 : (isEighthSword && berserkState ? 0.20 : 0));
   let passiveRangeMult = (isLadyGiant && giantForm ? 0.50 : (isCursedImmortal && caringState ? -0.50 : (isCursedImmortal && coldState ? -0.75 : 0)));
+  // Bioinsect Bio Reset stacks: each stack = +1% damage, +1% range (max 15 stacks)
+  if (isBioinsect && bioinsectResetStacks > 0) {
+    passiveDamageMult += bioinsectResetStacks * 0.01;
+    passiveRangeMult += bioinsectResetStacks * 0.01;
+  }
 
   if (isVegetable) {
     if (royalRivalry) {
@@ -284,6 +296,21 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   } else if (isCrow) {
     base.dotMultiplier = 2.0;
     base.dotName = "Black Fire";
+  }
+
+  // ── Bioinsect: derive base damage from a copied unit's raw base stat × 50% ──
+  // The copied unit's damage is taken BEFORE level or Z stat scaling.
+  // Bioinsect's own level 50 + Z stat then apply on top through the normal pipeline.
+  if (isBioinsect) {
+    const copiedId = unit.bioinsectCopiedUnitId;
+    const copiedUnit = copiedId ? allUnits.find(u => u.id === copiedId) : null;
+    if (copiedUnit) {
+      const copiedBase = getUnitBaseValues(copiedUnit);
+      // Raw final-upgrade base damage (no level mult, no Z stat)
+      base.damage = copiedBase.damage * 0.5;
+    } else {
+      base.damage = 0;
+    }
   }
 
   const lvl = Math.max(1, parseInt(level) || 1);
@@ -638,6 +665,16 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
       }
     ];
     singleFuaDmg = roarAvgHit;
+  } else if (isBioinsect) {
+    unitDirectDPS = avgHitDamage / effSpa;
+    unitDoTDPS = 0;
+
+    // Suppress summon in base form; summon only applies in imperfect/semiperfect/perfect
+    if (bioinsectForm === "base") {
+      unit._bioinsectSuppressSummon = true;
+    } else {
+      unit._bioinsectSuppressSummon = false;
+    }
   } else {
     unitDirectDPS = avgHitDamage / effSpa;
     unitDoTDPS = (base.dotMultiplier || 0) > 0 ? (dotDamage / dotIntervalSPA) : 0;
@@ -886,5 +923,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     dotIntervalMultiplier,
     dotIntervalSPA,
     dotDamage,
+    isBioinsect,
+    bioinsectForm,
+    bioinsectResetStacks,
+    bioinsectCopiedUnitId: unit.bioinsectCopiedUnitId || null,
   };
 }

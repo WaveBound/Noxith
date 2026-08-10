@@ -11,6 +11,7 @@ import razorjawhunter from "./units/razorjawhunter.js";
 import crimsonbrother from "./units/crimsonbrother.js";
 import cursedimmortalblacksun from "./units/cursedimmortalblacksun.js";
 import vegetableprince from "./units/vegetableprince.js";
+import bioinsect from "./units/bioinsect.js";
 
 import { getRelicStatsByName } from "./relicstats.js";
 import { relicImgByName } from "../icons/icons.js";
@@ -29,6 +30,7 @@ const rawUnits = [
   crimsonbrother,
   cursedimmortalblacksun,
   vegetableprince,
+  bioinsect,
 ];
 
 function formatRange(v) {
@@ -154,6 +156,10 @@ function normalize(u) {
     bestTraits: u.bestTraits || [],
     passives: (u.passives || []).map((p) => ({ name: p.name, effect: p.desc })),
     abilities: (u.abilities || []).map((a) => ({ name: a.name, effect: a.desc, cooldown: a.cooldown })),
+    isBioinsectUnit: !!u.isBioinsectUnit,
+    bioinsectCopiedUnitId: u.bioinsectCopiedUnitId || null,
+    bioinsectForm: u.bioinsectForm || "imperfect",
+    bioinsectResetStacks: u.bioinsectResetStacks || 0,
   };
 }
 

@@ -884,6 +884,7 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
         if (bd.isReaper) parts.push("Adaptation +40%");
         if (bd.isEighthSword && berserkState) parts.push("Berserk +20%");
         if (bd.isLadyGiant && giantForm) parts.push("Giant Form +125%");
+        if (bd.isBioinsect && bd.bioinsectResetStacks > 0) parts.push(`Bio Reset +${bd.bioinsectResetStacks}%`);
         const labelText = parts.length > 0 ? parts.join(" + ") : "Passives";
         dmgRowsHtml += `
           <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Passives (${labelText})</span><span class="dps-kv-val font-mono"><span class="faint-mult">x${(1 + totalPassiveDamageBonus).toFixed(2)}</span>${dmgAccum.toLocaleString()}</span></div>

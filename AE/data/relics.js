@@ -243,6 +243,12 @@ const rawRelics = [
     image: relicImgByName("Royal Gi"),
     unitEquip: "Vegetable (Prince)",
   },
+  {
+    id: "relic-mechanical-wings",
+    name: "Mechanical Wings",
+    image: relicImgByName("Mechanical Wings"),
+    unitEquip: "Bioinsect",
+  },
 ];
 
 rawRelics.forEach((r) => {

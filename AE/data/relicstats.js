@@ -293,6 +293,17 @@ export const relicStats = {
             desc: `For every Regular Attack from another unit in this unit's range:<br>- Increase this unit's damage by 5% (Capacity: 50%)<br>For every Critical Attack from another unit in this unit's range:<br>- Increase this unit's critical chance by 10% (Capacity: 50%)<br>For every Follow-Up Attack from another unit in this unit's range:<br>- Increase this unit's critical damage by 10% (Capacity: 30%)`,
         },
     },
+
+    "Mechanical Wings": {
+        stats: [
+            { damage: { min: "+10%", max: "+10%" } },
+            { range: { min: "+5%", max: "+5%" } },
+        ],
+        passive: {
+            name: "Genetic Duplication",
+            desc: `On activation:<br>- Summon 1 Mini Bioinsect at this unit's position (Capacity: 1)<br>Mini Bioinsect will:<br>- Take 45% of this unit's current damage as its own damage<br>- Have 100% of this unit's current SPA<br>- Have 100% of this unit's current range<br>- Increase the damage of strongest unit in range by 10%<br>Mini Bioinsect is permanently in Imperfect form, and does not have passives or abilities.`,
+        },
+    },
 };
 
 export function getRelicStatsByName(name) {

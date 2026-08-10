@@ -13,7 +13,7 @@ function calculateUnitBestStanding(unit, mode, isCompMode) {
     const res = optimizeRelicsForTrait(unit, traitKey, {
       mode,
       isCompMode,
-      simulateShinigamiPassive: unit.simulateShinigamiPassive,
+      simulateShinigamiPassive: unit.simulateShinigamiPassive !== undefined ? unit.simulateShinigamiPassive : true,
       darkMageMode: unit.darkMageMode,
       giantForm: unit.giantForm,
       berserkState: unit.berserkState,
@@ -21,7 +21,12 @@ function calculateUnitBestStanding(unit, mode, isCompMode) {
       crowEnemiesHit: unit.crowEnemiesHit,
       caringState: unit.caringState,
       coldState: unit.coldState,
-      fuaDamages: unit.fuaDamages
+      fuaDamages: unit.fuaDamages,
+      royalRivalry: unit.royalRivalry,
+      awakenedPride: unit.awakenedPride,
+      bioinsectForm: unit.bioinsectForm,
+      bioinsectResetStacks: unit.bioinsectResetStacks,
+      bioinsectCopiedUnitId: unit.bioinsectCopiedUnitId,
     });
     const val = mode === "dmg" ? (res.breakdown?.totalDmg || 0) : (res.breakdown?.dps || 0);
     if (val > maxOutput) maxOutput = val;

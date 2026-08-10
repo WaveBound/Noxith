@@ -27,7 +27,7 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
   const statMode = "Z";
   const simulateShinigamiPassive = options.simulateShinigamiPassive !== undefined
     ? options.simulateShinigamiPassive
-    : !!unit.simulateShinigamiPassive;
+    : (unit.simulateShinigamiPassive !== undefined ? !!unit.simulateShinigamiPassive : true);
   const mode = options.mode || "dps";
 
   const defaultPlacements = parseInt(String(unit.placementCount || unit.stats?.placementCount || "1").replace(/[^0-9]/g, "")) || 1;
@@ -62,6 +62,11 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       coldState: (unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"))) ? (options.coldState !== undefined ? !!options.coldState : !!unit.coldState) : false,
       fuaDamages: options.fuaDamages || unit.fuaDamages || [],
       isCompMode: options.isCompMode !== undefined ? !!options.isCompMode : !!unit.isCompMode,
+      royalRivalry: options.royalRivalry !== undefined ? !!options.royalRivalry : !!unit.royalRivalry,
+      awakenedPride: options.awakenedPride !== undefined ? !!options.awakenedPride : !!unit.awakenedPride,
+      bioinsectForm: options.bioinsectForm || unit.bioinsectForm || "imperfect",
+      bioinsectResetStacks: options.bioinsectResetStacks !== undefined ? options.bioinsectResetStacks : (unit.bioinsectResetStacks || 0),
+      bioinsectCopiedUnitId: options.bioinsectCopiedUnitId !== undefined ? options.bioinsectCopiedUnitId : (unit.bioinsectCopiedUnitId || null),
     };
 
     const rawBreakdown = getTraitBreakdown(mockUnit, traitKey, targetLevel, statMode);
@@ -341,6 +346,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     if (breakdown.isReaper) parts.push("Adaptation +40%");
     if (breakdown.isEighthSword && breakdown.berserkState) parts.push("Berserk +20%");
     if (breakdown.isLadyGiant && breakdown.giantForm) parts.push("Giant Form +125%");
+    if (breakdown.isBioinsect && breakdown.bioinsectResetStacks > 0) parts.push(`Bio Reset +${breakdown.bioinsectResetStacks}%`);
     const labelText = parts.length > 0 ? parts.join(" + ") : "Passives";
     dmgRowsHtml += `
       <div class="dps-table-row indented">
@@ -1305,7 +1311,8 @@ export async function DpsCard(unit, options = {}) {
   const card = document.createElement("div");
   card.className = "dps-calculator-card glass-card";
 
-  let shinigamiPassiveActive = !!unit.simulateShinigamiPassive;
+  let shinigamiPassiveActive = unit.simulateShinigamiPassive !== undefined ? !!unit.simulateShinigamiPassive : true;
+  unit.simulateShinigamiPassive = shinigamiPassiveActive;
   const isDarkMage = unit.id === "darkmagesovereign" || (unit.name && unit.name.includes("Dark Mage"));
   const isLadyGiant = unit.id === "ladygiantenvy" || (unit.name && unit.name.includes("Lady Giant"));
   const isEighthSword = unit.id === "8thswordberserk" || (unit.name && unit.name.includes("8th Sword"));
@@ -1313,6 +1320,7 @@ export async function DpsCard(unit, options = {}) {
   const isCrimson = unit.id === "crimsonbrother" || (unit.name && unit.name.includes("Crimson"));
   const isCursedImmortal = unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"));
   const isVegetable = unit.id === "vegetableprince" || (unit.name && unit.name.includes("Vegetable"));
+  const isBioinsect = unit.id === "bioinsectfinal" || !!unit.isBioinsectUnit;
 
   let darkMageMode = unit.darkMageMode || "lightning";
   let giantForm = unit.giantForm !== undefined ? unit.giantForm : false;
@@ -1322,6 +1330,15 @@ export async function DpsCard(unit, options = {}) {
   let royalRivalry = isVegetable ? (unit.royalRivalry !== undefined ? !!unit.royalRivalry : true) : false;
   let awakenedPride = isVegetable ? !!unit.awakenedPride : false;
   let isCompMode = options.isCompMode !== undefined ? !!options.isCompMode : (unit.isCompMode !== undefined ? !!unit.isCompMode : false);
+  // Bioinsect state
+  let bioinsectForm = isBioinsect ? (unit.bioinsectForm || "imperfect") : "base";
+  let bioinsectResetStacks = isBioinsect ? Math.max(0, Math.min(15, parseInt(unit.bioinsectResetStacks || 0, 10) || 0)) : 0;
+  let bioinsectCopiedUnitId = isBioinsect ? (unit.bioinsectCopiedUnitId || "") : "";
+  if (isBioinsect) {
+    unit.bioinsectForm = bioinsectForm;
+    unit.bioinsectResetStacks = bioinsectResetStacks;
+    unit.bioinsectCopiedUnitId = bioinsectCopiedUnitId;
+  }
   let crimsonAbilityActive = unit.crimsonAbilityActive !== undefined ? unit.crimsonAbilityActive : false;
   let crimsonPoolCount = unit.crimsonPoolCount !== undefined ? Math.max(0, Math.min(3, parseInt(unit.crimsonPoolCount, 10) || 0)) : 3;
   let coldState = isCursedImmortal ? !!unit.coldState : false;
@@ -1432,6 +1449,23 @@ export async function DpsCard(unit, options = {}) {
         <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}">
           Shinigami Passive: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
         </button>
+        ${isBioinsect ? `
+          <div class="dps-bioinsect-controls" id="bioinsect-controls-${unit.id}" style="display:flex;flex-direction:column;gap:4px;width:100%;">
+            <select class="dps-bioinsect-unit-select" id="bioinsect-unit-select-${unit.id}" style="font-size:7.5px;font-weight:700;padding:2px 5px;border-radius:4px;background:var(--background-elevated);border:1px solid var(--border);color:var(--text-secondary);cursor:pointer;width:100%;">
+              <option value="">— Select Copied Unit —</option>
+            </select>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">
+              <button type="button" class="dps-shinigami-toggle ${bioinsectForm !== 'base' ? 'active' : ''}" id="bioinsect-form-toggle-${unit.id}">
+                Form: ${bioinsectForm.charAt(0).toUpperCase() + bioinsectForm.slice(1)}
+              </button>
+              <div style="display:inline-flex;align-items:center;gap:3px;background:var(--background-elevated);border:1px solid var(--border);border-radius:4px;padding:2px 5px;">
+                <span style="font-size:7.5px;font-weight:700;color:var(--text-secondary);">Bio Reset:</span>
+                <input type="text" inputmode="numeric" pattern="[0-9]*" id="bioinsect-reset-input-${unit.id}" value="${bioinsectResetStacks}" placeholder="0" aria-label="Bio Reset stacks (0-15)" style="width:22px;height:14px;text-align:center;font-size:9px;font-weight:800;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:3px;color:#c7d2fe;" />
+                <span style="font-size:7.5px;font-weight:700;color:var(--text-secondary);">/15</span>
+              </div>
+            </div>
+          </div>
+        ` : ""}
       </div>
       <div class="dps-trait-stack" id="trait-stack-${unit.id}"></div>
     </div>
@@ -1457,6 +1491,9 @@ export async function DpsCard(unit, options = {}) {
   const coldToggle = card.querySelector(`#cold-toggle-${unit.id}`);
   const royalRivalryToggle = card.querySelector(`#royal-rivalry-toggle-${unit.id}`);
   const awakenedPrideToggle = card.querySelector(`#awakened-pride-toggle-${unit.id}`);
+  const bioinsectUnitSelect = card.querySelector(`#bioinsect-unit-select-${unit.id}`);
+  const bioinsectFormToggle = card.querySelector(`#bioinsect-form-toggle-${unit.id}`);
+  const bioinsectResetInput = card.querySelector(`#bioinsect-reset-input-${unit.id}`);
   let fuaEditor = null;
 
   const commitCrowEnemies = () => {
@@ -1614,6 +1651,58 @@ export async function DpsCard(unit, options = {}) {
     crimsonPoolToggle.textContent = `Pools: ${crimsonPoolCount}/3`;
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
     renderCalculations();
+  });
+
+  // ── Bioinsect controls ──
+  if (isBioinsect && bioinsectUnitSelect) {
+    // Import all units to populate the selector
+    import("../../data/units.js").then(({ units: allUnitsForSelect }) => {
+      // Only add units that are not Bioinsect itself
+      allUnitsForSelect
+        .filter(u => u.id !== unit.id)
+        .forEach(u => {
+          const opt = document.createElement("option");
+          opt.value = u.id;
+          opt.textContent = u.name;
+          if (u.id === bioinsectCopiedUnitId) opt.selected = true;
+          bioinsectUnitSelect.appendChild(opt);
+        });
+    });
+
+    bioinsectUnitSelect.addEventListener("change", () => {
+      bioinsectCopiedUnitId = bioinsectUnitSelect.value;
+      unit.bioinsectCopiedUnitId = bioinsectCopiedUnitId;
+      window.dispatchEvent(new CustomEvent("dps-value-changed"));
+      renderCalculations();
+    });
+  }
+
+  const BIOINSECT_FORMS = ["imperfect", "semiperfect", "perfect", "base"];
+  bioinsectFormToggle?.addEventListener("click", () => {
+    const idx = (BIOINSECT_FORMS.indexOf(bioinsectForm) + 1) % BIOINSECT_FORMS.length;
+    bioinsectForm = BIOINSECT_FORMS[idx];
+    unit.bioinsectForm = bioinsectForm;
+    const label = bioinsectForm.charAt(0).toUpperCase() + bioinsectForm.slice(1);
+    bioinsectFormToggle.textContent = `Form: ${label}`;
+    bioinsectFormToggle.classList.toggle("active", bioinsectForm !== "base");
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
+  bioinsectResetInput?.addEventListener("input", () => {
+    bioinsectResetInput.value = bioinsectResetInput.value.replace(/[^\d]/g, "");
+    bioinsectResetStacks = Math.max(0, Math.min(15, parseInt(bioinsectResetInput.value || "0", 10) || 0));
+    unit.bioinsectResetStacks = bioinsectResetStacks;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
+  bioinsectResetInput?.addEventListener("change", () => {
+    bioinsectResetInput.value = String(bioinsectResetStacks);
+  });
+
+  bioinsectResetInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); bioinsectResetInput.blur(); }
   });
 
   function updateFuaSummary() {
@@ -1813,6 +1902,9 @@ export async function DpsCard(unit, options = {}) {
         isCompMode,
         royalRivalry,
         awakenedPride,
+        bioinsectForm,
+        bioinsectResetStacks,
+        bioinsectCopiedUnitId,
       });
       return { traitKey, ...result };
     }).sort((a, b) => (Number(b.breakdown.displayVal) || 0) - (Number(a.breakdown.displayVal) || 0));
