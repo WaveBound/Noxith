@@ -294,6 +294,17 @@ export const relicStats = {
         },
     },
 
+    "Carrot's Gi": {
+        stats: [
+            { damage: { min: "+10%", max: "+10%" } },
+            { range: { min: "+5%", max: "+5%" } },
+        ],
+        passive: {
+            name: "Instant Relocation",
+            desc: `Select a unit on the map or a position within this unit's range to <b>Relocate</b> to for <b>15</b> seconds.<br>On <b>Relocate</b> to a unit:<br>- Immediately perform a <b>Follow-Up Attack</b> dealing <b>125%</b> of this unit's current damage<br>- Trigger the selected unit to perform the same <b>Follow-Up Attack</b> dealing <b>125%</b> of the selected unit's current damage<br>On <b>Relocate</b> to a position:<br>- Immediately perform a <b>Follow-Up Attack</b> dealing <b>125%</b> of this unit's current damage<br>- Increase this unit's Damage by <b>50%</b> for <b>15</b> seconds<br><br><i>20s CD | Local Cooldown | Unlocks on Upgrade 8</i>`,
+        },
+    },
+
     "Mechanical Wings": {
         stats: [
             { damage: { min: "+10%", max: "+10%" } },

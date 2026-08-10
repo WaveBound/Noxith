@@ -23,15 +23,19 @@ export function getUnitBaseValues(unit) {
   let spa = 1;
   let range = 0;
 
+  let attackTime = 0;
+
   if (unit.placement && Array.isArray(unit.placement) && unit.placement.length > 0) {
     const maxTier = unit.placement[unit.placement.length - 1];
     damage = parseNumber(maxTier.damage, parseNumber(unit.stats?.damage, 0));
     spa = parseNumber(maxTier.spa, parseNumber(unit.stats?.spa, 1));
     range = parseNumber(maxTier.range, parseNumber(unit.stats?.range, 0));
+    attackTime = parseNumber(maxTier.attackTime, 0);
   } else {
     damage = parseNumber(unit.stats?.damage, 0);
     spa = parseNumber(unit.stats?.spa, 1);
     range = parseNumber(unit.stats?.range, 0);
+    attackTime = parseNumber(unit.stats?.attackTime, 0);
   }
 
   if (spa <= 0) spa = 1;
@@ -69,7 +73,7 @@ export function getUnitBaseValues(unit) {
     }
   }
 
-  return { damage, spa, range, critChancePercent, critDamagePercent, dotMultiplier, dotDescription, dotName, followUpInfo };
+  return { damage, spa, range, attackTime, critChancePercent, critDamagePercent, dotMultiplier, dotDescription, dotName, followUpInfo };
 }
 
 function getRelicModifiers(name, unitRelicObj) {
@@ -233,6 +237,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isRazorjaw = unit && (unit.id === "razorjawhunter" || (unit.name && unit.name.includes("Razorjaw")));
   const isVegetable = unit && (unit.id === "vegetableprince" || (unit.name && unit.name.includes("Vegetable")));
   const isBioinsect = unit && (unit.id === "bioinsectfinal" || !!unit.isBioinsectUnit);
+  const isCarrot = unit && (unit.id === "carrotunleashed" || (unit.name && unit.name.includes("Carrot")));
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
@@ -247,22 +252,34 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const caringState = isCursedImmortal ? !coldState : (unit && !!unit.caringState);
   const royalRivalry = isVegetable ? (unit.royalRivalry !== undefined ? !!unit.royalRivalry : true) : false;
   const awakenedPride = isVegetable ? !!unit.awakenedPride : false;
+  const carrotTransformation = isCarrot ? !!unit.carrotTransformation : false;
+  const carrotInstantRelocation = isCarrot ? (unit.carrotInstantRelocation !== undefined ? !!unit.carrotInstantRelocation : true) : false;
   const isCompMode = unit ? !!unit.isCompMode : false;
   const bioinsectForm = isBioinsect ? (unit.bioinsectForm || "imperfect") : "base";
-  const bioinsectResetStacks = isBioinsect ? Math.max(0, Math.min(15, parseInt(unit.bioinsectResetStacks || 0, 10) || 0)) : 0;
+  const bioinsectResetStacks = isBioinsect ? Math.max(0, parseInt(unit.bioinsectResetStacks || 0, 10) || 0) : 0;
 
   let passiveSpaMult = isReaper ? -0.10 : (isLadyGiant && giantForm ? 0.25 : (isEighthSword && berserkState ? -0.10 : 0));
   let passiveCritChanceAdd = isReaper ? 0.40 : (isCursedImmortal ? 0.30 : (isRazorjaw ? 0.25 : 0));
-  let passiveCritDamageAdd = 0;
-  let passiveDamageMult = isReaper ? 0.40 : (isLadyGiant && giantForm ? 1.25 : (isEighthSword && berserkState ? 0.20 : 0));
+  let passiveCritDamageAdd = isCarrot && carrotTransformation ? 0.20 : 0;
+  let passiveDamageMult = isReaper ? 0.40 : (isLadyGiant && giantForm ? 1.25 : (isEighthSword && berserkState ? 0.20 : (isCarrot && carrotTransformation ? 0.15 : 0)));
   let passiveRangeMult = (isLadyGiant && giantForm ? 0.50 : (isCursedImmortal && caringState ? -0.50 : (isCursedImmortal && coldState ? -0.75 : 0)));
-  // Bioinsect Bio Reset stacks: each stack = +1% range, and +1% damage (+5% damage if Mechanical Wings equipped)
-  if (isBioinsect && bioinsectResetStacks > 0) {
-    const relics = getUnitRelicList(unit);
-    const hasMechanicalWings = relics.some(r => r.name === "Mechanical Wings");
-    const dmgPerStack = hasMechanicalWings ? 0.05 : 0.01;
-    passiveDamageMult += bioinsectResetStacks * dmgPerStack;
-    passiveRangeMult += bioinsectResetStacks * 0.01;
+
+  if (isCarrot && carrotInstantRelocation) {
+    passiveDamageMult += 0.50;
+  }
+  if (isBioinsect) {
+    // Genetic Code passive: +30% range bonus
+    passiveRangeMult += 0.30;
+
+    // Bioinsect Bio Reset stacks: each stack = +1% damage (+5% damage if Mechanical Wings equipped) [INFINITE SCALE]
+    // Range increases by 1% per stack up to 15% max (+0.15 max)
+    if (bioinsectResetStacks > 0) {
+      const relics = getUnitRelicList(unit);
+      const hasMechanicalWings = relics.some(r => r.name === "Mechanical Wings");
+      const dmgPerStack = hasMechanicalWings ? 0.05 : 0.01;
+      passiveDamageMult += bioinsectResetStacks * dmgPerStack;
+      passiveRangeMult += Math.min(0.15, bioinsectResetStacks * 0.01);
+    }
   }
 
   if (isVegetable) {
@@ -425,7 +442,11 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const rawCritChance = Math.min(1.0, baseCritRate + (trait.critChanceBonus || 0) + relicCritChanceAdd + passiveCritChanceAdd);
   const effCritChance = isCompMode ? (rawCritChance >= 0.25 ? rawCritChance : 0) : rawCritChance;
   const effCritDamage = baseCritDamage + (trait.critDamageBonus || 0) + relicCritDamageAdd + passiveCritDamageAdd;
-  const critAvgMult = 1 + effCritChance * effCritDamage;
+  
+  // Battle Instinct: every 4th attack is guaranteed crit -> effective crit rate is 0.75 * effCritChance + 0.25
+  const battleInstinctBonusCrit = isCarrot ? 0.25 * (1 - effCritChance) : 0; // extra crit contribution from guaranteed 4th hit
+  const effectiveCritRate = isCarrot ? Math.min(1.0, (0.75 * effCritChance) + 0.25) : effCritChance;
+  const critAvgMult = 1 + effectiveCritRate * effCritDamage;
 
   const avgHitDamage = effDamage * critAvgMult;
 
@@ -677,6 +698,46 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
       unit._bioinsectSuppressSummon = true;
     } else {
       unit._bioinsectSuppressSummon = false;
+    }
+  } else if (isCarrot) {
+    unitDoTDPS = 0;
+
+    if (carrotInstantRelocation) {
+      const hasCarrotGi = relics.some(r => r.name === "Carrot's Gi");
+      const fuaMult = hasCarrotGi ? 1.25 : 0.75;
+      const fuaInterval = 20;
+      const relocationFuaDmg = effDamage * fuaMult;
+      const relocationAvgHit = relocationFuaDmg * critAvgMult;
+      
+      const animTime = base.attackTime > 0 ? base.attackTime : 4.9;
+      // When Instant Relocation triggers, Carrot performs an extra attack with animation time (animTime).
+      // Effective direct SPA accounting for extra animation time over the 20s CD cycle:
+      const totalCycleTime = fuaInterval + animTime;
+      const directAttacksPerCycle = fuaInterval / effSpa;
+      const totalDirectDamageInCycle = directAttacksPerCycle * avgHitDamage;
+      unitDirectDPS = totalDirectDamageInCycle / totalCycleTime;
+
+      const relocationDps = relocationAvgHit / totalCycleTime;
+
+      fuaDps = relocationDps;
+      fuaBreakdowns = [
+        {
+          index: 0,
+          name: `Instant Relocation FUA (${hasCarrotGi ? "125% Carrot's Gi" : "75% Base"})`,
+          inputDamage: effDamage,
+          effectiveFollowUpDamage: relocationFuaDmg,
+          averageFollowUpHit: relocationAvgHit,
+          relocationInterval: fuaInterval,
+          animTime,
+          totalCycleTime,
+          critAvgMult,
+          dps: relocationDps,
+          isTimedFua: true
+        }
+      ];
+      singleFuaDmg = relocationAvgHit;
+    } else {
+      unitDirectDPS = avgHitDamage / effSpa;
     }
   } else {
     unitDirectDPS = avgHitDamage / effSpa;
@@ -930,5 +991,10 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     bioinsectForm,
     bioinsectResetStacks,
     bioinsectCopiedUnitId: unit.bioinsectCopiedUnitId || null,
+    isCarrot,
+    carrotTransformation,
+    carrotInstantRelocation,
+    effectiveCritRate,
+    battleInstinctBonusCrit,
   };
 }

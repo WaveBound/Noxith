@@ -64,6 +64,8 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       isCompMode: options.isCompMode !== undefined ? !!options.isCompMode : !!unit.isCompMode,
       royalRivalry: options.royalRivalry !== undefined ? !!options.royalRivalry : (unit.royalRivalry !== undefined ? !!unit.royalRivalry : true),
       awakenedPride: options.awakenedPride !== undefined ? !!options.awakenedPride : !!unit.awakenedPride,
+      carrotTransformation: options.carrotTransformation !== undefined ? !!options.carrotTransformation : !!unit.carrotTransformation,
+      carrotInstantRelocation: options.carrotInstantRelocation !== undefined ? !!options.carrotInstantRelocation : (unit.carrotInstantRelocation !== undefined ? !!unit.carrotInstantRelocation : true),
       bioinsectForm: options.bioinsectForm || unit.bioinsectForm || "imperfect",
       bioinsectResetStacks: options.bioinsectResetStacks !== undefined ? options.bioinsectResetStacks : (unit.bioinsectResetStacks || 0),
       bioinsectCopiedUnitId: options.bioinsectCopiedUnitId !== undefined ? options.bioinsectCopiedUnitId : (unit.bioinsectCopiedUnitId || null),
@@ -351,6 +353,8 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       const resetPct = breakdown.bioinsectResetStacks * (hasMechanicalWings ? 5 : 1);
       parts.push(`Bio Reset +${resetPct}%`);
     }
+    if (breakdown.isCarrot && breakdown.carrotTransformation) parts.push("Transformation +15%");
+    if (breakdown.isCarrot && breakdown.carrotInstantRelocation) parts.push("Instant Relocation +50%");
     const labelText = parts.length > 0 ? parts.join(" + ") : "Passives";
     dmgRowsHtml += `
       <div class="dps-table-row indented">
@@ -365,7 +369,11 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   const traitCritChance = (breakdown.trait?.critChanceBonus || 0) * 100;
   const relicCritChance = (breakdown.relicCritChanceAdd || 0) * 100;
   const passiveCritChance = (breakdown.passiveCritChanceAdd || (breakdown.isReaper ? 0.40 : 0)) * 100;
-  const finalCritChancePercent = Math.min(100, Math.round((breakdown.effCritChance || 0) * 100));
+  // For Carrot, effectiveCritRate includes Battle Instinct's guaranteed 4th-hit bonus
+  const displayCritRate = breakdown.isCarrot
+    ? (breakdown.effectiveCritRate ?? breakdown.effCritChance ?? 0)
+    : (breakdown.effCritChance || 0);
+  const finalCritChancePercent = Math.min(100, Math.round(displayCritRate * 100));
 
   const baseCritDmg = rawBase.critDamagePercent ?? 50;
   const traitCritDmg = (breakdown.trait?.critDamageBonus || 0) * 100;
@@ -373,7 +381,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   const passiveCritDmg = (breakdown.passiveCritDamageAdd || 0) * 100;
   const finalCritDmgPercent = Math.round((breakdown.effCritDamage || 1) * 100);
 
-  const critBonusVal = (breakdown.effCritChance || 0) * (breakdown.effCritDamage || 1);
+  const critBonusVal = displayCritRate * (breakdown.effCritDamage || 1);
   const critAvgMult = breakdown.critAvgMult || (1 + critBonusVal);
 
   let critRowsHtml = `
@@ -406,9 +414,18 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       </div>
     `;
   }
+  if (breakdown.isCarrot) {
+    const battleInstinctBonus = Math.round((breakdown.battleInstinctBonusCrit || 0) * 100);
+    critRowsHtml += `
+      <div class="dps-table-row indented">
+        <span class="dps-table-lbl">Battle Instinct (guaranteed 4th-hit crit avg.)</span>
+        <span class="dps-table-val font-mono">+${battleInstinctBonus}%</span>
+      </div>
+    `;
+  }
   critRowsHtml += `
     <div class="dps-table-row primary" style="margin-bottom: 6px;">
-      <span class="dps-table-lbl crit-highlight">Final Crit Rate</span>
+      <span class="dps-table-lbl crit-highlight">Effective Crit Rate${breakdown.isCarrot ? " (Battle Instinct avg.)" : ""}</span>
       <span class="dps-table-val font-mono crit-highlight">${finalCritChancePercent}%</span>
     </div>
 
@@ -436,7 +453,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   if (passiveCritDmg > 0) {
     critRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">Passive Crit DMG</span>
+        <span class="dps-table-lbl">Passive Crit DMG${breakdown.isCarrot && breakdown.carrotTransformation ? " (Transformation +20%)" : ""}</span>
         <span class="dps-table-val font-mono">+${Math.round(passiveCritDmg)}%</span>
       </div>
     `;
@@ -449,7 +466,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
 
     <div class="dps-table-row divider"></div>
     <div class="dps-table-row indented">
-      <span class="dps-table-lbl">Crit Bonus (Crit Rate &times; Crit DMG)</span>
+      <span class="dps-table-lbl">Crit Bonus (Eff. Crit Rate &times; Crit DMG)</span>
       <span class="dps-table-val font-mono">${finalCritChancePercent}% &times; ${finalCritDmgPercent}% = +${(critBonusVal * 100).toFixed(1)}%</span>
     </div>
     <div class="dps-table-row indented">
@@ -1156,6 +1173,45 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
               `;
     }
 
+    if (entry.isTimedFua) {
+      // Carrot Instant Relocation timed FUA
+      const fuaMult = Math.round((entry.effectiveFollowUpDamage / (entry.inputDamage || 1)) * 100);
+      const animTime = entry.animTime || 4.9;
+      const fuaInterval = entry.relocationInterval || 20;
+      const totalCycleTime = entry.totalCycleTime || (fuaInterval + animTime);
+      const directAttacksPerCycle = fuaInterval / effSpaVal;
+      return `
+                <div class="dps-table-row">
+                  <span class="dps-table-lbl">Instant Relocation (${fuaMult}% of Base DMG)</span>
+                  <span class="dps-table-val font-mono">${Math.round(entry.effectiveFollowUpDamage).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">Avg Hit DMG (with Crits)</span>
+                  <span class="dps-table-val font-mono"><span class="faint-mult">x${critMult.toFixed(2)}</span>${Math.round(entry.averageFollowUpHit).toLocaleString()} DMG</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">Cooldown</span>
+                  <span class="dps-table-val font-mono">${fuaInterval}s</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">Animation Time Penalty (FUA uses same attack animation)</span>
+                  <span class="dps-table-val font-mono">+${animTime.toFixed(2)}s</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">Total Cycle Time (CD + Anim)</span>
+                  <span class="dps-table-val font-mono">${fuaInterval}s + ${animTime.toFixed(2)}s = ${totalCycleTime.toFixed(2)}s</span>
+                </div>
+                <div class="dps-table-row indented">
+                  <span class="dps-table-lbl">Direct Attacks per Cycle (${fuaInterval}s / ${effSpaVal.toFixed(2)}s SPA)</span>
+                  <span class="dps-table-val font-mono">${directAttacksPerCycle.toFixed(2)} attacks</span>
+                </div>
+                <div class="dps-table-row primary" style="margin-bottom: 8px;">
+                  <span class="dps-table-lbl damage-highlight">Instant Relocation DPS</span>
+                  <span class="dps-table-val font-mono damage-highlight">+${formatFullDPS(entry.dps)} DPS</span>
+                </div>
+              `;
+    }
+
     const fuaBase = entry.effectiveFollowUpDamage || entry.inputDamage;
     const avgHit = entry.averageFollowUpHit || (fuaBase * critMult);
     const interval = entry.roarInterval || entry.cycleInterval || entry.intervalSpa || (effSpaVal * 3);
@@ -1325,6 +1381,7 @@ export async function DpsCard(unit, options = {}) {
   const isCursedImmortal = unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"));
   const isVegetable = unit.id === "vegetableprince" || (unit.name && unit.name.includes("Vegetable"));
   const isBioinsect = unit.id === "bioinsectfinal" || !!unit.isBioinsectUnit;
+  const isCarrot = unit.id === "carrotunleashed" || (unit.name && unit.name.includes("Carrot"));
 
   let darkMageMode = unit.darkMageMode || "lightning";
   let giantForm = unit.giantForm !== undefined ? unit.giantForm : false;
@@ -1333,6 +1390,8 @@ export async function DpsCard(unit, options = {}) {
   let crowEnemiesHit = unit.crowEnemiesHit || 1;
   let royalRivalry = isVegetable ? (unit.royalRivalry !== undefined ? !!unit.royalRivalry : true) : false;
   let awakenedPride = isVegetable ? !!unit.awakenedPride : false;
+  let carrotTransformation = isCarrot ? !!unit.carrotTransformation : false;
+  let carrotInstantRelocation = isCarrot ? (unit.carrotInstantRelocation !== undefined ? !!unit.carrotInstantRelocation : true) : false;
   let isCompMode = options.isCompMode !== undefined ? !!options.isCompMode : (unit.isCompMode !== undefined ? !!unit.isCompMode : false);
   // Bioinsect state
   let bioinsectForm = isBioinsect ? (unit.bioinsectForm || "imperfect") : "base";
@@ -1450,26 +1509,39 @@ export async function DpsCard(unit, options = {}) {
             Awakened Pride: ${awakenedPride ? "On" : "Off"}
           </button>
         ` : ""}
-        <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}">
-          Shinigami Passive: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
-        </button>
+        ${isCarrot ? `
+          <button type="button" class="dps-shinigami-toggle ${carrotTransformation ? 'active' : ''}" id="carrot-transform-toggle-${unit.id}" aria-pressed="${carrotTransformation}">
+            Transform: ${carrotTransformation ? "On" : "Off"}
+          </button>
+          <button type="button" class="dps-shinigami-toggle ${carrotInstantRelocation ? 'active' : ''}" id="carrot-relocation-toggle-${unit.id}" aria-pressed="${carrotInstantRelocation}">
+            Relocation: ${carrotInstantRelocation ? "On (+50%)" : "Off"}
+          </button>
+        ` : ""}
         ${isBioinsect ? `
-          <div class="dps-bioinsect-controls" id="bioinsect-controls-${unit.id}" style="display:flex;flex-direction:column;gap:4px;width:100%;">
-            <select class="dps-bioinsect-unit-select" id="bioinsect-unit-select-${unit.id}" style="font-size:7.5px;font-weight:700;padding:2px 5px;border-radius:4px;background:var(--background-elevated);border:1px solid var(--border);color:var(--text-secondary);cursor:pointer;width:100%;">
-              <option value="">— Select Copied Unit —</option>
-            </select>
-            <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">
-              <button type="button" class="dps-shinigami-toggle ${bioinsectForm !== 'base' ? 'active' : ''}" id="bioinsect-form-toggle-${unit.id}">
-                Form: ${bioinsectForm.charAt(0).toUpperCase() + bioinsectForm.slice(1)}
-              </button>
-              <div style="display:inline-flex;align-items:center;gap:3px;background:var(--background-elevated);border:1px solid var(--border);border-radius:4px;padding:2px 5px;">
-                <span style="font-size:7.5px;font-weight:700;color:var(--text-secondary);">Bio Reset:</span>
-                <input type="text" inputmode="numeric" pattern="[0-9]*" id="bioinsect-reset-input-${unit.id}" value="${bioinsectResetStacks}" placeholder="0" aria-label="Bio Reset stacks (0-15)" style="width:22px;height:14px;text-align:center;font-size:9px;font-weight:800;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:3px;color:#c7d2fe;" />
-                <span style="font-size:7.5px;font-weight:700;color:var(--text-secondary);">/15</span>
+          <div style="display:flex;flex-direction:column;gap:4px;width:100%;margin-bottom:4px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:4px;">
+              <select class="dps-bioinsect-unit-select" id="bioinsect-unit-select-${unit.id}" style="font-size:8.5px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(15,15,22,0.9);border:1px solid rgba(255,255,255,0.12);color:#e2e8f0;cursor:pointer;flex:1;min-width:0;box-sizing:border-box;outline:none;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;height:22px;">
+                <option value="">— Select Copied Unit —</option>
+              </select>
+              <div style="display:inline-flex;align-items:center;gap:3px;background:rgba(15,15,22,0.9);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:2px 6px;height:22px;box-sizing:border-box;flex-shrink:0;">
+                <span style="font-size:8px;font-weight:700;color:var(--text-secondary);">Bio Reset:</span>
+                <input type="text" inputmode="numeric" pattern="[0-9]*" id="bioinsect-reset-input-${unit.id}" value="${bioinsectResetStacks}" placeholder="0" aria-label="Bio Reset stacks" style="width:24px;height:14px;text-align:center;font-size:9px;font-weight:800;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);border-radius:3px;color:#c7d2fe;padding:0;" />
               </div>
             </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:4px;">
+              <button type="button" class="dps-shinigami-toggle ${bioinsectForm !== 'base' ? 'active' : ''}" id="bioinsect-form-toggle-${unit.id}" style="flex:1;text-align:center;">
+                Form: ${bioinsectForm.charAt(0).toUpperCase() + bioinsectForm.slice(1)}
+              </button>
+              <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}" style="flex:1;text-align:center;">
+                Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
+              </button>
+            </div>
           </div>
-        ` : ""}
+        ` : `
+          <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}">
+            Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
+          </button>
+        `}
       </div>
       <div class="dps-trait-stack" id="trait-stack-${unit.id}"></div>
     </div>
@@ -1495,6 +1567,8 @@ export async function DpsCard(unit, options = {}) {
   const coldToggle = card.querySelector(`#cold-toggle-${unit.id}`);
   const royalRivalryToggle = card.querySelector(`#royal-rivalry-toggle-${unit.id}`);
   const awakenedPrideToggle = card.querySelector(`#awakened-pride-toggle-${unit.id}`);
+  const carrotTransformToggle = card.querySelector(`#carrot-transform-toggle-${unit.id}`);
+  const carrotRelocationToggle = card.querySelector(`#carrot-relocation-toggle-${unit.id}`);
   const bioinsectUnitSelect = card.querySelector(`#bioinsect-unit-select-${unit.id}`);
   const bioinsectFormToggle = card.querySelector(`#bioinsect-form-toggle-${unit.id}`);
   const bioinsectResetInput = card.querySelector(`#bioinsect-reset-input-${unit.id}`);
@@ -1571,7 +1645,7 @@ export async function DpsCard(unit, options = {}) {
     unit.simulateShinigamiPassive = shinigamiPassiveActive;
     shinigamiToggle.classList.toggle("active", shinigamiPassiveActive);
     shinigamiToggle.setAttribute("aria-pressed", String(shinigamiPassiveActive));
-    shinigamiToggle.textContent = `Shinigami Passive: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}`;
+    shinigamiToggle.textContent = `Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}`;
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
     renderCalculations();
   });
@@ -1648,6 +1722,26 @@ export async function DpsCard(unit, options = {}) {
     renderCalculations();
   });
 
+  carrotTransformToggle?.addEventListener("click", () => {
+    carrotTransformation = !carrotTransformation;
+    unit.carrotTransformation = carrotTransformation;
+    carrotTransformToggle.classList.toggle("active", carrotTransformation);
+    carrotTransformToggle.setAttribute("aria-pressed", String(carrotTransformation));
+    carrotTransformToggle.textContent = `Transform: ${carrotTransformation ? "On" : "Off"}`;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
+  carrotRelocationToggle?.addEventListener("click", () => {
+    carrotInstantRelocation = !carrotInstantRelocation;
+    unit.carrotInstantRelocation = carrotInstantRelocation;
+    carrotRelocationToggle.classList.toggle("active", carrotInstantRelocation);
+    carrotRelocationToggle.setAttribute("aria-pressed", String(carrotInstantRelocation));
+    carrotRelocationToggle.textContent = `Relocation: ${carrotInstantRelocation ? "On (+50%)" : "Off"}`;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
   crimsonPoolToggle?.addEventListener("click", () => {
     crimsonPoolCount = (crimsonPoolCount + 1) % 4;
     unit.crimsonPoolCount = crimsonPoolCount;
@@ -1695,7 +1789,7 @@ export async function DpsCard(unit, options = {}) {
 
   bioinsectResetInput?.addEventListener("input", () => {
     bioinsectResetInput.value = bioinsectResetInput.value.replace(/[^\d]/g, "");
-    bioinsectResetStacks = Math.max(0, Math.min(15, parseInt(bioinsectResetInput.value || "0", 10) || 0));
+    bioinsectResetStacks = Math.max(0, parseInt(bioinsectResetInput.value || "0", 10) || 0);
     unit.bioinsectResetStacks = bioinsectResetStacks;
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
     renderCalculations();

@@ -108,6 +108,8 @@ const RELIC_NAME_TO_IMG = {
     "Dark Scepter": toAbsoluteUrl("icons/relics/DarkScepter.png"),
     "Illusion Crow": toAbsoluteUrl("icons/relics/IllusionCrow.png"),
     "Royal Gi": toAbsoluteUrl("icons/relics/RoyalGi.png"),
+    "Carrot's Gi": toAbsoluteUrl("icons/relics/CarrotsGi.png"),
+    "Carrots Gi": toAbsoluteUrl("icons/relics/CarrotsGi.png"),
     "Mechanical Wings": toAbsoluteUrl("icons/relics/MechanicalWings.png"),
 };
 

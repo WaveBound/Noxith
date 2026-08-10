@@ -448,7 +448,8 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 5px;
+  flex-wrap: wrap;
+  gap: 4px;
   margin-bottom: 5px;
 }
 

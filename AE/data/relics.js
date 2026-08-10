@@ -59,6 +59,7 @@ const UNIT_NAME_MAP = {
   "Razorjaw": "Razorjaw (Hunter)",
   "CursedImmortal": "Cursed Immortal (Black Sun)",
   "VegetablePrince": "Vegetable (Prince)",
+  "CarrotUnleashed": "Carrot (Unleashed)",
 };
 
 const rawRelics = [
@@ -242,6 +243,12 @@ const rawRelics = [
     name: "Royal Gi",
     image: relicImgByName("Royal Gi"),
     unitEquip: "Vegetable (Prince)",
+  },
+  {
+    id: "relic-carrots-gi",
+    name: "Carrot's Gi",
+    image: relicImgByName("Carrots Gi"),
+    unitEquip: "Carrot (Unleashed)",
   },
   {
     id: "relic-mechanical-wings",

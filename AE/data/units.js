@@ -12,6 +12,7 @@ import crimsonbrother from "./units/crimsonbrother.js";
 import cursedimmortalblacksun from "./units/cursedimmortalblacksun.js";
 import vegetableprince from "./units/vegetableprince.js";
 import bioinsect from "./units/bioinsect.js";
+import carrotunleashed from "./units/carrotunleashed.js";
 
 import { getRelicStatsByName } from "./relicstats.js";
 import { relicImgByName } from "../icons/icons.js";
@@ -31,6 +32,7 @@ const rawUnits = [
   cursedimmortalblacksun,
   vegetableprince,
   bioinsect,
+  carrotunleashed,
 ];
 
 function formatRange(v) {
