@@ -62,7 +62,7 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       coldState: (unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"))) ? (options.coldState !== undefined ? !!options.coldState : !!unit.coldState) : false,
       fuaDamages: options.fuaDamages || unit.fuaDamages || [],
       isCompMode: options.isCompMode !== undefined ? !!options.isCompMode : !!unit.isCompMode,
-      royalRivalry: options.royalRivalry !== undefined ? !!options.royalRivalry : !!unit.royalRivalry,
+      royalRivalry: options.royalRivalry !== undefined ? !!options.royalRivalry : (unit.royalRivalry !== undefined ? !!unit.royalRivalry : true),
       awakenedPride: options.awakenedPride !== undefined ? !!options.awakenedPride : !!unit.awakenedPride,
       bioinsectForm: options.bioinsectForm || unit.bioinsectForm || "imperfect",
       bioinsectResetStacks: options.bioinsectResetStacks !== undefined ? options.bioinsectResetStacks : (unit.bioinsectResetStacks || 0),
