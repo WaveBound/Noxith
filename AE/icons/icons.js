@@ -188,10 +188,17 @@ export function formatPassiveText(text) {
     out = out.replace(/Frostbite/gi, "@@FB@@");
     out = out.replace(/Freezes/gi, "@@FZS@@");
     out = out.replace(/Freeze/gi, "@@FZ@@");
+    out = out.replace(/Critical[\s\xA0]+Attacks/gi, "@@CAS@@");
+    out = out.replace(/Critical[\s\xA0]+Attack/gi, "@@CAK@@");
     out = out.replace(/Regular[\s\xA0]+Attacks/gi, "@@RAS@@");
     out = out.replace(/Regular[\s\xA0]+Attack/gi, "@@RA@@");
     out = out.replace(/\bAttacks\b/g, "@@ATKS@@");
     out = out.replace(/\bAttack\b/g, "@@ATK@@");
+    out = out.replace(/Vegetable[\s\xA0]+Transformation/gi, "@@VT@@");
+    out = out.replace(/Transformed/gi, "@@TRD@@");
+    out = out.replace(/Transforms/gi, "@@TRS@@");
+    out = out.replace(/Transform\b/gi, "@@TRM@@");
+    out = out.replace(/Patience/gi, "@@PAT@@");
 
     out = out.replace(/Rewind/gi, "@@RW@@");
     out = out.replace(/Stunned/gi, "@@SND@@");
@@ -254,10 +261,17 @@ export function formatPassiveText(text) {
     out = out.replace(/@@FB@@/g, `<span class="p-kw p-frostbite"><span>Frostbite</span></span>`);
     out = out.replace(/@@FZS@@/g, `<span class="p-kw p-freeze">${iconImgTag(STATUS_ICONS.freeze)}<span>Freezes</span></span>`);
     out = out.replace(/@@FZ@@/g, `<span class="p-kw p-freeze">${iconImgTag(STATUS_ICONS.freeze)}<span>Freeze</span></span>`);
+    out = out.replace(/@@CAS@@/g, `<span class="p-kw p-reg-attack"><span>Critical Attacks</span></span>`);
+    out = out.replace(/@@CAK@@/g, `<span class="p-kw p-reg-attack"><span>Critical Attack</span></span>`);
     out = out.replace(/@@RAS@@/g, `<span class="p-kw p-reg-attack"><span>Regular Attacks</span></span>`);
     out = out.replace(/@@RA@@/g, `<span class="p-kw p-reg-attack"><span>Regular Attack</span></span>`);
     out = out.replace(/@@ATKS@@/g, `<span class="p-kw p-reg-attack"><span>Attacks</span></span>`);
     out = out.replace(/@@ATK@@/g, `<span class="p-kw p-reg-attack"><span>Attack</span></span>`);
+    out = out.replace(/@@PAT@@/g, `<span class="p-kw p-reg-attack"><span>Patience</span></span>`);
+    out = out.replace(/@@VT@@/g, `<span class="p-kw p-reg-attack"><span>Vegetable Transformation</span></span>`);
+    out = out.replace(/@@TRD@@/g, `<span class="p-kw p-reg-attack"><span>Transformed</span></span>`);
+    out = out.replace(/@@TRS@@/g, `<span class="p-kw p-reg-attack"><span>Transforms</span></span>`);
+    out = out.replace(/@@TRM@@/g, `<span class="p-kw p-reg-attack"><span>Transform</span></span>`);
 
     out = out.replace(/@@RW@@/g, `<span class="p-kw p-rewind"><span>Rewind</span></span>`);
     out = out.replace(/@@SND@@/g, `<span class="p-kw p-stun">${iconImgTag(STATUS_ICONS.stun)}<span>Stunned</span></span>`);

@@ -256,9 +256,12 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   let passiveCritDamageAdd = 0;
   let passiveDamageMult = isReaper ? 0.40 : (isLadyGiant && giantForm ? 1.25 : (isEighthSword && berserkState ? 0.20 : 0));
   let passiveRangeMult = (isLadyGiant && giantForm ? 0.50 : (isCursedImmortal && caringState ? -0.50 : (isCursedImmortal && coldState ? -0.75 : 0)));
-  // Bioinsect Bio Reset stacks: each stack = +1% damage, +1% range (max 15 stacks)
+  // Bioinsect Bio Reset stacks: each stack = +1% range, and +1% damage (+5% damage if Mechanical Wings equipped)
   if (isBioinsect && bioinsectResetStacks > 0) {
-    passiveDamageMult += bioinsectResetStacks * 0.01;
+    const relics = getUnitRelicList(unit);
+    const hasMechanicalWings = relics.some(r => r.name === "Mechanical Wings");
+    const dmgPerStack = hasMechanicalWings ? 0.05 : 0.01;
+    passiveDamageMult += bioinsectResetStacks * dmgPerStack;
     passiveRangeMult += bioinsectResetStacks * 0.01;
   }
 

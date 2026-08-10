@@ -346,7 +346,11 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     if (breakdown.isReaper) parts.push("Adaptation +40%");
     if (breakdown.isEighthSword && breakdown.berserkState) parts.push("Berserk +20%");
     if (breakdown.isLadyGiant && breakdown.giantForm) parts.push("Giant Form +125%");
-    if (breakdown.isBioinsect && breakdown.bioinsectResetStacks > 0) parts.push(`Bio Reset +${breakdown.bioinsectResetStacks}%`);
+    if (breakdown.isBioinsect && breakdown.bioinsectResetStacks > 0) {
+      const hasMechanicalWings = (breakdown.equips || []).includes("Mechanical Wings") || breakdown.unitRelic === "Mechanical Wings";
+      const resetPct = breakdown.bioinsectResetStacks * (hasMechanicalWings ? 5 : 1);
+      parts.push(`Bio Reset +${resetPct}%`);
+    }
     const labelText = parts.length > 0 ? parts.join(" + ") : "Passives";
     dmgRowsHtml += `
       <div class="dps-table-row indented">
