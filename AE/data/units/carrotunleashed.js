@@ -7,7 +7,7 @@ export const unit = {
     archetype: "Physical",
 
     stats: {
-        recommendedTrait: "",
+        recommendedTrait: "Unbound",
         element: "Gale",
         archetype: "Physical",
         damage: "2,572",
@@ -82,9 +82,14 @@ export const unit = {
             name: "Limitless Warrior",
             desc: `This unit has <b>Fighting Spirit</b>, starting at 0.<br>On <b>Critical Attack</b>:<br>- Increase <b>Fighting Spirit</b> by <b>10</b><br>If this unit is <b>Debuffed</b>:<br>- Increase <b>Fighting Spirit</b> by <b>20</b><br>At <b>30 Fighting Spirit</b> stacks:<br>- Transform this unit into <b>Carrot Transformation</b><br>In <b>Carrot Transformation</b> form:<br>- Apply <b>Stagger</b> to all enemies in range<br>- This unit becomes immune to <b>Status Effects</b><br>- Increase Damage by <b>15%</b><br>- Increase Crit Damage by <b>20%</b><br>- <b>Fighting Spirit</b> will decrease by <b>1</b> every second<br>When <b>Fighting Spirit</b> is depleted:<br>- Transform back into base`,
         },
+    ],
+
+    abilities: [
         {
             name: "Instant Relocation",
-            desc: `Select a unit on the map or a position within this unit's range to <b>Relocate</b> to for <b>15</b> seconds.<br>On <b>Relocate</b> to a unit:<br>- Immediately perform a <b>Follow-Up Attack</b> dealing <b>75%</b> of this unit's current damage (<b>125%</b> with Carrot's Gi)<br>- Trigger the selected unit to perform the same <b>Follow-Up Attack</b> dealing <b>75%</b> of the selected unit's current damage (<b>125%</b> with Carrot's Gi)<br>On <b>Relocate</b> to a position:<br>- Immediately perform a <b>Follow-Up Attack</b> dealing <b>75%</b> of this unit's current damage (<b>125%</b> with Carrot's Gi)<br>- Increase this unit's Damage by <b>50%</b> for <b>15</b> seconds<br><br><i>20s CD | Local Cooldown | Unlocks on Upgrade 8</i>`,
+            cooldown: "20s CD",
+            unlocksUpgrade: 8,
+            desc: `Select a unit on the map or a position within this unit's range to <b>Relocate</b> to for <b>15</b> seconds.<br>On <b>Relocate</b> to a unit:<br>- Immediately perform a <b>Follow-Up Attack</b> dealing <b>75%</b> of this unit's current damage (<b>125%</b> with Carrot's Gi)<br>- Trigger the selected unit to perform the same <b>Follow-Up Attack</b> dealing <b>75%</b> of the selected unit's current damage (<b>125%</b> with Carrot's Gi)<br>On <b>Relocate</b> to a position:<br>- Immediately perform a <b>Follow-Up Attack</b> dealing <b>75%</b> of this unit's current damage (<b>125%</b> with Carrot's Gi)<br>- Increase this unit's Damage by <b>50%</b> for <b>15</b> seconds`,
         },
     ],
 
