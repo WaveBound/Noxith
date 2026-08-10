@@ -1135,8 +1135,8 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                   <span class="dps-table-val font-mono"><span class="faint-mult">x${critMult.toFixed(2)}</span>${Math.round(entry.averageFollowUpHit).toLocaleString()} DMG</span>
                 </div>
                 <div class="dps-table-row indented">
-                  <span class="dps-table-lbl">Mimicry SPA Interval (3 attacks)</span>
-                  <span class="dps-table-val font-mono">3 &times; ${effSpaVal.toFixed(2)}s = ${fuaInterval.toFixed(2)}s</span>
+                  <span class="dps-table-lbl">Mimicry SPA Interval (${entry.attacksNeeded || 3} attacks)</span>
+                  <span class="dps-table-val font-mono">${entry.attacksNeeded || 3} &times; ${effSpaVal.toFixed(2)}s = ${fuaInterval.toFixed(2)}s</span>
                 </div>
                 <div class="dps-table-row primary" style="margin-bottom: 8px;">
                   <span class="dps-table-lbl damage-highlight">${entry.name} DPS</span>

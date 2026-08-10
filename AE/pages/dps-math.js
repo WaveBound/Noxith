@@ -631,7 +631,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
         const effectiveFollowUpDamage = inputDamage * fuaDamageScale;
         const combinedHitDamage = effectiveFollowUpDamage + effDamage;
         const averageFollowUpHit = combinedHitDamage * fuaCritMultiplier;
-        const intervalSpa = effSpa * 3;
+        const attacksNeeded = (effSpa * 3 < 15) ? 4 : 3;
+        const intervalSpa = effSpa * attacksNeeded;
         const dps = inputDamage > 0 ? averageFollowUpHit / intervalSpa : 0;
 
         return {
@@ -646,6 +647,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
           averageFollowUpHit,
           critAvgMult: fuaCritMultiplier,
           intervalSpa,
+          attacksNeeded,
           dps,
           isMimicryFua: isCursedStudent
         };
