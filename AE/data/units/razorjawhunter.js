@@ -6,7 +6,7 @@ export const unit = {
     ascend: 3,
 
     stats: {
-        recommendedTrait: "Unbound",
+        recommendedTrait: "Primordial",
         element: "Neutral",
         archetype: "Physical",
         damage: "1,499",
