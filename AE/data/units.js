@@ -13,6 +13,7 @@ import cursedimmortalblacksun from "./units/cursedimmortalblacksun.js";
 import vegetableprince from "./units/vegetableprince.js";
 import bioinsect from "./units/bioinsect.js";
 import carrotunleashed from "./units/carrotunleashed.js";
+import prodigyrage from "./units/prodigyrage.js";
 
 import { getRelicStatsByName } from "./relicstats.js";
 import { relicImgByName } from "../icons/icons.js";
@@ -33,6 +34,7 @@ const rawUnits = [
   vegetableprince,
   bioinsect,
   carrotunleashed,
+  prodigyrage,
 ];
 
 function formatRange(v) {

@@ -315,6 +315,28 @@ export const relicStats = {
             desc: `On activation:<br>- Summon 1 Mini Bioinsect at this unit's position (Capacity: 1)<br>Mini Bioinsect will:<br>- Take 45% of this unit's current damage as its own damage<br>- Have 100% of this unit's current SPA<br>- Have 100% of this unit's current range<br>- Increase the damage of strongest unit in range by 10%<br>Mini Bioinsect is permanently in Imperfect form, and does not have passives or abilities.`,
         },
     },
+
+    "Mentors Cape": {
+        stats: [
+            { range: { min: "+1%", max: "+1.18%" } },
+            { spa: { min: "-1%", max: "-2.96%" } },
+        ],
+        passive: {
+            name: "Hidden Potential",
+            desc: `On Upgrade 3:<br>- Transform into Prodigy Transformation<br>- Every 3 Regular Attacks will deal 50% of this unit's damage to all enemies within its range<br>On Upgrade 5:<br>- Unlock Rage Unleashed`,
+        },
+    },
+
+    "Warrior Pole": {
+        stats: [
+            { physicaldamage: { min: "+1%", max: "+10%" } },
+            { damage: { min: "+1%", max: "+5%" } },
+        ],
+        passive: {
+            name: "Warrior Pole",
+            desc: `Increase unit damage by 1% to 20% while Transformed`,
+        },
+    },
 };
 
 export function getRelicStatsByName(name) {

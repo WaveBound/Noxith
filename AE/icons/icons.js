@@ -111,6 +111,8 @@ const RELIC_NAME_TO_IMG = {
     "Carrot's Gi": toAbsoluteUrl("icons/relics/CarrotsGi.png"),
     "Carrots Gi": toAbsoluteUrl("icons/relics/CarrotsGi.png"),
     "Mechanical Wings": toAbsoluteUrl("icons/relics/MechanicalWings.png"),
+    "Mentors Cape": toAbsoluteUrl("icons/relics/MentorsCape.png"),
+    "Warrior Pole": toAbsoluteUrl("icons/relics/WarriorPole.png"),
 };
 
 export function relicImgByName(name) {
@@ -190,13 +192,28 @@ export function formatPassiveText(text) {
     out = out.replace(/Frostbite/gi, "@@FB@@");
     out = out.replace(/Freezes/gi, "@@FZS@@");
     out = out.replace(/Freeze/gi, "@@FZ@@");
+    out = out.replace(/Genetic[\s\xA0]+Duplication/gi, "@@GD@@");
+    out = out.replace(/Bio[\s\xA0]+Reset/gi, "@@BRS@@");
+    out = out.replace(/Taken[\s\xA0]+Down/gi, "@@TKD@@");
+    out = out.replace(/Bio[\s\xA0]+Gel/gi, "@@BGEL@@");
+    out = out.replace(/\bBoss\b/g, "@@BSS@@");
+    out = out.replace(/Fighting[\s\xA0]+Spirit/gi, "@@FSP@@");
     out = out.replace(/Critical[\s\xA0]+Attacks/gi, "@@CAS@@");
     out = out.replace(/Critical[\s\xA0]+Attack/gi, "@@CAK@@");
+    out = out.replace(/Debuffed/gi, "@@DBF@@");
+    out = out.replace(/Relocate/gi, "@@RLC@@");
     out = out.replace(/Regular[\s\xA0]+Attacks/gi, "@@RAS@@");
     out = out.replace(/Regular[\s\xA0]+Attack/gi, "@@RA@@");
     out = out.replace(/\bAttacks\b/g, "@@ATKS@@");
     out = out.replace(/\bAttack\b/g, "@@ATK@@");
     out = out.replace(/Vegetable[\s\xA0]+Transformation/gi, "@@VT@@");
+    out = out.replace(/Prodigy[\s\xA0]+Transformation[\s\xA0]+2/gi, "@@PT2@@");
+    out = out.replace(/Prodigy[\s\xA0]+Transformation/gi, "@@PT1@@");
+    out = out.replace(/Prodigy[\s\xA0]+Meter/gi, "@@PMT@@");
+    out = out.replace(/Father[\s\xA0]+and[\s\xA0]+Son[\s\xA0]+Spirit[\s\xA0]+Energy/gi, "@@FSSE@@");
+    out = out.replace(/Rage[\s\xA0]+Unleashed/gi, "@@RU@@");
+    out = out.replace(/\bDOT\b/g, "@@DOT@@");
+    out = out.replace(/Status[\s\xA0]+Effects?/gi, "@@STE@@");
     out = out.replace(/Transformed/gi, "@@TRD@@");
     out = out.replace(/Transforms/gi, "@@TRS@@");
     out = out.replace(/Transform\b/gi, "@@TRM@@");
@@ -271,6 +288,21 @@ export function formatPassiveText(text) {
     out = out.replace(/@@ATK@@/g, `<span class="p-kw p-reg-attack"><span>Attack</span></span>`);
     out = out.replace(/@@PAT@@/g, `<span class="p-kw p-reg-attack"><span>Patience</span></span>`);
     out = out.replace(/@@VT@@/g, `<span class="p-kw p-reg-attack"><span>Vegetable Transformation</span></span>`);
+    out = out.replace(/@@PT2@@/g, `<span class="p-kw p-prodigy-transform"><span>Prodigy Transformation 2</span></span>`);
+    out = out.replace(/@@PT1@@/g, `<span class="p-kw p-prodigy-transform"><span>Prodigy Transformation</span></span>`);
+    out = out.replace(/@@PMT@@/g, `<span class="p-kw p-prodigy-meter"><span>Prodigy Meter</span></span>`);
+    out = out.replace(/@@RLC@@/g, `<span class="p-kw p-relocate"><span>Relocate</span></span>`);
+    out = out.replace(/@@DBF@@/g, `<span class="p-kw p-debuffed"><span>Debuffed</span></span>`);
+    out = out.replace(/@@FSP@@/g, `<span class="p-kw p-reg-attack"><span>Fighting Spirit</span></span>`);
+    out = out.replace(/@@BSS@@/g, `<span class="p-kw p-boss"><span>Boss</span></span>`);
+    out = out.replace(/@@BGEL@@/g, `<span class="p-kw p-bio-gel"><span>Bio Gel</span></span>`);
+    out = out.replace(/@@TKD@@/g, `<span class="p-kw p-taken-down"><span>Taken Down</span></span>`);
+    out = out.replace(/@@BRS@@/g, `<span class="p-kw p-stun"><span>Bio Reset</span></span>`);
+    out = out.replace(/@@GD@@/g, `<span class="p-kw p-genetic-dupe"><span>Genetic Duplication</span></span>`);
+    out = out.replace(/@@FSSE@@/g, `<span class="p-kw p-father-son"><span>Father and Son Spirit Energy</span></span>`);
+    out = out.replace(/@@RU@@/g, `<span class="p-kw p-rage-unleashed"><span>Rage Unleashed</span></span>`);
+    out = out.replace(/@@DOT@@/g, `<span class="p-kw p-dot"><span>DOT</span></span>`);
+    out = out.replace(/@@STE@@/g, `<span class="p-kw p-reg-attack"><span>Status Effect</span></span>`);
     out = out.replace(/@@TRD@@/g, `<span class="p-kw p-reg-attack"><span>Transformed</span></span>`);
     out = out.replace(/@@TRS@@/g, `<span class="p-kw p-reg-attack"><span>Transforms</span></span>`);
     out = out.replace(/@@TRM@@/g, `<span class="p-kw p-reg-attack"><span>Transform</span></span>`);
@@ -301,7 +333,6 @@ if (typeof window !== "undefined") {
         if (target.classList.contains("p-crimson-mark")) return toAbsoluteUrl("icons/info/CrimsonMarkInfo.png");
         if (target.classList.contains("p-crimson-pool")) return toAbsoluteUrl("icons/info/CrimsonPoolInfo.png");
         if (target.classList.contains("p-crimson-explode")) return toAbsoluteUrl("icons/info/CrimsonExplodeInfo.png");
-        if (target.classList.contains("p-reg-attack")) return toAbsoluteUrl("icons/info/AttackInfo.png");
         if (target.classList.contains("p-winged-spirit")) return toAbsoluteUrl("icons/info/WingedSpiritInfo.png");
         if (target.classList.contains("p-magical")) return toAbsoluteUrl("icons/info/MagicalInfo.png");
         if (target.classList.contains("p-wolf-spirit")) return toAbsoluteUrl("icons/info/WolfSpiritInfo.png");
@@ -315,6 +346,15 @@ if (typeof window !== "undefined") {
         if (target.classList.contains("p-ent")) return toAbsoluteUrl("icons/info/batinfo.png");
         if (target.classList.contains("p-fua")) return toAbsoluteUrl("icons/info/followupinfo.png");
         if (target.classList.contains("p-stun")) return toAbsoluteUrl("icons/info/StunInfo.png");
+        if (target.classList.contains("p-bio-gel")) return toAbsoluteUrl("icons/info/BioGelinfo.png");
+        if (target.classList.contains("p-genetic-dupe")) return toAbsoluteUrl("icons/info/Geneticdupeinfo.png");
+        if (target.classList.contains("p-rage-unleashed")) return toAbsoluteUrl("icons/info/ProdigyMeterinfo.png");
+        if (target.classList.contains("p-prodigy-meter")) return toAbsoluteUrl("icons/info/ProdigyMeterinfo.png");
+        if (target.classList.contains("p-prodigy-transform")) return toAbsoluteUrl("icons/info/ProdigyTransformationinfo.png");
+        if (target.classList.contains("p-father-son")) return toAbsoluteUrl("icons/info/FatherandSoninfo.png");
+        if (target.classList.contains("p-boss")) return toAbsoluteUrl("icons/info/Bossinfo.png");
+        if (target.classList.contains("p-dot")) return toAbsoluteUrl("icons/info/Dotinfo.png");
+        if (target.classList.contains("p-status-effect")) return toAbsoluteUrl("icons/info/StatusEffectinfo.png");
         if (target.classList.contains("p-stagger")) return toAbsoluteUrl("icons/info/StaggerInfo.png");
         if (target.classList.contains("p-slow")) return toAbsoluteUrl("icons/info/SlowInfo.png");
         if (target.classList.contains("p-freeze")) return toAbsoluteUrl("icons/info/FreezeInfo.png");

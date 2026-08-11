@@ -278,13 +278,81 @@ img {
 }
 
 /* Keyword Colors */
-.p-kw.p-reg-attack>span {
+.p-kw.p-reg-attack>span,
+.p-kw.p-prodigy-meter>span,
+.p-kw.p-prodigy-transform>span {
   --kw-color: #dadada;
   color: #dadada !important;
   -webkit-text-fill-color: #dadada !important;
   font-weight: 700 !important;
   text-decoration: underline !important;
   text-decoration-color: #dadada !important;
+  text-underline-offset: 2px !important;
+}
+
+.p-kw.p-relocate>span {
+  --kw-color: #a8a8a8;
+  color: #a8a8a8 !important;
+  -webkit-text-fill-color: #a8a8a8 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #a8a8a8 !important;
+  text-underline-offset: 2px !important;
+}
+
+.p-kw.p-debuffed>span {
+  --kw-color: #ef4444;
+  color: #ef4444 !important;
+  -webkit-text-fill-color: #ef4444 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #ef4444 !important;
+  text-underline-offset: 2px !important;
+}
+
+.p-kw.p-boss>span {
+  --kw-color: #ff7b00;
+}
+
+.p-kw.p-stun>span,
+.p-kw.p-slow>span,
+.p-kw.p-stagger>span,
+.p-kw.p-rewind>span,
+.p-kw.p-shadow-rewind>span,
+.p-kw.p-cocoon>span,
+.p-kw.p-puppet-mark>span,
+.p-kw.p-dismembered>span,
+.p-kw.p-genetic-dupe>span {
+  --kw-color: #9900ff;
+}
+
+.p-kw.p-bio-gel>span {
+  --kw-color: #7dd3fc;
+  color: #7dd3fc !important;
+  -webkit-text-fill-color: #7dd3fc !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #7dd3fc !important;
+  text-underline-offset: 2px !important;
+}
+
+.p-kw.p-taken-down>span {
+  --kw-color: #6b7280;
+  color: #6b7280 !important;
+  -webkit-text-fill-color: #6b7280 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #6b7280 !important;
+  text-underline-offset: 2px !important;
+}
+
+.p-kw.p-rage-unleashed>span {
+  --kw-color: #00e5ff;
+  color: #00e5ff !important;
+  -webkit-text-fill-color: #00e5ff !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #00e5ff !important;
   text-underline-offset: 2px !important;
 }
 
@@ -426,6 +494,8 @@ img {
 .p-kw.p-crimson-marked>span,
 .p-kw.p-crimson-pool>span,
 .p-kw.p-crimson-explode>span,
+.p-kw.p-boss>span,
+.p-kw.p-genetic-dupe>span,
 .p-kw.p-buffs>span {
   background: linear-gradient(180deg, color-mix(in srgb, var(--kw-color) calc(100% - var(--kw-darkness)), #000) 0%, var(--kw-color) 100%) !important;
   -webkit-background-clip: text !important;

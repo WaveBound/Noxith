@@ -344,24 +344,34 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   if (totalPassiveDmgBonus > 0) {
     dmgAccum = Math.round(dmgAccum * (1 + totalPassiveDmgBonus));
     const parts = [];
-    if (breakdown.shinigamiActive) parts.push("Shinigami +15%");
-    if (breakdown.isReaper) parts.push("Adaptation +40%");
-    if (breakdown.isEighthSword && breakdown.berserkState) parts.push("Berserk +20%");
-    if (breakdown.isLadyGiant && breakdown.giantForm) parts.push("Giant Form +125%");
+    if (breakdown.shinigamiActive) parts.push({ label: "Shinigami", pct: "15%" });
+    if (breakdown.isReaper) parts.push({ label: "Adaptation", pct: "40%" });
+    if (breakdown.isEighthSword && breakdown.berserkState) parts.push({ label: "Berserk", pct: "20%" });
+    if (breakdown.isLadyGiant && breakdown.giantForm) parts.push({ label: "Giant Form", pct: "125%" });
     if (breakdown.isBioinsect && breakdown.bioinsectResetStacks > 0) {
       const hasMechanicalWings = (breakdown.equips || []).includes("Mechanical Wings") || breakdown.unitRelic === "Mechanical Wings";
       const resetPct = breakdown.bioinsectResetStacks * (hasMechanicalWings ? 5 : 1);
-      parts.push(`Bio Reset +${resetPct}%`);
+      parts.push({ label: "Bio Reset", pct: `${resetPct}%` });
     }
-    if (breakdown.isCarrot && breakdown.carrotTransformation) parts.push("Transformation +15%");
-    if (breakdown.isCarrot && breakdown.carrotInstantRelocation) parts.push("Instant Relocation +50%");
-    const labelText = parts.length > 0 ? parts.join(" + ") : "Passives";
+    if (breakdown.isCarrot && breakdown.carrotTransformation) parts.push({ label: "Transformation", pct: "15%" });
+    if (breakdown.isCarrot && breakdown.carrotInstantRelocation) parts.push({ label: "Instant Relocation", pct: "50%" });
+    if (breakdown.isProdigy && breakdown.prodigyRageUnleashed) parts.push({ label: "Rage Unleashed", pct: "25%" });
+    if (breakdown.hasWarriorPole && breakdown.isTransformed) parts.push({ label: "Warrior Pole", pct: "20%" });
+
     dmgRowsHtml += `
       <div class="dps-table-row indented">
-        <span class="dps-table-lbl">Passives &amp; Buffs (${labelText})</span>
+        <span class="dps-table-lbl">Passives &amp; Buffs Total</span>
         <span class="dps-table-val font-mono"><span class="faint-mult">x${(1 + totalPassiveDmgBonus).toFixed(2)}</span>${dmgAccum.toLocaleString()}</span>
       </div>
     `;
+    parts.forEach(p => {
+      dmgRowsHtml += `
+        <div class="dps-table-row indented" style="padding-left: 28px; font-size: 11px; color: var(--text-secondary);">
+          <span class="dps-table-lbl">&bull; ${p.label}</span>
+          <span class="dps-table-val font-mono" style="color: #60a5fa;">+${p.pct}</span>
+        </div>
+      `;
+    });
   }
 
   // ── 2. CRIT AVERAGING MATH & STEP SEQUENCE ──
@@ -1038,7 +1048,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       ${activeFuaBreakdowns.length > 0 ? `
       <div class="dps-section section-damage">
         <div class="dps-section-hd" style="color: ${breakdown.isCrow ? '#e71a10' : 'var(--purple-strong)'};">
-          ${breakdown.isCrow ? 'Status Effect Calculations (Illusion)' : 'Follow-Up Attack Calculations (FUA)'}
+          ${breakdown.isCrow ? 'Status Effect Calculations (Illusion)' : breakdown.isProdigy ? 'Hidden Potential Strike' : 'Follow-Up Attack Calculations (FUA)'}
         </div>
         <div class="dps-table">
           ${activeFuaBreakdowns.map(entry => {
@@ -1268,6 +1278,25 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           </div>
         </div>
       </div>` : ""}
+
+      ${breakdown.isProdigy && (breakdown.prodigyStatusEffects || 0) > 0 ? `
+      <div class="dps-section section-dot" style="border-color: rgba(96,165,250,0.3);">
+        <div class="dps-section-hd" style="color:#60a5fa;">&#x26A1; Status Effect Scaling</div>
+        <div class="dps-table">
+          <div class="dps-table-row">
+            <span class="dps-table-lbl">Status Effects Active</span>
+            <span class="dps-table-val font-mono" style="color:#60a5fa;">${breakdown.prodigyStatusEffects} effect${breakdown.prodigyStatusEffects !== 1 ? "s" : ""}</span>
+          </div>
+          <div class="dps-table-row indented">
+            <span class="dps-table-lbl">Bonus per Effect</span>
+            <span class="dps-table-val font-mono">+10% per effect</span>
+          </div>
+          <div class="dps-table-row primary">
+            <span class="dps-table-lbl" style="color:#60a5fa;">Total Status Multiplier</span>
+            <span class="dps-table-val font-mono" style="color:#60a5fa;">&times;${(breakdown.prodigyStatusDmgMult || 1).toFixed(2)} (+${Math.round(((breakdown.prodigyStatusDmgMult || 1) - 1) * 100)}% damage)</span>
+          </div>
+        </div>
+      </div>` : ""}
     </div>
 
     <!-- ALWAYS DISPLAYED AT THE BOTTOM FOOTER -->
@@ -1290,7 +1319,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           </div>` : ""}
           ${(breakdown.singleFuaDps || 0) > 0 ? `
           <div class="dps-table-row indented">
-            <span class="dps-table-lbl">${breakdown.isCrow ? "Illusion Status DPS" : "Follow-Up DPS"} &times; ${placementCount} placements</span>
+            <span class="dps-table-lbl">${breakdown.isCrow ? "Illusion Status DPS" : breakdown.isProdigy ? "Strike DPS" : "Follow-Up DPS"} &times; ${placementCount} placements</span>
             <span class="dps-table-val font-mono">${formatFullDPS(breakdown.singleFuaDps)} &times; ${placementCount} = ${formatFullDPS((breakdown.totalFuaDps || 0))} DPS</span>
           </div>` : ""}
           ${(breakdown.totalSummonDPS || 0) > 0 ? `
@@ -1382,21 +1411,42 @@ export async function DpsCard(unit, options = {}) {
   const isVegetable = unit.id === "vegetableprince" || (unit.name && unit.name.includes("Vegetable"));
   const isBioinsect = unit.id === "bioinsectfinal" || !!unit.isBioinsectUnit;
   const isCarrot = unit.id === "carrotunleashed" || (unit.name && unit.name.includes("Carrot"));
+  const isProdigy = unit.id === "prodigyrage" || (unit.name && unit.name.includes("Prodigy"));
 
   let darkMageMode = unit.darkMageMode || "lightning";
   let giantForm = unit.giantForm !== undefined ? unit.giantForm : false;
   let berserkState = unit.berserkState !== undefined ? unit.berserkState : false;
   let demonicPresence = unit.demonicPresence !== undefined ? unit.demonicPresence : false;
-  let crowEnemiesHit = unit.crowEnemiesHit || 1;
+  let crowEnemiesHit = unit.crowEnemiesHit !== undefined ? unit.crowEnemiesHit : 5;
   let royalRivalry = isVegetable ? (unit.royalRivalry !== undefined ? !!unit.royalRivalry : true) : false;
-  let awakenedPride = isVegetable ? !!unit.awakenedPride : false;
-  let carrotTransformation = isCarrot ? !!unit.carrotTransformation : false;
+  let awakenedPride = isVegetable ? (unit.awakenedPride !== undefined ? !!unit.awakenedPride : true) : false;
+  let carrotTransformation = isCarrot ? (unit.carrotTransformation !== undefined ? !!unit.carrotTransformation : true) : false;
   let carrotInstantRelocation = isCarrot ? (unit.carrotInstantRelocation !== undefined ? !!unit.carrotInstantRelocation : true) : false;
   let isCompMode = options.isCompMode !== undefined ? !!options.isCompMode : (unit.isCompMode !== undefined ? !!unit.isCompMode : false);
   // Bioinsect state
   let bioinsectForm = isBioinsect ? (unit.bioinsectForm || "imperfect") : "base";
   let bioinsectResetStacks = isBioinsect ? Math.max(0, Math.min(15, parseInt(unit.bioinsectResetStacks || 0, 10) || 0)) : 0;
-  let bioinsectCopiedUnitId = isBioinsect ? (unit.bioinsectCopiedUnitId || "") : "";
+  let bioinsectCopiedUnitId = isBioinsect ? (unit.bioinsectCopiedUnitId || "puppet") : "";
+  // Write the default back immediately so dps-math picks it up on the first render
+  if (isBioinsect && !unit.bioinsectCopiedUnitId) {
+    unit.bioinsectCopiedUnitId = "puppet";
+  }
+
+  let prodigyRageUnleashed = isProdigy ? (unit.prodigyRageUnleashed !== undefined ? !!unit.prodigyRageUnleashed : true) : false;
+  let prodigyFatherAndSonActive = isProdigy ? (unit.prodigyFatherAndSonActive !== undefined ? !!unit.prodigyFatherAndSonActive : false) : false;
+  let prodigyStatusEffects = isProdigy ? Math.max(0, Math.min(100, parseInt(unit.prodigyStatusEffects || 0, 10) || 0)) : 0;
+
+  // Write defaults back immediately so dps-math picks them up on the first render
+  if (isCrow && unit.crowEnemiesHit === undefined) unit.crowEnemiesHit = 5;
+  if (isVegetable && unit.awakenedPride === undefined) unit.awakenedPride = true;
+  if (isCarrot && unit.carrotTransformation === undefined) unit.carrotTransformation = true;
+  if (isProdigy && unit.prodigyRageUnleashed === undefined) unit.prodigyRageUnleashed = true;
+
+  if (isProdigy) {
+    unit.prodigyRageUnleashed = prodigyRageUnleashed;
+    unit.prodigyFatherAndSonActive = prodigyFatherAndSonActive;
+    unit.prodigyStatusEffects = prodigyStatusEffects;
+  }
   if (isBioinsect) {
     unit.bioinsectForm = bioinsectForm;
     unit.bioinsectResetStacks = bioinsectResetStacks;
@@ -1517,7 +1567,30 @@ export async function DpsCard(unit, options = {}) {
             Relocation: ${carrotInstantRelocation ? "On (+50%)" : "Off"}
           </button>
         ` : ""}
-        ${isBioinsect ? `
+        ${isProdigy ? `
+          <div style="display:flex;flex-direction:column;gap:4px;width:100%;margin-bottom:4px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:4px;">
+              <button type="button" class="dps-shinigami-toggle ${prodigyRageUnleashed ? 'active' : ''}" id="prodigy-rage-toggle-${unit.id}" aria-pressed="${prodigyRageUnleashed}" style="flex:1;text-align:center;">
+                Rage Unleashed: ${prodigyRageUnleashed ? "On (+25%)" : "Off"}
+              </button>
+              <button type="button" class="dps-shinigami-toggle ${prodigyFatherAndSonActive ? 'active' : ''}" id="prodigy-fatherson-toggle-${unit.id}" aria-pressed="${prodigyFatherAndSonActive}" style="flex:1;text-align:center;">
+                Father & Son: ${prodigyFatherAndSonActive ? "On (75%/s)" : "Off"}
+              </button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:4px;">
+              <div style="display:inline-flex;align-items:center;justify-content:space-between;background:rgba(15,15,22,0.9);border:1px solid rgba(255,255,255,0.12);border-radius:4px;padding:2px 8px;height:22px;box-sizing:border-box;flex:1;min-width:0;">
+                <span style="font-size:8px;font-weight:700;color:var(--text-secondary);white-space:nowrap;">Status Effects:</span>
+                <div style="display:inline-flex;align-items:center;gap:4px;">
+                  <span id="prodigy-status-badge-${unit.id}" style="font-size:8px;font-weight:700;color:#60a5fa;white-space:nowrap;">(+${prodigyStatusEffects * 10}%)</span>
+                  <input type="text" inputmode="numeric" pattern="[0-9]*" id="prodigy-status-input-${unit.id}" value="${prodigyStatusEffects}" placeholder="0" aria-label="Status Effects count" style="width:24px;height:14px;text-align:center;font-size:9px;font-weight:800;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);border-radius:3px;color:#c7d2fe;padding:0;" />
+                </div>
+              </div>
+              <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}" style="flex:1;text-align:center;">
+                Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
+              </button>
+            </div>
+          </div>
+        ` : isBioinsect ? `
           <div style="display:flex;flex-direction:column;gap:4px;width:100%;margin-bottom:4px;">
             <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:4px;">
               <select class="dps-bioinsect-unit-select" id="bioinsect-unit-select-${unit.id}" style="font-size:8.5px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(15,15,22,0.9);border:1px solid rgba(255,255,255,0.12);color:#e2e8f0;cursor:pointer;flex:1;min-width:0;box-sizing:border-box;outline:none;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;height:22px;">
@@ -1569,6 +1642,9 @@ export async function DpsCard(unit, options = {}) {
   const awakenedPrideToggle = card.querySelector(`#awakened-pride-toggle-${unit.id}`);
   const carrotTransformToggle = card.querySelector(`#carrot-transform-toggle-${unit.id}`);
   const carrotRelocationToggle = card.querySelector(`#carrot-relocation-toggle-${unit.id}`);
+  const prodigyRageToggle = card.querySelector(`#prodigy-rage-toggle-${unit.id}`);
+  const prodigyFatherSonToggle = card.querySelector(`#prodigy-fatherson-toggle-${unit.id}`);
+  const prodigyStatusInput = card.querySelector(`#prodigy-status-input-${unit.id}`);
   const bioinsectUnitSelect = card.querySelector(`#bioinsect-unit-select-${unit.id}`);
   const bioinsectFormToggle = card.querySelector(`#bioinsect-form-toggle-${unit.id}`);
   const bioinsectResetInput = card.querySelector(`#bioinsect-reset-input-${unit.id}`);
@@ -1742,6 +1818,56 @@ export async function DpsCard(unit, options = {}) {
     renderCalculations();
   });
 
+  prodigyRageToggle?.addEventListener("click", () => {
+    prodigyRageUnleashed = !prodigyRageUnleashed;
+    unit.prodigyRageUnleashed = prodigyRageUnleashed;
+    prodigyRageToggle.classList.toggle("active", prodigyRageUnleashed);
+    prodigyRageToggle.setAttribute("aria-pressed", String(prodigyRageUnleashed));
+    prodigyRageToggle.textContent = `Rage Unleashed: ${prodigyRageUnleashed ? "On (+25%)" : "Off"}`;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
+  prodigyFatherSonToggle?.addEventListener("click", () => {
+    prodigyFatherAndSonActive = !prodigyFatherAndSonActive;
+    unit.prodigyFatherAndSonActive = prodigyFatherAndSonActive;
+    prodigyFatherSonToggle.classList.toggle("active", prodigyFatherAndSonActive);
+    prodigyFatherSonToggle.setAttribute("aria-pressed", String(prodigyFatherAndSonActive));
+    prodigyFatherSonToggle.textContent = `Father & Son: ${prodigyFatherAndSonActive ? "On (75%/s)" : "Off"}`;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
+  const prodigyStatusBadge = card.querySelector(`#prodigy-status-badge-${unit.id}`);
+
+  const commitProdigyStatus = () => {
+    if (!prodigyStatusInput) return;
+    prodigyStatusInput.value = prodigyStatusInput.value.replace(/[^\d]/g, "");
+    const val = Math.max(0, Math.min(100, parseInt(prodigyStatusInput.value || "0", 10) || 0));
+    prodigyStatusInput.value = String(val);
+    if (prodigyStatusBadge) {
+      prodigyStatusBadge.textContent = `(+${val * 10}%)`;
+    }
+    if (prodigyStatusEffects !== val) {
+      prodigyStatusEffects = val;
+      unit.prodigyStatusEffects = prodigyStatusEffects;
+      window.dispatchEvent(new CustomEvent("dps-value-changed"));
+      renderCalculations();
+    }
+  };
+
+  prodigyStatusInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commitProdigyStatus();
+      prodigyStatusInput.blur();
+    }
+  });
+
+  prodigyStatusInput?.addEventListener("change", () => {
+    commitProdigyStatus();
+  });
+
   crimsonPoolToggle?.addEventListener("click", () => {
     crimsonPoolCount = (crimsonPoolCount + 1) % 4;
     unit.crimsonPoolCount = crimsonPoolCount;
@@ -1765,6 +1891,14 @@ export async function DpsCard(unit, options = {}) {
           if (u.id === bioinsectCopiedUnitId) opt.selected = true;
           bioinsectUnitSelect.appendChild(opt);
         });
+      // If nothing was previously selected, force default to puppet
+      if (!bioinsectUnitSelect.value) {
+        bioinsectUnitSelect.value = "puppet";
+      }
+      bioinsectCopiedUnitId = bioinsectUnitSelect.value;
+      unit.bioinsectCopiedUnitId = bioinsectCopiedUnitId;
+      window.dispatchEvent(new CustomEvent("dps-value-changed"));
+      renderCalculations();
     });
 
     bioinsectUnitSelect.addEventListener("change", () => {

@@ -256,6 +256,17 @@ const rawRelics = [
     image: relicImgByName("Mechanical Wings"),
     unitEquip: "Bioinsect",
   },
+  {
+    id: "relic-mentors-cape",
+    name: "Mentors Cape",
+    image: relicImgByName("Mentors Cape"),
+    unitEquip: "Prodigy (Rage)",
+  },
+  {
+    id: "relic-warriors-pole",
+    name: "Warrior Pole",
+    image: relicImgByName("Warrior Pole"),
+  },
 ];
 
 rawRelics.forEach((r) => {

@@ -238,6 +238,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isVegetable = unit && (unit.id === "vegetableprince" || (unit.name && unit.name.includes("Vegetable")));
   const isBioinsect = unit && (unit.id === "bioinsectfinal" || !!unit.isBioinsectUnit);
   const isCarrot = unit && (unit.id === "carrotunleashed" || (unit.name && unit.name.includes("Carrot")));
+  const isProdigy = unit && (unit.id === "prodigyrage" || (unit.name && unit.name.includes("Prodigy")));
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
@@ -251,17 +252,25 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const coldState = isCursedImmortal ? !!unit.coldState : false;
   const caringState = isCursedImmortal ? !coldState : (unit && !!unit.caringState);
   const royalRivalry = isVegetable ? (unit.royalRivalry !== undefined ? !!unit.royalRivalry : true) : false;
-  const awakenedPride = isVegetable ? !!unit.awakenedPride : false;
-  const carrotTransformation = isCarrot ? !!unit.carrotTransformation : false;
+  const awakenedPride = isVegetable ? (unit.awakenedPride !== undefined ? !!unit.awakenedPride : true) : false;
+  const carrotTransformation = isCarrot ? (unit.carrotTransformation !== undefined ? !!unit.carrotTransformation : true) : false;
   const carrotInstantRelocation = isCarrot ? (unit.carrotInstantRelocation !== undefined ? !!unit.carrotInstantRelocation : true) : false;
   const isCompMode = unit ? !!unit.isCompMode : false;
   const bioinsectForm = isBioinsect ? (unit.bioinsectForm || "imperfect") : "base";
   const bioinsectResetStacks = isBioinsect ? Math.max(0, parseInt(unit.bioinsectResetStacks || 0, 10) || 0) : 0;
+  // Default copied unit to Puppet (Telekinetic) if none set
+  if (isBioinsect && !unit.bioinsectCopiedUnitId) {
+    unit.bioinsectCopiedUnitId = "puppet";
+  }
+
+  const prodigyRageUnleashed = isProdigy ? (unit.prodigyRageUnleashed !== undefined ? !!unit.prodigyRageUnleashed : true) : false;
+  const prodigyStatusEffects = isProdigy ? Math.max(0, Math.min(100, parseInt(unit.prodigyStatusEffects || 0, 10) || 0)) : 0;
+  const prodigyFatherAndSonActive = isProdigy ? !!unit.prodigyFatherAndSonActive : false;
 
   let passiveSpaMult = isReaper ? -0.10 : (isLadyGiant && giantForm ? 0.25 : (isEighthSword && berserkState ? -0.10 : 0));
   let passiveCritChanceAdd = isReaper ? 0.40 : (isCursedImmortal ? 0.30 : (isRazorjaw ? 0.25 : 0));
   let passiveCritDamageAdd = isCarrot && carrotTransformation ? 0.20 : 0;
-  let passiveDamageMult = isReaper ? 0.40 : (isLadyGiant && giantForm ? 1.25 : (isEighthSword && berserkState ? 0.20 : (isCarrot && carrotTransformation ? 0.15 : 0)));
+  let passiveDamageMult = isReaper ? 0.40 : (isLadyGiant && giantForm ? 1.25 : (isEighthSword && berserkState ? 0.20 : (isCarrot && carrotTransformation ? 0.15 : (isProdigy && prodigyRageUnleashed ? 0.25 : 0))));
   let passiveRangeMult = (isLadyGiant && giantForm ? 0.50 : (isCursedImmortal && caringState ? -0.50 : (isCursedImmortal && coldState ? -0.75 : 0)));
 
   if (isCarrot && carrotInstantRelocation) {
@@ -405,7 +414,13 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     effDamage = effDamage * 1.15;
   }
 
-  let totalPassiveDamageBonus = (shinigamiActive ? 0.15 : 0) + passiveDamageMult;
+  const hasWarriorPole = relics.some(r => r.name === "Warrior Pole");
+  const isTransformed = (isCarrot && carrotTransformation) ||
+    (isVegetable) || // Vegetable Prince is transformed
+    (isBioinsect && bioinsectForm !== "base") ||
+    (isProdigy && prodigyRageUnleashed);
+
+  let totalPassiveDamageBonus = (shinigamiActive ? 0.15 : 0) + (hasWarriorPole && isTransformed ? 0.20 : 0) + passiveDamageMult;
   const preShinigamiEffDamage = effDamage * (passiveDamageMult > 0 ? (1 + passiveDamageMult) : 1);
   if (totalPassiveDamageBonus > 0) {
     effDamage = effDamage * (1 + totalPassiveDamageBonus);
@@ -591,7 +606,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     const hasIllusionCrow = activeUnitEquip === "Illusion Crow";
     const illusionEffectiveness = hasIllusionCrow ? 0.50 : 0.25;
 
-    const enemiesHit = Math.max(1, parseInt(unit.crowEnemiesHit || 1, 10) || 1);
+    const enemiesHit = Math.max(1, parseInt(unit.crowEnemiesHit !== undefined ? unit.crowEnemiesHit : 5, 10) || 5);
     const storingAttacks = Math.ceil(12.0 / effSpa);
 
     const directStoredDmg = storingAttacks * avgHitDamage;
@@ -739,6 +754,76 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     } else {
       unitDirectDPS = avgHitDamage / effSpa;
     }
+  } else if (isProdigy) {
+    // Prodigy (Rage) calculations
+    unitDoTDPS = 0;
+
+    // 1) Hidden Potential / Rage Unleashed FUA:
+    // Base form: every 4th attack deals 25% dmg (with Relic Mentors Cape: 50% every 3 attacks)
+    // Transformed (Rage Unleashed): 75% every 3 attacks (with or without Relic)
+    const hasMentorsCape = relics.some(r => r.name === "Mentors Cape");
+    let prodigyFuaMult = 0.25;
+    let prodigyFuaAttacksNeeded = 4;
+
+    if (prodigyRageUnleashed) {
+      prodigyFuaMult = 0.75;
+      prodigyFuaAttacksNeeded = 3;
+    } else if (hasMentorsCape) {
+      prodigyFuaMult = 0.50;
+      prodigyFuaAttacksNeeded = 3;
+    }
+
+    const prodigyFuaInterval = prodigyFuaAttacksNeeded * effSpa;
+    const prodigyFuaRawDmg = effDamage * prodigyFuaMult;
+    const prodigyFuaAvgHit = prodigyFuaRawDmg * critAvgMult;
+    const prodigyFuaDps = prodigyFuaAvgHit / prodigyFuaInterval;
+
+    // 2) Father and Son Spirit Energy Ability: 75% DMG per 1 second
+    let fatherSonDps = 0;
+    let fatherSonAvgHit = 0;
+    if (prodigyFatherAndSonActive) {
+      const fatherSonRawDmg = effDamage * 0.75;
+      fatherSonAvgHit = fatherSonRawDmg * critAvgMult;
+      fatherSonDps = fatherSonAvgHit / 1.0; // 1s interval
+    }
+
+    // 3) Enemy Status Effects damage scaling (+10% damage per status effect, max 100 effects = +1000% damage)
+    // Note: status effects increase overall damage output by statusCount * 10%
+    const statusDmgBonus = prodigyStatusEffects * 0.10;
+    const statusDmgMult = 1 + statusDmgBonus;
+
+    // Direct DPS = (avgHitDamage * statusDmgMult) / effSpa
+    unitDirectDPS = (avgHitDamage * statusDmgMult) / effSpa;
+
+    // Combine FUAs into fuaBreakdowns
+    fuaDps = (prodigyFuaDps + fatherSonDps) * statusDmgMult;
+    fuaBreakdowns = [
+      {
+        index: 0,
+        name: `Prodigy FUA (${prodigyRageUnleashed ? "75% Rage Unleashed" : hasMentorsCape ? "50% Mentors Cape" : "25% Base"} every ${prodigyFuaAttacksNeeded} attacks)`,
+        inputDamage: effDamage,
+        effectiveFollowUpDamage: prodigyFuaRawDmg,
+        averageFollowUpHit: prodigyFuaAvgHit * statusDmgMult,
+        intervalSpa: prodigyFuaInterval,
+        critAvgMult,
+        dps: prodigyFuaDps * statusDmgMult,
+      }
+    ];
+
+    if (prodigyFatherAndSonActive) {
+      fuaBreakdowns.push({
+        index: 1,
+        name: `Father and Son Spirit Energy (75%/s)`,
+        inputDamage: effDamage,
+        effectiveFollowUpDamage: effDamage * 0.75,
+        averageFollowUpHit: fatherSonAvgHit * statusDmgMult,
+        intervalSpa: 1.0,
+        critAvgMult,
+        dps: fatherSonDps * statusDmgMult,
+        isAbility: true
+      });
+    }
+    singleFuaDmg = fuaBreakdowns.reduce((sum, b) => sum + b.averageFollowUpHit, 0);
   } else {
     unitDirectDPS = avgHitDamage / effSpa;
     unitDoTDPS = (base.dotMultiplier || 0) > 0 ? (dotDamage / dotIntervalSPA) : 0;
@@ -947,7 +1032,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     relicCritChanceAdd,
     relicCritDamageAdd,
     relicDotBonus,
-    unitArchetype,
+    shinigamiActive,
+    hasWarriorPole,
+    isTransformed,
     hasShinigami,
     shinigamiActive,
     hasAscend,
@@ -969,7 +1056,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     berserkState,
     demonicPresence,
     isCrow,
-    crowEnemiesHit: unit.crowEnemiesHit || 1,
+    crowEnemiesHit: unit.crowEnemiesHit !== undefined ? unit.crowEnemiesHit : 5,
     isCrimson,
     crimsonAbilityActive: isCrimson ? crimsonAbilityActive : false,
     crimsonPoolCount: isCrimson ? crimsonPoolCount : 0,
@@ -994,6 +1081,10 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     isCarrot,
     carrotTransformation,
     carrotInstantRelocation,
+    isProdigy,
+    prodigyRageUnleashed,
+    prodigyStatusEffects: isProdigy ? prodigyStatusEffects : 0,
+    prodigyStatusDmgMult: isProdigy ? (1 + prodigyStatusEffects * 0.10) : 1,
     effectiveCritRate,
     battleInstinctBonusCrit,
   };
