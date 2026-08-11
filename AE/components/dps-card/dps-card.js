@@ -43,6 +43,7 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
     }
   }
 
+  const isCursedStudent = unit.id === "cursestudenttruelove" || (unit.name && unit.name.includes("Cursed Student"));
   const isCrow = unit.id === "crowblackfire" || (unit.name && unit.name.includes("Crow"));
   const isVegetable = unit.id === "vegetableprince" || (unit.name && unit.name.includes("Vegetable"));
   const isBioinsect = unit.id === "bioinsectfinal" || !!unit.isBioinsectUnit;
