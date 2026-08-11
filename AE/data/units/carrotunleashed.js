@@ -7,7 +7,7 @@ export const unit = {
     archetype: "Physical",
 
     stats: {
-        recommendedTrait: "Unbound",
+        recommendedTrait: "Primordial",
         element: "Gale",
         archetype: "Physical",
         damage: "2,572",
