@@ -1902,14 +1902,13 @@ export async function DpsCard(unit, options = {}) {
           if (u.id === bioinsectCopiedUnitId) opt.selected = true;
           bioinsectUnitSelect.appendChild(opt);
         });
-      // If nothing was previously selected, force default to puppet
-      if (!bioinsectUnitSelect.value) {
-        bioinsectUnitSelect.value = "puppet";
+      const newId = bioinsectUnitSelect.value || "puppet";
+      if (unit.bioinsectCopiedUnitId !== newId) {
+        unit.bioinsectCopiedUnitId = newId;
+        bioinsectCopiedUnitId = newId;
+        window.dispatchEvent(new CustomEvent("dps-value-changed"));
+        renderCalculations();
       }
-      bioinsectCopiedUnitId = bioinsectUnitSelect.value;
-      unit.bioinsectCopiedUnitId = bioinsectCopiedUnitId;
-      window.dispatchEvent(new CustomEvent("dps-value-changed"));
-      renderCalculations();
     });
 
     bioinsectUnitSelect.addEventListener("change", () => {
