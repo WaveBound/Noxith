@@ -43,7 +43,12 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
     }
   }
 
-  const isCursedStudent = unit.id === "cursestudenttruelove" || (unit.name && unit.name.includes("Cursed Student"));
+  const isCrow = unit.id === "crowblackfire" || (unit.name && unit.name.includes("Crow"));
+  const isVegetable = unit.id === "vegetableprince" || (unit.name && unit.name.includes("Vegetable"));
+  const isBioinsect = unit.id === "bioinsectfinal" || !!unit.isBioinsectUnit;
+  const isCarrot = unit.id === "carrotunleashed" || (unit.name && unit.name.includes("Carrot"));
+  const isProdigy = unit.id === "prodigyrage" || (unit.name && unit.name.includes("Prodigy"));
+  const isCursedImmortal = unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"));
 
   combos.forEach(([eq1, eq2]) => {
     const mockUnit = {
@@ -54,21 +59,26 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       selectedDpsEquip2: eq2,
       simulateShinigamiPassive,
       darkMageMode: unit.darkMageMode || options.darkMageMode || "lightning",
-      giantForm: unit.giantForm !== undefined ? unit.giantForm : !!options.giantForm,
-      berserkState: unit.berserkState !== undefined ? unit.berserkState : !!options.berserkState,
-      demonicPresence: unit.demonicPresence !== undefined ? unit.demonicPresence : !!options.demonicPresence,
-      crowEnemiesHit: options.crowEnemiesHit !== undefined ? options.crowEnemiesHit : (unit.crowEnemiesHit || 1),
-      caringState: (unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"))) ? !(options.coldState !== undefined ? !!options.coldState : !!unit.coldState) : (options.caringState !== undefined ? !!options.caringState : !!unit.caringState),
-      coldState: (unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"))) ? (options.coldState !== undefined ? !!options.coldState : !!unit.coldState) : false,
+      giantForm: unit.giantForm !== undefined ? unit.giantForm : (options.giantForm !== undefined ? !!options.giantForm : false),
+      berserkState: unit.berserkState !== undefined ? unit.berserkState : (options.berserkState !== undefined ? !!options.berserkState : false),
+      demonicPresence: unit.demonicPresence !== undefined ? unit.demonicPresence : (options.demonicPresence !== undefined ? !!options.demonicPresence : false),
+      crowEnemiesHit: options.crowEnemiesHit !== undefined ? options.crowEnemiesHit : (unit.crowEnemiesHit !== undefined ? unit.crowEnemiesHit : (isCrow ? 5 : 1)),
+      caringState: isCursedImmortal ? !(options.coldState !== undefined ? !!options.coldState : !!unit.coldState) : (options.caringState !== undefined ? !!options.caringState : !!unit.caringState),
+      coldState: isCursedImmortal ? (options.coldState !== undefined ? !!options.coldState : !!unit.coldState) : false,
       fuaDamages: options.fuaDamages || unit.fuaDamages || [],
       isCompMode: options.isCompMode !== undefined ? !!options.isCompMode : !!unit.isCompMode,
-      royalRivalry: options.royalRivalry !== undefined ? !!options.royalRivalry : (unit.royalRivalry !== undefined ? !!unit.royalRivalry : true),
-      awakenedPride: options.awakenedPride !== undefined ? !!options.awakenedPride : !!unit.awakenedPride,
-      carrotTransformation: options.carrotTransformation !== undefined ? !!options.carrotTransformation : !!unit.carrotTransformation,
-      carrotInstantRelocation: options.carrotInstantRelocation !== undefined ? !!options.carrotInstantRelocation : (unit.carrotInstantRelocation !== undefined ? !!unit.carrotInstantRelocation : true),
-      bioinsectForm: options.bioinsectForm || unit.bioinsectForm || "imperfect",
+      royalRivalry: options.royalRivalry !== undefined ? !!options.royalRivalry : (unit.royalRivalry !== undefined ? !!unit.royalRivalry : isVegetable),
+      awakenedPride: options.awakenedPride !== undefined ? !!options.awakenedPride : (unit.awakenedPride !== undefined ? !!unit.awakenedPride : isVegetable),
+      carrotTransformation: options.carrotTransformation !== undefined ? !!options.carrotTransformation : (unit.carrotTransformation !== undefined ? !!unit.carrotTransformation : isCarrot),
+      carrotInstantRelocation: options.carrotInstantRelocation !== undefined ? !!options.carrotInstantRelocation : (unit.carrotInstantRelocation !== undefined ? !!unit.carrotInstantRelocation : isCarrot),
+      prodigyRageUnleashed: options.prodigyRageUnleashed !== undefined ? !!options.prodigyRageUnleashed : (unit.prodigyRageUnleashed !== undefined ? !!unit.prodigyRageUnleashed : isProdigy),
+      prodigyFatherAndSonActive: options.prodigyFatherAndSonActive !== undefined ? !!options.prodigyFatherAndSonActive : (unit.prodigyFatherAndSonActive !== undefined ? !!unit.prodigyFatherAndSonActive : false),
+      prodigyStatusEffects: options.prodigyStatusEffects !== undefined ? options.prodigyStatusEffects : (unit.prodigyStatusEffects || 0),
+      crimsonAbilityActive: options.crimsonAbilityActive !== undefined ? !!options.crimsonAbilityActive : (unit.crimsonAbilityActive !== undefined ? !!unit.crimsonAbilityActive : false),
+      crimsonPoolCount: options.crimsonPoolCount !== undefined ? options.crimsonPoolCount : (unit.crimsonPoolCount !== undefined ? unit.crimsonPoolCount : 3),
+      bioinsectForm: options.bioinsectForm || unit.bioinsectForm || (isBioinsect ? "imperfect" : "base"),
       bioinsectResetStacks: options.bioinsectResetStacks !== undefined ? options.bioinsectResetStacks : (unit.bioinsectResetStacks || 0),
-      bioinsectCopiedUnitId: options.bioinsectCopiedUnitId !== undefined ? options.bioinsectCopiedUnitId : (unit.bioinsectCopiedUnitId || null),
+      bioinsectCopiedUnitId: options.bioinsectCopiedUnitId !== undefined ? options.bioinsectCopiedUnitId : (unit.bioinsectCopiedUnitId || (isBioinsect ? "puppet" : null)),
     };
 
     const rawBreakdown = getTraitBreakdown(mockUnit, traitKey, targetLevel, statMode);
