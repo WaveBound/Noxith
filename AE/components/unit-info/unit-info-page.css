@@ -966,12 +966,12 @@
   gap: 5px;
   padding: 12px 16px;
   overflow: hidden;
-  background-color: #030008;
-  background-image: url('../../icons/status/StunInfo.png');
+  background-color: #020005;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('../../icons/status/StunInfo.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-  border: 1px solid #3b0764;
+  border: 1px solid #280545;
   border-radius: 12px;
 }
 
@@ -984,10 +984,10 @@
   inset: 0;
   background: linear-gradient(180deg,
       rgba(0, 0, 0, 0) 0%,
-      rgba(147, 51, 234, 0.12) 20%,
-      rgba(168, 85, 247, 0.22) 45%,
-      rgba(168, 85, 247, 0.22) 55%,
-      rgba(126, 34, 206, 0.12) 80%,
+      rgba(147, 51, 234, 0.05) 20%,
+      rgba(168, 85, 247, 0.10) 45%,
+      rgba(168, 85, 247, 0.10) 55%,
+      rgba(126, 34, 206, 0.05) 80%,
       rgba(0, 0, 0, 0) 100%);
   background-size: 100% 200%;
   filter: blur(12px);
