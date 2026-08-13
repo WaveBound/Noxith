@@ -124,22 +124,20 @@
     outline-offset: 2px;
 }
 
-/* Darkened placeholder image sitting behind the text */
-.home-nav-card-img {
+/* Thematic gradient background sitting behind the text */
+.home-nav-card-bg {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
     z-index: -2;
-    opacity: 0.45;
-    filter: saturate(0.85);
+    opacity: 0.85;
     transition: transform var(--t-med) var(--ease), opacity var(--t-med) var(--ease);
 }
 
-.home-nav-card:hover .home-nav-card-img {
-    transform: scale(1.05);
-    opacity: 0.6;
+.home-nav-card:hover .home-nav-card-bg {
+    transform: scale(1.04);
+    opacity: 1;
 }
 
 /* Gradient scrim so the wording stays legible over the image */

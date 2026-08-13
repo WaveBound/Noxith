@@ -72,7 +72,7 @@ const ALL_MAIN_TABS = [
     badge: "Section",
     type: "main-tab",
     published: IS_TRAITS_PUBLISHED,
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3c0 5 14 5 14 10s-14 5-14 10"/><path d="M19 3c0 5-14 5-14 10"/><path d="M7 7h10M7 17h10"/></svg>`,
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/></svg>`,
   },
   {
     id: "relics",
@@ -80,7 +80,7 @@ const ALL_MAIN_TABS = [
     subtitle: "Equipable Relics & Stat Boosts",
     badge: "Section",
     type: "main-tab",
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l5 4-5 5-5-5z"/><path d="M7 6l5 5 5-5"/><path d="M12 11v9"/><path d="M8 14l4 3 4-3"/></svg>`,
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
   },
   {
     id: "modes",
@@ -368,7 +368,7 @@ export function renderHeader(mountEl) {
     if (relicMatches.length > 0) {
       html += `
         <div class="search-group-header">
-          <span class="search-group-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l5 4-5 5-5-5z"/><path d="M12 11v9"/></svg> Relics</span>
+          <span class="search-group-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Relics</span>
           <span class="search-group-count">${relicMatches.length}</span>
         </div>
       `;
@@ -380,7 +380,7 @@ export function renderHeader(mountEl) {
     if (traitMatches.length > 0) {
       html += `
         <div class="search-group-header">
-          <span class="search-group-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Traits</span>
+          <span class="search-group-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/></svg> Traits</span>
           <span class="search-group-count">${traitMatches.length}</span>
         </div>
       `;

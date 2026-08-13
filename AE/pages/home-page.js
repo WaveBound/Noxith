@@ -9,18 +9,21 @@ const NAV_CARDS = [
     title: "Units",
     desc: "Browse every unit, their stats, traits, and best builds.",
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>`,
+    gradient: "linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.15) 100%)",
   },
   {
     id: "traits",
     title: "Traits",
     desc: "See how traits modify units and what to reroll for.",
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.6 6.2 6.7.5-5.1 4.4 1.6 6.6L12 16.9 6.2 19.7l1.6-6.6-5.1-4.4 6.7-.5z"/></svg>`,
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/></svg>`,
+    gradient: "linear-gradient(135deg, rgba(236, 72, 153, 0.25) 0%, rgba(219, 39, 119, 0.15) 100%)",
   },
   {
     id: "relics",
     title: "Relics",
     desc: "Discover relics and the bonuses they grant your team.",
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l7 4v6c0 5-3.2 8.5-7 10-3.8-1.5-7-5-7-10V6z"/></svg>`,
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    gradient: "linear-gradient(135deg, rgba(56, 189, 248, 0.25) 0%, rgba(59, 130, 246, 0.15) 100%)",
   },
   {
     id: "modes",
@@ -28,6 +31,7 @@ const NAV_CARDS = [
     desc: "Game modes and how they change the way you play.",
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
     badge: "soon",
+    gradient: "linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.15) 100%)",
   },
 ];
 
@@ -80,7 +84,7 @@ function statCard(value, label) {
 function navCard(c) {
   return `
     <button class="home-nav-card" type="button" data-section="${c.id}" aria-label="Go to ${c.title}">
-      <img class="home-nav-card-img" src="assets/placeholder.svg" alt="" aria-hidden="true" />
+      <span class="home-nav-card-bg" style="background: ${c.gradient}"></span>
       <span class="home-nav-card-overlay"></span>
       <span class="home-nav-card-content">
         <span class="home-nav-card-icon">${c.icon}</span>
