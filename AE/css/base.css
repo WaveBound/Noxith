@@ -238,14 +238,14 @@ img {
 }
 
 .p-kw-icon {
-  width: 1.0em !important;
-  height: 1.5em !important;
-  max-width: 20px !important;
-  max-height: 25px !important;
-  margin-right: 1px !important;
+  width: 1.25em !important;
+  height: 1.25em !important;
+  max-width: 22px !important;
+  max-height: 22px !important;
+  margin-right: 2px !important;
   display: inline-block !important;
   vertical-align: middle !important;
-  transform: translateY(1px) !important;
+  transform: translateY(-1px) !important;
   object-fit: contain !important;
   flex-shrink: 0 !important;
   filter: none !important;
@@ -322,8 +322,25 @@ img {
 .p-kw.p-cocoon>span,
 .p-kw.p-puppet-mark>span,
 .p-kw.p-dismembered>span,
+.p-kw.p-drink-mark>span,
 .p-kw.p-genetic-dupe>span {
-  --kw-color: #9900ff;
+  --kw-color: #a855f7;
+  color: #a855f7 !important;
+  -webkit-text-fill-color: #a855f7 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #a855f7 !important;
+  text-underline-offset: 2px !important;
+}
+
+.p-kw.p-physical>span {
+  --kw-color: #c81e1e;
+  color: #c81e1e !important;
+  -webkit-text-fill-color: #c81e1e !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #c81e1e !important;
+  text-underline-offset: 2px !important;
 }
 
 .p-kw.p-bio-gel>span {
@@ -346,13 +363,15 @@ img {
   text-underline-offset: 2px !important;
 }
 
-.p-kw.p-rage-unleashed>span {
-  --kw-color: #00e5ff;
-  color: #00e5ff !important;
-  -webkit-text-fill-color: #00e5ff !important;
+.p-kw.p-rage-unleashed>span,
+.p-kw.p-precision-slash>span,
+.p-kw.p-quick-assist>span {
+  --kw-color: #00d2ee;
+  color: #00d2ee !important;
+  -webkit-text-fill-color: #00d2ee !important;
   font-weight: 700 !important;
   text-decoration: underline !important;
-  text-decoration-color: #00e5ff !important;
+  text-decoration-color: #00d2ee !important;
   text-underline-offset: 2px !important;
 }
 
@@ -380,7 +399,7 @@ img {
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
-  font-weight: 700 !important;
+  font-weight: 800 !important;
   text-decoration: underline !important;
   text-decoration-color: #fde047 !important;
   text-underline-offset: 2px !important;
@@ -531,8 +550,8 @@ img {
   position: fixed !important;
   width: auto !important;
   height: auto !important;
-  max-width: 300px !important;
-  max-height: 160px !important;
+  max-width: 380px !important;
+  max-height: none !important;
   margin: 0 !important;
   padding: 0 !important;
   pointer-events: none !important;
@@ -540,8 +559,7 @@ img {
   box-shadow: none !important;
   border-radius: 10px !important;
   object-fit: contain !important;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
+  image-rendering: auto !important;
 }
 
 /* Disable duplicate tooltips */

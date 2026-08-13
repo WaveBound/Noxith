@@ -337,6 +337,17 @@ export const relicStats = {
             desc: `Increase unit damage by 1% to 20% while Transformed`,
         },
     },
+
+    "Pointy Straw": {
+        stats: [
+            { damage: { min: "+1%", max: "+10%" } },
+            { range: { min: "+1%", max: "+5%" } },
+        ],
+        passive: {
+            name: "Precision Slash",
+            desc: `Every <b>4 Regular Attacks</b>:<br>- Inflict enemies with <b>The Drink Mark</b> for <b>15</b> seconds<br><b>The Drink Mark</b> will:<br>- Increase all <b>Follow-Up Attack</b> damage by <b>25%</b><br>- Apply a <b>Physical</b> weakness at <b>10%</b>`,
+        },
+    },
 };
 
 export function getRelicStatsByName(name) {

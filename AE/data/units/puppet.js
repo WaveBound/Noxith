@@ -95,7 +95,14 @@ export const unit = {
         equip2: "Kunai",
     },
 
-    statusEffects: [],
+    statusEffects: [
+        {
+            name: "Puppet Mark",
+            icon: "puppetmark",
+            effect: "Inflicts enemies with Puppet Mark. When an enemy with Puppet Mark dies, summons a Doll at their location.",
+            cooldown: "0s",
+        },
+    ],
 };
 
 export default unit;

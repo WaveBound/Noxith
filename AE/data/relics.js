@@ -60,6 +60,7 @@ const UNIT_NAME_MAP = {
   "CursedImmortal": "Cursed Immortal (Black Sun)",
   "VegetablePrince": "Vegetable (Prince)",
   "CarrotUnleashed": "Carrot (Unleashed)",
+  "TheDrinkJuicebox": "The Drink (Juicebox)",
 };
 
 const rawRelics = [
@@ -266,6 +267,12 @@ const rawRelics = [
     id: "relic-warriors-pole",
     name: "Warrior Pole",
     image: relicImgByName("Warrior Pole"),
+  },
+  {
+    id: "relic-pointy-straw",
+    name: "Pointy Straw",
+    image: relicImgByName("Pointy Straw"),
+    unitEquip: "The Drink (Juicebox)",
   },
 ];
 

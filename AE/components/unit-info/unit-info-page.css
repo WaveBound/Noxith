@@ -957,7 +957,9 @@
 }
 
 .status-effect-box.status-card-stun,
-.status-effect-box.status-card-dismembered {
+.status-effect-box.status-card-dismembered,
+.status-effect-box.status-card-drinkmark,
+.status-effect-box.status-card-puppetmark {
   position: relative;
   display: flex;
   align-items: center;
@@ -974,7 +976,9 @@
 }
 
 .status-effect-box.status-card-stun::before,
-.status-effect-box.status-card-dismembered::before {
+.status-effect-box.status-card-dismembered::before,
+.status-effect-box.status-card-drinkmark::before,
+.status-effect-box.status-card-puppetmark::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1003,7 +1007,9 @@
 }
 
 .status-effect-box.status-card-stun .status-effect-tag,
-.status-effect-box.status-card-dismembered .status-effect-tag {
+.status-effect-box.status-card-dismembered .status-effect-tag,
+.status-effect-box.status-card-drinkmark .status-effect-tag,
+.status-effect-box.status-card-puppetmark .status-effect-tag {
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
@@ -1015,7 +1021,9 @@
 }
 
 .status-effect-box.status-card-stun .status-effect-cooldown,
-.status-effect-box.status-card-dismembered .status-effect-cooldown {
+.status-effect-box.status-card-dismembered .status-effect-cooldown,
+.status-effect-box.status-card-drinkmark .status-effect-cooldown,
+.status-effect-box.status-card-puppetmark .status-effect-cooldown {
   position: relative;
   z-index: 1;
   display: inline-block;
