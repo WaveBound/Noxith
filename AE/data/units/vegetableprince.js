@@ -101,7 +101,7 @@ export const unit = {
 
     recommendedEquips: {
         unitEquip: "Royal Gi",
-        equip1: "Three Swords From Hell",
+        equip1: "Shinigami Sword",
         equip2: "Magic Book",
     },
 };

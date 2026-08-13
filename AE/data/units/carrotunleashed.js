@@ -89,14 +89,14 @@ export const unit = {
             name: "Instant Relocation",
             cooldown: "20s CD",
             unlocksUpgrade: 8,
-            desc: `Select a unit on the map or a position within this unit's range to <b>Relocate</b> to for <b>15</b> seconds.<br>On <b>Relocate</b> to a unit:<br>- Immediately perform a <b>Follow-Up Attack</b> dealing <b>75%</b> of this unit's current damage (<b>125%</b> with Carrot's Gi)<br>- Trigger the selected unit to perform the same <b>Follow-Up Attack</b> dealing <b>75%</b> of the selected unit's current damage (<b>125%</b> with Carrot's Gi)<br>On <b>Relocate</b> to a position:<br>- Immediately perform a <b>Follow-Up Attack</b> dealing <b>75%</b> of this unit's current damage (<b>125%</b> with Carrot's Gi)<br>- Increase this unit's Damage by <b>50%</b> for <b>15</b> seconds`,
+            desc: `Select a unit on the map or a position within this unit's range to <b>Relocate</b> to for <b>15</b> seconds.<br>On <b>Relocate</b> to a unit:<br>- Immediately perform a <b>Follow-Up Attack</b> dealing <b>75%</b> of this unit's current damage<br>- Trigger the selected unit to perform the same <b>Follow-Up Attack</b> dealing <b>75%</b> of the selected unit's current damage <br>On <b>Relocate</b> to a position:<br>- Immediately perform a <b>Follow-Up Attack</b> dealing <b>75%</b> of this unit's current damage<br>- Increase this unit's Damage by <b>50%</b> for <b>15</b> seconds`,
         },
     ],
 
     recommendedEquips: {
         unitEquip: "Carrot's Gi",
-        equip1: "",
-        equip2: "",
+        equip1: "Shinigami Sword",
+        equip2: "Warrior Pole",
     },
 };
 
