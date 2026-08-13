@@ -390,7 +390,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   const traitCritChance = (breakdown.trait?.critChanceBonus || 0) * 100;
   const relicCritChance = (breakdown.relicCritChanceAdd || 0) * 100;
   const passiveCritChance = (breakdown.passiveCritChanceAdd || (breakdown.isReaper ? 0.40 : 0)) * 100;
-  // For Carrot, effectiveCritRate includes Battle Instinct's guaranteed 4th-hit bonus
+
   const displayCritRate = breakdown.isCarrot
     ? (breakdown.effectiveCritRate ?? breakdown.effCritChance ?? 0)
     : (breakdown.effCritChance || 0);
@@ -646,7 +646,6 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       const scaleMult = breakdown.effDamage > 0 ? (s.effDamage / breakdown.effDamage) : 0;
       const critMult = s.critAvgMult || breakdown.critAvgMult || 1.0;
 
-      // Summon Hit DMG Breakdown
       let intermediateRowsHtml = "";
       if (s.hasOwnUpgrades) {
         let sDmgAccum = s.baseDamage || 0;
@@ -676,7 +675,6 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           </div>`;
       }
 
-      // ── SUMMON SPA MATH BREAKDOWN STEP SEQUENCE ──
       const sBaseSpa = s.baseSpa || 1;
       let sSpaAccum = sBaseSpa;
       let sSpaRowsHtml = `
@@ -792,7 +790,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
             <div class="dps-section-hd color-summons">4. Direct Output &amp; DPS</div>
             <div class="dps-table">
               <div class="dps-table-row">
-                <span class="dps-table-lbl">Summon Output (${s.activeCount || 1} active)</span>
+                <span class="dps-table-lbl">Summon Output (${s.activeCount || 1} active / 1 Placement)</span>
                 <span class="dps-table-val font-mono">${Math.round(s.avgHitDamage || 0).toLocaleString()} &times; ${s.activeCount || 1} = ${Math.round((s.avgHitDamage || 0) * (s.activeCount || 1)).toLocaleString()}</span>
               </div>
               <div class="dps-table-row indented">
@@ -800,7 +798,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                 <span class="dps-table-val font-mono">${(s.effSpa || 1).toFixed(2)}s</span>
               </div>
               <div class="dps-table-row primary">
-                <span class="dps-table-lbl summons-highlight">Direct DPS</span>
+                <span class="dps-table-lbl summons-highlight">Direct DPS (1 Placement)</span>
                 <span class="dps-table-val font-mono summons-highlight">+${formatFullDPS(s.directDps)} DPS</span>
               </div>
             </div>
@@ -825,12 +823,12 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
         <div class="dps-panel-footer summons-footer">
           <div class="dps-summary-block" style="border-color: rgba(45, 212, 191, 0.25); background: rgba(45, 212, 191, 0.05); margin: 0;">
             <div class="dps-table-row">
-              <span class="dps-table-lbl color-summons">${s.name || "Summon"} DPS</span>
+              <span class="dps-table-lbl color-summons">${s.name || "Summon"} DPS (${s.activeCount || 1} Cubes / 1 Placement)</span>
               <span class="dps-table-val font-mono summons-highlight">${formatFullDPS(s.dps)} DPS</span>
             </div>
             <div class="dps-table-row divider"></div>
             <div class="dps-table-row primary">
-              <span class="dps-table-lbl combined-highlight">All Summons Total</span>
+              <span class="dps-table-lbl combined-highlight">All Summons Total (${(s.activeCount || 1) * placementCount} Cubes / ${placementCount} Placements)</span>
               <span class="dps-table-val font-mono combined-highlight">${formatFullDPS((breakdown.totalSummonDPS || 0) * placementCount)} DPS</span>
             </div>
           </div>
@@ -953,31 +951,31 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
               <span class="dps-table-val font-mono dot-highlight">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
             </div>
           ` : breakdown.isCrimson ? (() => {
-            const effDmg = breakdown.effDamage || 0;
-            const critM = breakdown.critAvgMult || 1;
-            const effSpaVal = breakdown.effSpa || 1;
-            
-            // Bleed
-            const bleedDmg = effDmg * 0.65;
-            const bleedIntervalMultiplier = Math.max(1, Math.ceil(6.0 / effSpaVal));
-            const bleedInterval = bleedIntervalMultiplier * effSpaVal;
-            const bleedDps = bleedDmg / bleedInterval;
-            
-            // Crimson Explode
-            const cExplodeBase = effDmg * 0.15;
-            const cExplodeDmg = cExplodeBase * critM;
-            const cExplodeIntervalMultiplier = Math.max(1, Math.ceil(15.0 / effSpaVal));
-            const cExplodeInterval = cExplodeIntervalMultiplier * effSpaVal;
-            const cExplodeDps = cExplodeDmg / cExplodeInterval;
-            
-            // Crimson Pool
-            const poolCount = breakdown.crimsonPoolCount || 0;
-            const poolBasePerPool = effDmg * 0.30;
-            const poolDmgPerPool = poolBasePerPool * critM;
-            const poolTotalDmg = poolCount * poolDmgPerPool;
-            const poolDps = poolTotalDmg / 6.0;
-            
-            return `
+        const effDmg = breakdown.effDamage || 0;
+        const critM = breakdown.critAvgMult || 1;
+        const effSpaVal = breakdown.effSpa || 1;
+
+        // Bleed
+        const bleedDmg = effDmg * 0.65;
+        const bleedIntervalMultiplier = Math.max(1, Math.ceil(6.0 / effSpaVal));
+        const bleedInterval = bleedIntervalMultiplier * effSpaVal;
+        const bleedDps = bleedDmg / bleedInterval;
+
+        // Crimson Explode
+        const cExplodeBase = effDmg * 0.15;
+        const cExplodeDmg = cExplodeBase * critM;
+        const cExplodeIntervalMultiplier = Math.max(1, Math.ceil(15.0 / effSpaVal));
+        const cExplodeInterval = cExplodeIntervalMultiplier * effSpaVal;
+        const cExplodeDps = cExplodeDmg / cExplodeInterval;
+
+        // Crimson Pool
+        const poolCount = breakdown.crimsonPoolCount || 0;
+        const poolBasePerPool = effDmg * 0.30;
+        const poolDmgPerPool = poolBasePerPool * critM;
+        const poolTotalDmg = poolCount * poolDmgPerPool;
+        const poolDps = poolTotalDmg / 6.0;
+
+        return `
               <div class="dps-table-row" style="margin-top: 6px; border-top: 1px solid rgba(197,37,37,0.25); padding-top: 6px;">
                 <span class="dps-table-lbl" style="color:#c52525; font-weight:700;">Bleed DoT</span>
               </div>
@@ -1043,7 +1041,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                 <span class="dps-table-val font-mono dot-highlight">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
               </div>
             `;
-          })() : `
+      })() : `
             <div class="dps-table-row indented">
               <span class="dps-table-lbl">Interval SPA</span>
               <span class="dps-table-val font-mono">${(breakdown.dotIntervalSPA || 1).toFixed(2)}s</span>
@@ -1063,25 +1061,25 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
         </div>
         <div class="dps-table">
           ${activeFuaBreakdowns.map(entry => {
-    const effSpaVal = breakdown.effSpa || 1;
-    const critMult = entry.critAvgMult || breakdown.critAvgMult || 1;
+        const effSpaVal = breakdown.effSpa || 1;
+        const critMult = entry.critAvgMult || breakdown.critAvgMult || 1;
 
-    if (breakdown.isCrow || entry.isStatusEffect) {
-      const storingAttacks = entry.storingAttacks || Math.ceil(12 / effSpaVal);
-      const directStoredDmg = entry.directStoredDmg || (storingAttacks * (breakdown.avgHitDamage || 0));
-      const dotStoredDmg = entry.dotStoredDmg || blackFireDotDmg;
-      const totalStoredDmg = entry.inputDamage || (directStoredDmg + dotStoredDmg);
-      const effectiveness = entry.illusionEffectiveness || 0.25;
-      const baseExplosion = entry.baseExplosionDamage || (totalStoredDmg * effectiveness);
-      const singleExplosionWithCrit = entry.explosionDamageWithCrit || (baseExplosion * critMult);
-      const enemiesHit = entry.enemiesHit || breakdown.crowEnemiesHit || 1;
-      const totalExplosionPerUnit = singleExplosionWithCrit * enemiesHit;
-      const fieldExplosionDmg = totalExplosionPerUnit * placementCount;
-      const cycleTime = entry.cycleTimeSeconds || (Math.ceil(22 / effSpaVal) * effSpaVal);
-      const singleDps = entry.dps || (totalExplosionPerUnit / cycleTime);
-      const fieldDps = singleDps * placementCount;
+        if (breakdown.isCrow || entry.isStatusEffect) {
+          const storingAttacks = entry.storingAttacks || Math.ceil(12 / effSpaVal);
+          const directStoredDmg = entry.directStoredDmg || (storingAttacks * (breakdown.avgHitDamage || 0));
+          const dotStoredDmg = entry.dotStoredDmg || blackFireDotDmg;
+          const totalStoredDmg = entry.inputDamage || (directStoredDmg + dotStoredDmg);
+          const effectiveness = entry.illusionEffectiveness || 0.25;
+          const baseExplosion = entry.baseExplosionDamage || (totalStoredDmg * effectiveness);
+          const singleExplosionWithCrit = entry.explosionDamageWithCrit || (baseExplosion * critMult);
+          const enemiesHit = entry.enemiesHit || breakdown.crowEnemiesHit || 1;
+          const totalExplosionPerUnit = singleExplosionWithCrit * enemiesHit;
+          const fieldExplosionDmg = totalExplosionPerUnit * placementCount;
+          const cycleTime = entry.cycleTimeSeconds || (Math.ceil(22 / effSpaVal) * effSpaVal);
+          const singleDps = entry.dps || (totalExplosionPerUnit / cycleTime);
+          const fieldDps = singleDps * placementCount;
 
-      return `
+          return `
                 <div class="dps-table-row">
                   <span class="dps-table-lbl">Illusion Storing Window / SPA</span>
                   <span class="dps-table-val font-mono">12.0s Storing / ${effSpaVal.toFixed(2)}s SPA</span>
@@ -1127,11 +1125,11 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                   <span class="dps-table-val font-mono damage-highlight">+${formatFullDPS(fieldDps)} DPS</span>
                 </div>
               `;
-    }
+        }
 
-    if (entry.isElfSpell) {
-      const spellInterval = entry.cycleInterval || (7 * effSpaVal);
-      return `
+        if (entry.isElfSpell) {
+          const spellInterval = entry.cycleInterval || (7 * effSpaVal);
+          return `
                 <div class="dps-table-row">
                   <span class="dps-table-lbl">${formatPassiveText(entry.name)}</span>
                   <span class="dps-table-val font-mono">${Math.round(entry.averageFollowUpHit).toLocaleString()} DMG</span>
@@ -1157,11 +1155,11 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                   <span class="dps-table-val font-mono damage-highlight">+${formatFullDPS(entry.dps)} DPS</span>
                 </div>
               `;
-    }
+        }
 
-    if (entry.isMimicryFua) {
-      const fuaInterval = entry.intervalSpa || (3 * effSpaVal);
-      return `
+        if (entry.isMimicryFua) {
+          const fuaInterval = entry.intervalSpa || (3 * effSpaVal);
+          return `
                 <div class="dps-table-row">
                   <span class="dps-table-lbl">${entry.name}</span>
                   <span class="dps-table-val font-mono">${Math.round(entry.averageFollowUpHit).toLocaleString()} DMG</span>
@@ -1192,16 +1190,15 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                   <span class="dps-table-val font-mono damage-highlight">+${formatFullDPS(entry.dps)} DPS</span>
                 </div>
               `;
-    }
+        }
 
-    if (entry.isTimedFua) {
-      // Carrot Instant Relocation timed FUA
-      const fuaMult = Math.round((entry.effectiveFollowUpDamage / (entry.inputDamage || 1)) * 100);
-      const animTime = entry.animTime || 4.9;
-      const fuaInterval = entry.relocationInterval || 20;
-      const totalCycleTime = entry.totalCycleTime || (fuaInterval + animTime);
-      const directAttacksPerCycle = fuaInterval / effSpaVal;
-      return `
+        if (entry.isTimedFua) {
+          const fuaMult = Math.round((entry.effectiveFollowUpDamage / (entry.inputDamage || 1)) * 100);
+          const animTime = entry.animTime || 4.9;
+          const fuaInterval = entry.relocationInterval || 20;
+          const totalCycleTime = entry.totalCycleTime || (fuaInterval + animTime);
+          const directAttacksPerCycle = fuaInterval / effSpaVal;
+          return `
                 <div class="dps-table-row">
                   <span class="dps-table-lbl">Instant Relocation (${fuaMult}% of Base DMG)</span>
                   <span class="dps-table-val font-mono">${Math.round(entry.effectiveFollowUpDamage).toLocaleString()} DMG</span>
@@ -1231,15 +1228,15 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                   <span class="dps-table-val font-mono damage-highlight">+${formatFullDPS(entry.dps)} DPS</span>
                 </div>
               `;
-    }
+        }
 
-    const fuaBase = entry.effectiveFollowUpDamage || entry.inputDamage;
-    const avgHit = entry.averageFollowUpHit || (fuaBase * critMult);
-    const interval = entry.roarInterval || entry.cycleInterval || entry.intervalSpa || (effSpaVal * 3);
-    const pct = entry.inputDamage > 0 ? Math.round((fuaBase / entry.inputDamage) * 100) : 0;
-    const formulaText = pct > 0 ? ` (${pct}% of ${Math.round(entry.inputDamage).toLocaleString()})` : "";
+        const fuaBase = entry.effectiveFollowUpDamage || entry.inputDamage;
+        const avgHit = entry.averageFollowUpHit || (fuaBase * critMult);
+        const interval = entry.roarInterval || entry.cycleInterval || entry.intervalSpa || (effSpaVal * 3);
+        const pct = entry.inputDamage > 0 ? Math.round((fuaBase / entry.inputDamage) * 100) : 0;
+        const formulaText = pct > 0 ? ` (${pct}% of ${Math.round(entry.inputDamage).toLocaleString()})` : "";
 
-    return `
+        return `
               <div class="dps-table-row">
                 <span class="dps-table-lbl">${formatPassiveText(entry.name || `FUA ${entry.index + 1}`)} Base DMG${formulaText}</span>
                 <span class="dps-table-val font-mono">${Math.round(fuaBase).toLocaleString()} DMG</span>
@@ -1257,7 +1254,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                 <span class="dps-table-val font-mono damage-highlight">+${formatFullDPS(entry.dps)} DPS</span>
               </div>
             `;
-  }).join("")}
+      }).join("")}
           ${!breakdown.isCrow ? `
           <div class="dps-table-row divider"></div>
           <div class="dps-table-row primary">
@@ -1316,7 +1313,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
         <div class="dps-section-hd">Placement DPS Total</div>
         <div class="dps-table">
           <div class="dps-table-row">
-            <span class="dps-table-lbl">Single Placement DPS</span>
+            <span class="dps-table-lbl">Single Placement DPS (1 Unit + ${breakdown.summonCount || 2} Summons)</span>
             <span class="dps-table-val font-mono dps-placement-single">${formatFullDPS(breakdown.singlePlacementDps)} DPS</span>
           </div>
           <div class="dps-table-row indented">
@@ -1335,7 +1332,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           </div>` : ""}
           ${(breakdown.totalSummonDPS || 0) > 0 ? `
           <div class="dps-table-row indented">
-            <span class="dps-table-lbl">Summons Total Field DPS</span>
+            <span class="dps-table-lbl">Summons Total Field DPS (${(breakdown.summonCount || 2) * placementCount} Summons / ${placementCount} Placements)</span>
             <span class="dps-table-val font-mono">+${formatFullDPS((breakdown.totalSummonDPS || 0) * placementCount)} DPS</span>
           </div>` : ""}
           <div class="dps-table-row primary total-row">
@@ -1434,11 +1431,11 @@ export async function DpsCard(unit, options = {}) {
   let carrotTransformation = isCarrot ? (unit.carrotTransformation !== undefined ? !!unit.carrotTransformation : true) : false;
   let carrotInstantRelocation = isCarrot ? (unit.carrotInstantRelocation !== undefined ? !!unit.carrotInstantRelocation : true) : false;
   let isCompMode = options.isCompMode !== undefined ? !!options.isCompMode : (unit.isCompMode !== undefined ? !!unit.isCompMode : false);
-  // Bioinsect state
+
   let bioinsectForm = isBioinsect ? (unit.bioinsectForm || "imperfect") : "base";
   let bioinsectResetStacks = isBioinsect ? Math.max(0, Math.min(15, parseInt(unit.bioinsectResetStacks || 0, 10) || 0)) : 0;
   let bioinsectCopiedUnitId = isBioinsect ? (unit.bioinsectCopiedUnitId || "puppet") : "";
-  // Write the default back immediately so dps-math picks it up on the first render
+
   if (isBioinsect && !unit.bioinsectCopiedUnitId) {
     unit.bioinsectCopiedUnitId = "puppet";
   }
@@ -1447,7 +1444,6 @@ export async function DpsCard(unit, options = {}) {
   let prodigyFatherAndSonActive = isProdigy ? (unit.prodigyFatherAndSonActive !== undefined ? !!unit.prodigyFatherAndSonActive : false) : false;
   let prodigyStatusEffects = isProdigy ? Math.max(0, Math.min(100, parseInt(unit.prodigyStatusEffects || 0, 10) || 0)) : 0;
 
-  // Write defaults back immediately so dps-math picks them up on the first render
   if (isCrow && unit.crowEnemiesHit === undefined) unit.crowEnemiesHit = 5;
   if (isVegetable && unit.awakenedPride === undefined) unit.awakenedPride = true;
   if (isCarrot && unit.carrotTransformation === undefined) unit.carrotTransformation = true;
@@ -1888,11 +1884,8 @@ export async function DpsCard(unit, options = {}) {
     renderCalculations();
   });
 
-  // ── Bioinsect controls ──
   if (isBioinsect && bioinsectUnitSelect) {
-    // Import all units to populate the selector
     import("../../data/units.js").then(({ units: allUnitsForSelect }) => {
-      // Only add units that are not Bioinsect itself
       allUnitsForSelect
         .filter(u => u.id !== unit.id)
         .forEach(u => {

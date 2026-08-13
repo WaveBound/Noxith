@@ -280,7 +280,8 @@ img {
 /* Keyword Colors */
 .p-kw.p-reg-attack>span,
 .p-kw.p-prodigy-meter>span,
-.p-kw.p-prodigy-transform>span {
+.p-kw.p-prodigy-transform>span,
+.p-kw.p-cubert-meter>span {
   --kw-color: #dadada;
   color: #dadada !important;
   -webkit-text-fill-color: #dadada !important;
@@ -366,12 +367,23 @@ img {
 .p-kw.p-rage-unleashed>span,
 .p-kw.p-precision-slash>span,
 .p-kw.p-quick-assist>span {
-  --kw-color: #00d2ee;
-  color: #00d2ee !important;
-  -webkit-text-fill-color: #00d2ee !important;
+  --kw-color: #00bcd4;
+  color: #00bcd4 !important;
+  -webkit-text-fill-color: #00bcd4 !important;
   font-weight: 700 !important;
   text-decoration: underline !important;
-  text-decoration-color: #00d2ee !important;
+  text-decoration-color: #00bcd4 !important;
+  text-underline-offset: 2px !important;
+}
+
+.p-kw.p-cubert-cubes>span,
+.p-kw.p-cubert-cube>span {
+  --kw-color: #00e5b9;
+  color: #00e5b9 !important;
+  -webkit-text-fill-color: #00e5b9 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #00e5b9 !important;
   text-underline-offset: 2px !important;
 }
 

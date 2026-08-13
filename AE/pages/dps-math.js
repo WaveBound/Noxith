@@ -176,7 +176,6 @@ export const TRAIT_DEFINITIONS = {
 export function getSummonsData(unit) {
   if (!unit) return null;
 
-  // Bioinsect base form has no summons
   if (unit._bioinsectSuppressSummon) return null;
 
   let data = unit.summons ||
@@ -258,7 +257,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isCompMode = unit ? !!unit.isCompMode : false;
   const bioinsectForm = isBioinsect ? (unit.bioinsectForm || "imperfect") : "base";
   const bioinsectResetStacks = isBioinsect ? Math.max(0, parseInt(unit.bioinsectResetStacks || 0, 10) || 0) : 0;
-  // Default copied unit to Puppet (Telekinetic) if none set
+
   if (isBioinsect && !unit.bioinsectCopiedUnitId) {
     unit.bioinsectCopiedUnitId = "puppet";
   }
@@ -277,11 +276,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     passiveDamageMult += 0.50;
   }
   if (isBioinsect) {
-    // Genetic Code passive: +30% range bonus
     passiveRangeMult += 0.30;
 
-    // Bioinsect Bio Reset stacks: each stack = +1% damage (+5% damage if Mechanical Wings equipped) [INFINITE SCALE]
-    // Range increases by 1% per stack up to 15% max (+0.15 max)
     if (bioinsectResetStacks > 0) {
       const relics = getUnitRelicList(unit);
       const hasMechanicalWings = relics.some(r => r.name === "Mechanical Wings");
@@ -327,15 +323,11 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     base.dotName = "Black Fire";
   }
 
-  // ── Bioinsect: derive base damage from a copied unit's raw base stat × 50% ──
-  // The copied unit's damage is taken BEFORE level or Z stat scaling.
-  // Bioinsect's own level 50 + Z stat then apply on top through the normal pipeline.
   if (isBioinsect) {
     const copiedId = unit.bioinsectCopiedUnitId;
     const copiedUnit = copiedId ? allUnits.find(u => u.id === copiedId) : null;
     if (copiedUnit) {
       const copiedBase = getUnitBaseValues(copiedUnit);
-      // Raw final-upgrade base damage (no level mult, no Z stat)
       base.damage = copiedBase.damage * 0.5;
     } else {
       base.damage = 0;
@@ -416,7 +408,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
 
   const hasWarriorPole = relics.some(r => r.name === "Warrior Pole");
   const isTransformed = (isCarrot && carrotTransformation) ||
-    (isVegetable) || // Vegetable Prince is transformed
+    (isVegetable) ||
     (isBioinsect && bioinsectForm !== "base") ||
     (isProdigy && prodigyRageUnleashed);
 
@@ -436,7 +428,12 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     effSpa = effSpa * (1 + passiveSpaMult);
   }
 
-  effSpa = Math.max(0.1, effSpa);
+  const mainAttackTime = parseNumber(base.attackTime, 0);
+  if (mainAttackTime > 0) {
+    effSpa = Math.max(mainAttackTime, effSpa);
+  } else {
+    effSpa = Math.max(0.1, effSpa);
+  }
 
   let effRange = (base.range || 0) * (1 + (trait.rangeBonus || 0)) * (1 + relicRangeMult);
 
@@ -457,9 +454,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const rawCritChance = Math.min(1.0, baseCritRate + (trait.critChanceBonus || 0) + relicCritChanceAdd + passiveCritChanceAdd);
   const effCritChance = isCompMode ? (rawCritChance >= 0.25 ? rawCritChance : 0) : rawCritChance;
   const effCritDamage = baseCritDamage + (trait.critDamageBonus || 0) + relicCritDamageAdd + passiveCritDamageAdd;
-  
-  // Battle Instinct: every 4th attack is guaranteed crit -> effective crit rate is 0.75 * effCritChance + 0.25
-  const battleInstinctBonusCrit = isCarrot ? 0.25 * (1 - effCritChance) : 0; // extra crit contribution from guaranteed 4th hit
+
+  const battleInstinctBonusCrit = isCarrot ? 0.25 * (1 - effCritChance) : 0;
   const effectiveCritRate = isCarrot ? Math.min(1.0, (0.75 * effCritChance) + 0.25) : effCritChance;
   const critAvgMult = 1 + effectiveCritRate * effCritDamage;
 
@@ -613,7 +609,6 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     const dotStoredDmg = blackFireDotDamage;
     const totalStoredDmg = directStoredDmg + dotStoredDmg;
 
-    // Illusion Explosion scales purely on stored damage & effectiveness
     const baseExplosionDamage = totalStoredDmg * illusionEffectiveness;
     const explosionDamageWithCrit = baseExplosionDamage * critAvgMult;
     const totalExplosionPerUnit = explosionDamageWithCrit * enemiesHit;
@@ -680,7 +675,6 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
 
     base.dotName = "Crimson & Bleed";
   } else if (isRazorjaw) {
-    // Roar: every 10s, 35% DMG AoE (crits included)
     unitDirectDPS = avgHitDamage / effSpa;
     unitDoTDPS = (base.dotMultiplier || 0) > 0 ? (dotDamage / dotIntervalSPA) : 0;
 
@@ -708,7 +702,6 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     unitDirectDPS = avgHitDamage / effSpa;
     unitDoTDPS = 0;
 
-    // Suppress summon in base form; summon only applies in imperfect/semiperfect/perfect
     if (bioinsectForm === "base") {
       unit._bioinsectSuppressSummon = true;
     } else {
@@ -723,10 +716,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
       const fuaInterval = 20;
       const relocationFuaDmg = effDamage * fuaMult;
       const relocationAvgHit = relocationFuaDmg * critAvgMult;
-      
+
       const animTime = base.attackTime > 0 ? base.attackTime : 4.9;
-      // When Instant Relocation triggers, Carrot performs an extra attack with animation time (animTime).
-      // Effective direct SPA accounting for extra animation time over the 20s CD cycle:
       const totalCycleTime = fuaInterval + animTime;
       const directAttacksPerCycle = fuaInterval / effSpa;
       const totalDirectDamageInCycle = directAttacksPerCycle * avgHitDamage;
@@ -755,12 +746,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
       unitDirectDPS = avgHitDamage / effSpa;
     }
   } else if (isProdigy) {
-    // Prodigy (Rage) calculations
     unitDoTDPS = 0;
 
-    // 1) Hidden Potential / Rage Unleashed FUA:
-    // Base form: every 4th attack deals 25% dmg (with Relic Mentors Cape: 50% every 3 attacks)
-    // Transformed (Rage Unleashed): 75% every 3 attacks (with or without Relic)
     const hasMentorsCape = relics.some(r => r.name === "Mentors Cape");
     let prodigyFuaMult = 0.25;
     let prodigyFuaAttacksNeeded = 4;
@@ -778,24 +765,19 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     const prodigyFuaAvgHit = prodigyFuaRawDmg * critAvgMult;
     const prodigyFuaDps = prodigyFuaAvgHit / prodigyFuaInterval;
 
-    // 2) Father and Son Spirit Energy Ability: 75% DMG per 1 second
     let fatherSonDps = 0;
     let fatherSonAvgHit = 0;
     if (prodigyFatherAndSonActive) {
       const fatherSonRawDmg = effDamage * 0.75;
       fatherSonAvgHit = fatherSonRawDmg * critAvgMult;
-      fatherSonDps = fatherSonAvgHit / 1.0; // 1s interval
+      fatherSonDps = fatherSonAvgHit / 1.0;
     }
 
-    // 3) Enemy Status Effects damage scaling (+10% damage per status effect, max 100 effects = +1000% damage)
-    // Note: status effects increase overall damage output by statusCount * 10%
     const statusDmgBonus = prodigyStatusEffects * 0.10;
     const statusDmgMult = 1 + statusDmgBonus;
 
-    // Direct DPS = (avgHitDamage * statusDmgMult) / effSpa
     unitDirectDPS = (avgHitDamage * statusDmgMult) / effSpa;
 
-    // Combine FUAs into fuaBreakdowns
     fuaDps = (prodigyFuaDps + fatherSonDps) * statusDmgMult;
     fuaBreakdowns = [
       {
@@ -913,9 +895,15 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
       }
 
       let baseSummonSpa = sData.intervalSPA || sData.maxSpa || sData.baseSpa || (base.spa || 6);
+      let sAttackTime = parseNumber(sData.attackTime, 0);
       let sEffSpa = baseSummonSpa * (1 + (trait.spaBonus || 0)) * (1 + relicSpaMult);
       if (statMode === "Z") sEffSpa *= 0.85;
-      sEffSpa = Math.max(0.1, sEffSpa);
+
+      if (sAttackTime > 0) {
+        sEffSpa = Math.max(sAttackTime, sEffSpa);
+      } else {
+        sEffSpa = Math.max(0.1, sEffSpa);
+      }
 
       const sAvgHit = sEffDmg * critAvgMult;
       const sSinglePlacementDps = (sAvgHit * singlePlacementCount) / sEffSpa;

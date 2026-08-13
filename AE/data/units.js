@@ -15,6 +15,7 @@ import bioinsect from "./units/bioinsect.js";
 import carrotunleashed from "./units/carrotunleashed.js";
 import prodigyrage from "./units/prodigyrage.js";
 import thedrinkjuicebox from "./units/thedrinkjuicebox.js";
+import cubert from "./units/cubert.js";
 
 import { getRelicStatsByName } from "./relicstats.js";
 import { relicImgByName } from "../icons/icons.js";
@@ -37,6 +38,7 @@ const rawUnits = [
   carrotunleashed,
   prodigyrage,
   thedrinkjuicebox,
+  cubert,
 ];
 
 function formatRange(v) {

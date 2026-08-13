@@ -227,6 +227,9 @@ export function formatPassiveText(text) {
     out = out.replace(/Transformed/gi, "@@TRD@@");
     out = out.replace(/Transforms/gi, "@@TRS@@");
     out = out.replace(/Transform\b/gi, "@@TRM@@");
+    out = out.replace(/Cubert[\s\xA0]+Cubes/gi, "@@CBCS@@");
+    out = out.replace(/Cubert[\s\xA0]+Cube/gi, "@@CBC@@");
+    out = out.replace(/Cubert[\s\xA0]+Meter/gi, "@@CBM@@");
     out = out.replace(/Patience/gi, "@@PAT@@");
 
     out = out.replace(/Rewind/gi, "@@RW@@");
@@ -320,6 +323,9 @@ export function formatPassiveText(text) {
     out = out.replace(/@@GAS@@/g, `<span class="p-kw p-reg-attack"><span>Golden Ascension</span></span>`);
     out = out.replace(/@@DOT@@/g, `<span class="p-kw p-dot"><span>DOT</span></span>`);
     out = out.replace(/@@STE@@/g, `<span class="p-kw p-reg-attack"><span>Status Effect</span></span>`);
+    out = out.replace(/@@CBCS@@/g, `<span class="p-kw p-cubert-cubes"><span>Cubert Cubes</span></span>`);
+    out = out.replace(/@@CBC@@/g, `<span class="p-kw p-cubert-cube"><span>Cubert Cube</span></span>`);
+    out = out.replace(/@@CBM@@/g, `<span class="p-kw p-cubert-meter"><span>Cubert Meter</span></span>`);
     out = out.replace(/@@TRD@@/g, `<span class="p-kw p-reg-attack"><span>Transformed</span></span>`);
     out = out.replace(/@@TRS@@/g, `<span class="p-kw p-reg-attack"><span>Transforms</span></span>`);
     out = out.replace(/@@TRM@@/g, `<span class="p-kw p-reg-attack"><span>Transform</span></span>`);
@@ -387,6 +393,9 @@ if (typeof window !== "undefined") {
         if (target.classList.contains("p-dismembered")) return toAbsoluteUrl("icons/info/DismemberedInfo.png");
         if (target.classList.contains("p-puppet-mark")) return toAbsoluteUrl("icons/info/PuppetMarkInfo.png");
         if (target.classList.contains("p-rewind")) return toAbsoluteUrl("icons/info/RewindInfo.png");
+        if (target.classList.contains("p-cubert-cubes")) return toAbsoluteUrl("icons/info/CubertCubesInfo.png");
+        if (target.classList.contains("p-cubert-cube")) return toAbsoluteUrl("icons/info/CubertCubeInfo.png");
+        if (target.classList.contains("p-cubert-meter")) return toAbsoluteUrl("icons/info/CubertMeterInfo.png");
         return "";
     }
 
