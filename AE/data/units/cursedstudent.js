@@ -106,7 +106,7 @@ export const unit = {
     recommendedEquips: {
         unitEquip: "Promise Ring",
         equip1: "Shinigami Sword",
-        equip2: "Red Finger",
+        equip2: "Warrior Axe",
     },
 
     statusEffects: [

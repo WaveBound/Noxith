@@ -112,7 +112,7 @@ export const unit = {
     recommendedEquips: {
         unitEquip: "Hair Bells",
         equip1: "Shinigami Sword",
-        equip2: "Katana",
+        equip2: "Warrior Pole",
     },
 
     statusEffects: [

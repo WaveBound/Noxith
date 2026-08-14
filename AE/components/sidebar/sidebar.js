@@ -3,7 +3,6 @@
 // Emits a "navigate" CustomEvent on window with { detail: { id } } when a tab is clicked.
 
 import { getOpenTabs, getActiveTab, setActiveTab, closeTab } from "../tabs/tabs.js";
-import { IS_TRAITS_PUBLISHED } from "../../data/traits.js";
 
 const NAV_ITEMS = [
   {
@@ -22,20 +21,9 @@ const NAV_ITEMS = [
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
   },
   {
-    id: "traits",
-    label: "Traits",
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/></svg>`,
-  },
-  {
     id: "relics",
     label: "Relics",
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
-  },
-  {
-    id: "modes",
-    label: "Modes",
-    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
-    badge: "soon",
   },
 ];
 
@@ -53,8 +41,7 @@ export async function initSidebar({ mountEl, activeId = "units", getUnitById }) 
   const node = template.content.cloneNode(true);
 
   const nav = node.querySelector("#sidebar-nav");
-  const visibleNavItems = NAV_ITEMS.filter(item => item.id !== "traits" || IS_TRAITS_PUBLISHED);
-  visibleNavItems.forEach((item) => {
+  NAV_ITEMS.forEach((item) => {
     const el = document.createElement("button");
     el.className = "nav-item";
     el.dataset.navId = item.id;

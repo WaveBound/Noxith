@@ -135,9 +135,24 @@ function normalize(u) {
     : null;
   const finalAttackType = maxPlacement?.aoe || s.attackType || s.archetype || "—";
 
+  const updateMap = {
+    thedrinkjuicebox: "1.0",
+    vegetableprince: "1.0",
+    prodigyrage: "1.0",
+    carrotunleashed: "1.0",
+    bioinsect: "1.0",
+    cubert: "1.0",
+    darkmagesovereign: "0.5",
+    razorjawhunter: "0.5",
+    crowblackfire: "0.5",
+  };
+
+  const unitUpdate = updateMap[u.id] || "Release";
+
   return {
     id: u.id,
     name: u.name,
+    update: unitUpdate,
     image: u.image || "assets/placeholder.svg",
     ascend: u.ascend || 0,
     tiers: u.tiers || [],

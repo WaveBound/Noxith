@@ -2,21 +2,18 @@ import { initSidebar, setActiveNav } from "../components/sidebar/sidebar.js";
 import { renderHeader, setBreadcrumb } from "../components/page-header/header.js";
 import { openTab, getActiveTab } from "../components/tabs/tabs.js";
 import { UnitsPage } from "../pages/units-page.js";
-import { TraitsPage } from "../pages/traits-page.js";
 import { RelicsPage } from "../pages/relics-page.js";
-import { ModesPage } from "../pages/modes-page.js";
 import { HomePage } from "../pages/home-page.js";
 import { DpsPage } from "../pages/dps-page.js";
 import { UnitInfoPage } from "../components/unit-info/unit-info-page.js";
 import { getUnitById } from "../data/units.js";
 import { getItem, setItem } from "./store.js";
-import { IS_TRAITS_PUBLISHED } from "../data/traits.js";
 
 const SECTION_KEY = "active-section";
 
 const initialSection = getItem(SECTION_KEY, "home");
 const state = {
-  section: (initialSection === "traits" && !IS_TRAITS_PUBLISHED) ? "home" : initialSection,
+  section: (initialSection === "traits" || initialSection === "modes") ? "home" : initialSection,
   query: "",
 };
 
@@ -53,16 +50,9 @@ async function renderContent() {
   } else if (state.section === "dps") {
     setBreadcrumb("dps");
     content = await DpsPage(state.query);
-  } else {
-    setBreadcrumb(state.section);
-
-    if (state.section === "traits") {
-      content = await TraitsPage(state.query);
-    } else if (state.section === "relics") {
-      content = await RelicsPage(state.query);
-    } else {
-      content = await ModesPage();
-    }
+  } else if (state.section === "relics") {
+    setBreadcrumb("relics");
+    content = await RelicsPage(state.query);
   }
 
   if (myToken !== renderToken) return;
@@ -82,7 +72,6 @@ function goToSection(id) {
 }
 
 window.addEventListener("navigate", (e) => {
-  if (e.detail.id === "traits" && !IS_TRAITS_PUBLISHED) return;
   goToSection(e.detail.id);
 });
 

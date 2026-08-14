@@ -410,7 +410,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isTransformed = (isCarrot && carrotTransformation) ||
     (isVegetable) ||
     (isBioinsect && bioinsectForm !== "base") ||
-    (isProdigy && prodigyRageUnleashed);
+    (isProdigy && prodigyRageUnleashed) ||
+    (isEighthSword && berserkState);
 
   let totalPassiveDamageBonus = (shinigamiActive ? 0.15 : 0) + (hasWarriorPole && isTransformed ? 0.20 : 0) + passiveDamageMult;
   const preShinigamiEffDamage = effDamage * (passiveDamageMult > 0 ? (1 + passiveDamageMult) : 1);
