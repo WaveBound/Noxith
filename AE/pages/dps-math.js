@@ -263,7 +263,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   }
 
   const prodigyRageUnleashed = isProdigy ? (unit.prodigyRageUnleashed !== undefined ? !!unit.prodigyRageUnleashed : true) : false;
-  const prodigyStatusEffects = isProdigy ? Math.max(0, Math.min(100, parseInt(unit.prodigyStatusEffects || 0, 10) || 0)) : 0;
+  const prodigyStatusEffects = isProdigy ? Math.max(0, Math.min(10, parseInt(unit.prodigyStatusEffects || 0, 10) || 0)) : 0;
   const prodigyFatherAndSonActive = isProdigy ? !!unit.prodigyFatherAndSonActive : false;
 
   let passiveSpaMult = isReaper ? -0.10 : (isLadyGiant && giantForm ? 0.25 : (isEighthSword && berserkState ? -0.10 : 0));

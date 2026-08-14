@@ -80,7 +80,7 @@ export const unit = {
         },
         {
             name: "Unyielding Spirit",
-            desc: `On Regular Attack against an enemy with a Status Effect:<br>- Deal 10% increased damage per stack of each Status Effect (Cap: 100)<br>If the Status Effect is a DOT:<br>- Refresh the duration<br>- Change the source to this unit<br>- This can only trigger once per DOT type per enemy`,
+            desc: `On Regular Attack against an enemy with a Status Effect:<br>- Deal 10% increased damage per stack of each Status Effect (Cap: 100%)<br>If the Status Effect is a DOT:<br>- Refresh the duration<br>- Change the source to this unit<br>- This can only trigger once per DOT type per enemy`,
         },
         {
             name: "Rage Unleashed",

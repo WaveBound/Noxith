@@ -1442,7 +1442,7 @@ export async function DpsCard(unit, options = {}) {
 
   let prodigyRageUnleashed = isProdigy ? (unit.prodigyRageUnleashed !== undefined ? !!unit.prodigyRageUnleashed : true) : false;
   let prodigyFatherAndSonActive = isProdigy ? (unit.prodigyFatherAndSonActive !== undefined ? !!unit.prodigyFatherAndSonActive : false) : false;
-  let prodigyStatusEffects = isProdigy ? Math.max(0, Math.min(100, parseInt(unit.prodigyStatusEffects || 0, 10) || 0)) : 0;
+  let prodigyStatusEffects = isProdigy ? Math.max(0, Math.min(10, parseInt(unit.prodigyStatusEffects || 0, 10) || 0)) : 0;
 
   if (isCrow && unit.crowEnemiesHit === undefined) unit.crowEnemiesHit = 5;
   if (isVegetable && unit.awakenedPride === undefined) unit.awakenedPride = true;
@@ -1850,7 +1850,7 @@ export async function DpsCard(unit, options = {}) {
   const commitProdigyStatus = () => {
     if (!prodigyStatusInput) return;
     prodigyStatusInput.value = prodigyStatusInput.value.replace(/[^\d]/g, "");
-    const val = Math.max(0, Math.min(100, parseInt(prodigyStatusInput.value || "0", 10) || 0));
+    const val = Math.max(0, Math.min(10, parseInt(prodigyStatusInput.value || "0", 10) || 0));
     prodigyStatusInput.value = String(val);
     if (prodigyStatusBadge) {
       prodigyStatusBadge.textContent = `(+${val * 10}%)`;
