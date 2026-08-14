@@ -7,7 +7,7 @@ export const unit = {
     archetype: "Physical",
 
     stats: {
-        recommendedTrait: "Primordial",
+        recommendedTrait: "Forsaken",
         element: "Gale",
         archetype: "Physical",
         damage: "2,572",
@@ -76,7 +76,7 @@ export const unit = {
     passives: [
         {
             name: "Battle Instinct",
-            desc: `Every <b>4</b> non-<b>Critical Attacks</b>:<br>- Next <b>Regular Attack</b> will be a guaranteed <b>Critical Attack</b>`,
+            desc: `Every <b>3</b> non-<b>Critical Attacks</b>:<br>- Next <b>Regular Attack</b> will be a guaranteed <b>Critical Attack</b>`,
         },
         {
             name: "Limitless Warrior",
