@@ -315,6 +315,16 @@ img {
   --kw-color: #ff7b00;
 }
 
+.p-kw.p-fighting-spirit>span {
+  --kw-color: #ff8c00;
+  color: #ff8c00 !important;
+  -webkit-text-fill-color: #ff8c00 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #ff8c00 !important;
+  text-underline-offset: 2px !important;
+}
+
 .p-kw.p-stun>span,
 .p-kw.p-slow>span,
 .p-kw.p-stagger>span,

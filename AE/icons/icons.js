@@ -200,6 +200,7 @@ export function formatPassiveText(text) {
     out = out.replace(/Taken[\s\xA0]+Down/gi, "@@TKD@@");
     out = out.replace(/Bio[\s\xA0]+Gel/gi, "@@BGEL@@");
     out = out.replace(/\bBoss\b/g, "@@BSS@@");
+    out = out.replace(/Carrot[\s\xA0]+Transformation/gi, "@@CT@@");
     out = out.replace(/Fighting[\s\xA0]+Spirit/gi, "@@FSP@@");
     out = out.replace(/Critical[\s\xA0]+Attacks/gi, "@@CAS@@");
     out = out.replace(/Critical[\s\xA0]+Attack/gi, "@@CAK@@");
@@ -306,7 +307,8 @@ export function formatPassiveText(text) {
     out = out.replace(/@@PMT@@/g, `<span class="p-kw p-prodigy-meter"><span>Prodigy Meter</span></span>`);
     out = out.replace(/@@RLC@@/g, `<span class="p-kw p-relocate"><span>Relocate</span></span>`);
     out = out.replace(/@@DBF@@/g, `<span class="p-kw p-debuffed"><span>Debuffed</span></span>`);
-    out = out.replace(/@@FSP@@/g, `<span class="p-kw p-reg-attack"><span>Fighting Spirit</span></span>`);
+    out = out.replace(/@@FSP@@/g, `<span class="p-kw p-fighting-spirit"><span>Fighting Spirit</span></span>`);
+    out = out.replace(/@@CT@@/g, `<span class="p-kw p-fighting-spirit"><span>Carrot Transformation</span></span>`);
     out = out.replace(/@@BSS@@/g, `<span class="p-kw p-boss"><span>Boss</span></span>`);
     out = out.replace(/@@BGEL@@/g, `<span class="p-kw p-bio-gel"><span>Bio Gel</span></span>`);
     out = out.replace(/@@TKD@@/g, `<span class="p-kw p-taken-down"><span>Taken Down</span></span>`);
