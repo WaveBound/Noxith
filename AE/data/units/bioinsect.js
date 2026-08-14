@@ -37,7 +37,7 @@ export const unit = {
         },
         {
             name: "Genetic Code",
-            desc: `In Imperfect form:<br>- Copy <b>50%</b> base damage of the strongest unit in range<br>- Increase the strongest unit in range's damage by <b>10%</b><br>In Semiperfect form:<br>- This unit gains <b>Bio Gel</b> on attack<br>- Unlock <b>Genetic Duplication</b><br><b>Bio Gel</b> will:<br>- <b>Slow</b> enemies by <b>60%</b> for <b>5</b> seconds<br>- <b>Stun</b> enemies for <b>3</b> seconds on expiry<br>In Perfect form:<br>Unlock <b>Bio Reset</b><br>On <b>Takedown</b> of an enemy inflicted with <b>Bio Gel</b>:<br>- Increase this unit's range by <b>0.2%</b> (Capacity: <b>30%</b>)<br>- Increase this unit's AoE size by <b>0.4%</b> (Capacity: <b>20%</b>)`,
+            desc: `In Imperfect form:<br>- Copy <b>50%</b> base damage of the strongest unit in range<br><br>In Semiperfect form:<br>- This unit gains <b>Bio Gel</b> on attack<br>- Unlock <b>Genetic Duplication</b><br><b>Bio Gel</b> will:<br>- <b>Slow</b> enemies by <b>60%</b> for <b>5</b> seconds<br>- <b>Stun</b> enemies for <b>3</b> seconds on expiry<br>In Perfect form:<br>Unlock <b>Bio Reset</b><br>On <b>Takedown</b> of an enemy inflicted with <b>Bio Gel</b>:<br>- Increase this unit's range by <b>0.2%</b> (Capacity: <b>30%</b>)<br>- Increase this unit's AoE size by <b>0.4%</b> (Capacity: <b>20%</b>)`,
         },
     ],
 
@@ -45,7 +45,7 @@ export const unit = {
         {
             name: "Genetic Duplication",
             cooldown: "PerUnit Cooldown",
-            desc: `On activation:<br>Summon <b>1 Mini Bioinsect</b> at this unit's position (Capacity: <b>1</b>)<br><b>Mini Bioinsect</b> will:<br>- Take <b>35%</b> of this unit's current damage as its own damage<br>- Have <b>100%</b> of this unit's current SPA<br>- Have <b>100%</b> of this unit's current range as its range<br>- Increase the damage of strongest unit in range by <b>10%</b><br><b>Mini Bioinsect</b> is permanently in Imperfect form, and does not have passives or abilities.`,
+            desc: `On activation:<br>Summon <b>1 Mini Bioinsect</b> at this unit's position (Capacity: <b>1</b>)<br><b>Mini Bioinsect</b> will:<br>- Take <b>35%</b> of this unit's current damage as its own damage<br>- Have <b>100%</b> of this unit's current SPA<br>- Have <b>100%</b> of this unit's current range as its range<br><b>Mini Bioinsect</b> is permanently in Imperfect form, and does not have passives or abilities.`,
         },
         {
             name: "Bio Reset",
