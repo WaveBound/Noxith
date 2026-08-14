@@ -302,12 +302,12 @@ img {
 }
 
 .p-kw.p-debuffed>span {
-  --kw-color: #ef4444;
-  color: #ef4444 !important;
-  -webkit-text-fill-color: #ef4444 !important;
+  --kw-color: #ec2424;
+  color: #e42020 !important;
+  -webkit-text-fill-color: #e42020 !important;
   font-weight: 700 !important;
   text-decoration: underline !important;
-  text-decoration-color: #ef4444 !important;
+  text-decoration-color: #e42020 !important;
   text-underline-offset: 2px !important;
 }
 
