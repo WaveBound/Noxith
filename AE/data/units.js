@@ -141,10 +141,12 @@ function normalize(u) {
     prodigyrage: "1.0",
     carrotunleashed: "1.0",
     bioinsect: "1.0",
+    bioinsectfinal: "1.0",
     cubert: "1.0",
     darkmagesovereign: "0.5",
     razorjawhunter: "0.5",
     crowblackfire: "0.5",
+    cursedimmortalblacksun: "0.5",
   };
 
   const unitUpdate = updateMap[u.id] || "Release";
