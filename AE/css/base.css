@@ -279,8 +279,8 @@ img {
 
 /* Keyword Colors */
 .p-kw.p-reg-attack>span,
-.p-kw.p-prodigy-meter>span,
-.p-kw.p-prodigy-transform>span,
+.p-kw.p-critical-attack>span,
+.p-kw.p-string>span,
 .p-kw.p-cubert-meter>span {
   --kw-color: #dadada;
   color: #dadada !important;
@@ -325,6 +325,16 @@ img {
   text-underline-offset: 2px !important;
 }
 
+.p-kw.p-carrot-transform>span {
+  --kw-color: #ff8c00;
+  color: #ff8c00 !important;
+  -webkit-text-fill-color: #ff8c00 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #ff8c00 !important;
+  text-underline-offset: 2px !important;
+}
+
 .p-kw.p-stun>span,
 .p-kw.p-slow>span,
 .p-kw.p-stagger>span,
@@ -332,19 +342,38 @@ img {
 .p-kw.p-shadow-rewind>span,
 .p-kw.p-cocoon>span,
 .p-kw.p-puppet-mark>span,
+.p-kw.p-puppet-marked>span,
 .p-kw.p-dismembered>span,
+.p-kw.p-patience>span,
+.p-kw.p-vegeta-transform>span,
+.p-kw.p-father-son>span,
+.p-kw.p-dot>span,
 .p-kw.p-drink-mark>span,
 .p-kw.p-genetic-dupe>span {
-  --kw-color: #a855f7;
-  color: #a855f7 !important;
-  -webkit-text-fill-color: #a855f7 !important;
+  --kw-color: #9900ff;
+  color: #9900ff !important;
+  -webkit-text-fill-color: #9900ff !important;
   font-weight: 700 !important;
   text-decoration: underline !important;
-  text-decoration-color: #a855f7 !important;
+  text-decoration-color: #9900ff !important;
   text-underline-offset: 2px !important;
 }
 
-.p-kw.p-physical>span {
+.p-kw.p-transforms>span {
+  --kw-color: #e2e8f0;
+  color: #e2e8f0 !important;
+  -webkit-text-fill-color: #e2e8f0 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #e2e8f0 !important;
+  text-underline-offset: 2px !important;
+}
+
+.p-kw.p-physical>span,
+.p-kw.p-prodigy-transform>span,
+.p-kw.p-prodigy-transform-2>span,
+.p-kw.p-prodigy-meter>span,
+.p-kw.p-rage-meter>span {
   --kw-color: #c81e1e;
   color: #c81e1e !important;
   -webkit-text-fill-color: #c81e1e !important;
@@ -364,15 +393,27 @@ img {
   text-underline-offset: 2px !important;
 }
 
-.p-kw.p-taken-down>span {
-  --kw-color: #6b7280;
-  color: #6b7280 !important;
-  -webkit-text-fill-color: #6b7280 !important;
+.p-kw.p-taken-down>span,
+.p-kw.p-takedown>span {
+  --kw-color: #353535;
+  color: #353535 !important;
+  -webkit-text-fill-color: #353535 !important;
   font-weight: 700 !important;
   text-decoration: underline !important;
-  text-decoration-color: #6b7280 !important;
+  text-decoration-color: #353535 !important;
   text-underline-offset: 2px !important;
 }
+
+.p-kw.p-drink-transform>span {
+  --kw-color: #3b82f6;
+  color: #3b82f6 !important;
+  -webkit-text-fill-color: #3b82f6 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #3b82f6 !important;
+  text-underline-offset: 2px !important;
+}
+
 
 .p-kw.p-rage-unleashed>span,
 .p-kw.p-precision-slash>span,
@@ -474,7 +515,13 @@ img {
 .p-kw.p-shadow-rewind>span,
 .p-kw.p-cocoon>span,
 .p-kw.p-puppet-mark>span,
-.p-kw.p-dismembered>span {
+.p-kw.p-puppet-marked>span,
+.p-kw.p-dismembered>span,
+.p-kw.p-patience>span,
+.p-kw.p-vegeta-transform>span,
+.p-kw.p-father-son>span,
+.p-kw.p-dot>span,
+.p-kw.p-drink-mark>span {
   --kw-color: #9900ff;
 }
 
@@ -524,7 +571,13 @@ img {
 .p-kw.p-shadow-rewind>span,
 .p-kw.p-cocoon>span,
 .p-kw.p-puppet-mark>span,
+.p-kw.p-puppet-marked>span,
 .p-kw.p-dismembered>span,
+.p-kw.p-patience>span,
+.p-kw.p-vegeta-transform>span,
+.p-kw.p-father-son>span,
+.p-kw.p-dot>span,
+.p-kw.p-drink-mark>span,
 .p-kw.p-winged-spirit>span,
 .p-kw.p-wolf-spirit>span,
 .p-kw.p-divine-spirit>span,
@@ -557,12 +610,12 @@ img {
 }
 
 .p-doll-text {
-  background: linear-gradient(180deg, #c3e6ff 0%, #d4c7ff 100%) !important;
+  background: linear-gradient(180deg, #c7ecff 0%, #e0c8ff 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   font-weight: 700 !important;
   text-decoration: underline !important;
-  text-decoration-color: #d4c7ff !important;
+  text-decoration-color: #e0c8ff !important;
   text-underline-offset: 2px !important;
   display: inline !important;
 }
@@ -572,7 +625,7 @@ img {
   position: fixed !important;
   width: auto !important;
   height: auto !important;
-  max-width: 380px !important;
+  max-width: 280px !important;
   max-height: none !important;
   margin: 0 !important;
   padding: 0 !important;

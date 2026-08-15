@@ -726,6 +726,18 @@
   animation: passiveLabelShimmer 3s linear infinite;
 }
 
+.passive-label.ability-label {
+  background: linear-gradient(90deg, #c084fc, #a855f7, #9333ea, #c084fc) !important;
+  background-size: 200% 100% !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  font-weight: 800 !important;
+  margin-right: 4px !important;
+  animation: passiveLabelShimmer 3s linear infinite !important;
+}
+
 @keyframes passiveLabelShimmer {
   0% {
     background-position: 0% 50%;

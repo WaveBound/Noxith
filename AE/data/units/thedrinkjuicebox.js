@@ -77,7 +77,7 @@ export const unit = {
     passives: [
         {
             name: "Precision Slash",
-            desc: `Every <b>6 Regular Attacks</b>:<br>- Inflict enemies with <b>The Drink Mark</b> for <b>15</b> seconds<br><b>The Drink Mark</b> will:<br>- Increase all <b>Follow-Up Attack</b> damage by <b>10%</b><br>- Apply a <b>Physical</b> weakness at <b>10%</b>`,
+            desc: `Every <b>6 Regular Attack</b>:<br>- Inflict enemies with <b>The Drink Mark</b> for <b>15</b> seconds<br><b>The Drink Mark</b> will:<br>- Increase all <b>Follow-Up Attack</b> damage by <b>10%</b><br>- Apply a <b>Physical</b> weakness at <b>10%</b>`,
         },
         {
             name: "Quick Assist",
@@ -108,7 +108,7 @@ export const unit = {
         {
             name: "The Drink Mark",
             icon: "thedrinkmark",
-            effect: "Inflicts enemies with The Drink Mark for 15s. Increases Follow-Up Attack damage by 10% (25% with Pointy Straw) and applies Physical weakness at 10%.",
+            effect: "Inflicts enemies with The Drink Mark for 15s. Increases Follow-Up Attack damage by 10% and applies Physical weakness at 10%.",
             cooldown: "10s",
         },
     ],

@@ -4,6 +4,7 @@ import puppet from "./units/puppet.js";
 import darkmagesovereign from "./units/darkmagesovereign.js";
 import reaperreleased from "./units/reaperreleased.js";
 import ladygiantenvy from "./units/ladygiantenvy.js";
+import stringdemonawakened from "./units/stringdemonawakened.js";
 import eighthswordberserk from "./units/8thswordberserk.js";
 import shadowdivine from "./units/shadowdivine.js";
 import crowblackfire from "./units/crowblackfire.js";
@@ -27,6 +28,7 @@ const rawUnits = [
   darkmagesovereign,
   reaperreleased,
   ladygiantenvy,
+  stringdemonawakened,
   eighthswordberserk,
   shadowdivine,
   crowblackfire,

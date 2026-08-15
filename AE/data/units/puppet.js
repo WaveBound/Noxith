@@ -75,32 +75,49 @@ export const unit = {
             attackName: "Rewrite Light",
             aoe: "Circle 8.5",
             attackTime: "3.8",
+            ability: "Complete Control",
         },
     ],
 
     passives: [
         {
-            name: "Puppet Creation",
-            desc: `When an enemy with Puppet Mark from this unit dies:<br>- Summon a Doll in front of the killed enemy. (Capacity: 1)<br>- Dolls will have 200% of this unit's current damage as health`,
+            name: "Marionette's Gaze",
+            desc: `Every 15 seconds:<br>- Inflict Puppet Mark on the strongest enemy in this unit's range without Puppet Mark applied for 15 seconds<br>Puppet Marked enemies receive 20% increased incoming damage`,
         },
         {
+            name: "Puppet Creation",
+            desc: `When an enemy with Puppet Mark from this unit dies:<br>- Summon a Doll in front of the killed enemy (Capacity: 1)<br>- Dolls will have 150% of this unit's current damage as health`,
+        },
+    ],
+
+    abilities: [
+        {
             name: "Complete Control",
-            desc: `On activation:<br>- Rewind all enemies in range for 2 seconds<br>(30s CD, Global Cooldown)`,
+            cooldown: "30s CD",
+            type: "Global Cooldown",
+            unlocksUpgrade: 8,
+            desc: `On activation:<br>- Rewind all enemies in range for 2 seconds`,
         },
     ],
 
     recommendedEquips: {
         unitEquip: "Calamity's Eye",
         equip1: "Shinigami Sword",
-        equip2: "Kunai",
+        equip2: "Bamboo Bottle",
     },
 
     statusEffects: [
         {
             name: "Puppet Mark",
             icon: "puppetmark",
-            effect: "Inflicts enemies with Puppet Mark. When an enemy with Puppet Mark dies, summons a Doll at their location.",
-            cooldown: "0s",
+            effect: "Inflicts enemies with Puppet Mark for 15 seconds. Puppet Marked enemies receive 20% increased incoming damage. When an enemy with Puppet Mark dies, summons a Doll at their location.",
+            cooldown: "15s",
+        },
+        {
+            name: "Rewind",
+            icon: "rewind",
+            effect: "Rewinds all enemies in range for 2 seconds on ability activation.",
+            cooldown: "30s",
         },
     ],
 };

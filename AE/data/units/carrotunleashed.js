@@ -80,7 +80,7 @@ export const unit = {
         },
         {
             name: "Limitless Warrior",
-            desc: `This unit has <b>Fighting Spirit</b>, starting at 0.<br>On <b>Critical Attack</b>:<br>- Increase <b>Fighting Spirit</b> by <b>10</b><br>If this unit is <b>Debuffed</b>:<br>- Increase <b>Fighting Spirit</b> by <b>20</b><br>At <b>30 Fighting Spirit</b> stacks:<br>- Transform this unit into <b>Carrot Transformation</b><br>In <b>Carrot Transformation</b> form:<br>- Apply <b>Stagger</b> to all enemies in range<br>- This unit becomes immune to <b>Status Effects</b><br>- Increase Damage by <b>15%</b><br>- Increase Crit Damage by <b>20%</b><br>- <b>Fighting Spirit</b> will decrease by <b>1</b> every second<br>When <b>Fighting Spirit</b> is depleted:<br>- Transform back into base`,
+            desc: `This unit has <b>Fighting Spirit</b>, starting at 0.<br>On <b>Critical Attack</b>:<br>- Increase <b>Fighting Spirit</b> by <b>10</b><br>If this unit is <b>Debuffed</b>:<br>- Increase <b>Fighting Spirit</b> by <b>20</b><br>At <b>30 Fighting Spirit</b> stacks:<br>- Transform this unit into <b>Carrot Transformation</b><br>In <b>Carrot Transformation</b> form:<br>- Apply <b>Stagger</b> to all enemies in range<br>- This unit becomes immune to <b>Status Effects</b><br>- Increase Damage by <b>15%</b><br>- Increase Crit Damage by <b>20%</b><br>- <b>Fighting Spirit</b> will decrease by <b>1</b> every 2 seconds<br>When <b>Fighting Spirit</b> is depleted:<br>- Transform back into base`,
         },
     ],
 
