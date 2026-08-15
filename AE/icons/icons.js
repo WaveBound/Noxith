@@ -498,6 +498,12 @@ if (typeof window !== "undefined") {
             floatingTooltip.removeAttribute("data-try-idx");
             floatingTooltip.src = src;
         }
+
+        const span = kwTarget.querySelector("span") || kwTarget;
+        const computedStyle = getComputedStyle(span);
+        const themeColor = computedStyle.getPropertyValue("--kw-color").trim() || computedStyle.color || "#a855f7";
+        floatingTooltip.style.setProperty("--tooltip-theme-color", themeColor);
+        floatingTooltip.style.borderColor = themeColor;
         floatingTooltip.style.display = "block";
 
         // Read CSS zoom scale factor

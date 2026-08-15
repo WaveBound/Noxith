@@ -631,8 +631,10 @@ img {
   padding: 0 !important;
   pointer-events: none !important;
   z-index: 1000000 !important;
-  box-shadow: none !important;
   border-radius: 10px !important;
+  border: 1px solid var(--tooltip-theme-color, rgba(168, 85, 247, 0.45)) !important;
+  background: radial-gradient(circle at top left, color-mix(in srgb, var(--tooltip-theme-color, #a855f7) 16%, #08060e) 0%, #08060e 100%) !important;
+  backdrop-filter: blur(8px) !important;
   object-fit: contain !important;
   image-rendering: auto !important;
 }
