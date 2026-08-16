@@ -176,6 +176,14 @@ export const TRAIT_DEFINITIONS = {
 export function getSummonsData(unit) {
   if (!unit) return null;
 
+  const isBioinsect = unit.id === "bioinsectfinal" || !!unit.isBioinsectUnit;
+  if (isBioinsect) {
+    const form = unit.bioinsectForm || "imperfect";
+    if (form === "imperfect" || unit._bioinsectSuppressSummon) {
+      return null;
+    }
+  }
+
   if (unit._bioinsectSuppressSummon) return null;
 
   let data = unit.summons ||
@@ -255,7 +263,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const carrotTransformation = isCarrot ? (unit.carrotTransformation !== undefined ? !!unit.carrotTransformation : true) : false;
   const carrotInstantRelocation = isCarrot ? (unit.carrotInstantRelocation !== undefined ? !!unit.carrotInstantRelocation : true) : false;
   const isCompMode = unit ? !!unit.isCompMode : false;
-  const bioinsectForm = isBioinsect ? (unit.bioinsectForm || "imperfect") : "base";
+  const bioinsectForm = isBioinsect ? (unit.bioinsectForm || "imperfect") : "imperfect";
   const bioinsectResetStacks = isBioinsect ? Math.max(0, parseInt(unit.bioinsectResetStacks || 0, 10) || 0) : 0;
 
   if (isBioinsect && !unit.bioinsectCopiedUnitId) {
@@ -409,7 +417,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const hasWarriorPole = relics.some(r => r.name === "Warrior Pole");
   const isTransformed = (isCarrot && carrotTransformation) ||
     (isVegetable) ||
-    (isBioinsect && bioinsectForm !== "base") ||
+    (isBioinsect && bioinsectForm !== "imperfect") ||
     (isProdigy && prodigyRageUnleashed) ||
     (isEighthSword && berserkState);
 
@@ -703,7 +711,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     unitDirectDPS = avgHitDamage / effSpa;
     unitDoTDPS = 0;
 
-    if (bioinsectForm === "base") {
+    if (bioinsectForm === "imperfect") {
       unit._bioinsectSuppressSummon = true;
     } else {
       unit._bioinsectSuppressSummon = false;

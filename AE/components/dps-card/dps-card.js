@@ -77,7 +77,7 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       prodigyStatusEffects: options.prodigyStatusEffects !== undefined ? options.prodigyStatusEffects : (unit.prodigyStatusEffects || 0),
       crimsonAbilityActive: options.crimsonAbilityActive !== undefined ? !!options.crimsonAbilityActive : (unit.crimsonAbilityActive !== undefined ? !!unit.crimsonAbilityActive : false),
       crimsonPoolCount: options.crimsonPoolCount !== undefined ? options.crimsonPoolCount : (unit.crimsonPoolCount !== undefined ? unit.crimsonPoolCount : 3),
-      bioinsectForm: options.bioinsectForm || unit.bioinsectForm || (isBioinsect ? "imperfect" : "base"),
+      bioinsectForm: options.bioinsectForm || unit.bioinsectForm || "imperfect",
       bioinsectResetStacks: options.bioinsectResetStacks !== undefined ? options.bioinsectResetStacks : (unit.bioinsectResetStacks || 0),
       bioinsectCopiedUnitId: options.bioinsectCopiedUnitId !== undefined ? options.bioinsectCopiedUnitId : (unit.bioinsectCopiedUnitId || (isBioinsect ? "puppet" : null)),
     };
@@ -1432,7 +1432,7 @@ export async function DpsCard(unit, options = {}) {
   let carrotInstantRelocation = isCarrot ? (unit.carrotInstantRelocation !== undefined ? !!unit.carrotInstantRelocation : true) : false;
   let isCompMode = options.isCompMode !== undefined ? !!options.isCompMode : (unit.isCompMode !== undefined ? !!unit.isCompMode : false);
 
-  let bioinsectForm = isBioinsect ? (unit.bioinsectForm || "imperfect") : "base";
+  let bioinsectForm = isBioinsect ? (unit.bioinsectForm || "imperfect") : "imperfect";
   let bioinsectResetStacks = isBioinsect ? Math.max(0, Math.min(15, parseInt(unit.bioinsectResetStacks || 0, 10) || 0)) : 0;
   let bioinsectCopiedUnitId = isBioinsect ? (unit.bioinsectCopiedUnitId || "puppet") : "";
 
@@ -1609,7 +1609,7 @@ export async function DpsCard(unit, options = {}) {
               </div>
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:4px;">
-              <button type="button" class="dps-shinigami-toggle ${bioinsectForm !== 'base' ? 'active' : ''}" id="bioinsect-form-toggle-${unit.id}" style="flex:1;text-align:center;">
+              <button type="button" class="dps-shinigami-toggle ${bioinsectForm !== 'imperfect' ? 'active' : ''}" id="bioinsect-form-toggle-${unit.id}" style="flex:1;text-align:center;">
                 Form: ${bioinsectForm.charAt(0).toUpperCase() + bioinsectForm.slice(1)}
               </button>
               <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}" style="flex:1;text-align:center;">
@@ -1912,14 +1912,14 @@ export async function DpsCard(unit, options = {}) {
     });
   }
 
-  const BIOINSECT_FORMS = ["imperfect", "semiperfect", "perfect", "base"];
+  const BIOINSECT_FORMS = ["imperfect", "semiperfect", "perfect"];
   bioinsectFormToggle?.addEventListener("click", () => {
     const idx = (BIOINSECT_FORMS.indexOf(bioinsectForm) + 1) % BIOINSECT_FORMS.length;
     bioinsectForm = BIOINSECT_FORMS[idx];
     unit.bioinsectForm = bioinsectForm;
     const label = bioinsectForm.charAt(0).toUpperCase() + bioinsectForm.slice(1);
     bioinsectFormToggle.textContent = `Form: ${label}`;
-    bioinsectFormToggle.classList.toggle("active", bioinsectForm !== "base");
+    bioinsectFormToggle.classList.toggle("active", bioinsectForm !== "imperfect");
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
     renderCalculations();
   });

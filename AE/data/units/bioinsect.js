@@ -54,7 +54,7 @@ export const unit = {
         },
     ],
 
-    // Summon configuration for Imperfect/Semiperfect form Mini Bioinsect
+    // Summon configuration for Semiperfect/Perfect form Mini Bioinsect (unlocked in Semiperfect form)
     // baseDamageMultiplier is 0.35 base; 0.45 with Mechanical Wings relic
     summons: {
         id: "minibioinsect",
