@@ -77,7 +77,7 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       prodigyStatusEffects: options.prodigyStatusEffects !== undefined ? options.prodigyStatusEffects : (unit.prodigyStatusEffects || 0),
       crimsonAbilityActive: options.crimsonAbilityActive !== undefined ? !!options.crimsonAbilityActive : (unit.crimsonAbilityActive !== undefined ? !!unit.crimsonAbilityActive : false),
       crimsonPoolCount: options.crimsonPoolCount !== undefined ? options.crimsonPoolCount : (unit.crimsonPoolCount !== undefined ? unit.crimsonPoolCount : 3),
-      bioinsectForm: options.bioinsectForm || unit.bioinsectForm || "imperfect",
+      bioinsectForm: options.bioinsectForm || unit.bioinsectForm || "semiperfect",
       bioinsectResetStacks: options.bioinsectResetStacks !== undefined ? options.bioinsectResetStacks : (unit.bioinsectResetStacks || 0),
       bioinsectCopiedUnitId: options.bioinsectCopiedUnitId !== undefined ? options.bioinsectCopiedUnitId : (unit.bioinsectCopiedUnitId || (isBioinsect ? "puppet" : null)),
     };
@@ -1432,7 +1432,7 @@ export async function DpsCard(unit, options = {}) {
   let carrotInstantRelocation = isCarrot ? (unit.carrotInstantRelocation !== undefined ? !!unit.carrotInstantRelocation : true) : false;
   let isCompMode = options.isCompMode !== undefined ? !!options.isCompMode : (unit.isCompMode !== undefined ? !!unit.isCompMode : false);
 
-  let bioinsectForm = isBioinsect ? (unit.bioinsectForm || "imperfect") : "imperfect";
+  let bioinsectForm = isBioinsect ? (unit.bioinsectForm || "semiperfect") : "semiperfect";
   let bioinsectResetStacks = isBioinsect ? Math.max(0, Math.min(15, parseInt(unit.bioinsectResetStacks || 0, 10) || 0)) : 0;
   let bioinsectCopiedUnitId = isBioinsect ? (unit.bioinsectCopiedUnitId || "puppet") : "";
 

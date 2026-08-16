@@ -78,6 +78,7 @@ export const unit = {
 
     // Custom flag to mark this unit as Bioinsect so dps-math handles it specially
     isBioinsectUnit: true,
+    bioinsectForm: "semiperfect",
 };
 
 export default unit;

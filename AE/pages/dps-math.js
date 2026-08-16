@@ -178,7 +178,7 @@ export function getSummonsData(unit) {
 
   const isBioinsect = unit.id === "bioinsectfinal" || !!unit.isBioinsectUnit;
   if (isBioinsect) {
-    const form = unit.bioinsectForm || "imperfect";
+    const form = unit.bioinsectForm || "semiperfect";
     if (form === "imperfect" || unit._bioinsectSuppressSummon) {
       return null;
     }
@@ -263,7 +263,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const carrotTransformation = isCarrot ? (unit.carrotTransformation !== undefined ? !!unit.carrotTransformation : true) : false;
   const carrotInstantRelocation = isCarrot ? (unit.carrotInstantRelocation !== undefined ? !!unit.carrotInstantRelocation : true) : false;
   const isCompMode = unit ? !!unit.isCompMode : false;
-  const bioinsectForm = isBioinsect ? (unit.bioinsectForm || "imperfect") : "imperfect";
+  const bioinsectForm = isBioinsect ? (unit.bioinsectForm || "semiperfect") : "semiperfect";
   const bioinsectResetStacks = isBioinsect ? Math.max(0, parseInt(unit.bioinsectResetStacks || 0, 10) || 0) : 0;
 
   if (isBioinsect && !unit.bioinsectCopiedUnitId) {

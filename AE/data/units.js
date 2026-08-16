@@ -185,7 +185,7 @@ function normalize(u) {
     abilities: (u.abilities || []).map((a) => ({ name: a.name, effect: a.desc, cooldown: a.cooldown })),
     isBioinsectUnit: !!u.isBioinsectUnit,
     bioinsectCopiedUnitId: u.bioinsectCopiedUnitId || null,
-    bioinsectForm: u.bioinsectForm || "imperfect",
+    bioinsectForm: u.bioinsectForm || "semiperfect",
     bioinsectResetStacks: u.bioinsectResetStacks || 0,
   };
 }
