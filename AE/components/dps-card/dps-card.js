@@ -361,8 +361,8 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     if (breakdown.isLadyGiant && breakdown.giantForm) parts.push({ label: "Giant Form", pct: "125%" });
     if (breakdown.isBioinsect && breakdown.bioinsectResetStacks > 0) {
       const hasMechanicalWings = (breakdown.equips || []).includes("Mechanical Wings") || breakdown.unitRelic === "Mechanical Wings";
-      const resetPct = breakdown.bioinsectResetStacks * (hasMechanicalWings ? 5 : 1);
-      parts.push({ label: "Bio Reset", pct: `${resetPct}%` });
+      const pctPerStack = hasMechanicalWings ? 5 : 1;
+      parts.push({ label: `Bio Reset ×${breakdown.bioinsectResetStacks}`, pct: `${pctPerStack}%` });
     }
     if (breakdown.isCarrot && breakdown.carrotTransformation) parts.push({ label: "Transformation", pct: "15%" });
     if (breakdown.isCarrot && breakdown.carrotInstantRelocation) parts.push({ label: "Instant Relocation", pct: "50%" });

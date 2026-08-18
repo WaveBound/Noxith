@@ -422,6 +422,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     (isEighthSword && berserkState);
 
   let totalPassiveDamageBonus = (shinigamiActive ? 0.15 : 0) + (hasWarriorPole && isTransformed ? 0.20 : 0) + passiveDamageMult;
+  // Capture effDamage before any passive/shinigami buffs — used for summons that should not scale with these
+  const prePassiveEffDamage = effDamage;
   const preShinigamiEffDamage = effDamage * (passiveDamageMult > 0 ? (1 + passiveDamageMult) : 1);
   if (totalPassiveDamageBonus > 0) {
     effDamage = effDamage * (1 + totalPassiveDamageBonus);
@@ -898,7 +900,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
         if (statMode === "Z") sEffDmg *= 1.20;
         if (hasAscend) sEffDmg *= 1.15;
       } else {
-        const baseDmgForSummon = (sData.noShinigamiPassive && shinigamiActive) ? preShinigamiEffDamage : effDamage;
+        // noShinigamiPassive means the summon should not benefit from any passive buffs
+        // (Shinigami Sword passive AND Bio Reset stacks, etc.) — use the clean pre-passive base
+        const baseDmgForSummon = sData.noShinigamiPassive ? prePassiveEffDamage : effDamage;
         baseSummonDmg = scaledBaseDamage * mult;
         sEffDmg = baseDmgForSummon * mult;
       }
