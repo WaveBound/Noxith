@@ -422,8 +422,13 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     (isEighthSword && berserkState);
 
   let totalPassiveDamageBonus = (shinigamiActive ? 0.15 : 0) + (hasWarriorPole && isTransformed ? 0.20 : 0) + passiveDamageMult;
+  // summonBaseEffDamage: scales with trait, flat relic damage, Z stat, and ascend
+  // but NOT relic archetype bonus and NOT passive/buff totals (Shinigami, Bio Reset, etc.)
+  let summonBaseEffDamage = scaledBaseDamage * (1 + (trait.damageBonus || 0)) * (1 + relicDamageMult);
+  if (statMode === "Z") summonBaseEffDamage *= 1.2;
+  if (hasAscend) summonBaseEffDamage *= 1.15;
   // Capture effDamage before any passive/shinigami buffs — used for summons that should not scale with these
-  const prePassiveEffDamage = effDamage;
+  const prePassiveEffDamage = summonBaseEffDamage;
   const preShinigamiEffDamage = effDamage * (passiveDamageMult > 0 ? (1 + passiveDamageMult) : 1);
   if (totalPassiveDamageBonus > 0) {
     effDamage = effDamage * (1 + totalPassiveDamageBonus);
