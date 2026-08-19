@@ -3,6 +3,7 @@ export const unit = {
     name: "Lady Giant (Envy)",
     image: "Units/Image/LadyGiantEnvy.png",
     ascend: 3,
+    tiers: ["Mythic"],
 
     stats: {
         recommendedTrait: "Primordial",

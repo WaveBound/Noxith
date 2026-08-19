@@ -3,6 +3,7 @@ export const unit = {
     name: "Elf Mage (Unleashed)",
     image: "Units/Image/ElfMageUnleashed.png",
     ascend: 3,
+    tiers: ["Mythic"],
 
     stats: {
         recommendedTrait: "Unbound",

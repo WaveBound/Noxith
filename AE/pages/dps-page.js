@@ -1,9 +1,10 @@
 import { units } from "../data/units.js";
 import { DpsCard, optimizeRelicsForTrait } from "../components/dps-card/dps-card.js";
 import { TRAIT_DEFINITIONS } from "./dps-math.js";
+import { getGlobalSetting, saveGlobalSetting } from "../js/unit-settings.js";
 
-let currentMode = "dps"; // "dps" or "dmg"
-let globalCompMode = false; // false = Non-Comp (100% Crit), true = Comp (50% Crit)
+let currentMode = getGlobalSetting("dpsMode", "dps"); // "dps" or "dmg"
+let globalCompMode = getGlobalSetting("compMode", false); // false = Non-Comp (100% Crit), true = Comp (50% Crit)
 
 const PAGE_SIZE = 10; // Up to 2 rows of 5 cards
 
@@ -147,13 +148,14 @@ export async function DpsPage(filter = "") {
   });
 
   // Mode button click listeners
-  page.querySelectorAll(".dps-mode-btn").forEach(btn => {
+  page.querySelectorAll(".dps-mode-btn[data-mode]").forEach(btn => {
     btn.addEventListener("click", () => {
       const mode = btn.dataset.mode;
       if (mode === currentMode) return;
       currentMode = mode;
+      saveGlobalSetting("dpsMode", currentMode);
 
-      page.querySelectorAll(".dps-mode-btn").forEach(b => b.classList.toggle("active", b.dataset.mode === currentMode));
+      page.querySelectorAll(".dps-mode-btn[data-mode]").forEach(b => b.classList.toggle("active", b.dataset.mode === currentMode));
       renderSortedCards();
     });
   });
@@ -164,6 +166,7 @@ export async function DpsPage(filter = "") {
       const compVal = btn.dataset.comp === "comp";
       if (compVal === globalCompMode) return;
       globalCompMode = compVal;
+      saveGlobalSetting("compMode", globalCompMode);
 
       page.querySelectorAll(".dps-comp-btn").forEach(b => b.classList.toggle("active", (b.dataset.comp === "comp") === globalCompMode));
       renderSortedCards();

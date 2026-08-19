@@ -3,6 +3,7 @@ export const unit = {
     name: "Dark Mage (Sovereign)",
     image: "Units/Image/DarkMageSovereign.png",
     ascend: 3,
+    tiers: ["Mythic"],
 
     stats: {
         recommendedTrait: "Unbound",

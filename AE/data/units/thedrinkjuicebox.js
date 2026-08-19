@@ -3,8 +3,7 @@ export const unit = {
     name: "The Drink (Juicebox)",
     image: "Units/Image/TheDrinkJuicebox.png",
     ascend: 3,
-    element: "Hydro",
-    archetype: "Physical",
+    tiers: ["Mythic"],
 
     stats: {
         recommendedTrait: "Primordial",

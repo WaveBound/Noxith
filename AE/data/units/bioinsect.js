@@ -3,7 +3,7 @@ export const unit = {
     name: "Bioinsect (Final Form)",
     image: "Units/Image/BioinsectFinalForm.png",
     ascend: 3,
-    tiers: [],
+    tiers: ["Mythic"],
 
     stats: {
         recommendedTrait: "Primordial",

@@ -3,7 +3,7 @@ export const unit = {
     name: "Vegetable (Prince)",
     image: "Units/Image/VegetablePrince.png",
     ascend: 3,
-    tiers: ["Secret"],
+    tiers: ["Mythic"],
 
     stats: {
         recommendedTrait: "Unbound",

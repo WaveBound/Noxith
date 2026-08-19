@@ -12,11 +12,18 @@ function generateDynamicNotifications() {
 
   const list = [
     {
+      id: "update-local-persistence-shinigami-v13",
+      icon: "⚙",
+      title: "Unit Settings & Ability Toggles Saved",
+      body: "Unit ability toggles, states, Shinigami Sword simulation, and DPS calculation settings are now automatically saved to local data.",
+      time: "Just now"
+    },
+    {
       id: "update-mobile-dps-v12",
       icon: "✦",
       title: "DPS Breakdown & Mobile UI Updated",
       body: "Mobile touch scrolling, dynamic rank badges, and 1 decimal place DPS scaling have been added.",
-      time: "Just now"
+      time: "1d ago"
     },
     ...units.slice(0, 2).map(u => ({
       id: `unit-release-${u.id}`,

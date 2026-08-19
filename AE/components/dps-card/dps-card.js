@@ -3,6 +3,7 @@ import { globalRelics } from "../../data/relics.js";
 import { getRelicStatsByName } from "../../data/relicstats.js";
 import { relicImgByName, ELEMENT_ICONS, ARCHETYPE_ICONS, iconImg, STAT_ICONS, formatPassiveText, STATUS_ICONS, toAbsoluteUrl } from "../../icons/icons.js";
 import { traits as allTraitsCatalog } from "../../data/traits.js";
+import { saveUnitSetting } from "../../js/unit-settings.js";
 
 const formatFullDPS = (value) => Math.round(Number(value) || 0).toLocaleString();
 const formatCompactNumber = (value) => {
@@ -1593,7 +1594,7 @@ export async function DpsCard(unit, options = {}) {
                   <input type="text" inputmode="numeric" pattern="[0-9]*" id="prodigy-status-input-${unit.id}" value="${prodigyStatusEffects}" placeholder="0" aria-label="Status Effects count" style="width:24px;height:14px;text-align:center;font-size:9px;font-weight:800;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);border-radius:3px;color:#c7d2fe;padding:0;" />
                 </div>
               </div>
-              <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}" style="flex:1;text-align:center;">
+              <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" id="shinigami-toggle-${unit.id}" aria-pressed="${shinigamiPassiveActive}" style="flex:1;text-align:center;">
                 Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
               </button>
             </div>
@@ -1613,13 +1614,13 @@ export async function DpsCard(unit, options = {}) {
               <button type="button" class="dps-shinigami-toggle ${bioinsectForm !== 'imperfect' ? 'active' : ''}" id="bioinsect-form-toggle-${unit.id}" style="flex:1;text-align:center;">
                 Form: ${bioinsectForm.charAt(0).toUpperCase() + bioinsectForm.slice(1)}
               </button>
-              <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}" style="flex:1;text-align:center;">
+              <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" id="shinigami-toggle-${unit.id}" aria-pressed="${shinigamiPassiveActive}" style="flex:1;text-align:center;">
                 Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
               </button>
             </div>
           </div>
         ` : `
-          <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" aria-pressed="${shinigamiPassiveActive}">
+          <button type="button" class="dps-shinigami-toggle${shinigamiPassiveActive ? ' active' : ''}" id="shinigami-toggle-${unit.id}" aria-pressed="${shinigamiPassiveActive}">
             Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
           </button>
         `}
@@ -1638,7 +1639,7 @@ export async function DpsCard(unit, options = {}) {
   const giantFormToggle = card.querySelector(`#giantform-toggle-${unit.id}`);
   const demonicToggle = card.querySelector(`#demonic-toggle-${unit.id}`);
   const berserkToggle = card.querySelector(`#berserk-toggle-${unit.id}`);
-  const shinigamiToggle = card.querySelector(".dps-shinigami-toggle:not([id])");
+  const shinigamiToggle = card.querySelector(`#shinigami-toggle-${unit.id}`);
   const fuaToggle = card.querySelector(".dps-fua-toggle");
   const fuaToggleWrapper = card.querySelector(".dps-fua-toggle-wrapper");
   const crowEnemiesInput = card.querySelector(`#crow-enemies-${unit.id}`);
@@ -1666,6 +1667,7 @@ export async function DpsCard(unit, options = {}) {
     if (crowEnemiesHit !== val) {
       crowEnemiesHit = val;
       unit.crowEnemiesHit = crowEnemiesHit;
+      saveUnitSetting(unit.id, "crowEnemiesHit", crowEnemiesHit);
       window.dispatchEvent(new CustomEvent("dps-value-changed"));
       renderCalculations();
     }
@@ -1686,6 +1688,7 @@ export async function DpsCard(unit, options = {}) {
   demonicToggle?.addEventListener("click", () => {
     demonicPresence = !demonicPresence;
     unit.demonicPresence = demonicPresence;
+    saveUnitSetting(unit.id, "demonicPresence", demonicPresence);
     demonicToggle.classList.toggle("active", demonicPresence);
     demonicToggle.setAttribute("aria-pressed", String(demonicPresence));
     demonicToggle.textContent = `Demonic Presence: ${demonicPresence ? "On (15%/s)" : "Off"}`;
@@ -1696,6 +1699,7 @@ export async function DpsCard(unit, options = {}) {
   berserkToggle?.addEventListener("click", () => {
     berserkState = !berserkState;
     unit.berserkState = berserkState;
+    saveUnitSetting(unit.id, "berserkState", berserkState);
     berserkToggle.classList.toggle("active", berserkState);
     berserkToggle.setAttribute("aria-pressed", String(berserkState));
     berserkToggle.textContent = `Berserk: ${berserkState ? "On" : "Off"}`;
@@ -1706,6 +1710,7 @@ export async function DpsCard(unit, options = {}) {
   giantFormToggle?.addEventListener("click", () => {
     giantForm = !giantForm;
     unit.giantForm = giantForm;
+    saveUnitSetting(unit.id, "giantForm", giantForm);
     giantFormToggle.classList.toggle("active", giantForm);
     giantFormToggle.setAttribute("aria-pressed", String(giantForm));
     giantFormToggle.textContent = `Giant Form: ${giantForm ? "On" : "Off"}`;
@@ -1719,6 +1724,7 @@ export async function DpsCard(unit, options = {}) {
     else darkMageMode = "lightning";
 
     unit.darkMageMode = darkMageMode;
+    saveUnitSetting(unit.id, "darkMageMode", darkMageMode);
     darkMageToggle.textContent = getDarkMageLabel(darkMageMode);
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
     renderCalculations();
@@ -1727,6 +1733,7 @@ export async function DpsCard(unit, options = {}) {
   shinigamiToggle?.addEventListener("click", () => {
     shinigamiPassiveActive = !shinigamiPassiveActive;
     unit.simulateShinigamiPassive = shinigamiPassiveActive;
+    saveUnitSetting(unit.id, "simulateShinigamiPassive", shinigamiPassiveActive);
     shinigamiToggle.classList.toggle("active", shinigamiPassiveActive);
     shinigamiToggle.setAttribute("aria-pressed", String(shinigamiPassiveActive));
     shinigamiToggle.textContent = `Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}`;
@@ -1737,6 +1744,7 @@ export async function DpsCard(unit, options = {}) {
   crimsonAbilityToggle?.addEventListener("click", () => {
     crimsonAbilityActive = !crimsonAbilityActive;
     unit.crimsonAbilityActive = crimsonAbilityActive;
+    saveUnitSetting(unit.id, "crimsonAbilityActive", crimsonAbilityActive);
     crimsonAbilityToggle.classList.toggle("active", crimsonAbilityActive);
     crimsonAbilityToggle.setAttribute("aria-pressed", String(crimsonAbilityActive));
     crimsonAbilityToggle.textContent = `Piercing Crimson: ${crimsonAbilityActive ? "On" : "Off"}`;
@@ -1750,6 +1758,8 @@ export async function DpsCard(unit, options = {}) {
     coldState = false;
     unit.caringState = true;
     unit.coldState = false;
+    saveUnitSetting(unit.id, "caringState", true);
+    saveUnitSetting(unit.id, "coldState", false);
 
     caringToggle.classList.add("active");
     caringToggle.setAttribute("aria-pressed", "true");
@@ -1771,6 +1781,8 @@ export async function DpsCard(unit, options = {}) {
     caringState = false;
     unit.coldState = true;
     unit.caringState = false;
+    saveUnitSetting(unit.id, "coldState", true);
+    saveUnitSetting(unit.id, "caringState", false);
 
     coldToggle.classList.add("active");
     coldToggle.setAttribute("aria-pressed", "true");
@@ -1789,6 +1801,7 @@ export async function DpsCard(unit, options = {}) {
   royalRivalryToggle?.addEventListener("click", () => {
     royalRivalry = !royalRivalry;
     unit.royalRivalry = royalRivalry;
+    saveUnitSetting(unit.id, "royalRivalry", royalRivalry);
     royalRivalryToggle.classList.toggle("active", royalRivalry);
     royalRivalryToggle.setAttribute("aria-pressed", String(royalRivalry));
     royalRivalryToggle.textContent = `Royal Rivalry: ${royalRivalry ? "On" : "Off"}`;
@@ -1799,6 +1812,7 @@ export async function DpsCard(unit, options = {}) {
   awakenedPrideToggle?.addEventListener("click", () => {
     awakenedPride = !awakenedPride;
     unit.awakenedPride = awakenedPride;
+    saveUnitSetting(unit.id, "awakenedPride", awakenedPride);
     awakenedPrideToggle.classList.toggle("active", awakenedPride);
     awakenedPrideToggle.setAttribute("aria-pressed", String(awakenedPride));
     awakenedPrideToggle.textContent = `Awakened Pride: ${awakenedPride ? "On" : "Off"}`;
@@ -1809,6 +1823,7 @@ export async function DpsCard(unit, options = {}) {
   carrotTransformToggle?.addEventListener("click", () => {
     carrotTransformation = !carrotTransformation;
     unit.carrotTransformation = carrotTransformation;
+    saveUnitSetting(unit.id, "carrotTransformation", carrotTransformation);
     carrotTransformToggle.classList.toggle("active", carrotTransformation);
     carrotTransformToggle.setAttribute("aria-pressed", String(carrotTransformation));
     carrotTransformToggle.textContent = `Transform: ${carrotTransformation ? "On" : "Off"}`;
@@ -1819,6 +1834,7 @@ export async function DpsCard(unit, options = {}) {
   carrotRelocationToggle?.addEventListener("click", () => {
     carrotInstantRelocation = !carrotInstantRelocation;
     unit.carrotInstantRelocation = carrotInstantRelocation;
+    saveUnitSetting(unit.id, "carrotInstantRelocation", carrotInstantRelocation);
     carrotRelocationToggle.classList.toggle("active", carrotInstantRelocation);
     carrotRelocationToggle.setAttribute("aria-pressed", String(carrotInstantRelocation));
     carrotRelocationToggle.textContent = `Relocation: ${carrotInstantRelocation ? "On (+50%)" : "Off"}`;
@@ -1829,6 +1845,7 @@ export async function DpsCard(unit, options = {}) {
   prodigyRageToggle?.addEventListener("click", () => {
     prodigyRageUnleashed = !prodigyRageUnleashed;
     unit.prodigyRageUnleashed = prodigyRageUnleashed;
+    saveUnitSetting(unit.id, "prodigyRageUnleashed", prodigyRageUnleashed);
     prodigyRageToggle.classList.toggle("active", prodigyRageUnleashed);
     prodigyRageToggle.setAttribute("aria-pressed", String(prodigyRageUnleashed));
     prodigyRageToggle.textContent = `Rage Unleashed: ${prodigyRageUnleashed ? "On (+25%)" : "Off"}`;
@@ -1839,6 +1856,7 @@ export async function DpsCard(unit, options = {}) {
   prodigyFatherSonToggle?.addEventListener("click", () => {
     prodigyFatherAndSonActive = !prodigyFatherAndSonActive;
     unit.prodigyFatherAndSonActive = prodigyFatherAndSonActive;
+    saveUnitSetting(unit.id, "prodigyFatherAndSonActive", prodigyFatherAndSonActive);
     prodigyFatherSonToggle.classList.toggle("active", prodigyFatherAndSonActive);
     prodigyFatherSonToggle.setAttribute("aria-pressed", String(prodigyFatherAndSonActive));
     prodigyFatherSonToggle.textContent = `Father & Son: ${prodigyFatherAndSonActive ? "On (75%/s)" : "Off"}`;
@@ -1859,6 +1877,7 @@ export async function DpsCard(unit, options = {}) {
     if (prodigyStatusEffects !== val) {
       prodigyStatusEffects = val;
       unit.prodigyStatusEffects = prodigyStatusEffects;
+      saveUnitSetting(unit.id, "prodigyStatusEffects", prodigyStatusEffects);
       window.dispatchEvent(new CustomEvent("dps-value-changed"));
       renderCalculations();
     }
@@ -1879,6 +1898,7 @@ export async function DpsCard(unit, options = {}) {
   crimsonPoolToggle?.addEventListener("click", () => {
     crimsonPoolCount = (crimsonPoolCount + 1) % 4;
     unit.crimsonPoolCount = crimsonPoolCount;
+    saveUnitSetting(unit.id, "crimsonPoolCount", crimsonPoolCount);
     crimsonPoolToggle.setAttribute("aria-label", `Crimson Pools: ${crimsonPoolCount}`);
     crimsonPoolToggle.textContent = `Pools: ${crimsonPoolCount}/3`;
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
@@ -1900,6 +1920,7 @@ export async function DpsCard(unit, options = {}) {
       if (unit.bioinsectCopiedUnitId !== newId) {
         unit.bioinsectCopiedUnitId = newId;
         bioinsectCopiedUnitId = newId;
+        saveUnitSetting(unit.id, "bioinsectCopiedUnitId", bioinsectCopiedUnitId);
         window.dispatchEvent(new CustomEvent("dps-value-changed"));
         renderCalculations();
       }
@@ -1908,6 +1929,7 @@ export async function DpsCard(unit, options = {}) {
     bioinsectUnitSelect.addEventListener("change", () => {
       bioinsectCopiedUnitId = bioinsectUnitSelect.value;
       unit.bioinsectCopiedUnitId = bioinsectCopiedUnitId;
+      saveUnitSetting(unit.id, "bioinsectCopiedUnitId", bioinsectCopiedUnitId);
       window.dispatchEvent(new CustomEvent("dps-value-changed"));
       renderCalculations();
     });
@@ -1918,6 +1940,7 @@ export async function DpsCard(unit, options = {}) {
     const idx = (BIOINSECT_FORMS.indexOf(bioinsectForm) + 1) % BIOINSECT_FORMS.length;
     bioinsectForm = BIOINSECT_FORMS[idx];
     unit.bioinsectForm = bioinsectForm;
+    saveUnitSetting(unit.id, "bioinsectForm", bioinsectForm);
     const label = bioinsectForm.charAt(0).toUpperCase() + bioinsectForm.slice(1);
     bioinsectFormToggle.textContent = `Form: ${label}`;
     bioinsectFormToggle.classList.toggle("active", bioinsectForm !== "imperfect");
@@ -1929,6 +1952,7 @@ export async function DpsCard(unit, options = {}) {
     bioinsectResetInput.value = bioinsectResetInput.value.replace(/[^\d]/g, "");
     bioinsectResetStacks = Math.max(0, parseInt(bioinsectResetInput.value || "0", 10) || 0);
     unit.bioinsectResetStacks = bioinsectResetStacks;
+    saveUnitSetting(unit.id, "bioinsectResetStacks", bioinsectResetStacks);
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
     renderCalculations();
   });
@@ -1985,6 +2009,7 @@ export async function DpsCard(unit, options = {}) {
         const idx = Number(input.dataset.fuaIndex);
         fuaDamages[idx] = Math.max(0, Number(input.value) || 0);
         unit.fuaDamages = fuaDamages;
+        saveUnitSetting(unit.id, "fuaDamages", fuaDamages);
         updateFuaSummary();
         renderCalculations();
       });
@@ -2138,6 +2163,13 @@ export async function DpsCard(unit, options = {}) {
         isCompMode,
         royalRivalry,
         awakenedPride,
+        carrotTransformation,
+        carrotInstantRelocation,
+        prodigyRageUnleashed,
+        prodigyFatherAndSonActive,
+        prodigyStatusEffects,
+        crimsonAbilityActive,
+        crimsonPoolCount,
         bioinsectForm,
         bioinsectResetStacks,
         bioinsectCopiedUnitId,

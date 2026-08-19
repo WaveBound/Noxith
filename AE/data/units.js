@@ -190,7 +190,10 @@ function normalize(u) {
   };
 }
 
+import { applySavedSettingsToAllUnits } from "../js/unit-settings.js";
+
 export const units = rawUnits.map(normalize);
+applySavedSettingsToAllUnits(units);
 
 export function getUnitById(id) {
   return units.find((u) => u.id === id) || null;

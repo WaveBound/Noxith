@@ -3,6 +3,7 @@ export const unit = {
     name: "Cubert",
     image: "Units/Image/Cubert.png",
     ascend: 0,
+    tiers: ["Exclusive"],
 
     stats: {
         recommendedTrait: "Primordial",

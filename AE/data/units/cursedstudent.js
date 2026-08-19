@@ -3,6 +3,7 @@ export const unit = {
     name: "Cursed Student (True Love)",
     image: "Units/Image/CursedStudentTrueLove.png",
     ascend: 3,
+    tiers: ["Mythic"],
 
     stats: {
         recommendedTrait: "Primordial",

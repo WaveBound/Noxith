@@ -3,6 +3,7 @@ import { traits } from "../../data/traits.js";
 import { getTraitBreakdown, formatDPS } from "../../pages/dps-math.js";
 import { relicStats } from "../../data/relicstats.js";
 import { relics as allRelicsCatalog } from "../../data/relics.js";
+import { saveUnitSetting } from "../../js/unit-settings.js";
 
 const unitSubTabMap = new Map();
 const activeSummonViewMap = new Map();
@@ -1208,25 +1209,34 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
           render();
         } else if (btn.dataset.darkmageMode) {
           unit.darkMageMode = btn.dataset.darkmageMode;
+          saveUnitSetting(unit.id, "darkMageMode", unit.darkMageMode);
           render();
         } else if (btn.dataset.giantMode) {
           unit.giantForm = btn.dataset.giantMode === "on";
+          saveUnitSetting(unit.id, "giantForm", unit.giantForm);
           render();
         } else if (btn.dataset.demonicMode) {
           unit.demonicPresence = btn.dataset.demonicMode === "on";
+          saveUnitSetting(unit.id, "demonicPresence", unit.demonicPresence);
           render();
         } else if (btn.dataset.berserkMode) {
           unit.berserkState = btn.dataset.berserkMode === "on";
+          saveUnitSetting(unit.id, "berserkState", unit.berserkState);
           render();
         } else if (btn.dataset.crimsonAbility) {
           unit.crimsonAbilityActive = btn.dataset.crimsonAbility === "on";
+          saveUnitSetting(unit.id, "crimsonAbilityActive", unit.crimsonAbilityActive);
           render();
         } else if (btn.dataset.crimsonPoolsCycle) {
           const currentCount = unit.crimsonPoolCount !== undefined ? unit.crimsonPoolCount : 3;
           unit.crimsonPoolCount = (currentCount + 1) % 4;
+          saveUnitSetting(unit.id, "crimsonPoolCount", unit.crimsonPoolCount);
           render();
         } else if (btn.dataset.cursedState) {
           unit.coldState = btn.dataset.cursedState === "cold";
+          unit.caringState = !unit.coldState;
+          saveUnitSetting(unit.id, "coldState", unit.coldState);
+          saveUnitSetting(unit.id, "caringState", unit.caringState);
           render();
         }
       });
@@ -1241,6 +1251,8 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
 
           unit.followUpInputsRaw[idx] = input.value;
           unit.followUpInputs[idx] = parseFloat(input.value) || 0;
+          saveUnitSetting(unit.id, "followUpInputsRaw", unit.followUpInputsRaw);
+          saveUnitSetting(unit.id, "followUpInputs", unit.followUpInputs);
 
           render();
 

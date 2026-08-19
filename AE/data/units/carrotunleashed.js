@@ -3,8 +3,7 @@ export const unit = {
     name: "Carrot (Unleashed)",
     image: "Units/Image/CarrotUnleashed.png",
     ascend: 3,
-    element: "Gale",
-    archetype: "Physical",
+    tiers: ["Mythic"],
 
     stats: {
         recommendedTrait: "Primordial",

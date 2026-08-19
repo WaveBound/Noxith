@@ -3,6 +3,7 @@ export const unit = {
     name: "Reaper (Released)",
     image: "Units/Image/ReaperReleased.png",
     ascend: 3,
+    tiers: ["Mythic"],
 
     stats: {
         recommendedTrait: "Unbound",
