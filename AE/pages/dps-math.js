@@ -966,6 +966,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
         rawMaxDamage: sData.maxDamage || 0,
         levelMult,
         baseDamage: baseSummonDmg,
+        summonDamageMult: mult,
         traitDmgBonus,
         relicTotalDmgMult,
         isZStat,

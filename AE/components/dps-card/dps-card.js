@@ -360,9 +360,10 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     if (breakdown.isEighthSword && breakdown.berserkState) parts.push({ label: "Berserk", pct: "20%" });
     if (breakdown.isLadyGiant && breakdown.giantForm) parts.push({ label: "Giant Form", pct: "125%" });
     if (breakdown.isBioinsect && breakdown.bioinsectResetStacks > 0) {
-      const hasMechanicalWings = (breakdown.equips || []).includes("Mechanical Wings") || breakdown.unitRelic === "Mechanical Wings";
+      const hasMechanicalWings = (breakdown.relics || []).some(r => r.name === "Mechanical Wings");
       const pctPerStack = hasMechanicalWings ? 5 : 1;
-      parts.push({ label: `Bio Reset ×${breakdown.bioinsectResetStacks}`, pct: `${pctPerStack}%` });
+      const totalPct = pctPerStack * breakdown.bioinsectResetStacks;
+      parts.push({ label: `Bio Reset ×${breakdown.bioinsectResetStacks}`, pct: `${totalPct}%` });
     }
     if (breakdown.isCarrot && breakdown.carrotTransformation) parts.push({ label: "Transformation", pct: "15%" });
     if (breakdown.isCarrot && breakdown.carrotInstantRelocation) parts.push({ label: "Instant Relocation", pct: "50%" });
@@ -643,7 +644,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     function renderSummonsPanel() {
       const s = summonBreakdowns[activeSummonIdx] || {};
       const hasMultiple = summonBreakdowns.length > 1;
-      const scaleMult = breakdown.effDamage > 0 ? (s.effDamage / breakdown.effDamage) : 0;
+      const scaleMult = s.summonDamageMult ?? (breakdown.effDamage > 0 ? (s.effDamage / breakdown.effDamage) : 0);
       const critMult = s.critAvgMult || breakdown.critAvgMult || 1.0;
 
       let intermediateRowsHtml = "";
