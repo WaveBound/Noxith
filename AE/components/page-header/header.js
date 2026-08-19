@@ -15,29 +15,25 @@ function generateDynamicNotifications() {
       id: "update-local-persistence-shinigami-v13",
       icon: "⚙",
       title: "Unit Settings & Ability Toggles Saved",
-      body: "Unit ability toggles, states, Shinigami Sword simulation, and DPS calculation settings are now automatically saved to local data.",
-      time: "Just now"
+      body: "Unit ability toggles and DPS calculation settings are now automatically saved to local data.",
     },
     {
       id: "update-mobile-dps-v12",
       icon: "✦",
       title: "DPS Breakdown & Mobile UI Updated",
       body: "Mobile touch scrolling, dynamic rank badges, and 1 decimal place DPS scaling have been added.",
-      time: "1d ago"
     },
     ...units.slice(0, 2).map(u => ({
       id: `unit-release-${u.id}`,
       icon: "✦",
       title: `Unit In Database: ${u.name}`,
       body: `Full stats, level scaling, and relic loadout options available for ${u.name}.`,
-      time: "1d ago"
     })),
     ...relics.slice(0, 2).map(r => ({
       id: `relic-release-${r.id}`,
       icon: "⚔",
       title: `Relic Added: ${r.name}`,
       body: r.location || "Available in Relics database.",
-      time: "2d ago"
     }))
   ];
 
