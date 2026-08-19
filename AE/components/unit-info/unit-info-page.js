@@ -829,7 +829,7 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
           `;
         }
       } else {
-        const scaleMult = effDamage > 0 ? (inspectedSummon.effDamage / effDamage) : 0;
+        const scaleMult = inspectedSummon.summonDamageMult ?? (effDamage > 0 ? (inspectedSummon.effDamage / effDamage) : 0);
         dmgRowsHtml += `
           <div class="dps-kv"><span class="dps-kv-lbl">Main Unit DMG</span><span class="dps-kv-val font-mono">${Math.round(effDamage).toLocaleString()}</span></div>
           <div class="dps-kv faint-nested">
@@ -885,7 +885,7 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
         if (bd.isEighthSword && berserkState) parts.push("Berserk +20%");
         if (bd.isLadyGiant && giantForm) parts.push("Giant Form +125%");
         if (bd.isBioinsect && bd.bioinsectResetStacks > 0) {
-          const hasMechanicalWings = (bd.equips || []).includes("Mechanical Wings") || bd.unitRelic === "Mechanical Wings";
+          const hasMechanicalWings = (bd.relics || []).some(r => r.name === "Mechanical Wings") || (unit.selectedDpsRelic === "Mechanical Wings") || (unit.relic?.name === "Mechanical Wings");
           const resetPct = bd.bioinsectResetStacks * (hasMechanicalWings ? 5 : 1);
           parts.push(`Bio Reset +${resetPct}%`);
         }
