@@ -16,24 +16,28 @@ function generateDynamicNotifications() {
       icon: "⚙",
       title: "Unit Settings & Ability Toggles Saved",
       body: "Unit ability toggles and DPS calculation settings are now automatically saved to local data.",
+      date: "Aug 19, 2026",
     },
     {
       id: "update-mobile-dps-v12",
       icon: "✦",
       title: "DPS Breakdown & Mobile UI Updated",
       body: "Mobile touch scrolling, dynamic rank badges, and 1 decimal place DPS scaling have been added.",
+      date: "Aug 5, 2026",
     },
     ...units.slice(0, 2).map(u => ({
       id: `unit-release-${u.id}`,
       icon: "✦",
       title: `Unit In Database: ${u.name}`,
       body: `Full stats, level scaling, and relic loadout options available for ${u.name}.`,
+      date: "Aug 5, 2026",
     })),
     ...relics.slice(0, 2).map(r => ({
       id: `relic-release-${r.id}`,
       icon: "⚔",
       title: `Relic Added: ${r.name}`,
       body: r.location || "Available in Relics database.",
+      date: "Aug 5, 2026",
     }))
   ];
 
@@ -166,7 +170,7 @@ export function renderHeader(mountEl) {
                 <div class="notif-item-body">
                   <div class="notif-item-title">${n.title}</div>
                   <div class="notif-item-text">${n.body}</div>
-                  <div class="notif-item-time">${n.time}</div>
+                  ${(n.date || n.time) ? `<div class="notif-item-time">${n.date || n.time}</div>` : ""}
                 </div>
               </div>
             `).join("")}
