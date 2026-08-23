@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Noxith Macro — Anime Expeditions</title>
+  <meta name="description" content="Standalone Windows macro for Anime Expeditions on Roblox." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #060608;
+      --bg-panel: rgba(14, 14, 18, 0.82);
+      --bg-card: rgba(19, 19, 26, 0.75);
+      --border: rgba(255, 255, 255, 0.12);
+      --border-bright: rgba(255, 255, 255, 0.35);
+      --text: #f7f7fa;
+      --text-muted: #9595a5;
+      --text-dim: #5c5c6e;
+      --accent: #ffffff;
+      --crimson: #d90429;
+      --crimson-glow: rgba(217, 4, 41, 0.25);
+      --font-display: 'Cinzel', serif;
+      --font-body: 'Space Grotesk', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    /* Atmospheric Vignette & Depth */
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(45, 45, 65, 0.5) 0%, transparent 65%),
+        radial-gradient(circle at 85% 85%, rgba(30, 30, 48, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 10% 60%, rgba(25, 25, 38, 0.35) 0%, transparent 45%),
+        linear-gradient(180deg, #060608 0%, #09090e 50%, #060608 100%);
+      z-index: -3;
+    }
+
+    /* Manga Diamond Lattice Pattern */
+    .bg-pattern {
+      position: fixed;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.018) 0px, rgba(255, 255, 255, 0.018) 1px, transparent 1px, transparent 16px),
+        repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.018) 0px, rgba(255, 255, 255, 0.018) 1px, transparent 1px, transparent 16px),
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 16px 16px, 16px 16px, 16px 16px;
+      z-index: -2;
+      opacity: 0.85;
+      mask-image: radial-gradient(ellipse at center, black 40%, transparent 95%);
+      -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 95%);
+    }
+
+    /* Falling Petals Canvas */
+    #petals-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 32px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Corner Registration Marks */
+    .corner-frame {
+      position: relative;
+    }
+
+    .corner-frame::before,
+    .corner-frame::after {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-color: var(--border-bright);
+      pointer-events: none;
+      transition: border-color 0.3s ease;
+    }
+
+    .corner-frame::before {
+      top: -1px;
+      left: -1px;
+      border-top: 1px solid var(--border-bright);
+      border-left: 1px solid var(--border-bright);
+    }
+
+    .corner-frame::after {
+      bottom: -1px;
+      right: -1px;
+      border-bottom: 1px solid var(--border-bright);
+      border-right: 1px solid var(--border-bright);
+    }
+
+    /* Navigation */
+    header {
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(6, 6, 8, 0.88);
+      backdrop-filter: blur(18px);
+      z-index: 100;
+    }
+
+    .nav-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 84px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 8px;
+      height: 8px;
+      background: var(--crimson);
+      transform: rotate(45deg);
+      box-shadow: 0 0 10px var(--crimson-glow);
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.45rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      font-size: 0.82rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      transition: color 0.25s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-cta {
+      border: 1px solid var(--border-bright);
+      padding: 10px 22px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--text) !important;
+      transition: all 0.3s ease;
+    }
+
+    .nav-cta:hover {
+      background: var(--text);
+      color: var(--bg) !important;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 90px 0 80px;
+    }
+
+    .hero-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .hero-desc {
+      margin: 0 auto 38px;
+    }
+
+    .hero-actions {
+      justify-content: center;
+    }
+
+    .manga-chapter-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.75rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .manga-chapter-tag .line {
+      width: 24px;
+      height: 1px;
+      background: var(--crimson);
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 5.5vw, 4.6rem);
+      line-height: 1.05;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      font-weight: 900;
+    }
+
+    .hero-game-badge {
+      display: inline-block;
+      font-size: 0.95rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 24px;
+      padding: 6px 16px;
+      background: var(--bg-card);
+      border-left: 3px solid var(--crimson);
+      border-top: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-desc {
+      font-size: 1.02rem;
+      color: var(--text-muted);
+      max-width: 480px;
+      margin-bottom: 38px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+    }
+
+    .btn-primary {
+      background: var(--crimson);
+      color: #fff;
+      padding: 16px 32px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.25s ease;
+      border: 1px solid var(--crimson);
+      box-shadow: 0 0 24px var(--crimson-glow);
+    }
+
+    .btn-primary:hover {
+      background: #b00320;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(217, 4, 41, 0.45);
+    }
+
+    .btn-secondary {
+      border: 1px solid var(--border);
+      padding: 16px 30px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      transition: all 0.25s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--border-bright);
+      background: rgba(30, 30, 42, 0.9);
+      transform: translateY(-2px);
+    }
+
+    .hero-manga-panel {
+      border: 1px solid var(--border);
+      padding: 12px;
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      position: relative;
+    }
+
+    .hero-art-img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      display: block;
+      filter: contrast(110%);
+    }
+
+    .ink-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin: 10px 0;
+      color: var(--border-bright);
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+    }
+
+    .ink-divider::before,
+    .ink-divider::after {
+      content: "";
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      flex: 1;
+    }
+
+    /* Section Framing */
+    .section-padding {
+      padding: 88px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-header {
+      margin-bottom: 48px;
+      position: relative;
+    }
+
+    .section-vol {
+      font-size: 0.72rem;
+      letter-spacing: 0.3em;
+      color: var(--crimson);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+    }
+
+    .section-vol::after {
+      content: "";
+      width: 30px;
+      height: 1px;
+      background: var(--crimson);
+      opacity: 0.6;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
+    /* Grid Panels */
+    .manga-panels-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .manga-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      padding: 34px 26px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .manga-panel:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-3px);
+    }
+
+    .panel-num {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 18px;
+      display: block;
+      letter-spacing: 0.22em;
+    }
+
+    .panel-name {
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .panel-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    .panel-tags {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag-chip {
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    /* Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--bg-panel);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      padding: 30px 26px;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-bright);
+    }
+
+    .feature-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .feature-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--crimson);
+      transform: rotate(45deg);
+    }
+
+    .feature-title {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .feature-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    /* Panorama Banner */
+    .panorama-spread {
+      margin: 48px 0;
+      position: relative;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      height: 230px;
+    }
+
+    .panorama-spread img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(75%) contrast(108%);
+    }
+
+    .panorama-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 24px;
+      background: radial-gradient(ellipse at center, rgba(14, 16, 23, 0.35) 0%, rgba(14, 16, 23, 0.15) 100%);
+      pointer-events: none;
+    }
+
+    .panorama-title {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9), 0 0 24px rgba(0, 0, 0, 0.8);
+    }
+
+    .panorama-sub {
+      font-size: 0.82rem;
+      letter-spacing: 0.2em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      background: rgba(6, 6, 8, 0.96);
+    }
+
+    .footer-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .footer-links a {
+      transition: color 0.2s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .manga-panels-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .footer-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Falling Petals Canvas -->
+  <canvas id="petals-canvas"></canvas>
+  <div class="bg-overlay"></div>
+  <div class="bg-pattern"></div>
+
+  <!-- Navigation -->
+  <header>
+    <div class="container">
+      <div class="nav-wrapper">
+        <a href="#" class="brand">
+          <div class="brand-mark"></div>
+          <span class="brand-title">NOXITH</span>
+        </a>
+        <nav class="nav-links">
+          <a href="#modes">Modes</a>
+          <a href="#features">Features</a>
+          <a href="checkout.html">License</a>
+          <a href="https://discord.com/invite/ju6ANNecQg" target="_blank" rel="noopener noreferrer">Discord</a>
+          <a href="checkout.html" class="nav-cta">Get Key ($5)</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-grid">
+
+        <div class="hero-content">
+          <div class="manga-chapter-tag">
+            <span class="line"></span>
+            <span>v1.1.6</span>
+          </div>
+
+          <h1>Noxith Macro</h1>
+
+          <div class="hero-game-badge">
+            Anime Expeditions
+          </div>
+
+          <p class="hero-desc">
+            Fast, reliable automation for Anime Expeditions with custom combos/targets, and auto-rejoin
+            failsafes.
+          </p>
+
+          <div class="hero-actions">
+            <a href="checkout.html" class="btn-primary">
+              <span>Buy Key ($5)</span>
+            </a>
+            <a href="https://github.com/WaveBound/AE_Macro/releases/download/v1.1.6/AE_Expeditions_Macro.exe"
+              class="btn-secondary" target="_blank" rel="noopener noreferrer">
+              <span>Download (.exe)</span>
+              <span>→</span>
+            </a>
+            <a href="https://discord.com/invite/ju6ANNecQg" class="btn-secondary" target="_blank"
+              rel="noopener noreferrer">
+              <span>Discord</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="ink-divider">◆ &nbsp; ◆ &nbsp; ◆</div>
+  </div>
+
+  <!-- Primary Modes -->
+  <section id="modes" class="section-padding">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-vol">Volume 01</span>
+        <h2 class="section-title">Modes</h2>
+      </div>
+
+      <div class="manga-panels-grid">
+
+        <div class="manga-panel corner-frame">
+          <span class="panel-num">MODE // 01</span>
+          <h3 class="panel-name">Expeditions</h3>
+          <p class="panel-desc">Runs School Grounds, Flower Forest, Rose Kingdom, and East Town on difficulties 1–3.</p>
+          <div class="panel-tags">
+            <span class="tag-chip">All Maps</span>
+            <span class="tag-chip">Diff 1–3</span>
+          </div>
+        </div>
+
+        <div class="manga-panel corner-frame">
+          <span class="panel-num">MODE // 02</span>
+          <h3 class="panel-name">Encounter Farmer</h3>
+          <p class="panel-desc">Target-farms encounter nodes for trunks.</p>
+          <div class="panel-tags">
+            <span class="tag-chip">Fast Loops</span>
+            <span class="tag-chip">Node Skips</span>
+          </div>
+        </div>
+
+        <div class="manga-panel corner-frame">
+          <span class="panel-num">MODE // 03</span>
+          <h3 class="panel-name">Auto Challenge</h3>
+          <p class="panel-desc">Automatically clears Trait RRs, Gems, Stat/Equip Locks, and Sprites.</p>
+          <div class="panel-tags">
+            <span class="tag-chip">Auto Queue</span>
+            <span class="tag-chip">All Types</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Banner -->
+  <div class="container">
+    <div class="panorama-spread corner-frame">
+      <img src="banner.png" alt="Noxith Macro Panorama Banner" />
+      <div class="panorama-content">
+        <p class="panorama-title">24/7 Automation</p>
+        <p class="panorama-sub">Standalone Windows App • Image Recognition</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Features -->
+  <section id="features" class="section-padding">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-vol">Volume 02</span>
+        <h2 class="section-title">Features</h2>
+      </div>
+
+      <div class="features-grid">
+
+        <div class="feature-card corner-frame">
+          <div class="feature-header">
+            <div class="feature-dot"></div>
+            <h3 class="feature-title">Material Recipes</h3>
+          </div>
+          <p class="feature-desc">
+            Set target drops and combo recipes. Runs only proceed when your target materials match.
+          </p>
+        </div>
+
+        <div class="feature-card corner-frame">
+          <div class="feature-header">
+            <div class="feature-dot"></div>
+            <h3 class="feature-title">Auto Rejoin</h3>
+          </div>
+          <p class="feature-desc">
+            Detects disconnects and crashes, then reconnects to your Private Server automatically.
+          </p>
+        </div>
+
+        <div class="feature-card corner-frame">
+          <div class="feature-header">
+            <div class="feature-dot"></div>
+            <h3 class="feature-title">Custom Unit Placements</h3>
+          </div>
+          <p class="feature-desc">
+            Visual map editor to customize unit placement spots on the map.
+          </p>
+        </div>
+
+        <div class="feature-card corner-frame">
+          <div class="feature-header">
+            <div class="feature-dot"></div>
+            <h3 class="feature-title">Discord Webhooks</h3>
+          </div>
+          <p class="feature-desc">
+            Sends real-time run summaries, clear times, and win/loss stats directly to Discord.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer with ToS & Privacy Links -->
+  <footer>
+    <div class="container">
+      <div class="footer-wrapper">
+        <div class="footer-brand">
+          <div class="brand-mark"></div>
+          <span
+            style="color: var(--text); font-family: var(--font-display); letter-spacing: 0.18em; font-weight: 700;">NOXITH
+            MACRO</span>
+        </div>
+        <div class="footer-links">
+          <a href="checkout.html">Checkout</a>
+          <a href="tos.html">Terms of Service</a>
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="https://github.com/WaveBound/AE_Macro/releases" target="_blank"
+            rel="noopener noreferrer">Releases</a>
+          <a href="https://discord.com/invite/ju6ANNecQg" target="_blank" rel="noopener noreferrer">Discord</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Organic Sakura Petals Physics Canvas -->
+  <script>
+    (function () {
+      const canvas = document.getElementById('petals-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      let width = (canvas.width = window.innerWidth);
+      let height = (canvas.height = window.innerHeight);
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      const PETAL_COUNT = 60;
+      const petals = [];
+
+      class SakuraPetal {
+        constructor() {
+          this.reset(true);
+        }
+
+        reset(initial = false) {
+          this.x = Math.random() * (width + 100) - 50;
+          this.y = initial ? Math.random() * height : -25;
+          this.w = Math.random() * 5 + 6.5;
+          this.h = this.w * (Math.random() * 0.25 + 1.25);
+          this.leftBulge = Math.random() * 0.15 + 0.85;
+          this.rightBulge = Math.random() * 0.15 + 0.85;
+          this.baseWidth = Math.random() * 0.12 + 0.1;
+          this.topNotchOffset = (Math.random() - 0.5) * 0.1;
+          this.topNotchDepth = Math.random() * 0.08 + 0.04;
+          this.hasNick = Math.random() > 0.78;
+          this.nickSide = Math.random() > 0.5 ? 1 : -1;
+          this.nickPos = Math.random() * 0.2 + 0.2;
+          this.speedY = Math.random() * 0.75 + 0.55;
+          this.speedX = Math.random() * 0.5 + 0.25;
+          this.sway = Math.random() * Math.PI * 2;
+          this.swaySpeed = Math.random() * 0.015 + 0.008;
+          this.flip = Math.random() * Math.PI * 2;
+          this.flipSpeed = Math.random() * 0.028 + 0.012;
+          this.roll = Math.random() * Math.PI * 2;
+          this.rollSpeed = Math.random() * 0.02 + 0.008;
+          this.angle = Math.random() * Math.PI * 2;
+          this.angleSpeed = (Math.random() - 0.5) * 0.015;
+          this.opacity = Math.random() * 0.35 + 0.25;
+          this.tintType = Math.random() > 0.88 ? 'crimson' : (Math.random() > 0.4 ? 'blush' : 'white');
+        }
+
+        update() {
+          this.sway += this.swaySpeed;
+          this.flip += this.flipSpeed;
+          this.roll += this.rollSpeed;
+          this.angle += this.angleSpeed;
+          this.x += Math.sin(this.sway) * 0.65 + this.speedX;
+          this.y += this.speedY;
+
+          if (this.y > height + 30 || this.x > width + 50) {
+            this.reset(false);
+          }
+        }
+
+        draw() {
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.angle);
+
+          const scaleX = Math.cos(this.flip);
+          const scaleY = Math.cos(this.roll) * 0.3 + 0.7;
+          ctx.scale(scaleX, scaleY);
+
+          const w = this.w;
+          const h = this.h;
+          const bw = w * this.baseWidth;
+
+          ctx.beginPath();
+          ctx.moveTo(-bw, h * 0.48);
+          ctx.lineTo(bw, h * 0.48);
+
+          if (this.hasNick && this.nickSide === 1) {
+            const ny = h * (this.nickPos - 0.2);
+            ctx.bezierCurveTo(w * this.rightBulge * 0.75, h * 0.32, w * this.rightBulge, ny + 3, w * (this.rightBulge - 0.08), ny);
+            ctx.bezierCurveTo(w * (this.rightBulge + 0.02), ny - 3, w * this.rightBulge * 0.85, -h * 0.2, w * 0.3, -h * 0.48);
+          } else {
+            ctx.bezierCurveTo(w * this.rightBulge * 0.75, h * 0.32, w * this.rightBulge * 0.95, -h * 0.15, w * 0.3, -h * 0.48);
+          }
+
+          const notchX = w * this.topNotchOffset;
+          const notchY = -h * (0.48 - this.topNotchDepth);
+          ctx.quadraticCurveTo(notchX, notchY, -w * 0.3, -h * 0.48);
+
+          if (this.hasNick && this.nickSide === -1) {
+            const ny = h * (this.nickPos - 0.2);
+            ctx.bezierCurveTo(-w * this.leftBulge * 0.85, -h * 0.2, -w * (this.leftBulge + 0.02), ny - 3, -w * (this.leftBulge - 0.08), ny);
+            ctx.bezierCurveTo(-w * this.leftBulge, ny + 3, -w * this.leftBulge * 0.75, h * 0.32, -bw, h * 0.48);
+          } else {
+            ctx.bezierCurveTo(-w * this.leftBulge * 0.95, -h * 0.15, -w * this.leftBulge * 0.75, h * 0.32, -bw, h * 0.48);
+          }
+
+          ctx.closePath();
+
+          const grad = ctx.createLinearGradient(0, -h * 0.5, 0, h * 0.5);
+          if (this.tintType === 'crimson') {
+            grad.addColorStop(0, `rgba(217, 4, 41, ${this.opacity * 0.85})`);
+            grad.addColorStop(0.7, `rgba(160, 2, 30, ${this.opacity * 0.5})`);
+            grad.addColorStop(1, `rgba(240, 210, 180, ${this.opacity * 0.35})`);
+          } else if (this.tintType === 'blush') {
+            grad.addColorStop(0, `rgba(255, 210, 225, ${this.opacity})`);
+            grad.addColorStop(0.75, `rgba(245, 230, 238, ${this.opacity * 0.8})`);
+            grad.addColorStop(1, `rgba(235, 220, 180, ${this.opacity * 0.45})`);
+          } else {
+            grad.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
+            grad.addColorStop(0.7, `rgba(235, 235, 245, ${this.opacity * 0.75})`);
+            grad.addColorStop(1, `rgba(215, 205, 175, ${this.opacity * 0.4})`);
+          }
+
+          ctx.fillStyle = grad;
+          ctx.fill();
+
+          ctx.restore();
+        }
+      }
+
+      for (let i = 0; i < PETAL_COUNT; i++) {
+        petals.push(new SakuraPetal());
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+        for (let i = 0; i < petals.length; i++) {
+          petals[i].update();
+          petals[i].draw();
+        }
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    })();
+  </script>
+</body>
+
+</html>
