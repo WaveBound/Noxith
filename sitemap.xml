@@ -9,10 +9,18 @@
       <priority>1.00</priority>
    </url>
 
+   <!-- AE-Macro Project -->
+   <url>
+      <loc>https://noxith.com/ae-macro/</loc>
+      <lastmod>2026-08-28</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.90</priority>
+   </url>
+
    <!-- BloxMulti Project -->
    <url>
       <loc>https://noxith.com/bloxmulti/</loc>
-      <lastmod>2026-07-30</lastmod>
+      <lastmod>2026-08-28</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.90</priority>
    </url>
