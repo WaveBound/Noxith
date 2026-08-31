@@ -417,7 +417,9 @@ img {
 
 .p-kw.p-rage-unleashed>span,
 .p-kw.p-precision-slash>span,
-.p-kw.p-quick-assist>span {
+.p-kw.p-quick-assist>span,
+.p-kw.p-shield>span,
+.p-kw.p-pierce>span {
   --kw-color: #00bcd4;
   color: #00bcd4 !important;
   -webkit-text-fill-color: #00bcd4 !important;
@@ -490,7 +492,9 @@ img {
 }
 
 .p-kw.p-burn>span,
-.p-burn-text {
+.p-burn-text,
+.p-kw.p-skeleton>span,
+.p-skeleton-text {
   --kw-color: #ff7b00;
 }
 
@@ -557,6 +561,8 @@ img {
 .p-bleed-text,
 .p-kw.p-burn>span,
 .p-burn-text,
+.p-kw.p-skeleton>span,
+.p-skeleton-text,
 .p-kw.p-frostbite>span,
 .p-kw.p-freeze>span,
 .p-kw.p-stone-wall>span,

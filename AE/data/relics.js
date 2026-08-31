@@ -274,6 +274,12 @@ const rawRelics = [
     image: relicImgByName("Pointy Straw"),
     unitEquip: "The Drink (Juicebox)",
   },
+  {
+    id: "relic-fiery-staff",
+    name: "Fiery Staff",
+    image: relicImgByName("Fiery Staff"),
+    unitEquip: "Head Captain (Char)",
+  },
 ];
 
 rawRelics.forEach((r) => {

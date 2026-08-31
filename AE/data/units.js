@@ -17,6 +17,7 @@ import carrotunleashed from "./units/carrotunleashed.js";
 import prodigyrage from "./units/prodigyrage.js";
 import thedrinkjuicebox from "./units/thedrinkjuicebox.js";
 import cubert from "./units/cubert.js";
+import headcaptainchar from "./units/headcaptainchar.js";
 
 import { getRelicStatsByName } from "./relicstats.js";
 import { relicImgByName } from "../icons/icons.js";
@@ -41,6 +42,7 @@ const rawUnits = [
   prodigyrage,
   thedrinkjuicebox,
   cubert,
+  headcaptainchar,
 ];
 
 function formatRange(v) {

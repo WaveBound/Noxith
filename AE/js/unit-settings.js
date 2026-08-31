@@ -94,6 +94,8 @@ export function applySavedSettingsToUnit(unit) {
   if (saved.fuaDamages !== undefined) unit.fuaDamages = saved.fuaDamages;
   if (saved.followUpInputsRaw !== undefined) unit.followUpInputsRaw = saved.followUpInputsRaw;
   if (saved.followUpInputs !== undefined) unit.followUpInputs = saved.followUpInputs;
+  if (saved.headCaptainBurningEnemies !== undefined) unit.headCaptainBurningEnemies = saved.headCaptainBurningEnemies;
+  if (saved.headCaptainBurnStacks !== undefined) unit.headCaptainBurnStacks = saved.headCaptainBurnStacks;
 
   return unit;
 }

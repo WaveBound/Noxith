@@ -348,6 +348,17 @@ export const relicStats = {
             desc: `Every <b>4 Regular Attacks</b>:<br>- Inflict enemies with <b>The Drink Mark</b> for <b>15</b> seconds<br><b>The Drink Mark</b> will:<br>- Increase all <b>Follow-Up Attack</b> damage by <b>25%</b><br>- Apply a <b>Physical</b> weakness at <b>10%</b>`,
         },
     },
+
+    "Fiery Staff": {
+        stats: [
+            { damage: { min: "+1%", max: "+10%" } },
+            { range: { min: "+1%", max: "+5%" } },
+        ],
+        passive: {
+            name: "Equipment Passive South",
+            desc: `On Takedown within this unit's range:<br>- Transform the enemy into a Skeleton (Capacity: 5)<br>Each Skeleton will act as a Path Trap:<br>- When touched by an enemy, deal 50% of this unit's current damage<br>- Explode and apply Burn to enemies within 3 range<br>Each Skeleton summoned will:<br>- Increase this unit's damage by 5%`,
+        },
+    },
 };
 
 export function getRelicStatsByName(name) {

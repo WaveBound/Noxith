@@ -246,10 +246,14 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isBioinsect = unit && (unit.id === "bioinsectfinal" || !!unit.isBioinsectUnit);
   const isCarrot = unit && (unit.id === "carrotunleashed" || (unit.name && unit.name.includes("Carrot")));
   const isProdigy = unit && (unit.id === "prodigyrage" || (unit.name && unit.name.includes("Prodigy")));
+  const isHeadCaptain = unit && (unit.id === "headcaptainchar" || (unit.name && unit.name.includes("Head Captain")));
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
     : "lightning";
+
+  const headCaptainBurningEnemies = isHeadCaptain ? (unit.headCaptainBurningEnemies !== undefined ? Math.max(0, Math.min(30, parseInt(unit.headCaptainBurningEnemies, 10) || 0)) : 30) : 30;
+  const headCaptainBurnStacks = isHeadCaptain ? (unit.headCaptainBurnStacks !== undefined ? Math.max(1, Math.min(10, parseInt(unit.headCaptainBurnStacks, 10) || 1)) : 1) : 1;
 
   const giantForm = unit && !!unit.giantForm;
   const berserkState = unit && !!unit.berserkState;
@@ -329,6 +333,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   } else if (isCrow) {
     base.dotMultiplier = 2.0;
     base.dotName = "Black Fire";
+  } else if (isHeadCaptain) {
+    base.dotMultiplier = 0.50;
+    base.dotName = "Burn";
   }
 
   if (isBioinsect) {
@@ -477,7 +484,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
 
   const avgHitDamage = effDamage * critAvgMult;
 
-  const effDotMult = isDarkMage
+  let effDotMult = isDarkMage
     ? (base.dotMultiplier || 0)
     : (base.dotMultiplier || 0) * (1 + (trait.dotBonus || 0)) * (1 + relicDotBonus);
 
@@ -489,6 +496,16 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   if (isCrow) {
     dotDuration = 12.0;
     dotIntervalMultiplier = Math.ceil(12.0 / effSpa);
+    dotIntervalSPA = dotIntervalMultiplier * effSpa;
+  } else if (isHeadCaptain) {
+    const burnBaseMult = base.dotMultiplier || 0.50;
+    const burnRangeBonusMult = 1 + (headCaptainBurningEnemies * 0.05);
+    const burnTraitRelicMult = 1 + (trait.dotBonus || 0) + relicDotBonus;
+    const singleStackBurnDmg = effDamage * burnBaseMult * burnRangeBonusMult * burnTraitRelicMult;
+    dotDamage = singleStackBurnDmg * headCaptainBurnStacks;
+    effDotMult = burnBaseMult * burnRangeBonusMult * burnTraitRelicMult * headCaptainBurnStacks;
+    dotDuration = 4.0;
+    dotIntervalMultiplier = Math.max(1, Math.ceil(4.0 / effSpa));
     dotIntervalSPA = dotIntervalMultiplier * effSpa;
   }
 
@@ -1095,6 +1112,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     prodigyRageUnleashed,
     prodigyStatusEffects: isProdigy ? prodigyStatusEffects : 0,
     prodigyStatusDmgMult: isProdigy ? (1 + prodigyStatusEffects * 0.10) : 1,
+    isHeadCaptain,
+    headCaptainBurningEnemies,
+    headCaptainBurnStacks,
     effectiveCritRate,
     battleInstinctBonusCrit,
   };

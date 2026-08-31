@@ -50,6 +50,7 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
   const isCarrot = unit.id === "carrotunleashed" || (unit.name && unit.name.includes("Carrot"));
   const isProdigy = unit.id === "prodigyrage" || (unit.name && unit.name.includes("Prodigy"));
   const isCursedImmortal = unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"));
+  const isHeadCaptain = unit.id === "headcaptainchar" || (unit.name && unit.name.includes("Head Captain"));
 
   combos.forEach(([eq1, eq2]) => {
     const mockUnit = {
@@ -80,6 +81,8 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       bioinsectForm: options.bioinsectForm || unit.bioinsectForm || "semiperfect",
       bioinsectResetStacks: options.bioinsectResetStacks !== undefined ? options.bioinsectResetStacks : (unit.bioinsectResetStacks || 0),
       bioinsectCopiedUnitId: options.bioinsectCopiedUnitId !== undefined ? options.bioinsectCopiedUnitId : (unit.bioinsectCopiedUnitId || (isBioinsect ? "puppet" : null)),
+      headCaptainBurningEnemies: options.headCaptainBurningEnemies !== undefined ? options.headCaptainBurningEnemies : (unit.headCaptainBurningEnemies !== undefined ? unit.headCaptainBurningEnemies : (isHeadCaptain ? 30 : 0)),
+      headCaptainBurnStacks: options.headCaptainBurnStacks !== undefined ? options.headCaptainBurnStacks : (unit.headCaptainBurnStacks !== undefined ? unit.headCaptainBurnStacks : (isHeadCaptain ? 1 : 1)),
     };
 
     const rawBreakdown = getTraitBreakdown(mockUnit, traitKey, targetLevel, statMode);
@@ -1030,7 +1033,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       <!-- ── SECTION 5: DOT & STATUS CALCULATIONS (IF ACTIVE) ── -->
       ${((rawBase.dotMultiplier || 0) > 0 || breakdown.demonicPresence || breakdown.isCrimson) ? `
       <div class="dps-section card-dot-theme">
-        <div class="dps-section-hd color-dot">5. ${breakdown.isDarkMage ? "Passive Damage Calculation" : breakdown.isEighthSword ? "Demonic Presence Calculation" : breakdown.isCrow ? "Black Fire DoT Calculation" : breakdown.isCrimson ? "Crimson Status Effects & Bleed" : `DoT Calculation (${formatPassiveText(rawBase.dotName || "Status")})`}</div>
+        <div class="dps-section-hd color-dot">5. ${breakdown.isDarkMage ? "Passive Damage Calculation" : breakdown.isEighthSword ? "Demonic Presence Calculation" : breakdown.isCrow ? "Black Fire DoT Calculation" : breakdown.isCrimson ? "Crimson Status Effects & Bleed" : breakdown.isHeadCaptain ? "Burn DoT Calculation (Passive West)" : `DoT Calculation (${formatPassiveText(rawBase.dotName || "Status")})`}</div>
         <div class="dps-breakdown-list">
           <div class="dps-breakdown-row">
             <span class="dps-row-lbl">Status Effect</span>
@@ -1038,7 +1041,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           </div>
           <div class="dps-breakdown-row">
             <span class="dps-row-lbl">Base Multiplier</span>
-            <span class="dps-row-val font-mono">${breakdown.isEighthSword ? "15% Current DMG (Can Crit)" : breakdown.isCrow ? "2.00x Base Hit in 12 ticks over 12s" : breakdown.isCrimson ? "Bleed: 0.65x | Explode: 15% | Pools: 10%/2s" : `${(rawBase.dotMultiplier || 0).toFixed(2)}x Base Hit`}</span>
+            <span class="dps-row-val font-mono">${breakdown.isEighthSword ? "15% Current DMG (Can Crit)" : breakdown.isCrow ? "2.00x Base Hit in 12 ticks over 12s" : breakdown.isCrimson ? "Bleed: 0.65x | Explode: 15% | Pools: 10%/2s" : breakdown.isHeadCaptain ? "0.50x Base Hit in 4 ticks over 4s" : `${(rawBase.dotMultiplier || 0).toFixed(2)}x Base Hit`}</span>
           </div>
           ${breakdown.isEighthSword ? `
             <div class="dps-breakdown-row step-indented">
@@ -1068,6 +1071,39 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
             </div>
             <div class="dps-breakdown-highlight-row color-dot-bg">
               <span class="dps-highlight-lbl color-dot">Unit Black Fire DoT DPS</span>
+              <span class="dps-highlight-val font-mono color-dot">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
+            </div>
+          ` : breakdown.isHeadCaptain ? `
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Base Burn DMG (50% Base Hit)</span>
+              <span class="dps-row-val font-mono">${Math.round(breakdown.effDamage * 0.50).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Passive West (+5% &times; ${breakdown.headCaptainBurningEnemies || 0} Burning in Range)</span>
+              <span class="dps-row-val font-mono color-buff">&times;${(1 + (breakdown.headCaptainBurningEnemies || 0) * 0.05).toFixed(2)} (${Math.round(breakdown.effDamage * 0.50 * (1 + (breakdown.headCaptainBurningEnemies || 0) * 0.05)).toLocaleString()} DMG)</span>
+            </div>
+            ${(breakdown.trait?.dotBonus || 0) > 0 ? `
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">${breakdown.trait.name} Trait DoT Bonus (+${Math.round(breakdown.trait.dotBonus * 100)}%)</span>
+              <span class="dps-row-val font-mono color-buff">&times;${(1 + breakdown.trait.dotBonus).toFixed(2)} (${Math.round(breakdown.effDamage * 0.50 * (1 + (breakdown.headCaptainBurningEnemies || 0) * 0.05) * (1 + breakdown.trait.dotBonus)).toLocaleString()} DMG)</span>
+            </div>
+            ` : ""}
+            ${(breakdown.headCaptainBurnStacks || 1) > 1 ? `
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Active Burn Stacks</span>
+              <span class="dps-row-val font-mono color-crit">&times;${breakdown.headCaptainBurnStacks} Stacks</span>
+            </div>
+            ` : ""}
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Total Burn DMG per Cycle</span>
+              <span class="dps-row-val font-mono color-dot">${Math.round(breakdown.dotDamage).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Re-proc Interval SPA</span>
+              <span class="dps-row-val font-mono">roundup(4 / ${(breakdown.effSpa || 1).toFixed(2)}s) &times; ${(breakdown.effSpa || 1).toFixed(2)}s = ${(breakdown.dotIntervalSPA || 4).toFixed(2)}s</span>
+            </div>
+            <div class="dps-breakdown-highlight-row color-dot-bg">
+              <span class="dps-highlight-lbl color-dot">Unit Burn DoT DPS</span>
               <span class="dps-highlight-val font-mono color-dot">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
             </div>
           ` : breakdown.isCrimson ? (() => {
@@ -1287,12 +1323,15 @@ export async function DpsCard(unit, options = {}) {
   const isBioinsect = unit.id === "bioinsectfinal" || !!unit.isBioinsectUnit;
   const isCarrot = unit.id === "carrotunleashed" || (unit.name && unit.name.includes("Carrot"));
   const isProdigy = unit.id === "prodigyrage" || (unit.name && unit.name.includes("Prodigy"));
+  const isHeadCaptain = unit.id === "headcaptainchar" || (unit.name && unit.name.includes("Head Captain"));
 
   let darkMageMode = unit.darkMageMode || "lightning";
   let giantForm = unit.giantForm !== undefined ? unit.giantForm : false;
   let berserkState = unit.berserkState !== undefined ? unit.berserkState : false;
   let demonicPresence = unit.demonicPresence !== undefined ? unit.demonicPresence : false;
   let crowEnemiesHit = unit.crowEnemiesHit !== undefined ? unit.crowEnemiesHit : 5;
+  let headCaptainBurningEnemies = unit.headCaptainBurningEnemies !== undefined ? unit.headCaptainBurningEnemies : 30;
+  let headCaptainBurnStacks = unit.headCaptainBurnStacks !== undefined ? unit.headCaptainBurnStacks : 1;
   let royalRivalry = isVegetable ? (unit.royalRivalry !== undefined ? !!unit.royalRivalry : true) : false;
   let awakenedPride = isVegetable ? (unit.awakenedPride !== undefined ? !!unit.awakenedPride : true) : false;
   let carrotTransformation = isCarrot ? (unit.carrotTransformation !== undefined ? !!unit.carrotTransformation : true) : false;
@@ -1315,6 +1354,10 @@ export async function DpsCard(unit, options = {}) {
   if (isVegetable && unit.awakenedPride === undefined) unit.awakenedPride = true;
   if (isCarrot && unit.carrotTransformation === undefined) unit.carrotTransformation = true;
   if (isProdigy && unit.prodigyRageUnleashed === undefined) unit.prodigyRageUnleashed = true;
+  if (isHeadCaptain) {
+    if (unit.headCaptainBurningEnemies === undefined) unit.headCaptainBurningEnemies = 30;
+    if (unit.headCaptainBurnStacks === undefined) unit.headCaptainBurnStacks = 1;
+  }
 
   if (isProdigy) {
     unit.prodigyRageUnleashed = prodigyRageUnleashed;
@@ -1456,7 +1499,20 @@ export async function DpsCard(unit, options = {}) {
             Relocation (+50%)
           </button>
         ` : ""}
-        ${isProdigy ? `
+        ${isHeadCaptain ? `
+          <div class="dps-control-stepper">
+            <span class="dps-stepper-lbl">Burn in Range:</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="hc-burning-input-${unit.id}" value="${headCaptainBurningEnemies}" class="dps-stepper-input" />
+          </div>
+          <div class="dps-control-stepper">
+            <span class="dps-stepper-lbl">Burn Stacks:</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="hc-stacks-input-${unit.id}" value="${headCaptainBurnStacks}" class="dps-stepper-input" />
+          </div>
+          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
+            <span class="dps-pill-dot"></span>
+            Shinigami: ${shinigamiPassiveActive ? "On" : "Off"}
+          </button>
+        ` : isProdigy ? `
           <div class="dps-prodigy-controls-stack">
             <div class="dps-prodigy-row">
               <button type="button" class="dps-toggle-pill ${prodigyRageUnleashed ? 'active' : ''}" id="prodigy-rage-toggle-${unit.id}">
@@ -1543,6 +1599,9 @@ export async function DpsCard(unit, options = {}) {
   const bioinsectUnitSelect = card.querySelector(`#bioinsect-unit-select-${unit.id}`);
   const bioinsectFormToggle = card.querySelector(`#bioinsect-form-toggle-${unit.id}`);
   const bioinsectResetInput = card.querySelector(`#bioinsect-reset-input-${unit.id}`);
+  const hcBurningInput = card.querySelector(`#hc-burning-input-${unit.id}`);
+  const hcBurningBadge = card.querySelector(`#hc-burning-badge-${unit.id}`);
+  const hcStacksInput = card.querySelector(`#hc-stacks-input-${unit.id}`);
   let fuaEditor = null;
 
   const commitCrowEnemies = () => {
@@ -1568,6 +1627,55 @@ export async function DpsCard(unit, options = {}) {
   });
 
   crowEnemiesInput?.addEventListener("change", commitCrowEnemies);
+
+  const commitHcBurning = () => {
+    if (!hcBurningInput) return;
+    hcBurningInput.value = hcBurningInput.value.replace(/[^\d]/g, "");
+    const val = Math.max(0, Math.min(30, parseInt(hcBurningInput.value || "0", 10) || 0));
+    hcBurningInput.value = String(val);
+    if (hcBurningBadge) {
+      hcBurningBadge.textContent = `(+${val * 5}%)`;
+    }
+    if (headCaptainBurningEnemies !== val) {
+      headCaptainBurningEnemies = val;
+      unit.headCaptainBurningEnemies = headCaptainBurningEnemies;
+      saveUnitSetting(unit.id, "headCaptainBurningEnemies", headCaptainBurningEnemies);
+      window.dispatchEvent(new CustomEvent("dps-value-changed"));
+      renderCalculations();
+    }
+  };
+
+  hcBurningInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commitHcBurning();
+      hcBurningInput.blur();
+    }
+  });
+  hcBurningInput?.addEventListener("change", commitHcBurning);
+
+  const commitHcStacks = () => {
+    if (!hcStacksInput) return;
+    hcStacksInput.value = hcStacksInput.value.replace(/[^\d]/g, "");
+    const val = Math.max(1, Math.min(10, parseInt(hcStacksInput.value || "1", 10) || 1));
+    hcStacksInput.value = String(val);
+    if (headCaptainBurnStacks !== val) {
+      headCaptainBurnStacks = val;
+      unit.headCaptainBurnStacks = headCaptainBurnStacks;
+      saveUnitSetting(unit.id, "headCaptainBurnStacks", headCaptainBurnStacks);
+      window.dispatchEvent(new CustomEvent("dps-value-changed"));
+      renderCalculations();
+    }
+  };
+
+  hcStacksInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commitHcStacks();
+      hcStacksInput.blur();
+    }
+  });
+  hcStacksInput?.addEventListener("change", commitHcStacks);
 
   demonicToggle?.addEventListener("click", () => {
     demonicPresence = !demonicPresence;
@@ -1616,7 +1724,7 @@ export async function DpsCard(unit, options = {}) {
     unit.simulateShinigamiPassive = shinigamiPassiveActive;
     saveUnitSetting(unit.id, "simulateShinigamiPassive", shinigamiPassiveActive);
     shinigamiToggle.classList.toggle("active", shinigamiPassiveActive);
-    shinigamiToggle.innerHTML = `<span class="dps-pill-dot"></span>Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}`;
+    shinigamiToggle.innerHTML = `<span class="dps-pill-dot"></span>Shinigami: ${shinigamiPassiveActive ? "On" : "Off"}`;
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
     renderCalculations();
   });
@@ -2031,6 +2139,8 @@ export async function DpsCard(unit, options = {}) {
         bioinsectForm,
         bioinsectResetStacks,
         bioinsectCopiedUnitId,
+        headCaptainBurningEnemies,
+        headCaptainBurnStacks,
       });
       return { traitKey, ...result };
     }).sort((a, b) => (Number(b.breakdown.displayVal) || 0) - (Number(a.breakdown.displayVal) || 0));

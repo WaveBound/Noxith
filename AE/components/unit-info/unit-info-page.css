@@ -846,6 +846,74 @@
   animation: statusTagShimmer 10s linear infinite;
 }
 
+.status-effect-box.status-card-burn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 16px;
+  overflow: hidden;
+  background-color: #000000;
+  border: 1px solid #5a2200;
+  border-radius: 12px;
+}
+
+.status-effect-box.status-card-burn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(180, 70, 0, 0.10) 20%,
+      rgba(220, 90, 0, 0.20) 45%,
+      rgba(220, 90, 0, 0.20) 55%,
+      rgba(140, 50, 0, 0.10) 80%,
+      rgba(0, 0, 0, 0) 100%);
+  background-size: 100% 200%;
+  filter: blur(12px);
+  pointer-events: none;
+  z-index: 1;
+  animation: statusOrangeFlowDown 6.5s linear infinite;
+}
+
+@keyframes statusOrangeFlowDown {
+  0% {
+    background-position: 50% 50%;
+  }
+
+  100% {
+    background-position: 50% -150%;
+  }
+}
+
+.status-effect-box.status-card-burn .status-effect-tag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background-image: linear-gradient(135deg, #ea580c 0%, #ea580c 38%, rgba(249, 115, 22, 0.70) 50%, #ea580c 62%, #ea580c 100%);
+  background-size: 500% 500%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: statusTagShimmer 10s linear infinite;
+}
+
+.status-effect-box.status-card-burn .status-effect-cooldown {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  padding: 2px 8px;
+  border: 1px solid rgba(234, 88, 12, 0.55);
+  border-radius: var(--radius-sm);
+  background: #0a0a0d;
+}
+
 .status-effect-box.status-card-illusion {
   position: relative;
   display: flex;

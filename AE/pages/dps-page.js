@@ -35,6 +35,8 @@ function calculateUnitBestStanding(unit, mode, isCompMode) {
       bioinsectForm: unit.bioinsectForm,
       bioinsectResetStacks: unit.bioinsectResetStacks,
       bioinsectCopiedUnitId: unit.bioinsectCopiedUnitId,
+      headCaptainBurningEnemies: unit.headCaptainBurningEnemies,
+      headCaptainBurnStacks: unit.headCaptainBurnStacks,
     });
     const val = mode === "dmg" ? (res.breakdown?.totalDmg || 0) : (res.breakdown?.dps || 0);
     if (val > maxOutput) maxOutput = val;

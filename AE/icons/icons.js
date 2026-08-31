@@ -71,6 +71,7 @@ export const RELIC_ICONS = {
     "relic-red-finger": toAbsoluteUrl("icons/relics/RedFinger.png"),
     "relic-magic-book": toAbsoluteUrl("icons/relics/MagicBook.png"),
     "relic-pointy-straw": toAbsoluteUrl("icons/relics/PointyStraw.png"),
+    "relic-fiery-staff": toAbsoluteUrl("icons/relics/FieryStaff.png"),
 };
 
 export function relicImg(id) {
@@ -117,6 +118,8 @@ const RELIC_NAME_TO_IMG = {
     "Mentors Cape": toAbsoluteUrl("icons/relics/MentorsCape.png"),
     "Warrior Pole": toAbsoluteUrl("icons/relics/WarriorPole.png"),
     "Pointy Straw": toAbsoluteUrl("icons/relics/PointyStraw.png"),
+    "Fiery Staff": toAbsoluteUrl("icons/relics/FieryStaff.png"),
+    "FieryStaff": toAbsoluteUrl("icons/relics/FieryStaff.png"),
 };
 
 export function relicImgByName(name) {
@@ -253,6 +256,12 @@ export function formatPassiveText(text) {
     out = out.replace(/Cleanse/gi, "@@CL@@");
     out = out.replace(/Dismembered/gi, "@@DM@@");
     out = out.replace(/Buffs/gi, "@@BF@@");
+    out = out.replace(/Skeletons/gi, "@@SKLS@@");
+    out = out.replace(/\bSkeleton\b/gi, "@@SKL@@");
+    out = out.replace(/Shields/gi, "@@SHLDS@@");
+    out = out.replace(/\bShield\b/gi, "@@SHLD@@");
+    out = out.replace(/Pierces/gi, "@@PRCS@@");
+    out = out.replace(/\bPierce\b/gi, "@@PRC@@");
 
     out = out.replace(/(\$\d[\d,]*%?|\b\d+(?:,\d{3})*(?:\.\d+)?)(x|s|%)?/gi, (match, num, unit) => {
         return `<span class="p-num" style="font-weight:800;">${num}${unit || ""}</span>`;
@@ -360,6 +369,12 @@ export function formatPassiveText(text) {
     out = out.replace(/@@CL@@/g, `<span class="p-kw p-cleanse"><span>Cleanse</span></span>`);
     out = out.replace(/@@DM@@/g, `<span class="p-kw p-dismembered"><span>Dismembered</span></span>`);
     out = out.replace(/@@BF@@/g, `<span class="p-kw p-buffs"><span>Buffs</span></span>`);
+    out = out.replace(/@@SKLS@@/g, `<span class="p-kw p-skeleton"><span class="p-burn-text">Skeletons</span></span>`);
+    out = out.replace(/@@SKL@@/g, `<span class="p-kw p-skeleton"><span class="p-burn-text">Skeleton</span></span>`);
+    out = out.replace(/@@SHLDS@@/g, `<span class="p-kw p-shield"><span>Shields</span></span>`);
+    out = out.replace(/@@SHLD@@/g, `<span class="p-kw p-shield"><span>Shield</span></span>`);
+    out = out.replace(/@@PRCS@@/g, `<span class="p-kw p-pierce"><span>Pierces</span></span>`);
+    out = out.replace(/@@PRC@@/g, `<span class="p-kw p-pierce"><span>Pierce</span></span>`);
 
     out = out.replace(/__BR__/g, "<br>");
     return out;
@@ -384,6 +399,7 @@ if (typeof window !== "undefined") {
         if (target.classList.contains("p-black-magic")) return toAbsoluteUrl("icons/info/BlackMagicInfo.png");
         if (target.classList.contains("p-illusion")) return toAbsoluteUrl("icons/info/IllusionInfo.png");
         if (target.classList.contains("p-mana-burn")) return toAbsoluteUrl("icons/info/ManaBurnInfo.png");
+        if (target.classList.contains("p-burn") || target.classList.contains("p-austere-flames")) return toAbsoluteUrl("icons/info/Burninfo.png");
         if (target.classList.contains("p-bleed")) return toAbsoluteUrl("icons/info/BleedInfo.png");
         if (target.classList.contains("p-ent")) return toAbsoluteUrl("icons/info/batinfo.png");
         if (target.classList.contains("p-fua")) return toAbsoluteUrl("icons/info/followupinfo.png");
