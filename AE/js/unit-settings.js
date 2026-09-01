@@ -96,6 +96,9 @@ export function applySavedSettingsToUnit(unit) {
   if (saved.followUpInputs !== undefined) unit.followUpInputs = saved.followUpInputs;
   if (saved.headCaptainBurningEnemies !== undefined) unit.headCaptainBurningEnemies = saved.headCaptainBurningEnemies;
   if (saved.headCaptainBurnStacks !== undefined) unit.headCaptainBurnStacks = saved.headCaptainBurnStacks;
+  if (saved.sovereignBossActive !== undefined) unit.sovereignBossActive = saved.sovereignBossActive;
+  if (saved.sovereignDjinnJudgmentActive !== undefined) unit.sovereignDjinnJudgmentActive = saved.sovereignDjinnJudgmentActive;
+  if (saved.sovereignEnemies !== undefined) unit.sovereignEnemies = saved.sovereignEnemies;
 
   return unit;
 }

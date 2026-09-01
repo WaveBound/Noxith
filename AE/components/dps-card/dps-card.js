@@ -413,6 +413,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     if (breakdown.hasWarriorPole && breakdown.isTransformed) parts.push({ label: "Warrior Pole Passive", pct: "20%" });
     if (breakdown.royalRivalry) parts.push({ label: "Royal Rivalry (Max Capacity)", pct: "50%" });
     if (breakdown.awakenedPride) parts.push({ label: "Awakened Pride (Transformation)", pct: "15%" });
+    if (breakdown.isSovereign && breakdown.sovereignBossActive) parts.push({ label: "Nine Tailed Fox Djinn (Boss in Range)", pct: "50%" });
 
     dmgRowsHtml += `
       <div class="dps-breakdown-row step-indented">
@@ -1162,7 +1163,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       <!-- ── SECTION 6: FUA & FOLLOW UP CALCULATIONS (IF ACTIVE) ── -->
       ${activeFuaBreakdowns.length > 0 ? `
       <div class="dps-section card-fua-theme">
-        <div class="dps-section-hd color-buff">6. ${breakdown.isCrow ? 'Illusion Status Calculations' : breakdown.isProdigy ? 'Hidden Potential Strike' : 'Follow-Up Attack Calculations (FUA)'}</div>
+        <div class="dps-section-hd color-buff">6. ${breakdown.isCrow ? 'Illusion Status Calculations' : breakdown.isProdigy ? 'Hidden Potential Strike' : breakdown.isSovereign ? 'Djinn Passives &amp; Lightning Math' : 'Follow-Up Attack Calculations (FUA)'}</div>
         <div class="dps-breakdown-list">
           ${activeFuaBreakdowns.map(entry => {
         const effSpaVal = breakdown.effSpa || 1;
@@ -1201,6 +1202,96 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                   <span class="dps-highlight-val font-mono color-buff">+${formatFullDPS(fieldDps)} DPS</span>
                 </div>
               `;
+        }
+
+        if (entry.passiveType === "lightningDjinn") {
+          const singleChain = entry.singleChainDmg || (entry.inputDamage * 0.25);
+          const totalChainBase = entry.effectiveFollowUpDamage || (entry.inputDamage * 1.25);
+          const avgHit = entry.averageFollowUpHit || (totalChainBase * critMult);
+          const singleChainAvg = singleChain * critMult;
+          const interval = entry.intervalSpa || effSpaVal;
+          const singleDps = entry.dps || (avgHit / interval);
+          const fieldDps = singleDps * placementCount;
+          const enemies = entry.sovereignEnemies || 1;
+          const hits = entry.hitsOnTarget !== undefined ? entry.hitsOnTarget : 5;
+          const pattern = entry.chainPattern || "1 → 1 → 1 → 1 → 1";
+          const totalPct = hits * 25;
+
+          return `
+            <div class="dps-breakdown-row">
+              <span class="dps-row-lbl">Passive: Lightning Djinn (Attack Chains)</span>
+              <span class="dps-row-val font-mono">${enemies} Enemie${enemies > 1 ? "s" : ""} &rarr; ${hits}/5 Hits on Target (${totalPct}%)</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Chain Bounce Sequence</span>
+              <span class="dps-row-val font-mono color-buff">${pattern}</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Base Single Chain DMG (25% Base Hit)</span>
+              <span class="dps-row-val font-mono">${Math.round(singleChain).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Avg Single Chain DMG with Crit (&times;${critMult.toFixed(2)})</span>
+              <span class="dps-row-val font-mono color-crit">${Math.round(singleChainAvg).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Target Hits Output (${hits} &times; 25% = ${totalPct}% with Crit)</span>
+              <span class="dps-row-val font-mono color-crit font-bold">${Math.round(avgHit).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Attack Interval</span>
+              <span class="dps-row-val font-mono">Every Attack (${interval.toFixed(2)}s)</span>
+            </div>
+            <div class="dps-breakdown-highlight-row color-buff-bg">
+              <span class="dps-highlight-lbl color-buff">Lightning Djinn Chains Field DPS (${placementCount} unit${placementCount > 1 ? "s" : ""})</span>
+              <span class="dps-highlight-val font-mono color-buff">+${formatFullDPS(fieldDps)} DPS</span>
+            </div>
+          `;
+        }
+
+        if (entry.passiveType === "djinnJudgment") {
+          const hasDagger = !!entry.hasLightningDagger;
+          const strikePct = entry.strikePercent || (hasDagger ? 100 : 75);
+          const chainCount = entry.judgmentChainCount || (hasDagger ? 5 : 3);
+          const chainPct = entry.judgmentChainPercent || (hasDagger ? 25 : 20);
+          const totalPct = entry.totalJudgmentPercent || (strikePct + chainCount * chainPct);
+
+          const singleStrikeBase = entry.singleStrikeDmg || (entry.inputDamage * (strikePct / 100));
+          const singleStrikeAvg = singleStrikeBase * critMult;
+          const singleChainBase = entry.singleJudgmentChainDmg || (entry.inputDamage * (chainPct / 100));
+          const singleChainAvg = singleChainBase * critMult;
+          const allChainsAvg = singleChainAvg * chainCount;
+
+          const totalAvgHit = entry.averageFollowUpHit || (singleStrikeAvg + allChainsAvg);
+          const singleDps = entry.dps || (totalAvgHit / 7.0);
+          const fieldDps = singleDps * placementCount;
+
+          return `
+            <div class="dps-breakdown-row">
+              <span class="dps-row-lbl">Passive: Djinn's Judgment ${hasDagger ? "(Lightning Dagger Enhanced)" : "(Base Mode)"}</span>
+              <span class="dps-row-val font-mono">${strikePct}% Strike + ${chainCount}&times;${chainPct}% Chains (${totalPct}% Total)</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Main Lightning Strike (${strikePct}%)</span>
+              <span class="dps-row-val font-mono">${Math.round(singleStrikeBase).toLocaleString()} Base &rarr; <span class="color-crit">${Math.round(singleStrikeAvg).toLocaleString()} Crit DMG</span></span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Chains (${chainCount} &times; ${chainPct}% = ${chainCount * chainPct}%)</span>
+              <span class="dps-row-val font-mono">${chainCount} &times; ${Math.round(singleChainAvg).toLocaleString()} &rarr; <span class="color-crit">${Math.round(allChainsAvg).toLocaleString()} Crit DMG</span></span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Total Strike Cycle Output (${totalPct}% with Crit)</span>
+              <span class="dps-row-val font-mono color-crit font-bold">${Math.round(totalAvgHit).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Proc Cooldown</span>
+              <span class="dps-row-val font-mono">Every 7.00s</span>
+            </div>
+            <div class="dps-breakdown-highlight-row color-buff-bg">
+              <span class="dps-highlight-lbl color-buff">Djinn's Judgment Field DPS (${placementCount} unit${placementCount > 1 ? "s" : ""})</span>
+              <span class="dps-highlight-val font-mono color-buff">+${formatFullDPS(fieldDps)} DPS</span>
+            </div>
+          `;
         }
 
         return `
@@ -1357,6 +1448,16 @@ export async function DpsCard(unit, options = {}) {
   if (isHeadCaptain) {
     if (unit.headCaptainBurningEnemies === undefined) unit.headCaptainBurningEnemies = 30;
     if (unit.headCaptainBurnStacks === undefined) unit.headCaptainBurnStacks = 1;
+  }
+
+  const isSovereign = unit.id === "sovereigndjinn" || (unit.name && unit.name.includes("Sovereign (Djinn)"));
+  let sovereignBossActive = isSovereign ? (unit.sovereignBossActive !== undefined ? !!unit.sovereignBossActive : true) : false;
+  let sovereignDjinnJudgmentActive = isSovereign ? (unit.sovereignDjinnJudgmentActive !== undefined ? !!unit.sovereignDjinnJudgmentActive : true) : true;
+  let sovereignEnemies = isSovereign ? Math.max(1, Math.min(5, parseInt(unit.sovereignEnemies || 1, 10) || 1)) : 1;
+  if (isSovereign) {
+    unit.sovereignBossActive = sovereignBossActive;
+    unit.sovereignDjinnJudgmentActive = sovereignDjinnJudgmentActive;
+    unit.sovereignEnemies = sovereignEnemies;
   }
 
   if (isProdigy) {
@@ -1558,6 +1659,29 @@ export async function DpsCard(unit, options = {}) {
               </button>
             </div>
           </div>
+        ` : isSovereign ? `
+          <div class="dps-prodigy-controls-stack">
+            <div class="dps-prodigy-row">
+              <button type="button" class="dps-toggle-pill ${sovereignBossActive ? 'active' : ''}" id="sovereign-boss-toggle-${unit.id}">
+                <span class="dps-pill-dot"></span>
+                Boss in Range: ${sovereignBossActive ? "On (+50%)" : "Off"}
+              </button>
+              <button type="button" class="dps-toggle-pill ${sovereignDjinnJudgmentActive ? 'active' : ''}" id="sovereign-judgment-toggle-${unit.id}">
+                <span class="dps-pill-dot"></span>
+                Judgment: ${sovereignDjinnJudgmentActive ? "On (7s)" : "Off"}
+              </button>
+            </div>
+            <div class="dps-prodigy-row">
+              <div class="dps-control-stepper">
+                <span class="dps-stepper-lbl">Enemies (chains):</span>
+                <input type="text" inputmode="numeric" pattern="[0-9]*" class="dps-stepper-input" id="sovereign-enemies-${unit.id}" value="${sovereignEnemies}" style="width:32px" />
+              </div>
+              <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
+                <span class="dps-pill-dot"></span>
+                Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
+              </button>
+            </div>
+          </div>
         ` : `
           <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
             <span class="dps-pill-dot"></span>
@@ -1602,6 +1726,9 @@ export async function DpsCard(unit, options = {}) {
   const hcBurningInput = card.querySelector(`#hc-burning-input-${unit.id}`);
   const hcBurningBadge = card.querySelector(`#hc-burning-badge-${unit.id}`);
   const hcStacksInput = card.querySelector(`#hc-stacks-input-${unit.id}`);
+  const sovereignBossToggle = card.querySelector(`#sovereign-boss-toggle-${unit.id}`);
+  const sovereignJudgmentToggle = card.querySelector(`#sovereign-judgment-toggle-${unit.id}`);
+  const sovereignEnemiesInput = card.querySelector(`#sovereign-enemies-${unit.id}`);
   let fuaEditor = null;
 
   const commitCrowEnemies = () => {
@@ -1826,6 +1953,45 @@ export async function DpsCard(unit, options = {}) {
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
     renderCalculations();
   });
+
+  sovereignBossToggle?.addEventListener("click", () => {
+    sovereignBossActive = !sovereignBossActive;
+    unit.sovereignBossActive = sovereignBossActive;
+    saveUnitSetting(unit.id, "sovereignBossActive", sovereignBossActive);
+    sovereignBossToggle.classList.toggle("active", sovereignBossActive);
+    sovereignBossToggle.innerHTML = `<span class="dps-pill-dot"></span>Boss in Range: ${sovereignBossActive ? "On (+50%)" : "Off"}`;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
+  sovereignJudgmentToggle?.addEventListener("click", () => {
+    sovereignDjinnJudgmentActive = !sovereignDjinnJudgmentActive;
+    unit.sovereignDjinnJudgmentActive = sovereignDjinnJudgmentActive;
+    saveUnitSetting(unit.id, "sovereignDjinnJudgmentActive", sovereignDjinnJudgmentActive);
+    sovereignJudgmentToggle.classList.toggle("active", sovereignDjinnJudgmentActive);
+    sovereignJudgmentToggle.innerHTML = `<span class="dps-pill-dot"></span>Judgment: ${sovereignDjinnJudgmentActive ? "On (7s)" : "Off"}`;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
+  const commitSovereignEnemies = () => {
+    if (!sovereignEnemiesInput) return;
+    sovereignEnemiesInput.value = sovereignEnemiesInput.value.replace(/[^\d]/g, "");
+    const val = Math.max(1, Math.min(5, parseInt(sovereignEnemiesInput.value || "1", 10) || 1));
+    sovereignEnemiesInput.value = String(val);
+    if (sovereignEnemies !== val) {
+      sovereignEnemies = val;
+      unit.sovereignEnemies = sovereignEnemies;
+      saveUnitSetting(unit.id, "sovereignEnemies", sovereignEnemies);
+      window.dispatchEvent(new CustomEvent("dps-value-changed"));
+      renderCalculations();
+    }
+  };
+
+  sovereignEnemiesInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); commitSovereignEnemies(); sovereignEnemiesInput.blur(); }
+  });
+  sovereignEnemiesInput?.addEventListener("change", commitSovereignEnemies);
 
   const prodigyStatusBadge = card.querySelector(`#prodigy-status-badge-${unit.id}`);
 

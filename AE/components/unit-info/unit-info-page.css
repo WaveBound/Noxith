@@ -683,6 +683,27 @@
   flex-direction: column;
   gap: 8px;
   margin-top: 6px;
+  overflow-y: auto;
+  padding-right: 4px;
+  box-sizing: border-box;
+}
+
+.passives-rows::-webkit-scrollbar {
+  width: 5px;
+}
+
+.passives-rows::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.passives-rows::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.35);
+  border-radius: 4px;
+}
+
+.passives-rows::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.6);
 }
 
 .passive-row {
@@ -1264,6 +1285,25 @@
   background: var(--background-elevated);
   border: 1px solid var(--border);
   color: var(--text-secondary);
+}
+
+.uip-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.uip-tier {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.28);
+  color: #a5b4fc;
 }
 
 .inspector-preferred {

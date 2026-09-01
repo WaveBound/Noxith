@@ -359,6 +359,17 @@ export const relicStats = {
             desc: `On Takedown within this unit's range:<br>- Transform the enemy into a Skeleton (Capacity: 5)<br>Each Skeleton will act as a Path Trap:<br>- When touched by an enemy, deal 50% of this unit's current damage<br>- Explode and apply Burn to enemies within 3 range<br>Each Skeleton summoned will:<br>- Increase this unit's damage by 5%`,
         },
     },
+
+    "Lightning Dagger": {
+        stats: [
+            { range: { min: "+1%", max: "+10%" } },
+            { damage: { min: "+1%", max: "+5%" } },
+        ],
+        passive: {
+            name: "Djinn's Judgment",
+            desc: `Every 7 seconds summon a Lightning Strike on the strongest enemy in this unit's range:<br>- Lightning Strike deals 100% of this unit's damage<br>- Lightning Strike will chain between 5 enemies<br>- Each chain deals 25% of this unit's current damage<br>- Each chain will also apply Freeze`,
+        },
+    },
 };
 
 export function getRelicStatsByName(name) {

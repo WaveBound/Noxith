@@ -472,6 +472,27 @@ function buildRightPanel(unit, activeSummonData = null) {
     if (statusPanel) {
       panel.appendChild(statusPanel);
     }
+
+    requestAnimationFrame(() => {
+      const rowsContainer = rightTable.querySelector(".passives-rows");
+      if (!rowsContainer) return;
+      const rows = rowsContainer.querySelectorAll(".passive-row");
+      const VISIBLE_ROWS = 2;
+      const GAP = 8;
+
+      if (rows.length <= VISIBLE_ROWS) {
+        rowsContainer.style.maxHeight = "none";
+        rowsContainer.style.overflowY = "visible";
+      } else {
+        let totalH = 0;
+        for (let i = 0; i < VISIBLE_ROWS; i++) {
+          totalH += (rows[i].offsetHeight || 130);
+          if (i < VISIBLE_ROWS - 1) totalH += GAP;
+        }
+        rowsContainer.style.maxHeight = `${totalH + 2}px`;
+        rowsContainer.style.overflowY = "auto";
+      }
+    });
   }
 
   render();
@@ -626,6 +647,7 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
   const isCrimson = unit.id === "crimsonbrother" || (unit.name && unit.name.includes("Crimson"));
   const isCursedImmortal = unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"));
   const isRazorjaw = unit.id === "razorjawhunter" || (unit.name && unit.name.includes("Razorjaw"));
+  const isSovereign = unit.id === "sovereigndjinn" || (unit.name && unit.name.includes("Sovereign (Djinn)"));
 
   let activeDpsSummonId = activeDpsSubtabSummonMap.get(unit.id) || "main";
 
@@ -635,6 +657,11 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
 
   if (isCursedImmortal && unit.coldState === undefined) {
     unit.coldState = false;  // Default: Caring State
+  }
+
+  if (isSovereign) {
+    if (unit.sovereignBossActive === undefined) unit.sovereignBossActive = true;
+    if (unit.sovereignDjinnJudgmentActive === undefined) unit.sovereignDjinnJudgmentActive = true;
   }
 
   const container = document.createElement("div");
@@ -651,6 +678,8 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
       selectedDpsEquip2: "",
       coldState: isCursedImmortal ? !!unit.coldState : false,
       caringState: isCursedImmortal ? !unit.coldState : false,
+      sovereignBossActive: isSovereign ? (unit.sovereignBossActive !== undefined ? !!unit.sovereignBossActive : true) : false,
+      sovereignDjinnJudgmentActive: isSovereign ? (unit.sovereignDjinnJudgmentActive !== undefined ? !!unit.sovereignDjinnJudgmentActive : true) : true,
     };
 
     const bd = getTraitBreakdown(baseUnitMock, "base", currentLevel, currentStatMode);
@@ -738,6 +767,51 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
         const calcDps = entry.dps;
         const pct = entry.inputDamage > 0 ? Math.round((fuaBase / entry.inputDamage) * 100) : 0;
         const formulaText = pct > 0 ? ` (${pct}% of ${Math.round(entry.inputDamage).toLocaleString()})` : "";
+
+        if (entry.passiveType === "lightningDjinn") {
+          const singleChain = entry.singleChainDmg || (entry.inputDamage * 0.25);
+          const singleChainAvg = singleChain * (entry.critAvgMult || critAvgMult);
+          return `
+            <div class="dps-section section-fua-entry" style="margin-bottom: 8px;">
+              <div class="dps-section-hd color-buff">Passive: Lightning Djinn (Attack Chains)</div>
+              <div class="dps-kv-list">
+                <div class="dps-kv"><span class="dps-kv-lbl">Chains per Regular Attack</span><span class="dps-kv-val font-mono">5 Chains &times; 25% (125% Base Hit)</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Single Chain DMG (25% Base Hit)</span><span class="dps-kv-val font-mono">${Math.round(singleChain).toLocaleString()} DMG</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Avg Single Chain with Crit</span><span class="dps-kv-val font-mono">${Math.round(singleChainAvg).toLocaleString()} DMG</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">All 5 Chains Total (with Crit)</span><span class="dps-kv-val font-mono">${Math.round(avgHit).toLocaleString()} DMG</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Proc Rate</span><span class="dps-kv-val font-mono">Every Regular Attack (${Number(interval).toFixed(2)}s)</span></div>
+                <div class="dps-kv primary"><span class="dps-kv-lbl crit-highlight">Lightning Djinn DPS</span><span class="dps-kv-val font-mono crit-highlight">+${formatDPS(calcDps)} DPS</span></div>
+              </div>
+            </div>
+          `;
+        }
+
+        if (entry.passiveType === "djinnJudgment") {
+          const hasDagger = !!entry.hasLightningDagger;
+          const strikePct = entry.strikePercent || (hasDagger ? 100 : 75);
+          const chainCount = entry.judgmentChainCount || (hasDagger ? 5 : 3);
+          const chainPct = entry.judgmentChainPercent || (hasDagger ? 25 : 20);
+          const totalPct = entry.totalJudgmentPercent || (strikePct + chainCount * chainPct);
+          const singleStrikeBase = entry.singleStrikeDmg || (entry.inputDamage * (strikePct / 100));
+          const singleStrikeAvg = singleStrikeBase * (entry.critAvgMult || critAvgMult);
+          const singleChainBase = entry.singleJudgmentChainDmg || (entry.inputDamage * (chainPct / 100));
+          const singleChainAvg = singleChainBase * (entry.critAvgMult || critAvgMult);
+          const allChainsAvg = singleChainAvg * chainCount;
+
+          return `
+            <div class="dps-section section-fua-entry" style="margin-bottom: 8px;">
+              <div class="dps-section-hd color-buff">Passive: Djinn's Judgment ${hasDagger ? "(Lightning Dagger Enhanced)" : "(Base Mode)"}</div>
+              <div class="dps-kv-list">
+                <div class="dps-kv"><span class="dps-kv-lbl">Strike &amp; Chains Multipliers</span><span class="dps-kv-val font-mono">${strikePct}% Strike + ${chainCount}&times;${chainPct}% Chains (${totalPct}% Total)</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Main Lightning Strike (${strikePct}%)</span><span class="dps-kv-val font-mono">${Math.round(singleStrikeBase).toLocaleString()} Base &rarr; ${Math.round(singleStrikeAvg).toLocaleString()} Crit</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Chains (${chainCount} &times; ${chainPct}%)</span><span class="dps-kv-val font-mono">${chainCount} &times; ${Math.round(singleChainAvg).toLocaleString()} &rarr; ${Math.round(allChainsAvg).toLocaleString()} Crit</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Total Strike Cycle Output</span><span class="dps-kv-val font-mono">${Math.round(avgHit).toLocaleString()} DMG</span></div>
+                <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Proc Cooldown</span><span class="dps-kv-val font-mono">Every 7.00s</span></div>
+                <div class="dps-kv primary"><span class="dps-kv-lbl crit-highlight">Djinn's Judgment DPS</span><span class="dps-kv-val font-mono crit-highlight">+${formatDPS(calcDps)} DPS</span></div>
+              </div>
+            </div>
+          `;
+        }
 
         return `
           <div class="dps-section section-fua-entry" style="margin-bottom: 8px;">
@@ -1175,6 +1249,16 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
                   <button type="button" class="uip-dps-lvl-btn${unit.coldState ? " active" : ""}" data-cursed-state="cold">Cold State</button>
                 </div>
               ` : ""}
+              ${isSovereign ? `
+                <div class="uip-dps-stat-mode-picker">
+                  <span style="font-size: 11px; font-weight: 700; color: var(--muted); align-self: center; margin-right: 2px;">Enemies:</span>
+                  ${[1, 2, 3, 4, 5].map(n => `<button type="button" class="uip-dps-lvl-btn${(unit.sovereignEnemies || 1) === n ? " active" : ""}" data-sovereign-enemies="${n}">${n}</button>`).join("")}
+                </div>
+                <div class="uip-dps-stat-mode-picker">
+                  <button type="button" class="uip-dps-lvl-btn${unit.sovereignBossActive ? " active" : ""}" data-sovereign-boss="toggle">Boss: ${unit.sovereignBossActive ? "On (+50%)" : "Off"}</button>
+                  <button type="button" class="uip-dps-lvl-btn${unit.sovereignDjinnJudgmentActive ? " active" : ""}" data-sovereign-judgment="toggle">Judgment: ${unit.sovereignDjinnJudgmentActive ? "On" : "Off"}</button>
+                </div>
+              ` : ""}
               <div class="uip-dps-level-picker">
                 <button type="button" class="uip-dps-lvl-btn${currentLevel === 1 ? " active" : ""}" data-lvl="1">Lv. 1</button>
                 <button type="button" class="uip-dps-lvl-btn${currentLevel === 50 ? " active" : ""}" data-lvl="50">Lv. 50</button>
@@ -1237,6 +1321,18 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
           unit.caringState = !unit.coldState;
           saveUnitSetting(unit.id, "coldState", unit.coldState);
           saveUnitSetting(unit.id, "caringState", unit.caringState);
+          render();
+        } else if (btn.dataset.sovereignBoss) {
+          unit.sovereignBossActive = !unit.sovereignBossActive;
+          saveUnitSetting(unit.id, "sovereignBossActive", unit.sovereignBossActive);
+          render();
+        } else if (btn.dataset.sovereignJudgment) {
+          unit.sovereignDjinnJudgmentActive = !unit.sovereignDjinnJudgmentActive;
+          saveUnitSetting(unit.id, "sovereignDjinnJudgmentActive", unit.sovereignDjinnJudgmentActive);
+          render();
+        } else if (btn.dataset.sovereignEnemies) {
+          unit.sovereignEnemies = parseInt(btn.dataset.sovereignEnemies, 10) || 1;
+          saveUnitSetting(unit.id, "sovereignEnemies", unit.sovereignEnemies);
           render();
         }
       });

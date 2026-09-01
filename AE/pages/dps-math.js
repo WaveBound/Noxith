@@ -247,6 +247,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isCarrot = unit && (unit.id === "carrotunleashed" || (unit.name && unit.name.includes("Carrot")));
   const isProdigy = unit && (unit.id === "prodigyrage" || (unit.name && unit.name.includes("Prodigy")));
   const isHeadCaptain = unit && (unit.id === "headcaptainchar" || (unit.name && unit.name.includes("Head Captain")));
+  const isSovereign = unit && (unit.id === "sovereigndjinn" || (unit.name && unit.name.includes("Sovereign (Djinn)")));
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
@@ -277,6 +278,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const prodigyRageUnleashed = isProdigy ? (unit.prodigyRageUnleashed !== undefined ? !!unit.prodigyRageUnleashed : true) : false;
   const prodigyStatusEffects = isProdigy ? Math.max(0, Math.min(10, parseInt(unit.prodigyStatusEffects || 0, 10) || 0)) : 0;
   const prodigyFatherAndSonActive = isProdigy ? !!unit.prodigyFatherAndSonActive : false;
+  const sovereignBossActive = isSovereign ? (unit.sovereignBossActive !== undefined ? !!unit.sovereignBossActive : true) : false;
+  const sovereignDjinnJudgmentActive = isSovereign ? (unit.sovereignDjinnJudgmentActive !== undefined ? !!unit.sovereignDjinnJudgmentActive : true) : true;
+  const sovereignEnemies = isSovereign ? Math.max(1, Math.min(5, parseInt(unit.sovereignEnemies || 1, 10) || 1)) : 1;
 
   let passiveSpaMult = isReaper ? -0.10 : (isLadyGiant && giantForm ? 0.25 : (isEighthSword && berserkState ? -0.10 : 0));
   let passiveCritChanceAdd = isReaper ? 0.40 : (isCursedImmortal ? 0.30 : (isRazorjaw ? 0.25 : 0));
@@ -285,6 +289,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   let passiveRangeMult = (isLadyGiant && giantForm ? 0.50 : (isCursedImmortal && caringState ? -0.50 : (isCursedImmortal && coldState ? -0.75 : 0)));
 
   if (isCarrot && carrotInstantRelocation) {
+    passiveDamageMult += 0.50;
+  }
+  if (isSovereign && sovereignBossActive) {
     passiveDamageMult += 0.50;
   }
   if (isBioinsect) {
@@ -839,6 +846,126 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
       });
     }
     singleFuaDmg = fuaBreakdowns.reduce((sum, b) => sum + b.averageFollowUpHit, 0);
+  } else if (isSovereign) {
+    unitDirectDPS = avgHitDamage / effSpa;
+    unitDoTDPS = 0;
+
+    let activeUnitEquip = "";
+    if (unit.selectedDpsRelic !== undefined && unit.selectedDpsRelic !== null && unit.selectedDpsRelic !== "") {
+      activeUnitEquip = unit.selectedDpsRelic;
+    } else if (unit.relic && unit.relic.name) {
+      activeUnitEquip = unit.relic.name;
+    } else if (unit.recommendedEquips?.unitEquip) {
+      activeUnitEquip = unit.recommendedEquips.unitEquip;
+    }
+
+    const hasLightningDagger = activeUnitEquip === "Lightning Dagger";
+
+    // 1. Lightning Djinn Chains — bounce algorithm
+    // With N enemies the chain ping-pongs: 1→2→...→N→N-1→...→2→1→...
+    // hitsOnTarget = how many of the 5 bounces land on enemy #1 (the primary target)
+    const TOTAL_CHAINS = 5;
+    const CHAIN_PCT = 0.25;
+
+    function hitsOnPrimaryTarget(numEnemies, numChains) {
+      if (numEnemies <= 1) return numChains;
+      let hits = 0, pos = 0, dir = 1;
+      for (let i = 0; i < numChains; i++) {
+        if (pos === 0) hits++;
+        let next = pos + dir;
+        if (next >= numEnemies) { dir = -1; next = pos + dir; }
+        else if (next < 0) { dir = 1; next = pos + dir; }
+        pos = next;
+      }
+      return hits;
+    }
+
+    // Build display string of the bounce sequence
+    function chainPattern(numEnemies, numChains) {
+      if (numEnemies <= 1) return Array(numChains).fill(1).join(" → ");
+      const seq = [];
+      let pos = 0, dir = 1;
+      for (let i = 0; i < numChains; i++) {
+        seq.push(pos + 1);
+        let next = pos + dir;
+        if (next >= numEnemies) { dir = -1; next = pos + dir; }
+        else if (next < 0) { dir = 1; next = pos + dir; }
+        pos = next;
+      }
+      return seq.join(" → ");
+    }
+
+    const djinnHitsOnTarget = hitsOnPrimaryTarget(sovereignEnemies, TOTAL_CHAINS);
+    const djinnChainPattern = chainPattern(sovereignEnemies, TOTAL_CHAINS);
+
+    const singleChainDmg = effDamage * CHAIN_PCT;
+    const chainDmg = effDamage * CHAIN_PCT * djinnHitsOnTarget;  // only hits-on-target matter for single-target DPS
+    const chainAvgHit = chainDmg * critAvgMult;
+    const chainDps = chainAvgHit / effSpa;
+    const chainTotalPercent = Math.round(CHAIN_PCT * 100 * djinnHitsOnTarget);
+
+    fuaBreakdowns = [
+      {
+        index: 0,
+        name: `Lightning Djinn (${djinnHitsOnTarget}/${TOTAL_CHAINS} Chains hit target = ${chainTotalPercent}%)`,
+        passiveType: "lightningDjinn",
+        chainCount: TOTAL_CHAINS,
+        chainPercent: Math.round(CHAIN_PCT * 100),
+        hitsOnTarget: djinnHitsOnTarget,
+        chainPattern: djinnChainPattern,
+        sovereignEnemies,
+        singleChainDmg,
+        inputDamage: effDamage,
+        effectiveFollowUpDamage: chainDmg,
+        averageFollowUpHit: chainAvgHit,
+        intervalSpa: effSpa,
+        critAvgMult,
+        dps: chainDps,
+      }
+    ];
+
+    // 2. Djinn's Judgment (Every 7s, can crit)
+    if (sovereignDjinnJudgmentActive) {
+      const strikeMult = hasLightningDagger ? 1.00 : 0.75;
+      const judgmentChainCount = hasLightningDagger ? 5 : 3;
+      const judgmentChainPercent = hasLightningDagger ? 0.25 : 0.20;
+      const judgmentChainMult = judgmentChainCount * judgmentChainPercent;
+      const totalJudgmentMult = strikeMult + judgmentChainMult;
+
+      const singleStrikeDmg = effDamage * strikeMult;
+      const singleJudgmentChainDmg = effDamage * judgmentChainPercent;
+      const allChainsDmg = effDamage * judgmentChainMult;
+      const judgmentRawDmg = effDamage * totalJudgmentMult;
+      const judgmentAvgHit = judgmentRawDmg * critAvgMult;
+      const judgmentInterval = 7.0;
+      const judgmentDps = judgmentAvgHit / judgmentInterval;
+
+      fuaBreakdowns.push({
+        index: 1,
+        name: `Djinn's Judgment (${hasLightningDagger ? "100% Strike + 5×25% Chains" : "75% Strike + 3×20% Chains"} every 7s)`,
+        passiveType: "djinnJudgment",
+        hasLightningDagger,
+        strikeMult,
+        strikePercent: Math.round(strikeMult * 100),
+        singleStrikeDmg,
+        judgmentChainCount,
+        judgmentChainPercent: Math.round(judgmentChainPercent * 100),
+        singleJudgmentChainDmg,
+        allChainsDmg,
+        totalJudgmentMult,
+        totalJudgmentPercent: Math.round(totalJudgmentMult * 100),
+        inputDamage: effDamage,
+        effectiveFollowUpDamage: judgmentRawDmg,
+        averageFollowUpHit: judgmentAvgHit,
+        intervalSpa: judgmentInterval,
+        critAvgMult,
+        dps: judgmentDps,
+        isTimedFua: true,
+      });
+    }
+
+    fuaDps = fuaBreakdowns.reduce((sum, b) => sum + b.dps, 0);
+    singleFuaDmg = fuaBreakdowns.reduce((sum, b) => sum + b.averageFollowUpHit, 0);
   } else {
     unitDirectDPS = avgHitDamage / effSpa;
     unitDoTDPS = (base.dotMultiplier || 0) > 0 ? (dotDamage / dotIntervalSPA) : 0;
@@ -1091,6 +1218,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     isVegetable,
     royalRivalry,
     awakenedPride,
+    isSovereign,
+    sovereignBossActive,
+    sovereignDjinnJudgmentActive,
     fuaDps,
     fuaDamages: unit.fuaDamages || [],
     fuaBreakdowns,

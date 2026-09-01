@@ -3,7 +3,8 @@ export const unit = {
     name: "Head Captain (Char)",
     image: "Units/Image/HeadCaptainChar.png",
     ascend: 3,
-    tiers: ["Mythic"],
+    tiers: ["Mythic", "Summer"],
+    update: "Summer",
 
     stats: {
         recommendedTrait: "Unbound",
@@ -65,7 +66,7 @@ export const unit = {
             attackTime: "3.35",
         },
         {
-            upgrade: 7, damage: "868", spa: "5.2", range: "26", cost: "5,175",
+            upgrade: 7, damage: "868", spa: "5.2", range: "26", cost: "5,750",
             attackName: "Solar Ravine",
             aoe: "Cone 65",
             attackTime: "2.7",
@@ -106,8 +107,8 @@ export const unit = {
 
     recommendedEquips: {
         unitEquip: "Fiery Staff",
-        equip1: "",
-        equip2: "",
+        equip1: "Shinigami Sword",
+        equip2: "Three Swords From Hell",
     },
 
     statusEffects: [

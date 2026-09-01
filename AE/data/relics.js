@@ -280,6 +280,12 @@ const rawRelics = [
     image: relicImgByName("Fiery Staff"),
     unitEquip: "Head Captain (Char)",
   },
+  {
+    id: "relic-lightning-dagger",
+    name: "Lightning Dagger",
+    image: relicImgByName("Lightning Dagger"),
+    unitEquip: "Sovereign (Djinn)",
+  },
 ];
 
 rawRelics.forEach((r) => {

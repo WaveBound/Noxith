@@ -18,6 +18,7 @@ import prodigyrage from "./units/prodigyrage.js";
 import thedrinkjuicebox from "./units/thedrinkjuicebox.js";
 import cubert from "./units/cubert.js";
 import headcaptainchar from "./units/headcaptainchar.js";
+import sovereigndjinn from "./units/sovereigndjinn.js";
 
 import { getRelicStatsByName } from "./relicstats.js";
 import { relicImgByName } from "../icons/icons.js";
@@ -43,6 +44,7 @@ const rawUnits = [
   thedrinkjuicebox,
   cubert,
   headcaptainchar,
+  sovereigndjinn,
 ];
 
 function formatRange(v) {
@@ -140,6 +142,8 @@ function normalize(u) {
   const finalAttackType = maxPlacement?.aoe || s.attackType || s.archetype || "—";
 
   const updateMap = {
+    headcaptainchar: "Summer",
+    sovereigndjinn: "Summer",
     thedrinkjuicebox: "1.0",
     vegetableprince: "1.0",
     prodigyrage: "1.0",
@@ -153,7 +157,7 @@ function normalize(u) {
     cursedimmortalblacksun: "0.5",
   };
 
-  const unitUpdate = updateMap[u.id] || "Release";
+  const unitUpdate = u.update || updateMap[u.id] || "Release";
 
   return {
     id: u.id,

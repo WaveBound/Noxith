@@ -72,6 +72,7 @@ export const RELIC_ICONS = {
     "relic-magic-book": toAbsoluteUrl("icons/relics/MagicBook.png"),
     "relic-pointy-straw": toAbsoluteUrl("icons/relics/PointyStraw.png"),
     "relic-fiery-staff": toAbsoluteUrl("icons/relics/FieryStaff.png"),
+    "relic-lightning-dagger": toAbsoluteUrl("icons/relics/LightningDagger.png"),
 };
 
 export function relicImg(id) {
@@ -120,6 +121,8 @@ const RELIC_NAME_TO_IMG = {
     "Pointy Straw": toAbsoluteUrl("icons/relics/PointyStraw.png"),
     "Fiery Staff": toAbsoluteUrl("icons/relics/FieryStaff.png"),
     "FieryStaff": toAbsoluteUrl("icons/relics/FieryStaff.png"),
+    "Lightning Dagger": toAbsoluteUrl("icons/relics/LightningDagger.png"),
+    "LightningDagger": toAbsoluteUrl("icons/relics/LightningDagger.png"),
 };
 
 export function relicImgByName(name) {
@@ -191,6 +194,9 @@ export function formatPassiveText(text) {
     out = out.replace(/Old[\s\xA0]+Magic/gi, "@@OM@@");
     out = out.replace(/Eruption/gi, "@@ER@@");
     out = out.replace(/Storm/gi, "@@ST@@");
+    out = out.replace(/Nine[\s\xA0]+Tailed[\s\xA0]+Fox[\s\xA0]+Djinn/gi, "@@NTFD@@");
+    out = out.replace(/Lightning[\s\xA0]+Djinn/gi, "@@LDJ@@");
+    out = out.replace(/Lightning[\s\xA0]+Strikes?/gi, "@@LST@@");
     out = out.replace(/Follow-Up[\s\xA0]+Attacks/gi, "@@FUAS@@");
     out = out.replace(/Follow-Up[\s\xA0]+Attack/gi, "@@FUA@@");
     out = out.replace(/Follow-Up/gi, "@@FU@@");
@@ -302,6 +308,9 @@ export function formatPassiveText(text) {
     out = out.replace(/@@OM@@/g, `<span class="p-kw p-spell"><span class="p-spell-text">Old Magic</span></span>`);
     out = out.replace(/@@ER@@/g, `<span class="p-kw p-spell"><span class="p-spell-text">Eruption</span></span>`);
     out = out.replace(/@@ST@@/g, `<span class="p-kw p-spell"><span class="p-spell-text">Storm</span></span>`);
+    out = out.replace(/@@NTFD@@/g, `<span class="p-kw p-nine-tailed-fox-djinn"><span>Nine Tailed Fox Djinn</span></span>`);
+    out = out.replace(/@@LDJ@@/g, `<span class="p-kw p-lightning-djinn"><span>Lightning Djinn</span></span>`);
+    out = out.replace(/@@LST@@/g, `<span class="p-kw p-lightning-strike"><span>Lightning Strike</span></span>`);
 
     out = out.replace(/@@FUAS@@/g, `<span class="p-kw p-fua"><span class="p-fua-text">Follow-Up Attacks</span></span>`);
     out = out.replace(/@@FUA@@/g, `<span class="p-kw p-fua"><span class="p-fua-text">Follow-Up Attack</span></span>`);
@@ -447,6 +456,12 @@ if (typeof window !== "undefined") {
         if (target.classList.contains("p-fighting-spirit")) return toAbsoluteUrl("icons/info/FightingSpiritinfo.png");
         if (target.classList.contains("p-carrot-transform")) return toAbsoluteUrl("icons/info/CarrotTrasnforminfo.png");
         if (target.classList.contains("p-debuffed")) return toAbsoluteUrl("icons/info/Debuffedinfo.png");
+        if (target.classList.contains("p-nine-tailed-fox-djinn")) return toAbsoluteUrl("icons/info/NineTailedFoxDjinninfo.png");
+        if (target.classList.contains("p-lightning-djinn")) return toAbsoluteUrl("icons/info/LightningDjinninfo.png");
+        if (target.classList.contains("p-lightning-strike")) return toAbsoluteUrl("icons/info/LightningStrikeinfo.png");
+        if (target.classList.contains("p-pierce")) return toAbsoluteUrl("icons/info/Pierceinfo.png");
+        if (target.classList.contains("p-skeleton")) return toAbsoluteUrl("icons/info/Skeletoninfo.png");
+        if (target.classList.contains("p-shield")) return toAbsoluteUrl("icons/info/Shieldinfo.png");
         return "";
     }
 

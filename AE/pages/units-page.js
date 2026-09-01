@@ -31,6 +31,7 @@ const ARCHETYPES = [
 
 const UPDATES = [
   { id: "all", label: "All" },
+  { id: "Summer", label: "Summer" },
   { id: "1.0", label: "Update 1.0" },
   { id: "0.5", label: "Update 0.5" },
   { id: "Release", label: "Release" },

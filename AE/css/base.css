@@ -312,7 +312,13 @@ img {
 }
 
 .p-kw.p-boss>span {
-  --kw-color: #ff7b00;
+  --kw-color: #ff3333;
+  color: #ff3333 !important;
+  -webkit-text-fill-color: #ff3333 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #ff3333 !important;
+  text-underline-offset: 2px !important;
 }
 
 .p-kw.p-fighting-spirit>span {
@@ -426,6 +432,18 @@ img {
   font-weight: 700 !important;
   text-decoration: underline !important;
   text-decoration-color: #00bcd4 !important;
+  text-underline-offset: 2px !important;
+}
+
+.p-kw.p-nine-tailed-fox-djinn>span,
+.p-kw.p-lightning-djinn>span,
+.p-kw.p-lightning-strike>span {
+  --kw-color: #00f0ff;
+  color: #00f0ff !important;
+  -webkit-text-fill-color: #00f0ff !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #00f0ff !important;
   text-underline-offset: 2px !important;
 }
 
@@ -596,7 +614,10 @@ img {
 .p-kw.p-crimson-explode>span,
 .p-kw.p-boss>span,
 .p-kw.p-genetic-dupe>span,
-.p-kw.p-buffs>span {
+.p-kw.p-buffs>span,
+.p-kw.p-nine-tailed-fox-djinn>span,
+.p-kw.p-lightning-djinn>span,
+.p-kw.p-lightning-strike>span {
   background: linear-gradient(180deg, color-mix(in srgb, var(--kw-color) calc(100% - var(--kw-darkness)), #000) 0%, var(--kw-color) 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
