@@ -433,7 +433,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     (isVegetable) ||
     (isBioinsect && bioinsectForm !== "imperfect") ||
     (isProdigy && prodigyRageUnleashed) ||
-    (isEighthSword && berserkState);
+    (isEighthSword && berserkState) ||
+    (isSovereign && sovereignBossActive);
 
   let totalPassiveDamageBonus = (shinigamiActive ? 0.15 : 0) + (hasWarriorPole && isTransformed ? 0.20 : 0) + passiveDamageMult;
   // summonBaseEffDamage: scales with trait, flat relic damage, Z stat, and ascend

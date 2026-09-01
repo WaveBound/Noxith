@@ -956,9 +956,11 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
         dmgAccum = Math.round(dmgAccum * (1 + totalPassiveDamageBonus));
         const parts = [];
         if (shinigamiActive) parts.push("Shinigami +15%");
+        if (bd.hasWarriorPole && bd.isTransformed) parts.push("Warrior Pole +20%");
         if (bd.isReaper) parts.push("Adaptation +40%");
         if (bd.isEighthSword && berserkState) parts.push("Berserk +20%");
         if (bd.isLadyGiant && giantForm) parts.push("Giant Form +125%");
+        if (bd.isSovereign && bd.sovereignBossActive) parts.push("Nine Tailed Fox +50%");
         if (bd.isBioinsect && bd.bioinsectResetStacks > 0) {
           const hasMechanicalWings = (bd.relics || []).some(r => r.name === "Mechanical Wings") || (unit.selectedDpsRelic === "Mechanical Wings") || (unit.relic?.name === "Mechanical Wings");
           const resetPct = bd.bioinsectResetStacks * (hasMechanicalWings ? 5 : 1);
