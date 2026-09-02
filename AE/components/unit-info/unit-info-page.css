@@ -1189,6 +1189,55 @@
   border-color: rgba(56, 189, 248, 0.55);
 }
 
+.status-effect-box.status-card-electricity {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 16px;
+  overflow: hidden;
+  background-color: #000000;
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  border-radius: 12px;
+}
+
+.status-effect-box.status-card-electricity::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 180, 216, 0.1) 20%,
+      rgba(0, 229, 255, 0.18) 45%,
+      rgba(0, 229, 255, 0.18) 55%,
+      rgba(0, 180, 216, 0.1) 80%,
+      rgba(0, 0, 0, 0) 100%);
+  background-size: 100% 200%;
+  filter: blur(12px);
+  pointer-events: none;
+  z-index: 1;
+  animation: statusBlueFlowDown 6.5s linear infinite;
+}
+
+.status-effect-box.status-card-electricity .status-effect-name {
+  color: #00e5ff !important;
+  -webkit-text-fill-color: #00e5ff !important;
+}
+
+.status-effect-box.status-card-electricity .status-effect-tag {
+  background-image: linear-gradient(135deg, #00e5ff 0%, #00e5ff 38%, rgba(0, 180, 216, 0.65) 50%, #00e5ff 62%, #00e5ff 100%);
+  background-size: 500% 500%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: statusTagShimmer 10s linear infinite;
+}
+
+.status-effect-box.status-card-electricity .status-effect-cooldown {
+  border-color: rgba(0, 229, 255, 0.55);
+}
+
 .status-effect-body {
   position: relative;
   z-index: 2;
@@ -1222,6 +1271,15 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+}
+
+.status-effect-icon img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
 }
 
 /* ── Inspector Right Sidebar (Fluid Height Scaling) ─────────────────────── */

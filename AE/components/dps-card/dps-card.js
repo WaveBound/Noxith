@@ -83,6 +83,9 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       bioinsectCopiedUnitId: options.bioinsectCopiedUnitId !== undefined ? options.bioinsectCopiedUnitId : (unit.bioinsectCopiedUnitId || (isBioinsect ? "puppet" : null)),
       headCaptainBurningEnemies: options.headCaptainBurningEnemies !== undefined ? options.headCaptainBurningEnemies : (unit.headCaptainBurningEnemies !== undefined ? unit.headCaptainBurningEnemies : (isHeadCaptain ? 30 : 0)),
       headCaptainBurnStacks: options.headCaptainBurnStacks !== undefined ? options.headCaptainBurnStacks : (unit.headCaptainBurnStacks !== undefined ? unit.headCaptainBurnStacks : (isHeadCaptain ? 1 : 1)),
+      lgVoltageMeter: options.lgVoltageMeter !== undefined ? options.lgVoltageMeter : (unit.lgVoltageMeter !== undefined ? unit.lgVoltageMeter : 25),
+      lgEnemies: options.lgEnemies !== undefined ? options.lgEnemies : (unit.lgEnemies !== undefined ? unit.lgEnemies : 10),
+      sfBurnStacks: options.sfBurnStacks !== undefined ? options.sfBurnStacks : (unit.sfBurnStacks !== undefined ? unit.sfBurnStacks : 0),
     };
 
     const rawBreakdown = getTraitBreakdown(mockUnit, traitKey, targetLevel, statMode);
@@ -1032,17 +1035,17 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       </div>
 
       <!-- ── SECTION 5: DOT & STATUS CALCULATIONS (IF ACTIVE) ── -->
-      ${((rawBase.dotMultiplier || 0) > 0 || breakdown.demonicPresence || breakdown.isCrimson) ? `
+      ${((rawBase.dotMultiplier || 0) > 0 || breakdown.demonicPresence || breakdown.isCrimson || breakdown.isLightningGod || (breakdown.unitDoTDPS || 0) > 0) ? `
       <div class="dps-section card-dot-theme">
-        <div class="dps-section-hd color-dot">5. ${breakdown.isDarkMage ? "Passive Damage Calculation" : breakdown.isEighthSword ? "Demonic Presence Calculation" : breakdown.isCrow ? "Black Fire DoT Calculation" : breakdown.isCrimson ? "Crimson Status Effects & Bleed" : breakdown.isHeadCaptain ? "Burn DoT Calculation (Passive West)" : `DoT Calculation (${formatPassiveText(rawBase.dotName || "Status")})`}</div>
+        <div class="dps-section-hd color-dot">5. ${breakdown.isDarkMage ? "Passive Damage Calculation" : breakdown.isEighthSword ? "Demonic Presence Calculation" : breakdown.isCrow ? "Black Fire DoT Calculation" : breakdown.isCrimson ? "Crimson Status Effects & Bleed" : breakdown.isHeadCaptain ? "Burn DoT Calculation (Passive West)" : breakdown.isLightningGod ? "Electricity Status Effect Calculation" : `DoT Calculation (${formatPassiveText(rawBase.dotName || "Status")})`}</div>
         <div class="dps-breakdown-list">
           <div class="dps-breakdown-row">
             <span class="dps-row-lbl">Status Effect</span>
-            <span class="dps-row-val">${formatPassiveText(rawBase.dotName || "DoT")}</span>
+            <span class="dps-row-val">${formatPassiveText(rawBase.dotName || "Electricity")}</span>
           </div>
           <div class="dps-breakdown-row">
             <span class="dps-row-lbl">Base Multiplier</span>
-            <span class="dps-row-val font-mono">${breakdown.isEighthSword ? "15% Current DMG (Can Crit)" : breakdown.isCrow ? "2.00x Base Hit in 12 ticks over 12s" : breakdown.isCrimson ? "Bleed: 0.65x | Explode: 15% | Pools: 10%/2s" : breakdown.isHeadCaptain ? "0.50x Base Hit in 4 ticks over 4s" : `${(rawBase.dotMultiplier || 0).toFixed(2)}x Base Hit`}</span>
+            <span class="dps-row-val font-mono">${breakdown.isEighthSword ? "15% Current DMG (Can Crit)" : breakdown.isCrow ? "2.00x Base Hit in 12 ticks over 12s" : breakdown.isCrimson ? "Bleed: 0.65x | Explode: 15% | Pools: 10%/2s" : breakdown.isHeadCaptain ? "0.50x Base Hit in 4 ticks over 4s" : breakdown.isLightningGod ? "0.15x Base Hit (+150% from Avg 30 Voltage = 0.375x)" : `${(rawBase.dotMultiplier || 0).toFixed(2)}x Base Hit`}</span>
           </div>
           ${breakdown.isEighthSword ? `
             <div class="dps-breakdown-row step-indented">
@@ -1107,7 +1110,62 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
               <span class="dps-highlight-lbl color-dot">Unit Burn DoT DPS</span>
               <span class="dps-highlight-val font-mono color-dot">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
             </div>
-          ` : breakdown.isCrimson ? (() => {
+          ` : breakdown.isSharkfang ? `
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Base Burn Multiplier</span>
+              <span class="dps-row-val font-mono">0.55x Base Hit per active Vapor Cloud puddle</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Active Puddles (Burn Stacks)</span>
+              <span class="dps-row-val font-mono color-buff">&times;${breakdown.sfBurnStacks || 0} Puddle${(breakdown.sfBurnStacks || 0) === 1 ? '' : 's'} (${Math.round((breakdown.sfBurnStacks || 0) * 55)}% Base Hit)</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Total Burn DMG over 4s</span>
+              <span class="dps-row-val font-mono color-dot">${Math.round(breakdown.dotDamage || 0).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Burn Duration & Ticks</span>
+              <span class="dps-row-val font-mono">4 ticks over 4.0s (1 tick/sec)</span>
+            </div>
+            <div class="dps-breakdown-highlight-row color-dot-bg">
+              <span class="dps-highlight-lbl color-dot">Unit Burn DoT DPS</span>
+              <span class="dps-highlight-val font-mono color-dot">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
+            </div>
+          ` : breakdown.isLightningGod ? (() => {
+        const vMeter = breakdown.lgVoltageMeter !== undefined ? breakdown.lgVoltageMeter : 25;
+        const vBoost = vMeter * 5;
+        const effMult = 0.15 * (1 + vMeter * 0.05);
+        return `
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Base Electricity Multiplier</span>
+              <span class="dps-row-val font-mono">0.15x Base Hit</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Storm Charge Voltage Scaling</span>
+              <span class="dps-row-val font-mono color-buff">+${vBoost}% (+5% &times; ${vMeter} Voltage Meter)</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Effective Electricity Multiplier</span>
+              <span class="dps-row-val font-mono color-buff">0.15 &times; (1 + ${(vMeter * 0.05).toFixed(2)}) = ${effMult.toFixed(3)}x (${(effMult * 100).toFixed(1)}% Base Hit)</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Base Electricity DMG (${(effMult * 100).toFixed(1)}% Base Hit)</span>
+              <span class="dps-row-val font-mono">${Math.round((breakdown.effDamage || 0) * effMult).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Avg Electricity DMG with Crit (&times;${(breakdown.critAvgMult || 1).toFixed(2)})</span>
+              <span class="dps-row-val font-mono color-dot">${Math.round((breakdown.avgHitDamage || 0) * effMult).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Application Rate</span>
+              <span class="dps-row-val font-mono">Every Attack (${(breakdown.effSpa || 1).toFixed(2)}s)</span>
+            </div>
+            <div class="dps-breakdown-highlight-row color-dot-bg">
+              <span class="dps-highlight-lbl color-dot">Unit Electricity Status Effect DPS</span>
+              <span class="dps-highlight-val font-mono color-dot">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
+            </div>
+        `;
+      })() : breakdown.isCrimson ? (() => {
         const effDmg = breakdown.effDamage || 0;
         const critM = breakdown.critAvgMult || 1;
         const effSpaVal = breakdown.effSpa || 1;
@@ -1163,7 +1221,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       <!-- ── SECTION 6: FUA & FOLLOW UP CALCULATIONS (IF ACTIVE) ── -->
       ${activeFuaBreakdowns.length > 0 ? `
       <div class="dps-section card-fua-theme">
-        <div class="dps-section-hd color-buff">6. ${breakdown.isCrow ? 'Illusion Status Calculations' : breakdown.isProdigy ? 'Hidden Potential Strike' : breakdown.isSovereign ? 'Djinn Passives &amp; Lightning Math' : 'Follow-Up Attack Calculations (FUA)'}</div>
+        <div class="dps-section-hd color-buff">6. ${breakdown.isCrow ? 'Illusion Status Calculations' : breakdown.isProdigy ? 'Hidden Potential Strike' : breakdown.isSovereign ? 'Djinn Passives &amp; Lightning Math' : breakdown.isLightningGod ? 'Lightning God Passives &amp; FUA Math' : 'Follow-Up Attack Calculations (FUA)'}</div>
         <div class="dps-breakdown-list">
           ${activeFuaBreakdowns.map(entry => {
         const effSpaVal = breakdown.effSpa || 1;
@@ -1294,6 +1352,166 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           `;
         }
 
+        if (entry.passiveType === "stormCloud") {
+          const cloudRaw = entry.effectiveFollowUpDamage || ((breakdown.effDamage || 0) * 0.25);
+          const cloudAvg = entry.averageFollowUpHit || (cloudRaw * critMult);
+          const cloudDps = entry.dps || (cloudAvg / 10.0);
+          const fieldDps = cloudDps * placementCount;
+
+          return `
+            <div class="dps-breakdown-row">
+              <span class="dps-row-lbl">Passive: Thundercloud (Storm Cloud)</span>
+              <span class="dps-row-val font-mono">25% Base Hit every 10s (&ge; 25 Voltage)</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Base Storm Cloud DMG (25% Base Hit)</span>
+              <span class="dps-row-val font-mono">${Math.round(cloudRaw).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Avg Storm Cloud DMG with Crit (&times;${critMult.toFixed(2)})</span>
+              <span class="dps-row-val font-mono color-crit">${Math.round(cloudAvg).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Proc Interval</span>
+              <span class="dps-row-val font-mono">Every 10.00s</span>
+            </div>
+            <div class="dps-breakdown-highlight-row color-buff-bg">
+              <span class="dps-highlight-lbl color-buff">Storm Cloud Field DPS (${placementCount} unit${placementCount > 1 ? "s" : ""})</span>
+              <span class="dps-highlight-val font-mono color-buff">+${formatFullDPS(fieldDps)} DPS</span>
+            </div>
+          `;
+        }
+
+        if (entry.passiveType === "tempestDischarge") {
+          const hasTrident = !!entry.hasStormTrident;
+          const multPct = Math.round((entry.dischargeMult || (hasTrident ? 2.0 : 1.0)) * 100);
+          const dischargeRaw = entry.effectiveFollowUpDamage || ((breakdown.effDamage || 0) * (multPct / 100));
+          const dischargeAvg = entry.averageFollowUpHit || (dischargeRaw * critMult);
+          const enemies = entry.lgEnemies || breakdown.lgEnemies || 10;
+          const attacksNeeded = entry.dischargeAttacksNeeded || Math.max(1, Math.ceil(60 / enemies));
+          const interval = entry.dischargeInterval || (attacksNeeded * effSpaVal);
+          const dischargeDps = entry.dps || (dischargeAvg / interval);
+          const fieldDps = dischargeDps * placementCount;
+
+          return `
+            <div class="dps-breakdown-row">
+              <span class="dps-row-lbl">Passive: Tempest Discharge ${hasTrident ? "(Storm Trident 200%)" : "(Base 100%)"}</span>
+              <span class="dps-row-val font-mono">${multPct}% Base Hit every ${attacksNeeded} attack${attacksNeeded > 1 ? "s" : ""} (${enemies} enemies in range)</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Base Strike DMG (${multPct}% Base Hit)</span>
+              <span class="dps-row-val font-mono">${Math.round(dischargeRaw).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Avg Strike DMG with Crit (&times;${critMult.toFixed(2)})</span>
+              <span class="dps-row-val font-mono color-crit">${Math.round(dischargeAvg).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Cycle Interval</span>
+              <span class="dps-row-val font-mono">${attacksNeeded} attacks &times; ${effSpaVal.toFixed(2)}s = ${interval.toFixed(2)}s</span>
+            </div>
+            <div class="dps-breakdown-highlight-row color-buff-bg">
+              <span class="dps-highlight-lbl color-buff">Tempest Discharge Field DPS (${placementCount} unit${placementCount > 1 ? "s" : ""})</span>
+              <span class="dps-highlight-val font-mono color-buff">+${formatFullDPS(fieldDps)} DPS</span>
+            </div>
+          `;
+        }
+
+        if (entry.passiveType === "waterfall") {
+          const hasTrident = !!entry.hasTideblade;
+          const multPct = Math.round((entry.waterfallMult || (hasTrident ? 0.35 : 0.15)) * 100);
+          const wfRaw = entry.effectiveFollowUpDamage || ((breakdown.effDamage || 0) * (multPct / 100));
+          const wfAvg = entry.averageFollowUpHit || (wfRaw * critMult);
+          const interval = entry.waterfallInterval || (hasTrident ? 8.0 : 12.0);
+          const wfDps = entry.dps || (wfAvg / interval);
+          const fieldDps = wfDps * placementCount;
+
+          return `
+            <div class="dps-breakdown-row">
+              <span class="dps-row-lbl">Passive: Waterfall ${hasTrident ? "(Tideblade 35% / 8s)" : "(Base 15% / 12s)"}</span>
+              <span class="dps-row-val font-mono">${multPct}% Base Hit every ${interval.toFixed(1)}s (Slow ${hasTrident ? "50%" : "35%"})</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Waterfall Wave DMG (${multPct}% Base Hit)</span>
+              <span class="dps-row-val font-mono">${Math.round(wfRaw).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Avg Wave DMG with Crit (&times;${critMult.toFixed(2)})</span>
+              <span class="dps-row-val font-mono color-crit">${Math.round(wfAvg).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Proc Interval</span>
+              <span class="dps-row-val font-mono">Every ${interval.toFixed(1)}s</span>
+            </div>
+            <div class="dps-breakdown-highlight-row color-buff-bg">
+              <span class="dps-highlight-lbl color-buff">Waterfall Field DPS (${placementCount} unit${placementCount > 1 ? "s" : ""})</span>
+              <span class="dps-highlight-val font-mono color-buff">+${formatFullDPS(fieldDps)} DPS</span>
+            </div>
+          `;
+        }
+
+        if (entry.passiveType === "vaporCloud") {
+          const vcRaw = entry.effectiveFollowUpDamage || ((breakdown.effDamage || 0) * 0.75);
+          const vcAvg = entry.averageFollowUpHit || (vcRaw * critMult);
+          const interval = entry.waterfallInterval || 8.0;
+          const vcDps = entry.dps || (vcAvg / interval);
+          const fieldDps = vcDps * placementCount;
+
+          return `
+            <div class="dps-breakdown-row">
+              <span class="dps-row-lbl">Passive: Boiling Waters (Vapor Cloud)</span>
+              <span class="dps-row-val font-mono">5 ticks &times; 15% = 75% Base Hit over 5s</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Total Cloud DMG (5 ticks)</span>
+              <span class="dps-row-val font-mono">${Math.round(vcRaw).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Avg Cloud DMG with Crit (&times;${critMult.toFixed(2)})</span>
+              <span class="dps-row-val font-mono color-crit">${Math.round(vcAvg).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Refresh Cycle</span>
+              <span class="dps-row-val font-mono">Every ${interval.toFixed(1)}s on Waterfall despawn</span>
+            </div>
+            <div class="dps-breakdown-highlight-row color-buff-bg">
+              <span class="dps-highlight-lbl color-buff">Vapor Cloud Field DPS (${placementCount} unit${placementCount > 1 ? "s" : ""})</span>
+              <span class="dps-highlight-val font-mono color-buff">+${formatFullDPS(fieldDps)} DPS</span>
+            </div>
+          `;
+        }
+
+        if (entry.passiveType === "tidalWave") {
+          const twRaw = entry.effectiveFollowUpDamage || ((breakdown.effDamage || 0) * 1.0);
+          const twAvg = entry.averageFollowUpHit || (twRaw * critMult);
+          const interval = entry.tidalWaveInterval || 25.0;
+          const twDps = entry.dps || (twAvg / interval);
+          const fieldDps = twDps * 1;
+
+          return `
+            <div class="dps-breakdown-row">
+              <span class="dps-row-lbl">Ability: Tidal Wave (1 placement only)</span>
+              <span class="dps-row-val font-mono">2 waves &times; 50% = 100% Base Hit every 25.0s</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">2 Waves Raw DMG (100% Base Hit)</span>
+              <span class="dps-row-val font-mono">${Math.round(twRaw).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Avg Ability DMG with Crit (&times;${critMult.toFixed(2)})</span>
+              <span class="dps-row-val font-mono color-crit">${Math.round(twAvg).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Cooldown Interval</span>
+              <span class="dps-row-val font-mono">25.00s (Only 1 placement casts)</span>
+            </div>
+            <div class="dps-breakdown-highlight-row color-buff-bg">
+              <span class="dps-highlight-lbl color-buff">Tidal Wave Field DPS (1 active cast)</span>
+              <span class="dps-highlight-val font-mono color-buff">+${formatFullDPS(fieldDps)} DPS</span>
+            </div>
+          `;
+        }
+
         return `
               <div class="dps-breakdown-row">
                 <span class="dps-row-lbl">${formatPassiveText(entry.name || `FUA ${entry.index + 1}`)}</span>
@@ -1415,6 +1633,8 @@ export async function DpsCard(unit, options = {}) {
   const isCarrot = unit.id === "carrotunleashed" || (unit.name && unit.name.includes("Carrot"));
   const isProdigy = unit.id === "prodigyrage" || (unit.name && unit.name.includes("Prodigy"));
   const isHeadCaptain = unit.id === "headcaptainchar" || (unit.name && unit.name.includes("Head Captain"));
+  const isLightningGod = unit.id === "lightninggodovercharged" || (unit.name && unit.name.includes("Lightning God (Overcharged)"));
+  const isSharkfang = unit.id === "sharkfangabyssal" || (unit.name && unit.name.includes("Sharkfang"));
 
   let darkMageMode = unit.darkMageMode || "lightning";
   let giantForm = unit.giantForm !== undefined ? unit.giantForm : false;
@@ -1454,10 +1674,20 @@ export async function DpsCard(unit, options = {}) {
   let sovereignBossActive = isSovereign ? (unit.sovereignBossActive !== undefined ? !!unit.sovereignBossActive : true) : false;
   let sovereignDjinnJudgmentActive = isSovereign ? (unit.sovereignDjinnJudgmentActive !== undefined ? !!unit.sovereignDjinnJudgmentActive : true) : true;
   let sovereignEnemies = isSovereign ? Math.max(1, Math.min(5, parseInt(unit.sovereignEnemies || 1, 10) || 1)) : 1;
+  let lgVoltageMeter = isLightningGod ? Math.max(0, Math.min(60, parseInt(unit.lgVoltageMeter !== undefined ? unit.lgVoltageMeter : 25, 10) || 0)) : 0;
+  let lgEnemies = isLightningGod ? Math.max(1, parseInt(unit.lgEnemies !== undefined ? unit.lgEnemies : 10, 10) || 10) : 10;
+  let sfBurnStacks = isSharkfang ? Math.max(0, Math.min(3, parseInt(unit.sfBurnStacks !== undefined ? unit.sfBurnStacks : 0, 10) || 0)) : 0;
   if (isSovereign) {
     unit.sovereignBossActive = sovereignBossActive;
     unit.sovereignDjinnJudgmentActive = sovereignDjinnJudgmentActive;
     unit.sovereignEnemies = sovereignEnemies;
+  }
+  if (isLightningGod) {
+    unit.lgVoltageMeter = lgVoltageMeter;
+    unit.lgEnemies = lgEnemies;
+  }
+  if (isSharkfang) {
+    unit.sfBurnStacks = sfBurnStacks;
   }
 
   if (isProdigy) {
@@ -1682,6 +1912,30 @@ export async function DpsCard(unit, options = {}) {
               </button>
             </div>
           </div>
+        ` : isLightningGod ? `
+          <div class="dps-control-stepper">
+            <span class="dps-stepper-lbl">Voltage:</span>
+            <span id="lg-voltage-badge-${unit.id}" class="dps-stepper-sub color-buff font-mono">(${lgVoltageMeter >= 25 ? 'Storm Active' : 'Inactive'})</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="lg-voltage-input-${unit.id}" value="${lgVoltageMeter}" class="dps-stepper-input" style="width:32px" />
+          </div>
+          <div class="dps-control-stepper">
+            <span class="dps-stepper-lbl">Enemies:</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="lg-enemies-input-${unit.id}" value="${lgEnemies}" class="dps-stepper-input" style="width:32px" />
+          </div>
+          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
+            <span class="dps-pill-dot"></span>
+            Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
+          </button>
+        ` : isSharkfang ? `
+          <div class="dps-control-stepper">
+            <span class="dps-stepper-lbl">Puddles:</span>
+            <span class="dps-stepper-sub color-dot font-mono">(Burn ${sfBurnStacks > 0 ? sfBurnStacks + ' stack' + (sfBurnStacks > 1 ? 's' : '') : 'Off'})</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="sf-burn-input-${unit.id}" value="${sfBurnStacks}" class="dps-stepper-input" style="width:32px" />
+          </div>
+          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
+            <span class="dps-pill-dot"></span>
+            Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
+          </button>
         ` : `
           <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
             <span class="dps-pill-dot"></span>
@@ -1729,6 +1983,10 @@ export async function DpsCard(unit, options = {}) {
   const sovereignBossToggle = card.querySelector(`#sovereign-boss-toggle-${unit.id}`);
   const sovereignJudgmentToggle = card.querySelector(`#sovereign-judgment-toggle-${unit.id}`);
   const sovereignEnemiesInput = card.querySelector(`#sovereign-enemies-${unit.id}`);
+  const lgVoltageInput = card.querySelector(`#lg-voltage-input-${unit.id}`);
+  const lgVoltageBadge = card.querySelector(`#lg-voltage-badge-${unit.id}`);
+  const lgEnemiesInput = card.querySelector(`#lg-enemies-input-${unit.id}`);
+  const sfBurnInput = card.querySelector(`#sf-burn-input-${unit.id}`);
   let fuaEditor = null;
 
   const commitCrowEnemies = () => {
@@ -1992,6 +2250,66 @@ export async function DpsCard(unit, options = {}) {
     if (e.key === "Enter") { e.preventDefault(); commitSovereignEnemies(); sovereignEnemiesInput.blur(); }
   });
   sovereignEnemiesInput?.addEventListener("change", commitSovereignEnemies);
+
+  const getLgVoltageBadgeLabel = (v) => v >= 25 ? "Storm Active" : "Inactive";
+
+  const commitLgVoltage = () => {
+    if (!lgVoltageInput) return;
+    lgVoltageInput.value = lgVoltageInput.value.replace(/[^\d]/g, "");
+    const val = Math.max(0, Math.min(60, parseInt(lgVoltageInput.value || "0", 10) || 0));
+    lgVoltageInput.value = String(val);
+    if (lgVoltageBadge) lgVoltageBadge.textContent = `(${getLgVoltageBadgeLabel(val)})`;
+    if (lgVoltageMeter !== val) {
+      lgVoltageMeter = val;
+      unit.lgVoltageMeter = lgVoltageMeter;
+      saveUnitSetting(unit.id, "lgVoltageMeter", lgVoltageMeter);
+      window.dispatchEvent(new CustomEvent("dps-value-changed"));
+      renderCalculations();
+    }
+  };
+
+  lgVoltageInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); commitLgVoltage(); lgVoltageInput.blur(); }
+  });
+  lgVoltageInput?.addEventListener("change", commitLgVoltage);
+
+  const commitLgEnemies = () => {
+    if (!lgEnemiesInput) return;
+    lgEnemiesInput.value = lgEnemiesInput.value.replace(/[^\d]/g, "");
+    const val = Math.max(1, Math.min(60, parseInt(lgEnemiesInput.value || "1", 10) || 1));
+    lgEnemiesInput.value = String(val);
+    if (lgEnemies !== val) {
+      lgEnemies = val;
+      unit.lgEnemies = lgEnemies;
+      saveUnitSetting(unit.id, "lgEnemies", lgEnemies);
+      window.dispatchEvent(new CustomEvent("dps-value-changed"));
+      renderCalculations();
+    }
+  };
+
+  lgEnemiesInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); commitLgEnemies(); lgEnemiesInput.blur(); }
+  });
+  lgEnemiesInput?.addEventListener("change", commitLgEnemies);
+
+  const commitSfBurn = () => {
+    if (!sfBurnInput) return;
+    sfBurnInput.value = sfBurnInput.value.replace(/[^\d]/g, "");
+    const val = Math.max(0, Math.min(3, parseInt(sfBurnInput.value || "0", 10) || 0));
+    sfBurnInput.value = String(val);
+    if (sfBurnStacks !== val) {
+      sfBurnStacks = val;
+      unit.sfBurnStacks = sfBurnStacks;
+      saveUnitSetting(unit.id, "sfBurnStacks", sfBurnStacks);
+      window.dispatchEvent(new CustomEvent("dps-value-changed"));
+      renderCalculations();
+    }
+  };
+
+  sfBurnInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); commitSfBurn(); sfBurnInput.blur(); }
+  });
+  sfBurnInput?.addEventListener("change", commitSfBurn);
 
   const prodigyStatusBadge = card.querySelector(`#prodigy-status-badge-${unit.id}`);
 
@@ -2307,6 +2625,11 @@ export async function DpsCard(unit, options = {}) {
         bioinsectCopiedUnitId,
         headCaptainBurningEnemies,
         headCaptainBurnStacks,
+        isLightningGod,
+        lgVoltageMeter,
+        lgEnemies,
+        isSharkfang,
+        sfBurnStacks,
       });
       return { traitKey, ...result };
     }).sort((a, b) => (Number(b.breakdown.displayVal) || 0) - (Number(a.breakdown.displayVal) || 0));

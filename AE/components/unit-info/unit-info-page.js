@@ -522,6 +522,7 @@ function buildStatusEffectsPanel(unit, activeSummonData = null) {
       : iconKey.includes("blackfire") || iconKey.includes("black fire") ? "status-card-blackfire"
         : iconKey.includes("freeze") ? "status-card-freeze"
           : iconKey.includes("burn") ? "status-card-burn"
+            : (iconKey.includes("electric") || iconKey.includes("voltage") || iconKey.includes("storm")) ? "status-card-electricity"
             : (iconKey.includes("slow") || iconKey.includes("stun") || iconKey.includes("stagger") || iconKey.includes("dismembered") || iconKey.includes("thedrinkmark") || iconKey.includes("drink mark") || iconKey.includes("puppetmark") || iconKey.includes("puppet mark") || iconKey.includes("rewind")) ? "status-card-stun"
               : "status-card-bleed";
 

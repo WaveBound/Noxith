@@ -19,6 +19,8 @@ import thedrinkjuicebox from "./units/thedrinkjuicebox.js";
 import cubert from "./units/cubert.js";
 import headcaptainchar from "./units/headcaptainchar.js";
 import sovereigndjinn from "./units/sovereigndjinn.js";
+import lightninggodovercharged from "./units/lightninggodovercharged.js";
+import sharkfangabyssal from "./units/sharkfangabyssal.js";
 
 import { getRelicStatsByName } from "./relicstats.js";
 import { relicImgByName } from "../icons/icons.js";
@@ -45,6 +47,8 @@ const rawUnits = [
   cubert,
   headcaptainchar,
   sovereigndjinn,
+  lightninggodovercharged,
+  sharkfangabyssal,
 ];
 
 function formatRange(v) {
@@ -142,6 +146,7 @@ function normalize(u) {
   const finalAttackType = maxPlacement?.aoe || s.attackType || s.archetype || "—";
 
   const updateMap = {
+    lightninggodovercharged: "Summer",
     headcaptainchar: "Summer",
     sovereigndjinn: "Summer",
     thedrinkjuicebox: "1.0",

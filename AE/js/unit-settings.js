@@ -99,6 +99,9 @@ export function applySavedSettingsToUnit(unit) {
   if (saved.sovereignBossActive !== undefined) unit.sovereignBossActive = saved.sovereignBossActive;
   if (saved.sovereignDjinnJudgmentActive !== undefined) unit.sovereignDjinnJudgmentActive = saved.sovereignDjinnJudgmentActive;
   if (saved.sovereignEnemies !== undefined) unit.sovereignEnemies = saved.sovereignEnemies;
+  if (saved.lgVoltageMeter !== undefined) unit.lgVoltageMeter = saved.lgVoltageMeter;
+  if (saved.lgEnemies !== undefined) unit.lgEnemies = saved.lgEnemies;
+  if (saved.sfBurnStacks !== undefined) unit.sfBurnStacks = saved.sfBurnStacks;
 
   return unit;
 }

@@ -370,6 +370,27 @@ export const relicStats = {
             desc: `Every 7 seconds summon a Lightning Strike on the strongest enemy in this unit's range:<br>- Lightning Strike deals 100% of this unit's damage<br>- Lightning Strike will chain between 5 enemies<br>- Each chain deals 25% of this unit's current damage<br>- Each chain will also apply Freeze`,
         },
     },
+
+    "Storm Trident": {
+        stats: [
+            { range: { min: "+1%", max: "+10%" }, damage: { min: "+1%", max: "+5%" } },
+        ],
+        passive: {
+            name: "Tempest Discharge & Molten Gold",
+            desc: `<b>Tempest Discharge:</b><br>At <b>60 Voltage Meter</b> stacks:<br>- Summon a <b>Lightning Strike</b> at this unit's position<br>- Reset <b>Voltage Meter</b><br>On <b>Lightning Strike</b>:<br>- Deal <b>200%</b> of this unit's current damage and apply <b>Electricity</b> to all enemies in this unit's range<br>- Leave <b>Electric Residue</b> on the ground that will despawn after <b>10</b> seconds<br><b>Electric Residue</b> will:<br>- Keep <b>Electricity</b> permanently active on enemy until enemy has left range or it has despawned<br><br><b>Molten Gold:</b><br>Every <b>10</b> seconds:<br>- Apply <b>Golden</b> to <b>2</b> enemies in range<br><b>Golden</b> will:<br>- Stun an enemy for <b>5</b> seconds<br>- Increase chain lightning hits from <b>Electricity</b> to an additional <b>4</b> enemies`,
+        },
+    },
+
+    "Tideblade": {
+        stats: [
+            { range: { min: "+1%", max: "+10%" } },
+            { spa: { min: "-1%", max: "-5%" } },
+        ],
+        passive: {
+            name: "Equipment Passive Waterfall",
+            desc: `Every <b>8</b> seconds:<br>- Summon <b>Waterfall</b> at the end of this unit's range moving towards spawn<br><b>Waterfall</b> will:<br>- <b>Slow</b> enemies hit by <b>50%</b><br>- Deal <b>35%</b> of this unit's current damage`,
+        },
+    },
 };
 
 export function getRelicStatsByName(name) {

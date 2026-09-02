@@ -421,6 +421,33 @@ img {
 }
 
 
+.p-kw.p-golden>span {
+  --kw-color: #ff8000;
+  background: linear-gradient(180deg, #ffe54c 0%, #ff8000 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  font-weight: 800 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #ff7700 !important;
+  text-underline-offset: 2px !important;
+  display: inline !important;
+}
+
+.p-kw.p-voltage-meter>span,
+.p-kw.p-storm-cloud>span,
+.p-kw.p-electricity>span,
+.p-kw.p-electric-residue>span,
+.p-kw.p-lightning-strike>span {
+  --kw-color: #00e5ff;
+  color: #00e5ff !important;
+  -webkit-text-fill-color: #00e5ff !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #00e5ff !important;
+  text-underline-offset: 2px !important;
+}
+
 .p-kw.p-rage-unleashed>span,
 .p-kw.p-precision-slash>span,
 .p-kw.p-quick-assist>span,
@@ -436,8 +463,7 @@ img {
 }
 
 .p-kw.p-nine-tailed-fox-djinn>span,
-.p-kw.p-lightning-djinn>span,
-.p-kw.p-lightning-strike>span {
+.p-kw.p-lightning-djinn>span {
   --kw-color: #00f0ff;
   color: #00f0ff !important;
   -webkit-text-fill-color: #00f0ff !important;
@@ -511,9 +537,14 @@ img {
 
 .p-kw.p-burn>span,
 .p-burn-text,
+.p-kw.p-vapor-cloud>span,
 .p-kw.p-skeleton>span,
 .p-skeleton-text {
   --kw-color: #ff7b00;
+}
+
+.p-kw.p-waterfall>span {
+  --kw-color: #00b4d8;
 }
 
 .p-kw.p-stone-wall>span,
@@ -535,6 +566,7 @@ img {
 .p-kw.p-stagger>span,
 .p-kw.p-rewind>span,
 .p-kw.p-shadow-rewind>span,
+.p-kw.p-tidal-wave>span,
 .p-kw.p-cocoon>span,
 .p-kw.p-puppet-mark>span,
 .p-kw.p-puppet-marked>span,
@@ -579,6 +611,8 @@ img {
 .p-bleed-text,
 .p-kw.p-burn>span,
 .p-burn-text,
+.p-kw.p-vapor-cloud>span,
+.p-kw.p-waterfall>span,
 .p-kw.p-skeleton>span,
 .p-skeleton-text,
 .p-kw.p-frostbite>span,
@@ -593,6 +627,7 @@ img {
 .p-kw.p-stagger>span,
 .p-kw.p-rewind>span,
 .p-kw.p-shadow-rewind>span,
+.p-kw.p-tidal-wave>span,
 .p-kw.p-cocoon>span,
 .p-kw.p-puppet-mark>span,
 .p-kw.p-puppet-marked>span,
@@ -615,6 +650,10 @@ img {
 .p-kw.p-boss>span,
 .p-kw.p-genetic-dupe>span,
 .p-kw.p-buffs>span,
+.p-kw.p-voltage-meter>span,
+.p-kw.p-storm-cloud>span,
+.p-kw.p-electricity>span,
+.p-kw.p-electric-residue>span,
 .p-kw.p-nine-tailed-fox-djinn>span,
 .p-kw.p-lightning-djinn>span,
 .p-kw.p-lightning-strike>span {

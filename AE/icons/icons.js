@@ -55,6 +55,7 @@ export const STATUS_ICONS = {
     crimsonmark: toAbsoluteUrl("icons/status/CrimsonMark.png"),
     thedrinkmark: toAbsoluteUrl("icons/status/TheDrinkMark.png"),
     rewind: toAbsoluteUrl("icons/status/Rewind.png"),
+    electricity: toAbsoluteUrl("icons/status/Electricity.png"),
 };
 
 export const RELIC_ICONS = {
@@ -73,6 +74,7 @@ export const RELIC_ICONS = {
     "relic-pointy-straw": toAbsoluteUrl("icons/relics/PointyStraw.png"),
     "relic-fiery-staff": toAbsoluteUrl("icons/relics/FieryStaff.png"),
     "relic-lightning-dagger": toAbsoluteUrl("icons/relics/LightningDagger.png"),
+    "relic-storm-trident": toAbsoluteUrl("icons/relics/StormTrident.png"),
 };
 
 export function relicImg(id) {
@@ -123,6 +125,9 @@ const RELIC_NAME_TO_IMG = {
     "FieryStaff": toAbsoluteUrl("icons/relics/FieryStaff.png"),
     "Lightning Dagger": toAbsoluteUrl("icons/relics/LightningDagger.png"),
     "LightningDagger": toAbsoluteUrl("icons/relics/LightningDagger.png"),
+    "Storm Trident": toAbsoluteUrl("icons/relics/StormTrident.png"),
+    "StormTrident": toAbsoluteUrl("icons/relics/StormTrident.png"),
+    "Tideblade": toAbsoluteUrl("icons/relics/Tideblade.png"),
 };
 
 export function relicImgByName(name) {
@@ -189,6 +194,11 @@ export function formatPassiveText(text) {
     out = out.replace(/Crumble[\s\xA0]+Away/gi, "@@CA@@");
     out = out.replace(/Radial[\s\xA0]+Flames/gi, "@@RF@@");
 
+    out = out.replace(/Voltage[\s\xA0]+Meter/gi, "@@VM@@");
+    out = out.replace(/Storm[\s\xA0]+Clouds?/gi, "@@SC@@");
+    out = out.replace(/Electric[\s\xA0]+Residue/gi, "@@ERES@@");
+    out = out.replace(/Electricity/gi, "@@ELEC@@");
+
     out = out.replace(/Magical/gi, "@@MAG@@");
     out = out.replace(/Mana[\s\xA0]+Burn/gi, "@@MB@@");
     out = out.replace(/Old[\s\xA0]+Magic/gi, "@@OM@@");
@@ -231,6 +241,7 @@ export function formatPassiveText(text) {
     out = out.replace(/Quick[\s\xA0]+Assist/gi, "@@QAS@@");
     out = out.replace(/Perfected[\s\xA0]+Strikes/gi, "@@PFS@@");
     out = out.replace(/Golden[\s\xA0]+Ascension/gi, "@@GAS@@");
+    out = out.replace(/Golden/gi, "@@GLD@@");
     out = out.replace(/Physical/gi, "@@PHY@@");
     out = out.replace(/Prodigy[\s\xA0]+Transformation[\s\xA0]+2/gi, "@@PT2@@");
     out = out.replace(/Prodigy[\s\xA0]+Transformation/gi, "@@PT1@@");
@@ -248,9 +259,17 @@ export function formatPassiveText(text) {
     out = out.replace(/Cubert[\s\xA0]+Meter/gi, "@@CBM@@");
     out = out.replace(/Patience/gi, "@@PAT@@");
 
+    out = out.replace(/Vapor[\s\xA0]+Clouds/gi, "@@VCS@@");
+    out = out.replace(/Vapor[\s\xA0]+Cloud/gi, "@@VC@@");
+    out = out.replace(/Tidal[\s\xA0]+Waves/gi, "@@TWS@@");
+    out = out.replace(/Tidal[\s\xA0]+Wave/gi, "@@TW@@");
+    out = out.replace(/Waterfalls/gi, "@@WFS_WF@@");
+    out = out.replace(/Waterfall/gi, "@@WF@@");
+
     out = out.replace(/Rewinds/gi, "@@RWS@@");
     out = out.replace(/Rewind/gi, "@@RW@@");
     out = out.replace(/Stunned/gi, "@@SND@@");
+    out = out.replace(/Stuns/gi, "@@SNS@@");
     out = out.replace(/Stun/gi, "@@SN@@");
     out = out.replace(/Slow/gi, "@@SL@@");
     out = out.replace(/Stagger/gi, "@@SG@@");
@@ -360,13 +379,26 @@ export function formatPassiveText(text) {
     out = out.replace(/@@CBCS@@/g, `<span class="p-kw p-cubert-cubes"><span>Cubert Cubes</span></span>`);
     out = out.replace(/@@CBC@@/g, `<span class="p-kw p-cubert-cube"><span>Cubert Cube</span></span>`);
     out = out.replace(/@@CBM@@/g, `<span class="p-kw p-cubert-meter"><span>Cubert Meter</span></span>`);
+    out = out.replace(/@@VM@@/g, `<span class="p-kw p-voltage-meter"><span>Voltage Meter</span></span>`);
+    out = out.replace(/@@SC@@/g, `<span class="p-kw p-storm-cloud"><span>Storm Cloud</span></span>`);
+    out = out.replace(/@@ERES@@/g, `<span class="p-kw p-electric-residue"><span>Electric Residue</span></span>`);
+    out = out.replace(/@@ELEC@@/g, `<span class="p-kw p-electricity">${iconImgTag(STATUS_ICONS.electricity)}<span>Electricity</span></span>`);
+    out = out.replace(/@@GLD@@/g, `<span class="p-kw p-golden"><span>Golden</span></span>`);
     out = out.replace(/@@TRD@@/g, `<span class="p-kw p-transforms"><span>Transformed</span></span>`);
     out = out.replace(/@@TRS@@/g, `<span class="p-kw p-transforms"><span>Transforms</span></span>`);
     out = out.replace(/@@TRM@@/g, `<span class="p-kw p-transforms"><span>Transform</span></span>`);
 
+    out = out.replace(/@@VCS@@/g, `<span class="p-kw p-vapor-cloud"><span>Vapor Clouds</span></span>`);
+    out = out.replace(/@@VC@@/g, `<span class="p-kw p-vapor-cloud"><span>Vapor Cloud</span></span>`);
+    out = out.replace(/@@TWS@@/g, `<span class="p-kw p-tidal-wave"><span>Tidal Waves</span></span>`);
+    out = out.replace(/@@TW@@/g, `<span class="p-kw p-tidal-wave"><span>Tidal Wave</span></span>`);
+    out = out.replace(/@@WFS_WF@@/g, `<span class="p-kw p-waterfall"><span>Waterfalls</span></span>`);
+    out = out.replace(/@@WF@@/g, `<span class="p-kw p-waterfall"><span>Waterfall</span></span>`);
+
     out = out.replace(/@@RWS@@/g, `<span class="p-kw p-rewind"><span>Rewinds</span></span>`);
     out = out.replace(/@@RW@@/g, `<span class="p-kw p-rewind"><span>Rewind</span></span>`);
     out = out.replace(/@@SND@@/g, `<span class="p-kw p-stun">${iconImgTag(STATUS_ICONS.stun)}<span>Stunned</span></span>`);
+    out = out.replace(/@@SNS@@/g, `<span class="p-kw p-stun">${iconImgTag(STATUS_ICONS.stun)}<span>Stuns</span></span>`);
     out = out.replace(/@@SN@@/g, `<span class="p-kw p-stun">${iconImgTag(STATUS_ICONS.stun)}<span>Stun</span></span>`);
     out = out.replace(/@@SL@@/g, `<span class="p-kw p-slow">${iconImgTag(STATUS_ICONS.slow)}<span>Slow</span></span>`);
     out = out.replace(/@@SG@@/g, `<span class="p-kw p-stagger"><span>Stagger</span></span>`);
@@ -459,9 +491,17 @@ if (typeof window !== "undefined") {
         if (target.classList.contains("p-nine-tailed-fox-djinn")) return toAbsoluteUrl("icons/info/NineTailedFoxDjinninfo.png");
         if (target.classList.contains("p-lightning-djinn")) return toAbsoluteUrl("icons/info/LightningDjinninfo.png");
         if (target.classList.contains("p-lightning-strike")) return toAbsoluteUrl("icons/info/LightningStrikeinfo.png");
+        if (target.classList.contains("p-golden")) return toAbsoluteUrl("icons/info/Goldeninfo.png");
+        if (target.classList.contains("p-voltage-meter")) return toAbsoluteUrl("icons/info/VoltageMeterinfo.png");
+        if (target.classList.contains("p-electricity")) return toAbsoluteUrl("icons/info/Electricityinfo.png");
+        if (target.classList.contains("p-storm-cloud")) return toAbsoluteUrl("icons/info/StormCloudinfo.png");
+        if (target.classList.contains("p-electric-residue")) return toAbsoluteUrl("icons/info/ElectricResidueinfo.png");
         if (target.classList.contains("p-pierce")) return toAbsoluteUrl("icons/info/Pierceinfo.png");
         if (target.classList.contains("p-skeleton")) return toAbsoluteUrl("icons/info/Skeletoninfo.png");
         if (target.classList.contains("p-shield")) return toAbsoluteUrl("icons/info/Shieldinfo.png");
+        if (target.classList.contains("p-vapor-cloud")) return toAbsoluteUrl("icons/info/VaporCloudinfo.png");
+        if (target.classList.contains("p-tidal-wave")) return toAbsoluteUrl("icons/info/TidalWaveinfo.png");
+        if (target.classList.contains("p-waterfall")) return toAbsoluteUrl("icons/info/Waterfallinfo.png");
         return "";
     }
 
@@ -499,6 +539,15 @@ if (typeof window !== "undefined") {
                         toAbsoluteUrl("icons/status/bleedinfo.png"),
                         toAbsoluteUrl("icons/status/Bleedinfo.png"),
                         toAbsoluteUrl("icons/status/Bleed_Info.png")
+                    ];
+                } else if (baseSrc.toLowerCase().includes("electri")) {
+                    candidates = [
+                        toAbsoluteUrl("icons/info/Electrictyinfo.png"),
+                        toAbsoluteUrl("icons/info/Electricityinfo.png"),
+                        toAbsoluteUrl("icons/info/ElectrictyInfo.png"),
+                        toAbsoluteUrl("icons/info/ElectricityInfo.png"),
+                        toAbsoluteUrl("icons/info/ElectricResidueinfo.png"),
+                        toAbsoluteUrl("icons/info/ElectricResidueInfo.png"),
                     ];
                 } else {
                     const filename = baseSrc.split('/').pop().split('?')[0];

@@ -61,6 +61,10 @@ const UNIT_NAME_MAP = {
   "VegetablePrince": "Vegetable (Prince)",
   "CarrotUnleashed": "Carrot (Unleashed)",
   "TheDrinkJuicebox": "The Drink (Juicebox)",
+  "LightningGodOvercharged": "Lightning God (Overcharged)",
+  "lightninggodovercharged": "Lightning God (Overcharged)",
+  "SharkfangAbyssal": "Sharkfang (Abyssal)",
+  "sharkfangabyssal": "Sharkfang (Abyssal)",
 };
 
 const rawRelics = [
@@ -285,6 +289,18 @@ const rawRelics = [
     name: "Lightning Dagger",
     image: relicImgByName("Lightning Dagger"),
     unitEquip: "Sovereign (Djinn)",
+  },
+  {
+    id: "relic-storm-trident",
+    name: "Storm Trident",
+    image: relicImgByName("Storm Trident"),
+    unitEquip: "Lightning God (Overcharged)",
+  },
+  {
+    id: "relic-tideblade",
+    name: "Tideblade",
+    image: relicImgByName("Tideblade"),
+    unitEquip: "Sharkfang (Abyssal)",
   },
 ];
 

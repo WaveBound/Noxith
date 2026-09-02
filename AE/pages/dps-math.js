@@ -248,6 +248,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isProdigy = unit && (unit.id === "prodigyrage" || (unit.name && unit.name.includes("Prodigy")));
   const isHeadCaptain = unit && (unit.id === "headcaptainchar" || (unit.name && unit.name.includes("Head Captain")));
   const isSovereign = unit && (unit.id === "sovereigndjinn" || (unit.name && unit.name.includes("Sovereign (Djinn)")));
+  const isLightningGod = unit && (unit.id === "lightninggodovercharged" || (unit.name && unit.name.includes("Lightning God (Overcharged)")));
+  const isSharkfang = unit && (unit.id === "sharkfangabyssal" || (unit.name && unit.name.includes("Sharkfang")));
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
@@ -281,6 +283,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const sovereignBossActive = isSovereign ? (unit.sovereignBossActive !== undefined ? !!unit.sovereignBossActive : true) : false;
   const sovereignDjinnJudgmentActive = isSovereign ? (unit.sovereignDjinnJudgmentActive !== undefined ? !!unit.sovereignDjinnJudgmentActive : true) : true;
   const sovereignEnemies = isSovereign ? Math.max(1, Math.min(5, parseInt(unit.sovereignEnemies || 1, 10) || 1)) : 1;
+  const lgVoltageMeter = isLightningGod ? Math.max(0, Math.min(60, parseInt(unit.lgVoltageMeter !== undefined ? unit.lgVoltageMeter : 25, 10) || 0)) : 0;
+  const lgEnemies = isLightningGod ? Math.max(1, parseInt(unit.lgEnemies !== undefined ? unit.lgEnemies : 10, 10) || 10) : 10;
 
   let passiveSpaMult = isReaper ? -0.10 : (isLadyGiant && giantForm ? 0.25 : (isEighthSword && berserkState ? -0.10 : 0));
   let passiveCritChanceAdd = isReaper ? 0.40 : (isCursedImmortal ? 0.30 : (isRazorjaw ? 0.25 : 0));
@@ -967,6 +971,190 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
 
     fuaDps = fuaBreakdowns.reduce((sum, b) => sum + b.dps, 0);
     singleFuaDmg = fuaBreakdowns.reduce((sum, b) => sum + b.averageFollowUpHit, 0);
+  } else if (isLightningGod) {
+    unitDirectDPS = avgHitDamage / effSpa;
+
+    // Electricity: applies on EVERY hit (no cooldown), chain lightning to 3 enemies
+    // Voltage Meter scaling: +5% damage per point in meter
+    const electricityBaseChainMult = 0.15;
+    const electricityVoltageBoost = 1 + lgVoltageMeter * 0.05;
+    const electricityEffMult = electricityBaseChainMult * electricityVoltageBoost;
+
+    base.dotName = "Electricity";
+    base.dotMultiplier = electricityEffMult;
+
+    const electricityDotDmg = effDamage * electricityEffMult;
+    const electricityDotAvgHit = electricityDotDmg * critAvgMult;
+    // Fires every attack — interval = 1 SPA
+    unitDoTDPS = electricityDotAvgHit / effSpa;
+    dotIntervalMultiplier = 1;
+    dotIntervalSPA = effSpa;
+    dotDamage = electricityDotDmg;
+
+    // Storm Cloud: at 25+ Voltage Meter, every 10s deal 25% dmg (can crit)
+    if (lgVoltageMeter >= 25) {
+      const stormCloudInterval = 10.0;
+      const stormCloudRawDmg = effDamage * 0.25;
+      const stormCloudAvgHit = stormCloudRawDmg * critAvgMult;
+      const stormCloudDps = stormCloudAvgHit / stormCloudInterval;
+
+      fuaBreakdowns.push({
+        index: 0,
+        name: `Storm Cloud (25% every 10s, Can Crit)`,
+        passiveType: "stormCloud",
+        lgVoltageMeter,
+        stormCloudInterval,
+        inputDamage: effDamage,
+        effectiveFollowUpDamage: stormCloudRawDmg,
+        averageFollowUpHit: stormCloudAvgHit,
+        critAvgMult,
+        dps: stormCloudDps,
+        isTimedFua: true,
+      });
+    }
+
+    // Tempest Discharge: deals 100% (or 200% with Storm Trident) of this unit's damage (can crit) every (60 / enemies) attacks
+    let activeUnitEquip = "";
+    if (unit.selectedDpsRelic !== undefined && unit.selectedDpsRelic !== null && unit.selectedDpsRelic !== "") {
+      activeUnitEquip = unit.selectedDpsRelic;
+    } else if (unit.relic && unit.relic.name) {
+      activeUnitEquip = unit.relic.name;
+    } else if (unit.recommendedEquips?.unitEquip) {
+      activeUnitEquip = unit.recommendedEquips.unitEquip;
+    }
+
+    const hasStormTrident = activeUnitEquip === "Storm Trident" || (relics || []).some(r => r.name === "Storm Trident");
+    const dischargeMult = hasStormTrident ? 2.00 : 1.00;
+
+    const dischargeAttacksNeeded = Math.max(1, Math.ceil(60 / lgEnemies));
+    const dischargeInterval = dischargeAttacksNeeded * effSpa;
+    const dischargeRawDmg = effDamage * dischargeMult;
+    const dischargeAvgHit = dischargeRawDmg * critAvgMult;
+    const dischargeDps = dischargeAvgHit / dischargeInterval;
+
+    fuaBreakdowns.push({
+      index: fuaBreakdowns.length,
+      name: `Tempest Discharge (${hasStormTrident ? "200% Storm Trident" : "100% Base"} every ${dischargeAttacksNeeded} attack${dischargeAttacksNeeded > 1 ? "s" : ""} [${dischargeInterval.toFixed(2)}s], Can Crit)`,
+      passiveType: "tempestDischarge",
+      hasStormTrident,
+      dischargeMult,
+      lgVoltageMeter,
+      lgEnemies,
+      dischargeAttacksNeeded,
+      dischargeInterval,
+      inputDamage: effDamage,
+      effectiveFollowUpDamage: dischargeRawDmg,
+      averageFollowUpHit: dischargeAvgHit,
+      intervalSpa: dischargeInterval,
+      critAvgMult,
+      dps: dischargeDps,
+    });
+
+    fuaDps = fuaBreakdowns.reduce((sum, b) => sum + b.dps, 0);
+    singleFuaDmg = fuaBreakdowns.reduce((sum, b) => sum + b.averageFollowUpHit, 0);
+  } else if (isSharkfang) {
+    unitDirectDPS = avgHitDamage / effSpa;
+
+    let activeUnitEquip = "";
+    if (unit.selectedDpsRelic !== undefined && unit.selectedDpsRelic !== null && unit.selectedDpsRelic !== "") {
+      activeUnitEquip = unit.selectedDpsRelic;
+    } else if (unit.relic && unit.relic.name) {
+      activeUnitEquip = unit.relic.name;
+    } else if (unit.recommendedEquips?.unitEquip) {
+      activeUnitEquip = unit.recommendedEquips.unitEquip;
+    }
+
+    const hasTideblade = activeUnitEquip === "Tideblade" || (relics || []).some(r => r.name === "Tideblade");
+
+    // 1. Waterfall: Every 12s (8s with Tideblade), deals 15% (35% with Tideblade) of unit damage (can crit)
+    const waterfallInterval = hasTideblade ? 8.0 : 12.0;
+    const waterfallMult = hasTideblade ? 0.35 : 0.15;
+    const waterfallRawDmg = effDamage * waterfallMult;
+    const waterfallAvgHit = waterfallRawDmg * critAvgMult;
+    const waterfallDps = waterfallAvgHit / waterfallInterval;
+
+    fuaBreakdowns.push({
+      index: 0,
+      name: `Waterfall (${hasTideblade ? "35% every 8s [Tideblade]" : "15% every 12s"}, Can Crit)`,
+      passiveType: "waterfall",
+      hasTideblade,
+      waterfallInterval,
+      waterfallMult,
+      inputDamage: effDamage,
+      effectiveFollowUpDamage: waterfallRawDmg,
+      averageFollowUpHit: waterfallAvgHit,
+      intervalSpa: waterfallInterval,
+      critAvgMult,
+      dps: waterfallDps,
+      isTimedFua: true,
+    });
+
+    // 2. Boiling Waters (Vapor Cloud): When Waterfall despawns, summons Vapor Cloud for 5s dealing 15% dmg/s (5 ticks × 15% = 75% per cycle)
+    const vaporCloudTicks = 5;
+    const vaporCloudTickMult = 0.15;
+    const vaporCloudTotalMult = vaporCloudTicks * vaporCloudTickMult;
+    const vaporCloudRawDmg = effDamage * vaporCloudTotalMult;
+    const vaporCloudAvgHit = vaporCloudRawDmg * critAvgMult;
+    const vaporCloudDps = vaporCloudAvgHit / waterfallInterval;
+
+    fuaBreakdowns.push({
+      index: 1,
+      name: `Vapor Cloud (5 ticks × 15% = 75% over 5s every ${waterfallInterval.toFixed(0)}s, Can Crit)`,
+      passiveType: "vaporCloud",
+      vaporCloudTicks,
+      vaporCloudTickMult,
+      waterfallInterval,
+      inputDamage: effDamage,
+      effectiveFollowUpDamage: vaporCloudRawDmg,
+      averageFollowUpHit: vaporCloudAvgHit,
+      intervalSpa: waterfallInterval,
+      critAvgMult,
+      dps: vaporCloudDps,
+      isTimedFua: true,
+    });
+
+    // 3. Tidal Wave (Ability — 1 placement only): Every 25s, 2 instances at 50% each = 100% total (can crit)
+    //    Only 1 placement can use the ability — so DPS is 1-placement value only, not × placements
+    const tidalWaveInterval = 25.0;
+    const tidalWaveRawDmg = effDamage * 1.00;
+    const tidalWaveAvgHit = tidalWaveRawDmg * critAvgMult;
+    const tidalWaveDps = tidalWaveAvgHit / tidalWaveInterval;
+
+    fuaBreakdowns.push({
+      index: 2,
+      name: `Tidal Wave (2 × 50% = 100% every 25s, Can Crit) [Ability — 1 placement]`,
+      passiveType: "tidalWave",
+      tidalWaveInterval,
+      isAbilityOnePlacement: true,
+      inputDamage: effDamage,
+      effectiveFollowUpDamage: tidalWaveRawDmg,
+      averageFollowUpHit: tidalWaveAvgHit,
+      intervalSpa: tidalWaveInterval,
+      critAvgMult,
+      dps: tidalWaveDps,
+      isTimedFua: true,
+    });
+
+    // 4. Burn DoT from Vapor Cloud puddles: 0.55x per stack × sfBurnStacks active puddles (0–3)
+    const sfBurnStacks = Math.max(0, Math.min(3, parseInt(unit.sfBurnStacks !== undefined ? unit.sfBurnStacks : 0, 10) || 0));
+    if (sfBurnStacks > 0) {
+      base.dotName = "Burn";
+      base.dotMultiplier = 0.55 * sfBurnStacks;
+      const burnDotDmg = effDamage * 0.55 * sfBurnStacks;
+      const burnTotalTicks = 4; // 4 ticks over 4s
+      unitDoTDPS = burnDotDmg / burnTotalTicks;
+      dotIntervalMultiplier = 1;
+      dotIntervalSPA = burnTotalTicks;
+      dotDamage = burnDotDmg;
+    } else {
+      base.dotName = null;
+      base.dotMultiplier = 0;
+      unitDoTDPS = 0;
+      dotDamage = 0;
+    }
+
+    fuaDps = fuaBreakdowns.reduce((sum, b) => sum + b.dps, 0);
+    singleFuaDmg = fuaBreakdowns.reduce((sum, b) => sum + b.averageFollowUpHit, 0);
   } else {
     unitDirectDPS = avgHitDamage / effSpa;
     unitDoTDPS = (base.dotMultiplier || 0) > 0 ? (dotDamage / dotIntervalSPA) : 0;
@@ -1248,5 +1436,10 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     headCaptainBurnStacks,
     effectiveCritRate,
     battleInstinctBonusCrit,
+    isLightningGod,
+    lgVoltageMeter: isLightningGod ? lgVoltageMeter : 0,
+    lgEnemies: isLightningGod ? lgEnemies : 10,
+    isSharkfang,
+    sfBurnStacks: isSharkfang ? Math.max(0, Math.min(3, parseInt(unit.sfBurnStacks !== undefined ? unit.sfBurnStacks : 0, 10) || 0)) : 0,
   };
 }
