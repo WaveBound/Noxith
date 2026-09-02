@@ -2,7 +2,7 @@ export const unit = {
     id: "sharkfangabyssal",
     name: "Sharkfang (Abyssal)",
     image: "Units/Image/SharkfangAbyssal.png",
-    ascend: 0,
+    ascend: 3,
     tiers: ["Mythic"],
     update: "Summer",
 
