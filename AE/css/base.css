@@ -490,8 +490,13 @@ img {
 }
 
 .p-kw.p-frostbite>span,
-.p-kw.p-freeze>span {
+.p-kw.p-freeze>span,
+.p-kw.p-ice-trap>span {
   --kw-color: #38bdf8;
+}
+
+.p-kw.p-desert-storm>span {
+  --kw-color: #0ecbff;
 }
 
 .p-spell,
@@ -549,7 +554,8 @@ img {
 
 .p-kw.p-stone-wall>span,
 .p-kw.p-rock-chunk>span,
-.p-kw.p-rock>span {
+.p-kw.p-rock>span,
+.p-kw.p-sandstorm>span {
   --kw-color: #ac5c31;
 }
 
@@ -575,7 +581,8 @@ img {
 .p-kw.p-vegeta-transform>span,
 .p-kw.p-father-son>span,
 .p-kw.p-dot>span,
-.p-kw.p-drink-mark>span {
+.p-kw.p-drink-mark>span,
+.p-kw.p-ground-eruption>span {
   --kw-color: #9900ff;
 }
 
@@ -599,6 +606,11 @@ img {
   --kw-color: #22c55e;
 }
 
+.p-kw.p-poison>span,
+.p-poison-text {
+  --kw-color: #4cc800;
+}
+
 /* Master Gradient Engine for Keywords */
 .p-spell,
 .p-spell-text,
@@ -611,17 +623,23 @@ img {
 .p-bleed-text,
 .p-kw.p-burn>span,
 .p-burn-text,
+.p-kw.p-poison>span,
+.p-poison-text,
 .p-kw.p-vapor-cloud>span,
 .p-kw.p-waterfall>span,
 .p-kw.p-skeleton>span,
 .p-skeleton-text,
 .p-kw.p-frostbite>span,
 .p-kw.p-freeze>span,
+.p-kw.p-ice-trap>span,
+.p-kw.p-desert-storm>span,
 .p-kw.p-stone-wall>span,
 .p-kw.p-rock-chunk>span,
 .p-kw.p-rock>span,
+.p-kw.p-sandstorm>span,
 .p-kw.p-austere-flames>span,
 .p-kw.p-black-magic>span,
+.p-kw.p-ground-eruption>span,
 .p-kw.p-stun>span,
 .p-kw.p-slow>span,
 .p-kw.p-stagger>span,

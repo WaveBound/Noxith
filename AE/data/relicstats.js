@@ -391,6 +391,28 @@ export const relicStats = {
             desc: `Every <b>8</b> seconds:<br>- Summon <b>Waterfall</b> at the end of this unit's range moving towards spawn<br><b>Waterfall</b> will:<br>- <b>Slow</b> enemies hit by <b>50%</b><br>- Deal <b>35%</b> of this unit's current damage`,
         },
     },
+
+    "Spirit King's Blade": {
+        stats: [
+            { spa: { min: "-1%", max: "-5%" } },
+            { range: { min: "+1%", max: "+5%" } },
+        ],
+        passive: {
+            name: "Equipment Passive Shatter",
+            desc: `Anytime this unit hits an enemy with <b>Freeze</b>:<br>- Deal <b>20%</b> of this unit's current damage around the enemy<br>When <b>Freeze</b> expires from an enemy:<br>- <b>Slow</b> enemy by <b>50%</b><br>If an enemy dies with <b>Freeze</b>:<br>- <b>5</b> nearest enemies will take <b>25%</b> of this unit's current damage`,
+        },
+    },
+
+    "Poison Hook": {
+        stats: [
+            { range: { min: "+1%", max: "+10%" } },
+            { damage: { min: "+1%", max: "+5%" } },
+        ],
+        passive: {
+            name: "Equipment Passive Desert Storm",
+            desc: `<b>Desert Storm</b> appears at this unit's location<br><b>Desert Storm</b> will:<br>- Increase <b>5%</b> in size every <b>1</b> seconds (Capacity: <b>100%</b>)<br>- Apply <b>Sandstorm</b> to enemies inside<br>After <b>Desert Storm</b> has been at <b>100%</b> for <b>14</b> seconds:<br>- Reset <b>Desert Storm</b> size to <b>10%</b>`,
+        },
+    },
 };
 
 export function getRelicStatsByName(name) {

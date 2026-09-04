@@ -65,6 +65,10 @@ const UNIT_NAME_MAP = {
   "lightninggodovercharged": "Lightning God (Overcharged)",
   "SharkfangAbyssal": "Sharkfang (Abyssal)",
   "sharkfangabyssal": "Sharkfang (Abyssal)",
+  "WaterMageScholar": "Water Mage (Scholar)",
+  "watermagescholar": "Water Mage (Scholar)",
+  "SandAlligator": "Sand (Alligator)",
+  "sandalligator": "Sand (Alligator)",
 };
 
 const rawRelics = [
@@ -301,6 +305,18 @@ const rawRelics = [
     name: "Tideblade",
     image: relicImgByName("Tideblade"),
     unitEquip: "Sharkfang (Abyssal)",
+  },
+  {
+    id: "relic-spirit-kings-blade",
+    name: "Spirit King's Blade",
+    image: relicImgByName("Spirit King's Blade"),
+    unitEquip: "Water Mage (Scholar)",
+  },
+  {
+    id: "relic-poison-hook",
+    name: "Poison Hook",
+    image: relicImgByName("Poison Hook"),
+    unitEquip: "Sand (Alligator)",
   },
 ];
 

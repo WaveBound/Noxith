@@ -21,6 +21,8 @@ import headcaptainchar from "./units/headcaptainchar.js";
 import sovereigndjinn from "./units/sovereigndjinn.js";
 import lightninggodovercharged from "./units/lightninggodovercharged.js";
 import sharkfangabyssal from "./units/sharkfangabyssal.js";
+import watermagescholar from "./units/watermagescholar.js";
+import sandalligator from "./units/sandalligator.js";
 
 import { getRelicStatsByName } from "./relicstats.js";
 import { relicImgByName } from "../icons/icons.js";
@@ -49,6 +51,8 @@ const rawUnits = [
   sovereigndjinn,
   lightninggodovercharged,
   sharkfangabyssal,
+  watermagescholar,
+  sandalligator,
 ];
 
 function formatRange(v) {

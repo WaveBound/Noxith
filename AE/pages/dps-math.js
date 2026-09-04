@@ -49,11 +49,22 @@ export function getUnitBaseValues(unit) {
   if (unit.statusEffects && Array.isArray(unit.statusEffects)) {
     unit.statusEffects.forEach((ef) => {
       if (ef.effect) {
-        const match = ef.effect.match(/([0-9.]+)\s*x\s*Damage/i);
-        if (match) {
-          dotMultiplier += parseFloat(match[1]);
+        const tickMatch = ef.effect.match(/([0-9.]+)\s*x\s*damage\s+in\s+([0-9]+)\s+ticks/i);
+        const addMatch = ef.effect.match(/Additionally\s+deal\s+([0-9.]+)\s*x\s*damage\s+every\s+tick/i);
+        if (tickMatch && addMatch) {
+          const baseTot = parseFloat(tickMatch[1]);
+          const ticks = parseInt(tickMatch[2], 10);
+          const addPerTick = parseFloat(addMatch[1]);
+          dotMultiplier += baseTot + (addPerTick * ticks);
           dotDescription = ef.name ? `${ef.name}: ${ef.effect}` : ef.effect;
           dotName = ef.name || "DoT";
+        } else {
+          const match = ef.effect.match(/([0-9.]+)\s*x\s*Damage/i);
+          if (match) {
+            dotMultiplier += parseFloat(match[1]);
+            dotDescription = ef.name ? `${ef.name}: ${ef.effect}` : ef.effect;
+            dotName = ef.name || "DoT";
+          }
         }
       }
     });
@@ -250,6 +261,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isSovereign = unit && (unit.id === "sovereigndjinn" || (unit.name && unit.name.includes("Sovereign (Djinn)")));
   const isLightningGod = unit && (unit.id === "lightninggodovercharged" || (unit.name && unit.name.includes("Lightning God (Overcharged)")));
   const isSharkfang = unit && (unit.id === "sharkfangabyssal" || (unit.name && unit.name.includes("Sharkfang")));
+  const isSandAlligator = unit && (unit.id === "sandalligator" || (unit.name && unit.name.includes("Sand (Alligator)")));
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
@@ -257,6 +269,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
 
   const headCaptainBurningEnemies = isHeadCaptain ? (unit.headCaptainBurningEnemies !== undefined ? Math.max(0, Math.min(30, parseInt(unit.headCaptainBurningEnemies, 10) || 0)) : 30) : 30;
   const headCaptainBurnStacks = isHeadCaptain ? (unit.headCaptainBurnStacks !== undefined ? Math.max(1, Math.min(10, parseInt(unit.headCaptainBurnStacks, 10) || 1)) : 1) : 1;
+  const sandPoisonStacks = isSandAlligator ? (unit.sandPoisonStacks !== undefined ? Math.max(0, Math.min(6, parseInt(unit.sandPoisonStacks, 10) || 0)) : 6) : 0;
+  const sandPoisonBugged = isSandAlligator ? (unit.sandPoisonBugged !== undefined ? !!unit.sandPoisonBugged : true) : false;
 
   const giantForm = unit && !!unit.giantForm;
   const berserkState = unit && !!unit.berserkState;
@@ -347,6 +361,9 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   } else if (isHeadCaptain) {
     base.dotMultiplier = 0.50;
     base.dotName = "Burn";
+  } else if (isSandAlligator) {
+    base.dotMultiplier = sandPoisonBugged ? 0.3 : 3.3;
+    base.dotName = "Poison";
   }
 
   if (isBioinsect) {
@@ -519,6 +536,18 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     dotDuration = 4.0;
     dotIntervalMultiplier = Math.max(1, Math.ceil(4.0 / effSpa));
     dotIntervalSPA = dotIntervalMultiplier * effSpa;
+  } else if (isSandAlligator) {
+    const poisonBaseMult = sandPoisonBugged ? 0.3 : 3.3;
+    const goldenHookMult = 1.15;
+    const stormBonusMult = 1 + (sandPoisonStacks * 0.25);
+    const poisonTraitRelicMult = (1 + (trait.dotBonus || 0)) * (1 + relicDotBonus);
+    dotDuration = 6.0;
+    dotIntervalMultiplier = Math.max(1, Math.ceil(6.0 / effSpa));
+    dotIntervalSPA = dotIntervalMultiplier * effSpa;
+
+    const singleStackPoisonDmg = effDamage * poisonBaseMult * goldenHookMult * stormBonusMult * poisonTraitRelicMult;
+    dotDamage = singleStackPoisonDmg * dotIntervalMultiplier;
+    effDotMult = poisonBaseMult * goldenHookMult * stormBonusMult * poisonTraitRelicMult * dotIntervalMultiplier;
   }
 
   let unitDirectDPS = 0;
@@ -1155,13 +1184,29 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
 
     fuaDps = fuaBreakdowns.reduce((sum, b) => sum + b.dps, 0);
     singleFuaDmg = fuaBreakdowns.reduce((sum, b) => sum + b.averageFollowUpHit, 0);
+  } else if (isSandAlligator) {
+    unitDirectDPS = avgHitDamage / effSpa;
+    const poisonBaseMult = sandPoisonBugged ? 0.3 : 3.3;
+    base.dotMultiplier = poisonBaseMult;
+    base.dotName = "Poison";
+    const goldenHookMult = 1.15;
+    const stormBonusMult = 1 + (sandPoisonStacks * 0.25);
+    const poisonTraitRelicMult = (1 + (trait.dotBonus || 0)) * (1 + relicDotBonus);
+    dotDuration = 6.0;
+    dotIntervalMultiplier = Math.max(1, Math.ceil(6.0 / effSpa));
+    dotIntervalSPA = dotIntervalMultiplier * effSpa;
+
+    const singleStackPoisonDmg = effDamage * poisonBaseMult * goldenHookMult * stormBonusMult * poisonTraitRelicMult;
+    dotDamage = singleStackPoisonDmg * dotIntervalMultiplier;
+    effDotMult = poisonBaseMult * goldenHookMult * stormBonusMult * poisonTraitRelicMult * dotIntervalMultiplier;
+    unitDoTDPS = dotDamage / dotIntervalSPA;
   } else {
     unitDirectDPS = avgHitDamage / effSpa;
     unitDoTDPS = (base.dotMultiplier || 0) > 0 ? (dotDamage / dotIntervalSPA) : 0;
 
     const fuaCritMultiplier = 1 + effCritChance * effCritDamage;
     const fuaDamageScale = 1 + relicArchetypeDamageMult;
-    fuaBreakdowns = Array.isArray(unit.fuaDamages)
+    fuaBreakdowns = (isCursedStudent && Array.isArray(unit.fuaDamages))
       ? unit.fuaDamages.map((value, index) => {
         const inputDamage = parseNumber(value, 0);
         const effectiveFollowUpDamage = inputDamage * fuaDamageScale;
@@ -1187,7 +1232,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
           dps,
           isMimicryFua: isCursedStudent
         };
-      })
+      }).filter(entry => entry.inputDamage > 0)  // exclude zero-input phantom entries
       : [];
     fuaDps = fuaBreakdowns.reduce((total, entry) => total + entry.dps, 0);
     singleFuaDmg = fuaBreakdowns.reduce((total, entry) => total + entry.averageFollowUpHit, 0);
@@ -1410,6 +1455,10 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     isSovereign,
     sovereignBossActive,
     sovereignDjinnJudgmentActive,
+    isSandAlligator,
+    sandPoisonStacks,
+    sandPoisonBugged,
+    singleStackPoisonDmg: isSandAlligator ? (effDamage * (sandPoisonBugged ? 0.3 : 3.3) * 1.15 * (1 + sandPoisonStacks * 0.25) * (1 + (trait.dotBonus || 0)) * (1 + relicDotBonus)) : 0,
     fuaDps,
     fuaDamages: unit.fuaDamages || [],
     fuaBreakdowns,

@@ -102,6 +102,8 @@ export function applySavedSettingsToUnit(unit) {
   if (saved.lgVoltageMeter !== undefined) unit.lgVoltageMeter = saved.lgVoltageMeter;
   if (saved.lgEnemies !== undefined) unit.lgEnemies = saved.lgEnemies;
   if (saved.sfBurnStacks !== undefined) unit.sfBurnStacks = saved.sfBurnStacks;
+  if (saved.sandPoisonStacks !== undefined) unit.sandPoisonStacks = saved.sandPoisonStacks;
+  if (saved.sandPoisonBugged !== undefined) unit.sandPoisonBugged = saved.sandPoisonBugged;
 
   return unit;
 }

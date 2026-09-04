@@ -51,6 +51,7 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
   const isProdigy = unit.id === "prodigyrage" || (unit.name && unit.name.includes("Prodigy"));
   const isCursedImmortal = unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"));
   const isHeadCaptain = unit.id === "headcaptainchar" || (unit.name && unit.name.includes("Head Captain"));
+  const isSandAlligator = unit.id === "sandalligator" || (unit.name && unit.name.includes("Sand (Alligator)"));
 
   combos.forEach(([eq1, eq2]) => {
     const mockUnit = {
@@ -86,6 +87,8 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       lgVoltageMeter: options.lgVoltageMeter !== undefined ? options.lgVoltageMeter : (unit.lgVoltageMeter !== undefined ? unit.lgVoltageMeter : 25),
       lgEnemies: options.lgEnemies !== undefined ? options.lgEnemies : (unit.lgEnemies !== undefined ? unit.lgEnemies : 10),
       sfBurnStacks: options.sfBurnStacks !== undefined ? options.sfBurnStacks : (unit.sfBurnStacks !== undefined ? unit.sfBurnStacks : 0),
+      sandPoisonStacks: options.sandPoisonStacks !== undefined ? options.sandPoisonStacks : (unit.sandPoisonStacks !== undefined ? unit.sandPoisonStacks : (isSandAlligator ? 6 : 0)),
+      sandPoisonBugged: options.sandPoisonBugged !== undefined ? options.sandPoisonBugged : (unit.sandPoisonBugged !== undefined ? unit.sandPoisonBugged : true),
     };
 
     const rawBreakdown = getTraitBreakdown(mockUnit, traitKey, targetLevel, statMode);
@@ -1037,7 +1040,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       <!-- ── SECTION 5: DOT & STATUS CALCULATIONS (IF ACTIVE) ── -->
       ${((rawBase.dotMultiplier || 0) > 0 || breakdown.demonicPresence || breakdown.isCrimson || breakdown.isLightningGod || (breakdown.unitDoTDPS || 0) > 0) ? `
       <div class="dps-section card-dot-theme">
-        <div class="dps-section-hd color-dot">5. ${breakdown.isDarkMage ? "Passive Damage Calculation" : breakdown.isEighthSword ? "Demonic Presence Calculation" : breakdown.isCrow ? "Black Fire DoT Calculation" : breakdown.isCrimson ? "Crimson Status Effects & Bleed" : breakdown.isHeadCaptain ? "Burn DoT Calculation (Passive West)" : breakdown.isLightningGod ? "Electricity Status Effect Calculation" : `DoT Calculation (${formatPassiveText(rawBase.dotName || "Status")})`}</div>
+        <div class="dps-section-hd color-dot">5. ${breakdown.isDarkMage ? "Passive Damage Calculation" : breakdown.isEighthSword ? "Demonic Presence Calculation" : breakdown.isCrow ? "Black Fire DoT Calculation" : breakdown.isCrimson ? "Crimson Status Effects & Bleed" : breakdown.isHeadCaptain ? "Burn DoT Calculation (Passive West)" : breakdown.isLightningGod ? "Electricity Status Effect Calculation" : breakdown.isSandAlligator ? (breakdown.sandPoisonBugged ? "Poison DoT Calculation (Bugged 0.3x)" : "Poison DoT Calculation (Fixed 3.3x)") : `DoT Calculation (${formatPassiveText(rawBase.dotName || "Status")})`}</div>
         <div class="dps-breakdown-list">
           <div class="dps-breakdown-row">
             <span class="dps-row-lbl">Status Effect</span>
@@ -1045,7 +1048,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           </div>
           <div class="dps-breakdown-row">
             <span class="dps-row-lbl">Base Multiplier</span>
-            <span class="dps-row-val font-mono">${breakdown.isEighthSword ? "15% Current DMG (Can Crit)" : breakdown.isCrow ? "2.00x Base Hit in 12 ticks over 12s" : breakdown.isCrimson ? "Bleed: 0.65x | Explode: 15% | Pools: 10%/2s" : breakdown.isHeadCaptain ? "0.50x Base Hit in 4 ticks over 4s" : breakdown.isLightningGod ? "0.15x Base Hit (+150% from Avg 30 Voltage = 0.375x)" : `${(rawBase.dotMultiplier || 0).toFixed(2)}x Base Hit`}</span>
+            <span class="dps-row-val font-mono">${breakdown.isEighthSword ? "15% Current DMG (Can Crit)" : breakdown.isCrow ? "2.00x Base Hit in 12 ticks over 12s" : breakdown.isCrimson ? "Bleed: 0.65x | Explode: 15% | Pools: 10%/2s" : breakdown.isHeadCaptain ? "0.50x Base Hit in 4 ticks over 4s" : breakdown.isLightningGod ? "0.15x Base Hit (+150% from Avg 30 Voltage = 0.375x)" : breakdown.isSandAlligator ? (breakdown.sandPoisonBugged ? "0.30x Base Hit (In-Game Bugged: 6 ticks × 0.05x)" : "3.30x Base Hit (Fixed: 6 ticks × 0.55x)") : `${(rawBase.dotMultiplier || 0).toFixed(2)}x Base Hit`}</span>
           </div>
           ${breakdown.isEighthSword ? `
             <div class="dps-breakdown-row step-indented">
@@ -1131,7 +1134,61 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
               <span class="dps-highlight-lbl color-dot">Unit Burn DoT DPS</span>
               <span class="dps-highlight-val font-mono color-dot">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
             </div>
-          ` : breakdown.isLightningGod ? (() => {
+          ` : breakdown.isSandAlligator ? (() => {
+            const effSpaVal = breakdown.effSpa || 1;
+            const stackCount = breakdown.sandPoisonStacks !== undefined ? breakdown.sandPoisonStacks : 6;
+            const stormPct = stackCount * 25;
+            const isBugged = breakdown.sandPoisonBugged !== undefined ? !!breakdown.sandPoisonBugged : true;
+            const basePoisonMult = isBugged ? 0.3 : 3.3;
+            const overlapCount = breakdown.dotIntervalMultiplier || Math.max(1, Math.ceil(6.0 / effSpaVal));
+            const singleStackDmg = breakdown.singleStackPoisonDmg || Math.round((breakdown.effDamage || 0) * basePoisonMult * 1.15 * (1 + stackCount * 0.25));
+            return `
+              <div class="dps-breakdown-row step-indented">
+                <span class="dps-row-lbl">Base Poison Multiplier ${isBugged ? "(In-Game Bugged: 0.30x total / 0.05x tick)" : "(Fixed / Intended: 0.05x + 0.50x = 0.55x/tick &times; 6 ticks)"}</span>
+                <span class="dps-row-val font-mono ${isBugged ? "color-crit" : "color-buff"}">${basePoisonMult.toFixed(2)}x Base Hit</span>
+              </div>
+              <div class="dps-breakdown-row step-indented">
+                <span class="dps-row-lbl">Golden Hook Passive (Innate)</span>
+                <span class="dps-row-val font-mono color-buff">&times;1.15</span>
+              </div>
+              <div class="dps-breakdown-row step-indented">
+                <span class="dps-row-lbl">Desert Storm / Eruption (${stackCount} stack${stackCount === 1 ? '' : 's'} &times; +25% = +${stormPct}%)</span>
+                <span class="dps-row-val font-mono color-buff">&times;${(1 + stackCount * 0.25).toFixed(2)}</span>
+              </div>
+              ${(breakdown.trait?.dotBonus || 0) > 0 ? `
+              <div class="dps-breakdown-row step-indented">
+                <span class="dps-row-lbl">${breakdown.trait.name} Trait DoT Bonus (+${Math.round(breakdown.trait.dotBonus * 100)}%)</span>
+                <span class="dps-row-val font-mono color-buff">&times;${(1 + breakdown.trait.dotBonus).toFixed(2)}</span>
+              </div>
+              ` : ""}
+              ${(breakdown.relicDotBonus || 0) > 0 ? `
+              <div class="dps-breakdown-row step-indented">
+                <span class="dps-row-lbl">Relic DoT Bonus (+${Math.round(breakdown.relicDotBonus * 100)}%)</span>
+                <span class="dps-row-val font-mono color-buff">&times;${(1 + breakdown.relicDotBonus).toFixed(2)}</span>
+              </div>
+              ` : ""}
+              <div class="dps-breakdown-row step-indented">
+                <span class="dps-row-lbl">Single Stack Poison DMG</span>
+                <span class="dps-row-val font-mono color-dot">${Math.round(singleStackDmg).toLocaleString()} DMG</span>
+              </div>
+              <div class="dps-breakdown-row step-indented">
+                <span class="dps-row-lbl">Overlapping Stacks Active (⌈6s &divide; ${effSpaVal.toFixed(2)}s⌉)</span>
+                <span class="dps-row-val font-mono">&times;${overlapCount} stack${overlapCount === 1 ? '' : 's'} active</span>
+              </div>
+              <div class="dps-breakdown-row step-indented">
+                <span class="dps-row-lbl">Total Poison DMG (Across Active Stacks)</span>
+                <span class="dps-row-val font-mono color-dot">${Math.round(breakdown.dotDamage || (singleStackDmg * overlapCount)).toLocaleString()} DMG</span>
+              </div>
+              <div class="dps-breakdown-row step-indented">
+                <span class="dps-row-lbl">Re-proc Interval SPA</span>
+                <span class="dps-row-val font-mono">${(breakdown.dotIntervalSPA || (overlapCount * effSpaVal)).toFixed(2)}s</span>
+              </div>
+              <div class="dps-breakdown-highlight-row color-dot-bg">
+                <span class="dps-highlight-lbl color-dot">Unit Poison DoT DPS</span>
+                <span class="dps-highlight-val font-mono color-dot">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
+              </div>
+            `;
+          })() : breakdown.isLightningGod ? (() => {
         const vMeter = breakdown.lgVoltageMeter !== undefined ? breakdown.lgVoltageMeter : 25;
         const vBoost = vMeter * 5;
         const effMult = 0.15 * (1 + vMeter * 0.05);
@@ -1635,6 +1692,7 @@ export async function DpsCard(unit, options = {}) {
   const isHeadCaptain = unit.id === "headcaptainchar" || (unit.name && unit.name.includes("Head Captain"));
   const isLightningGod = unit.id === "lightninggodovercharged" || (unit.name && unit.name.includes("Lightning God (Overcharged)"));
   const isSharkfang = unit.id === "sharkfangabyssal" || (unit.name && unit.name.includes("Sharkfang"));
+  const isSandAlligator = unit.id === "sandalligator" || (unit.name && unit.name.includes("Sand (Alligator)"));
 
   let darkMageMode = unit.darkMageMode || "lightning";
   let giantForm = unit.giantForm !== undefined ? unit.giantForm : false;
@@ -1677,6 +1735,8 @@ export async function DpsCard(unit, options = {}) {
   let lgVoltageMeter = isLightningGod ? Math.max(0, Math.min(60, parseInt(unit.lgVoltageMeter !== undefined ? unit.lgVoltageMeter : 25, 10) || 0)) : 0;
   let lgEnemies = isLightningGod ? Math.max(1, parseInt(unit.lgEnemies !== undefined ? unit.lgEnemies : 10, 10) || 10) : 10;
   let sfBurnStacks = isSharkfang ? Math.max(0, Math.min(3, parseInt(unit.sfBurnStacks !== undefined ? unit.sfBurnStacks : 0, 10) || 0)) : 0;
+  let sandPoisonStacks = isSandAlligator ? Math.max(0, Math.min(6, parseInt(unit.sandPoisonStacks !== undefined ? unit.sandPoisonStacks : 6, 10) || 0)) : 0;
+  let sandPoisonBugged = isSandAlligator ? (unit.sandPoisonBugged !== undefined ? !!unit.sandPoisonBugged : true) : false;
   if (isSovereign) {
     unit.sovereignBossActive = sovereignBossActive;
     unit.sovereignDjinnJudgmentActive = sovereignDjinnJudgmentActive;
@@ -1688,6 +1748,10 @@ export async function DpsCard(unit, options = {}) {
   }
   if (isSharkfang) {
     unit.sfBurnStacks = sfBurnStacks;
+  }
+  if (isSandAlligator) {
+    unit.sandPoisonStacks = sandPoisonStacks;
+    unit.sandPoisonBugged = sandPoisonBugged;
   }
 
   if (isProdigy) {
@@ -1936,6 +2000,20 @@ export async function DpsCard(unit, options = {}) {
             <span class="dps-pill-dot"></span>
             Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
           </button>
+        ` : isSandAlligator ? `
+          <div class="dps-control-stepper">
+            <span class="dps-stepper-lbl">Poison Stacks:</span>
+            <span id="sand-stacks-badge-${unit.id}" class="dps-stepper-sub color-buff font-mono">(+${sandPoisonStacks * 25}%)</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="sand-stacks-input-${unit.id}" value="${sandPoisonStacks}" class="dps-stepper-input" style="width:32px" />
+          </div>
+          <button type="button" class="dps-toggle-pill ${sandPoisonBugged ? 'active' : ''}" id="sand-bugged-toggle-${unit.id}" title="Toggle between Bugged in-game (0.3x) and Fixed (3.3x) poison">
+            <span class="dps-pill-dot"></span>
+            Poison: ${sandPoisonBugged ? "Bugged (0.3x)" : "Fixed (3.3x)"}
+          </button>
+          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
+            <span class="dps-pill-dot"></span>
+            Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
+          </button>
         ` : `
           <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
             <span class="dps-pill-dot"></span>
@@ -1987,6 +2065,9 @@ export async function DpsCard(unit, options = {}) {
   const lgVoltageBadge = card.querySelector(`#lg-voltage-badge-${unit.id}`);
   const lgEnemiesInput = card.querySelector(`#lg-enemies-input-${unit.id}`);
   const sfBurnInput = card.querySelector(`#sf-burn-input-${unit.id}`);
+  const sandStacksInput = card.querySelector(`#sand-stacks-input-${unit.id}`);
+  const sandStacksBadge = card.querySelector(`#sand-stacks-badge-${unit.id}`);
+  const sandBuggedToggle = card.querySelector(`#sand-bugged-toggle-${unit.id}`);
   let fuaEditor = null;
 
   const commitCrowEnemies = () => {
@@ -2311,6 +2392,42 @@ export async function DpsCard(unit, options = {}) {
   });
   sfBurnInput?.addEventListener("change", commitSfBurn);
 
+  const commitSandStacks = () => {
+    if (!sandStacksInput) return;
+    sandStacksInput.value = sandStacksInput.value.replace(/[^\d]/g, "");
+    const val = Math.max(0, Math.min(6, parseInt(sandStacksInput.value || "6", 10) || 0));
+    sandStacksInput.value = String(val);
+    if (sandStacksBadge) {
+      sandStacksBadge.textContent = `(+${val * 25}%)`;
+    }
+    if (sandPoisonStacks !== val) {
+      sandPoisonStacks = val;
+      unit.sandPoisonStacks = sandPoisonStacks;
+      saveUnitSetting(unit.id, "sandPoisonStacks", sandPoisonStacks);
+      window.dispatchEvent(new CustomEvent("dps-value-changed"));
+      renderCalculations();
+    }
+  };
+
+  sandStacksInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commitSandStacks();
+      sandStacksInput.blur();
+    }
+  });
+  sandStacksInput?.addEventListener("change", commitSandStacks);
+
+  sandBuggedToggle?.addEventListener("click", () => {
+    sandPoisonBugged = !sandPoisonBugged;
+    unit.sandPoisonBugged = sandPoisonBugged;
+    saveUnitSetting(unit.id, "sandPoisonBugged", sandPoisonBugged);
+    sandBuggedToggle.classList.toggle("active", sandPoisonBugged);
+    sandBuggedToggle.innerHTML = `<span class="dps-pill-dot"></span>Poison: ${sandPoisonBugged ? "Bugged (0.3x)" : "Fixed (3.3x)"}`;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
   const prodigyStatusBadge = card.querySelector(`#prodigy-status-badge-${unit.id}`);
 
   const commitProdigyStatus = () => {
@@ -2630,6 +2747,9 @@ export async function DpsCard(unit, options = {}) {
         lgEnemies,
         isSharkfang,
         sfBurnStacks,
+        isSandAlligator,
+        sandPoisonStacks,
+        sandPoisonBugged,
       });
       return { traitKey, ...result };
     }).sort((a, b) => (Number(b.breakdown.displayVal) || 0) - (Number(a.breakdown.displayVal) || 0));

@@ -521,10 +521,12 @@ function buildStatusEffectsPanel(unit, activeSummonData = null) {
     const themeClass = iconKey.includes("illusion") ? "status-card-illusion"
       : iconKey.includes("blackfire") || iconKey.includes("black fire") ? "status-card-blackfire"
         : iconKey.includes("freeze") ? "status-card-freeze"
-          : iconKey.includes("burn") ? "status-card-burn"
-            : (iconKey.includes("electric") || iconKey.includes("voltage") || iconKey.includes("storm")) ? "status-card-electricity"
-            : (iconKey.includes("slow") || iconKey.includes("stun") || iconKey.includes("stagger") || iconKey.includes("dismembered") || iconKey.includes("thedrinkmark") || iconKey.includes("drink mark") || iconKey.includes("puppetmark") || iconKey.includes("puppet mark") || iconKey.includes("rewind")) ? "status-card-stun"
-              : "status-card-bleed";
+          : iconKey.includes("sandstorm") ? "status-card-sandstorm"
+            : iconKey.includes("poison") ? "status-card-poison"
+              : iconKey.includes("burn") ? "status-card-burn"
+                : (iconKey.includes("electric") || iconKey.includes("voltage") || iconKey.includes("storm")) ? "status-card-electricity"
+                : (iconKey.includes("slow") || iconKey.includes("stun") || iconKey.includes("stagger") || iconKey.includes("dismembered") || iconKey.includes("thedrinkmark") || iconKey.includes("drink mark") || iconKey.includes("puppetmark") || iconKey.includes("puppet mark") || iconKey.includes("rewind")) ? "status-card-stun"
+                  : "status-card-bleed";
 
     const iconSrc = STATUS_ICONS[e.icon] || STATUS_ICONS.burn || STATUS_ICONS.bleed;
     return `
@@ -681,6 +683,8 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
       caringState: isCursedImmortal ? !unit.coldState : false,
       sovereignBossActive: isSovereign ? (unit.sovereignBossActive !== undefined ? !!unit.sovereignBossActive : true) : false,
       sovereignDjinnJudgmentActive: isSovereign ? (unit.sovereignDjinnJudgmentActive !== undefined ? !!unit.sovereignDjinnJudgmentActive : true) : true,
+      sandPoisonBugged: unit.sandPoisonBugged !== undefined ? !!unit.sandPoisonBugged : true,
+      sandPoisonStacks: unit.sandPoisonStacks !== undefined ? unit.sandPoisonStacks : 6,
     };
 
     const bd = getTraitBreakdown(baseUnitMock, "base", currentLevel, currentStatMode);
@@ -759,8 +763,9 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
             <div class="dps-kv" style="opacity:0.55;"><span class="dps-kv-lbl">Range Modifier</span><span class="dps-kv-val font-mono">${unit.coldState ? "-75% (Cold: 25% of range)" : "-50% (Caring: 50% of range)"}</span></div>
           </div>
         </div>`;
-    } else if (fuaBreakdowns && fuaBreakdowns.length > 0) {
-      const fuaRowsHtml = fuaBreakdowns.map(entry => {
+    } else if (fuaBreakdowns && fuaBreakdowns.filter(entry => (Number(entry.inputDamage) || 0) > 0 || (Number(entry.dps) || 0) > 0).length > 0) {
+      const activeFuaList = fuaBreakdowns.filter(entry => (Number(entry.inputDamage) || 0) > 0 || (Number(entry.dps) || 0) > 0);
+      const fuaRowsHtml = activeFuaList.map(entry => {
         const title = formatPassiveText(entry.name || `FUA ${entry.index + 1}`);
         const fuaBase = entry.effectiveFollowUpDamage || entry.inputDamage;
         const avgHit = entry.averageFollowUpHit || (fuaBase * (entry.critAvgMult || critAvgMult));
@@ -1175,12 +1180,12 @@ export function buildDPSBreakdownSubtab(unit, loadoutContainer = null) {
 
               ${(unitDoTDPS || 0) > 0 ? `
               <div class="dps-section section-dot">
-                <div class="dps-section-hd">${isCrow ? "Black Fire Calculation" : "DoT Calculation"}</div>
+                <div class="dps-section-hd">${isCrow ? "Black Fire Calculation" : bd.isSandAlligator ? "Poison DoT Calculation" : "DoT Calculation"}</div>
                 <div class="dps-kv-list">
                   <div class="dps-kv"><span class="dps-kv-lbl">Effect</span><span class="dps-kv-val">${formatPassiveText(base.dotName)}</span></div>
-                  <div class="dps-kv"><span class="dps-kv-lbl">Total DoT Scale</span><span class="dps-kv-val font-mono">${isCrow ? "2.00x Base Hit" : (effDotMult || 0).toFixed(2) + "x"}</span></div>
-                  <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Total DoT DMG</span><span class="dps-kv-val font-mono dot-highlight">${Math.round(effDamage * (isCrow ? 2.0 : (effDotMult || 0))).toLocaleString()} DMG</span></div>
-                  <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Duration &amp; Interval</span><span class="dps-kv-val font-mono">${isCrow ? `12s / ${(dotIntervalSPA || 12).toFixed(2)}s re-proc` : `${(bd.dotDuration || 8).toFixed(1)}s / ${(dotIntervalSPA || 1).toFixed(2)}s`}</span></div>
+                  <div class="dps-kv"><span class="dps-kv-lbl">Total DoT Scale</span><span class="dps-kv-val font-mono">${isCrow ? "2.00x Base Hit" : bd.isSandAlligator ? `${(bd.sandPoisonBugged ? 0.3 : 3.3).toFixed(2)}x Base ${bd.sandPoisonBugged ? "(Bugged)" : "(Fixed)"} &times; 1.15 Golden Hook &times; ${(1 + (bd.sandPoisonStacks !== undefined ? bd.sandPoisonStacks : 6) * 0.25).toFixed(2)} Stacks` : (effDotMult || 0).toFixed(2) + "x"}</span></div>
+                  <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Total DoT DMG</span><span class="dps-kv-val font-mono dot-highlight">${Math.round(bd.dotDamage || (effDamage * (effDotMult || 0))).toLocaleString()} DMG</span></div>
+                  <div class="dps-kv faint-nested"><span class="dps-kv-lbl">Duration &amp; Interval</span><span class="dps-kv-val font-mono">${isCrow ? `12s / ${(dotIntervalSPA || 12).toFixed(2)}s re-proc` : `${(bd.dotDuration || 6).toFixed(1)}s / ${(dotIntervalSPA || 1).toFixed(2)}s`}</span></div>
                   <div class="dps-kv primary"><span class="dps-kv-lbl dot-highlight">DoT DPS</span><span class="dps-kv-val font-mono dot-highlight">+${formatDPS(unitDoTDPS)} DPS</span></div>
                 </div>
               </div>` : ""}

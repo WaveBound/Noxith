@@ -56,6 +56,8 @@ export const STATUS_ICONS = {
     thedrinkmark: toAbsoluteUrl("icons/status/TheDrinkMark.png"),
     rewind: toAbsoluteUrl("icons/status/Rewind.png"),
     electricity: toAbsoluteUrl("icons/status/Electricity.png"),
+    poison: toAbsoluteUrl("icons/status/Poison.png"),
+    sandstorm: toAbsoluteUrl("icons/status/Sandstorm.png"),
 };
 
 export const RELIC_ICONS = {
@@ -75,6 +77,8 @@ export const RELIC_ICONS = {
     "relic-fiery-staff": toAbsoluteUrl("icons/relics/FieryStaff.png"),
     "relic-lightning-dagger": toAbsoluteUrl("icons/relics/LightningDagger.png"),
     "relic-storm-trident": toAbsoluteUrl("icons/relics/StormTrident.png"),
+    "relic-spirit-kings-blade": toAbsoluteUrl("icons/relics/SpiritKingsBlade.png"),
+    "relic-poison-hook": toAbsoluteUrl("icons/relics/PoisonHook.png"),
 };
 
 export function relicImg(id) {
@@ -128,6 +132,10 @@ const RELIC_NAME_TO_IMG = {
     "Storm Trident": toAbsoluteUrl("icons/relics/StormTrident.png"),
     "StormTrident": toAbsoluteUrl("icons/relics/StormTrident.png"),
     "Tideblade": toAbsoluteUrl("icons/relics/Tideblade.png"),
+    "Spirit King's Blade": toAbsoluteUrl("icons/relics/SpiritKingsBlade.png"),
+    "SpiritKingsBlade": toAbsoluteUrl("icons/relics/SpiritKingsBlade.png"),
+    "Poison Hook": toAbsoluteUrl("icons/relics/PoisonHook.png"),
+    "PoisonHook": toAbsoluteUrl("icons/relics/PoisonHook.png"),
 };
 
 export function relicImgByName(name) {
@@ -199,6 +207,9 @@ export function formatPassiveText(text) {
     out = out.replace(/Electric[\s\xA0]+Residue/gi, "@@ERES@@");
     out = out.replace(/Electricity/gi, "@@ELEC@@");
 
+    out = out.replace(/Ground[\s\xA0]+Eruption/gi, "@@GERU@@");
+    out = out.replace(/Desert[\s\xA0]+Storm/gi, "@@DSTM@@");
+    out = out.replace(/Sandstorms?/gi, "@@SSTM@@");
     out = out.replace(/Magical/gi, "@@MAG@@");
     out = out.replace(/Mana[\s\xA0]+Burn/gi, "@@MB@@");
     out = out.replace(/Old[\s\xA0]+Magic/gi, "@@OM@@");
@@ -213,10 +224,13 @@ export function formatPassiveText(text) {
     out = out.replace(/Bat[\s\xA0]+Spirits?/gi, "@@BS@@");
     out = out.replace(/Bleed/gi, "@@BL@@");
     out = out.replace(/(Burn|Flame|Flames|Ignite)/gi, "@@BU@@");
+    out = out.replace(/Poison/gi, "@@PSN@@");
 
     out = out.replace(/Frostbite/gi, "@@FB@@");
     out = out.replace(/Freezes/gi, "@@FZS@@");
     out = out.replace(/Freeze/gi, "@@FZ@@");
+    out = out.replace(/Ice[\s\xA0]+Traps/gi, "@@ITPS@@");
+    out = out.replace(/Ice[\s\xA0]+Trap/gi, "@@ITP@@");
     out = out.replace(/Genetic[\s\xA0]+Duplication/gi, "@@GD@@");
     out = out.replace(/Bio[\s\xA0]+Reset/gi, "@@BRS@@");
     out = out.replace(/Takedowns/gi, "@@TKDS@@");
@@ -322,6 +336,9 @@ export function formatPassiveText(text) {
     out = out.replace(/@@RK@@/g, `<span class="p-kw p-rock"><span>Rock</span></span>`);
     out = out.replace(/@@CC@@/g, `<span class="p-kw p-cocoon"><span>Cocoon of Carnage</span></span>`);
 
+    out = out.replace(/@@GERU@@/g, `<span class="p-kw p-ground-eruption"><span>Ground Eruption</span></span>`);
+    out = out.replace(/@@DSTM@@/g, `<span class="p-kw p-desert-storm"><span>Desert Storm</span></span>`);
+    out = out.replace(/@@SSTM@@/g, `<span class="p-kw p-sandstorm">${iconImgTag(STATUS_ICONS.sandstorm)}<span>Sandstorm</span></span>`);
     out = out.replace(/@@MAG@@/g, `<span class="p-kw p-magical"><span class="p-magical-text">Magical</span></span>`);
     out = out.replace(/@@MB@@/g, `<span class="p-kw p-mana-burn">${iconImgTag(STATUS_ICONS.manaburn)}<span class="p-mana-burn-text">Mana Burn</span></span>`);
     out = out.replace(/@@OM@@/g, `<span class="p-kw p-spell"><span class="p-spell-text">Old Magic</span></span>`);
@@ -338,10 +355,13 @@ export function formatPassiveText(text) {
 
     out = out.replace(/@@BL@@/g, `<span class="p-kw p-bleed">${iconImgTag(STATUS_ICONS.bleed)}<span class="p-bleed-text">Bleed</span></span>`);
     out = out.replace(/@@BU@@/g, `<span class="p-kw p-burn">${iconImgTag(STATUS_ICONS.burn)}<span class="p-burn-text">Burn</span></span>`);
+    out = out.replace(/@@PSN@@/g, `<span class="p-kw p-poison">${iconImgTag(STATUS_ICONS.poison)}<span class="p-poison-text">Poison</span></span>`);
 
     out = out.replace(/@@FB@@/g, `<span class="p-kw p-frostbite"><span>Frostbite</span></span>`);
     out = out.replace(/@@FZS@@/g, `<span class="p-kw p-freeze">${iconImgTag(STATUS_ICONS.freeze)}<span>Freezes</span></span>`);
     out = out.replace(/@@FZ@@/g, `<span class="p-kw p-freeze">${iconImgTag(STATUS_ICONS.freeze)}<span>Freeze</span></span>`);
+    out = out.replace(/@@ITPS@@/g, `<span class="p-kw p-ice-trap"><span>Ice Traps</span></span>`);
+    out = out.replace(/@@ITP@@/g, `<span class="p-kw p-ice-trap"><span>Ice Trap</span></span>`);
     out = out.replace(/@@CAS@@/g, `<span class="p-kw p-critical-attack"><span>Critical Attacks</span></span>`);
     out = out.replace(/@@CAK@@/g, `<span class="p-kw p-critical-attack"><span>Critical Attack</span></span>`);
     out = out.replace(/@@RAS@@/g, `<span class="p-kw p-reg-attack"><span>Regular Attacks</span></span>`);
@@ -502,6 +522,11 @@ if (typeof window !== "undefined") {
         if (target.classList.contains("p-vapor-cloud")) return toAbsoluteUrl("icons/info/VaporCloudinfo.png");
         if (target.classList.contains("p-tidal-wave")) return toAbsoluteUrl("icons/info/TidalWaveinfo.png");
         if (target.classList.contains("p-waterfall")) return toAbsoluteUrl("icons/info/Waterfallinfo.png");
+        if (target.classList.contains("p-ice-trap")) return toAbsoluteUrl("icons/info/IceTrapinfo.png");
+        if (target.classList.contains("p-poison")) return toAbsoluteUrl("icons/info/Poisoninfo.png");
+        if (target.classList.contains("p-ground-eruption")) return toAbsoluteUrl("icons/info/GroundEruptioninfo.png");
+        if (target.classList.contains("p-desert-storm")) return toAbsoluteUrl("icons/info/DesertStorminfo.png");
+        if (target.classList.contains("p-sandstorm")) return toAbsoluteUrl("icons/info/Sandstorminfo.png");
         return "";
     }
 
