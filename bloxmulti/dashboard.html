@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>BloxMulti Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- App-matched font: Inter -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+
+  <style>
+    /* ── BloxMulti Theme Variables (Desktop App Onyx Theme) ── */
+    :root {
+      --bg: #06050d;
+      --sidebar-bg: rgba(6, 5, 14, 0.97);
+      --surface: #0a0916;
+      --surface-2: #100e22;
+      --surface-hover: #161430;
+      --surface-card: rgba(15, 14, 28, 0.65);
+      --surface-card-hover: rgba(22, 20, 42, 0.85);
+      --input-bg: #05040a;
+      --border: rgba(255, 255, 255, 0.06);
+      --border-hi: rgba(255, 255, 255, 0.12);
+      --slideout-bg: rgba(16, 14, 34, 0.98);
+      --settings-sidebar-bg: rgba(6, 5, 14, 0.92);
+      --panel-bg: rgba(10, 9, 20, 0.72);
+      --modal-bg: #0d0c1e;
+      --modal-border: rgba(255, 255, 255, 0.08);
+
+      --accent: #9d6fff;
+      --accent-glow: rgba(157, 111, 255, 0.28);
+      --accent-light: #c4a0ff;
+      --accent-subtle: rgba(157, 111, 255, 0.08);
+      --accent-subtle-hover: rgba(157, 111, 255, 0.16);
+      --accent-border: rgba(157, 111, 255, 0.3);
+      --accent-text: #ffffff;
+
+      --text: #edeafa;
+      --muted: #6a607e;
+      --placeholder: rgba(106, 96, 126, 0.4);
+
+      --red: #ff3a5c;
+      --green: #2af598;
+      --premium-badge-bg: linear-gradient(135deg, var(--accent) 0%, #c4a0ff 100%);
+      --premium-badge-color: white;
+
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Scrollbars ── */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-hi);
+      border-radius: 99px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
+
+    /* ── Hero Ambient Background ── */
+    .hero-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 70% 30%, rgba(157, 111, 255, 0.18) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 20% 60%, rgba(50, 200, 255, 0.04) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 90% 80%, rgba(157, 111, 255, 0.1) 0%, transparent 55%),
+        linear-gradient(160deg, #06050d 0%, #030208 40%, #0a0718 100%);
+    }
+
+    .hero-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(120deg, transparent 0px, transparent 40px, rgba(157, 111, 255, 0.025) 40px, rgba(157, 111, 255, 0.025) 41.5px);
+    }
+
+    .hero-vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(to right, rgba(6, 5, 14, 0.95) 0%, rgba(6, 5, 14, 0.5) 35%, transparent 65%),
+        linear-gradient(to top, rgba(6, 5, 14, 0.95) 0%, rgba(6, 5, 14, 0.2) 30%, transparent 60%);
+      opacity: 0.75;
+    }
+
+    /* ── App Shell ── */
+    #app {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* ── Desktop Sidebar ── */
+    .settings-sidebar {
+      width: 230px;
+      background: var(--settings-sidebar-bg);
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      padding: 16px 12px;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .sidebar-top-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sidebar-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 6px 8px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      transition: all 0.15s ease;
+    }
+
+    .sidebar-back-btn:hover {
+      color: var(--text);
+      border-color: var(--border-hi);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .settings-sidebar-brand {
+      display: flex;
+      flex-direction: column;
+      padding: 4px 6px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .brand-text {
+      font-size: 16px;
+      font-weight: 800;
+      font-family: var(--font-display);
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .settings-tabs {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .settings-tab {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      background: transparent;
+      border: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .settings-tab svg {
+      color: var(--muted);
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+
+    .settings-tab:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .settings-tab:hover svg {
+      color: var(--text);
+    }
+
+    .settings-tab.active {
+      color: var(--accent-light);
+      background: var(--accent-subtle);
+    }
+
+    .settings-tab.active svg {
+      color: var(--accent-light);
+    }
+
+    /* ── Sidebar User Box (Desktop) ── */
+    .sidebar-user {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .user-chip-av {
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-hi);
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-light);
+    }
+
+    .user-chip-av img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-chip-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .user-chip-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-chip-email {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-signout-btn {
+      height: 28px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .sidebar-signout-btn:hover {
+      color: var(--red);
+      background: rgba(255, 58, 92, 0.08);
+      border-color: rgba(255, 58, 92, 0.25);
+    }
+
+    /* ── Mobile Header & Segmented Nav (<=768px) ── */
+    .mobile-header {
+      display: none;
+      flex-direction: column;
+      background: var(--sidebar-bg);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      flex-shrink: 0;
+    }
+
+    .mobile-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+    }
+
+    .mobile-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+    }
+
+    .mobile-back-btn:hover {
+      color: var(--text);
+    }
+
+    .mobile-segmented-nav {
+      display: flex;
+      padding: 0 12px 10px;
+      gap: 6px;
+    }
+
+    .mobile-nav-btn {
+      flex: 1;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .mobile-nav-btn.active {
+      color: var(--accent-light);
+      background: var(--accent-subtle);
+      border-color: var(--accent-border);
+    }
+
+    /* ── Main Viewport ── */
+    .main-viewport {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      min-width: 0;
+    }
+
+    .dash-topbar {
+      height: 52px;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(6, 5, 14, 0.72);
+      backdrop-filter: blur(14px);
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .dash-topbar-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.1px;
+    }
+
+    .dash-content {
+      padding: 24px 28px 48px;
+      max-width: 980px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ── Tab Panes ── */
+    .tab-pane {
+      display: none !important;
+    }
+
+    .tab-pane.active {
+      display: flex !important;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ── Panels & Cards ── */
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .panel-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stab-account-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .stab-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 9px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-hi);
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent-light);
+    }
+
+    .stab-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .stab-account-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .stab-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stab-email {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stab-plan-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .stab-plan-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stab-plan-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    /* ── Plan Badges ── */
+    .stab-plan-value.premium {
+      color: var(--accent-light);
+      background: var(--accent-subtle);
+      padding: 2px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--accent-border);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    .stab-plan-value.free {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Input Fields ── */
+    .input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border-hi);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .input:focus {
+      border-color: var(--accent);
+    }
+
+    /* ── Buttons ── */
+    .modal-btn {
+      padding: 8px 15px;
+      border-radius: 7px;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.14s;
+      border: 1px solid transparent;
+      letter-spacing: 0.1px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .modal-cancel {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .modal-cancel:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .modal-confirm {
+      background: var(--red);
+      color: #fff;
+      border-color: rgba(255, 58, 92, 0.4);
+    }
+
+    .modal-confirm:hover {
+      background: #ff4d6d;
+    }
+
+    .upgrade-confirm-btn {
+      background: var(--premium-badge-bg) !important;
+      color: var(--premium-badge-color) !important;
+      border-color: transparent !important;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .upgrade-confirm-btn:hover {
+      opacity: 0.9;
+    }
+
+    .upgrade-confirm-btn:active {
+      transform: scale(0.97);
+    }
+
+    .discord-btn {
+      background: rgba(88, 101, 242, 0.15) !important;
+      color: #7289da !important;
+      border-color: rgba(88, 101, 242, 0.35) !important;
+    }
+
+    .discord-btn:hover {
+      background: rgba(88, 101, 242, 0.28) !important;
+      border-color: rgba(88, 101, 242, 0.6) !important;
+      color: #99aaf0 !important;
+    }
+
+    .premium-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--premium-badge-bg);
+      color: var(--premium-badge-color) !important;
+      font-size: 8px;
+      font-weight: 800;
+      padding: 2.5px 7px;
+      border-radius: 20px;
+      letter-spacing: 0.8px;
+      white-space: nowrap;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    /* ── Stream Player Layout ── */
+    .stream-viewport {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #020106;
+      border: 1px solid var(--border-hi);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stream-viewport video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .stream-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(6, 5, 14, 0.94);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      z-index: 5;
+    }
+
+    .stream-overlay-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--accent-subtle);
+      border: 1px solid var(--accent-border);
+      color: var(--accent-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .stream-overlay-icon.locked {
+      background: rgba(255, 58, 92, 0.1);
+      border-color: rgba(255, 58, 92, 0.3);
+      color: var(--red);
+    }
+
+    .stream-overlay-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stream-overlay-text {
+      font-size: 12px;
+      color: var(--muted);
+      max-width: 360px;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .stream-id-badge {
+      margin-top: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent-light);
+      background: var(--accent-subtle);
+      border: 1px solid var(--accent-border);
+      padding: 5px 12px;
+      border-radius: 6px;
+    }
+
+    /* ── Plans Tab Grid ── */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 8px;
+    }
+
+    .pricing-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 22px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+
+    .pricing-card:hover {
+      border-color: rgba(157, 111, 255, 0.28);
+      transform: translateY(-2px);
+    }
+
+    .pricing-card.featured {
+      background: rgba(157, 111, 255, 0.05);
+      border-color: var(--accent-border);
+    }
+
+    .pricing-tier-name {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      margin-bottom: 10px;
+    }
+
+    .pricing-price {
+      font-family: var(--font-display);
+      font-size: 40px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .pricing-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.45;
+    }
+
+    .pricing-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 26px;
+      flex: 1;
+    }
+
+    .pricing-feat-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--text);
+    }
+
+    .pricing-check {
+      color: var(--green);
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .btn-pricing {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      height: 40px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+      border: 1px solid var(--border-hi);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+    }
+
+    .btn-pricing:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--accent);
+    }
+
+    .btn-pricing.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .btn-pricing.primary:hover:not(:disabled) {
+      background: var(--accent-light);
+    }
+
+    .btn-pricing:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      border-color: var(--border);
+    }
+
+    .pricing-note {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+      text-align: center;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    /* ── Modals & Overlays ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s;
+      padding: 16px;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: var(--modal-bg, #0d0c1e);
+      border: 1px solid var(--modal-border, rgba(255, 255, 255, 0.08));
+      border-radius: 10px;
+      padding: 22px;
+      width: 340px;
+      transform: scale(0.96) translateY(4px);
+      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.18s;
+      opacity: 0;
+      max-width: 100%;
+    }
+
+    .modal-overlay.show .modal {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+
+    .modal-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.1px;
+    }
+
+    .modal-text {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 22px;
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    /* ── Mobile Breakpoints ── */
+    @media (max-width: 850px) {
+      #app {
+        flex-direction: column;
+      }
+
+      .settings-sidebar {
+        display: none;
+      }
+
+      .mobile-header {
+        display: flex;
+      }
+
+      .dash-topbar {
+        display: none;
+      }
+
+      .dash-content {
+        padding: 14px 14px 32px;
+      }
+
+      .panel {
+        padding: 14px;
+        border-radius: 10px;
+      }
+
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="hero-bg"></div>
+  <div class="hero-vignette"></div>
+
+  <div id="app">
+    <!-- ── Desktop Sidebar ── -->
+    <aside class="settings-sidebar">
+      <div class="sidebar-top-nav">
+        <!-- Back to Website Link -->
+        <a href="index.html" class="sidebar-back-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+          <span>Back to Website</span>
+        </a>
+
+        <div class="settings-sidebar-brand">
+          <div class="brand-text">BloxMulti</div>
+          <div
+            style="font-size: 9.5px; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; margin-top: 2px;">
+            Web Dashboard</div>
+        </div>
+
+        <div class="settings-tabs">
+          <button class="settings-tab active" id="tabBtnStream" onclick="switchTab('stream')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg>
+            <span>Remote Screen</span>
+          </button>
+
+          <!-- Plans Tab: Credit card icon -->
+          <button class="settings-tab" id="tabBtnPlans" onclick="switchTab('plans')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+              <line x1="1" y1="10" x2="23" y2="10" />
+            </svg>
+            <span>Plans &amp; Upgrades</span>
+          </button>
+
+          <button class="settings-tab" id="tabBtnAccount" onclick="switchTab('account')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <span>Account &amp; Billing</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Desktop Sidebar Profile Box -->
+      <div class="sidebar-user">
+        <div class="user-chip">
+          <div class="user-chip-av" id="sidebarAvatar">U</div>
+          <div class="user-chip-info">
+            <div class="user-chip-name" id="sidebarUserName">Loading...</div>
+            <div class="user-chip-email" id="sidebarUserEmail">user@example.com</div>
+          </div>
+        </div>
+        <button class="sidebar-signout-btn" onclick="signOut()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── Mobile Header ── -->
+    <header class="mobile-header">
+      <div class="mobile-top-row">
+        <!-- Back to Website Link -->
+        <a href="index.html" class="mobile-back-btn">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+          <span>Main Site</span>
+        </a>
+
+        <div style="font-size:14px; font-weight:700;">BloxMulti</div>
+
+        <button class="modal-btn modal-cancel" style="height:28px; padding:0 8px;" onclick="signOut()" title="Sign Out">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="mobile-segmented-nav">
+        <button class="mobile-nav-btn active" id="mobTabBtnStream" onclick="switchTab('stream')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+            <line x1="8" y1="21" x2="16" y2="21" />
+            <line x1="12" y1="17" x2="12" y2="21" />
+          </svg>
+          Stream
+        </button>
+        <!-- Mobile Plans Tab -->
+        <button class="mobile-nav-btn" id="mobTabBtnPlans" onclick="switchTab('plans')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+            <line x1="1" y1="10" x2="23" y2="10" />
+          </svg>
+          Plans
+        </button>
+        <button class="mobile-nav-btn" id="mobTabBtnAccount" onclick="switchTab('account')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          Account
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Main Workspace ── -->
+    <main class="main-viewport">
+      <!-- Desktop Topbar -->
+      <header class="dash-topbar">
+        <div class="dash-topbar-title" id="pageTitle">Remote Screen Stream</div>
+      </header>
+
+      <div class="dash-content">
+        <!-- ── TAB 1: REMOTE SCREEN STREAM ── -->
+        <section class="tab-pane active" id="paneStream">
+          <div class="panel">
+            <div class="panel-title">
+              <span>Live Screen Session</span>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span id="streamRoomBadge" class="stream-id-badge"
+                  style="margin-top:0; font-size:9.5px; padding:2px 7px;">Room: bm-......</span>
+                <span id="streamStatusPill" class="stab-plan-value"
+                  style="color:var(--muted); font-size:11px;">Disconnected</span>
+              </div>
+            </div>
+
+            <!-- Video Viewport -->
+            <div class="stream-viewport" id="streamViewport">
+              <video id="remoteVideo" autoplay playsinline></video>
+
+              <!-- Waiting Overlay (Premium active) -->
+              <div class="stream-overlay" id="streamWaitingOverlay">
+                <div class="stream-overlay-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                    <line x1="8" y1="21" x2="16" y2="21" />
+                    <line x1="12" y1="17" x2="12" y2="21" />
+                  </svg>
+                </div>
+                <div class="stream-overlay-title">Waiting for Stream</div>
+                <p class="stream-overlay-text">
+                  Start Remote View inside BloxMulti on your PC. It will automatically connect to your screen.
+                </p>
+                <div class="stream-id-badge" id="streamOverlayRoomTag">Stream ID: bm-......</div>
+              </div>
+
+              <!-- Locked Overlay (Free tier) -->
+              <div class="stream-overlay" id="streamLockedOverlay" style="display:none;">
+                <div class="stream-overlay-icon locked">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                </div>
+                <div class="stream-overlay-title">Premium Feature</div>
+                <p class="stream-overlay-text">
+                  Remote Screen Streaming is exclusively available to BloxMulti Premium subscribers. Upgrade your
+                  account to observe your clients anywhere.
+                </p>
+                <button class="modal-btn upgrade-confirm-btn" style="margin-top:14px; height:34px; padding:0 18px;"
+                  onclick="switchTab('plans')">
+                  Upgrade to Unlock ($3/mo)
+                </button>
+              </div>
+            </div>
+
+            <!-- Stream Action Row -->
+            <div id="streamControlsRow"
+              style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+              <button class="modal-btn modal-cancel" id="streamReconnectBtn" onclick="autoConnectStream()"
+                style="height:32px; font-size:11.5px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                </svg>
+                Reconnect
+              </button>
+
+              <button class="modal-btn modal-cancel" onclick="toggleFullscreen()"
+                style="height:32px; font-size:11.5px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path
+                    d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                  </path>
+                </svg>
+                Fullscreen
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── TAB 2: PLANS & UPGRADES ── -->
+        <section class="tab-pane" id="panePlans">
+          <div class="panel">
+            <div class="panel-title">Available Subscription Plans</div>
+
+            <div class="pricing-grid">
+              <!-- Standard -->
+              <div class="pricing-card" id="planCardStandard">
+                <div class="pricing-tier-name">Standard</div>
+                <div class="pricing-price">$0</div>
+                <div class="pricing-sub">Free forever for casual multi-accounting</div>
+
+                <ul class="pricing-features">
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> Unlimited simultaneous Roblox
+                    accounts</li>
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> Global framerate cap configuration
+                  </li>
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> Place ID &amp; Job ID
+                    quick-launching</li>
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> Saved servers &amp; game bookmarks
+                  </li>
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> Local DPAPI hardware encryption
+                  </li>
+                </ul>
+
+                <button class="btn-pricing" id="planBtnStandard" disabled>Current Plan</button>
+              </div>
+
+              <!-- Monthly Premium -->
+              <div class="pricing-card featured" id="planCardMonthly">
+                <div class="pricing-tier-name">Monthly Premium</div>
+                <div class="pricing-price">$3 <span
+                    style="font-size:14px; color:var(--muted); font-family:var(--font); font-weight:500;">/ mo</span>
+                </div>
+                <div class="pricing-sub">Full automation suite with recurring flexibility</div>
+
+                <ul class="pricing-features">
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> <strong>Everything in
+                      Standard</strong></li>
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> Discord Webhook alerts &amp;
+                    screenshots</li>
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> Multi-monitor window layout
+                    coordinator</li>
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> Per-account individual FPS limits
+                  </li>
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> Remote WebRTC screen streaming</li>
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> Live instance telemetry
+                    (CPU/RAM/GPU)</li>
+                </ul>
+
+                <button class="btn-pricing primary" id="planBtnMonthly" onclick="initiateCheckout('monthly')">
+                  Subscribe ($3/mo)
+                </button>
+              </div>
+
+              <!-- Lifetime License -->
+              <div class="pricing-card" id="planCardLifetime">
+                <div class="pricing-tier-name">Lifetime License</div>
+                <div class="pricing-price">$15 <span
+                    style="font-size:14px; color:var(--muted); font-family:var(--font); font-weight:500;">one-time</span>
+                </div>
+                <div class="pricing-sub">Pay once, own all future updates forever</div>
+
+                <ul class="pricing-features">
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> <strong>All Premium features
+                      unlocked</strong></li>
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> One-time payment with no recurring
+                    fees</li>
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> Lifetime license linked to your
+                    account</li>
+                  <li class="pricing-feat-item"><span class="pricing-check">✓</span> Priority Discord support access
+                  </li>
+                </ul>
+
+                <button class="btn-pricing" id="planBtnLifetime" onclick="initiateCheckout('lifetime')">
+                  Get Lifetime ($15)
+                </button>
+              </div>
+            </div>
+
+            <div class="pricing-note">
+              <strong>No refunds.</strong> Subscriptions automatically recur monthly and can be canceled anytime from
+              Account &amp; Billing. Lifetime is a single one-time payment.
+            </div>
+          </div>
+        </section>
+
+        <!-- ── TAB 3: ACCOUNT & BILLING ── -->
+        <section class="tab-pane" id="paneAccount">
+          <!-- Account Details -->
+          <div class="panel">
+            <div class="panel-title">Account Details</div>
+            <div class="stab-account-card">
+              <div class="stab-avatar" id="accountAvatar">U</div>
+              <div class="stab-account-info">
+                <div class="stab-name" id="accountName">User</div>
+                <div class="stab-email" id="accountEmail">user@example.com</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- License & Plan Management -->
+          <div class="panel">
+            <div class="panel-title">License &amp; Plan</div>
+
+            <div class="stab-plan-card">
+              <div class="stab-plan-row">
+                <span class="stab-plan-label">Plan Tier</span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span class="stab-plan-value free" id="cardPlanTier">FREE</span>
+                  <button class="modal-btn upgrade-confirm-btn" id="billingUpgradeBtn" onclick="switchTab('plans')"
+                    style="height:25px; padding:0 11px; font-size:10.5px; border-radius:6px;">
+                    View Plans
+                  </button>
+                </div>
+              </div>
+
+              <div class="stab-plan-row" id="cardRenewRow" style="display:none;">
+                <span class="stab-plan-label" id="cardRenewLabel">Renews</span>
+                <span class="stab-plan-value" id="cardRenewDate">—</span>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:8px; justify-content:flex-start;" id="billingActionsContainer">
+              <button class="modal-btn modal-cancel" id="billingCancelBtn" onclick="confirmCancelSub()"
+                style="color:var(--red); border-color:rgba(255,58,92,0.3); display:none; height:32px; font-size:11.5px;">
+                Cancel Subscription
+              </button>
+              <button class="modal-btn modal-cancel" id="billingResumeBtn" onclick="confirmResumeSub()"
+                style="color:var(--green); border-color:rgba(42,245,152,0.3); display:none; height:32px; font-size:11.5px;">
+                Resume Subscription
+              </button>
+            </div>
+          </div>
+
+          <!-- Referral Program -->
+          <div class="panel">
+            <div class="panel-title">
+              <span>Your Referral Code</span>
+              <span class="premium-badge">EARN PREMIUM</span>
+            </div>
+
+            <div style="display:flex; gap:8px; max-width:440px;">
+              <input type="text" id="referralCodeBox" readonly value="Loading..." class="input"
+                style="font-family:var(--font-mono); font-weight:700; letter-spacing:1px; text-align:center;" />
+              <button class="modal-btn modal-cancel" id="copyRefBtn" onclick="copyReferralCode()">Copy</button>
+            </div>
+
+            <div
+              style="font-size:11px; color:var(--muted); line-height:1.5; background:rgba(255,255,255,0.02); border:1px solid var(--border); padding:10px 12px; border-radius:8px;">
+              Invite friends! When a friend joins and opens BloxMulti on 3 separate days, you instantly receive <strong
+                style="color:var(--text);">5 free days of Premium</strong>.
+            </div>
+
+            <!-- Apply Referral Box -->
+            <div id="applyReferralCard"
+              style="display:flex; flex-direction:column; gap:8px; margin-top:4px; border-top:1px solid rgba(255,255,255,0.05); padding-top:12px;">
+              <div style="font-size:11px; font-weight:700; color:var(--text);">Have a Referral Code?</div>
+              <div style="display:flex; gap:8px; max-width:440px;">
+                <input type="text" id="applyReferralInput" class="input" placeholder="e.g. BM-XXXXXX"
+                  style="font-family:var(--font-mono); text-transform:uppercase;" />
+                <button class="modal-btn upgrade-confirm-btn" id="applyRefBtn"
+                  onclick="submitReferralCode()">Apply</button>
+              </div>
+              <div id="applyRefStatus" style="font-size:11px; display:none;"></div>
+            </div>
+
+            <div id="appliedReferralBanner"
+              style="display:none; padding:10px 14px; border-radius:8px; background:rgba(42,245,152,0.08); border:1px solid rgba(42,245,152,0.25); font-size:11.5px; color:var(--green); font-weight:600; text-align:center;">
+              ✓ Referral code applied!
+            </div>
+          </div>
+
+          <!-- Community Support & Sign Out -->
+          <div class="panel">
+            <div class="panel-title">Community &amp; Options</div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+              <button class="modal-btn discord-btn" onclick="window.open('https://discord.gg/ju6ANNecQg', '_blank')"
+                style="flex:1; min-width:180px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+                </svg>
+                Discord Support
+              </button>
+              <button class="modal-btn modal-cancel" onclick="signOut()"
+                style="flex:1; min-width:180px; color:var(--red); border-color:rgba(255,58,92,0.3);">
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── MODAL: Confirm / Alert ── -->
+  <div id="confirmModalOverlay" class="modal-overlay">
+    <div class="modal">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <div id="confirmModalIcon"
+          style="display:none; width:30px; height:30px; border-radius:8px; background:rgba(255,58,92,0.12); border:1px solid rgba(255,58,92,0.28); color:var(--red); align-items:center; justify-content:center; flex-shrink:0;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        </div>
+        <div class="modal-title" id="confirmModalTitle">Confirm Action</div>
+      </div>
+      <div class="modal-text" id="confirmModalText">Are you sure you want to proceed?</div>
+      <div class="modal-btns">
+        <button class="modal-btn modal-cancel" id="confirmModalCancelBtn" onclick="closeConfirmModal()">Cancel</button>
+        <button class="modal-btn modal-confirm" id="confirmModalActionBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Javascript Logic ── -->
+  <script>
+    const SUPABASE_HOST = "vsgyclwnbrlticquvcjs.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_-IfvzZudr3vpqkVaaMN6uQ_ycOcDOHn";
+
+    let state = {
+      token: localStorage.getItem("sb_access_token") || localStorage.getItem("bm_web_token") || null,
+      refreshToken: localStorage.getItem("sb_refresh_token") || localStorage.getItem("bm_web_refresh") || null,
+      user: null,
+      subscription: { isPremium: false, tier: 0, renewDate: null, cancelAtPeriodEnd: false, status: "" },
+      referral: { referralCode: null, appliedCode: null }
+    };
+
+    let peer = null;
+    let activeDataConnection = null;
+    let activeMediaCall = null;
+    let peerRetryTimer = null;
+
+    // ── Tab Management ──
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+      document.querySelectorAll(".settings-tab, .mobile-nav-btn").forEach(t => t.classList.remove("active"));
+
+      const targetPane = document.getElementById("pane" + tabId.charAt(0).toUpperCase() + tabId.slice(1));
+      const targetDesktopBtn = document.getElementById("tabBtn" + tabId.charAt(0).toUpperCase() + tabId.slice(1));
+      const targetMobileBtn = document.getElementById("mobTabBtn" + tabId.charAt(0).toUpperCase() + tabId.slice(1));
+
+      if (targetPane) targetPane.classList.add("active");
+      if (targetDesktopBtn) targetDesktopBtn.classList.add("active");
+      if (targetMobileBtn) targetMobileBtn.classList.add("active");
+
+      const titles = {
+        stream: "Remote Screen Stream",
+        plans: "Plans & Upgrades",
+        account: "Account & Billing"
+      };
+      document.getElementById("pageTitle").textContent = titles[tabId] || "Dashboard";
+
+      if (tabId === "stream" && state.subscription.isPremium) {
+        autoConnectStream();
+      }
+    }
+
+    // ── Supabase & Token Requests ──
+    async function supabaseRequest(method, path, body = null, useAuth = true) {
+      const headers = {
+        "apikey": SUPABASE_ANON_KEY,
+        "Content-Type": "application/json"
+      };
+      if (useAuth && state.token) {
+        headers["Authorization"] = `Bearer ${state.token}`;
+      }
+
+      const options = { method, headers };
+      if (body) options.body = JSON.stringify(body);
+
+      const res = await fetch(`https://${SUPABASE_HOST}${path}`, options);
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errText}`);
+      }
+      return res.json();
+    }
+
+    async function ensureFreshToken() {
+      if (!state.token) return false;
+      try {
+        const payload = JSON.parse(atob(state.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        if (payload.exp && (Date.now() / 1000 + 45) < payload.exp) {
+          return true;
+        }
+      } catch (_) { }
+
+      if (!state.refreshToken) return false;
+
+      try {
+        const res = await supabaseRequest("POST", "/auth/v1/token?grant_type=refresh_token", {
+          refresh_token: state.refreshToken
+        }, false);
+
+        if (res && res.access_token) {
+          state.token = res.access_token;
+          state.refreshToken = res.refresh_token;
+          localStorage.setItem("sb_access_token", state.token);
+          localStorage.setItem("sb_refresh_token", state.refreshToken);
+          return true;
+        }
+      } catch (err) {
+        console.error("Token refresh failed:", err);
+      }
+      return false;
+    }
+
+    // ── Data Fetching ──
+    async function fetchDashboardData() {
+      if (!state.token) {
+        checkUrlHash();
+        if (!state.token) {
+          window.location.href = "index.html";
+          return;
+        }
+      }
+
+      await ensureFreshToken();
+
+      try {
+        // User Info
+        const u = await supabaseRequest("GET", "/auth/v1/user", null, true);
+        state.user = {
+          id: u.id,
+          email: u.email,
+          name: u.user_metadata?.full_name || u.email.split('@')[0],
+          picture: u.user_metadata?.avatar_url || ""
+        };
+
+        // Subscription Info
+        try {
+          const subRes = await supabaseRequest("GET", `/rest/v1/subscriptions?user_id=eq.${u.id}&select=tier,status,current_period_end,cancel_at_period_end`, null, true);
+          if (Array.isArray(subRes) && subRes.length > 0) {
+            const status = subRes[0].status;
+            const isPrem = status === "active" || status === "trialing";
+            state.subscription = {
+              isPremium: isPrem,
+              tier: subRes[0].tier,
+              renewDate: subRes[0].current_period_end,
+              cancelAtPeriodEnd: subRes[0].cancel_at_period_end,
+              status: status
+            };
+          }
+        } catch (e) {
+          console.warn("Subscription check warning:", e);
+        }
+
+        // Referral Info
+        try {
+          const refRes = await supabaseRequest("POST", "/functions/v1/BloxMulti-Referral", { action: "get_referral_info" }, true);
+          if (refRes && refRes.ok) {
+            state.referral = {
+              referralCode: refRes.referralCode,
+              appliedCode: refRes.appliedCode
+            };
+          }
+        } catch (e) {
+          console.warn("Referral fetch warning:", e);
+        }
+
+        renderUI();
+
+        if (state.subscription.isPremium) {
+          autoConnectStream();
+        }
+      } catch (err) {
+        console.error("Session invalid:", err);
+        signOut();
+      }
+    }
+
+    function checkUrlHash() {
+      const hash = window.location.hash;
+      if (hash && hash.includes("access_token=")) {
+        const params = new URLSearchParams(hash.substring(1));
+        const token = params.get("access_token");
+        const refresh = params.get("refresh_token");
+        if (token) {
+          state.token = token;
+          state.refreshToken = refresh;
+          localStorage.setItem("sb_access_token", token);
+          if (refresh) localStorage.setItem("sb_refresh_token", refresh);
+        }
+        history.replaceState(null, document.title, window.location.pathname + window.location.search);
+      }
+    }
+
+    function getUserStreamKey() {
+      if (!state.user || !state.user.id) return "";
+      const prefix = (state.user.id.includes("-") ? state.user.id.split("-")[0] : state.user.id.substring(0, 8)).toLowerCase();
+      return `bm-${prefix}`;
+    }
+
+    // ── Render Views ──
+    function renderUI() {
+      if (!state.user) return;
+
+      // Profile details
+      document.getElementById("sidebarUserName").textContent = state.user.name;
+      document.getElementById("sidebarUserEmail").textContent = state.user.email;
+      document.getElementById("accountName").textContent = state.user.name;
+      document.getElementById("accountEmail").textContent = state.user.email;
+
+      const sideAv = document.getElementById("sidebarAvatar");
+      const accAv = document.getElementById("accountAvatar");
+      if (state.user.picture) {
+        sideAv.innerHTML = `<img src="${state.user.picture}" alt="Avatar">`;
+        accAv.innerHTML = `<img src="${state.user.picture}" alt="Avatar">`;
+      } else {
+        const initial = (state.user.name || "U").charAt(0).toUpperCase();
+        sideAv.textContent = initial;
+        accAv.textContent = initial;
+      }
+
+      const sub = state.subscription;
+      const cardTier = document.getElementById("cardPlanTier");
+      const cardRenewRow = document.getElementById("cardRenewRow");
+      const cardRenewDate = document.getElementById("cardRenewDate");
+      const cardRenewLabel = document.getElementById("cardRenewLabel");
+      const billingUpgradeBtn = document.getElementById("billingUpgradeBtn");
+      const billingCancelBtn = document.getElementById("billingCancelBtn");
+      const billingResumeBtn = document.getElementById("billingResumeBtn");
+
+      // Stream Elements
+      const streamWaitingOverlay = document.getElementById("streamWaitingOverlay");
+      const streamLockedOverlay = document.getElementById("streamLockedOverlay");
+      const streamControlsRow = document.getElementById("streamControlsRow");
+
+      // Plan Buttons
+      const planBtnStandard = document.getElementById("planBtnStandard");
+      const planBtnMonthly = document.getElementById("planBtnMonthly");
+      const planBtnLifetime = document.getElementById("planBtnLifetime");
+
+      if (sub.isPremium) {
+        const isLifetime = sub.renewDate === "infinity";
+
+        cardTier.textContent = isLifetime ? "PREMIUM (LIFETIME)" : "PREMIUM";
+        cardTier.className = "stab-plan-value premium";
+        billingUpgradeBtn.style.display = "none";
+
+        // Stream unlocked
+        streamLockedOverlay.style.display = "none";
+        streamControlsRow.style.display = "flex";
+
+        if (isLifetime) {
+          cardRenewRow.style.display = "none";
+          billingCancelBtn.style.display = "none";
+          billingResumeBtn.style.display = "none";
+
+          planBtnStandard.disabled = true;
+          planBtnStandard.textContent = "Free Tier";
+          planBtnMonthly.disabled = true;
+          planBtnMonthly.textContent = "Included";
+          planBtnLifetime.disabled = true;
+          planBtnLifetime.textContent = "Active License";
+        } else {
+          planBtnStandard.disabled = true;
+          planBtnStandard.textContent = "Free Tier";
+          planBtnMonthly.disabled = true;
+          planBtnMonthly.textContent = "Active Subscription";
+          planBtnLifetime.disabled = false;
+          planBtnLifetime.textContent = "Upgrade to Lifetime ($15)";
+
+          if (sub.renewDate) {
+            cardRenewRow.style.display = "flex";
+            cardRenewDate.textContent = new Date(sub.renewDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+            if (sub.cancelAtPeriodEnd) {
+              cardRenewLabel.textContent = "Access Ends";
+              billingCancelBtn.style.display = "none";
+              billingResumeBtn.style.display = "inline-flex";
+            } else {
+              cardRenewLabel.textContent = "Renews On";
+              billingCancelBtn.style.display = "inline-flex";
+              billingResumeBtn.style.display = "none";
+            }
+          } else {
+            cardRenewRow.style.display = "none";
+            billingCancelBtn.style.display = "inline-flex";
+            billingResumeBtn.style.display = "none";
+          }
+        }
+      } else {
+        // Free Tier: Show white-ish badge and compact View Plans chip
+        cardTier.textContent = "FREE";
+        cardTier.className = "stab-plan-value free";
+        billingUpgradeBtn.style.display = "inline-flex";
+
+        cardRenewRow.style.display = "none";
+        billingCancelBtn.style.display = "none";
+        billingResumeBtn.style.display = "none";
+
+        // Stream Locked
+        streamWaitingOverlay.style.display = "none";
+        streamLockedOverlay.style.display = "flex";
+        streamControlsRow.style.display = "none";
+
+        planBtnStandard.disabled = true;
+        planBtnStandard.textContent = "Current Plan";
+        planBtnMonthly.disabled = false;
+        planBtnMonthly.textContent = "Subscribe ($3/mo)";
+        planBtnLifetime.disabled = false;
+        planBtnLifetime.textContent = "Get Lifetime ($15)";
+      }
+
+      // Referral Section
+      const refCodeBox = document.getElementById("referralCodeBox");
+      const applyCard = document.getElementById("applyReferralCard");
+      const appliedBanner = document.getElementById("appliedReferralBanner");
+
+      if (state.referral.referralCode) {
+        refCodeBox.value = state.referral.referralCode;
+      }
+
+      if (state.referral.appliedCode) {
+        applyCard.style.display = "none";
+        appliedBanner.style.display = "block";
+        appliedBanner.textContent = `✓ Referral code applied (${state.referral.appliedCode})`;
+      } else {
+        applyCard.style.display = "flex";
+        appliedBanner.style.display = "none";
+      }
+
+      // Display Stream ID Tags with bm- prefix
+      const streamKey = getUserStreamKey();
+      if (streamKey) {
+        document.getElementById("streamRoomBadge").textContent = `Room: ${streamKey}`;
+        document.getElementById("streamOverlayRoomTag").textContent = `Stream ID: ${streamKey}`;
+      }
+    }
+
+    // ── Checkout & Stripe Integration ──
+    async function initiateCheckout(planType) {
+      await ensureFreshToken();
+      if (!state.token) {
+        showModalAlert("Authentication Required", "Please sign in to upgrade your subscription.");
+        return;
+      }
+
+      try {
+        const res = await supabaseRequest("POST", "/functions/v1/BloxMulti-Subscription", { planType }, true);
+        if (res && res.url) {
+          window.location.href = res.url;
+        } else if (res && res.message === "Already subscribed") {
+          await fetchDashboardData();
+          showModalAlert("Already Active", "Your account is already active with BloxMulti Premium!");
+        } else {
+          showModalAlert("Checkout Error", res.error || "Unable to start checkout session.");
+        }
+      } catch (err) {
+        showModalAlert("Checkout Failed", err.message || "Failed to reach subscription service.");
+      }
+    }
+
+    // ── Cancellation & Resumption ──
+    function confirmCancelSub() {
+      showModalConfirm(
+        "Cancel Subscription",
+        "Are you sure you want to cancel your BloxMulti Premium subscription? You will keep your benefits until the end of your current billing period.",
+        async () => {
+          try {
+            const res = await supabaseRequest("POST", "/functions/v1/BloxMulti-CancelSubscription", {}, true);
+            if (res.ok) {
+              showModalAlert("Subscription Canceled", `Your subscription has been canceled. You retain full access until ${new Date(res.accessEndsAt).toLocaleDateString()}.`);
+              await fetchDashboardData();
+            } else {
+              showModalAlert("Cancellation Failed", res.error || "Failed to cancel subscription.");
+            }
+          } catch (e) {
+            showModalAlert("Cancellation Error", e.message);
+          }
+        },
+        true
+      );
+    }
+
+    function confirmResumeSub() {
+      showModalConfirm(
+        "Resume Subscription",
+        "Resume your BloxMulti Premium recurring plan? It will continue auto-renewing normally.",
+        async () => {
+          try {
+            const res = await supabaseRequest("POST", "/functions/v1/BloxMulti-ResumeSubscription", {}, true);
+            if (res.ok) {
+              showModalAlert("Subscription Resumed", "Your subscription is active and will auto-renew normally.");
+              await fetchDashboardData();
+            } else {
+              showModalAlert("Resume Failed", res.error || "Failed to resume subscription.");
+            }
+          } catch (e) {
+            showModalAlert("Resume Error", e.message);
+          }
+        }
+      );
+    }
+
+    // ── Referral Handling ──
+    async function copyReferralCode() {
+      const val = document.getElementById("referralCodeBox").value;
+      if (!val || val === "Loading...") return;
+      try {
+        await navigator.clipboard.writeText(val);
+        const btn = document.getElementById("copyRefBtn");
+        btn.textContent = "Copied!";
+        setTimeout(() => btn.textContent = "Copy", 1800);
+      } catch (_) { }
+    }
+
+    async function submitReferralCode() {
+      const input = document.getElementById("applyReferralInput");
+      const status = document.getElementById("applyRefStatus");
+      const btn = document.getElementById("applyRefBtn");
+      const code = (input.value || "").trim();
+
+      if (!code) return;
+      btn.disabled = true;
+      status.style.display = "block";
+      status.style.color = "var(--muted)";
+      status.textContent = "Validating code...";
+
+      try {
+        const res = await supabaseRequest("POST", "/functions/v1/BloxMulti-Referral", { action: "apply_code", code }, true);
+        if (res.ok) {
+          status.style.color = "var(--green)";
+          status.textContent = "✓ " + (res.message || "Referral code applied successfully!");
+          state.referral.appliedCode = res.appliedCode;
+          setTimeout(() => fetchDashboardData(), 1500);
+        } else {
+          status.style.color = "var(--red)";
+          status.textContent = res.error || "Invalid referral code.";
+        }
+      } catch (err) {
+        status.style.color = "var(--red)";
+        status.textContent = err.message || "Network error applying code.";
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // ── Remote WebRTC Streaming ──
+    function autoConnectStream() {
+      if (!state.subscription.isPremium) return;
+
+      const streamKey = getUserStreamKey();
+      if (!streamKey) return;
+
+      stopStream(false);
+
+      const statusPill = document.getElementById("streamStatusPill");
+      const overlay = document.getElementById("streamWaitingOverlay");
+
+      statusPill.textContent = "Connecting...";
+      statusPill.style.color = "var(--accent-light)";
+
+      peer = new Peer({
+        debug: 1,
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
+            { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' }
+          ]
+        }
+      });
+
+      peer.on('open', () => {
+        activeDataConnection = peer.connect(streamKey);
+        activeDataConnection.on('open', () => {
+          statusPill.textContent = "Awaiting Screen...";
+        });
+
+        activeDataConnection.on('close', () => {
+          handleStreamDisconnect();
+        });
+      });
+
+      peer.on('call', (call) => {
+        activeMediaCall = call;
+        call.answer();
+        call.on('stream', (remoteStream) => {
+          const video = document.getElementById("remoteVideo");
+          video.srcObject = remoteStream;
+          overlay.style.display = "none";
+          statusPill.textContent = "LIVE";
+          statusPill.style.color = "var(--green)";
+        });
+
+        call.on('close', () => {
+          handleStreamDisconnect();
+        });
+      });
+
+      peer.on('error', (err) => {
+        console.warn("Peer connection issue:", err);
+        statusPill.textContent = "Offline";
+        statusPill.style.color = "var(--red)";
+      });
+    }
+
+    function handleStreamDisconnect() {
+      const statusPill = document.getElementById("streamStatusPill");
+      const overlay = document.getElementById("streamWaitingOverlay");
+      const video = document.getElementById("remoteVideo");
+
+      if (video.srcObject) {
+        video.srcObject.getTracks().forEach(t => t.stop());
+        video.srcObject = null;
+      }
+
+      if (state.subscription.isPremium) {
+        overlay.style.display = "flex";
+      }
+      statusPill.textContent = "Disconnected";
+      statusPill.style.color = "var(--muted)";
+    }
+
+    function stopStream(resetStatus = true) {
+      clearTimeout(peerRetryTimer);
+      if (activeMediaCall) { activeMediaCall.close(); activeMediaCall = null; }
+      if (activeDataConnection) { activeDataConnection.close(); activeDataConnection = null; }
+      if (peer) { peer.destroy(); peer = null; }
+
+      const video = document.getElementById("remoteVideo");
+      if (video.srcObject) {
+        video.srcObject.getTracks().forEach(t => t.stop());
+        video.srcObject = null;
+      }
+
+      if (resetStatus) {
+        if (state.subscription.isPremium) {
+          document.getElementById("streamWaitingOverlay").style.display = "flex";
+        }
+        const statusPill = document.getElementById("streamStatusPill");
+        statusPill.textContent = "Disconnected";
+        statusPill.style.color = "var(--muted)";
+      }
+    }
+
+    function toggleFullscreen() {
+      const elem = document.getElementById("streamViewport");
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (elem.requestFullscreen) elem.requestFullscreen().catch(() => { });
+        else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    }
+
+    // ── Dialog Helpers ──
+    let confirmCallback = null;
+    function showModalConfirm(title, text, onConfirm, isDanger = false) {
+      document.getElementById("confirmModalTitle").textContent = title;
+      document.getElementById("confirmModalText").textContent = text;
+      const icon = document.getElementById("confirmModalIcon");
+      const actionBtn = document.getElementById("confirmModalActionBtn");
+      const cancelBtn = document.getElementById("confirmModalCancelBtn");
+
+      icon.style.display = isDanger ? "flex" : "none";
+      cancelBtn.style.display = "inline-flex";
+      actionBtn.textContent = "Confirm";
+      actionBtn.className = isDanger ? "modal-btn modal-confirm" : "modal-btn modal-cancel";
+
+      confirmCallback = onConfirm;
+      actionBtn.onclick = () => {
+        if (confirmCallback) confirmCallback();
+        closeConfirmModal();
+      };
+
+      document.getElementById("confirmModalOverlay").classList.add("show");
+    }
+
+    function showModalAlert(title, text) {
+      document.getElementById("confirmModalTitle").textContent = title;
+      document.getElementById("confirmModalText").textContent = text;
+      const icon = document.getElementById("confirmModalIcon");
+      const actionBtn = document.getElementById("confirmModalActionBtn");
+      const cancelBtn = document.getElementById("confirmModalCancelBtn");
+
+      icon.style.display = "none";
+      cancelBtn.style.display = "none";
+      actionBtn.textContent = "OK";
+      actionBtn.className = "modal-btn modal-cancel";
+      actionBtn.onclick = closeConfirmModal;
+
+      document.getElementById("confirmModalOverlay").classList.add("show");
+    }
+
+    function closeConfirmModal() {
+      document.getElementById("confirmModalOverlay").classList.remove("show");
+    }
+
+    document.querySelectorAll(".modal-overlay").forEach(overlay => {
+      overlay.addEventListener("click", e => {
+        if (e.target === overlay) {
+          overlay.classList.remove("show");
+        }
+      });
+    });
+
+    function signOut() {
+      localStorage.removeItem("sb_access_token");
+      localStorage.removeItem("sb_refresh_token");
+      localStorage.removeItem("bm_web_token");
+      localStorage.removeItem("bm_web_refresh");
+      state.token = null;
+      state.refreshToken = null;
+      state.user = null;
+      stopStream();
+      window.location.href = "index.html";
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      fetchDashboardData();
+    });
+  </script>
+</body>
+
+</html>

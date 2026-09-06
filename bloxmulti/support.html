@@ -15,10 +15,8 @@
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#9d6fff" />
 
-
-  <!-- Open Graph (Facebook, Discord unfurls, etc.) -->
+  <!-- Open Graph -->
   <meta property="og:type" content="website" />
-
   <meta property="og:title" content="BloxMulti — Roblox Multi-Account Manager" />
   <meta property="og:description"
     content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — for Windows." />
@@ -52,8 +50,8 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap"
+  <!-- App-matched font: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet" />
 
   <style>
@@ -73,7 +71,7 @@
       --border: #1c1a30;
       --border-hi: #2a2642;
       --font-body: 'Inter', sans-serif;
-      --font-display: 'Syne', sans-serif;
+      --font-display: 'Inter', sans-serif;
     }
 
     *,
@@ -231,439 +229,64 @@
       fill: rgba(255, 58, 92, 0.2);
     }
 
-    /* ── Hero ── */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+    .legal-page {
       padding: 140px 20px 80px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(157, 111, 255, 0.08);
-      border: 1px solid rgba(157, 111, 255, 0.2);
-      border-radius: 99px;
-      padding: 6px 16px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--accent-light);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 24px;
-      animation: fade-up 0.6s ease both 0.1s;
-    }
-
-    .hero-badge-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 8px rgba(42, 245, 152, 0.7);
-    }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-size: clamp(40px, 8vw, 96px);
-      font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
-      color: var(--text);
-      animation: fade-up 0.7s ease both 0.2s;
-    }
-
-    .hero-title span {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero-sub {
-      margin-top: 20px;
-      font-size: clamp(15px, 3vw, 18px);
-      color: var(--muted);
-      max-width: 600px;
-      line-height: 1.6;
-      animation: fade-up 0.7s ease both 0.35s;
-    }
-
-    .hero-actions {
-      margin-top: 40px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      justify-content: center;
-      animation: fade-up 0.7s ease both 0.5s;
-      width: 100%;
-      max-width: 500px;
-    }
-
-    .btn-primary,
-    .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 16px 28px;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s;
-      cursor: pointer;
-      border: none;
-      flex: 1;
-      min-width: 220px;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 6px 28px var(--accent-glow);
-    }
-
-    .btn-primary:hover {
-      background: var(--accent-light);
-      box-shadow: 0 8px 32px var(--accent-glow);
-      transform: translateY(-2px);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text);
-      border: 1px solid var(--border-hi);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: var(--muted);
-      transform: translateY(-2px);
-    }
-
-    .hero-meta {
-      margin-top: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      font-size: 13px;
-      color: var(--muted);
-      animation: fade-up 0.7s ease both 0.65s;
-    }
-
-    .hero-meta-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .hero-meta-item svg {
-      color: var(--green);
-    }
-
-    /* ── App Preview Image ── */
-    .preview-wrap {
-      margin-top: 60px;
-      animation: fade-up 0.9s ease both 0.7s;
-      position: relative;
-      width: 100%;
-      max-width: 1000px;
-      padding: 0 10px;
-    }
-
-    .preview-glow {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      height: 80%;
-      background: radial-gradient(ellipse, rgba(157, 111, 255, 0.3) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: -1;
-      filter: blur(40px);
-    }
-
-    .preview-frame {
-      width: 100%;
-      background: rgba(10, 9, 20, 0.82);
-      border: 1px solid var(--border-hi);
-      border-radius: 16px;
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(157, 111, 255, 0.08);
-      overflow: hidden;
-      display: flex;
-    }
-
-    .preview-image {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: contain;
-    }
-
-    /* ── Stats ── */
-    .stats {
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      background: rgba(10, 9, 20, 0.6);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      flex-wrap: wrap;
-    }
-
-    .stat-item {
-      flex: 1;
-      min-width: 250px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 32px;
-      border-right: 1px solid var(--border);
-    }
-
-    .stat-item:last-child {
-      border-right: none;
-    }
-
-    .stat-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: rgba(157, 111, 255, 0.1);
-      border: 1px solid rgba(157, 111, 255, 0.18);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent);
-      flex-shrink: 0;
-    }
-
-    .stat-text {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .stat-num {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .stat-num span {
-      color: var(--accent);
-    }
-
-    .stat-label {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.4;
-    }
-
-    /* ── Features ── */
-    .features {
-      padding: 100px 20px;
-      max-width: 1200px;
+      max-width: 900px;
       margin: 0 auto;
       position: relative;
       z-index: 1;
+      line-height: 1.8;
+      color: var(--muted);
     }
 
-    .section-label {
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--accent);
-      text-align: center;
-      margin-bottom: 16px;
-      opacity: 0;
-    }
-
-    .section-title {
+    .legal-page h1 {
       font-family: var(--font-display);
-      font-size: clamp(32px, 6vw, 48px);
+      font-size: 38px;
       font-weight: 800;
-      text-align: center;
-      letter-spacing: -1px;
-      line-height: 1.1;
-      margin-bottom: 60px;
-      opacity: 0;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-    }
-
-    .feat-card {
-      background: rgba(10, 9, 20, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px 24px;
-      transition: all 0.3s ease;
-      opacity: 0;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .feat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(157, 111, 255, 0.4), transparent);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .feat-card:hover {
-      border-color: rgba(157, 111, 255, 0.3);
-      background: rgba(15, 14, 28, 0.9);
-      transform: translateY(-4px);
-    }
-
-    .feat-card:hover::before {
-      opacity: 1;
-    }
-
-    .feat-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: rgba(157, 111, 255, 0.1);
-      border: 1px solid rgba(157, 111, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      letter-spacing: -0.5px;
+      color: var(--text);
       margin-bottom: 20px;
-      color: var(--accent);
     }
 
-    .feat-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 10px;
-    }
-
-    .feat-desc {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    /* ── Download CTA ── */
-    .download {
-      padding: 100px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      position: relative;
-      z-index: 1;
-    }
-
-    .download-glow {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 100%;
-      max-width: 600px;
-      height: 400px;
-      background: radial-gradient(ellipse, rgba(100, 40, 220, 0.2) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .download-title {
+    .legal-page h2 {
       font-family: var(--font-display);
-      font-size: clamp(32px, 6vw, 56px);
-      font-weight: 800;
-      letter-spacing: -1px;
-      margin-bottom: 16px;
-      opacity: 0;
-    }
-
-    .download-sub {
-      font-size: clamp(15px, 3vw, 16px);
-      color: var(--muted);
-      max-width: 500px;
-      line-height: 1.6;
-      margin-bottom: 40px;
-      opacity: 0;
-    }
-
-    .download-box {
-      background: rgba(10, 9, 20, 0.75);
-      border: 1px solid var(--border-hi);
-      border-radius: 16px;
-      padding: 32px;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(157, 111, 255, 0.06);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      width: 100%;
-      max-width: 420px;
-      opacity: 0;
-    }
-
-    .dl-platform {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 14px;
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    .dl-platform-icon {
-      width: 36px;
-      height: 36px;
-      background: var(--surface-2);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
       color: var(--text);
+      margin-top: 40px;
+      margin-bottom: 16px;
     }
 
-    .dl-version {
-      font-size: 12px;
-      color: var(--muted);
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 4px 10px;
+    .legal-page h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 24px;
+      margin-bottom: 12px;
     }
 
-    .dl-requirements {
-      font-size: 12px;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.6;
+    .legal-page p {
+      margin-bottom: 16px;
+    }
+
+    .legal-page ul,
+    .legal-page ol {
+      margin-bottom: 16px;
+      padding-left: 24px;
+    }
+
+    .legal-page li {
+      margin-bottom: 8px;
+    }
+
+    .legal-page a {
+      color: var(--accent-light);
+      text-decoration: none;
+    }
+
+    .legal-page a:hover {
+      text-decoration: underline;
     }
 
     /* ── Footer ── */
@@ -704,7 +327,6 @@
       color: var(--text);
     }
 
-    /* ── Mobile Overrides ── */
     @media (max-width: 768px) {
       nav {
         padding: 12px 20px;
@@ -712,55 +334,6 @@
 
       .nav-links {
         display: none;
-        /* Hide text links on mobile to save space */
-      }
-
-      .nav-actions {
-        gap: 8px;
-      }
-
-      .nav-btn-text {
-        display: none;
-        /* Hide text, keep icons for action buttons */
-      }
-
-      .nav-cta,
-      .btn-donate {
-        width: 40px;
-        height: 40px;
-        padding: 0;
-      }
-
-      .hero {
-        padding: 120px 20px 60px;
-      }
-
-      .hero-actions {
-        flex-direction: column;
-      }
-
-      .btn-primary,
-      .btn-secondary {
-        width: 100%;
-      }
-
-      .hero-meta {
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      .stat-item {
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-        padding: 24px 20px;
-      }
-
-      .stat-item:last-child {
-        border-bottom: none;
-      }
-
-      .features {
-        padding: 80px 20px;
       }
 
       footer {
@@ -770,592 +343,12 @@
         text-align: center;
       }
     }
-
-    /* ── Animations ── */
-    @keyframes fade-up {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .animate {
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.65s ease, transform 0.65s ease;
-      will-change: opacity, transform;
-    }
-
-    .animate.in {
-      opacity: 1 !important;
-      transform: translateY(0) !important;
-    }
-
-    .stagger>* {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.55s ease, transform 0.55s ease;
-      will-change: opacity, transform;
-    }
-
-    .stagger.in>*:nth-child(1) {
-      opacity: 1;
-      transform: none;
-      transition-delay: 0s;
-    }
-
-    .stagger.in>*:nth-child(2) {
-      opacity: 1;
-      transform: none;
-      transition-delay: 0.1s;
-    }
-
-    .stagger.in>*:nth-child(3) {
-      opacity: 1;
-      transform: none;
-      transition-delay: 0.2s;
-    }
-
-    .stagger.in>*:nth-child(4) {
-      opacity: 1;
-      transform: none;
-      transition-delay: 0.3s;
-    }
-
-    .stagger.in>*:nth-child(5) {
-      opacity: 1;
-      transform: none;
-      transition-delay: 0.4s;
-    }
-
-    .stagger.in>*:nth-child(6) {
-      opacity: 1;
-      transform: none;
-      transition-delay: 0.5s;
-    }
-
-    /* ── Widgets Section ── */
-    .widgets-section {
-      padding: 100px 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    .widgets-section .section-label,
-    .widgets-section .section-title {
-      text-align: center;
-    }
-
-    .widgets-intro {
-      font-size: 16px;
-      color: var(--muted);
-      text-align: center;
-      max-width: 600px;
-      margin: 0 auto 60px;
-      line-height: 1.7;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.65s ease 0.1s, transform 0.65s ease 0.1s;
-    }
-
-    .widgets-intro.in {
-      opacity: 1;
-      transform: none;
-    }
-
-    .widgets-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-
-    @media (max-width: 768px) {
-      .widgets-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* ── Updates for Widget Cards ── */
-    .widget-card {
-      background: rgba(10, 9, 20, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
-      /* Reduced from 28px 24px */
-      transition: all 0.3s ease;
-      opacity: 0;
-      transform: translateY(20px);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .widget-card-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      /* Tighter gap */
-      margin-bottom: 12px;
-      /* Tighter margin */
-    }
-
-    .widget-card-icon {
-      width: 38px;
-      /* Slightly smaller icon box */
-      height: 38px;
-      border-radius: 10px;
-      background: rgba(157, 111, 255, 0.1);
-      border: 1px solid rgba(157, 111, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent);
-      flex-shrink: 0;
-    }
-
-    .widget-card-title {
-      font-size: 16px;
-      /* Slightly smaller text */
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .widget-card-desc {
-      font-size: 13.5px;
-      color: var(--muted);
-      line-height: 1.55;
-      /* Tighter line height */
-    }
-
-    /* ── Updates for "How to change a widget" box ── */
-    .widget-how-to {
-      margin-top: 24px;
-      /* Reduced from 48px to bring it closer */
-      background: rgba(157, 111, 255, 0.05);
-      border: 1px solid rgba(157, 111, 255, 0.15);
-      border-radius: 16px;
-      padding: 24px;
-      /* Reduced from 32px 36px */
-      display: flex;
-      align-items: flex-start;
-      gap: 20px;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.65s ease 0.2s, transform 0.65s ease 0.2s;
-    }
-
-    .widget-how-to-icon {
-      width: 40px;
-      /* Smaller icon box */
-      height: 40px;
-      border-radius: 10px;
-      background: rgba(157, 111, 255, 0.12);
-      border: 1px solid rgba(157, 111, 255, 0.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent-light);
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    .widget-how-to-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--accent-light);
-      margin-bottom: 6px;
-    }
-
-    .widget-how-to-text {
-      font-size: 13.5px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .widget-how-to-steps {
-      margin-top: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      /* Tighter spacing between list items */
-    }
-
-    .widget-step {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 13.5px;
-      color: var(--muted);
-    }
-
-    .widget-step-num {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: rgba(157, 111, 255, 0.15);
-      border: 1px solid rgba(157, 111, 255, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--accent);
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    @media (max-width: 600px) {
-      .widget-how-to {
-        flex-direction: column;
-        padding: 24px 20px;
-      }
-    }
-
-    /* ── Premium Section ── */
-    .premium-section {
-      padding: 100px 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    .premium-section .section-label,
-    .premium-section .section-title {
-      text-align: center;
-    }
-
-    .premium-intro {
-      font-size: 16px;
-      color: var(--muted);
-      text-align: center;
-      max-width: 580px;
-      margin: 0 auto 60px;
-      line-height: 1.7;
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.65s ease 0.1s, transform 0.65s ease 0.1s;
-    }
-
-    .premium-intro.in {
-      opacity: 1;
-      transform: none;
-    }
-
-    .premium-layout {
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 24px;
-      align-items: start;
-    }
-
-    @media (max-width: 900px) {
-      .premium-layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .premium-features-list {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .premium-feat {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      background: rgba(10, 9, 20, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 22px 20px;
-      transition: all 0.3s ease;
-      opacity: 0;
-      transform: translateY(20px);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .premium-feat::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(157, 111, 255, 0.4), transparent);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .premium-feat:hover {
-      border-color: rgba(157, 111, 255, 0.3);
-      background: rgba(15, 14, 28, 0.9);
-      transform: translateY(-2px);
-    }
-
-    .premium-feat:hover::before {
-      opacity: 1;
-    }
-
-    .premium-feat.in {
-      opacity: 1;
-      transform: none;
-    }
-
-    .premium-feat-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 11px;
-      background: rgba(157, 111, 255, 0.1);
-      border: 1px solid rgba(157, 111, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent);
-      flex-shrink: 0;
-    }
-
-    .premium-feat-body {
-      flex: 1;
-    }
-
-    .premium-feat-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 5px;
-    }
-
-    .premium-feat-desc {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    /* Pricing card */
-    .premium-card {
-      background: rgba(157, 111, 255, 0.06);
-      border: 1px solid rgba(157, 111, 255, 0.22);
-      border-radius: 20px;
-      padding: 32px 28px;
-      /* Removed position: sticky and top: 100px here */
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.65s ease 0.25s, transform 0.65s ease 0.25s;
-      overflow: hidden;
-    }
-
-    .premium-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(157, 111, 255, 0.6), transparent);
-    }
-
-    .premium-card.in {
-      opacity: 1;
-      transform: none;
-    }
-
-    .premium-card-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 20px;
-    }
-
-    .premium-card-price {
-      display: flex;
-      align-items: baseline;
-      gap: 4px;
-      margin-bottom: 6px;
-    }
-
-    .price-amount {
-      font-family: var(--font-display);
-      font-size: 52px;
-      font-weight: 800;
-      color: var(--accent-light);
-      line-height: 1;
-    }
-
-    .price-currency {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--accent);
-      align-self: flex-start;
-      margin-top: 10px;
-    }
-
-    .price-period {
-      font-size: 14px;
-      color: var(--muted);
-      margin-left: 4px;
-    }
-
-    .premium-card-sub {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-
-    .premium-card-divider {
-      height: 1px;
-      background: rgba(157, 111, 255, 0.15);
-      margin-bottom: 20px;
-    }
-
-    .premium-card-perks {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 28px;
-    }
-
-    .premium-perk {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: var(--text);
-    }
-
-    .premium-perk-check {
-      width: 18px;
-      height: 18px;
-      border-radius: 5px;
-      background: rgba(42, 245, 152, 0.12);
-      border: 1px solid rgba(42, 245, 152, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--green);
-      flex-shrink: 0;
-    }
-
-    .btn-premium {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      width: 100%;
-      padding: 15px 24px;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 700;
-      text-decoration: none;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 6px 28px var(--accent-glow);
-      transition: opacity 0.2s, transform 0.2s;
-    }
-
-    .btn-premium:hover {
-      opacity: 0.9;
-      transform: translateY(-2px);
-    }
-
-    .premium-card-note {
-      margin-top: 14px;
-      font-size: 11px;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    /* premium badge on widget card */
-    .widget-premium-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      color: var(--accent);
-      background: rgba(157, 111, 255, 0.12);
-      border: 1px solid rgba(157, 111, 255, 0.25);
-      border-radius: 99px;
-      padding: 3px 8px;
-      margin-left: 8px;
-      vertical-align: middle;
-    }
-
-    .legal-page {
-      padding: 140px 20px 80px;
-      max-width: 900px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-      line-height: 1.8;
-      color: var(--muted);
-    }
-
-    .legal-page h1 {
-      font-family: var(--font-display);
-      font-size: 40px;
-      color: var(--text);
-      margin-bottom: 20px;
-    }
-
-    .legal-page h2 {
-      font-family: var(--font-display);
-      font-size: 24px;
-      color: var(--text);
-      margin-top: 40px;
-      margin-bottom: 16px;
-    }
-
-    .legal-page h3 {
-      font-size: 18px;
-      color: var(--text);
-      margin-top: 24px;
-      margin-bottom: 12px;
-    }
-
-    .legal-page p {
-      margin-bottom: 16px;
-    }
-
-    .legal-page ul,
-    .legal-page ol {
-      margin-bottom: 16px;
-      padding-left: 24px;
-    }
-
-    .legal-page li {
-      margin-bottom: 8px;
-    }
-
-    .legal-page a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .legal-page a:hover {
-      text-decoration: underline;
-    }
   </style>
-
 </head>
 
 <body>
   <div class="global-bg"></div>
+
   <!-- Nav -->
   <nav>
     <a href="index.html#" class="nav-logo">BloxMulti</a>
@@ -1363,81 +356,83 @@
     <div class="nav-right">
       <ul class="nav-links">
         <li><a href="index.html#features">Features</a></li>
-        <li><a href="index.html#widgets">Widgets</a></li>
-        <li><a href="index.html#premium">Premium</a></li>
+        <li><a href="index.html#pricing">Upgrade</a></li>
         <li><a href="index.html#download">Download</a></li>
+        <li><a href="support.html">Support</a></li>
       </ul>
 
       <div class="nav-actions">
-        <!-- Donate -->
-        <a href="javascript:void(0)" onclick="NoxithDonations.open()" class="btn-donate heart" title="Donate">
-          <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path
-              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
-            </path>
-          </svg>
-          <span class="nav-btn-text">Donate</span>
-        </a>
-        <!-- Back to Hub -->
-        <a href="/" class="btn-donate" title="Back to Hub">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-          </svg>
-          <span class="nav-btn-text">Hub</span>
-        </a>
-        <!-- Get App -->
         <a href="index.html#download" class="nav-cta" title="Get App">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
             stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-          <span class="nav-btn-text">Get App</span>
+          Get App
         </a>
       </div>
     </div>
   </nav>
-  <main class="legal-page">
-    <h1>Support</h1>
 
-    <p>We're here to help you get back into the game.</p>
+  <main class="legal-page">
+    <h1>Support &amp; Troubleshooting</h1>
+    <p>Need assistance setting up BloxMulti or troubleshooting multi-instance launching? Find answers to frequently
+      asked
+      questions below or reach out to our community.</p>
+
     <h2>Frequently Asked Questions (FAQ)</h2>
     <h3>What is BloxMulti?</h3>
-    <p>BloxMulti is a Windows desktop utility that allows you to launch and manage multiple Roblox instances
-      simultaneously. It features a customizable, tab-based interface powered by WebView2.</p>
+    <p>BloxMulti is a lightweight, portable Windows utility that lets you launch and manage multiple Roblox client
+      instances concurrently on a single PC. It isolates each account's session with its own token vault and unlocks
+      singleton Mutex handles automatically.</p>
+
     <h3>Do I need to install anything for the UI to work?</h3>
-    <p>BloxMulti uses <strong>Microsoft Edge WebView2</strong> to render its modern interface. Most modern Windows 10
-      and 11 systems have this installed by default. If the app fails to open or displays a blank screen, you may need
-      to download and install the <a href="https://developer.microsoft.com/en-us/microsoft-edge/webview2/"
-        target="_blank">WebView2 Runtime</a> from Microsoft.</p>
-    <h2>Troubleshooting</h2>
-    <h3>The app won't open / nothing happens</h3>
+    <p>BloxMulti uses <strong>Microsoft Edge WebView2</strong> to render its user interface. Most Windows 10 and 11
+      machines include this runtime by default. If the app displays a blank window or fails to open, install the
+      official
+      <a href="https://developer.microsoft.com/en-us/microsoft-edge/webview2/" target="_blank" rel="noopener">WebView2
+        Evergreen Runtime</a> from Microsoft.
+    </p>
+
+    <h3>Can I get banned for using BloxMulti?</h3>
+    <p>BloxMulti does not inject code into the Roblox game engine or alter in-game memory. It manages native Windows
+      Mutex
+      objects and handles session launching. However, always ensure your use complies with Roblox's Terms of Use.</p>
+
+    <h2>Troubleshooting Common Issues</h2>
+    <h3>Windows SmartScreen blocked the app</h3>
     <ul>
-      <li><strong>SmartScreen / Unblock the file:</strong> Because BloxMulti is a standalone executable, Windows
-        SmartScreen may occasionally prevent it from running. If nothing happens when launching, right-click
-        <code>BloxMulti.exe</code>, select <strong>Properties</strong>, check the <strong>Unblock</strong> box at the
-        bottom, click Apply, and open it again.
-      </li>
-    </ul>
-    <h3>Tabs aren't saving their configurations</h3>
-    <p>If you close the app and your tabs reset to their default states:</p>
-    <ul>
-      <li>Ensure the app is located in a folder where it has write permissions (like your Desktop or Documents). The app
-        needs permission to create and update its local JSON configuration file.</li>
-    </ul>
-    <h2>Contact Us</h2>
-    <p>Still need help? You can reach out to us through the following channels:</p>
-    <ul>
-      <li><strong>Discord:</strong> <a href="https://discord.gg/ju6ANNecQg">Join our Discord Server</a></li>
-      <li><strong>GitHub Issues:</strong> <a href="https://github.com/WaveBound/BloxMulti/issues">Submit an Issue</a>
+      <li>Because BloxMulti is a portable executable without an expensive commercial code-signing certificate, Windows
+        SmartScreen may display an unrecognized app notice. Click <strong>More info</strong> and select <strong>Run
+          anyway</strong>.</li>
+      <li>If the file was downloaded from a browser, right-click <code>BloxMulti.exe</code>, select
+        <strong>Properties</strong>, check the <strong>Unblock</strong> box at the bottom, and click Apply.
       </li>
     </ul>
 
+    <h3>Accounts or tabs are not saving</h3>
+    <p>Ensure the executable is placed in a folder with full read and write permissions (such as <code>Desktop</code>,
+      <code>Documents</code>, or a custom folder like <code>C:\BloxMulti</code>). Avoid running directly from a
+      temporary
+      zip folder or write-protected system directories.
+    </p>
+
+    <h3>Second account disconnects first account</h3>
+    <p>Make sure you launch instances through BloxMulti so its Multi-Instance Engine can neutralize the single-instance
+      Mutex handle before the Roblox client initialises.</p>
+
+    <h2>Community &amp; Direct Support</h2>
+    <p>If you're encountering an issue not covered above, get direct help from our team:</p>
+    <ul>
+      <li><strong>Discord Community:</strong> <a href="https://discord.gg/ju6ANNecQg" target="_blank"
+          rel="noopener">Join
+          our Discord Server</a> (Fastest response)</li>
+      <li><strong>GitHub Issues:</strong> <a href="https://github.com/WaveBound/BloxMulti/issues" target="_blank"
+          rel="noopener">Submit a Bug Report on GitHub</a></li>
+    </ul>
   </main>
+
   <!-- Footer -->
   <footer>
     <div class="footer-logo">BloxMulti</div>

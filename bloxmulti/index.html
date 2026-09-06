@@ -4,13 +4,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BloxMulti — Roblox Multi-Account Manager for Windows</title>
+  <title>BloxMulti — Roblox Multi-Account Manager & Cloud Hub</title>
 
   <!-- Primary SEO -->
   <meta name="description"
-    content="BloxMulti is a powerful Windows app that lets you manage multiple Roblox accounts at once. Switch accounts instantly, launch any game by Place ID, and save private server codes — all in one app." />
+    content="BloxMulti is a powerful Windows app that lets you manage multiple Roblox accounts at once. Switch accounts instantly, launch any game by Place ID, and save private server codes." />
   <meta name="keywords"
-    content="Roblox multi account manager, Roblox account switcher, BloxMulti, multiple Roblox accounts Windows, Roblox account manager app, Roblox private server codes, launch multiple Roblox accounts simultaneously, Roblox alt account manager" />
+    content="Roblox multi account manager, Roblox account switcher, BloxMulti, multiple Roblox accounts Windows, Roblox account manager app, Roblox private server codes, launch multiple Roblox accounts simultaneously" />
   <meta name="author" content="BloxMulti" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#9d6fff" />
@@ -23,43 +23,22 @@
   <meta property="og:image" content="og-image.png" />
   <meta property="og:site_name" content="BloxMulti" />
 
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="BloxMulti — Roblox Multi-Account Manager" />
-  <meta name="twitter:description"
-    content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — for Windows." />
-  <meta name="twitter:image" content="og-image.png" />
-
-  <!-- Structured Data -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "BloxMulti",
-    "operatingSystem": "Windows 10, Windows 11",
-    "applicationCategory": "UtilitiesApplication",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "description": "BloxMulti is a powerful Windows desktop app for managing multiple Roblox accounts. Launch any game instantly by Place ID, save favorite games, and store private server codes.",
-    "screenshot": "og-image.png"
-  }
-  </script>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- App-matched font: Inter -->
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
     rel="stylesheet" />
+
+  <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 
   <style>
     :root {
       --bg: #06050d;
       --surface: #0f0e1c;
       --surface-2: #14132a;
-      --input-bg: #0a0918;
+      --surface-card: rgba(15, 14, 28, 0.65);
+      --surface-card-hover: rgba(22, 20, 42, 0.85);
       --accent: #9d6fff;
       --accent-glow: rgba(157, 111, 255, 0.35);
       --accent-mid: rgba(157, 111, 255, 0.15);
@@ -70,8 +49,10 @@
       --muted: #6a607e;
       --border: #1c1a30;
       --border-hi: #2a2642;
+      --surface-border-hi: rgba(157, 111, 255, 0.28);
       --font-body: 'Inter', sans-serif;
-      --font-display: 'Syne', sans-serif;
+      --font-display: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
 
     *,
@@ -129,7 +110,6 @@
           rgba(157, 111, 255, 0.015) 40px, rgba(157, 111, 255, 0.015) 41px);
     }
 
-    /* ── Page Layout Constraint Container ── */
     .container {
       width: 100%;
       max-width: 1200px;
@@ -138,18 +118,18 @@
       position: relative;
     }
 
-    /* ── Nav (Edge-to-Edge) ── */
+    /* ── Nav ── */
     nav {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      z-index: 100;
+      z-index: 1000;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 16px 40px;
-      background: rgba(6, 5, 13, 0.75);
+      background: rgba(6, 5, 13, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
@@ -167,13 +147,13 @@
     .nav-right {
       display: flex;
       align-items: center;
-      gap: 32px;
+      gap: 24px;
     }
 
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 24px;
+      gap: 20px;
       list-style: none;
     }
 
@@ -208,6 +188,8 @@
       text-decoration: none;
       gap: 8px;
       transition: all 0.2s;
+      cursor: pointer;
+      border: none;
     }
 
     .nav-cta {
@@ -233,9 +215,50 @@
       transform: translateY(-1px);
     }
 
-    .btn-donate.heart svg {
-      color: var(--red);
-      fill: rgba(255, 58, 92, 0.2);
+    /* ── Clean User Avatar Icon (No Pill, No Name) ── */
+    .nav-avatar-btn {
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      outline: none;
+      transition: transform 0.15s ease;
+    }
+
+    .nav-avatar-btn:hover {
+      transform: scale(1.06);
+    }
+
+    .nav-avatar-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #5627c2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      overflow: hidden;
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .nav-avatar-btn:hover .nav-avatar-circle {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .nav-avatar-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     /* ── Hero ── */
@@ -399,13 +422,6 @@
       filter: blur(40px);
     }
 
-    .preview-carousel-container {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
     .preview-frame {
       width: 100%;
       aspect-ratio: 950 / 650;
@@ -445,7 +461,6 @@
       object-fit: cover;
     }
 
-    /* Carousel navigation arrows */
     .carousel-arrow {
       position: absolute;
       top: 50%;
@@ -480,7 +495,6 @@
       right: 16px;
     }
 
-    /* Dot indicators */
     .carousel-dots {
       display: flex;
       gap: 10px;
@@ -498,10 +512,6 @@
       transition: all 0.25s ease;
     }
 
-    .carousel-dot:hover {
-      background: var(--muted);
-    }
-
     .carousel-dot.active {
       background: var(--accent);
       width: 24px;
@@ -509,37 +519,33 @@
       box-shadow: 0 0 8px var(--accent-glow);
     }
 
-    /* ── Stats (Edge-to-Edge) ── */
+    /* ── Stats Strip ── */
     .stats {
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
-      background: rgba(10, 9, 20, 0.6);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(10, 9, 20, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       position: relative;
       z-index: 1;
       width: 100%;
     }
 
-    .stats .container {
-      max-width: 100%;
-      padding: 0 40px;
-    }
-
     .stats-inner {
       display: flex;
       align-items: stretch;
-      justify-content: center;
-      flex-wrap: wrap;
+      width: 100%;
+      margin: 0;
+      padding: 0;
     }
 
     .stat-item {
-      flex: 1;
-      min-width: 250px;
+      flex: 1 1 0;
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 32px;
+      justify-content: center;
+      gap: 14px;
+      padding: 15px 24px;
       border-right: 1px solid var(--border);
     }
 
@@ -548,10 +554,10 @@
     }
 
     .stat-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: rgba(157, 111, 255, 0.1);
+      width: 38px;
+      height: 38px;
+      border-radius: 9px;
+      background: rgba(157, 111, 255, 0.08);
       border: 1px solid rgba(157, 111, 255, 0.18);
       display: flex;
       align-items: center;
@@ -560,16 +566,21 @@
       flex-shrink: 0;
     }
 
+    .stat-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
     .stat-text {
       display: flex;
       flex-direction: column;
-      gap: 4px;
     }
 
     .stat-num {
-      font-size: 18px;
+      font-size: 15px;
       font-weight: 700;
       color: var(--text);
+      line-height: 1.25;
     }
 
     .stat-num span {
@@ -577,14 +588,38 @@
     }
 
     .stat-label {
-      font-size: 14px;
+      font-size: 12px;
       color: var(--muted);
-      line-height: 1.4;
+      line-height: 1.35;
+      margin-top: 2px;
     }
 
-    /* ── Features ── */
+    @media (max-width: 960px) {
+      .stats-inner {
+        flex-wrap: wrap;
+      }
+
+      .stat-item {
+        flex: 1 1 50%;
+        justify-content: flex-start;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .stat-item:nth-child(2n) {
+        border-right: none;
+      }
+    }
+
+    @media (max-width: 540px) {
+      .stat-item {
+        flex: 1 1 100%;
+        border-right: none;
+      }
+    }
+
+    /* ── Features Grid ── */
     .features {
-      padding: 100px 0;
+      padding: 90px 0;
       position: relative;
       z-index: 1;
     }
@@ -596,265 +631,49 @@
       text-transform: uppercase;
       color: var(--accent);
       text-align: center;
-      margin-bottom: 16px;
-      opacity: 0;
+      margin-bottom: 12px;
     }
 
     .section-title {
       font-family: var(--font-display);
-      font-size: clamp(32px, 6vw, 48px);
+      font-size: clamp(32px, 5vw, 46px);
       font-weight: 800;
       text-align: center;
       letter-spacing: -1px;
       line-height: 1.1;
-      margin-bottom: 60px;
-      opacity: 0;
+      margin-bottom: 50px;
     }
 
-    .features-grid {
+    .bento-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
     }
 
-    .feat-card {
-      background: rgba(10, 9, 20, 0.6);
+    .bento-card {
+      background: var(--surface-card);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 32px 24px;
+      padding: 28px 24px;
       transition: all 0.3s ease;
-      opacity: 0;
       position: relative;
-      overflow: hidden;
-    }
-
-    .feat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(157, 111, 255, 0.4), transparent);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .feat-card:hover {
-      border-color: rgba(157, 111, 255, 0.3);
-      background: rgba(15, 14, 28, 0.9);
-      transform: translateY(-4px);
-    }
-
-    .feat-card:hover::before {
-      opacity: 1;
-    }
-
-    .feat-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: rgba(157, 111, 255, 0.1);
-      border: 1px solid rgba(157, 111, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px;
-      color: var(--accent);
-    }
-
-    .feat-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 10px;
-    }
-
-    .feat-desc {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    /* ── Tabs Overview Section ── */
-    .tabs-section {
-      padding: 100px 0;
-      position: relative;
-      z-index: 1;
-    }
-
-    .tabs-intro {
-      font-size: 16px;
-      color: var(--muted);
-      text-align: center;
-      max-width: 600px;
-      margin: 0 auto 60px;
-      line-height: 1.7;
-      opacity: 0;
-    }
-
-    /* ── Updates for "How tabs work" box ── */
-    .tabs-how-to {
-      margin-top: 40px;
-      background: rgba(157, 111, 255, 0.05);
-      border: 1px solid rgba(157, 111, 255, 0.15);
-      border-radius: 16px;
-      padding: 32px;
-      display: flex;
-      align-items: flex-start;
-      gap: 24px;
-    }
-
-    .tabs-how-to-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: rgba(157, 111, 255, 0.12);
-      border: 1px solid rgba(157, 111, 255, 0.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent-light);
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    .tabs-how-to-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--accent-light);
-      margin-bottom: 8px;
-    }
-
-    .tabs-how-to-text {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .tabs-how-to-steps {
-      margin-top: 14px;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
 
-    .tabs-step {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      font-size: 14px;
-      color: var(--muted);
+    .bento-card:hover {
+      border-color: rgba(157, 111, 255, 0.25);
+      background: var(--surface-card-hover);
     }
 
-    .tabs-step-num {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: rgba(157, 111, 255, 0.15);
-      border: 1px solid rgba(157, 111, 255, 0.3);
+    .bento-header {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--accent);
-      flex-shrink: 0;
-      margin-top: 1px;
-      line-height: 1;
+      justify-content: space-between;
     }
 
-    .tabs-step-text {
-      flex: 1;
-      line-height: 1.6;
-    }
-
-    @media (max-width: 768px) {
-      .tabs-how-to {
-        flex-direction: column;
-        padding: 24px;
-      }
-    }
-
-    /* ── Premium Section ── */
-    .premium-section {
-      padding: 100px 0;
-      position: relative;
-      z-index: 1;
-    }
-
-    .premium-intro {
-      font-size: 16px;
-      color: var(--muted);
-      text-align: center;
-      max-width: 580px;
-      margin: 0 auto 60px;
-      line-height: 1.7;
-      opacity: 0;
-    }
-
-    .premium-layout {
-      display: grid;
-      grid-template-columns: 1fr 360px;
-      gap: 32px;
-      align-items: start;
-    }
-
-    @media (max-width: 900px) {
-      .premium-layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .premium-features-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .premium-feat {
-      display: flex;
-      align-items: stretch;
-      gap: 20px;
-      background: rgba(10, 9, 20, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      transition: all 0.3s ease;
-      opacity: 0;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .premium-feat::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(157, 111, 255, 0.4), transparent);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .premium-feat:hover {
-      border-color: rgba(157, 111, 255, 0.3);
-      background: rgba(15, 14, 28, 0.9);
-      transform: translateY(-2px);
-    }
-
-    .premium-feat:hover::before {
-      opacity: 1;
-    }
-
-    .premium-feat-left {
-      display: flex;
-      gap: 16px;
-      flex: 1;
-    }
-
-    .premium-feat-icon {
+    .bento-icon {
       width: 44px;
       height: 44px;
       border-radius: 11px;
@@ -864,396 +683,391 @@
       align-items: center;
       justify-content: center;
       color: var(--accent);
-      flex-shrink: 0;
     }
 
-    .premium-feat-body {
-      flex: 1;
+    .bento-badge {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      padding: 3px 8px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      background: rgba(157, 111, 255, 0.12);
+      border: 1px solid rgba(157, 111, 255, 0.25);
+      color: var(--accent-light);
     }
 
-    .premium-feat-title {
-      font-size: 16px;
+    .bento-badge.core {
+      background: rgba(42, 245, 152, 0.1);
+      border-color: rgba(42, 245, 152, 0.25);
+      color: var(--green);
+    }
+
+    .bento-title {
+      font-size: 17px;
       font-weight: 700;
       color: var(--text);
-      margin-bottom: 6px;
     }
 
-    .premium-feat-desc {
-      font-size: 13.5px;
+    .bento-desc {
+      font-size: 14px;
       color: var(--muted);
       line-height: 1.6;
     }
 
-    .premium-feat-visual {
-      width: 140px;
-      aspect-ratio: 16 / 10;
-      background: var(--surface-2);
-      border: 1px solid var(--border-hi);
-      border-radius: 10px;
-      overflow: hidden;
-      flex-shrink: 0;
-      align-self: center;
-    }
-
-    .premium-feat-visual img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    @media (max-width: 650px) {
-      .premium-feat {
-        flex-direction: column;
-        gap: 16px;
-      }
-
-      .premium-feat-visual {
-        width: 100%;
-        max-width: 280px;
-        align-self: flex-start;
-      }
-    }
-
-    /* Pricing card */
-    .premium-card {
-      background: rgba(157, 111, 255, 0.06);
-      border: 1px solid rgba(157, 111, 255, 0.22);
-      border-radius: 20px;
-      padding: 36px 30px;
-      opacity: 0;
-      position: relative;
-      transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    @media (min-width: 901px) {
-      .premium-card {
-        position: sticky;
-        top: 100px;
-      }
-    }
-
-    .premium-card:hover {
-      border-color: rgba(157, 111, 255, 0.45);
-      background: rgba(157, 111, 255, 0.09);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(157, 111, 255, 0.1);
-    }
-
-    .premium-price-box {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 24px;
-      padding: 18px;
-      background: rgba(157, 111, 255, 0.05);
-      border: 1px solid rgba(157, 111, 255, 0.15);
-      border-radius: 12px;
-    }
-
-    .premium-price-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .premium-price-label {
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .premium-price-label.monthly {
-      color: var(--muted);
-    }
-
-    .premium-price-label.lifetime {
-      color: var(--text);
-    }
-
-    .premium-price-value-container {
-      display: flex;
-      align-items: baseline;
-      gap: 3px;
-    }
-
-    .premium-price-val {
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--accent-light);
-      font-family: var(--font-body);
-      line-height: 1;
-    }
-
-    .premium-price-period {
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    .premium-price-sep {
-      height: 1px;
-      background: rgba(157, 111, 255, 0.12);
-    }
-
-    .premium-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(157, 111, 255, 0.6), transparent);
-    }
-
-    .premium-card-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 20px;
-    }
-
-    .premium-card-price {
-      display: flex;
-      align-items: baseline;
-      gap: 4px;
-      margin-bottom: 6px;
-    }
-
-    .price-amount {
-      font-family: var(--font-display);
-      font-size: 52px;
-      font-weight: 800;
-      color: var(--accent-light);
-      line-height: 1;
-    }
-
-    .price-currency {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--accent);
-      align-self: flex-start;
-      margin-top: 10px;
-    }
-
-    .price-period {
-      font-size: 14px;
-      color: var(--muted);
-      margin-left: 4px;
-    }
-
-    .premium-card-sub {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-
-    .premium-card-divider {
-      height: 1px;
-      background: rgba(157, 111, 255, 0.15);
-      margin-bottom: 20px;
-    }
-
-    .premium-card-perks {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 28px;
-    }
-
-    .premium-perk {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 13.5px;
-      color: var(--text);
-    }
-
-    .premium-perk-check {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: rgba(42, 245, 152, 0.12);
-      border: 1px solid rgba(42, 245, 152, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--green);
-      flex-shrink: 0;
-    }
-
-    .btn-premium {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      width: 100%;
-      padding: 15px 24px;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 700;
-      text-decoration: none;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 6px 28px var(--accent-glow);
-      transition: opacity 0.2s, transform 0.2s;
-    }
-
-    .btn-premium:hover {
-      opacity: 0.9;
-      transform: translateY(-2px);
-    }
-
-    .premium-card-note {
-      margin-top: 14px;
-      font-size: 11px;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    /* premium badge on tab card */
-    .tab-premium-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      color: var(--accent);
-      background: rgba(157, 111, 255, 0.12);
-      border: 1px solid rgba(157, 111, 255, 0.25);
-      border-radius: 99px;
-      padding: 3px 8px;
-      margin-left: 8px;
-      vertical-align: middle;
-    }
-
-    /* ── Download CTA ── */
-    .download {
-      padding: 100px 0;
+    /* ── Pricing Section ── */
+    .pricing-section {
+      padding: 90px 0;
       position: relative;
       z-index: 1;
     }
 
-    .download-glow {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 100%;
-      max-width: 600px;
-      height: 400px;
-      background: radial-gradient(ellipse, rgba(100, 40, 220, 0.2) 0%, transparent 70%);
-      pointer-events: none;
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      margin-top: 40px;
     }
 
-    .download-inner {
+    .pricing-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 34px 28px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      text-align: center;
+      position: relative;
+      transition: all 0.3s ease;
     }
 
-    .download-title {
-      font-family: var(--font-display);
-      font-size: clamp(32px, 6vw, 56px);
+    .pricing-card:hover {
+      border-color: rgba(157, 111, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .pricing-card.featured {
+      background: rgba(157, 111, 255, 0.05);
+      border-color: var(--surface-border-hi);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(157, 111, 255, 0.12);
+    }
+
+    .pricing-tier-name {
+      font-size: 12px;
       font-weight: 800;
-      letter-spacing: -1px;
-      margin-bottom: 16px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
     }
 
-    .download-sub {
-      font-size: clamp(15px, 3vw, 16px);
+    .pricing-price {
+      font-family: var(--font-display);
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .pricing-sub {
+      font-size: 13.5px;
       color: var(--muted);
-      max-width: 500px;
-      line-height: 1.6;
-      margin-bottom: 40px;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .pricing-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex: 1;
+    }
+
+    .pricing-feat-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
+      color: var(--text);
+    }
+
+    .pricing-check {
+      color: var(--green);
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .btn-pricing {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      height: 44px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: 1px solid var(--border-hi);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+    }
+
+    .btn-pricing:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--accent);
+    }
+
+    .btn-pricing.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .btn-pricing.primary:hover {
+      background: var(--accent-light);
+    }
+
+    /* ── Download CTA ── */
+    .download {
+      padding: 80px 0 100px;
+      position: relative;
+      z-index: 1;
     }
 
     .download-box {
       background: rgba(10, 9, 20, 0.75);
       border: 1px solid var(--border-hi);
       border-radius: 16px;
-      padding: 32px;
+      padding: 36px;
       backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(157, 111, 255, 0.06);
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 20px;
       width: 100%;
-      max-width: 420px;
+      max-width: 440px;
       margin: 0 auto;
+      text-align: center;
     }
 
-    .dl-platform {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 14px;
-      color: var(--muted);
-      font-weight: 500;
+    /* ── User Dropdown Popover ── */
+    .user-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 210px;
+      background: #100e22;
+      border: 1px solid var(--border-hi);
+      border-radius: 14px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7), 0 0 24px rgba(157, 111, 255, 0.08);
+      padding: 6px;
+      z-index: 2001;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px) scale(0.97);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      transform-origin: top right;
     }
 
-    .dl-platform-icon {
-      width: 36px;
-      height: 36px;
-      background: var(--surface-2);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .user-dropdown.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+    }
+
+    .user-dropdown-header {
+      padding: 10px 12px 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+
+    .user-dropdown-name {
+      font-weight: 700;
+      font-size: 13px;
       color: var(--text);
     }
 
-    .dl-version {
-      font-size: 12px;
+    .user-dropdown-email {
+      font-size: 11px;
       color: var(--muted);
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 4px 10px;
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .dl-requirements {
-      font-size: 12px;
-      color: var(--muted);
+    .user-dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s;
+      text-align: left;
+    }
+
+    .user-dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .user-dropdown-item.danger {
+      color: var(--red);
+    }
+
+    .user-dropdown-item svg {
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    .user-dropdown-sep {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    /* ── Simplified Minimalist Sign In Modal ── */
+    .auth-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 3500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .auth-backdrop.open {
+      display: flex;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 320px;
+      background: #0d0c1e;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 22px 20px 18px;
       text-align: center;
-      line-height: 1.6;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+      position: relative;
+      animation: modal-pop 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    /* Styled Download CTA button */
-    .btn-download-primary {
-      display: inline-flex;
+    @keyframes modal-pop {
+      from {
+        opacity: 0;
+        transform: scale(0.96) translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .auth-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 24px;
+      height: 24px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      transition: color 0.15s;
+    }
+
+    .auth-close-btn:hover {
+      color: var(--text);
+    }
+
+    .auth-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .auth-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-bottom: 18px;
+    }
+
+    .btn-oauth {
+      display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
       width: 100%;
-      padding: 16px 28px;
-      border-radius: 12px;
-      font-size: 15px;
+      height: 42px;
+      border-radius: 10px;
+      font-size: 13px;
       font-weight: 600;
-      text-decoration: none;
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 6px 28px var(--accent-glow);
-      transition: all 0.2s ease;
-      border: none;
       cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      margin-top: 8px;
+      transition: all 0.15s ease;
     }
 
-    .btn-download-primary:hover {
-      background: var(--accent-light);
-      box-shadow: 0 8px 32px var(--accent-glow);
-      transform: translateY(-2px);
+    .btn-oauth:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.18);
     }
 
-    /* ── Footer (Edge-to-Edge) ── */
+    .btn-oauth.discord {
+      background: rgba(88, 101, 242, 0.1);
+      border-color: rgba(88, 101, 242, 0.3);
+      color: #fff;
+    }
+
+    .btn-oauth.discord:hover {
+      background: rgba(88, 101, 242, 0.2);
+      border-color: rgba(88, 101, 242, 0.5);
+    }
+
+    .auth-footer-note {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 18px;
+      line-height: 1.4;
+    }
+
+    .auth-footer-note a {
+      color: var(--accent-light);
+      text-decoration: none;
+    }
+
+    .auth-footer-note a:hover {
+      text-decoration: underline;
+    }
+
+    /* Footer */
     footer {
       border-top: 1px solid var(--border);
       padding: 32px 0;
@@ -1261,12 +1075,7 @@
       z-index: 1;
     }
 
-    footer .container {
-      max-width: 100%;
-      padding: 0 40px;
-    }
-
-    .footer-inner {
+    .footer-flex {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1274,22 +1083,14 @@
       gap: 20px;
     }
 
-    .footer-logo {
-      font-family: var(--font-display);
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--muted);
-      letter-spacing: -0.5px;
-    }
-
     .footer-links {
       display: flex;
-      gap: 24px;
-      align-items: center;
+      gap: 20px;
+      list-style: none;
     }
 
     .footer-links a {
-      font-size: 14px;
+      font-size: 13.5px;
       color: var(--muted);
       text-decoration: none;
       transition: color 0.2s;
@@ -1299,8 +1100,13 @@
       color: var(--text);
     }
 
-    /* ── Mobile Overrides ── */
-    @media (max-width: 768px) {
+    @media (max-width: 850px) {
+
+      .bento-grid,
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+
       nav {
         padding: 12px 20px;
       }
@@ -1308,226 +1114,72 @@
       .nav-links {
         display: none;
       }
-
-      .nav-actions {
-        gap: 8px;
-      }
-
-      .nav-btn-text {
-        display: none;
-      }
-
-      .nav-cta,
-      .btn-donate {
-        width: 40px;
-        height: 40px;
-        padding: 0;
-      }
-
-      .hero {
-        padding: 120px 0 60px;
-      }
-
-      .hero-actions {
-        flex-direction: column;
-      }
-
-      .btn-primary,
-      .btn-secondary {
-        width: 100%;
-      }
-
-      .hero-meta {
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      .stats .container {
-        padding: 0 20px;
-      }
-
-      .stat-item {
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-        padding: 24px 20px;
-      }
-
-      .stat-item:last-child {
-        border-bottom: none;
-      }
-
-      .features {
-        padding: 80px 0;
-      }
-
-      footer .container {
-        padding: 0 20px;
-      }
-
-      footer .footer-inner {
-        flex-direction: column;
-        justify-content: center;
-        text-align: center;
-      }
-    }
-
-    /* ── Animations ── */
-    @keyframes fade-up {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .animate {
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.65s ease, transform 0.65s ease;
-      will-change: opacity, transform;
-    }
-
-    .animate.in {
-      opacity: 1 !important;
-      transform: translateY(0) !important;
-    }
-
-    .stagger>* {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.55s ease, transform 0.55s ease;
-      will-change: opacity, transform;
-    }
-
-    .stagger.in>*:nth-child(1) {
-      opacity: 1;
-      transform: none;
-      transition-delay: 0s;
-    }
-
-    .stagger.in>*:nth-child(2) {
-      opacity: 1;
-      transform: none;
-      transition-delay: 0.1s;
-    }
-
-    .stagger.in>*:nth-child(3) {
-      opacity: 1;
-      transform: none;
-      transition-delay: 0.2s;
-    }
-
-    .stagger.in>*:nth-child(4) {
-      opacity: 1;
-      transform: none;
-      transition-delay: 0.3s;
-    }
-
-    .stagger.in>*:nth-child(5) {
-      opacity: 1;
-      transform: none;
-      transition-delay: 0.4s;
-    }
-
-    .stagger.in>*:nth-child(6) {
-      opacity: 1;
-      transform: none;
-      transition-delay: 0.5s;
-    }
-
-    .stagger.in>*:nth-child(7) {
-      opacity: 1;
-      transform: none;
-      transition-delay: 0.6s;
-    }
-
-    /* Download Cooldown & Spinner Styles */
-    .download-cooldown {
-      pointer-events: none;
-      opacity: 0.75 !important;
-      cursor: not-allowed;
-      box-shadow: none !important;
-      transform: none !important;
-    }
-
-    .download-spinner {
-      animation: btn-spin 0.8s linear infinite;
-      margin-right: 8px;
-      display: inline-block;
-      vertical-align: middle;
-    }
-
-    @keyframes btn-spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
     }
   </style>
 </head>
 
 <body>
 
-  <!-- Background Layer -->
   <div class="global-bg"></div>
 
-  <!-- Nav -->
+  <!-- Main Top Nav -->
   <nav>
     <a href="#" class="nav-logo">BloxMulti</a>
 
     <div class="nav-right">
       <ul class="nav-links">
         <li><a href="#features">Features</a></li>
-        <li><a href="#tabs">Tabs</a></li>
-        <li><a href="#premium">Premium</a></li>
+        <li><a href="#pricing">Upgrade</a></li>
         <li><a href="#download">Download</a></li>
+        <li><a href="support.html">Support</a></li>
       </ul>
 
       <div class="nav-actions">
-        <!-- Donate -->
-        <a href="javascript:void(0)" onclick="NoxithDonations.open()" class="btn-donate heart" title="Donate">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path
-              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
-            </path>
-          </svg>
-          <span class="nav-btn-text">Donate</span>
-        </a>
-        <!-- Back to Hub -->
-        <a href="/" class="btn-donate" title="Back to Hub">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="9 22 9 12 15 12 15 22" />
-          </svg>
-          <span class="nav-btn-text">Hub</span>
-        </a>
-        <!-- Discord -->
-        <a href="https://discord.gg/ju6ANNecQg" target="_blank" rel="noopener noreferrer" class="btn-donate"
-          title="Join Discord" style="gap: 8px;">
-          <svg width="16" height="16" viewBox="0 0 127.14 96.36" fill="currentColor">
-            <path
-              d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a77.7,77.7,0,0,0,6.63-10.85,68.43,68.43,0,0,1-10.43-5c.87-.64,1.72-1.31,2.53-2a75.49,75.49,0,0,0,72.9,0c.81.71,1.66,1.38,2.53,2a68.19,68.19,0,0,1-10.43,5,77.7,77.7,0,0,0,6.63,10.85,105.73,105.73,0,0,0,31-18.83C129.81,49.27,123.6,26.47,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.83,46,53.83,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.07,46,96.07,53,91,65.69,84.69,65.69Z" />
-          </svg>
-          <span class="nav-btn-text">Discord</span>
-        </a>
-        <!-- Get App -->
-        <a href="#download" class="nav-cta" title="Get App">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
+        <!-- Auth state button -->
+        <button class="btn-donate" id="navSignInBtn" onclick="openAuthModal()">
+          Sign In
+        </button>
+
+        <!-- Clean Avatar Button (No Pill, No Text) -->
+        <div style="position:relative; display:flex; align-items:center;">
+          <button class="nav-avatar-btn" id="navUserChip" style="display:none;" onclick="toggleDropdown(event)"
+            aria-label="Account menu">
+            <div class="nav-avatar-circle" id="navAvatarCircle">U</div>
+          </button>
+
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-dropdown-header">
+              <div class="user-dropdown-name" id="dropdownUserName">User</div>
+              <div class="user-dropdown-email" id="dropdownUserEmail">user@gmail.com</div>
+            </div>
+            <button class="user-dropdown-item" onclick="openDashboard(); closeDropdown();">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+              </svg>
+              Dashboard
+            </button>
+            <div class="user-dropdown-sep"></div>
+            <button class="user-dropdown-item danger" onclick="signOut(); closeDropdown();">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              Sign Out
+            </button>
+          </div>
+        </div>
+
+        <a href="#download" class="nav-cta">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-          <span class="nav-btn-text">Get App</span>
+          Get App
         </a>
       </div>
     </div>
@@ -1536,159 +1188,99 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="container" style="display: flex; flex-direction: column; align-items: center;">
-      <div class="hero-badge animate">
+      <div class="hero-badge">
         <div class="hero-badge-dot"></div>
-        v1.4.0
+        v1.4.0 Live
       </div>
 
-      <h1 class="hero-title animate" style="transition-delay:0.1s">
+      <h1 class="hero-title">
         Roblox <span>Account Manager</span>
       </h1>
 
-      <p class="hero-sub animate" style="transition-delay:0.2s">
+      <p class="hero-sub">
         Launch and manage multiple Roblox accounts at the same time, each with its own isolated session. Customize your
-        dashboard with an open, closable, and fully reorderable tab bar, organize accounts, and monitor performance.
+        dashboard, organize accounts into folders, and monitor client performance.
       </p>
 
-      <div class="hero-actions animate" style="transition-delay:0.3s">
+      <div class="hero-actions">
         <a href="https://downloads.noxith.com/download" class="btn-primary">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
           Download Now
         </a>
-        <a href="#features" class="btn-secondary">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="12" />
-            <line x1="12" y1="16" x2="12.01" y2="16" />
+        <button class="btn-secondary" onclick="openDashboard()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
           </svg>
-          See Features
-        </a>
+          Open Web Dashboard
+        </button>
       </div>
 
-      <!-- Join Stream Card -->
-      <div class="animate" style="transition-delay:0.35s; margin-top: 24px; width: 100%; max-width: 460px;">
-        <div
-          style="background: rgba(10, 9, 20, 0.4); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
-          <div style="color: var(--accent); display: flex; align-items: center; flex-shrink: 0;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-              stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-              <line x1="8" y1="21" x2="16" y2="21" />
-              <line x1="12" y1="17" x2="12" y2="21" />
-            </svg>
-          </div>
-          <input type="text" id="streamCodeInput" placeholder="Enter Stream Code (e.g. AB12CD)"
-            style="background: transparent; border: none; outline: none; color: var(--text); font-family: var(--font-body); font-size: 14px; font-weight: 500; flex: 1; width: 100%; text-transform: uppercase;"
-            onkeydown="if(event.key==='Enter') joinStream()" />
-          <button onclick="joinStream()"
-            style="background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; box-shadow: 0 4px 12px var(--accent-glow);">
-            Join Stream
-          </button>
-        </div>
-      </div>
-
-      <div class="hero-meta animate" style="transition-delay:0.4s">
+      <div class="hero-meta">
         <div class="hero-meta-item">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polyline points="20 6 9 17 4 12" />
           </svg>
           Fast &amp; Light (~1.4 MB)
         </div>
         <div class="hero-meta-item">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polyline points="20 6 9 17 4 12" />
           </svg>
           No Installer Required
         </div>
         <div class="hero-meta-item">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polyline points="20 6 9 17 4 12" />
           </svg>
-          Windows 10 &amp; 11 Compatible
+          Windows 10 &amp; 11
         </div>
       </div>
 
-      <!-- App Preview Image Slider (Theme Images Only) -->
-      <div class="preview-wrap animate" style="transition-delay:0.5s">
+      <!-- App Preview Image Slider -->
+      <div class="preview-wrap">
         <div class="preview-glow"></div>
-        <div class="preview-carousel-container">
-          <div class="preview-frame">
-            <div class="carousel-slides" id="carouselSlides">
-              <!-- Slide 1: Default Onyx Theme -->
-              <div class="carousel-slide active">
-                <img src="Preview.png" alt="Onyx Theme"
-                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 viewBox=%220 0 1000 650%22 style=%22background:%230a0915%22><rect x=%220%22 y=%220%22 width=%2260%22 height=%22650%22 fill=%22%2305040d%22 /><rect x=%2215%22 y=%2220%22 width=%2230%22 height=%2230%22 rx=%226%22 fill=%22%239d6fff%22 /><rect x=%2290%22 y=%2230%22 width=%22410%22 height=%22270%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%22520%22 y=%2230%22 width=%22450%22 height=%22270%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%2290%22 y=%22320%22 width=%22410%22 height=%22300%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%22520%22 y=%22320%22 width=%22450%22 height=%22300%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><text x=%2250%25%22 y=%2252%25%22 fill=%22%236a607e%22 font-family=%22sans-serif%22 font-size=%2218%22 text-anchor=%22middle%22>Onyx Workspace Preview Placeholder (Preview.png)</text></svg>';" />
-              </div>
-              <!-- Slide 2: Noxith Theme -->
-              <div class="carousel-slide">
-                <img src="Theme-Noxith.png" alt="Noxith Theme"
-                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 viewBox=%220 0 1000 650%22 style=%22background:%23050505%22><rect x=%220%22 y=%220%22 width=%2260%22 height=%22650%22 fill=%22%23050505%22 /><rect x=%2215%22 y=%2220%22 width=%2230%22 height=%2230%22 rx=%226%22 fill=%22%23ffffff%22 /><rect x=%2290%22 y=%2230%22 width=%22410%22 height=%22270%22 rx=%2210%22 fill=%22%23121212%22 stroke=%22%23444444%22 /><rect x=%22520%22 y=%2230%22 width=%22450%22 height=%22270%22 rx=%2210%22 fill=%22%23121212%22 stroke=%22%23444444%22 /><rect x=%2290%22 y=%22320%22 width=%22410%22 height=%22300%22 rx=%2210%22 fill=%22%23121212%22 stroke=%22%23444444%22 /><rect x=%22520%22 y=%22320%22 width=%22450%22 height=%22300%22 rx=%2210%22 fill=%22%23121212%22 stroke=%22%23444444%22 /><text x=%2250%25%22 y=%2252%25%22 fill=%22%23a0a0a0%22 font-family=%22sans-serif%22 font-size=%2218%22 text-anchor=%22middle%22>Noxith Theme Preview Placeholder (Theme-Noxith.png)</text></svg>';" />
-              </div>
-              <!-- Slide 3: Eclipse Theme -->
-              <div class="carousel-slide">
-                <img src="Theme-Eclipse.png" alt="Eclipse Theme"
-                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 viewBox=%220 0 1000 650%22 style=%22background:%23030206%22><rect x=%220%22 y=%220%22 width=%2260%22 height=%22650%22 fill=%22%23030206%22 /><rect x=%2215%22 y=%2220%22 width=%2230%22 height=%2230%22 rx=%226%22 fill=%22%23ff6a00%22 /><rect x=%2290%22 y=%2230%22 width=%22410%22 height=%22270%22 rx=%2210%22 fill=%22%230a090f%22 stroke=%22%23191724%22 /><rect x=%22520%22 y=%2230%22 width=%22450%22 height=%22270%22 rx=%2210%22 fill=%22%230a090f%22 stroke=%22%23191724%22 /><rect x=%2290%22 y=%22320%22 width=%22410%22 height=%22300%22 rx=%2210%22 fill=%22%230a090f%22 stroke=%22%23191724%22 /><rect x=%22520%22 y=%22320%22 width=%22450%22 height=%22300%22 rx=%2210%22 fill=%22%230a090f%22 stroke=%22%23191724%22 /><text x=%2250%25%22 y=%2252%25%22 fill=%22%237a768a%22 font-family=%22sans-serif%22 font-size=%2218%22 text-anchor=%22middle%22>Eclipse Theme Preview Placeholder (Theme-Eclipse.png)</text></svg>';" />
-              </div>
-              <!-- Slide 4: Crimson Theme -->
-              <div class="carousel-slide">
-                <img src="Theme-Crimson.png" alt="Crimson Theme"
-                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 viewBox=%220 0 1000 650%22 style=%22background:%23050102%22><rect x=%220%22 y=%220%22 width=%2260%22 height=%22650%22 fill=%22%23050102%22 /><rect x=%2215%22 y=%2220%22 width=%2230%22 height=%2230%22 rx=%226%22 fill=%22%23d41b2c%22 /><rect x=%2290%22 y=%2230%22 width=%22410%22 height=%22270%22 rx=%2210%22 fill=%22%230d0406%22 stroke=%22%231e090d%22 /><rect x=%22520%22 y=%2230%22 width=%22450%22 height=%22270%22 rx=%2210%22 fill=%22%230d0406%22 stroke=%22%231e090d%22 /><rect x=%2290%22 y=%22320%22 width=%22410%22 height=%22300%22 rx=%2210%22 fill=%22%230d0406%22 stroke=%22%231e090d%22 /><rect x=%22520%22 y=%22320%22 width=%22450%22 height=%22300%22 rx=%2210%22 fill=%22%230d0406%22 stroke=%22%231e090d%22 /><text x=%2250%25%22 y=%2252%25%22 fill=%22%238c7a7d%22 font-family=%22sans-serif%22 font-size=%2218%22 text-anchor=%22middle%22>Crimson Theme Preview Placeholder (Theme-Crimson.png)</text></svg>';" />
-              </div>
-              <!-- Slide 6: Abyssal Theme -->
-              <div class="carousel-slide">
-                <img src="Theme-Abyssal.png" alt="Custom Designer"
-                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 viewBox=%220 0 1000 650%22 style=%22background:%2306050d%22><rect x=%220%22 y=%220%22 width=%2260%22 height=%22650%22 fill=%22%2306050d%22 /><rect x=%2215%22 y=%2220%22 width=%2230%22 height=%2230%22 rx=%226%22 fill=%22%23edeafa%22 /><rect x=%2290%22 y=%2230%22 width=%22410%22 height=%22270%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%22520%22 y=%2230%22 width=%22450%22 height=%22270%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%2290%22 y=%22320%22 width=%22410%22 height=%22300%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%22520%22 y=%22320%22 width=%22450%22 height=%22300%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><text x=%2250%25%22 y=%2252%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2218%22 text-anchor=%22middle%22>Custom Designer Preview Placeholder (Theme-Custom.png)</text></svg>';" />
-              </div>
-              <!-- Slide 7: Custom Theme Creator -->
-              <div class="carousel-slide">
-                <img src="Theme-Custom.png" alt="Custom Designer"
-                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 viewBox=%220 0 1000 650%22 style=%22background:%2306050d%22><rect x=%220%22 y=%220%22 width=%2260%22 height=%22650%22 fill=%22%2306050d%22 /><rect x=%2215%22 y=%2220%22 width=%2230%22 height=%2230%22 rx=%226%22 fill=%22%23edeafa%22 /><rect x=%2290%22 y=%2230%22 width=%22410%22 height=%22270%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%22520%22 y=%2230%22 width=%22450%22 height=%22270%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%2290%22 y=%22320%22 width=%22410%22 height=%22300%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><rect x=%22520%22 y=%22320%22 width=%22450%22 height=%22300%22 rx=%2210%22 fill=%22%230f0e1c%22 stroke=%22%231c1a30%22 /><text x=%2250%25%22 y=%2252%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2218%22 text-anchor=%22middle%22>Custom Designer Preview Placeholder (Theme-Custom.png)</text></svg>';" />
-              </div>
+        <div class="preview-frame">
+          <div class="carousel-slides" id="carouselSlides">
+            <div class="carousel-slide active"><img src="Preview.png" alt="Onyx Theme"
+                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 style=%22background:%230a0915%22><text x=%2250%25%22 y=%2250%25%22 fill=%22%236a607e%22 font-family=%22sans-serif%22 font-size=%2220%22 text-anchor=%22middle%22>BloxMulti Desktop Client</text></svg>';" />
             </div>
-
-            <!-- Carousel Navigation (Symmetrical arrows) -->
-            <button class="carousel-arrow prev" onclick="moveSlide(-1)">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            </button>
-            <button class="carousel-arrow next" onclick="moveSlide(1)">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="9 6 15 12 9 18" />
-              </svg>
-            </button>
+            <div class="carousel-slide"><img src="Theme-Noxith.png" alt="Noxith Theme"
+                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 style=%22background:%23050505%22><text x=%2250%25%22 y=%2250%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2220%22 text-anchor=%22middle%22>Noxith Theme</text></svg>';" />
+            </div>
+            <div class="carousel-slide"><img src="Theme-Eclipse.png" alt="Eclipse Theme"
+                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 style=%22background:%23030206%22><text x=%2250%25%22 y=%2250%25%22 fill=%22%23ff6a00%22 font-family=%22sans-serif%22 font-size=%2220%22 text-anchor=%22middle%22>Eclipse Theme</text></svg>';" />
+            </div>
+            <div class="carousel-slide"><img src="Theme-Crimson.png" alt="Crimson Theme"
+                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 style=%22background:%230d0406%22><text x=%2250%25%22 y=%2250%25%22 fill=%22%23ff3a5c%22 font-family=%22sans-serif%22 font-size=%2220%22 text-anchor=%22middle%22>Crimson Theme</text></svg>';" />
+            </div>
           </div>
+          <button class="carousel-arrow prev" onclick="moveSlide(-1)">❮</button>
+          <button class="carousel-arrow next" onclick="moveSlide(1)">❯</button>
+        </div>
 
-          <!-- Carousel Dots -->
-          <div class="carousel-dots" id="carouselDots">
-            <span class="carousel-dot active" onclick="setSlide(0)" title="Default Onyx Theme"></span>
-            <span class="carousel-dot" onclick="setSlide(1)" title="Noxith Theme"></span>
-            <span class="carousel-dot" onclick="setSlide(2)" title="Eclipse Theme"></span>
-            <span class="carousel-dot" onclick="setSlide(3)" title="Crimson Theme"></span>
-            <span class="carousel-dot" onclick="setSlide(4)" title="Abyssal Theme"></span>
-            <span class="carousel-dot" onclick="setSlide(5)" title="Custom Theme Creator"></span>
-          </div>
+        <div class="carousel-dots" id="carouselDots">
+          <span class="carousel-dot active" onclick="setSlide(0)"></span>
+          <span class="carousel-dot" onclick="setSlide(1)"></span>
+          <span class="carousel-dot" onclick="setSlide(2)"></span>
+          <span class="carousel-dot" onclick="setSlide(3)"></span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Real-time Stats -->
-  <div class="stats" id="features">
-    <div class="container stats-inner">
-      <div class="stat-item animate">
+  <!-- Stats Strip -->
+  <div class="stats">
+    <div class="stats-inner">
+      <div class="stat-item">
         <div class="stat-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="8" r="4" />
             <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
           </svg>
@@ -1698,573 +1290,242 @@
           <div class="stat-label">Save and switch between active sessions</div>
         </div>
       </div>
-      <div class="stat-item animate" style="transition-delay:0.1s">
+
+      <div class="stat-item">
         <div class="stat-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polygon points="5 3 19 12 5 21 5 3" />
           </svg>
         </div>
         <div class="stat-text">
           <div class="stat-num"><span>Multi-Instance</span> Support</div>
-          <div class="stat-label">Launch multiple Roblox windows at the same time</div>
+          <div class="stat-label">Launch multiple Roblox windows simultaneously</div>
         </div>
       </div>
-      <div class="stat-item animate" style="transition-delay:0.2s">
+
+      <div class="stat-item">
         <div class="stat-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-            stroke-linecap="round" stroke-linejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <circle cx="12" cy="12" r="10" />
             <polyline points="12 6 12 12 16 14" />
           </svg>
         </div>
         <div class="stat-text">
           <div class="stat-num"><span>Global</span> FPS Limiter</div>
-          <div class="stat-label">Tune framerate caps inside your XML configuration files</div>
+          <div class="stat-label">Tune framerate caps inside XML configuration files</div>
         </div>
       </div>
-      <div class="stat-item animate" style="transition-delay:0.3s">
+
+      <div class="stat-item">
         <div class="stat-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
         </div>
         <div class="stat-text">
-          <div class="stat-num"><span id="stats-downloads">0</span>+ Downloads</div>
-          <div class="stat-label">Join users running multiple clients daily</div>
+          <div class="stat-num"><span id="stats-downloads">12,000</span>+ Downloads</div>
+          <div class="stat-label">Active users running multiple clients</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Core Features Matrix -->
-  <section class="features">
+  <!-- Bento Features Grid -->
+  <section class="features" id="features">
     <div class="container">
-      <div class="section-label animate">Core Engine</div>
-      <h2 class="section-title animate">Built for multi-account automation</h2>
+      <div class="section-label">Core Architecture</div>
+      <h2 class="section-title">Built for Multi-Accounting Automation</h2>
 
-      <div class="features-grid stagger">
-        <div class="feat-card">
-          <div class="feat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-              stroke-linecap="round">
-              <polygon points="5 3 19 12 5 21 5 3" />
-            </svg>
+      <div class="bento-grid">
+        <div class="bento-card">
+          <div class="bento-header">
+            <div class="bento-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+            </div>
+            <span class="bento-badge core">CORE</span>
           </div>
-          <div class="feat-title">Multi-Instance Support</div>
-          <div class="feat-desc">Run multiple Roblox game windows at the same time with a smooth and reliable
-            experience. Easily switch between accounts, or play across several sessions without constantly reopening the
-            client.</div>
+          <div class="bento-title">Multi-Instance Engine</div>
+          <div class="bento-desc">Automatically neutralizes singleton Mutex and Event handles upon client launch,
+            letting you run unlimited instances smoothly side-by-side without disconnects.</div>
         </div>
 
-        <div class="feat-card">
-          <div class="feat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-            </svg>
+        <div class="bento-card">
+          <div class="bento-header">
+            <div class="bento-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </div>
+            <span class="bento-badge core">PERFORMANCE</span>
           </div>
-          <div class="feat-title">Secure Local Switching</div>
-          <div class="feat-desc">Store multiple profiles. Session cookies are encrypted locally on your hard drive using
-            Windows DPAPI encryption keys to protect your data.</div>
+          <div class="bento-title">Per-Account &amp; Global FPS Limiter</div>
+          <div class="bento-desc">Writes configuration limits directly to Roblox's XML settings. Throttle background alt
+            accounts down to 5–10 FPS while keeping your main account at max refresh rate.</div>
         </div>
 
-        <div class="feat-card">
-          <div class="feat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <path
-                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
+        <div class="bento-card">
+          <div class="bento-header">
+            <div class="bento-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <span class="bento-badge core">SECURITY</span>
           </div>
-          <div class="feat-title">Global FPS Limiter</div>
-          <div class="feat-desc">Writes limits straight into local XML settings. Regulate client rendering to optimize
-            hardware cycles and lower system heat.</div>
+          <div class="bento-title">DPAPI Hardware Vault</div>
+          <div class="bento-desc">Saved account cookies are encrypted using Windows CryptProtectData tied to your
+            device's hardware keys. Zero plain-text credentials ever touch external databases.</div>
         </div>
 
-        <div class="feat-card">
-          <div class="feat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
-            </svg>
+        <div class="bento-card">
+          <div class="bento-header">
+            <div class="bento-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+            </div>
+            <span class="bento-badge">PREMIUM</span>
           </div>
-          <div class="feat-title">Cloud Backup &amp; Sync</div>
-          <div class="feat-desc">Link Google accounts to export encrypted local backups to your drive. Restores
-            configurations, account profiles, and layouts across devices.</div>
+          <div class="bento-title">Discord Webhook Gateway</div>
+          <div class="bento-desc">Receive real-time Discord notifications when accounts disconnect, teleport, or launch,
+            complete with automated screenshot attachments and offline queueing.</div>
         </div>
 
-        <div class="feat-card">
-          <div class="feat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
-            </svg>
+        <div class="bento-card">
+          <div class="bento-header">
+            <div class="bento-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <line x1="9" y1="3" x2="9" y2="21" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+              </svg>
+            </div>
+            <span class="bento-badge">PREMIUM</span>
           </div>
-          <div class="feat-title">Isolated Browser Sessions</div>
-          <div class="feat-desc">Launches individual profile navigation containers using decoupled local directories.
-            Keeps online cookies completely isolated.</div>
+          <div class="bento-title">Window Layout Arranger</div>
+          <div class="bento-desc">Arrange window positions across monitors on a virtual canvas. Each client
+            automatically launches at its exact designated pixel size and screen coordinates.</div>
         </div>
 
-
-        <div class="feat-card">
-          <div class="feat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-              stroke-linecap="round">
-              <path d="M21 10V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2" />
-              <path d="M7 14l-3 3v3h16v-3l-3-3" />
-              <line x1="12" y1="6" x2="12" y2="14" />
-            </svg>
+        <div class="bento-card">
+          <div class="bento-header">
+            <div class="bento-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <line x1="8" y1="21" x2="16" y2="21" />
+                <line x1="12" y1="17" x2="12" y2="21" />
+              </svg>
+            </div>
+            <span class="bento-badge">PREMIUM</span>
           </div>
-          <div class="feat-title">Sidebar Favoriting</div>
-          <div class="feat-desc">Pin primary accounts to the top of your sidebar, arrange visual layouts via
-            drag-and-drop mechanics, and custom-order dashboard slots.</div>
+          <div class="bento-title">P2P Remote Screen Streaming</div>
+          <div class="bento-desc">Encrypted WebRTC screen streaming enables you to observe your client sessions from
+            secondary screens like phones or tablets without external video servers.</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Modular Tabs Overview -->
-  <section class="tabs-section" id="tabs">
+  <!-- Pricing Section -->
+  <section class="pricing-section" id="pricing">
     <div class="container">
-      <div class="section-label animate">Dashboard Tabs</div>
-      <h2 class="section-title animate">Open exactly what you need</h2>
-      <p class="tabs-intro animate">
-        Every panel lives in a single tab bar. Open as many as you want, drag them into any order, and close the
-        ones you don't need — no fixed layout, just the tools you're actually using.
-      </p>
+      <div class="section-label">Licensing</div>
+      <h2 class="section-title">Upgrade Options</h2>
 
-      <div class="features-grid stagger">
-        <div class="feat-card">
-          <div class="feat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-              stroke-linecap="round">
-              <polygon points="5 3 19 12 5 21 5 3" />
-            </svg>
-          </div>
-          <div class="feat-title">Launch</div>
-          <div class="feat-desc">Bookmark saved games and private servers, launch instantly, and browse your recent
-            launch history — all from one tab.</div>
+      <div class="pricing-grid">
+        <!-- Standard -->
+        <div class="pricing-card">
+          <div class="pricing-tier-name">Standard</div>
+          <div class="pricing-price">$0</div>
+          <div class="pricing-sub">Free forever for casual multi-accounting</div>
+
+          <ul class="pricing-features">
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Unlimited simultaneous Roblox accounts
+            </li>
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Global framerate cap configuration</li>
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Place ID &amp; Job ID quick-launching
+            </li>
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Saved servers &amp; game bookmarks</li>
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Local DPAPI hardware encryption</li>
+          </ul>
+
+          <a href="#download" class="btn-pricing">Download Free</a>
         </div>
 
-        <div class="feat-card">
-          <div class="feat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
+        <!-- Monthly Premium -->
+        <div class="pricing-card featured">
+          <div class="pricing-tier-name">Monthly Premium</div>
+          <div class="pricing-price">$3 <span
+              style="font-size:15px; color:var(--muted); font-family:var(--font-body); font-weight:500;">/ mo</span>
           </div>
-          <div class="feat-title">Launch Logs</div>
-          <div class="feat-desc">Real-time process events, connection statuses, and error details for every launch
-            attempt — searchable and copyable.</div>
+          <div class="pricing-sub">Full automation suite with recurring flexibility</div>
+
+          <ul class="pricing-features">
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> <strong>Everything in Standard</strong>
+            </li>
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Discord Webhook alerts &amp; disconnect
+              screenshots</li>
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Multi-monitor window layout coordinator
+            </li>
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Per-account individual FPS limits</li>
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Remote WebRTC screen streaming</li>
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Live instance telemetry (CPU/RAM/GPU)
+            </li>
+          </ul>
+
+          <button class="btn-pricing primary" onclick="handleCheckout('monthly')">Subscribe ($3/mo)</button>
         </div>
 
-        <div class="feat-card">
-          <div class="feat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
+        <!-- Lifetime License -->
+        <div class="pricing-card">
+          <div class="pricing-tier-name">Lifetime License</div>
+          <div class="pricing-price">$15 <span
+              style="font-size:15px; color:var(--muted); font-family:var(--font-body); font-weight:500;">one-time</span>
           </div>
-          <div class="feat-title">Online Friends</div>
-          <div class="feat-desc">See where your friends are playing right now and quick-join their server in one
-            click.</div>
-        </div>
+          <div class="pricing-sub">Pay once, own all future updates forever</div>
 
-        <div class="feat-card">
-          <div class="feat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-              stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-              <line x1="8" y1="21" x2="16" y2="21" />
-              <line x1="12" y1="17" x2="12" y2="21" />
-            </svg>
-          </div>
-          <div class="feat-title" style="display:flex; align-items:center; justify-content:space-between;">
-            Remote View
-            <span class="tab-premium-badge">Premium</span>
-          </div>
-          <div class="feat-desc">Stream your screen securely to any device with local, peer-to-peer encoding.</div>
-        </div>
+          <ul class="pricing-features">
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> <strong>All Premium features
+                unlocked</strong></li>
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> One-time payment with no recurring fees
+            </li>
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Lifetime license linked to your account
+            </li>
+            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Priority Discord support access</li>
+          </ul>
 
-        <div class="feat-card">
-          <div class="feat-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-              stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <path d="M8 21h8M12 17v4" />
-              <polyline points="7 10 10 7 13 10 17 6" />
-            </svg>
-          </div>
-          <div class="feat-title" style="display:flex; align-items:center; justify-content:space-between;">
-            Running Instances
-            <span class="tab-premium-badge">Premium</span>
-          </div>
-          <div class="feat-desc">Live CPU, RAM, and GPU stats per running client, with a quick process-kill
-            trigger.</div>
-        </div>
-      </div>
-
-      <!-- Walkthrough Panel -->
-      <div class="tabs-how-to animate">
-        <div class="tabs-how-to-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-        </div>
-        <div class="tabs-how-to-body">
-          <div class="tabs-how-to-title">How tabs work</div>
-          <div class="tabs-how-to-text">Your dashboard is a live tab bar — open, reorder, and close tabs on the fly,
-            just like a browser.</div>
-          <div class="tabs-how-to-steps">
-            <div class="tabs-step">
-              <div class="tabs-step-num">1</div>
-              <div class="tabs-step-text">
-                Click the <strong style="color:var(--text);">+</strong> at the end of the tab bar and pick a panel —
-                Launch, Logs, Remote View, and more.
-              </div>
-            </div>
-            <div class="tabs-step">
-              <div class="tabs-step-num">2</div>
-              <div class="tabs-step-text">
-                <strong style="color:var(--text);">Drag</strong> any tab left or right to reorder the bar exactly how
-                you like it.
-              </div>
-            </div>
-            <div class="tabs-step">
-              <div class="tabs-step-num">3</div>
-              <div class="tabs-step-text">
-                Click the <strong style="color:var(--text);">×</strong> on a tab to close it, or right-click for quick
-                actions like Close Tab and Close Other Tabs.
-              </div>
-            </div>
-          </div>
+          <button class="btn-pricing" onclick="handleCheckout('lifetime')">Get Lifetime ($15)</button>
         </div>
       </div>
     </div>
-  </section>
-
-  <!-- Premium Section -->
-  <section class="premium-section" id="premium">
-    <div class="container">
-      <div class="section-label animate">Upgrade</div>
-      <h2 class="section-title animate">Unlock advanced utility tools</h2>
-      <p class="premium-intro animate">
-        The core app is free. Premium unlocks advanced automation and monitoring tools designed for managing larger
-        numbers of sessions.
-      </p>
-
-      <div class="premium-layout">
-        <div class="premium-features-list">
-          <!-- Premium Feature: Discord Webhooks -->
-          <div class="premium-feat animate" style="transition-delay:0s">
-            <div class="premium-feat-left">
-              <div class="premium-feat-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                </svg>
-              </div>
-              <div class="premium-feat-body">
-                <div class="premium-feat-title">Discord Webhook Notifications</div>
-                <div class="premium-feat-desc">Receive real-time Discord alerts when accounts disconnect (including
-                  automatic game screenshots), teleport, or join servers. Automatically queues logs when offline and
-                  sends them when your connection returns.</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Premium Feature: Folders, Groups & Window Layout Coordinator -->
-          <div class="premium-feat animate" style="transition-delay:0.05s">
-            <div class="premium-feat-left">
-              <div class="premium-feat-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <line x1="9" y1="3" x2="9" y2="21" />
-                  <line x1="3" y1="12" x2="21" y2="12" />
-                </svg>
-              </div>
-              <div class="premium-feat-body">
-                <div class="premium-feat-title">Folders, Groups &amp; Window Coordinator</div>
-                <div class="premium-feat-desc">Sort your sidebar accounts into named groups to batch-launch accounts
-                  together with automated delay spacing. Access a dedicated layout editor panel to visually map,
-                  position, and resize window dimensions across multiple displays before launch.</div>
-              </div>
-            </div>
-            <div class="premium-feat-visual">
-              <img src="Window-Layout.png" alt="Window Layout Coordinator"
-                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22100%22 style=%22background:%2314132a%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%236a607e%22 font-family=%22sans-serif%22 font-size=%2211%22 text-anchor=%22middle%22>Window-Layout.png</text></svg>';" />
-            </div>
-          </div>
-
-          <!-- Per-Account FPS Cap (Visual Container Removed) -->
-          <div class="premium-feat animate" style="transition-delay:0.1s">
-            <div class="premium-feat-left">
-              <div class="premium-feat-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-              </div>
-              <div class="premium-feat-body">
-                <div class="premium-feat-title">Per-Account FPS Cap</div>
-                <div class="premium-feat-desc">Throttle background clients to save system resources. Set an individual
-                  framerate limit for each account to override the global setting. Limit background sessions to 5 or 10
-                  FPS while keeping your primary screen smooth.</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Window Renaming (Visual Container Removed) -->
-          <div class="premium-feat animate" style="transition-delay:0.2s">
-            <div class="premium-feat-left">
-              <div class="premium-feat-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="3" width="20" height="14" rx="2" />
-                  <path d="M8 21h8M12 17v4" />
-                  <polyline points="7 10 10 7 13 10 17 6" />
-                </svg>
-              </div>
-              <div class="premium-feat-body">
-                <div class="premium-feat-title">Roblox Window Renaming</div>
-                <div class="premium-feat-desc">The application monitors launched PIDs and renames their window title
-                  text from "Roblox" to their active account username. This allows you to identify specific sessions
-                  easily in your taskbar and Task Manager.</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Running Instances Tab -->
-          <div class="premium-feat animate" style="transition-delay:0.3s">
-            <div class="premium-feat-left">
-              <div class="premium-feat-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="3" width="20" height="14" rx="2" />
-                  <path d="M8 21h8M12 17v4" />
-                  <polyline points="7 10 10 7 13 10 17 6" />
-                </svg>
-              </div>
-              <div class="premium-feat-body">
-                <div class="premium-feat-title">Running Instances Tab</div>
-                <div class="premium-feat-desc">An interactive dashboard monitor that maps running clients to their
-                  parent account, showing real-time CPU percentages, working memory, and GPU usage bars. Includes a
-                  quick process-kill trigger.</div>
-              </div>
-            </div>
-            <div class="premium-feat-visual">
-              <img src="Live-Monitor.png" alt="Live Monitor statistics"
-                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22100%22 style=%22background:%2314132a%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%236a607e%22 font-family=%22sans-serif%22 font-size=%2211%22 text-anchor=%22middle%22>Live-Monitor.png</text></svg>';" />
-            </div>
-          </div>
-
-          <!-- Custom Theme Designer -->
-          <div class="premium-feat animate" style="transition-delay:0.4s">
-            <div class="premium-feat-left">
-              <div class="premium-feat-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <path
-                    d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.92 0 1.63-.77 1.63-1.7 0-.44-.17-.86-.44-1.18-.27-.32-.44-.74-.44-1.18 0-.93.77-1.63 1.7-1.63h1.75c2.78 0 5-2.22 5-5 0-4.42-4.03-8-8.75-8z" />
-                  <circle cx="7.5" cy="10.5" r="1" />
-                  <circle cx="11.5" cy="7.5" r="1" />
-                  <circle cx="16.5" cy="9.5" r="1" />
-                </svg>
-              </div>
-              <div class="premium-feat-body">
-                <div class="premium-feat-title">Custom Theme Color Creator</div>
-                <div class="premium-feat-desc">Personalize the dashboard styling. Unlocks color selectors in the
-                  appearance panel to set custom Hex codes for the application background, sidebar layout, glow accents,
-                  and text elements.</div>
-              </div>
-            </div>
-            <div class="premium-feat-visual">
-              <img src="Theme-Custom.png" alt="Custom styling designer"
-                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22100%22 style=%22background:%2314132a%22><text x=%2250%25%22 y=%2255%25%22 fill=%22%236a607e%22 font-family=%22sans-serif%22 font-size=%2211%22 text-anchor=%22middle%22>Custom designer</text></svg>';" />
-            </div>
-          </div>
-
-          <!-- Remote Screen Streaming (Premium Feature) -->
-          <div class="premium-feat animate" style="transition-delay:0.5s">
-            <div class="premium-feat-left">
-              <div class="premium-feat-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                  <line x1="8" y1="21" x2="16" y2="21" />
-                  <line x1="12" y1="17" x2="12" y2="21" />
-                </svg>
-              </div>
-              <div class="premium-feat-body">
-                <div class="premium-feat-title">Remote Screen Streaming</div>
-                <div class="premium-feat-desc">Stream your desktop screen to secondary screens like mobile devices,
-                  tablets, or laptops. High-performance WebRTC peer-to-peer
-                  connections deliver low-latency video without routing your data through external servers.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pricing Card -->
-        <div class="premium-card animate">
-          <div class="premium-card-label">BloxMulti Premium</div>
-
-          <!-- Compact Multi-Plan Box Matching App Aesthetics -->
-          <div class="premium-price-box">
-            <!-- Monthly Row -->
-            <div class="premium-price-row">
-              <span class="premium-price-label monthly">Monthly Access</span>
-              <div class="premium-price-value-container">
-                <span class="premium-price-val">$3</span>
-                <span class="premium-price-period">/ mo</span>
-              </div>
-            </div>
-            <div class="premium-price-sep"></div>
-            <!-- Lifetime Row -->
-            <div class="premium-price-row">
-              <span class="premium-price-label lifetime">Lifetime License</span>
-              <div class="premium-price-value-container">
-                <span class="premium-price-val">$15</span>
-                <span class="premium-price-period">one-time</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="premium-card-sub"
-            style="margin-bottom: 20px; font-size: 12.5px; line-height: 1.5; color: var(--muted);">Choose your plan
-            inside the desktop application upgrade menu. All plans unlock complete features immediately.</div>
-          <div class="premium-card-divider"></div>
-          <div class="premium-card-perks">
-            <div class="premium-perk">
-              <div class="premium-perk-check">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-              Discord Webhook Alerts &amp; Screenshots
-            </div>
-            <div class="premium-perk">
-              <div class="premium-perk-check">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-              Remote Screen Streaming
-            </div>
-            <div class="premium-perk">
-              <div class="premium-perk-check">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-              Folders, Groups &amp; Window Spawn Coordinators
-            </div>
-            <div class="premium-perk">
-              <div class="premium-perk-check">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-              Per-Account FPS Cap
-            </div>
-            <div class="premium-perk">
-              <div class="premium-perk-check">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-              Window Title Renaming
-            </div>
-            <div class="premium-perk">
-              <div class="premium-perk-check">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-              Interactive Resource Monitor
-            </div>
-            <div class="premium-perk">
-              <div class="premium-perk-check">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-              Theme Palette Creator
-            </div>
-          </div>
-          <a href="https://downloads.noxith.com/download" class="btn-premium">
-            <svg width="14" height="14" viewBox="0 0 1024 1024" fill="currentColor">
-              <path
-                d="M967.68 368.64l-153.6-204.8c-3.9424-5.2736-9.7792-8.8064-16.2816-9.8816l-307.2-51.2c-2.7648-0.4608-5.632-0.4608-8.3968 0l-307.2 51.2c-6.5024 1.0752-12.3392 4.608-16.2816 9.8816l-153.6 204.8c-7.3216 9.7792-6.7072 23.3984 1.4336 32.4608l460.8 512c4.864 5.376 11.776 8.4992 19.0464 8.4992s14.1824-3.072 19.0464-8.4992l460.8-512c8.192-9.1136 8.8064-22.6816 1.4336-32.4608z" />
-            </svg>
-            See Upgrade Plans
-          </a>
-          <div class="premium-card-note">Upgrade directly from inside the desktop app after logging in.</div>
-        </div>
-      </div>
   </section>
 
   <!-- Download Section -->
   <section class="download" id="download">
-    <div class="container download-inner">
-      <div class="download-glow"></div>
-
-      <h2 class="download-title animate">Ready to launch?</h2>
-      <p class="download-sub animate">
-        Download BloxMulti to coordinate your client instances.
-      </p>
-
-      <div class="download-box animate">
-        <div class="dl-platform">
-          <div class="dl-platform-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-13.051-1.8" />
-            </svg>
-          </div>
-          Windows 10 / 11
-          <div class="dl-version">v1.4.0</div>
+    <div class="container">
+      <div class="download-box">
+        <div style="font-size:14px; font-weight:600; color:var(--muted); display:flex; align-items:center; gap:8px;">
+          Windows 10 / 11 · Portable Executable
         </div>
 
-        <a href="https://downloads.noxith.com/download" class="btn-download-primary">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
+        <a href="https://downloads.noxith.com/download" class="btn-primary" style="width:100%; padding:15px 24px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-          Download BloxMulti
+          Download BloxMulti v1.4.0
         </a>
 
-        <div class="dl-requirements">
-          Requires Windows 10 or later &nbsp;·&nbsp; ~1.4 MB &nbsp;·&nbsp; Portable Executable
+        <div style="font-size:12px; color:var(--muted);">
+          SHA-256 Verified · Clean VirusTotal Scan · ~1.4 MB
         </div>
       </div>
     </div>
@@ -2272,137 +1533,257 @@
 
   <!-- Footer -->
   <footer>
-    <div class="container footer-inner">
-      <div class="footer-logo">BloxMulti</div>
-      <div class="footer-links">
-        <a href="https://github.com/WaveBound/BloxMulti">GitHub</a>
-        <a href="https://discord.gg/ju6ANNecQg">Discord</a>
-        <a href="support.html">Support</a>
-        <a href="privacy.html">Privacy Policy</a>
-        <a href="terms.html">Terms of Service</a>
+    <div class="container footer-flex">
+      <div style="font-family: var(--font-display); font-weight: 800; color: var(--muted); font-size: 18px;">
+        BloxMulti
       </div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/WaveBound/BloxMulti">GitHub</a></li>
+        <li><a href="https://discord.gg/ju6ANNecQg">Discord</a></li>
+        <li><a href="support.html">Support</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="terms.html">Terms</a></li>
+      </ul>
     </div>
   </footer>
 
-  <script src="../donations/donations.js"></script>
+  <!-- Simplified Minimalist Sign In Modal -->
+  <div class="auth-backdrop" id="authModal" onclick="closeAuthModal()">
+    <div class="auth-card" onclick="event.stopPropagation()">
+      <button class="auth-close-btn" onclick="closeAuthModal()" title="Close">✕</button>
+
+      <h3 class="auth-title">Sign In</h3>
+      <p class="auth-desc">Choose a provider to access your dashboard and license.</p>
+
+      <button class="btn-oauth google" onclick="signInWith('google')">
+        <svg width="17" height="17" viewBox="0 0 24 24">
+          <path
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            fill="#4285F4" />
+          <path
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            fill="#34A853" />
+          <path
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z"
+            fill="#FBBC05" />
+          <path
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z"
+            fill="#EA4335" />
+        </svg>
+        Continue with Google
+      </button>
+
+      <button class="btn-oauth discord" onclick="signInWith('discord')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="#5865F2">
+          <path
+            d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+        </svg>
+        Continue with Discord
+      </button>
+
+      <div class="auth-footer-note">
+        By continuing, you agree to our <a href="terms.html">Terms</a> and <a href="privacy.html">Privacy</a>.
+      </div>
+    </div>
+  </div>
+
   <script>
-    // ── Carousel Functionality ──
-    let currentSlideIdx = 0;
-    const slides = document.querySelectorAll('.carousel-slide');
-    const dots = document.querySelectorAll('.carousel-dot');
+    const SUPABASE_HOST = "vsgyclwnbrlticquvcjs.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_-IfvzZudr3vpqkVaaMN6uQ_ycOcDOHn";
 
-    function showSlide(index) {
-      if (index >= slides.length) {
-        currentSlideIdx = 0;
-      } else if (index < 0) {
-        currentSlideIdx = slides.length - 1;
-      } else {
-        currentSlideIdx = index;
-      }
-
-      slides.forEach((slide, i) => {
-        slide.classList.toggle('active', i === currentSlideIdx);
-      });
-      dots.forEach((dot, i) => {
-        dot.classList.toggle('active', i === currentSlideIdx);
-      });
-    }
-
-    function moveSlide(delta) {
-      showSlide(currentSlideIdx + delta);
-    }
-
-    function setSlide(index) {
-      showSlide(index);
-    }
-
-    // Auto-advance loop (Pauses on Hover)
-    let autoPlayTimer = setInterval(() => moveSlide(1), 7000);
-    const container = document.querySelector('.preview-carousel-container');
-    if (container) {
-      container.addEventListener('mouseenter', () => clearInterval(autoPlayTimer));
-      container.addEventListener('mouseleave', () => {
-        clearInterval(autoPlayTimer);
-        autoPlayTimer = setInterval(() => moveSlide(1), 7000);
-      });
-    }
-
-    // ── Scroll Animations (Intersection Observer) ──
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
+    let state = {
+      token: localStorage.getItem("bm_web_token") || null,
+      refresh: localStorage.getItem("bm_web_refresh") || null,
+      user: null,
+      sub: { isPrem: false, tier: "free", periodEnd: null }
     };
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('in');
-          observer.unobserve(e.target);
+    let peer = null;
+
+    // Parse OAuth Tokens on return
+    function parseTokens() {
+      const hash = window.location.hash;
+      if (hash && hash.includes("access_token=")) {
+        const params = new URLSearchParams(hash.substring(1));
+        const token = params.get("access_token");
+        const refresh = params.get("refresh_token");
+        if (token) {
+          state.token = token;
+          state.refresh = refresh;
+          localStorage.setItem("bm_web_token", token);
+          if (refresh) localStorage.setItem("bm_web_refresh", refresh);
         }
-      });
-    }, observerOptions);
-
-    document.querySelectorAll('.animate, .stagger, .premium-feat, .premium-card').forEach(el => observer.observe(el));
-
-    // Fallback in case Observer fails
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        document.querySelectorAll('.animate, .stagger, .premium-feat, .premium-card').forEach(el => {
-          el.classList.add('in');
-        });
-      }, 1000);
-    });
-
-    function joinStream() {
-      const input = document.getElementById("streamCodeInput");
-      const code = input ? input.value.trim().toUpperCase() : "";
-      if (!code) {
-        alert("Please enter a stream code.");
-        return;
+        history.replaceState(null, document.title, window.location.pathname + window.location.search);
+        closeAuthModal();
+        return true;
       }
-      if (code.length < 6) {
-        alert("Stream codes must be at least 6 characters.");
-        return;
-      }
-      // Redirects securely to the designated Remote Viewer subdirectory passing the stream code query parameter
-      window.location.href = `./view/?code=${code}`;
+      return false;
     }
 
-    // Fetch active download count securely
-    fetch("https://downloads.noxith.com/count", { cache: "no-store" })
-      .then(r => r.text())
-      .then(count => {
-        const el = document.getElementById("stats-downloads");
-        if (el && count) el.innerText = count.trim();
-      })
-      .catch(err => console.error("Failed to query download count statistics:", err));
+    async function req(method, path, body = null) {
+      const headers = { "apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json" };
+      if (state.token) headers["Authorization"] = `Bearer ${state.token}`;
+      const res = await fetch(`https://${SUPABASE_HOST}${path}`, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : null
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    }
 
-    // Intercept download button clicks to prevent double-clicking / spamming server
-    document.addEventListener('click', function (e) {
-      const link = e.target.closest('a[href*="downloads.noxith.com"]');
-      if (!link) return;
-
-      if (link.classList.contains('download-cooldown')) {
-        e.preventDefault();
-        e.stopPropagation();
+    async function fetchAccount() {
+      if (!state.token) {
+        updateUI();
         return;
       }
+      try {
+        const u = await req("GET", "/auth/v1/user");
+        state.user = {
+          id: u.id,
+          email: u.email,
+          name: u.user_metadata?.full_name || u.email.split('@')[0],
+          picture: u.user_metadata?.avatar_url || ""
+        };
 
-      link.classList.add('download-cooldown');
-      const originalHTML = link.innerHTML;
+        // Subscription query
+        try {
+          const subRes = await req("GET", `/rest/v1/subscriptions?user_id=eq.${u.id}&select=tier,status,current_period_end`);
+          if (Array.isArray(subRes) && subRes.length > 0) {
+            const isPrem = subRes[0].status === "active" || subRes[0].status === "trialing";
+            state.sub = {
+              isPrem,
+              tier: subRes[0].tier === 1 ? "premium" : "free",
+              periodEnd: subRes[0].current_period_end
+            };
+          }
+        } catch (_) { }
 
-      // Temporary loading/cooldown state
-      link.innerHTML = `
-        <svg class="download-spinner" width="16" height="16" viewBox="0 0 50 50">
-          <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-dasharray="80, 200" stroke-dashoffset="0"></circle>
-        </svg>
-        Preparing...
-      `;
+        // Automatically close modal when account is verified
+        closeAuthModal();
+        updateUI();
+      } catch (e) {
+        console.warn("Session expired:", e);
+        signOut();
+      }
+    }
 
-      setTimeout(() => {
-        link.classList.remove('download-cooldown');
-        link.innerHTML = originalHTML;
-      }, 1000);
+    function updateUI() {
+      const navSignInBtn = document.getElementById("navSignInBtn");
+      const navUserChip = document.getElementById("navUserChip");
+
+      if (state.user) {
+        navSignInBtn.style.display = "none";
+        navUserChip.style.display = "inline-flex";
+
+        const circle = document.getElementById("navAvatarCircle");
+        if (state.user.picture) circle.innerHTML = `<img src="${state.user.picture}" alt="Avatar">`;
+        else circle.textContent = state.user.name.substring(0, 1).toUpperCase();
+
+        // Dropdown elements
+        document.getElementById("dropdownUserName").textContent = state.user.name;
+        document.getElementById("dropdownUserEmail").textContent = state.user.email;
+      } else {
+        navSignInBtn.style.display = "inline-flex";
+        navUserChip.style.display = "none";
+      }
+    }
+
+    function signInWith(provider) {
+      if (window.location.protocol === "file:") {
+        alert("OAuth sign-in (Google/Discord) cannot be run from file:/// on your hard drive.\n\nTo test sign-in, upload this file to your website or run a local web server (such as VS Code Live Server)!");
+        return;
+      }
+      const redirect = encodeURIComponent(window.location.origin + window.location.pathname);
+      let scopes = "";
+      if (provider === "google") scopes = "&scopes=email+profile";
+      if (provider === "discord") scopes = "&scopes=identify+email";
+      window.location.href = `https://${SUPABASE_HOST}/auth/v1/authorize?provider=${provider}${scopes}&redirect_to=${redirect}`;
+    }
+
+    function signOut() {
+      localStorage.removeItem("bm_web_token");
+      localStorage.removeItem("bm_web_refresh");
+      state.token = null;
+      state.user = null;
+      updateUI();
+    }
+
+    async function handleCheckout(planType) {
+      if (!state.user) {
+        openAuthModal();
+        return;
+      }
+      try {
+        const res = await req("POST", "/functions/v1/BloxMulti-Subscription", { planType });
+        if (res.url) {
+          window.location.href = res.url;
+        } else {
+          alert(res.error || "Unable to start checkout session.");
+        }
+      } catch (e) {
+        alert("Checkout error: " + e.message);
+      }
+    }
+
+    async function openDashboard() {
+      if (!state.user) {
+        if (state.token) {
+          await fetchAccount();
+        }
+        if (!state.user) {
+          openAuthModal();
+          return;
+        }
+      }
+      window.location.href = "dashboard.html";
+    }
+
+    function openAuthModal() { document.getElementById("authModal").classList.add("open"); }
+    function closeAuthModal() {
+      const modal = document.getElementById("authModal");
+      if (modal) modal.classList.remove("open");
+    }
+
+    function toggleDropdown(e) {
+      e.stopPropagation();
+      document.getElementById("userDropdown").classList.toggle("open");
+    }
+    function closeDropdown() {
+      const dd = document.getElementById("userDropdown");
+      if (dd) dd.classList.remove("open");
+    }
+    document.addEventListener("click", () => closeDropdown());
+
+    // ── Carousel Controls ──
+    let currentSlide = 0;
+    const slides = document.querySelectorAll(".carousel-slide");
+    const dots = document.querySelectorAll(".carousel-dot");
+
+    function showSlide(idx) {
+      currentSlide = (idx + slides.length) % slides.length;
+      slides.forEach((s, i) => s.classList.toggle("active", i === currentSlide));
+      dots.forEach((d, i) => d.classList.toggle("active", i === currentSlide));
+    }
+    function moveSlide(dir) { showSlide(currentSlide + dir); }
+    function setSlide(idx) { showSlide(idx); }
+
+    // Init
+    window.addEventListener("DOMContentLoaded", async () => {
+      const hadTokens = parseTokens();
+      await fetchAccount();
+      if (hadTokens && state.user) {
+        closeAuthModal();
+      }
+
+      // Download stats count fetch
+      fetch("https://downloads.noxith.com/count", { cache: "no-store" })
+        .then(r => r.text())
+        .then(t => {
+          const el = document.getElementById("stats-downloads");
+          if (el && t) el.innerText = t.trim();
+        })
+        .catch(() => { });
     });
   </script>
 </body>
