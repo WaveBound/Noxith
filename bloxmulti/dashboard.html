@@ -932,18 +932,17 @@
       justify-content: flex-end;
     }
 
-    /* ── Minimalist Dashboard Auth Modal ── */
+    /* ── Minimalist Dashboard Auth Modal (GPU-Optimized) ── */
     .auth-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      background: rgba(4, 3, 10, 0.85);
       z-index: 20000;
       display: none;
       align-items: center;
       justify-content: center;
       padding: 20px;
+      contain: strict;
     }
 
     .auth-backdrop.open {
@@ -953,20 +952,22 @@
     .auth-card {
       width: 100%;
       max-width: 320px;
-      background: #0d0c1e;
+      background: #0e0c1f;
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       padding: 24px 20px 20px;
       text-align: center;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
       position: relative;
-      animation: modal-pop 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      will-change: transform, opacity;
+      transform: translateZ(0);
+      animation: modal-pop 0.14s ease-out forwards;
     }
 
     @keyframes modal-pop {
       from {
         opacity: 0;
-        transform: scale(0.96) translateY(6px);
+        transform: scale(0.97) translateY(4px);
       }
 
       to {
@@ -1545,7 +1546,12 @@
       </button>
 
       <div class="auth-footer-note">
-        <a href="index.html">← Back to Website</a>
+        By continuing, you agree to our <a href="terms.html" target="_blank">Terms</a> and <a href="privacy.html"
+          target="_blank">Privacy Policy</a>.
+        <div style="margin-top: 10px;">
+          <a href="index.html" style="color: var(--muted); text-decoration: none; font-weight: 500;">← Back to
+            Website</a>
+        </div>
       </div>
     </div>
   </div>
