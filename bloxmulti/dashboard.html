@@ -932,6 +932,137 @@
       justify-content: flex-end;
     }
 
+    /* ── Minimalist Dashboard Auth Modal ── */
+    .auth-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 20000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .auth-backdrop.open {
+      display: flex;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 320px;
+      background: #0d0c1e;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 24px 20px 20px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+      position: relative;
+      animation: modal-pop 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes modal-pop {
+      from {
+        opacity: 0;
+        transform: scale(0.96) translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .auth-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 24px;
+      height: 24px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .auth-close-btn:hover {
+      color: var(--text);
+    }
+
+    .auth-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .auth-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-bottom: 18px;
+    }
+
+    .btn-oauth {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      height: 42px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      margin-top: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-oauth:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .btn-oauth.discord {
+      background: rgba(88, 101, 242, 0.1);
+      border-color: rgba(88, 101, 242, 0.3);
+      color: #fff;
+    }
+
+    .btn-oauth.discord:hover {
+      background: rgba(88, 101, 242, 0.2);
+      border-color: rgba(88, 101, 242, 0.5);
+    }
+
+    .auth-footer-note {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 18px;
+      line-height: 1.4;
+    }
+
+    .auth-footer-note a {
+      color: var(--accent-light);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-footer-note a:hover {
+      text-decoration: underline;
+    }
+
     /* ── Mobile Breakpoints ── */
     @media (max-width: 850px) {
       #app {
@@ -1002,7 +1133,7 @@
             <span>Remote Screen</span>
           </button>
 
-          <!-- Plans Tab: Credit card icon -->
+          <!-- Plans Tab: Credit card / billing icon -->
           <button class="settings-tab" id="tabBtnPlans" onclick="switchTab('plans')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
@@ -1076,7 +1207,6 @@
           </svg>
           Stream
         </button>
-        <!-- Mobile Plans Tab -->
         <button class="mobile-nav-btn" id="mobTabBtnPlans" onclick="switchTab('plans')">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -1288,6 +1418,7 @@
             <div class="panel-title">License &amp; Plan</div>
 
             <div class="stab-plan-card">
+              <!-- Plan Tier Row with compact View Plans chip button -->
               <div class="stab-plan-row">
                 <span class="stab-plan-label">Plan Tier</span>
                 <div style="display:flex; align-items:center; gap:8px;">
@@ -1305,6 +1436,7 @@
               </div>
             </div>
 
+            <!-- Action Buttons -->
             <div style="display:flex; gap:8px; justify-content:flex-start;" id="billingActionsContainer">
               <button class="modal-btn modal-cancel" id="billingCancelBtn" onclick="confirmCancelSub()"
                 style="color:var(--red); border-color:rgba(255,58,92,0.3); display:none; height:32px; font-size:11.5px;">
@@ -1376,6 +1508,46 @@
         </section>
       </div>
     </main>
+  </div>
+
+  <!-- ── MODAL: Sign In (Shown on unauthenticated direct visit) ── -->
+  <div class="auth-backdrop" id="authModal">
+    <div class="auth-card" onclick="event.stopPropagation()">
+      <a href="index.html" class="auth-close-btn" title="Back to Website">✕</a>
+
+      <h3 class="auth-title">Sign In</h3>
+      <p class="auth-desc">Sign in to access your BloxMulti dashboard.</p>
+
+      <button class="btn-oauth google" onclick="signInWith('google')">
+        <svg width="17" height="17" viewBox="0 0 24 24">
+          <path
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            fill="#4285F4" />
+          <path
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            fill="#34A853" />
+          <path
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z"
+            fill="#FBBC05" />
+          <path
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z"
+            fill="#EA4335" />
+        </svg>
+        Continue with Google
+      </button>
+
+      <button class="btn-oauth discord" onclick="signInWith('discord')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="#5865F2">
+          <path
+            d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+        </svg>
+        Continue with Discord
+      </button>
+
+      <div class="auth-footer-note">
+        <a href="index.html">← Back to Website</a>
+      </div>
+    </div>
   </div>
 
   <!-- ── MODAL: Confirm / Alert ── -->
@@ -1496,15 +1668,19 @@
 
     // ── Data Fetching ──
     async function fetchDashboardData() {
+      checkUrlHash();
+
+      // If user has no token saved or returned, prompt for login instead of redirecting
       if (!state.token) {
-        checkUrlHash();
-        if (!state.token) {
-          window.location.href = "index.html";
-          return;
-        }
+        openAuthModal();
+        return;
       }
 
-      await ensureFreshToken();
+      const validToken = await ensureFreshToken();
+      if (!validToken) {
+        openAuthModal();
+        return;
+      }
 
       try {
         // User Info
@@ -1547,6 +1723,7 @@
           console.warn("Referral fetch warning:", e);
         }
 
+        closeAuthModal();
         renderUI();
 
         if (state.subscription.isPremium) {
@@ -1554,7 +1731,7 @@
         }
       } catch (err) {
         console.error("Session invalid:", err);
-        signOut();
+        openAuthModal();
       }
     }
 
@@ -1717,11 +1894,34 @@
       }
     }
 
+    // ── Sign-in Modal & Auth Logic ──
+    function openAuthModal() {
+      const m = document.getElementById("authModal");
+      if (m) m.classList.add("open");
+    }
+
+    function closeAuthModal() {
+      const m = document.getElementById("authModal");
+      if (m) m.classList.remove("open");
+    }
+
+    function signInWith(provider) {
+      if (window.location.protocol === "file:") {
+        alert("OAuth sign-in (Google/Discord) cannot be run from file:/// on your hard drive.\n\nTo test sign-in, upload this file to your website or run a local web server (such as VS Code Live Server)!");
+        return;
+      }
+      const redirect = encodeURIComponent(window.location.origin + window.location.pathname);
+      let scopes = "";
+      if (provider === "google") scopes = "&scopes=email+profile";
+      if (provider === "discord") scopes = "&scopes=identify+email";
+      window.location.href = `https://${SUPABASE_HOST}/auth/v1/authorize?provider=${provider}${scopes}&redirect_to=${redirect}`;
+    }
+
     // ── Checkout & Stripe Integration ──
     async function initiateCheckout(planType) {
       await ensureFreshToken();
       if (!state.token) {
-        showModalAlert("Authentication Required", "Please sign in to upgrade your subscription.");
+        openAuthModal();
         return;
       }
 
@@ -1995,7 +2195,7 @@
       state.refreshToken = null;
       state.user = null;
       stopStream();
-      window.location.href = "index.html";
+      openAuthModal();
     }
 
     window.addEventListener("DOMContentLoaded", () => {
