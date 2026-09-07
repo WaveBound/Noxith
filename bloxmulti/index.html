@@ -25,7 +25,6 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- App-matched font: Inter -->
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
     rel="stylesheet" />
@@ -215,7 +214,7 @@
       transform: translateY(-1px);
     }
 
-    /* ── Clean User Avatar Icon (No Pill, No Name) ── */
+    /* ── Clean User Avatar Icon ── */
     .nav-avatar-btn {
       background: transparent;
       border: none;
@@ -938,7 +937,7 @@
       margin: 4px 0;
     }
 
-    /* ── Simplified Minimalist Sign In Modal (GPU-Optimized) ── */
+    /* ── Simplified Minimalist Sign In Modal ── */
     .auth-backdrop {
       position: fixed;
       inset: 0;
@@ -1141,7 +1140,7 @@
           Sign In
         </button>
 
-        <!-- Clean Avatar Button (No Pill, No Text) -->
+        <!-- Clean Avatar Button -->
         <div style="position:relative; display:flex; align-items:center;">
           <button class="nav-avatar-btn" id="navUserChip" style="display:none;" onclick="toggleDropdown(event)"
             aria-label="Account menu">
@@ -1592,38 +1591,103 @@
     const SUPABASE_HOST = "vsgyclwnbrlticquvcjs.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_-IfvzZudr3vpqkVaaMN6uQ_ycOcDOHn";
 
+    // ── Unified Storage Helper ──
+    const Auth = {
+      getToken() {
+        return localStorage.getItem("sb_access_token") || localStorage.getItem("bm_web_token") || null;
+      },
+      getRefresh() {
+        return localStorage.getItem("sb_refresh_token") || localStorage.getItem("bm_web_refresh") || null;
+      },
+      setTokens(token, refresh) {
+        if (token) {
+          localStorage.setItem("sb_access_token", token);
+          localStorage.removeItem("bm_web_token");
+        } else {
+          localStorage.removeItem("sb_access_token");
+          localStorage.removeItem("bm_web_token");
+        }
+        if (refresh) {
+          localStorage.setItem("sb_refresh_token", refresh);
+          localStorage.removeItem("bm_web_refresh");
+        } else {
+          localStorage.removeItem("sb_refresh_token");
+          localStorage.removeItem("bm_web_refresh");
+        }
+      },
+      clear() {
+        this.setTokens(null, null);
+      },
+      parseHash() {
+        const hash = window.location.hash;
+        if (hash && hash.includes("access_token=")) {
+          const params = new URLSearchParams(hash.substring(1));
+          const token = params.get("access_token");
+          const refresh = params.get("refresh_token");
+          if (token) {
+            this.setTokens(token, refresh || this.getRefresh());
+          }
+          history.replaceState(null, document.title, window.location.pathname + window.location.search);
+          return true;
+        }
+        return false;
+      },
+      async ensureToken() {
+        const token = this.getToken();
+        const refresh = this.getRefresh();
+
+        if (token) {
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+            if (payload.exp && (Date.now() / 1000 + 45) < payload.exp) {
+              return token; // Token is still valid
+            }
+          } catch (_) {}
+        }
+
+        if (refresh) {
+          try {
+            const res = await fetch(`https://${SUPABASE_HOST}/auth/v1/token?grant_type=refresh_token`, {
+              method: "POST",
+              headers: {
+                "apikey": SUPABASE_ANON_KEY,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ refresh_token: refresh })
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data.access_token) {
+                this.setTokens(data.access_token, data.refresh_token || refresh);
+                return data.access_token;
+              }
+            }
+          } catch (err) {
+            console.error("Token refresh failed:", err);
+          }
+        }
+        return null;
+      },
+      signIn(provider) {
+        if (window.location.protocol === "file:") {
+          alert("OAuth sign-in cannot be run from file:///.\nPlease run on a local web server or upload to your hosting.");
+          return;
+        }
+        const redirect = encodeURIComponent(window.location.origin + window.location.pathname);
+        const scopes = provider === "google" ? "&scopes=email+profile" : "&scopes=identify+email";
+        window.location.href = `https://${SUPABASE_HOST}/auth/v1/authorize?provider=${provider}${scopes}&redirect_to=${redirect}`;
+      }
+    };
+
     let state = {
-      token: localStorage.getItem("bm_web_token") || null,
-      refresh: localStorage.getItem("bm_web_refresh") || null,
       user: null,
       sub: { isPrem: false, tier: "free", periodEnd: null }
     };
 
-    let peer = null;
-
-    // Parse OAuth Tokens on return
-    function parseTokens() {
-      const hash = window.location.hash;
-      if (hash && hash.includes("access_token=")) {
-        const params = new URLSearchParams(hash.substring(1));
-        const token = params.get("access_token");
-        const refresh = params.get("refresh_token");
-        if (token) {
-          state.token = token;
-          state.refresh = refresh;
-          localStorage.setItem("bm_web_token", token);
-          if (refresh) localStorage.setItem("bm_web_refresh", refresh);
-        }
-        history.replaceState(null, document.title, window.location.pathname + window.location.search);
-        closeAuthModal();
-        return true;
-      }
-      return false;
-    }
-
     async function req(method, path, body = null) {
+      const token = await Auth.ensureToken();
       const headers = { "apikey": SUPABASE_ANON_KEY, "Content-Type": "application/json" };
-      if (state.token) headers["Authorization"] = `Bearer ${state.token}`;
+      if (token) headers["Authorization"] = `Bearer ${token}`;
       const res = await fetch(`https://${SUPABASE_HOST}${path}`, {
         method,
         headers,
@@ -1634,10 +1698,13 @@
     }
 
     async function fetchAccount() {
-      if (!state.token) {
+      const token = await Auth.ensureToken();
+      if (!token) {
+        state.user = null;
         updateUI();
         return;
       }
+
       try {
         const u = await req("GET", "/auth/v1/user");
         state.user = {
@@ -1647,7 +1714,6 @@
           picture: u.user_metadata?.avatar_url || ""
         };
 
-        // Subscription query
         try {
           const subRes = await req("GET", `/rest/v1/subscriptions?user_id=eq.${u.id}&select=tier,status,current_period_end`);
           if (Array.isArray(subRes) && subRes.length > 0) {
@@ -1658,9 +1724,8 @@
               periodEnd: subRes[0].current_period_end
             };
           }
-        } catch (_) { }
+        } catch (_) {}
 
-        // Automatically close modal when account is verified
         closeAuthModal();
         updateUI();
       } catch (e) {
@@ -1679,9 +1744,8 @@
 
         const circle = document.getElementById("navAvatarCircle");
         if (state.user.picture) circle.innerHTML = `<img src="${state.user.picture}" alt="Avatar">`;
-        else circle.textContent = state.user.name.substring(0, 1).toUpperCase();
+        else circle.textContent = (state.user.name || "U").substring(0, 1).toUpperCase();
 
-        // Dropdown elements
         document.getElementById("dropdownUserName").textContent = state.user.name;
         document.getElementById("dropdownUserEmail").textContent = state.user.email;
       } else {
@@ -1691,27 +1755,18 @@
     }
 
     function signInWith(provider) {
-      if (window.location.protocol === "file:") {
-        alert("OAuth sign-in (Google/Discord) cannot be run from file:/// on your hard drive.\n\nTo test sign-in, upload this file to your website or run a local web server (such as VS Code Live Server)!");
-        return;
-      }
-      const redirect = encodeURIComponent(window.location.origin + window.location.pathname);
-      let scopes = "";
-      if (provider === "google") scopes = "&scopes=email+profile";
-      if (provider === "discord") scopes = "&scopes=identify+email";
-      window.location.href = `https://${SUPABASE_HOST}/auth/v1/authorize?provider=${provider}${scopes}&redirect_to=${redirect}`;
+      Auth.signIn(provider);
     }
 
     function signOut() {
-      localStorage.removeItem("bm_web_token");
-      localStorage.removeItem("bm_web_refresh");
-      state.token = null;
+      Auth.clear();
       state.user = null;
       updateUI();
     }
 
     async function handleCheckout(planType) {
-      if (!state.user) {
+      const token = await Auth.ensureToken();
+      if (!token || !state.user) {
         openAuthModal();
         return;
       }
@@ -1728,14 +1783,10 @@
     }
 
     async function openDashboard() {
-      if (!state.user) {
-        if (state.token) {
-          await fetchAccount();
-        }
-        if (!state.user) {
-          openAuthModal();
-          return;
-        }
+      const token = await Auth.ensureToken();
+      if (!token) {
+        openAuthModal();
+        return;
       }
       window.location.href = "dashboard.html";
     }
@@ -1769,15 +1820,13 @@
     function moveSlide(dir) { showSlide(currentSlide + dir); }
     function setSlide(idx) { showSlide(idx); }
 
-    // Init
     window.addEventListener("DOMContentLoaded", async () => {
-      const hadTokens = parseTokens();
+      const hadTokens = Auth.parseHash();
       await fetchAccount();
       if (hadTokens && state.user) {
         closeAuthModal();
       }
 
-      // Download stats count fetch
       fetch("https://downloads.noxith.com/count", { cache: "no-store" })
         .then(r => r.text())
         .then(t => {

@@ -8,7 +8,6 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- App-matched font: Inter -->
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap"
     rel="stylesheet" />
@@ -540,7 +539,6 @@
       letter-spacing: 0.8px;
     }
 
-    /* ── Plan Badges ── */
     .stab-plan-value.premium {
       color: var(--accent-light);
       background: var(--accent-subtle);
@@ -568,7 +566,6 @@
       justify-content: center;
     }
 
-    /* ── Input Fields ── */
     .input {
       width: 100%;
       background: var(--input-bg);
@@ -586,7 +583,6 @@
       border-color: var(--accent);
     }
 
-    /* ── Buttons ── */
     .modal-btn {
       padding: 8px 15px;
       border-radius: 7px;
@@ -668,7 +664,6 @@
       line-height: 1;
     }
 
-    /* ── Stream Player Layout ── */
     .stream-viewport {
       width: 100%;
       aspect-ratio: 16/9;
@@ -746,7 +741,6 @@
       border-radius: 6px;
     }
 
-    /* ── Plans Tab Grid ── */
     .pricing-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -874,7 +868,6 @@
       margin-top: 10px;
     }
 
-    /* ── Modals & Overlays ── */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -932,7 +925,6 @@
       justify-content: flex-end;
     }
 
-    /* ── Minimalist Dashboard Auth Modal (GPU-Optimized) ── */
     .auth-backdrop {
       position: fixed;
       inset: 0;
@@ -1064,7 +1056,6 @@
       text-decoration: underline;
     }
 
-    /* ── Mobile Breakpoints ── */
     @media (max-width: 850px) {
       #app {
         flex-direction: column;
@@ -1103,10 +1094,9 @@
   <div class="hero-vignette"></div>
 
   <div id="app">
-    <!-- ── Desktop Sidebar ── -->
+    <!-- Desktop Sidebar -->
     <aside class="settings-sidebar">
       <div class="sidebar-top-nav">
-        <!-- Back to Website Link -->
         <a href="index.html" class="sidebar-back-btn">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -1134,7 +1124,6 @@
             <span>Remote Screen</span>
           </button>
 
-          <!-- Plans Tab: Credit card / billing icon -->
           <button class="settings-tab" id="tabBtnPlans" onclick="switchTab('plans')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
@@ -1155,7 +1144,6 @@
         </div>
       </div>
 
-      <!-- Desktop Sidebar Profile Box -->
       <div class="sidebar-user">
         <div class="user-chip">
           <div class="user-chip-av" id="sidebarAvatar">U</div>
@@ -1176,10 +1164,9 @@
       </div>
     </aside>
 
-    <!-- ── Mobile Header ── -->
+    <!-- Mobile Header -->
     <header class="mobile-header">
       <div class="mobile-top-row">
-        <!-- Back to Website Link -->
         <a href="index.html" class="mobile-back-btn">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
             <line x1="19" y1="12" x2="5" y2="12" />
@@ -1209,8 +1196,7 @@
           Stream
         </button>
         <button class="mobile-nav-btn" id="mobTabBtnPlans" onclick="switchTab('plans')">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
             <line x1="1" y1="10" x2="23" y2="10" />
           </svg>
@@ -1226,15 +1212,14 @@
       </div>
     </header>
 
-    <!-- ── Main Workspace ── -->
+    <!-- Main Workspace -->
     <main class="main-viewport">
-      <!-- Desktop Topbar -->
       <header class="dash-topbar">
         <div class="dash-topbar-title" id="pageTitle">Remote Screen Stream</div>
       </header>
 
       <div class="dash-content">
-        <!-- ── TAB 1: REMOTE SCREEN STREAM ── -->
+        <!-- TAB 1: REMOTE SCREEN STREAM -->
         <section class="tab-pane active" id="paneStream">
           <div class="panel">
             <div class="panel-title">
@@ -1247,11 +1232,9 @@
               </div>
             </div>
 
-            <!-- Video Viewport -->
             <div class="stream-viewport" id="streamViewport">
               <video id="remoteVideo" autoplay playsinline></video>
 
-              <!-- Waiting Overlay (Premium active) -->
               <div class="stream-overlay" id="streamWaitingOverlay">
                 <div class="stream-overlay-icon">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -1268,7 +1251,6 @@
                 <div class="stream-id-badge" id="streamOverlayRoomTag">Stream ID: bm-......</div>
               </div>
 
-              <!-- Locked Overlay (Free tier) -->
               <div class="stream-overlay" id="streamLockedOverlay" style="display:none;">
                 <div class="stream-overlay-icon locked">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -1289,7 +1271,6 @@
               </div>
             </div>
 
-            <!-- Stream Action Row -->
             <div id="streamControlsRow"
               style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
               <button class="modal-btn modal-cancel" id="streamReconnectBtn" onclick="autoConnectStream()"
@@ -1313,13 +1294,12 @@
           </div>
         </section>
 
-        <!-- ── TAB 2: PLANS & UPGRADES ── -->
+        <!-- TAB 2: PLANS & UPGRADES -->
         <section class="tab-pane" id="panePlans">
           <div class="panel">
             <div class="panel-title">Available Subscription Plans</div>
 
             <div class="pricing-grid">
-              <!-- Standard -->
               <div class="pricing-card" id="planCardStandard">
                 <div class="pricing-tier-name">Standard</div>
                 <div class="pricing-price">$0</div>
@@ -1341,7 +1321,6 @@
                 <button class="btn-pricing" id="planBtnStandard" disabled>Current Plan</button>
               </div>
 
-              <!-- Monthly Premium -->
               <div class="pricing-card featured" id="planCardMonthly">
                 <div class="pricing-tier-name">Monthly Premium</div>
                 <div class="pricing-price">$3 <span
@@ -1368,7 +1347,6 @@
                 </button>
               </div>
 
-              <!-- Lifetime License -->
               <div class="pricing-card" id="planCardLifetime">
                 <div class="pricing-tier-name">Lifetime License</div>
                 <div class="pricing-price">$15 <span
@@ -1400,9 +1378,8 @@
           </div>
         </section>
 
-        <!-- ── TAB 3: ACCOUNT & BILLING ── -->
+        <!-- TAB 3: ACCOUNT & BILLING -->
         <section class="tab-pane" id="paneAccount">
-          <!-- Account Details -->
           <div class="panel">
             <div class="panel-title">Account Details</div>
             <div class="stab-account-card">
@@ -1414,12 +1391,10 @@
             </div>
           </div>
 
-          <!-- License & Plan Management -->
           <div class="panel">
             <div class="panel-title">License &amp; Plan</div>
 
             <div class="stab-plan-card">
-              <!-- Plan Tier Row with compact View Plans chip button -->
               <div class="stab-plan-row">
                 <span class="stab-plan-label">Plan Tier</span>
                 <div style="display:flex; align-items:center; gap:8px;">
@@ -1437,7 +1412,6 @@
               </div>
             </div>
 
-            <!-- Action Buttons -->
             <div style="display:flex; gap:8px; justify-content:flex-start;" id="billingActionsContainer">
               <button class="modal-btn modal-cancel" id="billingCancelBtn" onclick="confirmCancelSub()"
                 style="color:var(--red); border-color:rgba(255,58,92,0.3); display:none; height:32px; font-size:11.5px;">
@@ -1450,7 +1424,6 @@
             </div>
           </div>
 
-          <!-- Referral Program -->
           <div class="panel">
             <div class="panel-title">
               <span>Your Referral Code</span>
@@ -1469,7 +1442,6 @@
                 style="color:var(--text);">5 free days of Premium</strong>.
             </div>
 
-            <!-- Apply Referral Box -->
             <div id="applyReferralCard"
               style="display:flex; flex-direction:column; gap:8px; margin-top:4px; border-top:1px solid rgba(255,255,255,0.05); padding-top:12px;">
               <div style="font-size:11px; font-weight:700; color:var(--text);">Have a Referral Code?</div>
@@ -1488,7 +1460,6 @@
             </div>
           </div>
 
-          <!-- Community Support & Sign Out -->
           <div class="panel">
             <div class="panel-title">Community &amp; Options</div>
             <div style="display:flex; flex-wrap:wrap; gap:8px;">
@@ -1511,7 +1482,7 @@
     </main>
   </div>
 
-  <!-- ── MODAL: Sign In (Shown on unauthenticated direct visit) ── -->
+  <!-- Sign In Modal -->
   <div class="auth-backdrop" id="authModal">
     <div class="auth-card" onclick="event.stopPropagation()">
       <a href="index.html" class="auth-close-btn" title="Back to Website">✕</a>
@@ -1556,7 +1527,7 @@
     </div>
   </div>
 
-  <!-- ── MODAL: Confirm / Alert ── -->
+  <!-- Confirm / Alert Modal -->
   <div id="confirmModalOverlay" class="modal-overlay">
     <div class="modal">
       <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
@@ -1579,14 +1550,100 @@
     </div>
   </div>
 
-  <!-- ── Javascript Logic ── -->
+  <!-- Javascript Logic -->
   <script>
     const SUPABASE_HOST = "vsgyclwnbrlticquvcjs.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_-IfvzZudr3vpqkVaaMN6uQ_ycOcDOHn";
 
+    // ── Unified Storage Helper (Identical to index.html) ──
+    const Auth = {
+      getToken() {
+        return localStorage.getItem("sb_access_token") || localStorage.getItem("bm_web_token") || null;
+      },
+      getRefresh() {
+        return localStorage.getItem("sb_refresh_token") || localStorage.getItem("bm_web_refresh") || null;
+      },
+      setTokens(token, refresh) {
+        if (token) {
+          localStorage.setItem("sb_access_token", token);
+          localStorage.removeItem("bm_web_token");
+        } else {
+          localStorage.removeItem("sb_access_token");
+          localStorage.removeItem("bm_web_token");
+        }
+        if (refresh) {
+          localStorage.setItem("sb_refresh_token", refresh);
+          localStorage.removeItem("bm_web_refresh");
+        } else {
+          localStorage.removeItem("sb_refresh_token");
+          localStorage.removeItem("bm_web_refresh");
+        }
+      },
+      clear() {
+        this.setTokens(null, null);
+      },
+      parseHash() {
+        const hash = window.location.hash;
+        if (hash && hash.includes("access_token=")) {
+          const params = new URLSearchParams(hash.substring(1));
+          const token = params.get("access_token");
+          const refresh = params.get("refresh_token");
+          if (token) {
+            this.setTokens(token, refresh || this.getRefresh());
+          }
+          history.replaceState(null, document.title, window.location.pathname + window.location.search);
+          return true;
+        }
+        return false;
+      },
+      async ensureToken() {
+        const token = this.getToken();
+        const refresh = this.getRefresh();
+
+        if (token) {
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+            if (payload.exp && (Date.now() / 1000 + 45) < payload.exp) {
+              return token; // Current token still valid
+            }
+          } catch (_) { }
+        }
+
+        if (refresh) {
+          try {
+            const res = await fetch(`https://${SUPABASE_HOST}/auth/v1/token?grant_type=refresh_token`, {
+              method: "POST",
+              headers: {
+                "apikey": SUPABASE_ANON_KEY,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ refresh_token: refresh })
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data.access_token) {
+                this.setTokens(data.access_token, data.refresh_token || refresh);
+                return data.access_token;
+              }
+            }
+          } catch (err) {
+            console.error("Dashboard token refresh failed:", err);
+          }
+        }
+        return null;
+      },
+      signIn(provider) {
+        if (window.location.protocol === "file:") {
+          alert("OAuth sign-in cannot be run from file:///.\nPlease run on a local web server or upload to your website.");
+          return;
+        }
+        const redirect = encodeURIComponent(window.location.origin + window.location.pathname);
+        const scopes = provider === "google" ? "&scopes=email+profile" : "&scopes=identify+email";
+        window.location.href = `https://${SUPABASE_HOST}/auth/v1/authorize?provider=${provider}${scopes}&redirect_to=${redirect}`;
+      }
+    };
+
     let state = {
-      token: localStorage.getItem("sb_access_token") || localStorage.getItem("bm_web_token") || null,
-      refreshToken: localStorage.getItem("sb_refresh_token") || localStorage.getItem("bm_web_refresh") || null,
       user: null,
       subscription: { isPremium: false, tier: 0, renewDate: null, cancelAtPeriodEnd: false, status: "" },
       referral: { referralCode: null, appliedCode: null }
@@ -1622,15 +1679,19 @@
       }
     }
 
-    // ── Supabase & Token Requests ──
+    // ── Requests (Auto-refresh on every call) ──
     async function supabaseRequest(method, path, body = null, useAuth = true) {
+      let token = null;
+      if (useAuth) {
+        token = await Auth.ensureToken();
+        if (!token) throw new Error("Unauthorized");
+      }
+
       const headers = {
         "apikey": SUPABASE_ANON_KEY,
         "Content-Type": "application/json"
       };
-      if (useAuth && state.token) {
-        headers["Authorization"] = `Bearer ${state.token}`;
-      }
+      if (token) headers["Authorization"] = `Bearer ${token}`;
 
       const options = { method, headers };
       if (body) options.body = JSON.stringify(body);
@@ -1643,53 +1704,17 @@
       return res.json();
     }
 
-    async function ensureFreshToken() {
-      if (!state.token) return false;
-      try {
-        const payload = JSON.parse(atob(state.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-        if (payload.exp && (Date.now() / 1000 + 45) < payload.exp) {
-          return true;
-        }
-      } catch (_) { }
-
-      if (!state.refreshToken) return false;
-
-      try {
-        const res = await supabaseRequest("POST", "/auth/v1/token?grant_type=refresh_token", {
-          refresh_token: state.refreshToken
-        }, false);
-
-        if (res && res.access_token) {
-          state.token = res.access_token;
-          state.refreshToken = res.refresh_token;
-          localStorage.setItem("sb_access_token", state.token);
-          localStorage.setItem("sb_refresh_token", state.refreshToken);
-          return true;
-        }
-      } catch (err) {
-        console.error("Token refresh failed:", err);
-      }
-      return false;
-    }
-
     // ── Data Fetching ──
     async function fetchDashboardData() {
-      checkUrlHash();
+      Auth.parseHash();
 
-      // If user has no token saved or returned, prompt for login instead of redirecting
-      if (!state.token) {
-        openAuthModal();
-        return;
-      }
-
-      const validToken = await ensureFreshToken();
+      const validToken = await Auth.ensureToken();
       if (!validToken) {
         openAuthModal();
         return;
       }
 
       try {
-        // User Info
         const u = await supabaseRequest("GET", "/auth/v1/user", null, true);
         state.user = {
           id: u.id,
@@ -1698,7 +1723,6 @@
           picture: u.user_metadata?.avatar_url || ""
         };
 
-        // Subscription Info
         try {
           const subRes = await supabaseRequest("GET", `/rest/v1/subscriptions?user_id=eq.${u.id}&select=tier,status,current_period_end,cancel_at_period_end`, null, true);
           if (Array.isArray(subRes) && subRes.length > 0) {
@@ -1716,7 +1740,6 @@
           console.warn("Subscription check warning:", e);
         }
 
-        // Referral Info
         try {
           const refRes = await supabaseRequest("POST", "/functions/v1/BloxMulti-Referral", { action: "get_referral_info" }, true);
           if (refRes && refRes.ok) {
@@ -1741,22 +1764,6 @@
       }
     }
 
-    function checkUrlHash() {
-      const hash = window.location.hash;
-      if (hash && hash.includes("access_token=")) {
-        const params = new URLSearchParams(hash.substring(1));
-        const token = params.get("access_token");
-        const refresh = params.get("refresh_token");
-        if (token) {
-          state.token = token;
-          state.refreshToken = refresh;
-          localStorage.setItem("sb_access_token", token);
-          if (refresh) localStorage.setItem("sb_refresh_token", refresh);
-        }
-        history.replaceState(null, document.title, window.location.pathname + window.location.search);
-      }
-    }
-
     function getUserStreamKey() {
       if (!state.user || !state.user.id) return "";
       const prefix = (state.user.id.includes("-") ? state.user.id.split("-")[0] : state.user.id.substring(0, 8)).toLowerCase();
@@ -1767,7 +1774,6 @@
     function renderUI() {
       if (!state.user) return;
 
-      // Profile details
       document.getElementById("sidebarUserName").textContent = state.user.name;
       document.getElementById("sidebarUserEmail").textContent = state.user.email;
       document.getElementById("accountName").textContent = state.user.name;
@@ -1793,12 +1799,10 @@
       const billingCancelBtn = document.getElementById("billingCancelBtn");
       const billingResumeBtn = document.getElementById("billingResumeBtn");
 
-      // Stream Elements
       const streamWaitingOverlay = document.getElementById("streamWaitingOverlay");
       const streamLockedOverlay = document.getElementById("streamLockedOverlay");
       const streamControlsRow = document.getElementById("streamControlsRow");
 
-      // Plan Buttons
       const planBtnStandard = document.getElementById("planBtnStandard");
       const planBtnMonthly = document.getElementById("planBtnMonthly");
       const planBtnLifetime = document.getElementById("planBtnLifetime");
@@ -1810,7 +1814,6 @@
         cardTier.className = "stab-plan-value premium";
         billingUpgradeBtn.style.display = "none";
 
-        // Stream unlocked
         streamLockedOverlay.style.display = "none";
         streamControlsRow.style.display = "flex";
 
@@ -1852,7 +1855,6 @@
           }
         }
       } else {
-        // Free Tier: Show white-ish badge and compact View Plans chip
         cardTier.textContent = "FREE";
         cardTier.className = "stab-plan-value free";
         billingUpgradeBtn.style.display = "inline-flex";
@@ -1861,7 +1863,6 @@
         billingCancelBtn.style.display = "none";
         billingResumeBtn.style.display = "none";
 
-        // Stream Locked
         streamWaitingOverlay.style.display = "none";
         streamLockedOverlay.style.display = "flex";
         streamControlsRow.style.display = "none";
@@ -1874,7 +1875,6 @@
         planBtnLifetime.textContent = "Get Lifetime ($15)";
       }
 
-      // Referral Section
       const refCodeBox = document.getElementById("referralCodeBox");
       const applyCard = document.getElementById("applyReferralCard");
       const appliedBanner = document.getElementById("appliedReferralBanner");
@@ -1892,7 +1892,6 @@
         appliedBanner.style.display = "none";
       }
 
-      // Display Stream ID Tags with bm- prefix
       const streamKey = getUserStreamKey();
       if (streamKey) {
         document.getElementById("streamRoomBadge").textContent = `Room: ${streamKey}`;
@@ -1900,7 +1899,7 @@
       }
     }
 
-    // ── Sign-in Modal & Auth Logic ──
+    // ── Auth Modal & OAuth ──
     function openAuthModal() {
       const m = document.getElementById("authModal");
       if (m) m.classList.add("open");
@@ -1912,21 +1911,13 @@
     }
 
     function signInWith(provider) {
-      if (window.location.protocol === "file:") {
-        alert("OAuth sign-in (Google/Discord) cannot be run from file:/// on your hard drive.\n\nTo test sign-in, upload this file to your website or run a local web server (such as VS Code Live Server)!");
-        return;
-      }
-      const redirect = encodeURIComponent(window.location.origin + window.location.pathname);
-      let scopes = "";
-      if (provider === "google") scopes = "&scopes=email+profile";
-      if (provider === "discord") scopes = "&scopes=identify+email";
-      window.location.href = `https://${SUPABASE_HOST}/auth/v1/authorize?provider=${provider}${scopes}&redirect_to=${redirect}`;
+      Auth.signIn(provider);
     }
 
-    // ── Checkout & Stripe Integration ──
+    // ── Checkout & Stripe ──
     async function initiateCheckout(planType) {
-      await ensureFreshToken();
-      if (!state.token) {
+      const token = await Auth.ensureToken();
+      if (!token) {
         openAuthModal();
         return;
       }
@@ -2193,12 +2184,7 @@
     });
 
     function signOut() {
-      localStorage.removeItem("sb_access_token");
-      localStorage.removeItem("sb_refresh_token");
-      localStorage.removeItem("bm_web_token");
-      localStorage.removeItem("bm_web_refresh");
-      state.token = null;
-      state.refreshToken = null;
+      Auth.clear();
       state.user = null;
       stopStream();
       openAuthModal();
