@@ -429,12 +429,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     if (breakdown.royalRivalry) parts.push({ label: "Royal Rivalry (Max Capacity)", pct: "50%" });
     if (breakdown.awakenedPride) parts.push({ label: "Awakened Pride (Transformation)", pct: "15%" });
     if (breakdown.isSovereign && breakdown.sovereignBossActive) parts.push({ label: "Nine Tailed Fox Djinn (Boss in Range)", pct: "50%" });
-    if (breakdown.is5thGodHand && (breakdown.markedEnemies || 0) > 0) {
-      const hasRelic = (breakdown.relics || []).some(r => r.name === "Orb of Causality") || breakdown.hasOrbOfCausality;
-      const pctPerMark = hasRelic ? 5 : 2.5;
-      const totalPct = pctPerMark * breakdown.markedEnemies;
-      parts.push({ label: `Mark Of Fate (×${breakdown.markedEnemies} Marked)`, pct: `${totalPct}%` });
-    }
+
 
     dmgRowsHtml += `
       <div class="dps-breakdown-row step-indented">
@@ -724,13 +719,13 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
   }
 
   if (breakdown.is5thGodHand && (breakdown.markedEnemies || 0) > 0) {
-    const hasRelic = (relics || []).some(r => r.name === "Orb of Causality") || breakdown.hasOrbOfCausality;
+    const hasRelic = (breakdown.relics || []).some(r => r.name === "Orb of Causality") || breakdown.hasOrbOfCausality;
     const rngBonus = (breakdown.markedEnemies || 0) * (hasRelic ? 0.025 : 0.01);
     rngAccum = rngAccum * (1 + rngBonus);
     rngRowsHtml += `
       <div class="dps-breakdown-row step-indented">
         <div class="dps-row-label-wrap">
-          <span class="dps-row-num">6</span>
+          <span class="dps-row-num">7</span>
           <span class="dps-row-lbl">Mark Of Fate (${breakdown.markedEnemies} Marked &times; +${hasRelic ? '2.5%' : '1%'} Range)</span>
         </div>
         <span class="dps-row-val font-mono"><span class="dps-mult-tag">×${(1 + rngBonus).toFixed(3)}</span>${rngAccum.toFixed(1)}</span>
@@ -1659,7 +1654,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           const meterStacks = entry.fatedMeter !== undefined ? entry.fatedMeter : 34;
           const rawMeterPct = meterStacks * 5;
           const meterMult = entry.distortionMeterMult || (1 + meterStacks * 0.05);
-          const relicMult = entry.relic3rdAttackMult || (hasRelic ? 1.20 : 1.05);
+          const relicMult = entry.relic3rdAttackMult !== undefined ? entry.relic3rdAttackMult : 1.0;
           const rawDistortionDmg = (breakdown.effDamage || 0) * 0.50 * meterMult * relicMult;
           const avgDistortionHit = entry.distortionDamage || (rawDistortionDmg * critMult);
           const interval = entry.intervalSpa || (3 * effSpaVal);
@@ -1668,7 +1663,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
 
           return `
             <div class="dps-breakdown-row">
-              <span class="dps-row-lbl">Passive: Eclipse Distortion (${hasRelic ? 'Orb of Causality 1.20x' : 'Mark Of Fate 1.05x'})</span>
+              <span class="dps-row-lbl">Passive: Eclipse Distortion${relicMult > 1.0 ? ` (${hasRelic ? 'Orb of Causality' : 'Mark Of Fate'})` : ''}</span>
               <span class="dps-row-val font-mono">Every 3 Attacks (${interval.toFixed(2)}s)</span>
             </div>
             <div class="dps-breakdown-row step-indented">
@@ -1679,10 +1674,17 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
               <span class="dps-row-lbl">Fated Meter Raw Multiplier (${meterStacks} stacks &times; +5%)</span>
               <span class="dps-row-val font-mono color-buff">+${rawMeterPct}% (${meterMult.toFixed(2)}x)</span>
             </div>
+            ${relicMult > 1.0 ? `
             <div class="dps-breakdown-row step-indented">
-              <span class="dps-row-lbl">3rd Attack Relic / Mark Boost</span>
+              <span class="dps-row-lbl">3rd Attack Mark Boost (${entry.markedEnemies || breakdown.markedEnemies || 0} Marked)</span>
               <span class="dps-row-val font-mono color-buff">&times;${relicMult.toFixed(2)}x (${hasRelic ? 'Orb of Causality' : 'Mark Of Fate'})</span>
             </div>
+            ` : `
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">3rd Attack Mark Boost</span>
+              <span class="dps-row-val font-mono color-dim">&times;1.00x (0 Marked)</span>
+            </div>
+            `}
             <div class="dps-breakdown-row step-indented">
               <span class="dps-row-lbl">Total Distortion Hit with Crit (&times;${critMult.toFixed(2)})</span>
               <span class="dps-row-val font-mono color-crit font-bold">${Math.round(avgDistortionHit).toLocaleString()} DMG</span>
@@ -1696,7 +1698,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
 
         if (entry.passiveType === "eclipse") {
           const hasRelic = !!entry.hasOrbOfCausality;
-          const relicMult = entry.relic3rdAttackMult || (hasRelic ? 1.20 : 1.05);
+          const relicMult = entry.relic3rdAttackMult !== undefined ? entry.relic3rdAttackMult : 1.0;
           const interval = entry.intervalSpa || (3 * effSpaVal);
           const singleDps = entry.dps || 0;
           const fieldDps = singleDps * placementCount;
@@ -1715,10 +1717,17 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
               <span class="dps-row-lbl">Base Eclipse DMG (5.0&times; Base Hit)</span>
               <span class="dps-row-val font-mono">${Math.round((breakdown.effDamage || 0) * 5.0).toLocaleString()} DMG</span>
             </div>
+            ${relicMult > 1.0 ? `
             <div class="dps-breakdown-row step-indented">
-              <span class="dps-row-lbl">3rd Attack Relic / Mark Boost</span>
+              <span class="dps-row-lbl">3rd Attack Mark Boost (${entry.markedEnemies || breakdown.markedEnemies || 0} Marked)</span>
               <span class="dps-row-val font-mono color-buff">&times;${relicMult.toFixed(2)}x (${hasRelic ? 'Orb of Causality' : 'Mark Of Fate'})</span>
             </div>
+            ` : `
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">3rd Attack Mark Boost</span>
+              <span class="dps-row-val font-mono color-dim">&times;1.00x (0 Marked)</span>
+            </div>
+            `}
             <div class="dps-breakdown-row step-indented">
               <span class="dps-row-lbl">Total Eclipse Hit with Crit (&times;${critMult.toFixed(2)})</span>
               <span class="dps-row-val font-mono color-crit font-bold">${Math.round(eclipseTotalDmg).toLocaleString()} DMG</span>
@@ -1904,6 +1913,12 @@ export async function DpsCard(unit, options = {}) {
   let ironWolfExtraSpill = isIronWolf ? !!(unit.ironWolfExtraSpill) : false;
   let fatedMeter = is5thGodHand ? Math.max(0, Math.min(35, parseInt(unit.fatedMeter !== undefined ? unit.fatedMeter : 34, 10) || 0)) : 0;
   let markedEnemies = is5thGodHand ? Math.max(0, parseInt(unit.markedEnemies !== undefined ? unit.markedEnemies : 0, 10) || 0) : 0;
+  const hasOrbOfCausality = is5thGodHand && (
+    unit.selectedDpsRelic === "Orb of Causality" ||
+    unit.relic?.name === "Orb of Causality" ||
+    unit.recommendedEquips?.unitEquip === "Orb of Causality" ||
+    (unit.relics || []).some(r => r.name === "Orb of Causality")
+  );
   if (isSovereign) {
     unit.sovereignBossActive = sovereignBossActive;
     unit.sovereignDjinnJudgmentActive = sovereignDjinnJudgmentActive;
@@ -2210,7 +2225,7 @@ export async function DpsCard(unit, options = {}) {
           </div>
           <div class="dps-control-stepper">
             <span class="dps-stepper-lbl">Marked:</span>
-            <span id="gh-marked-badge-${unit.id}" class="dps-stepper-sub color-buff font-mono">(+${(markedEnemies * 5).toFixed(0)}% DMG)</span>
+            <span id="gh-marked-badge-${unit.id}" class="dps-stepper-sub color-buff font-mono">(+${(markedEnemies * (hasOrbOfCausality ? 5 : 2.5)).toFixed(1)}% DMG)</span>
             <input type="text" inputmode="numeric" pattern="[0-9]*" id="gh-marked-input-${unit.id}" value="${markedEnemies}" class="dps-stepper-input" style="width:32px" />
           </div>
           <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
@@ -2675,7 +2690,22 @@ export async function DpsCard(unit, options = {}) {
   ghMeterInput?.addEventListener("keydown", (e) => {
     if (e.key === "Enter") { e.preventDefault(); commitGhMeter(); ghMeterInput.blur(); }
   });
+  ghMeterInput?.addEventListener("blur", commitGhMeter);
   ghMeterInput?.addEventListener("change", commitGhMeter);
+  ghMeterInput?.addEventListener("input", () => {
+    const raw = ghMeterInput.value.replace(/[^\d]/g, "");
+    if (ghMeterInput.value !== raw) ghMeterInput.value = raw;
+    if (raw === "") return;
+    const val = Math.max(0, Math.min(35, parseInt(raw, 10) || 0));
+    if (ghMeterBadge) ghMeterBadge.textContent = `(${getGhMeterBadgeLabel(val)})`;
+    if (fatedMeter !== val) {
+      fatedMeter = val;
+      unit.fatedMeter = fatedMeter;
+      saveUnitSetting(unit.id, "fatedMeter", fatedMeter);
+      window.dispatchEvent(new CustomEvent("dps-value-changed"));
+      renderCalculations();
+    }
+  });
 
   const ghMarkedInput = card.querySelector(`#gh-marked-input-${unit.id}`);
   const ghMarkedBadge = card.querySelector(`#gh-marked-badge-${unit.id}`);
@@ -2685,7 +2715,8 @@ export async function DpsCard(unit, options = {}) {
     ghMarkedInput.value = ghMarkedInput.value.replace(/[^\d]/g, "");
     const val = Math.max(0, parseInt(ghMarkedInput.value || "0", 10) || 0);
     ghMarkedInput.value = String(val);
-    if (ghMarkedBadge) ghMarkedBadge.textContent = `(+${(val * 5).toFixed(0)}% DMG)`;
+    const pctPerMark = hasOrbOfCausality ? 5 : 2.5;
+    if (ghMarkedBadge) ghMarkedBadge.textContent = `(+${(val * pctPerMark).toFixed(1)}% DMG)`;
     if (markedEnemies !== val) {
       markedEnemies = val;
       unit.markedEnemies = markedEnemies;
@@ -2698,7 +2729,23 @@ export async function DpsCard(unit, options = {}) {
   ghMarkedInput?.addEventListener("keydown", (e) => {
     if (e.key === "Enter") { e.preventDefault(); commitGhMarked(); ghMarkedInput.blur(); }
   });
+  ghMarkedInput?.addEventListener("blur", commitGhMarked);
   ghMarkedInput?.addEventListener("change", commitGhMarked);
+  ghMarkedInput?.addEventListener("input", () => {
+    const raw = ghMarkedInput.value.replace(/[^\d]/g, "");
+    if (ghMarkedInput.value !== raw) ghMarkedInput.value = raw;
+    if (raw === "") return;
+    const val = Math.max(0, parseInt(raw, 10) || 0);
+    const pctPerMark = hasOrbOfCausality ? 5 : 2.5;
+    if (ghMarkedBadge) ghMarkedBadge.textContent = `(+${(val * pctPerMark).toFixed(1)}% DMG)`;
+    if (markedEnemies !== val) {
+      markedEnemies = val;
+      unit.markedEnemies = markedEnemies;
+      saveUnitSetting(unit.id, "markedEnemies", markedEnemies);
+      window.dispatchEvent(new CustomEvent("dps-value-changed"));
+      renderCalculations();
+    }
+  });
 
   const prodigyStatusBadge = card.querySelector(`#prodigy-status-badge-${unit.id}`);
 
