@@ -69,6 +69,8 @@ const UNIT_NAME_MAP = {
   "watermagescholar": "Water Mage (Scholar)",
   "SandAlligator": "Sand (Alligator)",
   "sandalligator": "Sand (Alligator)",
+  "IronWolfStruggler": "Iron Wolf (Struggler)",
+  "ironwolfstruggler": "Iron Wolf (Struggler)",
 };
 
 const rawRelics = [
@@ -317,6 +319,12 @@ const rawRelics = [
     name: "Poison Hook",
     image: relicImgByName("Poison Hook"),
     unitEquip: "Sand (Alligator)",
+  },
+  {
+    id: "relic-demonslayer",
+    name: "Demonslayer",
+    image: relicImgByName("Demonslayer"),
+    unitEquip: "IronWolfStruggler",
   },
 ];
 

@@ -413,6 +413,17 @@ export const relicStats = {
             desc: `<b>Desert Storm</b> appears at this unit's location<br><b>Desert Storm</b> will:<br>- Increase <b>5%</b> in size every <b>1</b> seconds (Capacity: <b>100%</b>)<br>- Apply <b>Sandstorm</b> to enemies inside<br>After <b>Desert Storm</b> has been at <b>100%</b> for <b>14</b> seconds:<br>- Reset <b>Desert Storm</b> size to <b>10%</b>`,
         },
     },
+
+    "Demonslayer": {
+        stats: [
+            { damage: { min: "+10%", max: "+10%" } },
+            { range: { min: "+5%", max: "+5%" } },
+        ],
+        passive: {
+            name: "Crimson Spill",
+            desc: `When an enemy that have been inflicted with <b>Bleed</b> at least <b>1</b> time dies:<br>- Leave <b>1</b> <b>Crimson Spill</b> on the ground for <b>6</b> seconds<br><br><b>Crimson Spill</b> will apply <b>1</b> stack of <b>Bleed</b> every <b>3</b> seconds.<br>Only <b>2</b> non-permanent <b>Crimson Spill</b> may exist at a time.`,
+        },
+    },
 };
 
 export function getRelicStatsByName(name) {

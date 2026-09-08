@@ -23,6 +23,7 @@ import lightninggodovercharged from "./units/lightninggodovercharged.js";
 import sharkfangabyssal from "./units/sharkfangabyssal.js";
 import watermagescholar from "./units/watermagescholar.js";
 import sandalligator from "./units/sandalligator.js";
+import ironwolfstruggler from "./units/ironwolfstruggler.js";
 
 import { getRelicStatsByName } from "./relicstats.js";
 import { relicImgByName } from "../icons/icons.js";
@@ -53,6 +54,7 @@ const rawUnits = [
   sharkfangabyssal,
   watermagescholar,
   sandalligator,
+  ironwolfstruggler,
 ];
 
 function formatRange(v) {

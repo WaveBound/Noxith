@@ -262,6 +262,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isLightningGod = unit && (unit.id === "lightninggodovercharged" || (unit.name && unit.name.includes("Lightning God (Overcharged)")));
   const isSharkfang = unit && (unit.id === "sharkfangabyssal" || (unit.name && unit.name.includes("Sharkfang")));
   const isSandAlligator = unit && (unit.id === "sandalligator" || (unit.name && unit.name.includes("Sand (Alligator)")));
+  const isIronWolf = unit && (unit.id === "ironwolfstruggler" || (unit.name && unit.name.includes("Iron Wolf (Struggler)")));
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
@@ -1201,6 +1202,26 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     dotDamage = singleStackPoisonDmg * dotIntervalMultiplier;
     effDotMult = poisonBaseMult * goldenHookMult * stormBonusMult * poisonTraitRelicMult * dotIntervalMultiplier;
     unitDoTDPS = dotDamage / dotIntervalSPA;
+  } else if (isIronWolf) {
+    // Sacrificial Brand: each hit applies Bleed then instantly procs all stacks as True Damage.
+    // Base: 3 full Bleed cycles per attack = 1.05x damage.
+    // Perm Crimson Spill ×2: +4 stacks × 0.35x = +1.40x per attack.
+    // Extra Crimson Spill ×2 (total ×4): +4 more stacks × 0.35x = +1.40x more.
+    unitDirectDPS = avgHitDamage / effSpa;
+
+    const ironWolfPermSpill = !!(unit.ironWolfPermSpill);
+    const ironWolfExtraSpill = !!(unit.ironWolfExtraSpill);
+    const sacrificialBrandBase = 1.05;
+    const puddleExtra = (ironWolfPermSpill ? 1.40 : 0) + (ironWolfExtraSpill ? 1.40 : 0);
+    const sacrificialBrandMult = sacrificialBrandBase + puddleExtra;
+    const bleedTraitRelicMult = (1 + (trait.dotBonus || 0)) * (1 + relicDotBonus);
+    const sacrificialBrandDmg = effDamage * sacrificialBrandMult * bleedTraitRelicMult;
+    unitDoTDPS = sacrificialBrandDmg / effSpa;
+
+    base.dotName = "Bleed";
+    base.dotMultiplier = sacrificialBrandMult * bleedTraitRelicMult;
+    dotDamage = sacrificialBrandDmg;
+    dotIntervalSPA = effSpa;
   } else {
     unitDirectDPS = avgHitDamage / effSpa;
     unitDoTDPS = (base.dotMultiplier || 0) > 0 ? (dotDamage / dotIntervalSPA) : 0;
@@ -1491,5 +1512,8 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     lgEnemies: isLightningGod ? lgEnemies : 10,
     isSharkfang,
     sfBurnStacks: isSharkfang ? Math.max(0, Math.min(3, parseInt(unit.sfBurnStacks !== undefined ? unit.sfBurnStacks : 0, 10) || 0)) : 0,
+    isIronWolf,
+    ironWolfPermSpill: isIronWolf ? !!(unit.ironWolfPermSpill) : false,
+    ironWolfExtraSpill: isIronWolf ? !!(unit.ironWolfExtraSpill) : false,
   };
 }

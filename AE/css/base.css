@@ -529,6 +529,28 @@ img {
   --kw-color: #d20000;
 }
 
+.p-kw.p-crimson-spill>span,
+.p-crimson-spill-text {
+  --kw-color: #d20000;
+  color: #d20000 !important;
+  -webkit-text-fill-color: #d20000 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #d20000 !important;
+  text-underline-offset: 2px !important;
+}
+
+
+.p-kw.p-true-damage>span {
+  --kw-color: #dadada;
+  color: #dadada !important;
+  -webkit-text-fill-color: #dadada !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #dadada !important;
+  text-underline-offset: 2px !important;
+}
+
 .p-kw.p-crimson-mark>span,
 .p-kw.p-crimson-marked>span,
 .p-kw.p-crimson-pool>span,

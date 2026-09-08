@@ -79,6 +79,7 @@ export const RELIC_ICONS = {
     "relic-storm-trident": toAbsoluteUrl("icons/relics/StormTrident.png"),
     "relic-spirit-kings-blade": toAbsoluteUrl("icons/relics/SpiritKingsBlade.png"),
     "relic-poison-hook": toAbsoluteUrl("icons/relics/PoisonHook.png"),
+    "relic-demonslayer": toAbsoluteUrl("icons/relics/Demonslayer.png"),
 };
 
 export function relicImg(id) {
@@ -136,6 +137,7 @@ const RELIC_NAME_TO_IMG = {
     "SpiritKingsBlade": toAbsoluteUrl("icons/relics/SpiritKingsBlade.png"),
     "Poison Hook": toAbsoluteUrl("icons/relics/PoisonHook.png"),
     "PoisonHook": toAbsoluteUrl("icons/relics/PoisonHook.png"),
+    "Demonslayer": toAbsoluteUrl("icons/relics/Demonslayer.png"),
 };
 
 export function relicImgByName(name) {
@@ -177,6 +179,8 @@ export function formatPassiveText(text) {
     out = out.replace(/Skyward[\s\xA0]+Slash/gi, "@@SS@@");
     out = out.replace(/Way[\s\xA0]+of[\s\xA0]+the[\s\xA0]+Sword/gi, "@@WSW@@");
 
+    out = out.replace(/Crimson[\s\xA0]+Spill/gi, "@@CSPILL@@");
+    out = out.replace(/True[\s\xA0]+Damage/gi, "@@TDMG@@");
     out = out.replace(/Piercing[\s\xA0]+Crimson/gi, "@@PC@@");
     out = out.replace(/Crimson[\s\xA0]+Marked/gi, "@@CMD@@");
     out = out.replace(/Crimson[\s\xA0]+Mark/gi, "@@CMK@@");
@@ -314,6 +318,8 @@ export function formatPassiveText(text) {
     out = out.replace(/@@WSW@@/g, `<span class="p-kw p-atk-name"><span>Way of the Sword</span></span>`);
 
     out = out.replace(/@@PC@@/g, `<span class="p-kw p-piercing-crimson"><span>Piercing Crimson</span></span>`);
+    out = out.replace(/@@CSPILL@@/g, `<span class="p-kw p-crimson-spill"><span class="p-crimson-spill-text">Crimson Spill</span></span>`);
+    out = out.replace(/@@TDMG@@/g, `<span class="p-kw p-true-damage"><span>True Damage</span></span>`);
     out = out.replace(/@@CMD@@/g, `<span class="p-kw p-crimson-marked">${iconImgTag(STATUS_ICONS.crimsonmark)}<span>Crimson Marked</span></span>`);
     out = out.replace(/@@CMK@@/g, `<span class="p-kw p-crimson-mark">${iconImgTag(STATUS_ICONS.crimsonmark)}<span>Crimson Mark</span></span>`);
     out = out.replace(/@@CPL@@/g, `<span class="p-kw p-crimson-pool"><span>Crimson Pool</span></span>`);
@@ -527,6 +533,8 @@ if (typeof window !== "undefined") {
         if (target.classList.contains("p-ground-eruption")) return toAbsoluteUrl("icons/info/GroundEruptioninfo.png");
         if (target.classList.contains("p-desert-storm")) return toAbsoluteUrl("icons/info/DesertStorminfo.png");
         if (target.classList.contains("p-sandstorm")) return toAbsoluteUrl("icons/info/Sandstorminfo.png");
+        if (target.classList.contains("p-crimson-spill")) return toAbsoluteUrl("icons/info/CrimsonSpillinfo.png");
+        if (target.classList.contains("p-true-damage")) return toAbsoluteUrl("icons/info/TrueDamageinfo.png");
         return "";
     }
 

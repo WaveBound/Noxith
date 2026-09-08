@@ -104,6 +104,8 @@ export function applySavedSettingsToUnit(unit) {
   if (saved.sfBurnStacks !== undefined) unit.sfBurnStacks = saved.sfBurnStacks;
   if (saved.sandPoisonStacks !== undefined) unit.sandPoisonStacks = saved.sandPoisonStacks;
   if (saved.sandPoisonBugged !== undefined) unit.sandPoisonBugged = saved.sandPoisonBugged;
+  if (saved.ironWolfPermSpill !== undefined) unit.ironWolfPermSpill = saved.ironWolfPermSpill;
+  if (saved.ironWolfExtraSpill !== undefined) unit.ironWolfExtraSpill = saved.ironWolfExtraSpill;
 
   return unit;
 }

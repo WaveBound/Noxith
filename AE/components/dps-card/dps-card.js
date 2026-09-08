@@ -52,6 +52,7 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
   const isCursedImmortal = unit.id === "cursedimmortalblacksun" || (unit.name && unit.name.includes("Cursed Immortal"));
   const isHeadCaptain = unit.id === "headcaptainchar" || (unit.name && unit.name.includes("Head Captain"));
   const isSandAlligator = unit.id === "sandalligator" || (unit.name && unit.name.includes("Sand (Alligator)"));
+  const isIronWolf = unit.id === "ironwolfstruggler" || (unit.name && unit.name.includes("Iron Wolf (Struggler)"));
 
   combos.forEach(([eq1, eq2]) => {
     const mockUnit = {
@@ -88,6 +89,8 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       lgEnemies: options.lgEnemies !== undefined ? options.lgEnemies : (unit.lgEnemies !== undefined ? unit.lgEnemies : 10),
       sfBurnStacks: options.sfBurnStacks !== undefined ? options.sfBurnStacks : (unit.sfBurnStacks !== undefined ? unit.sfBurnStacks : 0),
       sandPoisonStacks: options.sandPoisonStacks !== undefined ? options.sandPoisonStacks : (unit.sandPoisonStacks !== undefined ? unit.sandPoisonStacks : (isSandAlligator ? 6 : 0)),
+      ironWolfPermSpill: options.ironWolfPermSpill !== undefined ? !!options.ironWolfPermSpill : !!(unit.ironWolfPermSpill),
+      ironWolfExtraSpill: options.ironWolfExtraSpill !== undefined ? !!options.ironWolfExtraSpill : !!(unit.ironWolfExtraSpill),
       sandPoisonBugged: options.sandPoisonBugged !== undefined ? options.sandPoisonBugged : (unit.sandPoisonBugged !== undefined ? unit.sandPoisonBugged : true),
     };
 
@@ -1040,15 +1043,15 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       <!-- ── SECTION 5: DOT & STATUS CALCULATIONS (IF ACTIVE) ── -->
       ${((rawBase.dotMultiplier || 0) > 0 || breakdown.demonicPresence || breakdown.isCrimson || breakdown.isLightningGod || (breakdown.unitDoTDPS || 0) > 0) ? `
       <div class="dps-section card-dot-theme">
-        <div class="dps-section-hd color-dot">5. ${breakdown.isDarkMage ? "Passive Damage Calculation" : breakdown.isEighthSword ? "Demonic Presence Calculation" : breakdown.isCrow ? "Black Fire DoT Calculation" : breakdown.isCrimson ? "Crimson Status Effects & Bleed" : breakdown.isHeadCaptain ? "Burn DoT Calculation (Passive West)" : breakdown.isLightningGod ? "Electricity Status Effect Calculation" : breakdown.isSandAlligator ? (breakdown.sandPoisonBugged ? "Poison DoT Calculation (Bugged 0.3x)" : "Poison DoT Calculation (Fixed 3.3x)") : `DoT Calculation (${formatPassiveText(rawBase.dotName || "Status")})`}</div>
+        <div class="dps-section-hd color-dot">5. ${breakdown.isDarkMage ? "Passive Damage Calculation" : breakdown.isEighthSword ? "Demonic Presence Calculation" : breakdown.isCrow ? "Black Fire DoT Calculation" : breakdown.isCrimson ? "Crimson Status Effects & Bleed" : breakdown.isHeadCaptain ? "Burn DoT Calculation (Passive West)" : breakdown.isLightningGod ? "Electricity Status Effect Calculation" : breakdown.isSandAlligator ? (breakdown.sandPoisonBugged ? "Poison DoT Calculation (Bugged 0.3x)" : "Poison DoT Calculation (Fixed 3.3x)") : breakdown.isIronWolf ? "Bleed DoT Calculation" : `DoT Calculation (${formatPassiveText(rawBase.dotName || "Status")})`}</div>
         <div class="dps-breakdown-list">
           <div class="dps-breakdown-row">
             <span class="dps-row-lbl">Status Effect</span>
-            <span class="dps-row-val">${formatPassiveText(rawBase.dotName || "Electricity")}</span>
+            <span class="dps-row-val">${formatPassiveText(rawBase.dotName || (breakdown.isIronWolf ? "Bleed" : "Electricity"))}</span>
           </div>
           <div class="dps-breakdown-row">
             <span class="dps-row-lbl">Base Multiplier</span>
-            <span class="dps-row-val font-mono">${breakdown.isEighthSword ? "15% Current DMG (Can Crit)" : breakdown.isCrow ? "2.00x Base Hit in 12 ticks over 12s" : breakdown.isCrimson ? "Bleed: 0.65x | Explode: 15% | Pools: 10%/2s" : breakdown.isHeadCaptain ? "0.50x Base Hit in 4 ticks over 4s" : breakdown.isLightningGod ? "0.15x Base Hit (+150% from Avg 30 Voltage = 0.375x)" : breakdown.isSandAlligator ? (breakdown.sandPoisonBugged ? "0.30x Base Hit (In-Game Bugged: 6 ticks × 0.05x)" : "3.30x Base Hit (Fixed: 6 ticks × 0.55x)") : `${(rawBase.dotMultiplier || 0).toFixed(2)}x Base Hit`}</span>
+            <span class="dps-row-val font-mono">${breakdown.isEighthSword ? "15% Current DMG (Can Crit)" : breakdown.isCrow ? "2.00x Base Hit in 12 ticks over 12s" : breakdown.isCrimson ? "Bleed: 0.65x | Explode: 15% | Pools: 10%/2s" : breakdown.isHeadCaptain ? "0.50x Base Hit in 4 ticks over 4s" : breakdown.isLightningGod ? "0.15x Base Hit (+150% from Avg 30 Voltage = 0.375x)" : breakdown.isSandAlligator ? (breakdown.sandPoisonBugged ? "0.30x Base Hit (In-Game Bugged: 6 ticks × 0.05x)" : "3.30x Base Hit (Fixed: 6 ticks × 0.55x)") : breakdown.isIronWolf ? "1.05x Base Hit (3 Bleed Cycles × 0.35x)" : `${(rawBase.dotMultiplier || 0).toFixed(2)}x Base Hit`}</span>
           </div>
           ${breakdown.isEighthSword ? `
             <div class="dps-breakdown-row step-indented">
@@ -1135,14 +1138,14 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
               <span class="dps-highlight-val font-mono color-dot">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
             </div>
           ` : breakdown.isSandAlligator ? (() => {
-            const effSpaVal = breakdown.effSpa || 1;
-            const stackCount = breakdown.sandPoisonStacks !== undefined ? breakdown.sandPoisonStacks : 6;
-            const stormPct = stackCount * 25;
-            const isBugged = breakdown.sandPoisonBugged !== undefined ? !!breakdown.sandPoisonBugged : true;
-            const basePoisonMult = isBugged ? 0.3 : 3.3;
-            const overlapCount = breakdown.dotIntervalMultiplier || Math.max(1, Math.ceil(6.0 / effSpaVal));
-            const singleStackDmg = breakdown.singleStackPoisonDmg || Math.round((breakdown.effDamage || 0) * basePoisonMult * 1.15 * (1 + stackCount * 0.25));
-            return `
+        const effSpaVal = breakdown.effSpa || 1;
+        const stackCount = breakdown.sandPoisonStacks !== undefined ? breakdown.sandPoisonStacks : 6;
+        const stormPct = stackCount * 25;
+        const isBugged = breakdown.sandPoisonBugged !== undefined ? !!breakdown.sandPoisonBugged : true;
+        const basePoisonMult = isBugged ? 0.3 : 3.3;
+        const overlapCount = breakdown.dotIntervalMultiplier || Math.max(1, Math.ceil(6.0 / effSpaVal));
+        const singleStackDmg = breakdown.singleStackPoisonDmg || Math.round((breakdown.effDamage || 0) * basePoisonMult * 1.15 * (1 + stackCount * 0.25));
+        return `
               <div class="dps-breakdown-row step-indented">
                 <span class="dps-row-lbl">Base Poison Multiplier ${isBugged ? "(In-Game Bugged: 0.30x total / 0.05x tick)" : "(Fixed / Intended: 0.05x + 0.50x = 0.55x/tick &times; 6 ticks)"}</span>
                 <span class="dps-row-val font-mono ${isBugged ? "color-crit" : "color-buff"}">${basePoisonMult.toFixed(2)}x Base Hit</span>
@@ -1188,7 +1191,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                 <span class="dps-highlight-val font-mono color-dot">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
               </div>
             `;
-          })() : breakdown.isLightningGod ? (() => {
+      })() : breakdown.isLightningGod ? (() => {
         const vMeter = breakdown.lgVoltageMeter !== undefined ? breakdown.lgVoltageMeter : 25;
         const vBoost = vMeter * 5;
         const effMult = 0.15 * (1 + vMeter * 0.05);
@@ -1262,6 +1265,61 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
                 <span class="dps-highlight-val font-mono color-dot">+${formatFullDPS(breakdown.unitDoTDPS)} DPS</span>
               </div>
             `;
+      })() : breakdown.isIronWolf ? (() => {
+        const effDmg = breakdown.effDamage || 0;
+        const effSpaVal = breakdown.effSpa || 1;
+        const hasPermSpill = !!(breakdown.ironWolfPermSpill);
+        const hasExtraSpill = !!(breakdown.ironWolfExtraSpill);
+        const baseMult = 1.05;
+        const permBonus = hasPermSpill ? 1.40 : 0;
+        const extraBonus = hasExtraSpill ? 1.40 : 0;
+        const totalMult = baseMult + permBonus + extraBonus;
+        const traitRelicMult = (1 + (breakdown.trait?.dotBonus || 0)) * (1 + (breakdown.relicDotBonus || 0));
+        const bleedDmgPerAttack = effDmg * totalMult * traitRelicMult;
+        const bleedDps = bleedDmgPerAttack / effSpaVal;
+        return `
+          <div class="dps-breakdown-row step-indented">
+            <span class="dps-row-lbl">Base Bleed (3 Bleed cycles × 0.35x)</span>
+            <span class="dps-row-val font-mono">1.05x per Attack</span>
+          </div>
+          <div class="dps-breakdown-row step-indented">
+            <span class="dps-row-lbl">Perm Crimson Spill ×2 (+4 Bleed Stacks × 0.35x)</span>
+            <span class="dps-row-val font-mono ${hasPermSpill ? 'color-buff' : ''}">${hasPermSpill ? '+1.40x per Attack' : 'Inactive (0.00x)'}</span>
+          </div>
+          <div class="dps-breakdown-row step-indented">
+            <span class="dps-row-lbl">Crimson Spill ×2 (+4 Bleed Stacks × 0.35x)</span>
+            <span class="dps-row-val font-mono ${hasExtraSpill ? 'color-buff' : ''}">${hasExtraSpill ? '+1.40x per Attack' : 'Inactive (0.00x)'}</span>
+          </div>
+          <div class="dps-breakdown-row step-indented">
+            <span class="dps-row-lbl">Total Bleed Multiplier</span>
+            <span class="dps-row-val font-mono color-dot">1.05${permBonus > 0 ? ' + 1.40' : ''}${extraBonus > 0 ? ' + 1.40' : ''} = ${totalMult.toFixed(2)}x per Attack</span>
+          </div>
+          ${traitRelicMult > 1 ? `
+          <div class="dps-breakdown-row step-indented">
+            <span class="dps-row-lbl">Trait / Relic DoT Multiplier</span>
+            <span class="dps-row-val font-mono color-buff">×${traitRelicMult.toFixed(2)}</span>
+          </div>` : ""}
+          <div class="dps-breakdown-row step-indented">
+            <span class="dps-row-lbl">Base Hit Reference</span>
+            <span class="dps-row-val font-mono">${Math.round(effDmg).toLocaleString()} DMG</span>
+          </div>
+          <div class="dps-breakdown-row step-indented">
+            <span class="dps-row-lbl">Bleed Damage per Attack</span>
+            <span class="dps-row-val font-mono color-dot">${Math.round(effDmg).toLocaleString()} × ${totalMult.toFixed(2)}x${traitRelicMult > 1 ? ` × ${traitRelicMult.toFixed(2)}` : ''} = ${Math.round(bleedDmgPerAttack).toLocaleString()} DMG</span>
+          </div>
+          <div class="dps-breakdown-row step-indented">
+            <span class="dps-row-lbl">Attack Interval</span>
+            <span class="dps-row-val font-mono">Every ${effSpaVal.toFixed(2)}s</span>
+          </div>
+          <div class="dps-breakdown-row step-indented">
+            <span class="dps-row-lbl">Bleed DPS Formula</span>
+            <span class="dps-row-val font-mono">${Math.round(bleedDmgPerAttack).toLocaleString()} DMG / ${effSpaVal.toFixed(2)}s</span>
+          </div>
+          <div class="dps-breakdown-highlight-row color-dot-bg">
+            <span class="dps-highlight-lbl color-dot">Bleed DoT DPS</span>
+            <span class="dps-highlight-val font-mono color-dot">+${formatFullDPS(breakdown.unitDoTDPS || bleedDps)} DPS</span>
+          </div>
+        `;
       })() : `
             <div class="dps-breakdown-row step-indented">
               <span class="dps-row-lbl">Interval SPA</span>
@@ -1693,6 +1751,7 @@ export async function DpsCard(unit, options = {}) {
   const isLightningGod = unit.id === "lightninggodovercharged" || (unit.name && unit.name.includes("Lightning God (Overcharged)"));
   const isSharkfang = unit.id === "sharkfangabyssal" || (unit.name && unit.name.includes("Sharkfang"));
   const isSandAlligator = unit.id === "sandalligator" || (unit.name && unit.name.includes("Sand (Alligator)"));
+  const isIronWolf = unit.id === "ironwolfstruggler" || (unit.name && unit.name.includes("Iron Wolf (Struggler)"));
 
   let darkMageMode = unit.darkMageMode || "lightning";
   let giantForm = unit.giantForm !== undefined ? unit.giantForm : false;
@@ -1737,6 +1796,8 @@ export async function DpsCard(unit, options = {}) {
   let sfBurnStacks = isSharkfang ? Math.max(0, Math.min(3, parseInt(unit.sfBurnStacks !== undefined ? unit.sfBurnStacks : 0, 10) || 0)) : 0;
   let sandPoisonStacks = isSandAlligator ? Math.max(0, Math.min(6, parseInt(unit.sandPoisonStacks !== undefined ? unit.sandPoisonStacks : 6, 10) || 0)) : 0;
   let sandPoisonBugged = isSandAlligator ? (unit.sandPoisonBugged !== undefined ? !!unit.sandPoisonBugged : true) : false;
+  let ironWolfPermSpill = isIronWolf ? !!(unit.ironWolfPermSpill) : false;
+  let ironWolfExtraSpill = isIronWolf ? !!(unit.ironWolfExtraSpill) : false;
   if (isSovereign) {
     unit.sovereignBossActive = sovereignBossActive;
     unit.sovereignDjinnJudgmentActive = sovereignDjinnJudgmentActive;
@@ -1752,6 +1813,10 @@ export async function DpsCard(unit, options = {}) {
   if (isSandAlligator) {
     unit.sandPoisonStacks = sandPoisonStacks;
     unit.sandPoisonBugged = sandPoisonBugged;
+  }
+  if (isIronWolf) {
+    unit.ironWolfPermSpill = ironWolfPermSpill;
+    unit.ironWolfExtraSpill = ironWolfExtraSpill;
   }
 
   if (isProdigy) {
@@ -2014,6 +2079,19 @@ export async function DpsCard(unit, options = {}) {
             <span class="dps-pill-dot"></span>
             Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
           </button>
+        ` : isIronWolf ? `
+          <button type="button" class="dps-toggle-pill ${ironWolfPermSpill ? 'active' : ''}" id="iw-perm-spill-toggle-${unit.id}">
+            <span class="dps-pill-dot"></span>
+            Perm Crimson Spill ×2
+          </button>
+          <button type="button" class="dps-toggle-pill ${ironWolfExtraSpill ? 'active' : ''}" id="iw-extra-spill-toggle-${unit.id}">
+            <span class="dps-pill-dot"></span>
+            Crimson Spill ×2
+          </button>
+          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
+            <span class="dps-pill-dot"></span>
+            Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
+          </button>
         ` : `
           <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
             <span class="dps-pill-dot"></span>
@@ -2068,6 +2146,8 @@ export async function DpsCard(unit, options = {}) {
   const sandStacksInput = card.querySelector(`#sand-stacks-input-${unit.id}`);
   const sandStacksBadge = card.querySelector(`#sand-stacks-badge-${unit.id}`);
   const sandBuggedToggle = card.querySelector(`#sand-bugged-toggle-${unit.id}`);
+  const iwPermSpillToggle = card.querySelector(`#iw-perm-spill-toggle-${unit.id}`);
+  const iwExtraSpillToggle = card.querySelector(`#iw-extra-spill-toggle-${unit.id}`);
   let fuaEditor = null;
 
   const commitCrowEnemies = () => {
@@ -2418,6 +2498,26 @@ export async function DpsCard(unit, options = {}) {
   });
   sandStacksInput?.addEventListener("change", commitSandStacks);
 
+  iwPermSpillToggle?.addEventListener("click", () => {
+    ironWolfPermSpill = !ironWolfPermSpill;
+    unit.ironWolfPermSpill = ironWolfPermSpill;
+    saveUnitSetting(unit.id, "ironWolfPermSpill", ironWolfPermSpill);
+    iwPermSpillToggle.classList.toggle("active", ironWolfPermSpill);
+    iwPermSpillToggle.innerHTML = `<span class="dps-pill-dot"></span>Perm Crimson Spill ×2`;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
+  iwExtraSpillToggle?.addEventListener("click", () => {
+    ironWolfExtraSpill = !ironWolfExtraSpill;
+    unit.ironWolfExtraSpill = ironWolfExtraSpill;
+    saveUnitSetting(unit.id, "ironWolfExtraSpill", ironWolfExtraSpill);
+    iwExtraSpillToggle.classList.toggle("active", ironWolfExtraSpill);
+    iwExtraSpillToggle.innerHTML = `<span class="dps-pill-dot"></span>Crimson Spill ×2`;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
+  });
+
   sandBuggedToggle?.addEventListener("click", () => {
     sandPoisonBugged = !sandPoisonBugged;
     unit.sandPoisonBugged = sandPoisonBugged;
@@ -2750,6 +2850,9 @@ export async function DpsCard(unit, options = {}) {
         isSandAlligator,
         sandPoisonStacks,
         sandPoisonBugged,
+        isIronWolf,
+        ironWolfPermSpill,
+        ironWolfExtraSpill,
       });
       return { traitKey, ...result };
     }).sort((a, b) => (Number(b.breakdown.displayVal) || 0) - (Number(a.breakdown.displayVal) || 0));
