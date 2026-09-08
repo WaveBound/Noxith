@@ -263,6 +263,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isSharkfang = unit && (unit.id === "sharkfangabyssal" || (unit.name && unit.name.includes("Sharkfang")));
   const isSandAlligator = unit && (unit.id === "sandalligator" || (unit.name && unit.name.includes("Sand (Alligator)")));
   const isIronWolf = unit && (unit.id === "ironwolfstruggler" || (unit.name && unit.name.includes("Iron Wolf (Struggler)")));
+  const is5thGodHand = unit && (unit.id === "5thgodhand" || (unit.name && unit.name.includes("5th God Hand")));
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
@@ -300,6 +301,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const sovereignEnemies = isSovereign ? Math.max(1, Math.min(5, parseInt(unit.sovereignEnemies || 1, 10) || 1)) : 1;
   const lgVoltageMeter = isLightningGod ? Math.max(0, Math.min(60, parseInt(unit.lgVoltageMeter !== undefined ? unit.lgVoltageMeter : 25, 10) || 0)) : 0;
   const lgEnemies = isLightningGod ? Math.max(1, parseInt(unit.lgEnemies !== undefined ? unit.lgEnemies : 10, 10) || 10) : 10;
+  const fatedMeter = is5thGodHand ? Math.max(0, Math.min(35, parseInt(unit.fatedMeter !== undefined ? unit.fatedMeter : 34, 10) || 0)) : 0;
 
   let passiveSpaMult = isReaper ? -0.10 : (isLadyGiant && giantForm ? 0.25 : (isEighthSword && berserkState ? -0.10 : 0));
   let passiveCritChanceAdd = isReaper ? 0.40 : (isCursedImmortal ? 0.30 : (isRazorjaw ? 0.25 : 0));
@@ -1222,6 +1224,69 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     base.dotMultiplier = sacrificialBrandMult * bleedTraitRelicMult;
     dotDamage = sacrificialBrandDmg;
     dotIntervalSPA = effSpa;
+  } else if (is5thGodHand) {
+    let activeUnitEquip = "";
+    if (unit.selectedDpsRelic !== undefined && unit.selectedDpsRelic !== null && unit.selectedDpsRelic !== "") {
+      activeUnitEquip = unit.selectedDpsRelic;
+    } else if (unit.relic && unit.relic.name) {
+      activeUnitEquip = unit.relic.name;
+    } else if (unit.recommendedEquips?.unitEquip) {
+      activeUnitEquip = unit.recommendedEquips.unitEquip;
+    }
+    const hasOrbOfCausality = activeUnitEquip === "Orb of Causality" || (relics || []).some(r => r.name === "Orb of Causality");
+    const relic3rdAttackMult = hasOrbOfCausality ? 1.20 : 1.05;
+
+    if (fatedMeter >= 35) {
+      const eclipseDps = avgHitDamage * relic3rdAttackMult;
+      unitDirectDPS = avgHitDamage / effSpa;
+      unitDoTDPS = 0;
+      fuaBreakdowns = [
+        {
+          index: 0,
+          name: `Eclipse (100% DMG/s${hasOrbOfCausality ? ' × 1.20x [Relic]' : ' × 1.05x [Mark]'} at 35 Fated Meter)`,
+          passiveType: "eclipse",
+          hasOrbOfCausality,
+          relic3rdAttackMult,
+          fatedMeter: 35,
+          intervalSpa: 1.0,
+          critAvgMult,
+          dps: eclipseDps,
+          isTimedFua: true,
+        }
+      ];
+      fuaDps = eclipseDps;
+      singleFuaDmg = avgHitDamage * relic3rdAttackMult;
+    } else {
+      // Normal attack cycle: attack 1 & 2 do 1.0x, attack 3 does relic3rdAttackMult (1.20x with relic)
+      unitDirectDPS = (avgHitDamage * (2 + relic3rdAttackMult) / 3) / effSpa;
+      unitDoTDPS = 0;
+
+      // Distortion on 3rd attack: 50% base dmg with raw multi (+5% per meter stack)
+      // e.g. at 34 stacks: 50% * (1 + 34 * 0.05) = 50% * 2.7 = 135% base.
+      // With relic on 3rd attack: * 1.2x.
+      const distortionMeterMult = 1 + (fatedMeter * 0.05);
+      const distortionDamage = avgHitDamage * 0.50 * distortionMeterMult * relic3rdAttackMult;
+      const distortionInterval = 3 * effSpa;
+      const distortionDps = distortionDamage / distortionInterval;
+
+      fuaBreakdowns = [
+        {
+          index: 0,
+          name: `Distortion (50% × ${distortionMeterMult.toFixed(2)}x [${fatedMeter} Meter]${hasOrbOfCausality ? ' × 1.20x [Relic]' : ' × 1.05x [Mark]'} every 3 attacks)`,
+          passiveType: "distortion",
+          hasOrbOfCausality,
+          relic3rdAttackMult,
+          fatedMeter,
+          distortionMeterMult,
+          distortionDamage,
+          intervalSpa: distortionInterval,
+          critAvgMult,
+          dps: distortionDps,
+        }
+      ];
+      fuaDps = distortionDps;
+      singleFuaDmg = distortionDamage;
+    }
   } else {
     unitDirectDPS = avgHitDamage / effSpa;
     unitDoTDPS = (base.dotMultiplier || 0) > 0 ? (dotDamage / dotIntervalSPA) : 0;
@@ -1515,5 +1580,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     isIronWolf,
     ironWolfPermSpill: isIronWolf ? !!(unit.ironWolfPermSpill) : false,
     ironWolfExtraSpill: isIronWolf ? !!(unit.ironWolfExtraSpill) : false,
+    is5thGodHand,
+    fatedMeter: is5thGodHand ? fatedMeter : 0,
   };
 }

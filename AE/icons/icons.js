@@ -58,6 +58,7 @@ export const STATUS_ICONS = {
     electricity: toAbsoluteUrl("icons/status/Electricity.png"),
     poison: toAbsoluteUrl("icons/status/Poison.png"),
     sandstorm: toAbsoluteUrl("icons/status/Sandstorm.png"),
+    markoffate: toAbsoluteUrl("icons/status/MarkOfFate.png"),
 };
 
 export const RELIC_ICONS = {
@@ -80,6 +81,7 @@ export const RELIC_ICONS = {
     "relic-spirit-kings-blade": toAbsoluteUrl("icons/relics/SpiritKingsBlade.png"),
     "relic-poison-hook": toAbsoluteUrl("icons/relics/PoisonHook.png"),
     "relic-demonslayer": toAbsoluteUrl("icons/relics/Demonslayer.png"),
+    "relic-orb-of-causality": toAbsoluteUrl("icons/relics/OrbofCausality.png"),
 };
 
 export function relicImg(id) {
@@ -138,6 +140,8 @@ const RELIC_NAME_TO_IMG = {
     "Poison Hook": toAbsoluteUrl("icons/relics/PoisonHook.png"),
     "PoisonHook": toAbsoluteUrl("icons/relics/PoisonHook.png"),
     "Demonslayer": toAbsoluteUrl("icons/relics/Demonslayer.png"),
+    "Orb of Causality": toAbsoluteUrl("icons/relics/OrbofCausality.png"),
+    "OrbofCausality": toAbsoluteUrl("icons/relics/OrbofCausality.png"),
 };
 
 export function relicImgByName(name) {
@@ -305,12 +309,21 @@ export function formatPassiveText(text) {
     out = out.replace(/\bShield\b/gi, "@@SHLD@@");
     out = out.replace(/Pierces/gi, "@@PRCS@@");
     out = out.replace(/\bPierce\b/gi, "@@PRC@@");
+    out = out.replace(/Mark[\s\xA0]+Of[\s\xA0]+Fate/gi, "@@MOF@@");
+    out = out.replace(/Fated[\s\xA0]+Meters?/gi, "@@FM@@");
+    out = out.replace(/Distortions?/gi, "@@DIST@@");
+    out = out.replace(/\bTargets?\b/gi, "@@TGT@@");
 
     out = out.replace(/(\$\d[\d,]*%?|\b\d+(?:,\d{3})*(?:\.\d+)?)(x|s|%)?/gi, (match, num, unit) => {
         return `<span class="p-num" style="font-weight:800;">${num}${unit || ""}</span>`;
     });
 
     const iconImgTag = (src) => src ? `<img src="${toAbsoluteUrl(src)}" class="p-kw-icon" alt="" />` : "";
+
+    out = out.replace(/@@MOF@@/g, `<span class="p-kw p-mark-of-fate">${iconImgTag(STATUS_ICONS.markoffate)}<span>Mark Of Fate</span></span>`);
+    out = out.replace(/@@FM@@/g, `<span class="p-kw p-fated-meter"><span>Fated Meter</span></span>`);
+    out = out.replace(/@@DIST@@/g, `<span class="p-kw p-distortion"><span>Distortion</span></span>`);
+    out = out.replace(/@@TGT@@/g, `<span class="p-kw p-target"><span>Target</span></span>`);
 
     out = out.replace(/@@TC@@/g, `<span class="p-kw p-atk-name"><span>Thunderclap Cut</span></span>`);
     out = out.replace(/@@UR@@/g, `<span class="p-kw p-atk-name"><span>Unrestrained Rampage</span></span>`);
@@ -535,6 +548,10 @@ if (typeof window !== "undefined") {
         if (target.classList.contains("p-sandstorm")) return toAbsoluteUrl("icons/info/Sandstorminfo.png");
         if (target.classList.contains("p-crimson-spill")) return toAbsoluteUrl("icons/info/CrimsonSpillinfo.png");
         if (target.classList.contains("p-true-damage")) return toAbsoluteUrl("icons/info/TrueDamageinfo.png");
+        if (target.classList.contains("p-distortion")) return toAbsoluteUrl("icons/info/Distortioninfo.png");
+        if (target.classList.contains("p-target")) return toAbsoluteUrl("icons/info/Targetinfo.png");
+        if (target.classList.contains("p-fated-meter")) return toAbsoluteUrl("icons/info/FatedMeterinfo.png");
+        if (target.classList.contains("p-mark-of-fate")) return toAbsoluteUrl("icons/info/MarkOfFateinfo.png");
         return "";
     }
 

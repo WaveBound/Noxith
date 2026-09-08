@@ -281,7 +281,9 @@ img {
 .p-kw.p-reg-attack>span,
 .p-kw.p-critical-attack>span,
 .p-kw.p-string>span,
-.p-kw.p-cubert-meter>span {
+.p-kw.p-cubert-meter>span,
+.p-kw.p-distortion>span,
+.p-kw.p-target>span {
   --kw-color: #dadada;
   color: #dadada !important;
   -webkit-text-fill-color: #dadada !important;
@@ -355,13 +357,24 @@ img {
 .p-kw.p-father-son>span,
 .p-kw.p-dot>span,
 .p-kw.p-drink-mark>span,
-.p-kw.p-genetic-dupe>span {
+.p-kw.p-genetic-dupe>span,
+.p-kw.p-fated-meter>span {
   --kw-color: #9900ff;
   color: #9900ff !important;
   -webkit-text-fill-color: #9900ff !important;
   font-weight: 700 !important;
   text-decoration: underline !important;
   text-decoration-color: #9900ff !important;
+  text-underline-offset: 2px !important;
+}
+
+.p-kw.p-mark-of-fate>span {
+  --kw-color: #d70536;
+  color: #d70536 !important;
+  -webkit-text-fill-color: #d70536 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #d70536 !important;
   text-underline-offset: 2px !important;
 }
 
@@ -604,8 +617,13 @@ img {
 .p-kw.p-father-son>span,
 .p-kw.p-dot>span,
 .p-kw.p-drink-mark>span,
-.p-kw.p-ground-eruption>span {
+.p-kw.p-ground-eruption>span,
+.p-kw.p-fated-meter>span {
   --kw-color: #9900ff;
+}
+
+.p-kw.p-mark-of-fate>span {
+  --kw-color: #d70536;
 }
 
 .p-kw.p-winged-spirit>span {
@@ -677,6 +695,8 @@ img {
 .p-kw.p-father-son>span,
 .p-kw.p-dot>span,
 .p-kw.p-drink-mark>span,
+.p-kw.p-fated-meter>span,
+.p-kw.p-mark-of-fate>span,
 .p-kw.p-winged-spirit>span,
 .p-kw.p-wolf-spirit>span,
 .p-kw.p-divine-spirit>span,

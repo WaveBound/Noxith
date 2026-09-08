@@ -71,6 +71,8 @@ const UNIT_NAME_MAP = {
   "sandalligator": "Sand (Alligator)",
   "IronWolfStruggler": "Iron Wolf (Struggler)",
   "ironwolfstruggler": "Iron Wolf (Struggler)",
+  "5thGodHand": "5th God Hand",
+  "5thgodhand": "5th God Hand",
 };
 
 const rawRelics = [
@@ -325,6 +327,12 @@ const rawRelics = [
     name: "Demonslayer",
     image: relicImgByName("Demonslayer"),
     unitEquip: "IronWolfStruggler",
+  },
+  {
+    id: "relic-orb-of-causality",
+    name: "Orb of Causality",
+    image: relicImgByName("Orb of Causality"),
+    unitEquip: "5th God Hand",
   },
 ];
 

@@ -53,6 +53,7 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
   const isHeadCaptain = unit.id === "headcaptainchar" || (unit.name && unit.name.includes("Head Captain"));
   const isSandAlligator = unit.id === "sandalligator" || (unit.name && unit.name.includes("Sand (Alligator)"));
   const isIronWolf = unit.id === "ironwolfstruggler" || (unit.name && unit.name.includes("Iron Wolf (Struggler)"));
+  const is5thGodHand = unit.id === "5thgodhand" || (unit.name && unit.name.includes("5th God Hand"));
 
   combos.forEach(([eq1, eq2]) => {
     const mockUnit = {
@@ -92,6 +93,8 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       ironWolfPermSpill: options.ironWolfPermSpill !== undefined ? !!options.ironWolfPermSpill : !!(unit.ironWolfPermSpill),
       ironWolfExtraSpill: options.ironWolfExtraSpill !== undefined ? !!options.ironWolfExtraSpill : !!(unit.ironWolfExtraSpill),
       sandPoisonBugged: options.sandPoisonBugged !== undefined ? options.sandPoisonBugged : (unit.sandPoisonBugged !== undefined ? unit.sandPoisonBugged : true),
+      is5thGodHand,
+      fatedMeter: options.fatedMeter !== undefined ? options.fatedMeter : (unit.fatedMeter !== undefined ? unit.fatedMeter : 34),
     };
 
     const rawBreakdown = getTraitBreakdown(mockUnit, traitKey, targetLevel, statMode);
@@ -151,7 +154,9 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       formattedVal,
       formattedDPS: formattedVal,
       unitLabel,
-      placements
+      placements,
+      is5thGodHand,
+      fatedMeter: rawBreakdown.fatedMeter !== undefined ? rawBreakdown.fatedMeter : (options.fatedMeter !== undefined ? options.fatedMeter : 34),
     };
 
     builds.push({
@@ -1336,7 +1341,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
       <!-- ── SECTION 6: FUA & FOLLOW UP CALCULATIONS (IF ACTIVE) ── -->
       ${activeFuaBreakdowns.length > 0 ? `
       <div class="dps-section card-fua-theme">
-        <div class="dps-section-hd color-buff">6. ${breakdown.isCrow ? 'Illusion Status Calculations' : breakdown.isProdigy ? 'Hidden Potential Strike' : breakdown.isSovereign ? 'Djinn Passives &amp; Lightning Math' : breakdown.isLightningGod ? 'Lightning God Passives &amp; FUA Math' : 'Follow-Up Attack Calculations (FUA)'}</div>
+        <div class="dps-section-hd color-buff">6. ${breakdown.isCrow ? 'Illusion Status Calculations' : breakdown.isProdigy ? 'Hidden Potential Strike' : breakdown.isSovereign ? 'Djinn Passives &amp; Lightning Math' : breakdown.isLightningGod ? 'Lightning God Passives &amp; FUA Math' : breakdown.is5thGodHand ? 'Eclipse &amp; Distortion Calculations' : 'Follow-Up Attack Calculations (FUA)'}</div>
         <div class="dps-breakdown-list">
           ${activeFuaBreakdowns.map(entry => {
         const effSpaVal = breakdown.effSpa || 1;
@@ -1627,6 +1632,78 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
           `;
         }
 
+        if (entry.passiveType === "distortion") {
+          const hasRelic = !!entry.hasOrbOfCausality;
+          const meterStacks = entry.fatedMeter !== undefined ? entry.fatedMeter : 34;
+          const rawMeterPct = meterStacks * 5;
+          const meterMult = entry.distortionMeterMult || (1 + meterStacks * 0.05);
+          const relicMult = entry.relic3rdAttackMult || (hasRelic ? 1.20 : 1.05);
+          const rawDistortionDmg = (breakdown.effDamage || 0) * 0.50 * meterMult * relicMult;
+          const avgDistortionHit = entry.distortionDamage || (rawDistortionDmg * critMult);
+          const interval = entry.intervalSpa || (3 * effSpaVal);
+          const singleDps = entry.dps || (avgDistortionHit / interval);
+          const fieldDps = singleDps * placementCount;
+
+          return `
+            <div class="dps-breakdown-row">
+              <span class="dps-row-lbl">Passive: Eclipse Distortion (${hasRelic ? 'Orb of Causality 1.20x' : 'Mark Of Fate 1.05x'})</span>
+              <span class="dps-row-val font-mono">Every 3 Attacks (${interval.toFixed(2)}s)</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Base Distortion DMG (50% Base Hit)</span>
+              <span class="dps-row-val font-mono">${Math.round((breakdown.effDamage || 0) * 0.50).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Fated Meter Raw Multiplier (${meterStacks} stacks &times; +5%)</span>
+              <span class="dps-row-val font-mono color-buff">+${rawMeterPct}% (${meterMult.toFixed(2)}x)</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">3rd Attack Relic / Mark Boost</span>
+              <span class="dps-row-val font-mono color-buff">&times;${relicMult.toFixed(2)}x (${hasRelic ? 'Orb of Causality' : 'Mark Of Fate'})</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Total Distortion Hit with Crit (&times;${critMult.toFixed(2)})</span>
+              <span class="dps-row-val font-mono color-crit font-bold">${Math.round(avgDistortionHit).toLocaleString()} DMG</span>
+            </div>
+            <div class="dps-breakdown-highlight-row color-buff-bg">
+              <span class="dps-highlight-lbl color-buff">Distortion FUA Field DPS (${placementCount} unit${placementCount > 1 ? "s" : ""})</span>
+              <span class="dps-highlight-val font-mono color-buff">+${formatFullDPS(fieldDps)} DPS</span>
+            </div>
+          `;
+        }
+
+        if (entry.passiveType === "eclipse") {
+          const hasRelic = !!entry.hasOrbOfCausality;
+          const relicMult = entry.relic3rdAttackMult || (hasRelic ? 1.20 : 1.05);
+          const eclipseHit = entry.effectiveFollowUpDamage || ((breakdown.effDamage || 0) * relicMult);
+          const avgEclipseHit = (breakdown.avgHitDamage || 0) * relicMult;
+          const singleDps = entry.dps || avgEclipseHit;
+          const fieldDps = singleDps * placementCount;
+
+          return `
+            <div class="dps-breakdown-row">
+              <span class="dps-row-lbl">Passive: Eclipse (35 Fated Meter Stacks)</span>
+              <span class="dps-row-val font-mono color-buff">100% DMG/s (Active)</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Base Damage per Second (100% Base Hit)</span>
+              <span class="dps-row-val font-mono">${Math.round(breakdown.effDamage || 0).toLocaleString()} DMG/s</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Relic / Mark Multiplier</span>
+              <span class="dps-row-val font-mono color-buff">&times;${relicMult.toFixed(2)}x (${hasRelic ? 'Orb of Causality' : 'Mark Of Fate'})</span>
+            </div>
+            <div class="dps-breakdown-row step-indented">
+              <span class="dps-row-lbl">Eclipse Output per Second with Crit</span>
+              <span class="dps-row-val font-mono color-crit font-bold">${Math.round(avgEclipseHit).toLocaleString()} DMG/s</span>
+            </div>
+            <div class="dps-breakdown-highlight-row color-buff-bg">
+              <span class="dps-highlight-lbl color-buff">Eclipse Field DPS (${placementCount} unit${placementCount > 1 ? "s" : ""})</span>
+              <span class="dps-highlight-val font-mono color-buff">+${formatFullDPS(fieldDps)} DPS</span>
+            </div>
+          `;
+        }
+
         return `
               <div class="dps-breakdown-row">
                 <span class="dps-row-lbl">${formatPassiveText(entry.name || `FUA ${entry.index + 1}`)}</span>
@@ -1752,6 +1829,7 @@ export async function DpsCard(unit, options = {}) {
   const isSharkfang = unit.id === "sharkfangabyssal" || (unit.name && unit.name.includes("Sharkfang"));
   const isSandAlligator = unit.id === "sandalligator" || (unit.name && unit.name.includes("Sand (Alligator)"));
   const isIronWolf = unit.id === "ironwolfstruggler" || (unit.name && unit.name.includes("Iron Wolf (Struggler)"));
+  const is5thGodHand = unit.id === "5thgodhand" || (unit.name && unit.name.includes("5th God Hand"));
 
   let darkMageMode = unit.darkMageMode || "lightning";
   let giantForm = unit.giantForm !== undefined ? unit.giantForm : false;
@@ -1798,6 +1876,7 @@ export async function DpsCard(unit, options = {}) {
   let sandPoisonBugged = isSandAlligator ? (unit.sandPoisonBugged !== undefined ? !!unit.sandPoisonBugged : true) : false;
   let ironWolfPermSpill = isIronWolf ? !!(unit.ironWolfPermSpill) : false;
   let ironWolfExtraSpill = isIronWolf ? !!(unit.ironWolfExtraSpill) : false;
+  let fatedMeter = is5thGodHand ? Math.max(0, Math.min(35, parseInt(unit.fatedMeter !== undefined ? unit.fatedMeter : 34, 10) || 0)) : 0;
   if (isSovereign) {
     unit.sovereignBossActive = sovereignBossActive;
     unit.sovereignDjinnJudgmentActive = sovereignDjinnJudgmentActive;
@@ -1817,6 +1896,9 @@ export async function DpsCard(unit, options = {}) {
   if (isIronWolf) {
     unit.ironWolfPermSpill = ironWolfPermSpill;
     unit.ironWolfExtraSpill = ironWolfExtraSpill;
+  }
+  if (is5thGodHand) {
+    unit.fatedMeter = fatedMeter;
   }
 
   if (isProdigy) {
@@ -2088,6 +2170,16 @@ export async function DpsCard(unit, options = {}) {
             <span class="dps-pill-dot"></span>
             Crimson Spill ×2
           </button>
+          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
+            <span class="dps-pill-dot"></span>
+            Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
+          </button>
+        ` : is5thGodHand ? `
+          <div class="dps-control-stepper">
+            <span class="dps-stepper-lbl">Fated Meter:</span>
+            <span id="gh-meter-badge-${unit.id}" class="dps-stepper-sub color-buff font-mono">(${fatedMeter >= 35 ? 'Eclipse 100%/s' : (fatedMeter > 0 ? '+' + (fatedMeter * 5) + '% Dist' : 'Base 50%')})</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="gh-meter-input-${unit.id}" value="${fatedMeter}" class="dps-stepper-input" style="width:32px" />
+          </div>
           <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
             <span class="dps-pill-dot"></span>
             Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
@@ -2528,6 +2620,30 @@ export async function DpsCard(unit, options = {}) {
     renderCalculations();
   });
 
+  const ghMeterInput = card.querySelector(`#gh-meter-input-${unit.id}`);
+  const ghMeterBadge = card.querySelector(`#gh-meter-badge-${unit.id}`);
+  const getGhMeterBadgeLabel = (v) => v >= 35 ? "Eclipse 100%/s" : (v > 0 ? `+${v * 5}% Dist` : "Base 50%");
+
+  const commitGhMeter = () => {
+    if (!ghMeterInput) return;
+    ghMeterInput.value = ghMeterInput.value.replace(/[^\d]/g, "");
+    const val = Math.max(0, Math.min(35, parseInt(ghMeterInput.value || "0", 10) || 0));
+    ghMeterInput.value = String(val);
+    if (ghMeterBadge) ghMeterBadge.textContent = `(${getGhMeterBadgeLabel(val)})`;
+    if (fatedMeter !== val) {
+      fatedMeter = val;
+      unit.fatedMeter = fatedMeter;
+      saveUnitSetting(unit.id, "fatedMeter", fatedMeter);
+      window.dispatchEvent(new CustomEvent("dps-value-changed"));
+      renderCalculations();
+    }
+  };
+
+  ghMeterInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); commitGhMeter(); ghMeterInput.blur(); }
+  });
+  ghMeterInput?.addEventListener("change", commitGhMeter);
+
   const prodigyStatusBadge = card.querySelector(`#prodigy-status-badge-${unit.id}`);
 
   const commitProdigyStatus = () => {
@@ -2853,6 +2969,8 @@ export async function DpsCard(unit, options = {}) {
         isIronWolf,
         ironWolfPermSpill,
         ironWolfExtraSpill,
+        is5thGodHand,
+        fatedMeter,
       });
       return { traitKey, ...result };
     }).sort((a, b) => (Number(b.breakdown.displayVal) || 0) - (Number(a.breakdown.displayVal) || 0));

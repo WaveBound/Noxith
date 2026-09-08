@@ -424,6 +424,17 @@ export const relicStats = {
             desc: `When an enemy that have been inflicted with <b>Bleed</b> at least <b>1</b> time dies:<br>- Leave <b>1</b> <b>Crimson Spill</b> on the ground for <b>6</b> seconds<br><br><b>Crimson Spill</b> will apply <b>1</b> stack of <b>Bleed</b> every <b>3</b> seconds.<br>Only <b>2</b> non-permanent <b>Crimson Spill</b> may exist at a time.`,
         },
     },
+
+    "Orb of Causality": {
+        stats: [
+            { damage: { min: "+1%", max: "+10%" } },
+            { spa: { min: "-1%", max: "-5%" } },
+        ],
+        passive: {
+            name: "Equipment Passive Causality",
+            desc: `This unit has <b>Fated Meter</b>, starting at 0. (Capacity: <b>35</b>)<br><br>If an enemy survives <b>Distortion</b>'s damage:<br>- Inflict enemy with <b>Mark Of Fate</b> for <b>5</b> seconds<br>- Gain <b>1</b> <b>Fated Meter</b><br><br>For every enemy in range with <b>Mark Of Fate</b>:<br>- Increase this unit's damage by <b>5%</b><br>- Increase this unit's range by <b>2.5%</b><br><br><b>Mark Of Fate</b> cannot stack.<br>Enemies inflicted with <b>Mark Of Fate</b> will take <b>20%</b> increased damage from this unit.`,
+        },
+    },
 };
 
 export function getRelicStatsByName(name) {
