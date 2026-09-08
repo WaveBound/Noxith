@@ -369,12 +369,12 @@ img {
 }
 
 .p-kw.p-mark-of-fate>span {
-  --kw-color: #d70536;
-  color: #d70536 !important;
-  -webkit-text-fill-color: #d70536 !important;
+  --kw-color: #d6006e;
+  color: #d6006e !important;
+  -webkit-text-fill-color: #d6006e !important;
   font-weight: 700 !important;
   text-decoration: underline !important;
-  text-decoration-color: #d70536 !important;
+  text-decoration-color: #d6006e !important;
   text-underline-offset: 2px !important;
 }
 
@@ -623,7 +623,7 @@ img {
 }
 
 .p-kw.p-mark-of-fate>span {
-  --kw-color: #d70536;
+  --kw-color: #d6006e;
 }
 
 .p-kw.p-winged-spirit>span {

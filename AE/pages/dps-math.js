@@ -302,12 +302,33 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const lgVoltageMeter = isLightningGod ? Math.max(0, Math.min(60, parseInt(unit.lgVoltageMeter !== undefined ? unit.lgVoltageMeter : 25, 10) || 0)) : 0;
   const lgEnemies = isLightningGod ? Math.max(1, parseInt(unit.lgEnemies !== undefined ? unit.lgEnemies : 10, 10) || 10) : 10;
   const fatedMeter = is5thGodHand ? Math.max(0, Math.min(35, parseInt(unit.fatedMeter !== undefined ? unit.fatedMeter : 34, 10) || 0)) : 0;
+  const markedEnemies = is5thGodHand ? Math.max(0, parseInt(unit.markedEnemies !== undefined ? unit.markedEnemies : 0, 10) || 0) : 0;
+  let hasOrbOfCausality = false;
+  if (is5thGodHand) {
+    let activeUnitEquip = "";
+    if (unit.selectedDpsRelic !== undefined && unit.selectedDpsRelic !== null && unit.selectedDpsRelic !== "") {
+      activeUnitEquip = unit.selectedDpsRelic;
+    } else if (unit.relic && unit.relic.name) {
+      activeUnitEquip = unit.relic.name;
+    } else if (unit.recommendedEquips?.unitEquip) {
+      activeUnitEquip = unit.recommendedEquips.unitEquip;
+    }
+    const unitRelics = getUnitRelicList(unit);
+    hasOrbOfCausality = activeUnitEquip === "Orb of Causality" || (unitRelics || []).some(r => r.name === "Orb of Causality");
+  }
 
   let passiveSpaMult = isReaper ? -0.10 : (isLadyGiant && giantForm ? 0.25 : (isEighthSword && berserkState ? -0.10 : 0));
   let passiveCritChanceAdd = isReaper ? 0.40 : (isCursedImmortal ? 0.30 : (isRazorjaw ? 0.25 : 0));
   let passiveCritDamageAdd = isCarrot && carrotTransformation ? 0.20 : 0;
   let passiveDamageMult = isReaper ? 0.40 : (isLadyGiant && giantForm ? 1.25 : (isEighthSword && berserkState ? 0.20 : (isCarrot && carrotTransformation ? 0.15 : (isProdigy && prodigyRageUnleashed ? 0.25 : 0))));
   let passiveRangeMult = (isLadyGiant && giantForm ? 0.50 : (isCursedImmortal && caringState ? -0.50 : (isCursedImmortal && coldState ? -0.75 : 0)));
+
+  if (is5thGodHand && markedEnemies > 0) {
+    const dmgPerMark = hasOrbOfCausality ? 0.05 : 0.025;
+    const rngPerMark = hasOrbOfCausality ? 0.025 : 0.01;
+    passiveDamageMult += markedEnemies * dmgPerMark;
+    passiveRangeMult += markedEnemies * rngPerMark;
+  }
 
   if (isCarrot && carrotInstantRelocation) {
     passiveDamageMult += 0.50;
@@ -1237,25 +1258,30 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     const relic3rdAttackMult = hasOrbOfCausality ? 1.20 : 1.05;
 
     if (fatedMeter >= 35) {
-      const eclipseDps = avgHitDamage * relic3rdAttackMult;
-      unitDirectDPS = avgHitDamage / effSpa;
+      // Eclipse is triggered on the 3rd attack, dealing 100% of the unit's damage per second for 5 seconds (5.0x Base Hit) with 3rd attack relic/mark boost
+      const cycleInterval = 3 * effSpa;
+      const eclipseTotalDamage = avgHitDamage * 5.0 * relic3rdAttackMult;
+      const eclipseDps = eclipseTotalDamage / cycleInterval;
+
+      unitDirectDPS = (avgHitDamage * (2 + relic3rdAttackMult) / 3) / effSpa;
       unitDoTDPS = 0;
       fuaBreakdowns = [
         {
           index: 0,
-          name: `Eclipse (100% DMG/s${hasOrbOfCausality ? ' × 1.20x [Relic]' : ' × 1.05x [Mark]'} at 35 Fated Meter)`,
+          name: `Eclipse (5.0× Base Hit over 5s${hasOrbOfCausality ? ' × 1.20x [Relic]' : ' × 1.05x [Mark]'} every 3 attacks)`,
           passiveType: "eclipse",
           hasOrbOfCausality,
           relic3rdAttackMult,
           fatedMeter: 35,
-          intervalSpa: 1.0,
+          eclipseTotalDamage,
+          intervalSpa: cycleInterval,
           critAvgMult,
           dps: eclipseDps,
-          isTimedFua: true,
+          isTimedFua: false,
         }
       ];
       fuaDps = eclipseDps;
-      singleFuaDmg = avgHitDamage * relic3rdAttackMult;
+      singleFuaDmg = eclipseTotalDamage;
     } else {
       // Normal attack cycle: attack 1 & 2 do 1.0x, attack 3 does relic3rdAttackMult (1.20x with relic)
       unitDirectDPS = (avgHitDamage * (2 + relic3rdAttackMult) / 3) / effSpa;
@@ -1582,5 +1608,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     ironWolfExtraSpill: isIronWolf ? !!(unit.ironWolfExtraSpill) : false,
     is5thGodHand,
     fatedMeter: is5thGodHand ? fatedMeter : 0,
+    markedEnemies: is5thGodHand ? markedEnemies : 0,
+    hasOrbOfCausality: is5thGodHand ? hasOrbOfCausality : false,
   };
 }

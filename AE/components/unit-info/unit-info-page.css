@@ -1264,6 +1264,60 @@
   background: #0a0a0d;
 }
 
+.status-effect-box.status-card-markoffate {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 16px;
+  overflow: hidden;
+  background-color: #000000;
+  border: 1px solid #3a001e;
+  border-radius: 12px;
+}
+
+.status-effect-box.status-card-markoffate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(214, 0, 110, 0.10) 20%,
+      rgba(214, 0, 110, 0.22) 45%,
+      rgba(214, 0, 110, 0.22) 55%,
+      rgba(214, 0, 110, 0.10) 80%,
+      rgba(0, 0, 0, 0) 100%);
+  background-size: 100% 200%;
+  filter: blur(12px);
+  pointer-events: none;
+  z-index: 1;
+  animation: statusPinkPurpleFlowDown 6.5s linear infinite;
+}
+
+@keyframes statusPinkPurpleFlowDown {
+  0% {
+    background-position: 50% 50%;
+  }
+
+  100% {
+    background-position: 50% -150%;
+  }
+}
+
+.status-effect-box.status-card-markoffate .status-effect-tag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background-image: linear-gradient(135deg, #d6006e 0%, #d6006e 38%, rgba(214, 80, 140, 0.55) 50%, #d6006e 62%, #d6006e 100%);
+  background-size: 500% 500%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: statusTagShimmer 10s linear infinite;
+}
+
 .status-effect-box.status-card-freeze {
   background-color: #000000;
   background-image: url('../../icons/status/FreezeInfo.png');

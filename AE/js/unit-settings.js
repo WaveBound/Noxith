@@ -106,6 +106,8 @@ export function applySavedSettingsToUnit(unit) {
   if (saved.sandPoisonBugged !== undefined) unit.sandPoisonBugged = saved.sandPoisonBugged;
   if (saved.ironWolfPermSpill !== undefined) unit.ironWolfPermSpill = saved.ironWolfPermSpill;
   if (saved.ironWolfExtraSpill !== undefined) unit.ironWolfExtraSpill = saved.ironWolfExtraSpill;
+  if (saved.fatedMeter !== undefined) unit.fatedMeter = saved.fatedMeter;
+  if (saved.markedEnemies !== undefined) unit.markedEnemies = saved.markedEnemies;
 
   return unit;
 }

@@ -518,7 +518,8 @@ function buildStatusEffectsPanel(unit, activeSummonData = null) {
 
   const rowsHtml = effects.map(e => {
     const iconKey = (e.icon || e.name || "bleed").toLowerCase();
-    const themeClass = iconKey.includes("illusion") ? "status-card-illusion"
+    const themeClass = (iconKey.includes("markoffate") || iconKey.includes("mark of fate")) ? "status-card-markoffate"
+      : iconKey.includes("illusion") ? "status-card-illusion"
       : iconKey.includes("blackfire") || iconKey.includes("black fire") ? "status-card-blackfire"
         : iconKey.includes("freeze") ? "status-card-freeze"
           : iconKey.includes("sandstorm") ? "status-card-sandstorm"
@@ -533,7 +534,7 @@ function buildStatusEffectsPanel(unit, activeSummonData = null) {
       <div class="status-effect-box ${themeClass}">
         <div class="status-effect-body">
           <div class="status-effect-name">${e.name}</div>
-          <div class="status-effect-tag">Status Effect</div>
+          <div class="status-effect-tag">${e.tag || "Status Effect"}</div>
           <div class="status-effect-desc">${formatPassiveText(e.effect || "")}</div>
           <div class="status-effect-cooldown">${e.cooldown || "0s"} Cooldown</div>
         </div>

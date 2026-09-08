@@ -40,6 +40,8 @@ function calculateUnitBestStanding(unit, mode, isCompMode) {
       sfBurnStacks: unit.sfBurnStacks,
       sandPoisonStacks: unit.sandPoisonStacks,
       sandPoisonBugged: unit.sandPoisonBugged,
+      fatedMeter: unit.fatedMeter,
+      markedEnemies: unit.markedEnemies,
     });
     const val = mode === "dmg" ? (res.breakdown?.totalDmg || 0) : (res.breakdown?.dps || 0);
     if (val > maxOutput) maxOutput = val;

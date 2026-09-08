@@ -7,7 +7,7 @@ export const unit = {
     update: "2.5",
 
     stats: {
-        recommendedTrait: "Solar",
+        recommendedTrait: "Unbound",
         element: "Dark",
         archetype: "Psychic",
         damage: "5,960",
@@ -104,7 +104,7 @@ export const unit = {
 
     recommendedEquips: {
         unitEquip: "Orb of Causality",
-        equip1: "Three Sword",
+        equip1: "Three Swords From Hell",
         equip2: "Kunai",
     },
 
@@ -112,7 +112,8 @@ export const unit = {
         {
             name: "Mark Of Fate",
             icon: "markoffate",
-            effect: "Mark Aplied by Causality",
+            tag: "Mark",
+            effect: "Mark applied by Causality",
             cooldown: "10s",
         },
     ],
