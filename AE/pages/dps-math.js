@@ -1256,23 +1256,27 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     const hasOrbOfCausality = activeUnitEquip === "Orb of Causality" || (relics || []).some(r => r.name === "Orb of Causality");
     const markDebuffMult = hasOrbOfCausality ? 1.20 : 1.05;
     const markDmgPerEnemy = hasOrbOfCausality ? 0.05 : 0.025;
-    relic3rdAttackMult = markedEnemies > 0 ? (markDebuffMult * (1 + markedEnemies * markDmgPerEnemy)) : 1.0;
+    // Direct 3rd attack defaults to 1.0 (0 buff) when marked is 0, getting mark boost when marked > 0
+    const direct3rdAttackMult = markedEnemies > 0 ? (markDebuffMult * (1 + markedEnemies * markDmgPerEnemy)) : 1.0;
+    // Eclipse & Distortion always apply the 3rd attack mark boost (1.20x with Orb of Causality / 1.05x without), scaling further with marked enemies
+    const fua3rdAttackMult = markDebuffMult * (1 + (markedEnemies > 0 ? markedEnemies * markDmgPerEnemy : 0));
+    relic3rdAttackMult = fua3rdAttackMult;
 
     if (fatedMeter >= 35) {
       // Eclipse is triggered on the 3rd attack, dealing 100% of the unit's damage per second for 5 seconds (5.0x Base Hit) with 3rd attack relic/mark boost
       const cycleInterval = 3 * effSpa;
-      const eclipseTotalDamage = avgHitDamage * 5.0 * relic3rdAttackMult;
+      const eclipseTotalDamage = avgHitDamage * 5.0 * fua3rdAttackMult;
       const eclipseDps = eclipseTotalDamage / cycleInterval;
 
-      unitDirectDPS = (avgHitDamage * (2 + relic3rdAttackMult) / 3) / effSpa;
+      unitDirectDPS = (avgHitDamage * (2 + direct3rdAttackMult) / 3) / effSpa;
       unitDoTDPS = 0;
       fuaBreakdowns = [
         {
           index: 0,
-          name: `Eclipse (5.0× Base Hit over 5s${relic3rdAttackMult > 1.0 ? ` × ${relic3rdAttackMult.toFixed(2)}x [${hasOrbOfCausality ? 'Relic' : 'Mark'}]` : ''} every 3 attacks)`,
+          name: `Eclipse (5.0× Base Hit over 5s × ${fua3rdAttackMult.toFixed(2)}x [${hasOrbOfCausality ? 'Relic' : 'Mark'}${markedEnemies > 0 ? ` + ${markedEnemies} Marked` : ''}] every 3 attacks)`,
           passiveType: "eclipse",
           hasOrbOfCausality,
-          relic3rdAttackMult,
+          relic3rdAttackMult: fua3rdAttackMult,
           markedEnemies,
           fatedMeter: 35,
           eclipseTotalDamage,
@@ -1285,25 +1289,25 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
       fuaDps = eclipseDps;
       singleFuaDmg = eclipseTotalDamage;
     } else {
-      // Normal attack cycle: attack 1 & 2 do 1.0x, attack 3 does relic3rdAttackMult (1.0x default, mark buff when marked > 0)
-      unitDirectDPS = (avgHitDamage * (2 + relic3rdAttackMult) / 3) / effSpa;
+      // Normal attack cycle: attack 1 & 2 do 1.0x, attack 3 does direct3rdAttackMult
+      unitDirectDPS = (avgHitDamage * (2 + direct3rdAttackMult) / 3) / effSpa;
       unitDoTDPS = 0;
 
       // Distortion on 3rd attack: 50% base dmg with raw multi (+5% per meter stack)
       // e.g. at 34 stacks: 50% * (1 + 34 * 0.05) = 50% * 2.7 = 135% base.
-      // With mark/relic on 3rd attack: * relic3rdAttackMult.
+      // With mark/relic on 3rd attack: * fua3rdAttackMult (always 1.20x / 1.05x).
       const distortionMeterMult = 1 + (fatedMeter * 0.05);
-      const distortionDamage = avgHitDamage * 0.50 * distortionMeterMult * relic3rdAttackMult;
+      const distortionDamage = avgHitDamage * 0.50 * distortionMeterMult * fua3rdAttackMult;
       const distortionInterval = 3 * effSpa;
       const distortionDps = distortionDamage / distortionInterval;
 
       fuaBreakdowns = [
         {
           index: 0,
-          name: `Distortion (50% × ${distortionMeterMult.toFixed(2)}x [${fatedMeter} Meter]${relic3rdAttackMult > 1.0 ? ` × ${relic3rdAttackMult.toFixed(2)}x [${hasOrbOfCausality ? 'Relic' : 'Mark'}]` : ''} every 3 attacks)`,
+          name: `Distortion (50% × ${distortionMeterMult.toFixed(2)}x [${fatedMeter} Meter] × ${fua3rdAttackMult.toFixed(2)}x [${hasOrbOfCausality ? 'Relic' : 'Mark'}${markedEnemies > 0 ? ` + ${markedEnemies} Marked` : ''}] every 3 attacks)`,
           passiveType: "distortion",
           hasOrbOfCausality,
-          relic3rdAttackMult,
+          relic3rdAttackMult: fua3rdAttackMult,
           markedEnemies,
           fatedMeter,
           distortionMeterMult,

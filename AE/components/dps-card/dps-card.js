@@ -1674,17 +1674,10 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
               <span class="dps-row-lbl">Fated Meter Raw Multiplier (${meterStacks} stacks &times; +5%)</span>
               <span class="dps-row-val font-mono color-buff">+${rawMeterPct}% (${meterMult.toFixed(2)}x)</span>
             </div>
-            ${relicMult > 1.0 ? `
             <div class="dps-breakdown-row step-indented">
-              <span class="dps-row-lbl">3rd Attack Mark Boost (${entry.markedEnemies || breakdown.markedEnemies || 0} Marked)</span>
+              <span class="dps-row-lbl">3rd Attack Relic / Mark Boost${(entry.markedEnemies || breakdown.markedEnemies || 0) > 0 ? ` (${entry.markedEnemies || breakdown.markedEnemies} Marked)` : ''}</span>
               <span class="dps-row-val font-mono color-buff">&times;${relicMult.toFixed(2)}x (${hasRelic ? 'Orb of Causality' : 'Mark Of Fate'})</span>
             </div>
-            ` : `
-            <div class="dps-breakdown-row step-indented">
-              <span class="dps-row-lbl">3rd Attack Mark Boost</span>
-              <span class="dps-row-val font-mono color-dim">&times;1.00x (0 Marked)</span>
-            </div>
-            `}
             <div class="dps-breakdown-row step-indented">
               <span class="dps-row-lbl">Total Distortion Hit with Crit (&times;${critMult.toFixed(2)})</span>
               <span class="dps-row-val font-mono color-crit font-bold">${Math.round(avgDistortionHit).toLocaleString()} DMG</span>
@@ -1698,7 +1691,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
 
         if (entry.passiveType === "eclipse") {
           const hasRelic = !!entry.hasOrbOfCausality;
-          const relicMult = entry.relic3rdAttackMult !== undefined ? entry.relic3rdAttackMult : 1.0;
+          const relicMult = entry.relic3rdAttackMult !== undefined ? entry.relic3rdAttackMult : (hasRelic ? 1.20 : 1.05);
           const interval = entry.intervalSpa || (3 * effSpaVal);
           const singleDps = entry.dps || 0;
           const fieldDps = singleDps * placementCount;
@@ -1717,17 +1710,10 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
               <span class="dps-row-lbl">Base Eclipse DMG (5.0&times; Base Hit)</span>
               <span class="dps-row-val font-mono">${Math.round((breakdown.effDamage || 0) * 5.0).toLocaleString()} DMG</span>
             </div>
-            ${relicMult > 1.0 ? `
             <div class="dps-breakdown-row step-indented">
-              <span class="dps-row-lbl">3rd Attack Mark Boost (${entry.markedEnemies || breakdown.markedEnemies || 0} Marked)</span>
+              <span class="dps-row-lbl">3rd Attack Relic / Mark Boost${(entry.markedEnemies || breakdown.markedEnemies || 0) > 0 ? ` (${entry.markedEnemies || breakdown.markedEnemies} Marked)` : ''}</span>
               <span class="dps-row-val font-mono color-buff">&times;${relicMult.toFixed(2)}x (${hasRelic ? 'Orb of Causality' : 'Mark Of Fate'})</span>
             </div>
-            ` : `
-            <div class="dps-breakdown-row step-indented">
-              <span class="dps-row-lbl">3rd Attack Mark Boost</span>
-              <span class="dps-row-val font-mono color-dim">&times;1.00x (0 Marked)</span>
-            </div>
-            `}
             <div class="dps-breakdown-row step-indented">
               <span class="dps-row-lbl">Total Eclipse Hit with Crit (&times;${critMult.toFixed(2)})</span>
               <span class="dps-row-val font-mono color-crit font-bold">${Math.round(eclipseTotalDmg).toLocaleString()} DMG</span>
