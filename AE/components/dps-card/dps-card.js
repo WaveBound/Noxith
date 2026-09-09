@@ -29,6 +29,9 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
   const simulateShinigamiPassive = options.simulateShinigamiPassive !== undefined
     ? options.simulateShinigamiPassive
     : (unit.simulateShinigamiPassive !== undefined ? !!unit.simulateShinigamiPassive : true);
+  const simulateSacrificialMark = options.simulateSacrificialMark !== undefined
+    ? options.simulateSacrificialMark
+    : (unit.simulateSacrificialMark !== undefined ? !!unit.simulateSacrificialMark : true);
   const mode = options.mode || "dps";
 
   const defaultPlacements = parseInt(String(unit.placementCount || unit.stats?.placementCount || "1").replace(/[^0-9]/g, "")) || 1;
@@ -97,6 +100,7 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       fatedMeter: options.fatedMeter !== undefined ? options.fatedMeter : (unit.fatedMeter !== undefined ? unit.fatedMeter : 34),
       markedEnemies: options.markedEnemies !== undefined ? options.markedEnemies : (unit.markedEnemies !== undefined ? unit.markedEnemies : 0),
       falconPawnActive: options.falconPawnActive !== undefined ? !!options.falconPawnActive : (unit.falconPawnActive !== undefined ? !!unit.falconPawnActive : true),
+      simulateSacrificialMark,
     };
 
     const rawBreakdown = getTraitBreakdown(mockUnit, traitKey, targetLevel, statMode);
@@ -1833,8 +1837,14 @@ export async function DpsCard(unit, options = {}) {
   const card = document.createElement("div");
   card.className = "dps-calculator-card glass-card";
 
-  let shinigamiPassiveActive = unit.simulateShinigamiPassive !== undefined ? !!unit.simulateShinigamiPassive : true;
+  let shinigamiPassiveActive = options.simulateShinigamiPassive !== undefined
+    ? !!options.simulateShinigamiPassive
+    : (unit.simulateShinigamiPassive !== undefined ? !!unit.simulateShinigamiPassive : true);
   unit.simulateShinigamiPassive = shinigamiPassiveActive;
+
+  let simulateSacrificialMark = options.simulateSacrificialMark !== undefined
+    ? !!options.simulateSacrificialMark
+    : (unit.simulateSacrificialMark !== undefined ? !!unit.simulateSacrificialMark : true);
 
   const isDarkMage = unit.id === "darkmagesovereign" || (unit.name && unit.name.includes("Dark Mage"));
   const isLadyGiant = unit.id === "ladygiantenvy" || (unit.name && unit.name.includes("Lady Giant"));
@@ -2407,15 +2417,7 @@ export async function DpsCard(unit, options = {}) {
     renderCalculations();
   });
 
-  shinigamiToggle?.addEventListener("click", () => {
-    shinigamiPassiveActive = !shinigamiPassiveActive;
-    unit.simulateShinigamiPassive = shinigamiPassiveActive;
-    saveUnitSetting(unit.id, "simulateShinigamiPassive", shinigamiPassiveActive);
-    shinigamiToggle.classList.toggle("active", shinigamiPassiveActive);
-    shinigamiToggle.innerHTML = `<span class="dps-pill-dot"></span>Shinigami: ${shinigamiPassiveActive ? "On" : "Off"}`;
-    window.dispatchEvent(new CustomEvent("dps-value-changed"));
-    renderCalculations();
-  });
+  // Shinigami is now a global toggle on the DPS page header — no per-card handler needed.
 
   crimsonAbilityToggle?.addEventListener("click", () => {
     crimsonAbilityActive = !crimsonAbilityActive;
@@ -3088,6 +3090,8 @@ export async function DpsCard(unit, options = {}) {
         is5thGodHand,
         fatedMeter,
         markedEnemies,
+        falconPawnActive,
+        simulateSacrificialMark,
       });
       return { traitKey, ...result };
     }).sort((a, b) => (Number(b.breakdown.displayVal) || 0) - (Number(a.breakdown.displayVal) || 0));

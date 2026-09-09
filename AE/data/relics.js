@@ -342,6 +342,11 @@ const rawRelics = [
     image: relicImgByName("Chosen Sabre"),
     unitEquip: "Silver Falcon",
   },
+  {
+    id: "relic-sacrificial-mark",
+    name: "Sacrificial Mark",
+    image: relicImgByName("Sacrificial Mark"),
+  },
 ];
 
 rawRelics.forEach((r) => {

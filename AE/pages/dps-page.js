@@ -5,6 +5,8 @@ import { getGlobalSetting, saveGlobalSetting } from "../js/unit-settings.js";
 
 let currentMode = getGlobalSetting("dpsMode", "dps"); // "dps" or "dmg"
 let globalCompMode = getGlobalSetting("compMode", false); // false = Non-Comp (100% Crit), true = Comp (50% Crit)
+let globalShinigami = getGlobalSetting("shinigamiPassive", true); // true = Shinigami +15% active
+let globalSacrificialMark = getGlobalSetting("sacrificialMark", true); // true = Sacrificial Mark max +15% active
 
 const PAGE_SIZE = 10; // Up to 2 rows of 5 cards
 
@@ -14,7 +16,8 @@ function calculateUnitBestStanding(unit, mode, isCompMode) {
     const res = optimizeRelicsForTrait(unit, traitKey, {
       mode,
       isCompMode,
-      simulateShinigamiPassive: unit.simulateShinigamiPassive,
+      simulateShinigamiPassive: globalShinigami,
+      simulateSacrificialMark: globalSacrificialMark,
       darkMageMode: unit.darkMageMode,
       giantForm: unit.giantForm,
       berserkState: unit.berserkState,
@@ -42,6 +45,7 @@ function calculateUnitBestStanding(unit, mode, isCompMode) {
       sandPoisonBugged: unit.sandPoisonBugged,
       fatedMeter: unit.fatedMeter,
       markedEnemies: unit.markedEnemies,
+      falconPawnActive: unit.falconPawnActive,
     });
     const val = mode === "dmg" ? (res.breakdown?.totalDmg || 0) : (res.breakdown?.dps || 0);
     if (val > maxOutput) maxOutput = val;
@@ -74,6 +78,18 @@ export async function DpsPage(filter = "") {
         </div>
       </div>
 
+      <div class="dps-mode-toggle-group">
+        <span class="dps-mode-label">Passives:</span>
+        <div class="dps-mode-selector">
+          <button type="button" class="dps-mode-btn dps-passive-btn ${globalShinigami ? 'active' : ''}" id="global-shinigami-btn">
+            Shinigami ${globalShinigami ? 'On (+15%)' : 'Off'}
+          </button>
+          <button type="button" class="dps-mode-btn dps-passive-btn ${globalSacrificialMark ? 'active' : ''}" id="global-sacmark-btn">
+            Sacrificial Mark ${globalSacrificialMark ? 'On (+15%)' : 'Off'}
+          </button>
+        </div>
+      </div>
+
       <div class="dps-pagination-controls" id="dps-pagination-controls">
         <button type="button" class="dps-page-nav-btn" id="dps-prev-page" title="Previous Page" aria-label="Previous Page">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -103,6 +119,8 @@ export async function DpsPage(filter = "") {
   const nextBtn = page.querySelector("#dps-next-page");
   const currentPageEl = page.querySelector("#dps-current-page");
   const totalPagesEl = page.querySelector("#dps-total-pages");
+  const shinigamiBtn = page.querySelector("#global-shinigami-btn");
+  const sacMarkBtn = page.querySelector("#global-sacmark-btn");
 
   async function renderSortedCards() {
     list.innerHTML = "";
@@ -133,7 +151,13 @@ export async function DpsPage(filter = "") {
 
     // Render cards with active mode & global ranking index
     const cards = await Promise.all(
-      pageUnits.map((u, index) => DpsCard(u, { mode: currentMode, rank: startIndex + index + 1, isCompMode: globalCompMode }))
+      pageUnits.map((u, index) => DpsCard(u, {
+        mode: currentMode,
+        rank: startIndex + index + 1,
+        isCompMode: globalCompMode,
+        simulateShinigamiPassive: globalShinigami,
+        simulateSacrificialMark: globalSacrificialMark,
+      }))
     );
     cards.forEach(card => list.appendChild(card));
   }
@@ -161,7 +185,6 @@ export async function DpsPage(filter = "") {
       if (mode === currentMode) return;
       currentMode = mode;
       saveGlobalSetting("dpsMode", currentMode);
-
       page.querySelectorAll(".dps-mode-btn[data-mode]").forEach(b => b.classList.toggle("active", b.dataset.mode === currentMode));
       renderSortedCards();
     });
@@ -174,10 +197,27 @@ export async function DpsPage(filter = "") {
       if (compVal === globalCompMode) return;
       globalCompMode = compVal;
       saveGlobalSetting("compMode", globalCompMode);
-
       page.querySelectorAll(".dps-comp-btn").forEach(b => b.classList.toggle("active", (b.dataset.comp === "comp") === globalCompMode));
       renderSortedCards();
     });
+  });
+
+  // Global Shinigami toggle
+  shinigamiBtn?.addEventListener("click", () => {
+    globalShinigami = !globalShinigami;
+    saveGlobalSetting("shinigamiPassive", globalShinigami);
+    shinigamiBtn.classList.toggle("active", globalShinigami);
+    shinigamiBtn.textContent = `Shinigami ${globalShinigami ? 'On (+15%)' : 'Off'}`;
+    renderSortedCards();
+  });
+
+  // Global Sacrificial Mark toggle
+  sacMarkBtn?.addEventListener("click", () => {
+    globalSacrificialMark = !globalSacrificialMark;
+    saveGlobalSetting("sacrificialMark", globalSacrificialMark);
+    sacMarkBtn.classList.toggle("active", globalSacrificialMark);
+    sacMarkBtn.textContent = `Sacrificial Mark ${globalSacrificialMark ? 'On (+15%)' : 'Off'}`;
+    renderSortedCards();
   });
 
   // Mark the update button as needing a re-sort when values change (but don't auto-sort)

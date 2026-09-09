@@ -446,6 +446,16 @@ export const relicStats = {
             desc: `On Placement:<br>- Increase all players' units' base damage by <b>15%</b> (+<b>2%</b> per upgrade)<br>- Increase all players' <b>Physical</b> Archetype units' damage by <b>5%</b> (+<b>2%</b> per upgrade)<br>- Increase all players' <b>Magical</b> Archetype units' damage by <b>5%</b> (+<b>2%</b> per upgrade)<br><br>The player's most equipped <b>Archetype</b> gains an additional <b>15%</b> damage.<br><b>Buffs</b> from <b>The Captain</b> do not stack.`,
         },
     },
+
+    "Sacrificial Mark": {
+        stats: [
+            { range: { min: "+1%", max: "+10%" } },
+        ],
+        passive: {
+            name: "Sacrificial Mark",
+            desc: `Increase Damage by <b>1%</b> (Capacity: <b>15%</b>) for each enemy with <b>Bleed</b> or <b>Marks</b> applied in this unit's range`,
+        },
+    },
 };
 
 export function getRelicStatsByName(name) {

@@ -83,6 +83,7 @@ export const RELIC_ICONS = {
     "relic-demonslayer": toAbsoluteUrl("icons/relics/Demonslayer.png"),
     "relic-orb-of-causality": toAbsoluteUrl("icons/relics/OrbofCausality.png"),
     "relic-chosen-sabre": toAbsoluteUrl("icons/relics/ChosenSabre.png"),
+    "relic-sacrificial-mark": toAbsoluteUrl("icons/relics/SacrificialMark.png"),
 };
 
 export function relicImg(id) {
@@ -145,6 +146,8 @@ const RELIC_NAME_TO_IMG = {
     "OrbofCausality": toAbsoluteUrl("icons/relics/OrbofCausality.png"),
     "Chosen Sabre": toAbsoluteUrl("icons/relics/ChosenSabre.png"),
     "ChosenSabre": toAbsoluteUrl("icons/relics/ChosenSabre.png"),
+    "Sacrificial Mark": toAbsoluteUrl("icons/relics/SacrificialMark.png"),
+    "SacrificialMark": toAbsoluteUrl("icons/relics/SacrificialMark.png"),
 };
 
 export function relicImgByName(name) {
