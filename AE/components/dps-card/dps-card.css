@@ -62,6 +62,25 @@
   box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
 }
 
+/* Global relic passives are controlled once from the page header. */
+.dps-global-relic-group {
+  gap: 4px;
+  padding: 3px 6px;
+}
+
+.dps-global-relic-group .dps-mode-label {
+  font-size: 9px;
+}
+
+.dps-global-relic-group .dps-mode-selector {
+  gap: 2px;
+}
+
+.dps-global-relic-group .dps-passive-btn {
+  padding: 3px 6px;
+  font-size: 10px;
+}
+
 .dps-pagination-controls {
   display: flex;
   align-items: center;
@@ -485,18 +504,11 @@
 }
 
 .dps-prodigy-controls-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  width: 100%;
+  display: contents;
 }
 
 .dps-prodigy-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  width: 100%;
+  display: contents;
 }
 
 .dps-bioinsect-unit-select {

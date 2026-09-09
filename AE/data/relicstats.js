@@ -453,7 +453,7 @@ export const relicStats = {
         ],
         passive: {
             name: "Sacrificial Mark",
-            desc: `Increase Damage by <b>1%</b> (Capacity: <b>15%</b>) for each enemy with <b>Bleed</b> or <b>Marks</b> applied in this unit's range`,
+            desc: `Increase Damage by <b>1%</b> (Capacity: <b>25%</b>) for each enemy with <b>Bleed</b> or <b>Marks</b> applied in this unit's range`,
         },
     },
 };

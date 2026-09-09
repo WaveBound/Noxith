@@ -489,7 +489,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     (isSovereign && sovereignBossActive) ||
     (isLadyGiant && giantForm);
 
-  let totalPassiveDamageBonus = (shinigamiActive ? 0.15 : 0) + (sacrificialMarkActive ? 0.15 : 0) + (hasWarriorPole && isTransformed ? 0.20 : 0) + passiveDamageMult;
+  let totalPassiveDamageBonus = (shinigamiActive ? 0.15 : 0) + (sacrificialMarkActive ? 0.25 : 0) + (hasWarriorPole && isTransformed ? 0.20 : 0) + passiveDamageMult;
   // summonBaseEffDamage: scales with trait, flat relic damage, Z stat, and ascend
   // but NOT relic archetype bonus and NOT passive/buff totals (Shinigami, Bio Reset, etc.)
   let summonBaseEffDamage = scaledBaseDamage * (1 + (trait.damageBonus || 0)) * (1 + relicDamageMult);
@@ -1547,10 +1547,11 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
     relicCritDamageAdd,
     relicDotBonus,
     shinigamiActive,
+    sacrificialMarkActive,
+    hasSacrificialMark,
     hasWarriorPole,
     isTransformed,
     hasShinigami,
-    shinigamiActive,
     hasAscend,
     summonCount,
     summonDamageMult,

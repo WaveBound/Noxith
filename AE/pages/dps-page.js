@@ -6,7 +6,7 @@ import { getGlobalSetting, saveGlobalSetting } from "../js/unit-settings.js";
 let currentMode = getGlobalSetting("dpsMode", "dps"); // "dps" or "dmg"
 let globalCompMode = getGlobalSetting("compMode", false); // false = Non-Comp (100% Crit), true = Comp (50% Crit)
 let globalShinigami = getGlobalSetting("shinigamiPassive", true); // true = Shinigami +15% active
-let globalSacrificialMark = getGlobalSetting("sacrificialMark", true); // true = Sacrificial Mark max +15% active
+let globalSacrificialMark = getGlobalSetting("sacrificialMark", true); // true = Sacrificial Mark max +25% active
 
 const PAGE_SIZE = 10; // Up to 2 rows of 5 cards
 
@@ -78,14 +78,14 @@ export async function DpsPage(filter = "") {
         </div>
       </div>
 
-      <div class="dps-mode-toggle-group">
-        <span class="dps-mode-label">Passives:</span>
+      <div class="dps-mode-toggle-group dps-global-relic-group">
+        <span class="dps-mode-label">Global Relics:</span>
         <div class="dps-mode-selector">
-          <button type="button" class="dps-mode-btn dps-passive-btn ${globalShinigami ? 'active' : ''}" id="global-shinigami-btn">
-            Shinigami ${globalShinigami ? 'On (+15%)' : 'Off'}
+          <button type="button" class="dps-mode-btn dps-passive-btn ${globalShinigami ? 'active' : ''}" id="global-shinigami-btn" aria-pressed="${globalShinigami}" title="Shinigami Sword passive: +15% damage">
+            Shinigami +15%
           </button>
-          <button type="button" class="dps-mode-btn dps-passive-btn ${globalSacrificialMark ? 'active' : ''}" id="global-sacmark-btn">
-            Sacrificial Mark ${globalSacrificialMark ? 'On (+15%)' : 'Off'}
+          <button type="button" class="dps-mode-btn dps-passive-btn ${globalSacrificialMark ? 'active' : ''}" id="global-sacmark-btn" aria-pressed="${globalSacrificialMark}" title="Sacrificial Mark passive: +25% damage">
+            Sacrificial +25%
           </button>
         </div>
       </div>
@@ -207,7 +207,7 @@ export async function DpsPage(filter = "") {
     globalShinigami = !globalShinigami;
     saveGlobalSetting("shinigamiPassive", globalShinigami);
     shinigamiBtn.classList.toggle("active", globalShinigami);
-    shinigamiBtn.textContent = `Shinigami ${globalShinigami ? 'On (+15%)' : 'Off'}`;
+    shinigamiBtn.setAttribute("aria-pressed", String(globalShinigami));
     renderSortedCards();
   });
 
@@ -216,7 +216,7 @@ export async function DpsPage(filter = "") {
     globalSacrificialMark = !globalSacrificialMark;
     saveGlobalSetting("sacrificialMark", globalSacrificialMark);
     sacMarkBtn.classList.toggle("active", globalSacrificialMark);
-    sacMarkBtn.textContent = `Sacrificial Mark ${globalSacrificialMark ? 'On (+15%)' : 'Off'}`;
+    sacMarkBtn.setAttribute("aria-pressed", String(globalSacrificialMark));
     renderSortedCards();
   });
 

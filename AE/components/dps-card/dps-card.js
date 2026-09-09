@@ -418,6 +418,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
     dmgAccum = Math.round(dmgAccum * (1 + totalPassiveDmgBonus));
     const parts = [];
     if (breakdown.shinigamiActive) parts.push({ label: "Shinigami Sword", pct: "15%" });
+    if (breakdown.sacrificialMarkActive) parts.push({ label: "Sacrificial Mark", pct: "25%" });
     if (breakdown.isReaper) parts.push({ label: "Adaptation Passive", pct: "40%" });
     if (breakdown.isEighthSword && breakdown.berserkState) parts.push({ label: "The Nameless Demon (Berserk)", pct: "20%" });
     if (breakdown.isLadyGiant && breakdown.giantForm) parts.push({ label: "Size Control: Giant Form", pct: "125%" });
@@ -1002,6 +1003,7 @@ function openBreakdownModal(unit, traitName, breakdown, bestEquips, lockedRelic)
             <span class="dps-status-chip chip-zstat">Z Stat (1.20x DMG / 0.85x SPA / 1.15x RNG)</span>
             ${hasAscend ? `<span class="dps-status-chip chip-ascend">Ascension III (1.15x DMG / 1.05x RNG)</span>` : ""}
             ${breakdown.shinigamiActive ? `<span class="dps-status-chip chip-shinigami">Shinigami Sword Active (+15%)</span>` : ""}
+            ${breakdown.sacrificialMarkActive ? `<span class="dps-status-chip chip-shinigami">Sacrificial Mark Active (+25%)</span>` : ""}
           </div>
         </div>
       </div>
@@ -2096,10 +2098,6 @@ export async function DpsCard(unit, options = {}) {
             <span class="dps-stepper-lbl">Burn Stacks:</span>
             <input type="text" inputmode="numeric" pattern="[0-9]*" id="hc-stacks-input-${unit.id}" value="${headCaptainBurnStacks}" class="dps-stepper-input" />
           </div>
-          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
-            <span class="dps-pill-dot"></span>
-            Shinigami: ${shinigamiPassiveActive ? "On" : "Off"}
-          </button>
         ` : isProdigy ? `
           <div class="dps-prodigy-controls-stack">
             <div class="dps-prodigy-row">
@@ -2118,10 +2116,6 @@ export async function DpsCard(unit, options = {}) {
                 <span id="prodigy-status-badge-${unit.id}" class="dps-stepper-sub color-buff font-mono">(+${prodigyStatusEffects * 10}%)</span>
                 <input type="text" inputmode="numeric" pattern="[0-9]*" id="prodigy-status-input-${unit.id}" value="${prodigyStatusEffects}" class="dps-stepper-input" />
               </div>
-              <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
-                <span class="dps-pill-dot"></span>
-                Shinigami (1.15x)
-              </button>
             </div>
           </div>
         ` : isBioinsect ? `
@@ -2139,10 +2133,6 @@ export async function DpsCard(unit, options = {}) {
               <button type="button" class="dps-toggle-pill ${bioinsectForm !== 'imperfect' ? 'active' : ''}" id="bioinsect-form-toggle-${unit.id}">
                 <span class="dps-pill-dot"></span>
                 Form: ${bioinsectForm.charAt(0).toUpperCase() + bioinsectForm.slice(1)}
-              </button>
-              <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
-                <span class="dps-pill-dot"></span>
-                Shinigami (1.15x)
               </button>
             </div>
           </div>
@@ -2163,10 +2153,6 @@ export async function DpsCard(unit, options = {}) {
                 <span class="dps-stepper-lbl">Enemies (chains):</span>
                 <input type="text" inputmode="numeric" pattern="[0-9]*" class="dps-stepper-input" id="sovereign-enemies-${unit.id}" value="${sovereignEnemies}" style="width:32px" />
               </div>
-              <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
-                <span class="dps-pill-dot"></span>
-                Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
-              </button>
             </div>
           </div>
         ` : isLightningGod ? `
@@ -2179,20 +2165,12 @@ export async function DpsCard(unit, options = {}) {
             <span class="dps-stepper-lbl">Enemies:</span>
             <input type="text" inputmode="numeric" pattern="[0-9]*" id="lg-enemies-input-${unit.id}" value="${lgEnemies}" class="dps-stepper-input" style="width:32px" />
           </div>
-          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
-            <span class="dps-pill-dot"></span>
-            Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
-          </button>
         ` : isSharkfang ? `
           <div class="dps-control-stepper">
             <span class="dps-stepper-lbl">Puddles:</span>
             <span class="dps-stepper-sub color-dot font-mono">(Burn ${sfBurnStacks > 0 ? sfBurnStacks + ' stack' + (sfBurnStacks > 1 ? 's' : '') : 'Off'})</span>
             <input type="text" inputmode="numeric" pattern="[0-9]*" id="sf-burn-input-${unit.id}" value="${sfBurnStacks}" class="dps-stepper-input" style="width:32px" />
           </div>
-          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
-            <span class="dps-pill-dot"></span>
-            Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
-          </button>
         ` : isSandAlligator ? `
           <div class="dps-control-stepper">
             <span class="dps-stepper-lbl">Poison Stacks:</span>
@@ -2203,10 +2181,6 @@ export async function DpsCard(unit, options = {}) {
             <span class="dps-pill-dot"></span>
             Poison: ${sandPoisonBugged ? "Bugged (0.3x)" : "Fixed (3.3x)"}
           </button>
-          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
-            <span class="dps-pill-dot"></span>
-            Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
-          </button>
         ` : isIronWolf ? `
           <button type="button" class="dps-toggle-pill ${ironWolfPermSpill ? 'active' : ''}" id="iw-perm-spill-toggle-${unit.id}">
             <span class="dps-pill-dot"></span>
@@ -2215,10 +2189,6 @@ export async function DpsCard(unit, options = {}) {
           <button type="button" class="dps-toggle-pill ${ironWolfExtraSpill ? 'active' : ''}" id="iw-extra-spill-toggle-${unit.id}">
             <span class="dps-pill-dot"></span>
             Crimson Spill ×2
-          </button>
-          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
-            <span class="dps-pill-dot"></span>
-            Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
           </button>
         ` : is5thGodHand ? `
           <div class="dps-control-stepper">
@@ -2231,25 +2201,12 @@ export async function DpsCard(unit, options = {}) {
             <span id="gh-marked-badge-${unit.id}" class="dps-stepper-sub color-buff font-mono">(+${(markedEnemies * (hasOrbOfCausality ? 5 : 2.5)).toFixed(1)}% DMG)</span>
             <input type="text" inputmode="numeric" pattern="[0-9]*" id="gh-marked-input-${unit.id}" value="${markedEnemies}" class="dps-stepper-input" style="width:32px" />
           </div>
-          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
-            <span class="dps-pill-dot"></span>
-            Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
-          </button>
         ` : isSilverFalcon ? `
           <button type="button" class="dps-toggle-pill ${falconPawnActive ? 'active' : ''}" id="sf-pawn-toggle-${unit.id}">
             <span class="dps-pill-dot"></span>
             Falcon's Pawn: ${falconPawnActive ? "On (+50% Crit)" : "Off"}
           </button>
-          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
-            <span class="dps-pill-dot"></span>
-            Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
-          </button>
-        ` : `
-          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
-            <span class="dps-pill-dot"></span>
-            Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
-          </button>
-        `}
+        ` : ""}
       </div>
 
       <!-- Trait Leaderboard Stack -->
@@ -2267,7 +2224,6 @@ export async function DpsCard(unit, options = {}) {
   const giantFormToggle = card.querySelector(`#giantform-toggle-${unit.id}`);
   const demonicToggle = card.querySelector(`#demonic-toggle-${unit.id}`);
   const berserkToggle = card.querySelector(`#berserk-toggle-${unit.id}`);
-  const shinigamiToggle = card.querySelector(`#shinigami-toggle-${unit.id}`);
   const fuaToggle = card.querySelector(".dps-fua-toggle");
   const fuaToggleWrapper = card.querySelector(".dps-fua-toggle-wrapper");
   const crowEnemiesInput = card.querySelector(`#crow-enemies-${unit.id}`);
