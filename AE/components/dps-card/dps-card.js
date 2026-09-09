@@ -2015,7 +2015,7 @@ export async function DpsCard(unit, options = {}) {
       <div class="dps-options-bar">
         ${isCrow ? `
           <div class="dps-control-stepper">
-            <span class="dps-stepper-lbl">Enemies:</span>
+            <span class="dps-stepper-lbl">Enemy Stacks:</span>
             <input type="text" inputmode="numeric" pattern="[0-9]*" class="dps-stepper-input" id="crow-enemies-${unit.id}" value="${crowEnemiesHit}" />
           </div>
         ` : ""}
@@ -2145,12 +2145,12 @@ export async function DpsCard(unit, options = {}) {
               </button>
               <button type="button" class="dps-toggle-pill ${sovereignDjinnJudgmentActive ? 'active' : ''}" id="sovereign-judgment-toggle-${unit.id}">
                 <span class="dps-pill-dot"></span>
-                Judgment: ${sovereignDjinnJudgmentActive ? "On (7s)" : "Off"}
+                Judgment: ${sovereignDjinnJudgmentActive ? "On" : "Off"}
               </button>
             </div>
             <div class="dps-prodigy-row">
               <div class="dps-control-stepper">
-                <span class="dps-stepper-lbl">Enemies (chains):</span>
+                <span class="dps-stepper-lbl">Chains:</span>
                 <input type="text" inputmode="numeric" pattern="[0-9]*" class="dps-stepper-input" id="sovereign-enemies-${unit.id}" value="${sovereignEnemies}" style="width:32px" />
               </div>
             </div>
@@ -2488,7 +2488,7 @@ export async function DpsCard(unit, options = {}) {
     unit.sovereignDjinnJudgmentActive = sovereignDjinnJudgmentActive;
     saveUnitSetting(unit.id, "sovereignDjinnJudgmentActive", sovereignDjinnJudgmentActive);
     sovereignJudgmentToggle.classList.toggle("active", sovereignDjinnJudgmentActive);
-    sovereignJudgmentToggle.innerHTML = `<span class="dps-pill-dot"></span>Judgment: ${sovereignDjinnJudgmentActive ? "On (7s)" : "Off"}`;
+    sovereignJudgmentToggle.innerHTML = `<span class="dps-pill-dot"></span>Judgment: ${sovereignDjinnJudgmentActive ? "On" : "Off"}`;
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
     renderCalculations();
   });

@@ -59,6 +59,7 @@ export async function DpsPage(filter = "") {
 
   let currentPage = 1;
   const filtered = filter ? units.filter((u) => u.name.toLowerCase().includes(filter)) : units;
+  let sortedUnits = [];
 
   page.innerHTML = `
     <div class="dps-page-header">
@@ -79,7 +80,7 @@ export async function DpsPage(filter = "") {
       </div>
 
       <div class="dps-mode-toggle-group dps-global-relic-group">
-        <span class="dps-mode-label">Global Relics:</span>
+        <span class="dps-mode-label">Relic Passives:</span>
         <div class="dps-mode-selector">
           <button type="button" class="dps-mode-btn dps-passive-btn ${globalShinigami ? 'active' : ''}" id="global-shinigami-btn" aria-pressed="${globalShinigami}" title="Shinigami Sword passive: +15% damage">
             Shinigami +15%
@@ -122,20 +123,23 @@ export async function DpsPage(filter = "") {
   const shinigamiBtn = page.querySelector("#global-shinigami-btn");
   const sacMarkBtn = page.querySelector("#global-sacmark-btn");
 
-  async function renderSortedCards() {
+  async function renderSortedCards({ resort = true } = {}) {
     list.innerHTML = "";
-    updateBtn.classList.remove("needs-update");
-    updateBtn.textContent = "Update Rankings";
 
-    // Calculate best standing for each unit and sort in descending order
-    const evaluatedUnits = filtered.map(unit => ({
-      unit,
-      standing: calculateUnitBestStanding(unit, currentMode, globalCompMode)
-    }));
+    if (resort) {
+      updateBtn.classList.remove("needs-update");
+      updateBtn.textContent = "Update Rankings";
 
-    evaluatedUnits.sort((a, b) => b.standing - a.standing);
+      // Calculate best standing for each unit and sort in descending order.
+      const evaluatedUnits = filtered.map(unit => ({
+        unit,
+        standing: calculateUnitBestStanding(unit, currentMode, globalCompMode)
+      }));
 
-    const sortedUnits = evaluatedUnits.map(item => item.unit);
+      evaluatedUnits.sort((a, b) => b.standing - a.standing);
+      sortedUnits = evaluatedUnits.map(item => item.unit);
+    }
+
     const totalPages = Math.max(1, Math.ceil(sortedUnits.length / PAGE_SIZE));
     if (currentPage > totalPages) currentPage = totalPages;
     if (currentPage < 1) currentPage = 1;
@@ -166,15 +170,15 @@ export async function DpsPage(filter = "") {
   prevBtn.addEventListener("click", () => {
     if (currentPage > 1) {
       currentPage--;
-      renderSortedCards();
+      renderSortedCards({ resort: false });
     }
   });
 
   nextBtn.addEventListener("click", () => {
-    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(sortedUnits.length / PAGE_SIZE));
     if (currentPage < totalPages) {
       currentPage++;
-      renderSortedCards();
+      renderSortedCards({ resort: false });
     }
   });
 
@@ -208,7 +212,9 @@ export async function DpsPage(filter = "") {
     saveGlobalSetting("shinigamiPassive", globalShinigami);
     shinigamiBtn.classList.toggle("active", globalShinigami);
     shinigamiBtn.setAttribute("aria-pressed", String(globalShinigami));
-    renderSortedCards();
+    updateBtn.classList.add("needs-update");
+    updateBtn.textContent = "Update Rankings \u25b2";
+    renderSortedCards({ resort: false });
   });
 
   // Global Sacrificial Mark toggle
@@ -217,7 +223,9 @@ export async function DpsPage(filter = "") {
     saveGlobalSetting("sacrificialMark", globalSacrificialMark);
     sacMarkBtn.classList.toggle("active", globalSacrificialMark);
     sacMarkBtn.setAttribute("aria-pressed", String(globalSacrificialMark));
-    renderSortedCards();
+    updateBtn.classList.add("needs-update");
+    updateBtn.textContent = "Update Rankings \u25b2";
+    renderSortedCards({ resort: false });
   });
 
   // Mark the update button as needing a re-sort when values change (but don't auto-sort)
