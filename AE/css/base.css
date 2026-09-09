@@ -223,7 +223,7 @@ img {
 
 /* ── Universal Keyword Highlights ─────────────────────────────────────────── */
 :root {
-  --kw-darkness: 45%;
+  --kw-darkness: 25%;
 }
 
 .p-kw,
@@ -283,7 +283,9 @@ img {
 .p-kw.p-string>span,
 .p-kw.p-cubert-meter>span,
 .p-kw.p-distortion>span,
-.p-kw.p-target>span {
+.p-kw.p-target>span,
+.p-kw.p-ambition-meter>span,
+.p-kw.p-kill>span {
   --kw-color: #dadada;
   color: #dadada !important;
   -webkit-text-fill-color: #dadada !important;
@@ -423,6 +425,16 @@ img {
   text-underline-offset: 2px !important;
 }
 
+.p-kw.p-archetype>span {
+  --kw-color: #4d4d4d;
+  color: #4d4d4d !important;
+  -webkit-text-fill-color: #4d4d4d !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #4d4d4d !important;
+  text-underline-offset: 2px !important;
+}
+
 .p-kw.p-drink-transform>span {
   --kw-color: #3b82f6;
   color: #3b82f6 !important;
@@ -499,13 +511,18 @@ img {
 
 .p-kw.p-magical>span,
 .p-magical-text {
-  --kw-color: #0eaae8;
+  --kw-color: #38c8ff;
 }
 
 .p-kw.p-frostbite>span,
 .p-kw.p-freeze>span,
 .p-kw.p-ice-trap>span {
   --kw-color: #38bdf8;
+}
+
+.p-kw.p-the-captain>span,
+.p-kw.p-the-falcons-pawn>span {
+  --kw-color: #6dcfff;
 }
 
 .p-kw.p-desert-storm>span {
@@ -643,7 +660,7 @@ img {
 }
 
 .p-kw.p-buffs>span {
-  --kw-color: #22c55e;
+  --kw-color: #22e25b;
 }
 
 .p-kw.p-poison>span,
@@ -716,6 +733,8 @@ img {
 .p-kw.p-electric-residue>span,
 .p-kw.p-nine-tailed-fox-djinn>span,
 .p-kw.p-lightning-djinn>span,
+.p-kw.p-the-captain>span,
+.p-kw.p-the-falcons-pawn>span,
 .p-kw.p-lightning-strike>span {
   background: linear-gradient(180deg, color-mix(in srgb, var(--kw-color) calc(100% - var(--kw-darkness)), #000) 0%, var(--kw-color) 100%) !important;
   -webkit-background-clip: text !important;

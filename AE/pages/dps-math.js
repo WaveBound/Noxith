@@ -264,6 +264,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const isSandAlligator = unit && (unit.id === "sandalligator" || (unit.name && unit.name.includes("Sand (Alligator)")));
   const isIronWolf = unit && (unit.id === "ironwolfstruggler" || (unit.name && unit.name.includes("Iron Wolf (Struggler)")));
   const is5thGodHand = unit && (unit.id === "5thgodhand" || (unit.name && unit.name.includes("5th God Hand")));
+  const isSilverFalcon = unit && (unit.id === "silverfalcon" || (unit.name && unit.name.includes("Silver Falcon")));
 
   const darkMageMode = isDarkMage
     ? (unit.darkMageMode || (unit.darkMageLightningMode === false ? "normal" : "lightning"))
@@ -303,6 +304,7 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   const lgEnemies = isLightningGod ? Math.max(1, parseInt(unit.lgEnemies !== undefined ? unit.lgEnemies : 10, 10) || 10) : 10;
   const fatedMeter = is5thGodHand ? Math.max(0, Math.min(35, parseInt(unit.fatedMeter !== undefined ? unit.fatedMeter : 34, 10) || 0)) : 0;
   const markedEnemies = is5thGodHand ? Math.max(0, parseInt(unit.markedEnemies !== undefined ? unit.markedEnemies : 0, 10) || 0) : 0;
+  const falconPawnActive = isSilverFalcon ? (unit.falconPawnActive !== undefined ? !!unit.falconPawnActive : true) : false;
   let hasOrbOfCausality = false;
   if (is5thGodHand) {
     let activeUnitEquip = "";
@@ -320,6 +322,11 @@ export function getTraitBreakdown(unit, traitKey = "base", level = 1, statMode =
   let passiveSpaMult = isReaper ? -0.10 : (isLadyGiant && giantForm ? 0.25 : (isEighthSword && berserkState ? -0.10 : 0));
   let passiveCritChanceAdd = isReaper ? 0.40 : (isCursedImmortal ? 0.30 : (isRazorjaw ? 0.25 : 0));
   let passiveCritDamageAdd = isCarrot && carrotTransformation ? 0.20 : 0;
+
+  if (isSilverFalcon && falconPawnActive) {
+    passiveCritChanceAdd += 0.50;
+    passiveCritDamageAdd += 0.50;
+  }
   let passiveDamageMult = isReaper ? 0.40 : (isLadyGiant && giantForm ? 1.25 : (isEighthSword && berserkState ? 0.20 : (isCarrot && carrotTransformation ? 0.15 : (isProdigy && prodigyRageUnleashed ? 0.25 : 0))));
   let passiveRangeMult = (isLadyGiant && giantForm ? 0.50 : (isCursedImmortal && caringState ? -0.50 : (isCursedImmortal && coldState ? -0.75 : 0)));
 

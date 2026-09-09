@@ -96,6 +96,7 @@ export function optimizeRelicsForTrait(unit, traitKey, options = {}) {
       is5thGodHand,
       fatedMeter: options.fatedMeter !== undefined ? options.fatedMeter : (unit.fatedMeter !== undefined ? unit.fatedMeter : 34),
       markedEnemies: options.markedEnemies !== undefined ? options.markedEnemies : (unit.markedEnemies !== undefined ? unit.markedEnemies : 0),
+      falconPawnActive: options.falconPawnActive !== undefined ? !!options.falconPawnActive : (unit.falconPawnActive !== undefined ? !!unit.falconPawnActive : true),
     };
 
     const rawBreakdown = getTraitBreakdown(mockUnit, traitKey, targetLevel, statMode);
@@ -1851,6 +1852,7 @@ export async function DpsCard(unit, options = {}) {
   const isSandAlligator = unit.id === "sandalligator" || (unit.name && unit.name.includes("Sand (Alligator)"));
   const isIronWolf = unit.id === "ironwolfstruggler" || (unit.name && unit.name.includes("Iron Wolf (Struggler)"));
   const is5thGodHand = unit.id === "5thgodhand" || (unit.name && unit.name.includes("5th God Hand"));
+  const isSilverFalcon = unit.id === "silverfalcon" || (unit.name && unit.name.includes("Silver Falcon"));
 
   let darkMageMode = unit.darkMageMode || "lightning";
   let giantForm = unit.giantForm !== undefined ? unit.giantForm : false;
@@ -1899,6 +1901,7 @@ export async function DpsCard(unit, options = {}) {
   let ironWolfExtraSpill = isIronWolf ? !!(unit.ironWolfExtraSpill) : false;
   let fatedMeter = is5thGodHand ? Math.max(0, Math.min(35, parseInt(unit.fatedMeter !== undefined ? unit.fatedMeter : 34, 10) || 0)) : 0;
   let markedEnemies = is5thGodHand ? Math.max(0, parseInt(unit.markedEnemies !== undefined ? unit.markedEnemies : 0, 10) || 0) : 0;
+  let falconPawnActive = isSilverFalcon ? (unit.falconPawnActive !== undefined ? !!unit.falconPawnActive : true) : false;
   const hasOrbOfCausality = is5thGodHand && (
     unit.selectedDpsRelic === "Orb of Causality" ||
     unit.relic?.name === "Orb of Causality" ||
@@ -1928,6 +1931,10 @@ export async function DpsCard(unit, options = {}) {
   if (is5thGodHand) {
     unit.fatedMeter = fatedMeter;
     unit.markedEnemies = markedEnemies;
+  }
+  if (isSilverFalcon) {
+    if (unit.falconPawnActive === undefined) unit.falconPawnActive = true;
+    falconPawnActive = !!unit.falconPawnActive;
   }
 
   if (isProdigy) {
@@ -2214,6 +2221,15 @@ export async function DpsCard(unit, options = {}) {
             <span id="gh-marked-badge-${unit.id}" class="dps-stepper-sub color-buff font-mono">(+${(markedEnemies * (hasOrbOfCausality ? 5 : 2.5)).toFixed(1)}% DMG)</span>
             <input type="text" inputmode="numeric" pattern="[0-9]*" id="gh-marked-input-${unit.id}" value="${markedEnemies}" class="dps-stepper-input" style="width:32px" />
           </div>
+          <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
+            <span class="dps-pill-dot"></span>
+            Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
+          </button>
+        ` : isSilverFalcon ? `
+          <button type="button" class="dps-toggle-pill ${falconPawnActive ? 'active' : ''}" id="sf-pawn-toggle-${unit.id}">
+            <span class="dps-pill-dot"></span>
+            Falcon's Pawn: ${falconPawnActive ? "On (+50% Crit)" : "Off"}
+          </button>
           <button type="button" class="dps-toggle-pill ${shinigamiPassiveActive ? 'active' : ''}" id="shinigami-toggle-${unit.id}">
             <span class="dps-pill-dot"></span>
             Shinigami: ${shinigamiPassiveActive ? "On (1.15x)" : "Off"}
@@ -2656,6 +2672,7 @@ export async function DpsCard(unit, options = {}) {
 
   const ghMeterInput = card.querySelector(`#gh-meter-input-${unit.id}`);
   const ghMeterBadge = card.querySelector(`#gh-meter-badge-${unit.id}`);
+  const sfPawnToggle = card.querySelector(`#sf-pawn-toggle-${unit.id}`);
   const getGhMeterBadgeLabel = (v) => v >= 35 ? "Eclipse" : (v > 0 ? `+${v * 5}%` : "Base");
 
   const commitGhMeter = () => {
@@ -2731,6 +2748,16 @@ export async function DpsCard(unit, options = {}) {
       window.dispatchEvent(new CustomEvent("dps-value-changed"));
       renderCalculations();
     }
+  });
+
+  sfPawnToggle?.addEventListener("click", () => {
+    falconPawnActive = !falconPawnActive;
+    unit.falconPawnActive = falconPawnActive;
+    saveUnitSetting(unit.id, "falconPawnActive", falconPawnActive);
+    sfPawnToggle.classList.toggle("active", falconPawnActive);
+    sfPawnToggle.innerHTML = `<span class="dps-pill-dot"></span>Falcon's Pawn: ${falconPawnActive ? "On (+50% Crit)" : "Off"}`;
+    window.dispatchEvent(new CustomEvent("dps-value-changed"));
+    renderCalculations();
   });
 
   const prodigyStatusBadge = card.querySelector(`#prodigy-status-badge-${unit.id}`);

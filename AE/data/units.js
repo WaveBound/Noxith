@@ -25,6 +25,7 @@ import watermagescholar from "./units/watermagescholar.js";
 import sandalligator from "./units/sandalligator.js";
 import ironwolfstruggler from "./units/ironwolfstruggler.js";
 import fifthgodhand from "./units/5thgodhand.js";
+import silverfalcon from "./units/silverfalcon.js";
 
 import { getRelicStatsByName } from "./relicstats.js";
 import { relicImgByName } from "../icons/icons.js";
@@ -57,6 +58,7 @@ const rawUnits = [
   sandalligator,
   ironwolfstruggler,
   fifthgodhand,
+  silverfalcon,
 ];
 
 function formatRange(v) {

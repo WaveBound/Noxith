@@ -435,6 +435,17 @@ export const relicStats = {
             desc: `This unit has <b>Fated Meter</b>, starting at 0. (Capacity: <b>35</b>)<br><br>If an enemy survives <b>Distortion</b>'s damage:<br>- Inflict enemy with <b>Mark Of Fate</b> for <b>5</b> seconds<br>- Gain <b>1</b> <b>Fated Meter</b><br><br>For every enemy in range with <b>Mark Of Fate</b>:<br>- Increase this unit's damage by <b>5%</b><br>- Increase this unit's range by <b>2.5%</b><br><br><b>Mark Of Fate</b> cannot stack.<br>Enemies inflicted with <b>Mark Of Fate</b> will take <b>20%</b> increased damage from this unit.`,
         },
     },
+
+    "Chosen Sabre": {
+        stats: [
+            { range: { min: "+10%", max: "+10%" } },
+            { damage: { min: "+5%", max: "+5%" } },
+        ],
+        passive: {
+            name: "Equipment Passive The Captain",
+            desc: `On Placement:<br>- Increase all players' units' base damage by <b>15%</b> (+<b>2%</b> per upgrade)<br>- Increase all players' <b>Physical</b> Archetype units' damage by <b>5%</b> (+<b>2%</b> per upgrade)<br>- Increase all players' <b>Magical</b> Archetype units' damage by <b>5%</b> (+<b>2%</b> per upgrade)<br><br>The player's most equipped <b>Archetype</b> gains an additional <b>15%</b> damage.<br><b>Buffs</b> from <b>The Captain</b> do not stack.`,
+        },
+    },
 };
 
 export function getRelicStatsByName(name) {
