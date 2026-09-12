@@ -2141,7 +2141,7 @@ export async function DpsCard(unit, options = {}) {
             <div class="dps-prodigy-row">
               <button type="button" class="dps-toggle-pill ${sovereignBossActive ? 'active' : ''}" id="sovereign-boss-toggle-${unit.id}">
                 <span class="dps-pill-dot"></span>
-                Boss in Range: ${sovereignBossActive ? "On (+50%)" : "Off"}
+                Boss in Range: ${sovereignBossActive ? "On" : "Off"}
               </button>
               <button type="button" class="dps-toggle-pill ${sovereignDjinnJudgmentActive ? 'active' : ''}" id="sovereign-judgment-toggle-${unit.id}">
                 <span class="dps-pill-dot"></span>
@@ -2167,8 +2167,7 @@ export async function DpsCard(unit, options = {}) {
           </div>
         ` : isSharkfang ? `
           <div class="dps-control-stepper">
-            <span class="dps-stepper-lbl">Puddles:</span>
-            <span class="dps-stepper-sub color-dot font-mono">(Burn ${sfBurnStacks > 0 ? sfBurnStacks + ' stack' + (sfBurnStacks > 1 ? 's' : '') : 'Off'})</span>
+            <span class="dps-stepper-lbl">Burn Puddle:</span>
             <input type="text" inputmode="numeric" pattern="[0-9]*" id="sf-burn-input-${unit.id}" value="${sfBurnStacks}" class="dps-stepper-input" style="width:32px" />
           </div>
         ` : isSandAlligator ? `
@@ -2478,7 +2477,7 @@ export async function DpsCard(unit, options = {}) {
     unit.sovereignBossActive = sovereignBossActive;
     saveUnitSetting(unit.id, "sovereignBossActive", sovereignBossActive);
     sovereignBossToggle.classList.toggle("active", sovereignBossActive);
-    sovereignBossToggle.innerHTML = `<span class="dps-pill-dot"></span>Boss in Range: ${sovereignBossActive ? "On (+50%)" : "Off"}`;
+    sovereignBossToggle.innerHTML = `<span class="dps-pill-dot"></span>Boss in Range: ${sovereignBossActive ? "On" : "Off"}`;
     window.dispatchEvent(new CustomEvent("dps-value-changed"));
     renderCalculations();
   });
@@ -2933,42 +2932,50 @@ export async function DpsCard(unit, options = {}) {
     panel.className = "dps-builds-modal-v2";
     panel.innerHTML = `
       <div class="dps-modal-unit-standalone">
-        <img class="dps-modal-unit-img-only" src="${toAbsoluteUrl(unit.image || "assets/placeholder.svg")}" alt="${unit.name}" onerror="this.src='assets/placeholder.svg'" />
+        <div class="dps-builds-media">
+          <img class="dps-modal-unit-img-only" src="${toAbsoluteUrl(unit.image || "assets/placeholder.svg")}" alt="${unit.name}" onerror="this.src='assets/placeholder.svg'" />
+        </div>
+        <div class="dps-builds-visual-overlay">
+          <span class="dps-builds-eyebrow">Build explorer</span>
+          <strong>${unit.name}</strong>
+          <span class="dps-builds-trait"><img src="${toAbsoluteUrl(traitIconSrc)}" alt="" onerror="this.style.display='none'" />${traitDef.name}</span>
+        </div>
       </div>
 
       <div class="dps-leaderboard-side">
         <div class="dps-leaderboard-header">
           <div class="dps-leaderboard-header-title">
-            <div class="dps-modal-unit-row">
-              <span class="dps-lh-main">${unit.name}</span>
-              <span class="dps-modal-trait-badge">
-                <img src="${toAbsoluteUrl(traitIconSrc)}" alt="" onerror="this.style.display='none'" />
-                ${traitDef.name}
-              </span>
-            </div>
-            <span class="dps-lh-sub">${builds.length} Relic Loadout Simulations Tested</span>
+            <span class="dps-lh-main">Relic builds</span>
+            <span class="dps-lh-sub">${builds.length} loadouts ranked by ${mode === "dmg" ? "damage" : "DPS"}</span>
           </div>
           <button type="button" class="dps-builds-modal-close" aria-label="Close modal">&times;</button>
         </div>
 
-        <div class="dps-builds-table-header">
-          <span>Rank</span>
-          <span>Loadout</span>
-          <span class="col-right">${mode === "dmg" ? "DMG" : "DPS"}</span>
-          <span class="col-right">Diff</span>
-          <span></span>
+        <button type="button" class="dps-build-feature" data-build-index="0">
+          <span class="dps-build-feature-label">Best configuration</span>
+          <span class="dps-build-feature-main">
+            <span class="dps-loadout-icons-col">${buildLoadoutIcons(topBuild)}</span>
+            <span class="dps-build-feature-value font-mono">${topBuild?.breakdown?.formattedVal || "—"}<small>${mode === "dmg" ? "DMG" : "DPS"}</small></span>
+          </span>
+          <span class="dps-build-feature-action">View breakdown <span>→</span></span>
+        </button>
+
+        <div class="dps-builds-list-title">
+          <span>Other loadouts</span>
+          <span>${Math.max(0, builds.length - 1)} alternatives</span>
         </div>
 
         <div class="dps-leaderboard-list">
-          ${builds.map((build, index) => {
+          ${builds.slice(1).map((build, index) => {
+      index += 1;
       const rankIdx = index + 1;
       const rankClass = rankIdx === 1 ? "rank-gold" : (rankIdx === 2 ? "rank-silver" : (rankIdx === 3 ? "rank-bronze" : ""));
       const buildVal = build.breakdown.displayVal;
       const diffPercent = topVal > 0 ? ((buildVal - topVal) / topVal) * 100 : 0;
-      const diffDisplay = index === 0 ? `<span class="diff-best">BEST</span>` : `<span class="diff-loss">${diffPercent.toFixed(1)}%</span>`;
+      const diffDisplay = `<span class="diff-loss">${diffPercent.toFixed(1)}%</span>`;
 
       return `
-              <div class="dps-table-build-row ${rankClass}" data-build-index="${index}">
+              <button type="button" class="dps-table-build-row ${rankClass}" data-build-index="${index}">
                 <div class="row-rank-col">
                   <span class="rank-badge-text">#${rankIdx}</span>
                 </div>
@@ -2982,16 +2989,16 @@ export async function DpsCard(unit, options = {}) {
                 <div class="row-action-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                 </div>
-              </div>
+              </button>
             `;
-    }).join("")}
+    }).join("") || `<div class="dps-builds-empty">This is the only available optimized loadout.</div>`}
         </div>
       </div>
     `;
 
     panel.querySelector(".dps-builds-modal-close").addEventListener("click", close);
 
-    panel.querySelectorAll(".dps-table-build-row").forEach(rowEl => {
+    panel.querySelectorAll(".dps-build-feature, .dps-table-build-row").forEach(rowEl => {
       rowEl.addEventListener("click", () => {
         const build = builds[Number(rowEl.dataset.buildIndex)];
         openBreakdownModal(unit, traitDef.name, build.breakdown, build.equips, build.unitRelic);
@@ -3067,7 +3074,6 @@ export async function DpsCard(unit, options = {}) {
             <div class="dps-trait-icon-container" title="${traitDef.name}">
               <img class="dps-trait-icon" src="${toAbsoluteUrl(traitIconSrc)}" alt="${traitDef.name}" onerror="this.style.display='none'" />
             </div>
-            <span class="dps-trait-name">${traitDef.name}</span>
             <div class="dps-loadout-icons-col">${buildLoadoutIcons(topBuild)}</div>
           </div>
 
