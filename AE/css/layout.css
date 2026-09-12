@@ -1,3 +1,4 @@
+/* ── Main App Shell ────────────────────────────────────────────────────────── */
 #app {
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;
@@ -14,7 +15,8 @@
   overflow: hidden;
 }
 
-#header-mount {
+#header-mount,
+#sub-header-mount {
   flex-shrink: 0;
 }
 
@@ -26,7 +28,7 @@
   padding: 10px 16px 24px;
 }
 
-/* ── Scale padding on wider viewports (above 1080p) ──────────────────── */
+/* ── Wide Viewport Padding Scaling ────────────────────────────────────────── */
 @media (min-width: 2000px) {
   #page-container {
     padding: 12px 28px 52px;
@@ -39,6 +41,7 @@
   }
 }
 
+/* ── Page Transitions & Titles ────────────────────────────────────────────── */
 .page {
   animation: page-in var(--t-med) var(--ease);
 }
@@ -73,28 +76,13 @@
   font-size: 12px;
 }
 
-/* ── Relics page: split sections ─────────────────────────────────────────── */
-.relic-section {
-  margin-bottom: 24px;
-}
-
-.relic-section-title {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--text);
-  margin: 0 0 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-}
-
 .relic-section-empty {
   color: var(--muted);
   font-size: 12px;
   padding: 8px 0 4px;
 }
 
-/* ── Sidebar Mobile Backdrop ────────────────────────────────────────────── */
+/* ── Mobile Sidebar Backdrop ──────────────────────────────────────────────── */
 .sidebar-backdrop {
   position: fixed;
   inset: 0;
@@ -111,30 +99,20 @@
   visibility: visible;
 }
 
-/* ── Responsive Layout (< 1100px) ───────────────────────────────────────────── */
+/* ── Mobile Layout (< 1100px) ─────────────────────────────────────────────── */
 @media (max-width: 1100px) {
   #app {
     display: flex !important;
     flex-direction: column !important;
     width: 100vw !important;
-    height: 100dvh !important;
-    overflow: hidden !important;
   }
 
   #main {
     width: 100vw !important;
-    height: 100dvh !important;
     flex: 1 !important;
-    min-width: 0 !important;
-    overflow: hidden !important;
-  }
-
-  #header-mount {
-    flex-shrink: 0 !important;
   }
 
   #page-container {
     padding: 10px 14px 32px !important;
-    overflow-y: auto !important;
   }
 }

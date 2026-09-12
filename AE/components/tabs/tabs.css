@@ -1,4 +1,4 @@
-/* ── Compact tab bar ─────────────────────────────────────────────────────── */
+/* ── Compact Tab Bar ───────────────────────────────────────────────────────── */
 .tab-bar {
   display: flex;
   align-items: flex-end;
@@ -9,10 +9,11 @@
   flex-shrink: 0;
   background: var(--background);
   height: 38px;
+  scrollbar-width: none;
 }
 
 .tab-bar::-webkit-scrollbar {
-  height: 0;
+  display: none;
 }
 
 .tab-item {
@@ -27,7 +28,6 @@
   white-space: nowrap;
   border-bottom: 2px solid transparent;
   transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
-  position: relative;
 }
 
 .tab-item:hover {
@@ -48,7 +48,7 @@
   justify-content: center;
   color: var(--muted);
   opacity: 0.6;
-  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease);
+  transition: all var(--t-fast) var(--ease);
 }
 
 .tab-item:hover .tab-close {

@@ -1,10 +1,11 @@
+/* ── Coming Soon Placeholder Component ────────────────────────────────────── */
 .coming-soon {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  padding: 100px 20px;
+  padding: clamp(48px, 8vw, 80px) 20px;
   text-align: center;
   border-radius: var(--radius-lg);
   border: 1px dashed var(--border-strong);
@@ -20,6 +21,7 @@
   align-items: center;
   justify-content: center;
   color: var(--purple-strong);
+  flex-shrink: 0;
 }
 
 .coming-soon-icon svg {
@@ -29,10 +31,13 @@
 
 .coming-soon h2 {
   font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
 }
 
 .coming-soon p {
   color: var(--muted);
   font-size: 13px;
+  line-height: 1.5;
   max-width: 40ch;
 }

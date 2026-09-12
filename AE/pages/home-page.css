@@ -1,10 +1,10 @@
-/* ── Home / landing page ─────────────────────────────────────────────────────── */
+/* ── Home Page Layout ─────────────────────────────────────────────────────── */
 .home-page {
     max-width: 1100px;
     margin: 0 auto;
 }
 
-/* ── Hero ──────────────────────────────────────────────────────────────────── */
+/* ── Hero Section ─────────────────────────────────────────────────────────── */
 .home-hero {
     padding: 28px 4px 24px;
     border-bottom: 1px solid var(--border);
@@ -21,7 +21,7 @@
 }
 
 .home-hero-title {
-    font-size: 30px;
+    font-size: clamp(24px, 4vw, 30px);
     font-weight: 700;
     letter-spacing: -0.03em;
     line-height: 1.15;
@@ -36,6 +36,7 @@
     line-height: 1.6;
 }
 
+/* ── Stats Row ────────────────────────────────────────────────────────────── */
 .home-stats {
     display: flex;
     gap: 12px;
@@ -65,7 +66,7 @@
     color: var(--muted);
 }
 
-/* ── Section heading ────────────────────────────────────────────────────────── */
+/* ── Section Headings ─────────────────────────────────────────────────────── */
 .home-section-head {
     margin-bottom: 16px;
 }
@@ -81,21 +82,11 @@
     margin-top: 2px;
 }
 
-/* ── Navigation cards ───────────────────────────────────────────────────────── */
+/* ── Navigation Cards Grid ────────────────────────────────────────────────── */
 .home-nav-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
-}
-
-@media (max-width: 720px) {
-    .home-nav-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .home-hero-title {
-        font-size: 24px;
-    }
 }
 
 .home-nav-card {
@@ -108,28 +99,17 @@
     background: var(--card);
     min-height: 152px;
     isolation: isolate;
-    transition: transform var(--t-med) var(--ease),
-        border-color var(--t-med) var(--ease),
-        box-shadow var(--t-med) var(--ease);
+    transition: transform var(--t-med) var(--ease), border-color var(--t-med) var(--ease);
 }
 
 .home-nav-card:hover {
     transform: translateY(-3px);
     border-color: var(--border-strong);
-    box-shadow: none;
 }
 
-.home-nav-card:focus-visible {
-    outline: 2px solid var(--purple-strong);
-    outline-offset: 2px;
-}
-
-/* Thematic gradient background sitting behind the text */
 .home-nav-card-bg {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
     z-index: -2;
     opacity: 0.85;
     transition: transform var(--t-med) var(--ease), opacity var(--t-med) var(--ease);
@@ -140,7 +120,6 @@
     opacity: 1;
 }
 
-/* Gradient scrim so the wording stays legible over the image */
 .home-nav-card-overlay {
     position: absolute;
     inset: 0;
@@ -223,4 +202,11 @@
 
 .home-nav-card:hover .home-nav-card-cta svg {
     transform: translateX(3px);
+}
+
+/* ── Mobile Layout (< 720px) ──────────────────────────────────────────────── */
+@media (max-width: 720px) {
+    .home-nav-grid {
+        grid-template-columns: 1fr;
+    }
 }

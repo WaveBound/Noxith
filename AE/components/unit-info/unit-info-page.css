@@ -1,3 +1,4 @@
+/* ── Unit Info Page Shell ─────────────────────────────────────────────────── */
 .unit-info-page {
   width: 100%;
   max-width: 100%;
@@ -30,13 +31,13 @@
   color: var(--muted);
 }
 
-/* ── Top-Level Unit Header (Fluid Padding) ──────────────────────────────── */
+/* ── Top-Level Sticky Header & Subnav ─────────────────────────────────────── */
 .uip-sticky-header {
   width: 100% !important;
-  background: var(--background, #060608) !important;
-  border-bottom: 1px solid var(--border, #16161a) !important;
+  background: var(--background) !important;
+  border-bottom: 1px solid var(--border) !important;
   padding: clamp(8px, 1vw, 12px) clamp(12px, 1.2vw, 16px) 4px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .uip-header {
@@ -44,7 +45,6 @@
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  padding-top: 0;
   padding-bottom: 8px;
   margin-bottom: 8px;
   border-bottom: 1px solid var(--border);
@@ -69,8 +69,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 8px;
-  margin-bottom: 8px;
+  margin: 8px 0;
 }
 
 .uip-subtab-btn {
@@ -80,8 +79,8 @@
   padding: 6px 14px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border, #1e1e22);
-  color: var(--muted, #71717a);
+  border: 1px solid var(--border);
+  color: var(--muted);
   font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
@@ -90,24 +89,24 @@
 
 .uip-subtab-btn:hover {
   background: rgba(255, 255, 255, 0.06);
-  color: var(--text-secondary, #a1a1aa);
+  color: var(--text-secondary);
   border-color: rgba(255, 255, 255, 0.12);
 }
 
 .uip-subtab-btn.active {
   background: rgba(99, 102, 241, 0.15);
-  border-color: var(--purple-strong, #818cf8);
-  color: var(--text, #fafafa);
+  border-color: var(--purple-strong);
+  color: var(--text);
 }
 
-/* ── Summon View Selector Bar ── */
+/* ── Summon View Selector Bar ─────────────────────────────────────────────── */
 .uip-summon-selector-bar {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 6px;
   background: rgba(0, 0, 0, 0.35);
-  border: 1px solid var(--border, #16161a);
+  border: 1px solid var(--border);
   border-radius: 6px;
   margin-bottom: 14px;
   flex-wrap: wrap;
@@ -142,7 +141,7 @@
   border-color: rgba(99, 102, 241, 0.45);
 }
 
-/* ── Top Right Header DPS Summary Grid ── */
+/* ── Header DPS Summary Grid ──────────────────────────────────────────────── */
 .uip-header-dps-grid {
   display: flex;
   align-items: center;
@@ -187,6 +186,7 @@
   margin-top: 2px;
 }
 
+/* ── Header Identity & Tags ───────────────────────────────────────────────── */
 .uip-avatar {
   width: 70px;
   height: 70px;
@@ -221,20 +221,20 @@
 .uip-tags {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .uip-tier {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 3px;
-  background: var(--background-elevated);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.28);
+  color: #a5b4fc;
 }
 
 .uip-trait-tag {
@@ -242,12 +242,12 @@
   font-weight: 600;
   padding: 2px 7px;
   border-radius: 3px;
-  background: #10b9810d;
+  background: rgba(16, 185, 129, 0.05);
   border: 1px solid rgba(16, 185, 129, 0.18);
-  color: #10b981;
+  color: var(--positive);
 }
 
-/* ── Fluid Main Layout Grids (Self-Wrapping) ───────────────────────── */
+/* ── Fluid Main Layout Grids ──────────────────────────────────────────────── */
 .uip-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) clamp(250px, 22vw, 320px);
@@ -274,7 +274,7 @@
   min-width: 0;
 }
 
-/* Loadout Panel */
+/* ── Loadout Panel ────────────────────────────────────────────────────────── */
 .loadout-panel {
   background: transparent;
   border: none;
@@ -306,6 +306,7 @@
   border-radius: var(--radius-md);
   padding: 6px 8px;
   box-sizing: border-box;
+  transition: border-color var(--t-fast) var(--ease);
 }
 
 .loadout-item:hover {
@@ -315,10 +316,10 @@
 .loadout-img-wrap {
   width: 36px;
   height: 36px;
-  background-image: url("../../icons/relics/RelicBackground.png") !important;
-  background-size: cover !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
+  background-image: url("../../icons/relics/RelicBackground.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   border-radius: var(--radius-sm);
   overflow: hidden;
   flex-shrink: 0;
@@ -328,10 +329,10 @@
 }
 
 .loadout-img-wrap img {
-  width: 86% !important;
-  height: 86% !important;
-  object-fit: contain !important;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) !important;
+  width: 86%;
+  height: 86%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 
 .loadout-item-right {
@@ -366,7 +367,6 @@
   justify-content: space-between;
   gap: 4px;
   width: 100%;
-  font-family: inherit;
   font-size: 9.5px;
   font-weight: 600;
   color: var(--purple-strong);
@@ -410,7 +410,6 @@
   width: 100%;
 }
 
-/* ── Relic Passive Container & Glow inside Dropdown ── */
 .loadout-dropdown-passive {
   display: flex;
   flex-direction: column;
@@ -449,10 +448,9 @@
 }
 
 .loadout-passive-text {
-  font-family: "Montserrat", sans-serif !important;
   font-size: 11px !important;
   line-height: 1.4 !important;
-  color: var(--text-secondary, #a1a1aa);
+  color: var(--text-secondary);
 }
 
 .loadout-mods {
@@ -474,19 +472,19 @@
 }
 
 .loadout-mod-icon {
-  width: 15px !important;
-  height: 15px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-shrink: 0 !important;
+  width: 15px;
+  height: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .loadout-mod-icon img,
 .loadout-mod-icon svg {
-  width: 15px !important;
-  height: 15px !important;
-  object-fit: contain !important;
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
 }
 
 .loadout-mod-label {
@@ -503,6 +501,7 @@
   color: #ffffff;
 }
 
+/* ── Upgrades Table ───────────────────────────────────────────────────────── */
 .upgrades-table {
   padding: 12px 14px;
   box-sizing: border-box;
@@ -523,7 +522,7 @@
   flex-direction: column;
   gap: 5px;
   padding: 10px 12px;
-  background: var(--background-elevated, #0a0a0c);
+  background: var(--background-elevated);
   border: 1px solid rgba(99, 102, 241, 0.22);
   border-radius: 6px;
 }
@@ -602,23 +601,23 @@
 }
 
 .upgrade-stat-icon {
-  width: 13px !important;
-  height: 13px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-shrink: 0 !important;
+  width: 13px;
+  height: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .upgrade-stat-icon img,
 .upgrade-stat-icon svg {
-  width: 13px !important;
-  height: 13px !important;
-  object-fit: contain !important;
+  width: 13px;
+  height: 13px;
+  object-fit: contain;
 }
 
 .upgrade-stat-label {
-  color: #a1a1aa;
+  color: var(--text-secondary);
   font-weight: 700 !important;
 }
 
@@ -645,6 +644,7 @@
   font-weight: 700;
 }
 
+/* ── Passives & Abilities Table ───────────────────────────────────────────── */
 .right-panel-switcher {
   display: flex;
   align-items: center;
@@ -727,11 +727,11 @@
 .passive-name {
   font-size: 15.5px;
   font-weight: 700;
-  color: #ffffff !important;
+  color: #ffffff;
 }
 
 .passive-title-text {
-  color: #ffffff !important;
+  color: #ffffff;
   font-weight: 700;
 }
 
@@ -748,15 +748,8 @@
 }
 
 .passive-label.ability-label {
-  background: linear-gradient(90deg, #c084fc, #a855f7, #9333ea, #c084fc) !important;
-  background-size: 200% 100% !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  color: transparent !important;
-  font-weight: 800 !important;
-  margin-right: 4px !important;
-  animation: passiveLabelShimmer 3s linear infinite !important;
+  background: linear-gradient(90deg, #c084fc, #a855f7, #9333ea, #c084fc);
+  background-size: 200% 100%;
 }
 
 @keyframes passiveLabelShimmer {
@@ -767,6 +760,86 @@
   100% {
     background-position: 200% 50%;
   }
+}
+
+.passive-effect {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+/* ── Status Effects Components (Consolidated) ─────────────────────────────── */
+.status-effects-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.status-effects-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 0;
+  width: 100%;
+}
+
+@keyframes statusFlowDown {
+  0% {
+    background-position: 50% 50%;
+  }
+
+  100% {
+    background-position: 50% -150%;
+  }
+}
+
+@keyframes statusTagShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.status-effect-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 16px;
+  overflow: hidden;
+  background-color: #000000;
+  border-radius: 12px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.status-effect-box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-size: 100% 200%;
+  filter: blur(12px);
+  pointer-events: none;
+  z-index: 1;
+  animation: statusFlowDown 6.5s linear infinite;
+}
+
+.status-effect-tag {
+  font-size: 10px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background-size: 500% 500%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: statusTagShimmer 10s linear infinite;
 }
 
 .status-effect-cooldown {
@@ -784,585 +857,161 @@
   margin-top: 4px;
 }
 
-.passive-effect {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.45;
-}
-
-/* ── Status Effects Custom Boxes (FIXED RELATIVE PATHS FOR DEPLOYMENT) ── */
-.status-effects-table {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  width: 100%;
-}
-
-.status-effects-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 0;
-  width: 100%;
-}
-
-.status-effect-box,
+/* ── Status Card Variants ─────────────────────────────────────────────────── */
 .status-effect-box.status-card-bleed {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 12px 16px;
-  overflow: hidden;
-  background-color: #000000;
-  background-image: url('../../icons/status/BleedInfo.png');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+  background-image: url("../../icons/status/BleedInfo.png");
   border: 1px solid #300000;
-  border-radius: 12px;
 }
 
-.status-effect-box::before,
 .status-effect-box.status-card-bleed::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(80, 0, 0, 0.1) 20%,
-      rgba(100, 0, 0, 0.22) 45%,
-      rgba(100, 0, 0, 0.22) 55%,
-      rgba(40, 0, 0, 0.1) 80%,
-      rgba(0, 0, 0, 0) 100%);
-  background-size: 100% 200%;
-  filter: blur(12px);
-  pointer-events: none;
-  z-index: 1;
-  animation: statusRedFlowDown 6.5s linear infinite;
+  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(80, 0, 0, 0.1) 20%, rgba(100, 0, 0, 0.22) 45%, rgba(100, 0, 0, 0.22) 55%, rgba(40, 0, 0, 0.1) 80%, rgba(0, 0, 0, 0) 100%);
 }
 
-@keyframes statusRedFlowDown {
-  0% {
-    background-position: 50% 50%;
-  }
-
-  100% {
-    background-position: 50% -150%;
-  }
-}
-
-.status-effect-box .status-effect-tag,
 .status-effect-box.status-card-bleed .status-effect-tag {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   background-image: linear-gradient(135deg, #d20000 0%, #d20000 38%, rgba(138, 0, 0, 0.55) 50%, #d20000 62%, #d20000 100%);
-  background-size: 500% 500%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation: statusTagShimmer 10s linear infinite;
 }
 
 .status-effect-box.status-card-burn {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 12px 16px;
-  overflow: hidden;
-  background-color: #000000;
   border: 1px solid #5a2200;
-  border-radius: 12px;
 }
 
 .status-effect-box.status-card-burn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(180, 70, 0, 0.10) 20%,
-      rgba(220, 90, 0, 0.20) 45%,
-      rgba(220, 90, 0, 0.20) 55%,
-      rgba(140, 50, 0, 0.10) 80%,
-      rgba(0, 0, 0, 0) 100%);
-  background-size: 100% 200%;
-  filter: blur(12px);
-  pointer-events: none;
-  z-index: 1;
-  animation: statusOrangeFlowDown 6.5s linear infinite;
-}
-
-@keyframes statusOrangeFlowDown {
-  0% {
-    background-position: 50% 50%;
-  }
-
-  100% {
-    background-position: 50% -150%;
-  }
+  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(180, 70, 0, 0.1) 20%, rgba(220, 90, 0, 0.2) 45%, rgba(220, 90, 0, 0.2) 55%, rgba(140, 50, 0, 0.1) 80%, rgba(0, 0, 0, 0) 100%);
 }
 
 .status-effect-box.status-card-burn .status-effect-tag {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  background-image: linear-gradient(135deg, #ea580c 0%, #ea580c 38%, rgba(249, 115, 22, 0.70) 50%, #ea580c 62%, #ea580c 100%);
-  background-size: 500% 500%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation: statusTagShimmer 10s linear infinite;
+  background-image: linear-gradient(135deg, #ea580c 0%, #ea580c 38%, rgba(249, 115, 22, 0.7) 50%, #ea580c 62%, #ea580c 100%);
 }
 
 .status-effect-box.status-card-burn .status-effect-cooldown {
-  position: relative;
-  z-index: 1;
-  display: inline-block;
-  align-self: flex-start;
-  font-size: 11px;
-  font-weight: 600;
-  color: #ffffff;
-  padding: 2px 8px;
-  border: 1px solid rgba(234, 88, 12, 0.55);
-  border-radius: var(--radius-sm);
-  background: #0a0a0d;
+  border-color: rgba(234, 88, 12, 0.55);
 }
 
 .status-effect-box.status-card-sandstorm {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 12px 16px;
-  overflow: hidden;
-  background-color: #000000;
   border: 1px solid rgba(172, 92, 49, 0.55);
-  border-radius: 12px;
 }
 
 .status-effect-box.status-card-sandstorm::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(140, 70, 20, 0.12) 20%,
-      rgba(172, 92, 49, 0.22) 45%,
-      rgba(172, 92, 49, 0.22) 55%,
-      rgba(120, 60, 20, 0.12) 80%,
-      rgba(0, 0, 0, 0) 100%);
-  background-size: 100% 200%;
-  filter: blur(12px);
-  pointer-events: none;
-  z-index: 1;
-  animation: statusOrangeFlowDown 6.5s linear infinite;
+  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(140, 70, 20, 0.12) 20%, rgba(172, 92, 49, 0.22) 45%, rgba(172, 92, 49, 0.22) 55%, rgba(120, 60, 20, 0.12) 80%, rgba(0, 0, 0, 0) 100%);
 }
 
 .status-effect-box.status-card-sandstorm .status-effect-tag {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   background-image: linear-gradient(135deg, #c4804c 0%, #ac5c31 38%, rgba(172, 92, 49, 0.65) 50%, #ac5c31 62%, #c4804c 100%);
-  background-size: 500% 500%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation: statusTagShimmer 10s linear infinite;
 }
 
 .status-effect-box.status-card-sandstorm .status-effect-cooldown {
-  position: relative;
-  z-index: 1;
-  display: inline-block;
-  align-self: flex-start;
-  font-size: 11px;
-  font-weight: 600;
-  color: #ffffff;
-  padding: 2px 8px;
-  border: 1px solid rgba(172, 92, 49, 0.55);
-  border-radius: var(--radius-sm);
-  background: #0a0a0d;
+  border-color: rgba(172, 92, 49, 0.55);
 }
 
 .status-effect-box.status-card-poison {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 12px 16px;
-  overflow: hidden;
-  background-color: #000000;
   border: 1px solid rgba(76, 200, 0, 0.55);
-  border-radius: 12px;
 }
 
 .status-effect-box.status-card-poison::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(35, 120, 0, 0.15) 20%,
-      rgba(76, 200, 0, 0.25) 45%,
-      rgba(76, 200, 0, 0.25) 55%,
-      rgba(35, 120, 0, 0.15) 80%,
-      rgba(0, 0, 0, 0) 100%);
-  background-size: 100% 200%;
-  filter: blur(12px);
-  pointer-events: none;
-  z-index: 1;
-  animation: statusGreenFlowDown 6.5s linear infinite;
-}
-
-@keyframes statusGreenFlowDown {
-  0% {
-    background-position: 50% 50%;
-  }
-
-  100% {
-    background-position: 50% -150%;
-  }
+  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(35, 120, 0, 0.15) 20%, rgba(76, 200, 0, 0.25) 45%, rgba(76, 200, 0, 0.25) 55%, rgba(35, 120, 0, 0.15) 80%, rgba(0, 0, 0, 0) 100%);
 }
 
 .status-effect-box.status-card-poison .status-effect-tag {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  background-image: linear-gradient(135deg, #4cc800 0%, #3ca000 38%, rgba(76, 200, 0, 0.70) 50%, #3ca000 62%, #4cc800 100%);
-  background-size: 500% 500%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation: statusTagShimmer 10s linear infinite;
+  background-image: linear-gradient(135deg, #4cc800 0%, #3ca000 38%, rgba(76, 200, 0, 0.7) 50%, #3ca000 62%, #4cc800 100%);
 }
 
 .status-effect-box.status-card-poison .status-effect-cooldown {
-  position: relative;
-  z-index: 1;
-  display: inline-block;
-  align-self: flex-start;
-  font-size: 11px;
-  font-weight: 600;
-  color: #ffffff;
-  padding: 2px 8px;
-  border: 1px solid rgba(76, 200, 0, 0.65);
-  border-radius: var(--radius-sm);
-  background: #0a0a0d;
+  border-color: rgba(76, 200, 0, 0.65);
 }
 
 .status-effect-box.status-card-illusion {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 12px 16px;
-  overflow: hidden;
   background-color: #040000;
-  background-image: url('../../icons/status/IllusionInfo.png');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+  background-image: url("../../icons/status/IllusionInfo.png");
   border: 1px solid #3d0505;
-  border-radius: 12px;
 }
 
 .status-effect-box.status-card-illusion::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(231, 26, 16, 0) 0%, rgba(180, 20, 12, 0.12) 50%, rgba(231, 26, 16, 0) 100%);
-  background-size: 100% 200%;
-  filter: blur(10px);
-  pointer-events: none;
-  z-index: 1;
-  animation: statusRedFlowDown 6.5s linear infinite;
+  background-image: linear-gradient(180deg, rgba(231, 26, 16, 0) 0%, rgba(180, 20, 12, 0.12) 50%, rgba(231, 26, 16, 0) 100%);
 }
 
 .status-effect-box.status-card-illusion .status-effect-tag {
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   background-image: linear-gradient(135deg, #e71a10 0%, #b8140c 50%, #e71a10 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .status-effect-box.status-card-illusion .status-effect-cooldown {
-  position: relative;
-  z-index: 1;
-  display: inline-block;
-  align-self: flex-start;
-  font-size: 11px;
-  font-weight: 600;
-  color: #ffffff;
-  padding: 2px 8px;
-  border: 1px solid rgba(231, 26, 16, 0.45);
-  border-radius: var(--radius-sm);
-  background: #0a0a0d;
+  border-color: rgba(231, 26, 16, 0.45);
 }
 
 .status-effect-box.status-card-blackfire {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 12px 16px;
-  overflow: hidden;
   background-color: #050507;
-  background-image: url('../../icons/status/BlackFireInfo.png');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+  background-image: url("../../icons/status/BlackFireInfo.png");
   border: 1px solid #27272a;
-  border-radius: 12px;
 }
 
 .status-effect-box.status-card-blackfire::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(80, 80, 90, 0.12) 20%,
-      rgba(120, 120, 135, 0.18) 45%,
-      rgba(120, 120, 135, 0.18) 55%,
-      rgba(60, 60, 70, 0.12) 80%,
-      rgba(0, 0, 0, 0) 100%);
-  background-size: 100% 200%;
-  filter: blur(12px);
-  pointer-events: none;
-  z-index: 1;
-  animation: statusGreyFlowDown 6.5s linear infinite;
-}
-
-@keyframes statusGreyFlowDown {
-  0% {
-    background-position: 50% 50%;
-  }
-
-  100% {
-    background-position: 50% -150%;
-  }
+  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(80, 80, 90, 0.12) 20%, rgba(120, 120, 135, 0.18) 45%, rgba(120, 120, 135, 0.18) 55%, rgba(60, 60, 70, 0.12) 80%, rgba(0, 0, 0, 0) 100%);
 }
 
 .status-effect-box.status-card-blackfire .status-effect-tag {
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   background-image: linear-gradient(135deg, #767676 0%, #a1a1aa 50%, #d4d4d8 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .status-effect-box.status-card-blackfire .status-effect-cooldown {
-  position: relative;
-  z-index: 1;
-  display: inline-block;
-  align-self: flex-start;
-  font-size: 11px;
-  font-weight: 600;
-  color: #ffffff;
-  padding: 2px 8px;
-  border: 1px solid rgba(118, 118, 118, 0.45);
-  border-radius: var(--radius-sm);
-  background: #0a0a0d;
+  border-color: rgba(118, 118, 118, 0.45);
 }
 
 .status-effect-box.status-card-stun,
 .status-effect-box.status-card-dismembered,
 .status-effect-box.status-card-drinkmark,
 .status-effect-box.status-card-puppetmark {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 12px 16px;
-  overflow: hidden;
   background-color: #020005;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('../../icons/status/StunInfo.png');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url("../../icons/status/StunInfo.png");
   border: 1px solid #280545;
-  border-radius: 12px;
 }
 
 .status-effect-box.status-card-stun::before,
 .status-effect-box.status-card-dismembered::before,
 .status-effect-box.status-card-drinkmark::before,
 .status-effect-box.status-card-puppetmark::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(147, 51, 234, 0.05) 20%,
-      rgba(168, 85, 247, 0.10) 45%,
-      rgba(168, 85, 247, 0.10) 55%,
-      rgba(126, 34, 206, 0.05) 80%,
-      rgba(0, 0, 0, 0) 100%);
-  background-size: 100% 200%;
-  filter: blur(12px);
-  pointer-events: none;
-  z-index: 1;
-  animation: statusPurpleFlowDown 6.5s linear infinite;
-}
-
-@keyframes statusPurpleFlowDown {
-  0% {
-    background-position: 50% 50%;
-  }
-
-  100% {
-    background-position: 50% -150%;
-  }
+  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(147, 51, 234, 0.05) 20%, rgba(168, 85, 247, 0.1) 45%, rgba(168, 85, 247, 0.1) 55%, rgba(126, 34, 206, 0.05) 80%, rgba(0, 0, 0, 0) 100%);
 }
 
 .status-effect-box.status-card-stun .status-effect-tag,
 .status-effect-box.status-card-dismembered .status-effect-tag,
 .status-effect-box.status-card-drinkmark .status-effect-tag,
 .status-effect-box.status-card-puppetmark .status-effect-tag {
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   background-image: linear-gradient(135deg, #a855f7 0%, #9900ff 50%, #c084fc 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .status-effect-box.status-card-stun .status-effect-cooldown,
 .status-effect-box.status-card-dismembered .status-effect-cooldown,
 .status-effect-box.status-card-drinkmark .status-effect-cooldown,
 .status-effect-box.status-card-puppetmark .status-effect-cooldown {
-  position: relative;
-  z-index: 1;
-  display: inline-block;
-  align-self: flex-start;
-  font-size: 11px;
-  font-weight: 600;
-  color: #ffffff;
-  padding: 2px 8px;
-  border: 1px solid rgba(168, 85, 247, 0.45);
-  border-radius: var(--radius-sm);
-  background: #0a0a0d;
+  border-color: rgba(168, 85, 247, 0.45);
 }
 
 .status-effect-box.status-card-markoffate {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 12px 16px;
-  overflow: hidden;
-  background-color: #000000;
   border: 1px solid #3a001e;
-  border-radius: 12px;
 }
 
 .status-effect-box.status-card-markoffate::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(214, 0, 110, 0.10) 20%,
-      rgba(214, 0, 110, 0.22) 45%,
-      rgba(214, 0, 110, 0.22) 55%,
-      rgba(214, 0, 110, 0.10) 80%,
-      rgba(0, 0, 0, 0) 100%);
-  background-size: 100% 200%;
-  filter: blur(12px);
-  pointer-events: none;
-  z-index: 1;
-  animation: statusPinkPurpleFlowDown 6.5s linear infinite;
-}
-
-@keyframes statusPinkPurpleFlowDown {
-  0% {
-    background-position: 50% 50%;
-  }
-
-  100% {
-    background-position: 50% -150%;
-  }
+  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(214, 0, 110, 0.1) 20%, rgba(214, 0, 110, 0.22) 45%, rgba(214, 0, 110, 0.22) 55%, rgba(214, 0, 110, 0.1) 80%, rgba(0, 0, 0, 0) 100%);
 }
 
 .status-effect-box.status-card-markoffate .status-effect-tag {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   background-image: linear-gradient(135deg, #d6006e 0%, #d6006e 38%, rgba(214, 80, 140, 0.55) 50%, #d6006e 62%, #d6006e 100%);
-  background-size: 500% 500%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation: statusTagShimmer 10s linear infinite;
+}
+
+.status-effect-box.status-card-markoffate .status-effect-cooldown {
+  border-color: rgba(214, 0, 110, 0.55);
 }
 
 .status-effect-box.status-card-freeze {
-  background-color: #000000;
-  background-image: url('../../icons/status/FreezeInfo.png');
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+  background-image: url("../../icons/status/FreezeInfo.png");
   border: 1px solid #002244;
 }
 
 .status-effect-box.status-card-freeze::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(0, 40, 80, 0.1) 20%,
-      rgba(0, 80, 150, 0.18) 45%,
-      rgba(0, 80, 150, 0.18) 55%,
-      rgba(0, 30, 60, 0.1) 80%,
-      rgba(0, 0, 0, 0) 100%);
-  background-size: 100% 200%;
-  filter: blur(12px);
-  pointer-events: none;
-  z-index: 1;
-  animation: statusBlueFlowDown 6.5s linear infinite;
-}
-
-@keyframes statusBlueFlowDown {
-  0% {
-    background-position: 50% 50%;
-  }
-
-  100% {
-    background-position: 50% -150%;
-  }
+  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 40, 80, 0.1) 20%, rgba(0, 80, 150, 0.18) 45%, rgba(0, 80, 150, 0.18) 55%, rgba(0, 30, 60, 0.1) 80%, rgba(0, 0, 0, 0) 100%);
 }
 
 .status-effect-box.status-card-freeze .status-effect-tag {
   background-image: linear-gradient(135deg, #38bdf8 0%, #38bdf8 38%, rgba(2, 132, 199, 0.65) 50%, #38bdf8 62%, #38bdf8 100%);
-  background-size: 500% 500%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation: statusTagShimmer 10s linear infinite;
 }
 
 .status-effect-box.status-card-freeze .status-effect-cooldown {
@@ -1370,48 +1019,19 @@
 }
 
 .status-effect-box.status-card-electricity {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 12px 16px;
-  overflow: hidden;
-  background-color: #000000;
   border: 1px solid rgba(0, 229, 255, 0.4);
-  border-radius: 12px;
 }
 
 .status-effect-box.status-card-electricity::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(0, 180, 216, 0.1) 20%,
-      rgba(0, 229, 255, 0.18) 45%,
-      rgba(0, 229, 255, 0.18) 55%,
-      rgba(0, 180, 216, 0.1) 80%,
-      rgba(0, 0, 0, 0) 100%);
-  background-size: 100% 200%;
-  filter: blur(12px);
-  pointer-events: none;
-  z-index: 1;
-  animation: statusBlueFlowDown 6.5s linear infinite;
+  background-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 180, 216, 0.1) 20%, rgba(0, 229, 255, 0.18) 45%, rgba(0, 229, 255, 0.18) 55%, rgba(0, 180, 216, 0.1) 80%, rgba(0, 0, 0, 0) 100%);
 }
 
 .status-effect-box.status-card-electricity .status-effect-name {
-  color: #00e5ff !important;
-  -webkit-text-fill-color: #00e5ff !important;
+  color: #00e5ff;
 }
 
 .status-effect-box.status-card-electricity .status-effect-tag {
   background-image: linear-gradient(135deg, #00e5ff 0%, #00e5ff 38%, rgba(0, 180, 216, 0.65) 50%, #00e5ff 62%, #00e5ff 100%);
-  background-size: 500% 500%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  animation: statusTagShimmer 10s linear infinite;
 }
 
 .status-effect-box.status-card-electricity .status-effect-cooldown {
@@ -1462,12 +1082,11 @@
   display: block;
 }
 
-/* ── Inspector Right Sidebar (Fluid Height Scaling) ─────────────────────── */
+/* ── Inspector Right Sidebar ──────────────────────────────────────────────── */
 .inspector {
   padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 0;
   position: sticky;
   top: 0;
   max-height: calc(100vh - 195px);
@@ -1525,25 +1144,6 @@
   color: var(--text-secondary);
 }
 
-.uip-tags {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.uip-tier {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(99, 102, 241, 0.12);
-  border: 1px solid rgba(99, 102, 241, 0.28);
-  color: #a5b4fc;
-}
-
 .inspector-preferred {
   display: flex;
   align-items: center;
@@ -1577,7 +1177,7 @@
 .inspector-pref-value {
   font-size: 11px;
   font-weight: 600;
-  color: #10b981;
+  color: var(--positive);
 }
 
 .inspector-section-label {
@@ -1586,7 +1186,7 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--muted);
-  margin: -2px 0px 4px;
+  margin: -2px 0 4px;
 }
 
 .level-toggle {
@@ -1599,7 +1199,6 @@
 }
 
 .level-btn {
-  appearance: none;
   border: none;
   background: transparent;
   color: var(--muted);
@@ -1620,7 +1219,7 @@
 
 .level-btn.active {
   background: var(--purple);
-  color: #fff;
+  color: #ffffff;
 }
 
 .inspector-stat-group {
@@ -1670,7 +1269,7 @@
   color: var(--text);
 }
 
-/* ── Fluid DPS Breakdown Subtab Layout ─────────────────────────────────── */
+/* ── DPS Breakdown Subtab Layout ─────────────────────────────────────────── */
 .uip-dps-compact-wrapper {
   display: flex;
   flex-direction: column;
@@ -1690,20 +1289,20 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background: var(--background-elevated, #0a0a0c);
-  border: 1px solid var(--border, #16161a);
-  border-radius: var(--radius-md, 6px);
+  background: var(--background-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 2px 4px;
 }
 
 .uip-dps-lvl-btn {
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 4px;
   background: transparent;
-  color: var(--text-secondary, #a1a1aa);
+  color: var(--text-secondary);
   border: none;
   cursor: pointer;
   transition: all var(--t-fast) var(--ease);
@@ -1715,7 +1314,7 @@
 }
 
 .uip-dps-lvl-btn.active {
-  background: var(--purple, #6366f1);
+  background: var(--purple);
   color: #ffffff;
 }
 
@@ -1758,8 +1357,8 @@
 }
 
 .dps-section {
-  background: var(--background-elevated, #0a0a0c);
-  border: 1px solid var(--border, #16161a);
+  background: var(--background-elevated);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 12px 14px;
   display: flex;
@@ -1777,12 +1376,12 @@
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--text-secondary, #a1a1aa);
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   gap: 6px;
   padding-bottom: 6px;
-  border-bottom: 1px solid var(--border, #16161a);
+  border-bottom: 1px solid var(--border);
   margin-bottom: 6px;
 }
 
@@ -1831,7 +1430,6 @@
 
 .dps-kv.faint-nested {
   padding-left: 16px;
-  opacity: 1 !important;
 }
 
 .dps-kv.faint-nested .dps-kv-lbl {
@@ -1839,7 +1437,6 @@
 }
 
 .dps-kv.faint-nested .dps-kv-val {
-  opacity: 1 !important;
   color: #f1f5f9;
 }
 
@@ -1849,12 +1446,12 @@
 }
 
 .dps-kv-lbl {
-  color: var(--text-secondary, #a1a1aa);
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .dps-kv-val {
-  color: var(--text, #ffffff);
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -1863,7 +1460,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-secondary, #a1a1aa);
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1874,7 +1471,7 @@
 }
 
 .uip-dps-badge {
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
 }
@@ -1902,7 +1499,7 @@
   grid-template-columns: 1fr;
 }
 
-/* ── Single Mobile Query (UI Functional Shifts) ───────────────────────── */
+/* ── Mobile Layout (< 900px) ──────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .uip-body {
     grid-template-columns: 1fr !important;
@@ -1929,7 +1526,6 @@
     object-position: center 20% !important;
   }
 
-  /* ── Compact Mobile Loadout Icons ── */
   .loadout-items {
     gap: 10px !important;
   }
@@ -1961,7 +1557,6 @@
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) !important;
   }
 
-  /* ── Smaller Mobile Dropdown ── */
   .loadout-dropdown {
     top: calc(100% + 6px) !important;
     width: min(230px, 75vw) !important;
@@ -1990,7 +1585,7 @@
   }
 }
 
-/* Custom Follow-Up Mimicry Input Styling */
+/* ── Follow-Up Inputs & Summons Column Tweaks ──────────────────────────────── */
 .followup-inputs {
   display: flex;
   gap: 8px;
@@ -2000,12 +1595,12 @@
 .uip-followup-input {
   flex: 1;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border, #16161a);
+  border: 1px solid var(--border);
   border-radius: 6px;
   color: #ffffff;
   padding: 6px 8px;
   font-size: 11px;
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-mono);
   text-align: center;
   transition: all 0.2s ease;
   min-width: 0;
@@ -2013,17 +1608,16 @@
 
 .uip-followup-input:focus {
   outline: none;
-  border-color: var(--purple, #6366f1);
+  border-color: var(--purple);
   background: rgba(99, 102, 241, 0.05);
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
 .uip-followup-input::placeholder {
-  color: var(--text-muted, #71717a);
-  font-family: var(--font-sans, sans-serif);
+  color: var(--muted);
+  font-family: var(--font-body);
 }
 
-/* Compact styles for summons cards in unit info page */
 .uip-dps-column.summons-col .dps-section {
   padding: 8px 12px;
   gap: 4px;
