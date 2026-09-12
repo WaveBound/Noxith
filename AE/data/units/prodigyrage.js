@@ -2,7 +2,7 @@ export const unit = {
     id: "prodigyrage",
     name: "Prodigy (Rage)",
     image: "Units/Image/ProdigyRage.png",
-    ascend: 3,
+    ascend: 0,
     element: "Light",
     archetype: "Physical",
 
