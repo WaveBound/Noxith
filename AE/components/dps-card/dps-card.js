@@ -3067,6 +3067,7 @@ export async function DpsCard(unit, options = {}) {
             <div class="dps-trait-icon-container" title="${traitDef.name}">
               <img class="dps-trait-icon" src="${toAbsoluteUrl(traitIconSrc)}" alt="${traitDef.name}" onerror="this.style.display='none'" />
             </div>
+            <span class="dps-trait-name">${traitDef.name}</span>
             <div class="dps-loadout-icons-col">${buildLoadoutIcons(topBuild)}</div>
           </div>
 

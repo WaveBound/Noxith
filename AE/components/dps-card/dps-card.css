@@ -1638,6 +1638,273 @@
   box-shadow: 0 0 10px rgba(45, 212, 191, 0.15);
 }
 
+/* ── Minimal tracking-console treatment for DPS breakdowns ──────────────── */
+.dps-panel {
+  background: #070809;
+  border-color: #252a31;
+  border-radius: 10px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.62);
+}
+
+.dps-panel.summons-panel {
+  border-color: #253a3c;
+}
+
+.dps-modal-top-bar,
+.summons-top-bar {
+  background: #0a0b0d;
+  border-bottom-color: #252a31;
+}
+
+.dps-unit-avatar-wrap {
+  border-color: #00d9e8;
+  background: #050607;
+  box-shadow: none;
+}
+
+.dps-modal-trait-badge,
+.dps-status-chip,
+.dps-relic-card-box,
+.dps-relic-stat-pill,
+.dps-relic-passive-container,
+.dps-relic-passive-desc,
+.dps-crit-subcard,
+.dps-formula-box {
+  background: #0b0d10;
+  border-color: #252a31;
+}
+
+.dps-modal-trait-badge,
+.dps-passive-tag,
+.dps-crit-subcard-title {
+  color: #00d9e8;
+}
+
+.dps-panel-body {
+  padding: 10px;
+  gap: 8px;
+}
+
+.dps-section {
+  background: #0a0b0d;
+  border-color: #252a31;
+  border-radius: 7px;
+  padding: 9px;
+}
+
+.dps-section-hd {
+  color: #8fa3b8;
+  border-bottom-color: #252a31;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.dps-breakdown-row,
+.dps-breakdown-row.step-indented,
+.dps-breakdown-subrow {
+  background: #0d0f12;
+  border: 1px solid #1d2228;
+  border-radius: 4px;
+}
+
+.dps-breakdown-row.step-indented { border-left-color: #3a424c; }
+
+.dps-breakdown-highlight-row {
+  background: #101318;
+  border: 1px solid #2b333d;
+  border-left: 3px solid #4ec9bd;
+}
+
+.dps-breakdown-row.result-row {
+  background: rgba(142, 155, 216, 0.07);
+  border: 1px solid rgba(142, 155, 216, 0.34);
+  border-left: 3px solid #8e9bd8;
+}
+
+.color-damage { color: #e76a7d; }
+.color-crit { color: #b482e8; }
+.color-spa { color: #4eb3d3; }
+.color-range { color: #dbad41; }
+.color-dot { color: #50bf90; }
+.color-summons { color: #4ec9bd; }
+.color-buff { color: #8e9bd8; }
+
+.color-damage-bg { background: rgba(231, 106, 125, 0.07); border-color: rgba(231, 106, 125, 0.34); border-left: 3px solid #e76a7d; }
+.color-crit-bg { background: rgba(180, 130, 232, 0.07); border-color: rgba(180, 130, 232, 0.34); border-left: 3px solid #b482e8; }
+.color-spa-bg { background: rgba(78, 179, 211, 0.07); border-color: rgba(78, 179, 211, 0.34); border-left: 3px solid #4eb3d3; }
+.color-range-bg { background: rgba(219, 173, 65, 0.07); border-color: rgba(219, 173, 65, 0.34); border-left: 3px solid #dbad41; }
+.color-dot-bg { background: rgba(80, 191, 144, 0.07); border-color: rgba(80, 191, 144, 0.34); border-left: 3px solid #50bf90; }
+.color-buff-bg { background: rgba(142, 155, 216, 0.07); border-color: rgba(142, 155, 216, 0.34); border-left: 3px solid #8e9bd8; }
+
+.dps-row-num,
+.dps-mult-tag {
+  background: #050607;
+  border-color: #252a31;
+  color: #8fa3b8;
+}
+
+.dps-row-val,
+.dps-subrow-val,
+.dps-highlight-val,
+.dps-formula-code {
+  color: #eaf2f7;
+}
+
+.dps-highlight-val.color-damage { color: #e76a7d; }
+.dps-highlight-val.color-crit { color: #b482e8; }
+.dps-highlight-val.color-spa { color: #4eb3d3; }
+.dps-highlight-val.color-range { color: #dbad41; }
+.dps-highlight-val.color-dot { color: #50bf90; }
+.dps-highlight-val.color-summons { color: #4ec9bd; }
+.dps-highlight-val.color-buff { color: #8e9bd8; }
+
+.dps-breakdown-row.result-row .dps-row-val,
+.color-glow-purple {
+  color: #8e9bd8;
+  text-shadow: none;
+}
+
+.dps-formula-box {
+  border-style: solid;
+  background: #0d0f12;
+}
+
+.dps-panel-footer,
+.summons-panel-footer {
+  background: #08090b;
+  border-top-color: #252a31;
+}
+
+.dps-footer-total-badge { color: #8fa3b8; }
+.dps-footer-total-val { color: #eaf2f7; }
+
+.dps-summon-tab-bar {
+  background: #08090b;
+  border-bottom-color: #252a31;
+}
+
+.dps-summon-tab-btn {
+  background: #0d0f12;
+  border-color: #252a31;
+  border-radius: 4px;
+}
+
+.dps-summon-tab-btn:hover,
+.dps-summon-tab-btn.active {
+  color: #00d9e8;
+  background: rgba(0, 217, 232, 0.08);
+  border-color: #00d9e8;
+  box-shadow: none;
+}
+
+/* Card layout: compact, framed data panel instead of a large media-first card. */
+.dps-calculator-card {
+  background: #08090b;
+  border-color: #252a31;
+  border-radius: 10px;
+}
+
+.dps-calculator-card:hover {
+  transform: translateY(-2px);
+  border-color: #00b9c8;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.48);
+}
+
+.dps-card-media {
+  height: 182px;
+  background: #0b0d10;
+  border-bottom-color: #252a31;
+}
+
+.dps-card-media::after {
+  background: linear-gradient(to top, rgba(8, 9, 11, 0.97) 0%, rgba(8, 9, 11, 0.48) 52%, rgba(8, 9, 11, 0.06) 100%);
+}
+
+.dps-rank-badge,
+.dps-portrait-badge,
+.dps-mini-chip {
+  border-radius: 4px;
+  background: rgba(7, 8, 10, 0.88);
+  border-color: #3a424c;
+  box-shadow: none;
+}
+
+.dps-card-nameplate-overlay { padding: 8px 9px; }
+.dps-card-title { font-size: 14px; }
+
+.dps-optimized-container {
+  padding: 8px;
+  gap: 7px;
+}
+
+.dps-options-bar {
+  min-height: 28px;
+  padding: 4px;
+  background: #0b0d10;
+  border: 1px solid #252a31;
+  border-radius: 5px;
+}
+
+.dps-toggle-pill,
+.dps-control-stepper,
+.dps-bioinsect-unit-select {
+  background: #101318;
+  border-color: #2b333d;
+  border-radius: 4px;
+}
+
+.dps-toggle-pill.active {
+  color: #00d9e8;
+  background: rgba(0, 217, 232, 0.08);
+  border-color: #00d9e8;
+  box-shadow: none;
+}
+
+.dps-toggle-pill.active .dps-pill-dot { background: #00d9e8; box-shadow: none; }
+.dps-stepper-input { background: #070809; border-color: #2b333d; }
+
+.dps-trait-stack { gap: 5px; }
+
+.dps-trait-row {
+  padding: 6px 7px;
+  background: #0b0d10;
+  border-color: #252a31;
+  border-radius: 5px;
+}
+
+.dps-trait-row:hover {
+  background: #101318;
+  border-color: #3a424c;
+}
+
+.dps-trait-header-left { gap: 6px; }
+.dps-trait-icon-container { width: 25px; height: 25px; }
+
+.dps-trait-name {
+  min-width: 0;
+  color: #dce6ed;
+  font-size: 10px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dps-loadout-icons-col { margin-left: auto; }
+.dps-result-value { color: #eaf2f7; }
+
+.dps-action-btn {
+  border-radius: 4px;
+  background: #101318;
+  border-color: #2b333d;
+}
+
+.dps-action-btn:hover {
+  color: #00d9e8;
+  background: rgba(0, 217, 232, 0.08);
+  border-color: #00d9e8;
+}
+
 /* ── Trait Builds Leaderboard Modal ───────────────────────────────────────── */
 .dps-builds-modal-v2 {
   width: min(840px, 95vw);
