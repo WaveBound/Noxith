@@ -1,7 +1,11 @@
 User-agent: *
+Allow: /
+
+# Disallow internal and dynamic checkout paths
 Disallow: /donations/
 Disallow: /pfp/
 Disallow: /bloxmulti/success/
 Disallow: /bloxmulti/cancel/
 
+# Sitemap location
 Sitemap: https://noxith.com/sitemap.xml

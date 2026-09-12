@@ -1,39 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
    
-   <!-- Main Homepage -->
+   <!-- Main Noxith Homepage -->
    <url>
       <loc>https://noxith.com/</loc>
-      <lastmod>2026-08-2</lastmod>
+      <lastmod>2026-08-02</lastmod>
       <changefreq>monthly</changefreq>
       <priority>1.00</priority>
    </url>
 
-   <!-- AE-Macro Project -->
+   <!-- BloxMulti Main Page -->
+   <url>
+      <loc>https://noxith.com/bloxmulti/</loc>
+      <lastmod>2026-09-12</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.95</priority>
+   </url>
+
+   <!-- BloxMulti Support & FAQ (High SEO Value) -->
+   <url>
+      <loc>https://noxith.com/bloxmulti/support.html</loc>
+      <lastmod>2026-09-12</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.80</priority>
+   </url>
+
+   <!-- BloxMulti Web Dashboard -->
+   <url>
+      <loc>https://noxith.com/bloxmulti/dashboard.html</loc>
+      <lastmod>2026-09-12</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.70</priority>
+   </url>
+
+   <!-- BloxMulti Legal & Trust Anchors -->
+   <url>
+      <loc>https://noxith.com/bloxmulti/privacy.html</loc>
+      <lastmod>2026-09-12</lastmod>
+      <changefreq>yearly</changefreq>
+      <priority>0.40</priority>
+   </url>
+   <url>
+      <loc>https://noxith.com/bloxmulti/terms.html</loc>
+      <lastmod>2026-09-12</lastmod>
+      <changefreq>yearly</changefreq>
+      <priority>0.40</priority>
+   </url>
+
+   <!-- Other Projects -->
    <url>
       <loc>https://noxith.com/ae-macro/</loc>
       <lastmod>2026-08-28</lastmod>
       <changefreq>monthly</changefreq>
-      <priority>0.90</priority>
+      <priority>0.85</priority>
    </url>
 
-   <!-- BloxMulti Project -->
-   <url>
-      <loc>https://noxith.com/bloxmulti/</loc>
-      <lastmod>2026-08-28</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.90</priority>
-   </url>
-
-   <!-- UTDX Project -->
    <url>
       <loc>https://noxith.com/utdx/</loc>
-      <lastmod>2026-06-3</lastmod>
+      <lastmod>2026-06-03</lastmod>
       <changefreq>monthly</changefreq>
-      <priority>0.90</priority>
+      <priority>0.85</priority>
    </url>
 
-   <!-- Wavebound Project -->
    <url>
       <loc>https://noxith.com/wavebound/</loc>
       <lastmod>2026-05-01</lastmod>
