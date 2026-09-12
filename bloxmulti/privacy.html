@@ -1,56 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Privacy Policy — BloxMulti</title>
+  <title>Privacy Policy — BloxMulti | Data Security &amp; Encryption Standards</title>
 
-  <!-- Primary SEO -->
+  <!-- Canonical -->
+  <link rel="canonical" href="https://bloxmulti.com/privacy.html" />
+
+  <!-- Primary SEO Meta -->
+  <meta name="title" content="Privacy Policy — BloxMulti | Data Security &amp; Encryption Standards" />
   <meta name="description"
-    content="BloxMulti is a powerful Windows app that lets you manage multiple Roblox accounts at once. Switch accounts instantly, launch any game by Place ID, and save private server codes — all in one app." />
+    content="Review BloxMulti's Privacy Policy. Learn how our local Windows DPAPI token encryption, zero telemetry tracking, and AES-256 Google Drive sync protect your data." />
   <meta name="keywords"
-    content="Roblox multi account manager, Roblox account switcher, BloxMulti, multiple Roblox accounts Windows, Roblox account manager app, Roblox private server codes, launch multiple Roblox accounts simultaneously, Roblox alt account manager" />
+    content="BloxMulti privacy policy, BloxMulti data security, Roblox alt manager privacy, Windows DPAPI encryption, Roblox account security, zero telemetry multi account" />
   <meta name="author" content="BloxMulti" />
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <meta name="theme-color" content="#9d6fff" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="BloxMulti — Roblox Multi-Account Manager" />
-  <meta property="og:description"
-    content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — for Windows." />
-  <meta property="og:image" content="og-image.png" />
+  <meta property="og:url" content="https://bloxmulti.com/privacy.html" />
   <meta property="og:site_name" content="BloxMulti" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:title" content="Privacy Policy — BloxMulti Data Protection &amp; Security" />
+  <meta property="og:description"
+    content="Understand how BloxMulti handles local Windows DPAPI encryption, OAuth credentials, and zero-telemetry privacy." />
+  <meta property="og:image" content="https://bloxmulti.com/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="BloxMulti Privacy &amp; Data Security Policy" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="BloxMulti — Roblox Multi-Account Manager" />
+  <meta name="twitter:url" content="https://bloxmulti.com/privacy.html" />
+  <meta name="twitter:title" content="Privacy Policy — BloxMulti Data Security" />
   <meta name="twitter:description"
-    content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — for Windows." />
-  <meta name="twitter:image" content="og-image.png" />
+    content="Learn how BloxMulti protects your session tokens with local DPAPI encryption and zero-knowledge Google Drive backup." />
+  <meta name="twitter:image" content="https://bloxmulti.com/og-image.png" />
 
-  <!-- Structured Data -->
+  <!-- Structured Data: WebPage, PrivacyPolicy & Breadcrumbs -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "BloxMulti",
-    "operatingSystem": "Windows 10, Windows 11",
-    "applicationCategory": "UtilitiesApplication",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "description": "BloxMulti is a powerful Windows desktop app for managing multiple Roblox accounts. Launch any game instantly by Place ID, save favorite games, and store private server codes.",
-    "screenshot": "og-image.png"
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://bloxmulti.com/privacy.html#breadcrumbs",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://bloxmulti.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Privacy Policy",
+            "item": "https://bloxmulti.com/privacy.html"
+          }
+        ]
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://bloxmulti.com/privacy.html#webpage",
+        "url": "https://bloxmulti.com/privacy.html",
+        "name": "Privacy Policy — BloxMulti",
+        "description": "Details regarding local session storage, Windows DPAPI encryption, zero personal telemetry, and OAuth authentication.",
+        "dateModified": "2026-05-16",
+        "isPartOf": {
+          "@type": "WebSite",
+          "@id": "https://bloxmulti.com/#website",
+          "name": "BloxMulti",
+          "url": "https://bloxmulti.com/"
+        }
+      }
+    ]
   }
   </script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- App-matched font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet" />
 
@@ -347,11 +379,11 @@
 </head>
 
 <body>
-  <div class="global-bg"></div>
+  <div class="global-bg" aria-hidden="true"></div>
 
   <!-- Nav -->
-  <nav>
-    <a href="index.html#" class="nav-logo">BloxMulti</a>
+  <nav aria-label="Main Navigation">
+    <a href="index.html" class="nav-logo" aria-label="BloxMulti Homepage">BloxMulti</a>
 
     <div class="nav-right">
       <ul class="nav-links">
@@ -362,9 +394,9 @@
       </ul>
 
       <div class="nav-actions">
-        <a href="index.html#download" class="nav-cta" title="Get App">
+        <a href="index.html#download" class="nav-cta" title="Download BloxMulti App">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
@@ -375,7 +407,7 @@
     </div>
   </nav>
 
-  <main class="legal-page">
+  <main class="legal-page" role="main">
     <h1>Privacy Policy</h1>
     <p><strong>Last Updated:</strong> May 16, 2026</p>
     <p>Welcome to BloxMulti. This Privacy Policy explains how we handle your data when you use the BloxMulti desktop
@@ -443,17 +475,18 @@
 
     <h2>7. Contact Us</h2>
     <p>If you have any questions or concerns about this Privacy Policy, please contact us via our <a
-        href="support.html">Support Page</a> or join our <a href="https://discord.gg/ju6ANNecQg">Discord Server</a>.</p>
+        href="support.html">Support Page</a> or join our <a href="https://discord.gg/ju6ANNecQg" target="_blank"
+        rel="noopener">Discord Server</a>.</p>
   </main>
 
   <!-- Footer -->
   <footer>
     <div class="footer-logo">BloxMulti</div>
     <div class="footer-links">
-      <a href="https://github.com/WaveBound/BloxMulti">GitHub</a>
-      <a href="https://discord.gg/ju6ANNecQg">Discord</a>
+      <a href="https://github.com/WaveBound/BloxMulti" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://discord.gg/ju6ANNecQg" target="_blank" rel="noopener">Discord</a>
       <a href="support.html">Support</a>
-      <a href="privacy.html">Privacy</a>
+      <a href="privacy.html" aria-current="page">Privacy</a>
       <a href="terms.html">Terms</a>
     </div>
   </footer>

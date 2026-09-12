@@ -1,35 +1,161 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BloxMulti — Roblox Multi-Account Manager & Cloud Hub</title>
+  <title>BloxMulti — Roblox Account Manager (RAM) &amp; Multiple Roblox Launcher</title>
 
-  <!-- Primary SEO -->
+  <!-- Canonical -->
+  <link rel="canonical" href="https://bloxmulti.com/" />
+
+  <!-- Primary SEO Meta -->
+  <meta name="title" content="BloxMulti — Roblox Account Manager (RAM) &amp; Multiple Roblox Launcher" />
   <meta name="description"
-    content="BloxMulti is a powerful Windows app that lets you manage multiple Roblox accounts at once. Switch accounts instantly, launch any game by Place ID, and save private server codes." />
+    content="The modern Roblox Account Manager (RAM) and Multiple Roblox launcher. Run multiple Roblox accounts simultaneously on Windows with DPAPI encryption, FPS limits, and Mutex unlock." />
   <meta name="keywords"
-    content="Roblox multi account manager, Roblox account switcher, BloxMulti, multiple Roblox accounts Windows, Roblox account manager app, Roblox private server codes, launch multiple Roblox accounts simultaneously" />
+    content="roblox ram, roblox account manager, roblox launcher, multiple roblox, roblox ram alternative, play multiple roblox, roblox multi account, roblox account switcher, run 2 roblox accounts" />
   <meta name="author" content="BloxMulti" />
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
   <meta name="theme-color" content="#9d6fff" />
+  <meta name="application-name" content="BloxMulti" />
 
-  <!-- Open Graph -->
+  <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="BloxMulti — Roblox Multi-Account Manager" />
-  <meta property="og:description"
-    content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — for Windows." />
-  <meta property="og:image" content="og-image.png" />
+  <meta property="og:url" content="https://bloxmulti.com/" />
   <meta property="og:site_name" content="BloxMulti" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:title" content="BloxMulti — Roblox Account Manager (RAM) &amp; Multiple Roblox Launcher" />
+  <meta property="og:description"
+    content="Run multiple Roblox accounts concurrently on Windows. Modern Roblox RAM alternative with DPAPI token encryption, per-account FPS limits, and custom launcher tools." />
+  <meta property="og:image" content="https://bloxmulti.com/og-image.png" />
+  <meta property="og:image:secure_url" content="https://bloxmulti.com/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="BloxMulti Roblox Account Manager RAM and Launcher Interface" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://bloxmulti.com/" />
+  <meta name="twitter:title" content="BloxMulti — Roblox Account Manager (RAM) &amp; Launcher" />
+  <meta name="twitter:description"
+    content="Run Multiple Roblox accounts concurrently on Windows. The secure Roblox RAM alternative with hardware DPAPI encryption and background FPS throttling." />
+  <meta name="twitter:image" content="https://bloxmulti.com/og-image.png" />
+  <meta name="twitter:image:alt" content="BloxMulti Roblox Account Manager RAM and Launcher Interface" />
+
+  <!-- Preconnect and Resource Hints -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="https://vsgyclwnbrlticquvcjs.supabase.co" />
+  <link rel="dns-prefetch" href="https://downloads.noxith.com" />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
     rel="stylesheet" />
 
-  <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+  <!-- WebRTC PeerJS -->
+  <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js" defer></script>
+
+  <!-- Structured Data / JSON-LD for Search Engines & GEO (AI Answer Engines) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://bloxmulti.com/#website",
+        "url": "https://bloxmulti.com/",
+        "name": "BloxMulti",
+        "description": "Modern Roblox Account Manager (RAM) and Multiple Roblox launcher for Windows.",
+        "inLanguage": "en-US"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://bloxmulti.com/#software",
+        "name": "BloxMulti Roblox Account Manager",
+        "alternateName": ["BloxMulti RAM", "BloxMulti Launcher", "BloxMulti Multiple Roblox"],
+        "operatingSystem": "Windows 10, Windows 11",
+        "applicationCategory": "UtilitiesApplication",
+        "applicationSubCategory": "Roblox Account Manager & Launcher",
+        "downloadUrl": "https://downloads.noxith.com/download",
+        "softwareVersion": "1.4.2",
+        "fileSize": "1400KB",
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "Standard Edition",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free Roblox account manager and multiple Roblox launcher with unlimited accounts."
+          },
+          {
+            "@type": "Offer",
+            "name": "Monthly Premium",
+            "price": "3.00",
+            "priceCurrency": "USD",
+            "billingDuration": "P1M"
+          },
+          {
+            "@type": "Offer",
+            "name": "Lifetime License",
+            "price": "15.00",
+            "priceCurrency": "USD"
+          }
+        ],
+        "featureList": [
+          "Multiple Roblox account management and instant switching",
+          "Roblox RAM (Account Manager) modern alternative with DPAPI security",
+          "Place ID and Job ID game launching engine",
+          "XML-based per-account FPS limiting down to 5 FPS",
+          "Discord Webhook integration with disconnect screenshots",
+          "P2P WebRTC remote screen monitoring"
+        ],
+        "author": {
+          "@type": "Organization",
+          "name": "BloxMulti",
+          "url": "https://bloxmulti.com/"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://bloxmulti.com/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is BloxMulti and how does it compare to Roblox RAM?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "BloxMulti is a modern Roblox Account Manager (RAM) and custom launcher designed for Windows. Unlike older account managers that store plain credentials or require complex setups, BloxMulti features a modern UI, hardware-tied Windows DPAPI token encryption, automatic Mutex unlocking, and built-in per-account FPS limiting."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I play Multiple Roblox accounts at once on one PC?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "By default, Roblox only allows a single client window due to an internal Mutex handle lock. BloxMulti automatically detects and neutralizes these singleton Mutex handles upon launch, allowing you to run unlimited Multiple Roblox accounts simultaneously without disconnects."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can BloxMulti be used as a Roblox Launcher for Place IDs?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. BloxMulti includes a direct Roblox launcher engine that lets you launch specific Place IDs, Job IDs, and VIP server links across any of your saved accounts with a single click."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is BloxMulti safe and does it steal Roblox account passwords?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "BloxMulti is 100% safe and local. Your account session tokens are encrypted directly on your device using the native Windows Data Protection API (DPAPI) and never leave your computer. BloxMulti never transmits your authentication data to third-party databases."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 
   <style>
     :root {
@@ -49,9 +175,9 @@
       --border: #1c1a30;
       --border-hi: #2a2642;
       --surface-border-hi: rgba(157, 111, 255, 0.28);
-      --font-body: 'Inter', sans-serif;
-      --font-display: 'Inter', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
     }
 
     *,
@@ -299,11 +425,12 @@
 
     .hero-title {
       font-family: var(--font-display);
-      font-size: clamp(40px, 8vw, 90px);
+      font-size: clamp(38px, 7.5vw, 84px);
       font-weight: 800;
       line-height: 1.1;
       letter-spacing: -0.03em;
       color: var(--text);
+      max-width: 980px;
     }
 
     .hero-title span {
@@ -315,9 +442,9 @@
 
     .hero-sub {
       margin-top: 20px;
-      font-size: clamp(15px, 3vw, 18px);
+      font-size: clamp(15px, 2.8vw, 18px);
       color: var(--muted);
-      max-width: 600px;
+      max-width: 680px;
       line-height: 1.6;
       margin-left: auto;
       margin-right: auto;
@@ -616,9 +743,53 @@
       }
     }
 
+    /* ── Technical Overview Matrix ── */
+    .tech-specs {
+      padding: 70px 0 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 30px;
+    }
+
+    .spec-card {
+      background: rgba(15, 14, 28, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .spec-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    .spec-val {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .spec-sub {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
     /* ── Features Grid ── */
     .features {
-      padding: 90px 0;
+      padding: 80px 0;
       position: relative;
       z-index: 1;
     }
@@ -635,11 +806,11 @@
 
     .section-title {
       font-family: var(--font-display);
-      font-size: clamp(32px, 5vw, 46px);
+      font-size: clamp(30px, 4.8vw, 46px);
       font-weight: 800;
       text-align: center;
       letter-spacing: -1px;
-      line-height: 1.1;
+      line-height: 1.15;
       margin-bottom: 50px;
     }
 
@@ -832,9 +1003,71 @@
       background: var(--accent-light);
     }
 
+    /* ── FAQ Section ── */
+    .faq-section {
+      padding: 80px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .faq-container {
+      max-width: 820px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 36px;
+    }
+
+    .faq-item {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      transition: border-color 0.2s;
+    }
+
+    .faq-item:hover {
+      border-color: var(--surface-border-hi);
+    }
+
+    .faq-question {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      list-style: none;
+    }
+
+    .faq-question::-webkit-details-marker {
+      display: none;
+    }
+
+    .faq-chevron {
+      color: var(--accent-light);
+      transition: transform 0.2s ease;
+      font-size: 18px;
+    }
+
+    details[open] .faq-chevron {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      padding-top: 12px;
+    }
+
     /* ── Download CTA ── */
     .download {
-      padding: 80px 0 100px;
+      padding: 70px 0 100px;
       position: relative;
       z-index: 1;
     }
@@ -850,7 +1083,7 @@
       align-items: center;
       gap: 20px;
       width: 100%;
-      max-width: 440px;
+      max-width: 460px;
       margin: 0 auto;
       text-align: center;
     }
@@ -937,7 +1170,7 @@
       margin: 4px 0;
     }
 
-    /* ── Simplified Minimalist Sign In Modal ── */
+    /* ── Sign In Modal ── */
     .auth-backdrop {
       position: fixed;
       inset: 0;
@@ -1102,6 +1335,7 @@
 
     @media (max-width: 850px) {
 
+      .specs-grid,
       .bento-grid,
       .pricing-grid {
         grid-template-columns: 1fr;
@@ -1120,16 +1354,18 @@
 
 <body>
 
-  <div class="global-bg"></div>
+  <div class="global-bg" aria-hidden="true"></div>
 
   <!-- Main Top Nav -->
-  <nav>
-    <a href="#" class="nav-logo">BloxMulti</a>
+  <nav aria-label="Main Navigation">
+    <a href="#" class="nav-logo" aria-label="BloxMulti Homepage">BloxMulti</a>
 
     <div class="nav-right">
       <ul class="nav-links">
         <li><a href="#features">Features</a></li>
+        <li><a href="#specs">Specifications</a></li>
         <li><a href="#pricing">Upgrade</a></li>
+        <li><a href="#faq">FAQ</a></li>
         <li><a href="#download">Download</a></li>
         <li><a href="support.html">Support</a></li>
       </ul>
@@ -1143,17 +1379,18 @@
         <!-- Clean Avatar Button -->
         <div style="position:relative; display:flex; align-items:center;">
           <button class="nav-avatar-btn" id="navUserChip" style="display:none;" onclick="toggleDropdown(event)"
-            aria-label="Account menu">
+            aria-label="Account profile options">
             <div class="nav-avatar-circle" id="navAvatarCircle">U</div>
           </button>
 
-          <div class="user-dropdown" id="userDropdown">
+          <div class="user-dropdown" id="userDropdown" role="menu">
             <div class="user-dropdown-header">
               <div class="user-dropdown-name" id="dropdownUserName">User</div>
               <div class="user-dropdown-email" id="dropdownUserEmail">user@gmail.com</div>
             </div>
-            <button class="user-dropdown-item" onclick="openDashboard(); closeDropdown();">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button class="user-dropdown-item" onclick="openDashboard(); closeDropdown();" role="menuitem">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                aria-hidden="true">
                 <rect x="3" y="3" width="7" height="7" rx="1" />
                 <rect x="14" y="3" width="7" height="7" rx="1" />
                 <rect x="3" y="14" width="7" height="7" rx="1" />
@@ -1162,8 +1399,9 @@
               Dashboard
             </button>
             <div class="user-dropdown-sep"></div>
-            <button class="user-dropdown-item danger" onclick="signOut(); closeDropdown();">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button class="user-dropdown-item danger" onclick="signOut(); closeDropdown();" role="menuitem">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                aria-hidden="true">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                 <polyline points="16 17 21 12 16 7" />
                 <line x1="21" y1="12" x2="9" y2="12" />
@@ -1173,8 +1411,9 @@
           </div>
         </div>
 
-        <a href="#download" class="nav-cta">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <a href="#download" class="nav-cta" title="Download BloxMulti for Windows">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
@@ -1186,350 +1425,469 @@
   </nav>
 
   <!-- Hero Section -->
-  <section class="hero">
-    <div class="container" style="display: flex; flex-direction: column; align-items: center;">
-      <div class="hero-badge">
-        <div class="hero-badge-dot"></div>
-        v1.4.2
-      </div>
-
-      <h1 class="hero-title">
-        Roblox <span>Account Manager</span>
-      </h1>
-
-      <p class="hero-sub">
-        Launch and manage multiple Roblox accounts at the same time, each with its own isolated session. Customize your
-        dashboard, organize accounts into folders, and monitor client performance.
-      </p>
-
-      <div class="hero-actions">
-        <a href="https://downloads.noxith.com/download" class="btn-primary">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          Download Now
-        </a>
-        <button class="btn-secondary" onclick="openDashboard()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="7" height="7" />
-            <rect x="14" y="3" width="7" height="7" />
-            <rect x="14" y="14" width="7" height="7" />
-            <rect x="3" y="14" width="7" height="7" />
-          </svg>
-          Open Web Dashboard
-        </button>
-      </div>
-
-      <div class="hero-meta">
-        <div class="hero-meta-item">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          Fast &amp; Light (~1.4 MB)
+  <main>
+    <section class="hero">
+      <div class="container" style="display: flex; flex-direction: column; align-items: center;">
+        <div class="hero-badge">
+          <div class="hero-badge-dot" aria-hidden="true"></div>
+          Release v1.4.2 · The Modern Roblox RAM &amp; Launcher
         </div>
-        <div class="hero-meta-item">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          No Installer Required
-        </div>
-        <div class="hero-meta-item">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          Windows 10 &amp; 11
-        </div>
-      </div>
 
-      <!-- App Preview Image Slider -->
-      <div class="preview-wrap">
-        <div class="preview-glow"></div>
-        <div class="preview-frame">
-          <div class="carousel-slides" id="carouselSlides">
-            <div class="carousel-slide active"><img src="Preview.png" alt="Onyx Theme"
-                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 style=%22background:%230a0915%22><text x=%2250%25%22 y=%2250%25%22 fill=%22%236a607e%22 font-family=%22sans-serif%22 font-size=%2220%22 text-anchor=%22middle%22>BloxMulti Desktop Client</text></svg>';" />
-            </div>
-            <div class="carousel-slide"><img src="Theme-Noxith.png" alt="Noxith Theme"
-                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 style=%22background:%23050505%22><text x=%2250%25%22 y=%2250%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2220%22 text-anchor=%22middle%22>Noxith Theme</text></svg>';" />
-            </div>
-            <div class="carousel-slide"><img src="Theme-Eclipse.png" alt="Eclipse Theme"
-                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 style=%22background:%23030206%22><text x=%2250%25%22 y=%2250%25%22 fill=%22%23ff6a00%22 font-family=%22sans-serif%22 font-size=%2220%22 text-anchor=%22middle%22>Eclipse Theme</text></svg>';" />
-            </div>
-            <div class="carousel-slide"><img src="Theme-Crimson.png" alt="Crimson Theme"
-                onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 style=%22background:%230d0406%22><text x=%2250%25%22 y=%2250%25%22 fill=%22%23ff3a5c%22 font-family=%22sans-serif%22 font-size=%2220%22 text-anchor=%22middle%22>Crimson Theme</text></svg>';" />
-            </div>
+        <h1 class="hero-title">
+          Roblox <span>Account Manager</span> &amp; Launcher
+        </h1>
+
+        <p class="hero-sub">
+          Launch and manage Multiple Roblox accounts at the same time. The lightweight, secure alternative to classic
+          Roblox RAM with hardware DPAPI encryption, Place ID launching, and background FPS limits.
+        </p>
+
+        <div class="hero-actions">
+          <a href="https://downloads.noxith.com/download" class="btn-primary"
+            title="Download portable Roblox RAM alternative">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download BloxMulti
+          </a>
+          <button class="btn-secondary" onclick="openDashboard()" title="Launch Web Dashboard">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              aria-hidden="true">
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+            </svg>
+            Open Web Dashboard
+          </button>
+        </div>
+
+        <div class="hero-meta">
+          <div class="hero-meta-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              aria-hidden="true">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Lightweight Portable (~1.4 MB)
           </div>
-          <button class="carousel-arrow prev" onclick="moveSlide(-1)">❮</button>
-          <button class="carousel-arrow next" onclick="moveSlide(1)">❯</button>
+          <div class="hero-meta-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              aria-hidden="true">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Zero Memory Injection
+          </div>
+          <div class="hero-meta-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              aria-hidden="true">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Hardware DPAPI Encrypted
+          </div>
         </div>
 
-        <div class="carousel-dots" id="carouselDots">
-          <span class="carousel-dot active" onclick="setSlide(0)"></span>
-          <span class="carousel-dot" onclick="setSlide(1)"></span>
-          <span class="carousel-dot" onclick="setSlide(2)"></span>
-          <span class="carousel-dot" onclick="setSlide(3)"></span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Stats Strip -->
-  <div class="stats">
-    <div class="stats-inner">
-      <div class="stat-item">
-        <div class="stat-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-          </svg>
-        </div>
-        <div class="stat-text">
-          <div class="stat-num"><span>Unlimited</span> Accounts</div>
-          <div class="stat-label">Save and switch between active sessions</div>
-        </div>
-      </div>
-
-      <div class="stat-item">
-        <div class="stat-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polygon points="5 3 19 12 5 21 5 3" />
-          </svg>
-        </div>
-        <div class="stat-text">
-          <div class="stat-num"><span>Multi-Instance</span> Support</div>
-          <div class="stat-label">Launch multiple Roblox windows simultaneously</div>
-        </div>
-      </div>
-
-      <div class="stat-item">
-        <div class="stat-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-          </svg>
-        </div>
-        <div class="stat-text">
-          <div class="stat-num"><span>Global</span> FPS Limiter</div>
-          <div class="stat-label">Tune framerate caps inside XML configuration files</div>
-        </div>
-      </div>
-
-      <div class="stat-item">
-        <div class="stat-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-        </div>
-        <div class="stat-text">
-          <div class="stat-num"><span id="stats-downloads">12,000</span>+ Downloads</div>
-          <div class="stat-label">Active users running multiple clients</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bento Features Grid -->
-  <section class="features" id="features">
-    <div class="container">
-      <div class="section-label">Core Architecture</div>
-      <h2 class="section-title">Built for Multi-Accounting Automation</h2>
-
-      <div class="bento-grid">
-        <div class="bento-card">
-          <div class="bento-header">
-            <div class="bento-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
+        <!-- App Preview Image Slider -->
+        <div class="preview-wrap">
+          <div class="preview-glow" aria-hidden="true"></div>
+          <div class="preview-frame">
+            <div class="carousel-slides" id="carouselSlides">
+              <div class="carousel-slide active">
+                <img src="Preview.png" alt="BloxMulti Onyx Dark Theme Roblox RAM Account Manager preview"
+                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 style=%22background:%230a0915%22><text x=%2250%25%22 y=%2250%25%22 fill=%22%236a607e%22 font-family=%22sans-serif%22 font-size=%2220%22 text-anchor=%22middle%22>BloxMulti Desktop Client</text></svg>';" />
+              </div>
+              <div class="carousel-slide">
+                <img src="Theme-Noxith.png" alt="BloxMulti Noxith Theme displaying Multiple Roblox instances"
+                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 style=%22background:%23050505%22><text x=%2250%25%22 y=%2250%25%22 fill=%22%239d6fff%22 font-family=%22sans-serif%22 font-size=%2220%22 text-anchor=%22middle%22>Noxith Theme</text></svg>';" />
+              </div>
+              <div class="carousel-slide">
+                <img src="Theme-Eclipse.png" alt="BloxMulti Eclipse Amber Theme for Roblox launcher"
+                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 style=%22background:%23030206%22><text x=%2250%25%22 y=%2250%25%22 fill=%22%23ff6a00%22 font-family=%22sans-serif%22 font-size=%2220%22 text-anchor=%22middle%22>Eclipse Theme</text></svg>';" />
+              </div>
+              <div class="carousel-slide">
+                <img src="Theme-Crimson.png" alt="BloxMulti Crimson Theme showing multiple active Roblox accounts"
+                  onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221000%22 height=%22650%22 style=%22background:%230d0406%22><text x=%2250%25%22 y=%2250%25%22 fill=%22%23ff3a5c%22 font-family=%22sans-serif%22 font-size=%2220%22 text-anchor=%22middle%22>Crimson Theme</text></svg>';" />
+              </div>
             </div>
-            <span class="bento-badge core">CORE</span>
+            <button class="carousel-arrow prev" onclick="moveSlide(-1)" aria-label="Previous Theme Slide">❮</button>
+            <button class="carousel-arrow next" onclick="moveSlide(1)" aria-label="Next Theme Slide">❯</button>
           </div>
-          <div class="bento-title">Multi-Instance Engine</div>
-          <div class="bento-desc">Automatically neutralizes singleton Mutex and Event handles upon client launch,
-            letting you run unlimited instances smoothly side-by-side without disconnects.</div>
-        </div>
 
-        <div class="bento-card">
-          <div class="bento-header">
-            <div class="bento-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-            </div>
-            <span class="bento-badge core">PERFORMANCE</span>
+          <div class="carousel-dots" id="carouselDots">
+            <span class="carousel-dot active" onclick="setSlide(0)" role="button" aria-label="Slide 1"></span>
+            <span class="carousel-dot" onclick="setSlide(1)" role="button" aria-label="Slide 2"></span>
+            <span class="carousel-dot" onclick="setSlide(2)" role="button" aria-label="Slide 3"></span>
+            <span class="carousel-dot" onclick="setSlide(3)" role="button" aria-label="Slide 4"></span>
           </div>
-          <div class="bento-title">Per-Account &amp; Global FPS Limiter</div>
-          <div class="bento-desc">Writes configuration limits directly to Roblox's XML settings. Throttle background alt
-            accounts down to 5–10 FPS while keeping your main account at max refresh rate.</div>
-        </div>
-
-        <div class="bento-card">
-          <div class="bento-header">
-            <div class="bento-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-            </div>
-            <span class="bento-badge core">SECURITY</span>
-          </div>
-          <div class="bento-title">DPAPI Hardware Vault</div>
-          <div class="bento-desc">Saved account cookies are encrypted using Windows CryptProtectData tied to your
-            device's hardware keys. Zero plain-text credentials ever touch external databases.</div>
-        </div>
-
-        <div class="bento-card">
-          <div class="bento-header">
-            <div class="bento-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-            </div>
-            <span class="bento-badge">PREMIUM</span>
-          </div>
-          <div class="bento-title">Discord Webhook Gateway</div>
-          <div class="bento-desc">Receive real-time Discord notifications when accounts disconnect, teleport, or launch,
-            complete with automated screenshot attachments and offline queueing.</div>
-        </div>
-
-        <div class="bento-card">
-          <div class="bento-header">
-            <div class="bento-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <line x1="9" y1="3" x2="9" y2="21" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-              </svg>
-            </div>
-            <span class="bento-badge">PREMIUM</span>
-          </div>
-          <div class="bento-title">Window Layout Arranger</div>
-          <div class="bento-desc">Arrange window positions across monitors on a virtual canvas. Each client
-            automatically launches at its exact designated pixel size and screen coordinates.</div>
-        </div>
-
-        <div class="bento-card">
-          <div class="bento-header">
-            <div class="bento-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="3" width="20" height="14" rx="2" />
-                <line x1="8" y1="21" x2="16" y2="21" />
-                <line x1="12" y1="17" x2="12" y2="21" />
-              </svg>
-            </div>
-            <span class="bento-badge">PREMIUM</span>
-          </div>
-          <div class="bento-title">P2P Remote Screen Streaming</div>
-          <div class="bento-desc">Encrypted WebRTC screen streaming enables you to observe your client sessions from
-            secondary screens like phones or tablets without external video servers.</div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Pricing Section -->
-  <section class="pricing-section" id="pricing">
-    <div class="container">
-      <div class="section-label">Licensing</div>
-      <h2 class="section-title">Upgrade Options</h2>
-
-      <div class="pricing-grid">
-        <!-- Standard -->
-        <div class="pricing-card">
-          <div class="pricing-tier-name">Standard</div>
-          <div class="pricing-price">$0</div>
-          <div class="pricing-sub">Free forever for casual multi-accounting</div>
-
-          <ul class="pricing-features">
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Unlimited simultaneous Roblox accounts
-            </li>
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Global framerate cap configuration</li>
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Place ID &amp; Job ID quick-launching
-            </li>
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Saved servers &amp; game bookmarks</li>
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Local DPAPI hardware encryption</li>
-          </ul>
-
-          <a href="#download" class="btn-pricing">Download Free</a>
+    <!-- Stats Strip -->
+    <section class="stats" aria-label="Application Performance &amp; Usage Statistics">
+      <div class="stats-inner">
+        <div class="stat-item">
+          <div class="stat-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+          </div>
+          <div class="stat-text">
+            <div class="stat-num"><span>Unlimited</span> Accounts</div>
+            <div class="stat-label">Organized in isolated DPAPI token vaults</div>
+          </div>
         </div>
 
-        <!-- Monthly Premium -->
-        <div class="pricing-card featured">
-          <div class="pricing-tier-name">Monthly Premium</div>
-          <div class="pricing-price">$3 <span
-              style="font-size:15px; color:var(--muted); font-family:var(--font-body); font-weight:500;">/ mo</span>
+        <div class="stat-item">
+          <div class="stat-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
           </div>
-          <div class="pricing-sub">Full automation suite with recurring flexibility</div>
-
-          <ul class="pricing-features">
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> <strong>Everything in Standard</strong>
-            </li>
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Discord Webhook alerts &amp; disconnect
-              screenshots</li>
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Multi-monitor window layout coordinator
-            </li>
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Per-account individual FPS limits</li>
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Remote WebRTC screen streaming</li>
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Live instance telemetry (CPU/RAM/GPU)
-            </li>
-          </ul>
-
-          <button class="btn-pricing primary" onclick="handleCheckout('monthly')">Subscribe ($3/mo)</button>
+          <div class="stat-text">
+            <div class="stat-num"><span>Multiple Roblox</span> Engine</div>
+            <div class="stat-label">Automated Win32 Mutex handle unlock</div>
+          </div>
         </div>
 
-        <!-- Lifetime License -->
-        <div class="pricing-card">
-          <div class="pricing-tier-name">Lifetime License</div>
-          <div class="pricing-price">$15 <span
-              style="font-size:15px; color:var(--muted); font-family:var(--font-body); font-weight:500;">one-time</span>
+        <div class="stat-item">
+          <div class="stat-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
           </div>
-          <div class="pricing-sub">Pay once, own all future updates forever</div>
+          <div class="stat-text">
+            <div class="stat-num"><span>XML</span> FPS Limiter</div>
+            <div class="stat-label">Individual background throttle down to 5 FPS</div>
+          </div>
+        </div>
 
-          <ul class="pricing-features">
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> <strong>All Premium features
-                unlocked</strong></li>
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> One-time payment with no recurring fees
-            </li>
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Lifetime license linked to your account
-            </li>
-            <li class="pricing-feat-item"><span class="pricing-check">✓</span> Priority Discord support access</li>
-          </ul>
-
-          <button class="btn-pricing" onclick="handleCheckout('lifetime')">Get Lifetime ($15)</button>
+        <div class="stat-item">
+          <div class="stat-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+          </div>
+          <div class="stat-text">
+            <div class="stat-num"><span id="stats-downloads">12,000</span>+ Active Downloads</div>
+            <div class="stat-label">Community trusted across Windows</div>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Download Section -->
-  <section class="download" id="download">
-    <div class="container">
-      <div class="download-box">
-        <div style="font-size:14px; font-weight:600; color:var(--muted); display:flex; align-items:center; gap:8px;">
-          Windows 10 / 11 · Portable Executable
-        </div>
+    <!-- Technical Specifications Matrix -->
+    <section class="tech-specs" id="specs" aria-label="Technical Specifications">
+      <div class="container">
+        <div class="section-label">Architecture</div>
+        <h2 class="section-title">Technical Specifications &amp; Safety Model</h2>
 
-        <a href="https://downloads.noxith.com/download" class="btn-primary" style="width:100%; padding:15px 24px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          Download BloxMulti v1.4.2
-        </a>
+        <div class="specs-grid">
+          <div class="spec-card">
+            <span class="spec-title">Binary Size</span>
+            <span class="spec-val">~1.4 MB</span>
+            <span class="spec-sub">Zero-dependency C++ backend with Edge WebView2 frontend.</span>
+          </div>
 
-        <div style="font-size:12px; color:var(--muted);">
-          SHA-256 Verified · Clean VirusTotal Scan · ~1.4 MB
+          <div class="spec-card">
+            <span class="spec-title">Engine Safety</span>
+            <span class="spec-val">0% Memory Injection</span>
+            <span class="spec-sub">Zero DLL injection or game memory alteration. 100% external OS Mutex control.</span>
+          </div>
+
+          <div class="spec-card">
+            <span class="spec-title">Credential Encryption</span>
+            <span class="spec-val">Windows DPAPI</span>
+            <span class="spec-sub">Encrypted locally with CryptProtectData using machine hardware keys.</span>
+          </div>
+
+          <div class="spec-card">
+            <span class="spec-title">Supported Environments</span>
+            <span class="spec-val">Windows 10 &amp; 11</span>
+            <span class="spec-sub">Compatible with 64-bit Windows installations and native Roblox clients.</span>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+
+    <!-- Bento Features Grid -->
+    <section class="features" id="features" aria-label="Features">
+      <div class="container">
+        <div class="section-label">Multi-Instance Automation</div>
+        <h2 class="section-title">Built for Multiple Roblox &amp; Account Automation</h2>
+
+        <div class="bento-grid">
+          <article class="bento-card">
+            <div class="bento-header">
+              <div class="bento-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+              </div>
+              <span class="bento-badge core">CORE ENGINE</span>
+            </div>
+            <h3 class="bento-title">Multiple Roblox Engine</h3>
+            <p class="bento-desc">Automatically neutralizes singleton Mutex and Event handles upon client launch,
+              allowing you to run Multiple Roblox accounts smoothly without the standard single-instance disconnect
+              error.</p>
+          </article>
+
+          <article class="bento-card">
+            <div class="bento-header">
+              <div class="bento-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <span class="bento-badge core">PERFORMANCE</span>
+            </div>
+            <h3 class="bento-title">Per-Account &amp; Global FPS Limiter</h3>
+            <p class="bento-desc">Directly configures Roblox XML settings files. Throttle idle background alt accounts
+              down to
+              5–10 FPS to preserve GPU and CPU bandwidth while keeping your main client at uncapped refresh rates.</p>
+          </article>
+
+          <article class="bento-card">
+            <div class="bento-header">
+              <div class="bento-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              </div>
+              <span class="bento-badge core">SECURITY</span>
+            </div>
+            <h3 class="bento-title">DPAPI Hardware Vault</h3>
+            <p class="bento-desc">Saved account authentication cookies are secured via Windows CryptProtectData bound to
+              your
+              specific device. Credentials remain entirely on your local PC and never touch third-party databases.</p>
+          </article>
+
+          <article class="bento-card">
+            <div class="bento-header">
+              <div class="bento-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+              </div>
+              <span class="bento-badge">PREMIUM</span>
+            </div>
+            <h3 class="bento-title">Discord Webhook Gateway</h3>
+            <p class="bento-desc">Receive instant webhook alerts when accounts disconnect, reconnect, or teleport into
+              servers, paired with automatic high-resolution window screenshots and offline delivery queues.</p>
+          </article>
+
+          <article class="bento-card">
+            <div class="bento-header">
+              <div class="bento-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <line x1="9" y1="3" x2="9" y2="21" />
+                  <line x1="3" y1="12" x2="21" y2="12" />
+                </svg>
+              </div>
+              <span class="bento-badge">PREMIUM</span>
+            </div>
+            <h3 class="bento-title">Window Layout Arranger</h3>
+            <p class="bento-desc">Snap and arrange game clients across multiple monitors on a customizable grid canvas.
+              Every
+              instance remembers its assigned screen, coordinates, and pixel dimensions automatically.</p>
+          </article>
+
+          <article class="bento-card">
+            <div class="bento-header">
+              <div class="bento-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <line x1="8" y1="21" x2="16" y2="21" />
+                  <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+              </div>
+              <span class="bento-badge">PREMIUM</span>
+            </div>
+            <h3 class="bento-title">P2P Remote Screen Streaming</h3>
+            <p class="bento-desc">Secure peer-to-peer WebRTC video streaming allows you to check in on active game
+              sessions
+              from any browser, phone, or tablet without routing through third-party video storage servers.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing-section" id="pricing" aria-label="Plans and Pricing">
+      <div class="container">
+        <div class="section-label">Licensing</div>
+        <h2 class="section-title">Upgrade Options &amp; Plans</h2>
+
+        <div class="pricing-grid">
+          <!-- Standard -->
+          <div class="pricing-card">
+            <div class="pricing-tier-name">Standard</div>
+            <div class="pricing-price">$0</div>
+            <div class="pricing-sub">Free forever for casual multi-accounting</div>
+
+            <ul class="pricing-features">
+              <li class="pricing-feat-item"><span class="pricing-check">✓</span> Unlimited simultaneous Roblox accounts
+              </li>
+              <li class="pricing-feat-item"><span class="pricing-check">✓</span> Global framerate cap configuration</li>
+              <li class="pricing-feat-item"><span class="pricing-check">✓</span> Place ID &amp; Job ID quick-launching
+              </li>
+              <li class="pricing-feat-item"><span class="pricing-check">✓</span> Saved servers &amp; game bookmarks</li>
+              <li class="pricing-feat-item"><span class="pricing-check">✓</span> Local DPAPI hardware encryption</li>
+            </ul>
+
+            <a href="#download" class="btn-pricing">Download Free</a>
+          </div>
+
+          <!-- Monthly Premium -->
+          <div class="pricing-card featured">
+            <div class="pricing-tier-name">Monthly Premium</div>
+            <div class="pricing-price">$3 <span
+                style="font-size:15px; color:var(--muted); font-family:var(--font-body); font-weight:500;">/ mo</span>
+            </div>
+            <div class="pricing-sub">Full automation suite with recurring flexibility</div>
+
+            <ul class="pricing-features">
+              <li class="pricing-feat-item"><span class="pricing-check">✓</span> <strong>Everything in Standard</strong>
+              </li>
+              <li class="pricing-feat-item"><span class="pricing-check">✓</span> Discord Webhook alerts &amp; disconnect
+                screenshots</li>
+              <li class="pricing-feat-item"><span class="pricing-check">✓</span> Multi-monitor window layout coordinator
+              </li>
+              <li class="pricing-feat-item"><span class="pricing-check">✓</span> Per-account individual FPS limits</li>
+              <li class="pricing-feat-item"><span class="pricing-check">✓</span> Remote WebRTC screen streaming</li>
+              <li class="pricing-feat-item"><span class="pricing-check">✓</span> Live instance telemetry (CPU/RAM/GPU)
+              </li>
+            </ul>
+
+            <button class="btn-pricing primary" onclick="handleCheckout('monthly')">Subscribe ($3/mo)</button>
+          </div>
+
+          <!-- Lifetime License -->
+          <div class="pricing-card">
+            <div class="pricing-tier-name">Lifetime License</div>
+            <div class="pricing-price">$15 <span
+                style="font-size:15px; color:var(--muted); font-family:var(--font-body); font-weight:500;">one-time</span>
+            </div>
+            <div class="pricing-sub">Pay once, own all future updates forever</div>
+
+            <ul class="pricing-features">
+              <li class="pricing-feat-item"><span class="pricing-check">✓</span> <strong>All Premium features
+                  unlocked</strong></li>
+              <li class="pricing-feat-item"><span class="pricing-check">✓</span> One-time payment with no recurring fees
+              </li>
+              <li class="pricing-feat-item"><span class="pricing-check">✓</span> Lifetime license linked to your account
+            </ul>
+
+            <button class="btn-pricing" onclick="handleCheckout('lifetime')">Get Lifetime ($15)</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section" id="faq" aria-label="Frequently Asked Questions">
+      <div class="container">
+        <div class="section-label">Questions &amp; Clarifications</div>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+
+        <div class="faq-container">
+          <details class="faq-item" open>
+            <summary class="faq-question">
+              <span>What is BloxMulti and how does it compare to Roblox RAM?</span>
+              <span class="faq-chevron">▼</span>
+            </summary>
+            <div class="faq-answer">
+              BloxMulti is a modern Roblox Account Manager (RAM) and custom launcher designed for Windows. While older
+              tools often rely on plain-text storage or complex manual Mutex management, BloxMulti provides a sleek
+              interface, hardware-level Windows DPAPI token encryption, automatic Mutex unlocks for Multiple Roblox
+              sessions, and XML-based per-account FPS limiting.
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">
+              <span>How do I launch and play Multiple Roblox accounts on one PC?</span>
+              <span class="faq-chevron">▼</span>
+            </summary>
+            <div class="faq-answer">
+              Normally, Roblox uses a singleton Mutex handle to prevent more than one game client from opening.
+              BloxMulti handles this automatically by releasing the single-instance Mutex handle before subsequent
+              client windows launch, letting you play Multiple Roblox accounts simultaneously with independent accounts.
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">
+              <span>Can BloxMulti be used as a Place ID Roblox Launcher?</span>
+              <span class="faq-chevron">▼</span>
+            </summary>
+            <div class="faq-answer">
+              Yes. BloxMulti features a built-in launcher that allows you to launch specific Place IDs, Job IDs, and VIP
+              server links with any selected account directly from your dashboard.
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">
+              <span>Is using BloxMulti safe? Can I get banned?</span>
+              <span class="faq-chevron">▼</span>
+            </summary>
+            <div class="faq-answer">
+              BloxMulti does <strong>not inject code</strong> into the Roblox game engine or modify in-game memory. It
+              operates purely at the Windows OS level by managing process handles and configuration files externally.
+            </div>
+          </details>
+
+          <details class="faq-item">
+            <summary class="faq-question">
+              <span>Where are my account passwords and login tokens stored?</span>
+              <span class="faq-chevron">▼</span>
+            </summary>
+            <div class="faq-answer">
+              Your login credentials and cookies never leave your device in plain text. BloxMulti encrypts all account
+              session tokens locally using the <strong>Windows Data Protection API (DPAPI)</strong>, binding encryption
+              directly to your local Windows user hardware profile.
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- Download Section -->
+    <section class="download" id="download" aria-label="Download Section">
+      <div class="container">
+        <div class="download-box">
+          <div style="font-size:14px; font-weight:600; color:var(--muted); display:flex; align-items:center; gap:8px;">
+            Windows 10 / 11 · Portable Executable
+          </div>
+
+          <a href="https://downloads.noxith.com/download" class="btn-primary" style="width:100%; padding:15px 24px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download BloxMulti v1.4.2
+          </a>
+
+          <div style="font-size:12px; color:var(--muted);">
+            SHA-256 Verified · Clean VirusTotal Scan · ~1.4 MB Portable
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <!-- Footer -->
   <footer>
@@ -1538,25 +1896,26 @@
         BloxMulti
       </div>
       <ul class="footer-links">
-        <li><a href="https://github.com/WaveBound/BloxMulti">GitHub</a></li>
-        <li><a href="https://discord.gg/ju6ANNecQg">Discord</a></li>
+        <li><a href="https://github.com/WaveBound/BloxMulti" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="https://discord.gg/ju6ANNecQg" target="_blank" rel="noopener">Discord</a></li>
         <li><a href="support.html">Support</a></li>
-        <li><a href="privacy.html">Privacy</a></li>
-        <li><a href="terms.html">Terms</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms of Service</a></li>
       </ul>
     </div>
   </footer>
 
   <!-- Simplified Minimalist Sign In Modal -->
-  <div class="auth-backdrop" id="authModal" onclick="closeAuthModal()">
+  <div class="auth-backdrop" id="authModal" onclick="closeAuthModal()" role="dialog" aria-modal="true"
+    aria-labelledby="authTitle">
     <div class="auth-card" onclick="event.stopPropagation()">
-      <button class="auth-close-btn" onclick="closeAuthModal()" title="Close">✕</button>
+      <button class="auth-close-btn" onclick="closeAuthModal()" aria-label="Close dialog">✕</button>
 
-      <h3 class="auth-title">Sign In</h3>
+      <h3 class="auth-title" id="authTitle">Sign In</h3>
       <p class="auth-desc">Choose a provider to access your dashboard and license.</p>
 
       <button class="btn-oauth google" onclick="signInWith('google')">
-        <svg width="17" height="17" viewBox="0 0 24 24">
+        <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true">
           <path
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
             fill="#4285F4" />
@@ -1574,7 +1933,7 @@
       </button>
 
       <button class="btn-oauth discord" onclick="signInWith('discord')">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="#5865F2">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="#5865F2" aria-hidden="true">
           <path
             d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
         </svg>
@@ -1582,7 +1941,7 @@
       </button>
 
       <div class="auth-footer-note">
-        By continuing, you agree to our <a href="terms.html">Terms</a> and <a href="privacy.html">Privacy</a>.
+        By continuing, you agree to our <a href="terms.html">Terms</a> and <a href="privacy.html">Privacy Policy</a>.
       </div>
     </div>
   </div>

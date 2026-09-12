@@ -1,58 +1,131 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Support — BloxMulti</title>
+  <title>Support &amp; Troubleshooting Guide — BloxMulti</title>
 
-  <!-- Primary SEO -->
+  <!-- Canonical -->
+  <link rel="canonical" href="https://bloxmulti.com/support.html" />
+
+  <!-- Primary SEO Meta -->
+  <meta name="title" content="Support &amp; Troubleshooting Guide — BloxMulti" />
   <meta name="description"
-    content="BloxMulti is a powerful Windows app that lets you manage multiple Roblox accounts at once. Switch accounts instantly, launch any game by Place ID, and save private server codes — all in one app." />
+    content="Troubleshooting guide and official help for BloxMulti. Solutions for Windows SmartScreen, WebView2 runtime setup, account saving permissions, and Roblox multi-instance disconnects." />
   <meta name="keywords"
-    content="Roblox multi account manager, Roblox account switcher, BloxMulti, multiple Roblox accounts Windows, Roblox account manager app, Roblox private server codes, launch multiple Roblox accounts simultaneously, Roblox alt account manager" />
+    content="BloxMulti support, BloxMulti SmartScreen run anyway, Roblox multi instance disconnect fix, BloxMulti WebView2 runtime, BloxMulti help, Roblox alt manager troubleshooting" />
   <meta name="author" content="BloxMulti" />
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <meta name="theme-color" content="#9d6fff" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="BloxMulti — Roblox Multi-Account Manager" />
-  <meta property="og:description"
-    content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — for Windows." />
-  <meta property="og:image" content="og-image.png" />
+  <meta property="og:url" content="https://bloxmulti.com/support.html" />
   <meta property="og:site_name" content="BloxMulti" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:title" content="BloxMulti Support &amp; Troubleshooting Guide" />
+  <meta property="og:description"
+    content="Find quick solutions for Windows SmartScreen notices, Microsoft Edge WebView2 requirements, and multi-client Mutex configuration." />
+  <meta property="og:image" content="https://bloxmulti.com/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="BloxMulti Support &amp; Help Desk" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="BloxMulti — Roblox Multi-Account Manager" />
+  <meta name="twitter:url" content="https://bloxmulti.com/support.html" />
+  <meta name="twitter:title" content="BloxMulti Support &amp; Troubleshooting Guide" />
   <meta name="twitter:description"
-    content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — for Windows." />
-  <meta name="twitter:image" content="og-image.png" />
+    content="Find quick solutions for Windows SmartScreen notices, Microsoft Edge WebView2 requirements, and multi-client Mutex configuration." />
+  <meta name="twitter:image" content="https://bloxmulti.com/og-image.png" />
 
-  <!-- Structured Data -->
+  <!-- Preconnect and Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+
+  <!-- Structured Data: Breadcrumbs & FAQPage (GEO Optimized) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "BloxMulti",
-    "operatingSystem": "Windows 10, Windows 11",
-    "applicationCategory": "UtilitiesApplication",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "description": "BloxMulti is a powerful Windows desktop app for managing multiple Roblox accounts. Launch any game instantly by Place ID, save favorite games, and store private server codes.",
-    "screenshot": "og-image.png"
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://bloxmulti.com/support.html#breadcrumbs",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://bloxmulti.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Support",
+            "item": "https://bloxmulti.com/support.html"
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://bloxmulti.com/support.html#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is BloxMulti?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "BloxMulti is a lightweight, portable Windows utility that lets you launch and manage multiple Roblox client instances concurrently on a single PC. It isolates each account's session with its own token vault and unlocks singleton Mutex handles automatically."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need to install anything for the UI to work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "BloxMulti uses Microsoft Edge WebView2 to render its user interface. Most Windows 10 and 11 machines include this runtime by default. If the app displays a blank window or fails to open, install the official WebView2 Evergreen Runtime from Microsoft."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I get banned for using BloxMulti?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "BloxMulti does not inject code into the Roblox game engine or alter in-game memory. It manages native Windows Mutex objects and handles session launching. However, always ensure your use complies with Roblox's Terms of Use."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why did Windows SmartScreen block the app?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Because BloxMulti is a portable executable without an expensive commercial code-signing certificate, Windows SmartScreen may display an unrecognized app notice. Click 'More info' and select 'Run anyway'. If the file was downloaded from a browser, right-click BloxMulti.exe, select Properties, check the Unblock box at the bottom, and click Apply."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why are accounts or tabs not saving?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ensure the executable is placed in a folder with full read and write permissions (such as Desktop, Documents, or a custom folder like C:\\BloxMulti). Avoid running directly from a temporary zip folder or write-protected system directories."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Why does the second account disconnect the first account?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Make sure you launch instances through BloxMulti so its Multi-Instance Engine can neutralize the single-instance Mutex handle before the Roblox client initialises."
+            }
+          }
+        ]
+      }
+    ]
   }
   </script>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- App-matched font: Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet" />
 
   <style>
     :root {
@@ -224,11 +297,6 @@
       transform: translateY(-1px);
     }
 
-    .btn-donate.heart svg {
-      color: var(--red);
-      fill: rgba(255, 58, 92, 0.2);
-    }
-
     .legal-page {
       padding: 140px 20px 80px;
       max-width: 900px;
@@ -278,6 +346,15 @@
 
     .legal-page li {
       margin-bottom: 8px;
+    }
+
+    .legal-page code {
+      background: var(--surface-2);
+      border: 1px solid var(--border-hi);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--accent-light);
     }
 
     .legal-page a {
@@ -347,24 +424,24 @@
 </head>
 
 <body>
-  <div class="global-bg"></div>
+  <div class="global-bg" aria-hidden="true"></div>
 
   <!-- Nav -->
-  <nav>
-    <a href="index.html#" class="nav-logo">BloxMulti</a>
+  <nav aria-label="Main Navigation">
+    <a href="index.html" class="nav-logo" aria-label="BloxMulti Homepage">BloxMulti</a>
 
     <div class="nav-right">
       <ul class="nav-links">
         <li><a href="index.html#features">Features</a></li>
         <li><a href="index.html#pricing">Upgrade</a></li>
         <li><a href="index.html#download">Download</a></li>
-        <li><a href="support.html">Support</a></li>
+        <li><a href="support.html" aria-current="page">Support</a></li>
       </ul>
 
       <div class="nav-actions">
-        <a href="index.html#download" class="nav-cta" title="Get App">
+        <a href="index.html#download" class="nav-cta" title="Download BloxMulti App">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
@@ -375,7 +452,7 @@
     </div>
   </nav>
 
-  <main class="legal-page">
+  <main class="legal-page" role="main">
     <h1>Support &amp; Troubleshooting</h1>
     <p>Need assistance setting up BloxMulti or troubleshooting multi-instance launching? Find answers to frequently
       asked
@@ -437,8 +514,8 @@
   <footer>
     <div class="footer-logo">BloxMulti</div>
     <div class="footer-links">
-      <a href="https://github.com/WaveBound/BloxMulti">GitHub</a>
-      <a href="https://discord.gg/ju6ANNecQg">Discord</a>
+      <a href="https://github.com/WaveBound/BloxMulti" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://discord.gg/ju6ANNecQg" target="_blank" rel="noopener">Discord</a>
       <a href="support.html">Support</a>
       <a href="privacy.html">Privacy</a>
       <a href="terms.html">Terms</a>

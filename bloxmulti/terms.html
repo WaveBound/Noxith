@@ -1,56 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Terms of Service — BloxMulti</title>
+  <title>Terms of Service — BloxMulti | License Agreement &amp; Disclaimer</title>
 
-  <!-- Primary SEO -->
+  <!-- Canonical -->
+  <link rel="canonical" href="https://bloxmulti.com/terms.html" />
+
+  <!-- Primary SEO Meta -->
+  <meta name="title" content="Terms of Service — BloxMulti | License Agreement &amp; Disclaimer" />
   <meta name="description"
-    content="BloxMulti is a powerful Windows app that lets you manage multiple Roblox accounts at once. Switch accounts instantly, launch any game by Place ID, and save private server codes — all in one app." />
+    content="Read the Terms of Service and End-User License Agreement for BloxMulti. Includes software licensing terms, refund policy, and third-party disclaimers." />
   <meta name="keywords"
-    content="Roblox multi account manager, Roblox account switcher, BloxMulti, multiple Roblox accounts Windows, Roblox account manager app, Roblox private server codes, launch multiple Roblox accounts simultaneously, Roblox alt account manager" />
+    content="BloxMulti terms of service, BloxMulti license agreement, Roblox alt manager terms, BloxMulti refund policy, software disclaimer, BloxMulti EULA" />
   <meta name="author" content="BloxMulti" />
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <meta name="theme-color" content="#9d6fff" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="BloxMulti — Roblox Multi-Account Manager" />
-  <meta property="og:description"
-    content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — for Windows." />
-  <meta property="og:image" content="og-image.png" />
+  <meta property="og:url" content="https://bloxmulti.com/terms.html" />
   <meta property="og:site_name" content="BloxMulti" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:title" content="Terms of Service — BloxMulti Licensing &amp; Usage Terms" />
+  <meta property="og:description"
+    content="Terms and conditions governing the use of the BloxMulti multi-instance desktop application, licensing, and cloud sync features." />
+  <meta property="og:image" content="https://bloxmulti.com/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="BloxMulti Terms of Service &amp; Licensing" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="BloxMulti — Roblox Multi-Account Manager" />
+  <meta name="twitter:url" content="https://bloxmulti.com/terms.html" />
+  <meta name="twitter:title" content="Terms of Service — BloxMulti" />
   <meta name="twitter:description"
-    content="Manage all your Roblox accounts in one place. Switch instantly, launch any game, save private server codes — for Windows." />
-  <meta name="twitter:image" content="og-image.png" />
+    content="Review BloxMulti's user license agreement, refund policy, and service terms." />
+  <meta name="twitter:image" content="https://bloxmulti.com/og-image.png" />
 
-  <!-- Structured Data -->
+  <!-- Structured Data: WebPage & Breadcrumbs -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "BloxMulti",
-    "operatingSystem": "Windows 10, Windows 11",
-    "applicationCategory": "UtilitiesApplication",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "description": "BloxMulti is a powerful Windows desktop app for managing multiple Roblox accounts. Launch any game instantly by Place ID, save favorite games, and store private server codes.",
-    "screenshot": "og-image.png"
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://bloxmulti.com/terms.html#breadcrumbs",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://bloxmulti.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Terms of Service",
+            "item": "https://bloxmulti.com/terms.html"
+          }
+        ]
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://bloxmulti.com/terms.html#webpage",
+        "url": "https://bloxmulti.com/terms.html",
+        "name": "Terms of Service — BloxMulti",
+        "description": "Terms of service, licensing details, refund terms, and disclaimers for the BloxMulti application.",
+        "dateModified": "2026-05-16",
+        "isPartOf": {
+          "@type": "WebSite",
+          "@id": "https://bloxmulti.com/#website",
+          "name": "BloxMulti",
+          "url": "https://bloxmulti.com/"
+        }
+      }
+    ]
   }
   </script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- App-matched font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet" />
 
@@ -224,11 +256,6 @@
       transform: translateY(-1px);
     }
 
-    .btn-donate.heart svg {
-      color: var(--red);
-      fill: rgba(255, 58, 92, 0.2);
-    }
-
     .legal-page {
       padding: 140px 20px 80px;
       max-width: 900px;
@@ -347,11 +374,11 @@
 </head>
 
 <body>
-  <div class="global-bg"></div>
+  <div class="global-bg" aria-hidden="true"></div>
 
   <!-- Nav -->
-  <nav>
-    <a href="index.html#" class="nav-logo">BloxMulti</a>
+  <nav aria-label="Main Navigation">
+    <a href="index.html" class="nav-logo" aria-label="BloxMulti Homepage">BloxMulti</a>
 
     <div class="nav-right">
       <ul class="nav-links">
@@ -362,9 +389,9 @@
       </ul>
 
       <div class="nav-actions">
-        <a href="index.html#download" class="nav-cta" title="Get App">
+        <a href="index.html#download" class="nav-cta" title="Download BloxMulti App">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
@@ -375,7 +402,7 @@
     </div>
   </nav>
 
-  <main class="legal-page">
+  <main class="legal-page" role="main">
     <h1>Terms of Service</h1>
     <p><strong>Last Updated:</strong> May 16, 2026</p>
     <p>Please read these Terms of Service ("Terms") carefully before using the BloxMulti desktop application ("the App")
@@ -439,11 +466,11 @@
   <footer>
     <div class="footer-logo">BloxMulti</div>
     <div class="footer-links">
-      <a href="https://github.com/WaveBound/BloxMulti">GitHub</a>
-      <a href="https://discord.gg/ju6ANNecQg">Discord</a>
+      <a href="https://github.com/WaveBound/BloxMulti" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://discord.gg/ju6ANNecQg" target="_blank" rel="noopener">Discord</a>
       <a href="support.html">Support</a>
       <a href="privacy.html">Privacy</a>
-      <a href="terms.html">Terms</a>
+      <a href="terms.html" aria-current="page">Terms</a>
     </div>
   </footer>
 </body>
