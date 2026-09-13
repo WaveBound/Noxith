@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- SEO & Canonical Configuration -->
-  <title>noxith hub — everything lives here.</title>
+  <title>noxith hub — software, tools & utilities</title>
   <meta name="description"
     content="A home for tools and projects. Official hub for BloxMulti, Anime Expedition Wiki, Wavebound, and UTDX." />
   <link rel="canonical" href="https://noxith.com/" />
@@ -19,7 +19,7 @@
   <!-- Open Graph / Discord Embed Metadata -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://noxith.com/" />
-  <meta property="og:title" content="noxith hub — everything lives here." />
+  <meta property="og:title" content="noxith hub — software, tools & utilities" />
   <meta property="og:description"
     content="A home for tools and projects. Official hub for BloxMulti, Anime Expedition Wiki, Wavebound, and UTDX." />
   <meta property="og:image" content="https://noxith.com/logo.png" />
@@ -29,7 +29,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
     rel="stylesheet" />
 
   <!-- Tailwind CSS CDN -->
@@ -57,38 +57,48 @@
 
   <style>
     body {
-      background-color: #000000;
+      background-color: #030305;
       color: #E4E4E7;
       overflow-x: hidden;
     }
 
-    /* Clean Bento Cards */
-    .dark-card {
-      background-color: rgba(9, 9, 11, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      transform: translateZ(0);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    /* Interactive Spotlight Bento Card */
+    .spotlight-card {
+      position: relative;
+      background-color: rgba(12, 12, 15, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 1.25rem;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+      overflow: hidden;
     }
 
-    .dark-card:hover {
-      border-color: rgba(255, 255, 255, 0.24);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+    .spotlight-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: radial-gradient(450px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+          rgba(255, 255, 255, 0.16),
+          transparent 70%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 20;
     }
 
-    /* Monochrome Image Filter */
-    .img-bw {
-      filter: grayscale(100%) contrast(120%) brightness(88%);
-      transition: filter 0.25s ease;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
+    .spotlight-card:hover::before {
+      opacity: 1;
     }
 
-    .dark-card:hover .img-bw {
-      filter: grayscale(100%) contrast(128%) brightness(98%);
+    .spotlight-card:hover {
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.9);
+      border-color: rgba(255, 255, 255, 0.18);
     }
 
     /* Crisp Canvas */
@@ -103,7 +113,7 @@
       position: fixed;
       bottom: 24px;
       right: 24px;
-      background: #09090b;
+      background: #0d0d12;
       color: #ffffff;
       padding: 10px 18px;
       border-radius: 12px;
@@ -111,57 +121,65 @@
       font-size: 0.8rem;
       font-family: 'JetBrains Mono', monospace;
       border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9), 0 0 20px rgba(99, 102, 241, 0.15);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       animation: toast-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     @keyframes toast-in {
       from {
         opacity: 0;
-        transform: translateY(12px);
+        transform: translateY(12px) scale(0.96);
       }
 
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
       }
+    }
+
+    .card-hidden {
+      display: none !important;
     }
   </style>
 </head>
 
-<body class="bg-black text-zinc-300 font-sans selection:bg-white selection:text-black">
+<body class="bg-[#030305] text-zinc-300 font-sans selection:bg-white selection:text-black">
 
-  <!-- STATIC CRISP CONTOUR LINES BACKGROUND -->
+  <!-- AMBIENT GLOWS & CONTOUR LINES BACKGROUND -->
   <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div
+      class="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-indigo-500/10 via-purple-500/5 to-transparent blur-[110px] rounded-full">
+    </div>
+    <div class="absolute top-[45%] -right-40 w-[500px] h-[350px] bg-violet-600/5 blur-[120px] rounded-full"></div>
+
     <canvas id="waveCanvas"></canvas>
-    <!-- Soft Vignette Overlays -->
-    <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90"></div>
-    <div class="absolute inset-0 bg-radial from-transparent via-black/20 to-black/90"></div>
+
+    <div class="absolute inset-0 bg-gradient-to-b from-[#030305]/70 via-transparent to-[#030305]/95"></div>
   </div>
 
   <!-- TOP NAVBAR -->
-  <nav class="fixed top-0 left-0 right-0 z-50 bg-black/75 backdrop-blur-xl border-b border-white/10">
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-[#030305]/80 backdrop-blur-xl border-b border-white/[0.08]">
     <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
 
-      <!-- Circular Brand Logo -->
-      <a href="/" class="flex items-center gap-2.5 group">
+      <!-- Brand Logo -->
+      <a href="/" class="flex items-center gap-3 group">
         <div
-          class="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center bg-zinc-900 border border-white/20 shrink-0 ring-1 ring-white/10">
+          class="relative w-8 h-8 rounded-full flex items-center justify-center bg-zinc-900 border border-white/20 shrink-0 ring-1 ring-white/10 group-hover:ring-white/30 transition-all duration-300">
           <img src="./logo.png" alt="noxith logo"
-            class="w-full h-full object-cover rounded-full transition-transform duration-200 group-hover:scale-110" />
+            class="w-full h-full object-cover rounded-full transition-transform duration-300 group-hover:scale-105" />
         </div>
-        <span class="font-display font-bold text-base text-white tracking-tight">
-          noxith <span class="text-zinc-500 font-mono font-normal text-xs">hub</span>
-        </span>
+        <div class="flex items-baseline gap-1.5">
+          <span class="font-display font-extrabold text-base text-white tracking-tight">noxith</span>
+          <span class="text-zinc-500 font-mono text-[11px] uppercase tracking-wider font-semibold">hub</span>
+        </div>
       </a>
 
       <!-- Nav Links -->
       <div class="flex items-center gap-6 text-xs font-medium text-zinc-400">
-        <!-- Hidden on mobile, visible on desktop (md screens and up) -->
         <div class="hidden md:flex items-center gap-6">
           <a href="#projects" class="hover:text-white transition-colors">Projects</a>
           <a href="#team" class="hover:text-white transition-colors">Team</a>
@@ -170,10 +188,10 @@
             class="hover:text-white transition-colors">Donate</button>
         </div>
 
-        <!-- Stays visible on all screen sizes -->
         <a href="https://discord.gg/ju6ANNecQg" target="_blank" rel="noopener noreferrer"
-          class="px-3.5 py-1.5 rounded-full bg-white hover:bg-zinc-200 text-black font-semibold transition-colors flex items-center gap-1.5">
-          Discord <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+          class="px-4 py-2 rounded-full bg-white hover:bg-zinc-200 text-black font-semibold text-xs tracking-tight transition-all flex items-center gap-1.5">
+          <span>Discord</span>
+          <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
         </a>
       </div>
 
@@ -181,276 +199,324 @@
   </nav>
 
   <!-- HERO SECTION -->
-  <section class="relative pt-32 pb-12 px-6 z-10 max-w-6xl mx-auto">
+  <section class="relative pt-32 pb-10 px-6 z-10 max-w-6xl mx-auto">
     <div class="max-w-3xl">
 
-      <!-- REFINED CLEAN TEAM BADGES -->
-      <div id="team" class="flex flex-wrap items-center gap-2.5 mb-8">
+      <!-- TEAM PILLS -->
+      <div id="team" class="flex flex-wrap items-center gap-3 mb-8">
+        <span class="text-[11px] font-mono uppercase text-zinc-500 tracking-wider flex items-center gap-1.5 mr-1">
+          <i data-lucide="users" class="w-3.5 h-3.5 text-zinc-400"></i> Developers
+        </span>
 
         <!-- xAuroraFlare Badge -->
         <div onclick="copyDiscordTag('xauroraflare')"
-          class="group inline-flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-full bg-zinc-900/70 hover:bg-zinc-800/90 border border-white/[0.08] hover:border-white/20 transition-all duration-200 cursor-pointer backdrop-blur-md shadow-sm"
+          class="group inline-flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full bg-zinc-900/80 hover:bg-zinc-800/90 border border-white/[0.08] hover:border-purple-500/40 transition-all duration-200 cursor-pointer backdrop-blur-md shadow-sm"
           title="Click to copy Discord: xauroraflare">
           <div class="w-5 h-5 rounded-full overflow-hidden bg-zinc-800 ring-1 ring-white/10 shrink-0">
             <img src="pfp/xauroraflare.gif" alt="xAuroraFlare" class="w-full h-full object-cover rounded-full"
               onerror="this.onerror=null; this.src='/pfp/xauroraflare.gif';" />
           </div>
-          <span class="text-xs font-mono text-zinc-300 group-hover:text-white transition-colors">xauroraflare</span>
+          <span class="text-xs font-mono text-zinc-200 group-hover:text-white transition-colors">xauroraflare</span>
           <span
-            class="text-[10px] font-mono text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20">owner</span>
+            class="text-[10px] font-mono text-purple-300 bg-purple-500/15 px-1.5 py-0.5 rounded border border-purple-500/25">Owner</span>
           <a href="https://discord.com/users/216293393888837632" target="_blank" rel="noopener noreferrer"
             onclick="openDiscordProfile('216293393888837632', event)"
-            class="text-zinc-500 hover:text-white transition-colors ml-0.5" title="Open Discord Profile">
+            class="text-zinc-500 hover:text-purple-300 transition-colors ml-0.5" title="Open Discord Profile">
             <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
           </a>
         </div>
 
         <!-- xKing. Badge -->
         <div onclick="copyDiscordTag('xking.')"
-          class="group inline-flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-full bg-zinc-900/70 hover:bg-zinc-800/90 border border-white/[0.08] hover:border-white/20 transition-all duration-200 cursor-pointer backdrop-blur-md shadow-sm"
+          class="group inline-flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full bg-zinc-900/80 hover:bg-zinc-800/90 border border-white/[0.08] hover:border-blue-500/40 transition-all duration-200 cursor-pointer backdrop-blur-md shadow-sm"
           title="Click to copy Discord: xking.">
           <div class="w-5 h-5 rounded-full overflow-hidden bg-zinc-800 ring-1 ring-white/10 shrink-0">
             <img src="pfp/xking.png" alt="xKing." class="w-full h-full object-cover rounded-full"
               onerror="this.onerror=null; this.src='/pfp/xking.png';" />
           </div>
-          <span class="text-xs font-mono text-zinc-300 group-hover:text-white transition-colors">xking.</span>
+          <span class="text-xs font-mono text-zinc-200 group-hover:text-white transition-colors">xking.</span>
           <span
-            class="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded border border-blue-500/20">co-owner</span>
+            class="text-[10px] font-mono text-blue-300 bg-blue-500/15 px-1.5 py-0.5 rounded border border-blue-500/25">Co-Owner</span>
           <a href="https://discord.com/users/347578773857632258" target="_blank" rel="noopener noreferrer"
             onclick="openDiscordProfile('347578773857632258', event)"
-            class="text-zinc-500 hover:text-white transition-colors ml-0.5" title="Open Discord Profile">
+            class="text-zinc-500 hover:text-blue-300 transition-colors ml-0.5" title="Open Discord Profile">
             <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
           </a>
         </div>
-
       </div>
 
       <!-- Main Headline -->
-      <h1 class="font-display font-extrabold text-4xl sm:text-6xl text-white tracking-tight leading-[1.1] mb-6">
+      <h1 class="font-display font-extrabold text-4xl sm:text-6xl text-white tracking-tight leading-[1.1] mb-5">
         A home for tools & projects.
         <br>
-        <span class="text-zinc-500">Everything lives here.</span>
+        <span class="bg-gradient-to-r from-zinc-400 via-zinc-500 to-zinc-600 bg-clip-text text-transparent">Everything
+          lives here.</span>
       </h1>
 
-      <!-- Instant Quick Access Bar -->
+      <p class="text-zinc-400 text-sm sm:text-base max-w-xl mb-8 leading-relaxed font-normal">
+        Performance-driven Roblox utilities, macro engines, and community databases built for speed and precision.
+      </p>
+
+      <!-- REAL-TIME FILTER BAR (All, Active, Archive) -->
       <div class="flex flex-wrap items-center gap-2">
-        <span class="text-xs font-mono uppercase text-zinc-500 mr-1">Quick Access:</span>
-        <a href="/bloxmulti/"
-          class="px-3 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-white/10 text-xs font-mono text-white flex items-center gap-1.5 transition-colors">
-          BloxMulti <i data-lucide="external-link" class="w-3 h-3 text-zinc-400"></i>
-        </a>
-        <a href="/ae-macro/"
-          class="px-3 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-white/10 text-xs font-mono text-white flex items-center gap-1.5 transition-colors">
-          Noxith Macro <i data-lucide="external-link" class="w-3 h-3 text-zinc-400"></i>
-        </a>
-        <a href="https://noxith.com/AE/"
-          class="px-3 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-white/10 text-xs font-mono text-white flex items-center gap-1.5 transition-colors">
-          AE Wiki <i data-lucide="external-link" class="w-3 h-3 text-zinc-400"></i>
-        </a>
-        <a href="/utdx/"
-          class="px-3 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-white/10 text-xs font-mono text-zinc-400 hover:text-white flex items-center gap-1.5 transition-colors">
-          UTDX <i data-lucide="external-link" class="w-3 h-3"></i>
-        </a>
-        <a href="/wavebound/"
-          class="px-3 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-white/10 text-xs font-mono text-zinc-400 hover:text-white flex items-center gap-1.5 transition-colors">
-          Wavebound <i data-lucide="external-link" class="w-3 h-3 text-zinc-400"></i>
-        </a>
+        <span class="text-xs font-mono text-zinc-500 uppercase tracking-wider mr-1">Filter:</span>
+        <button onclick="filterProjects('all')" id="filter-all"
+          class="filter-btn px-3 py-1.5 rounded-lg bg-white text-black font-semibold text-xs font-mono transition-all">
+          All (5)
+        </button>
+        <button onclick="filterProjects('active')" id="filter-active"
+          class="filter-btn px-3 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-white/10 text-xs font-mono transition-all flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Active (3)
+        </button>
+        <button onclick="filterProjects('discontinued')" id="filter-discontinued"
+          class="filter-btn px-3 py-1.5 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-white/10 text-xs font-mono transition-all">
+          Archive (2)
+        </button>
       </div>
 
     </div>
   </section>
 
   <!-- PROJECTS DIRECTORY -->
-  <main id="projects" class="py-10 px-6 relative z-10 max-w-6xl mx-auto">
+  <main id="projects" class="py-6 px-6 relative z-10 max-w-6xl mx-auto">
 
-    <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-8">
-      <h2 class="font-display font-bold text-2xl text-white">Recent Projects</h2>
-      <div class="text-xs font-mono text-zinc-500">5 tools total</div>
-    </div>
-
-    <!-- 2 Large Feature Bento Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-
-      <!-- PROJECT 1: BloxMulti -->
-      <div class="dark-card rounded-2xl overflow-hidden flex flex-col justify-between">
-        <div class="relative h-52 w-full overflow-hidden bg-black border-b border-white/5">
-          <img src="bloxmulti.png" alt="BloxMulti" class="w-full h-full object-cover img-bw"
-            onerror="this.onerror=null; this.src='/bloxmulti.png';" />
-          <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent"></div>
-          <div class="absolute top-4 left-4">
-            <span
-              class="px-2.5 py-1 rounded-md bg-black/90 border border-white/20 text-[11px] font-mono text-white flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> Active
-            </span>
-          </div>
-          <div class="absolute top-4 right-4 text-xs font-mono text-zinc-400">
-            Updated recently
-          </div>
+    <!-- Flagship Software -->
+    <div class="mb-12">
+      <div class="flex items-center justify-between border-b border-white/[0.08] pb-3 mb-6">
+        <div class="flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+          <h2 class="font-display font-bold text-xl text-white tracking-tight">Flagship Utilities</h2>
         </div>
+        <span class="text-[11px] font-mono text-zinc-500 uppercase">Primary Releases</span>
+      </div>
 
-        <div class="p-6">
-          <h3 class="text-2xl font-bold font-display text-white">BloxMulti</h3>
-          <p class="text-zinc-400 text-sm mt-2 leading-relaxed">
-            Account manager for Roblox. Run multiple accounts at once with isolated sessions, launch games by Place ID,
-            and save private server codes.
-          </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-          <div class="flex gap-2 mt-4 text-[11px] font-mono text-zinc-400">
-            <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">roblox</span>
-            <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">multi-account</span>
-            <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">windows</span>
+        <!-- PROJECT 1: BloxMulti -->
+        <div data-category="active" class="project-card spotlight-card flex flex-col justify-between group">
+          <div>
+            <div class="relative h-60 w-full overflow-hidden bg-black/60 border-b border-white/5">
+              <img src="bloxmulti.png" alt="BloxMulti"
+                class="w-full h-full object-cover object-top opacity-95 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                onerror="this.onerror=null; this.src='/bloxmulti.png';" />
+
+              <div class="absolute inset-0 bg-gradient-to-t from-[#0c0c0f] via-transparent to-black/30"></div>
+
+              <div class="absolute top-4 left-4">
+                <span
+                  class="px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md border border-white/15 text-[11px] font-mono text-white flex items-center gap-1.5 shadow-sm">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Active
+                </span>
+              </div>
+              <div
+                class="absolute top-4 right-4 text-xs font-mono text-zinc-300 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10">
+                Updated recently
+              </div>
+            </div>
+
+            <div class="p-6">
+              <h3 class="text-2xl font-bold font-display text-white">BloxMulti</h3>
+              <p class="text-zinc-400 text-sm mt-2 leading-relaxed">
+                Account manager for Roblox. Run multiple accounts at once with isolated sessions, launch games by Place
+                ID,
+                and save private server codes.
+              </p>
+
+              <div class="flex flex-wrap gap-2 mt-4 text-[11px] font-mono text-zinc-400">
+                <span class="px-2.5 py-0.5 rounded-md bg-zinc-900 border border-white/5">roblox</span>
+                <span class="px-2.5 py-0.5 rounded-md bg-zinc-900 border border-white/5">multi-account</span>
+                <span class="px-2.5 py-0.5 rounded-md bg-zinc-900 border border-white/5">windows</span>
+              </div>
+            </div>
           </div>
 
-          <div class="mt-6 pt-5 border-t border-white/10">
+          <div class="p-6 pt-0">
             <a href="/bloxmulti/"
-              class="w-full py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors flex items-center justify-center gap-1.5">
-              Open BloxMulti <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              class="w-full py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-xs tracking-tight transition-all flex items-center justify-center gap-1.5 shadow-sm">
+              Open BloxMulti <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
             </a>
           </div>
         </div>
-      </div>
 
-      <!-- PROJECT 2: Noxith Macro -->
-      <div class="dark-card rounded-2xl overflow-hidden flex flex-col justify-between">
-        <div class="relative h-52 w-full overflow-hidden bg-black border-b border-white/5">
-          <img src="ae-macro.png" alt="Noxith Macro" class="w-full h-full object-cover img-bw"
-            onerror="this.onerror=null; this.src='/ae-macro.png';" />
-          <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent"></div>
-          <div class="absolute top-4 left-4">
-            <span
-              class="px-2.5 py-1 rounded-md bg-black/90 border border-white/20 text-[11px] font-mono text-white flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> Active
-            </span>
+        <!-- PROJECT 2: Noxith Macro -->
+        <div data-category="active" class="project-card spotlight-card flex flex-col justify-between group">
+          <div>
+            <div class="relative h-60 w-full overflow-hidden bg-black/60 border-b border-white/5">
+              <img src="ae-macro.png" alt="Noxith Macro"
+                class="w-full h-full object-cover object-top opacity-95 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                onerror="this.onerror=null; this.src='/ae-macro.png';" />
+
+              <div class="absolute inset-0 bg-gradient-to-t from-[#0c0c0f] via-transparent to-black/30"></div>
+
+              <div class="absolute top-4 left-4">
+                <span
+                  class="px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md border border-white/15 text-[11px] font-mono text-white flex items-center gap-1.5 shadow-sm">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Active
+                </span>
+              </div>
+              <div
+                class="absolute top-4 right-4 text-xs font-mono text-zinc-300 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/10">
+                Updated recently
+              </div>
+            </div>
+
+            <div class="p-6">
+              <h3 class="text-2xl font-bold font-display text-white">Noxith Macro</h3>
+              <p class="text-zinc-400 text-sm mt-2 leading-relaxed">
+                Fast, reliable automation for Anime Expeditions with custom combos/targets, and auto-rejoin failsafes.
+              </p>
+
+              <div class="flex flex-wrap gap-2 mt-4 text-[11px] font-mono text-zinc-400">
+                <span class="px-2.5 py-0.5 rounded-md bg-zinc-900 border border-white/5">roblox</span>
+                <span class="px-2.5 py-0.5 rounded-md bg-zinc-900 border border-white/5">macro</span>
+                <span class="px-2.5 py-0.5 rounded-md bg-zinc-900 border border-white/5">windows</span>
+              </div>
+            </div>
           </div>
-          <div class="absolute top-4 right-4 text-xs font-mono text-zinc-400">
-            Updated recently
-          </div>
-        </div>
 
-        <div class="p-6">
-          <h3 class="text-2xl font-bold font-display text-white">Noxith Macro</h3>
-          <p class="text-zinc-400 text-sm mt-2 leading-relaxed">
-            Fast, reliable automation for Anime Expeditions with custom combos/targets, and auto-rejoin failsafes.
-          </p>
-
-          <div class="flex gap-2 mt-4 text-[11px] font-mono text-zinc-400">
-            <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">roblox</span>
-            <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">macro</span>
-            <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">windows</span>
-          </div>
-
-          <div class="mt-6 pt-5 border-t border-white/10">
+          <div class="p-6 pt-0">
             <a href="/ae-macro/"
-              class="w-full py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors flex items-center justify-center gap-1.5">
-              Open Noxith Macro <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              class="w-full py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-xs tracking-tight transition-all flex items-center justify-center gap-1.5 shadow-sm">
+              Open Noxith Macro <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
             </a>
           </div>
         </div>
-      </div>
 
+      </div>
     </div>
 
-    <!-- 3 Compact Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-      <!-- PROJECT 3: Anime Expedition Wiki -->
-      <div class="dark-card rounded-2xl overflow-hidden flex flex-col justify-between">
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <span class="px-2 py-0.5 rounded bg-white/10 text-[10px] font-mono uppercase text-white">Active</span>
-            <span class="text-xs font-mono text-zinc-500">Wiki / DB</span>
-          </div>
-
-          <h3 class="text-xl font-bold font-display text-white">Anime Expedition Wiki</h3>
-          <p class="text-zinc-400 text-xs mt-2 leading-relaxed">
-            Unofficial wiki and database for Anime Expedition. View units, stats, and builds.
-          </p>
-
-          <div class="flex gap-1.5 mt-4 text-[10px] font-mono text-zinc-500">
-            <span>#roblox</span>
-            <span>#wiki</span>
-            <span>#database</span>
-          </div>
+    <!-- Ecosystem & Web Tools -->
+    <div>
+      <div class="flex items-center justify-between border-b border-white/[0.08] pb-3 mb-6">
+        <div class="flex items-center gap-2">
+          <i data-lucide="layers" class="w-4 h-4 text-zinc-400"></i>
+          <h2 class="font-display font-bold text-xl text-white tracking-tight">Ecosystem & Web Tools</h2>
         </div>
-
-        <div class="p-6 pt-0">
-          <a href="https://noxith.com/AE/"
-            class="w-full py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-white font-medium text-xs transition-colors flex items-center justify-center gap-1.5">
-            Open Wiki <i data-lucide="external-link" class="w-3 h-3"></i>
-          </a>
-        </div>
+        <span class="text-[11px] font-mono text-zinc-500 uppercase">Databases & Archive</span>
       </div>
 
-      <!-- PROJECT 4: UTDX Optimizer -->
-      <div class="dark-card rounded-2xl overflow-hidden flex flex-col justify-between opacity-85 hover:opacity-100">
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <span
-              class="px-2 py-0.5 rounded bg-zinc-800 text-[10px] font-mono uppercase text-zinc-400">Discontinued</span>
-            <span class="text-xs font-mono text-zinc-500">No longer maintained</span>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- PROJECT 3: Anime Expedition Wiki -->
+        <div data-category="active" class="project-card spotlight-card flex flex-col justify-between group">
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-5">
+              <div
+                class="w-9 h-9 rounded-lg bg-zinc-900 border border-white/10 flex items-center justify-center text-zinc-300">
+                <i data-lucide="book-open" class="w-4 h-4"></i>
+              </div>
+              <span
+                class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono uppercase">
+                Active Wiki
+              </span>
+            </div>
+
+            <h3 class="text-lg font-bold font-display text-white">Anime Expedition Wiki</h3>
+            <p class="text-zinc-400 text-xs mt-2 leading-relaxed">
+              Unofficial wiki and database for Anime Expedition. View units, stats, and builds.
+            </p>
+
+            <div class="flex gap-1.5 mt-5 text-[10px] font-mono text-zinc-500">
+              <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">#roblox</span>
+              <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">#wiki</span>
+              <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">#database</span>
+            </div>
           </div>
 
-          <h3 class="text-xl font-bold font-display text-zinc-200">UTDX</h3>
-          <p class="text-zinc-400 text-xs mt-2 leading-relaxed">
-            Advanced Unit Optimizer for UTDX. Optimize your units with the best traits, relics, and builds.
-          </p>
-
-          <div class="flex gap-1.5 mt-4 text-[10px] font-mono text-zinc-500">
-            <span>#tool</span>
-            <span>#optimizer</span>
+          <div class="p-6 pt-0">
+            <a href="https://noxith.com/AE/"
+              class="w-full py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-white font-medium text-xs transition-colors flex items-center justify-center gap-1.5">
+              Open Wiki <i data-lucide="external-link" class="w-3 h-3 text-zinc-400"></i>
+            </a>
           </div>
         </div>
 
-        <div class="p-6 pt-0">
-          <a href="/utdx/"
-            class="w-full py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-zinc-300 hover:text-white font-medium text-xs transition-colors flex items-center justify-center gap-1.5">
-            Open UTDX <i data-lucide="external-link" class="w-3 h-3"></i>
-          </a>
+        <!-- PROJECT 4: UTDX Optimizer -->
+        <div data-category="discontinued"
+          class="project-card spotlight-card flex flex-col justify-between group opacity-90 hover:opacity-100">
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-5">
+              <div
+                class="w-9 h-9 rounded-lg bg-zinc-900 border border-white/10 flex items-center justify-center text-zinc-400">
+                <i data-lucide="sliders" class="w-4 h-4"></i>
+              </div>
+              <span
+                class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-mono uppercase">
+                Discontinued
+              </span>
+            </div>
+
+            <h3 class="text-lg font-bold font-display text-zinc-200">UTDX Optimizer</h3>
+            <p class="text-zinc-400 text-xs mt-2 leading-relaxed">
+              Advanced Unit Optimizer for UTDX on Roblox. Optimize your units with the best traits, relics, and builds.
+            </p>
+
+            <div class="flex gap-1.5 mt-5 text-[10px] font-mono text-zinc-500">
+              <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">#roblox</span>
+              <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">#optimizer</span>
+              <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">#tool</span>
+            </div>
+          </div>
+
+          <div class="p-6 pt-0">
+            <a href="/utdx/"
+              class="w-full py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-zinc-300 hover:text-white font-medium text-xs transition-colors flex items-center justify-center gap-1.5">
+              Open UTDX <i data-lucide="external-link" class="w-3 h-3 text-zinc-500"></i>
+            </a>
+          </div>
         </div>
+
+        <!-- PROJECT 5: Wavebound -->
+        <div data-category="discontinued"
+          class="project-card spotlight-card flex flex-col justify-between group opacity-90 hover:opacity-100">
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-5">
+              <div
+                class="w-9 h-9 rounded-lg bg-zinc-900 border border-white/10 flex items-center justify-center text-zinc-400">
+                <i data-lucide="cpu" class="w-4 h-4"></i>
+              </div>
+              <span
+                class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-mono uppercase">
+                Discontinued
+              </span>
+            </div>
+
+            <h3 class="text-lg font-bold font-display text-zinc-200">Wavebound</h3>
+            <p class="text-zinc-400 text-xs mt-2 leading-relaxed">
+              Game automation with sub-10ms timing, OCR screen reading, HSV color detection, and full remote control.
+            </p>
+
+            <div class="flex gap-1.5 mt-5 text-[10px] font-mono text-zinc-500">
+              <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">#automation</span>
+              <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">#windows</span>
+              <span class="px-2 py-0.5 rounded bg-zinc-900 border border-white/5">#ocr</span>
+            </div>
+          </div>
+
+          <div class="p-6 pt-0">
+            <a href="/wavebound/"
+              class="w-full py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-zinc-300 hover:text-white font-medium text-xs transition-colors flex items-center justify-center gap-1.5">
+              Open Wavebound <i data-lucide="external-link" class="w-3 h-3 text-zinc-500"></i>
+            </a>
+          </div>
+        </div>
+
       </div>
-
-      <!-- PROJECT 5: Wavebound -->
-      <div class="dark-card rounded-2xl overflow-hidden flex flex-col justify-between opacity-85 hover:opacity-100">
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <span
-              class="px-2 py-0.5 rounded bg-zinc-800 text-[10px] font-mono uppercase text-zinc-400">Discontinued</span>
-            <span class="text-xs font-mono text-zinc-500">No longer maintained</span>
-          </div>
-
-          <h3 class="text-xl font-bold font-display text-zinc-200">Wavebound</h3>
-          <p class="text-zinc-400 text-xs mt-2 leading-relaxed">
-            Game automation with sub-10ms timing, OCR screen reading, HSV color detection, and full remote control.
-          </p>
-
-          <div class="flex gap-1.5 mt-4 text-[10px] font-mono text-zinc-500">
-            <span>#automation</span>
-            <span>#windows</span>
-            <span>#ocr</span>
-          </div>
-        </div>
-
-        <div class="p-6 pt-0">
-          <a href="/wavebound/"
-            class="w-full py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-white/10 text-zinc-300 hover:text-white font-medium text-xs transition-colors flex items-center justify-center gap-1.5">
-            Open Wavebound <i data-lucide="external-link" class="w-3 h-3"></i>
-          </a>
-        </div>
-      </div>
-
     </div>
+
   </main>
 
   <!-- FOOTER -->
-  <footer class="py-8 px-6 border-t border-white/10 relative z-10 text-xs text-zinc-500">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-2.5">
-        <img src="logo.png" alt="noxith logo"
-          class="w-5 h-5 rounded-full object-cover opacity-80 border border-white/10"
+  <footer class="py-12 px-6 border-t border-white/[0.08] relative z-10 text-xs text-zinc-500 mt-12 bg-black/40">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <img src="logo.png" alt="noxith logo" class="w-6 h-6 rounded-full object-cover border border-white/10"
           onerror="this.onerror=null; this.src='/logo.png'; this.onerror=() => { this.src='favicon.ico'; this.onerror=() => { this.style.display='none'; }; }" />
-        <span class="font-display font-bold text-white">noxith</span>
-        <span>© 2026 — all rights reserved</span>
+        <span class="font-display font-bold text-white tracking-tight">noxith hub</span>
+        <span class="text-zinc-600">/</span>
+        <span>© 2026 all rights reserved</span>
       </div>
+
       <div class="flex items-center gap-6">
         <a href="#projects" class="hover:text-white transition-colors">Projects</a>
         <a href="#team" class="hover:text-white transition-colors">Team</a>
@@ -458,7 +524,7 @@
         <button onclick="if(window.NoxithDonations) NoxithDonations.open()"
           class="hover:text-white transition-colors">Donate</button>
         <a href="https://discord.gg/ju6ANNecQg" target="_blank" rel="noopener noreferrer"
-          class="text-white hover:underline flex items-center gap-1">
+          class="text-zinc-300 hover:text-white font-medium flex items-center gap-1 transition-colors">
           Discord <i data-lucide="external-link" class="w-3 h-3"></i>
         </a>
       </div>
@@ -468,34 +534,38 @@
   <!-- CONTACT MODAL -->
   <div id="contactModal"
     class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-200">
-    <div class="dark-card rounded-2xl p-6 max-w-md w-full relative" id="modalCard">
-      <button onclick="closeModal()" class="absolute top-5 right-5 text-zinc-400 hover:text-white">
+    <div class="spotlight-card rounded-2xl p-6 max-w-md w-full relative border border-white/20 shadow-2xl"
+      id="modalCard">
+      <button onclick="closeModal()" class="absolute top-5 right-5 text-zinc-400 hover:text-white transition-colors">
         <i data-lucide="x" class="w-4 h-4"></i>
       </button>
 
-      <h3 class="font-display font-bold text-xl text-white">Contact us</h3>
-      <p class="text-zinc-400 text-xs mt-1">
-        Have a question or want to work with us? Drop a message below and we'll get back to you.
+      <div class="flex items-center gap-2 mb-2">
+        <div class="w-2 h-2 rounded-full bg-white"></div>
+        <h3 class="font-display font-bold text-xl text-white">Contact Us</h3>
+      </div>
+      <p class="text-zinc-400 text-xs leading-relaxed">
+        Got a question, bug report, or want to collaborate? Send a message and our team will get back to you.
       </p>
 
       <form onsubmit="sendContact(event)" class="mt-5 space-y-4">
         <div>
-          <label class="block text-xs font-mono text-zinc-400 mb-1">Your Discord</label>
-          <input type="text" id="contactDiscord" required placeholder="e.g. username#0000"
-            class="w-full px-3.5 py-2 rounded-lg bg-black border border-white/10 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-white transition-colors" />
+          <label class="block text-xs font-mono text-zinc-400 mb-1.5">Discord Username</label>
+          <input type="text" id="contactDiscord" required placeholder="e.g. username"
+            class="w-full px-3.5 py-2 rounded-lg bg-zinc-950 border border-white/10 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-white/40 transition-colors" />
         </div>
 
         <div>
-          <label class="block text-xs font-mono text-zinc-400 mb-1">Message</label>
+          <label class="block text-xs font-mono text-zinc-400 mb-1.5">Message</label>
           <textarea id="contactMessage" required rows="4" placeholder="How can we help?"
-            class="w-full px-3.5 py-2 rounded-lg bg-black border border-white/10 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-white transition-colors resize-none"></textarea>
+            class="w-full px-3.5 py-2 rounded-lg bg-zinc-950 border border-white/10 text-white text-xs placeholder:text-zinc-600 focus:outline-none focus:border-white/40 transition-colors resize-none"></textarea>
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-2">
           <button type="button" onclick="closeModal()"
             class="px-3.5 py-2 text-xs font-medium text-zinc-400 hover:text-white transition-colors">Cancel</button>
           <button type="submit" id="submitBtn"
-            class="px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors">
+            class="px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors shadow-sm">
             Send Message
           </button>
         </div>
@@ -505,10 +575,46 @@
     </div>
   </div>
 
-  <!-- ULTRA-CRISP HIGH-DPI STATIC CONTOUR LINES -->
+  <!-- SCRIPTS -->
   <script>
     lucide.createIcons();
 
+    // SPOTLIGHT MOUSE TRACKING
+    document.querySelectorAll('.spotlight-card').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+      });
+    });
+
+    // REAL-TIME CATEGORY FILTER
+    function filterProjects(category) {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-white', 'text-black', 'font-semibold');
+        btn.classList.add('bg-zinc-900/80', 'text-zinc-400');
+      });
+
+      const activeBtn = document.getElementById(`filter-${category}`);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-white', 'text-black', 'font-semibold');
+        activeBtn.classList.remove('bg-zinc-900/80', 'text-zinc-400');
+      }
+
+      const cards = document.querySelectorAll('.project-card');
+      cards.forEach(card => {
+        const cardCategories = card.getAttribute('data-category') || '';
+        if (category === 'all' || cardCategories.includes(category)) {
+          card.classList.remove('card-hidden');
+        } else {
+          card.classList.add('card-hidden');
+        }
+      });
+    }
+
+    // CRISP CONTOUR LINES CANVAS
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
     let width = 0;
@@ -516,7 +622,6 @@
     let dpr = 1;
 
     function drawStaticWaves() {
-      // Crisp 2x physical pixel canvas buffer
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       width = window.innerWidth;
       height = window.innerHeight;
@@ -536,10 +641,9 @@
         ctx.beginPath();
 
         const progress = i / WAVE_COUNT;
-        const baseY = (height * 0.35) + (progress * height * 0.58) + (Math.sin(progress * 2.5) * 12);
+        const baseY = (height * 0.32) + (progress * height * 0.60) + (Math.sin(progress * 2.5) * 12);
 
-        // Crisp 1px hairlines with clean opacity
-        const opacity = (Math.sin(progress * Math.PI) * 0.16 + 0.05).toFixed(3);
+        const opacity = (Math.sin(progress * Math.PI) * 0.12 + 0.03).toFixed(3);
         ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
         ctx.lineWidth = 1;
 
@@ -561,7 +665,6 @@
           points.push({ x, y: baseY + totalAmp });
         }
 
-        // Draw mathematically smooth curves
         ctx.moveTo(points[0].x, points[0].y);
         for (let j = 0; j < points.length - 1; j++) {
           const xc = (points[j].x + points[j + 1].x) / 2;
@@ -578,7 +681,7 @@
     window.addEventListener('resize', drawStaticWaves);
     drawStaticWaves();
 
-    // Modal Handlers
+    // MODAL LOGIC
     const modal = document.getElementById('contactModal');
     const statusMsg = document.getElementById('statusMsg');
     const submitBtn = document.getElementById('submitBtn');
@@ -594,7 +697,7 @@
       document.body.style.overflow = 'auto';
     }
 
-    // Contact API
+    // CONTACT API
     async function sendContact(e) {
       e.preventDefault();
       const discord = document.getElementById('contactDiscord').value.trim();
@@ -642,34 +745,34 @@
       }
     }
 
-    // Copy Discord Tag
+    // COPY DISCORD TAG
     function copyDiscordTag(tag) {
       navigator.clipboard.writeText(tag).then(() => {
-        showToast(`Copied "${tag}" to clipboard!`);
+        showToast(`Copied Discord: "${tag}" to clipboard`);
       });
     }
 
-    // Open Discord Profile
+    // OPEN DISCORD PROFILE
     function openDiscordProfile(userId, event) {
       event.stopPropagation();
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isMobile = /Android|webOS|iPhone|iPad|IEMobile|Opera Mini/i.test(navigator.userAgent);
       if (!isMobile) {
         window.location.href = `discord://-/users/${userId}`;
       }
     }
 
-    // Custom Toast
+    // CUSTOM TOAST
     function showToast(message) {
       const existing = document.querySelector('.custom-toast');
       if (existing) existing.remove();
 
       const toast = document.createElement('div');
       toast.className = 'custom-toast';
-      toast.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <span>${message}</span>`;
+      toast.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <span>${message}</span>`;
       document.body.appendChild(toast);
       setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translateY(10px)';
+        toast.style.transform = 'translateY(10px) scale(0.95)';
         toast.style.transition = 'all 0.2s ease';
         setTimeout(() => toast.remove(), 200);
       }, 2500);
