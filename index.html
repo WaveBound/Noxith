@@ -161,11 +161,16 @@
 
       <!-- Nav Links -->
       <div class="flex items-center gap-6 text-xs font-medium text-zinc-400">
-        <a href="#projects" class="hover:text-white transition-colors">Projects</a>
-        <a href="#team" class="hover:text-white transition-colors">Team</a>
-        <button onclick="openModal()" class="hover:text-white transition-colors">Contact</button>
-        <button onclick="if(window.NoxithDonations) NoxithDonations.open()"
-          class="hover:text-white transition-colors">Donate</button>
+        <!-- Hidden on mobile, visible on desktop (md screens and up) -->
+        <div class="hidden md:flex items-center gap-6">
+          <a href="#projects" class="hover:text-white transition-colors">Projects</a>
+          <a href="#team" class="hover:text-white transition-colors">Team</a>
+          <button onclick="openModal()" class="hover:text-white transition-colors">Contact</button>
+          <button onclick="if(window.NoxithDonations) NoxithDonations.open()"
+            class="hover:text-white transition-colors">Donate</button>
+        </div>
+
+        <!-- Stays visible on all screen sizes -->
         <a href="https://discord.gg/ju6ANNecQg" target="_blank" rel="noopener noreferrer"
           class="px-3.5 py-1.5 rounded-full bg-white hover:bg-zinc-200 text-black font-semibold transition-colors flex items-center gap-1.5">
           Discord <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
