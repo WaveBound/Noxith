@@ -15,11 +15,11 @@
         :root {
             --bg: #06050d;
             --accent: #9d6fff;
-            --accent-glow: rgba(157, 111, 255, 0.35);
-            --green: #2af598;
+            --accent-light: #b794f6;
+            --accent-glow: rgba(157, 111, 255, 0.25);
             --text: #edeafa;
-            --muted: #6a607e;
-            --border-hi: #2a2642;
+            --muted: #8f86ab;
+            --border: rgba(157, 111, 255, 0.16);
             --font-body: 'Inter', sans-serif;
             --font-display: 'Syne', sans-serif;
         }
@@ -42,6 +42,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* BACKGROUND - UNCHANGED */
         .global-bg {
             position: fixed;
             inset: 0;
@@ -62,33 +63,37 @@
         }
 
         .card {
-            background: rgba(10, 9, 20, 0.75);
-            border: 1px solid var(--border-hi);
-            border-radius: 16px;
-            padding: 48px 32px;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            box-shadow: none;
+            background: rgba(12, 10, 24, 0.72);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px 36px;
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            box-shadow:
+                0 30px 60px -15px rgba(0, 0, 0, 0.7),
+                0 0 0 1px rgba(255, 255, 255, 0.03),
+                inset 0 1px 0 rgba(255, 255, 255, 0.12);
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
             width: 100%;
             max-width: 440px;
-            animation: fade-up 0.6s ease-out forwards;
+            animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             margin: 20px;
         }
 
         .icon-wrapper {
-            width: 64px;
-            height: 64px;
+            width: 68px;
+            height: 68px;
             border-radius: 50%;
-            background: rgba(42, 245, 152, 0.1);
-            border: 1px solid rgba(42, 245, 152, 0.3);
+            background: radial-gradient(circle at 50% 30%, rgba(157, 111, 255, 0.2), rgba(157, 111, 255, 0.05));
+            border: 1px solid rgba(157, 111, 255, 0.35);
+            box-shadow: 0 0 24px var(--accent-glow), inset 0 0 12px rgba(157, 111, 255, 0.12);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--green);
+            color: var(--accent-light);
             margin-bottom: 24px;
         }
 
@@ -98,23 +103,26 @@
             font-weight: 800;
             margin-bottom: 12px;
             letter-spacing: -0.5px;
+            background: linear-gradient(180deg, #ffffff 0%, #d8d0ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .desc {
             font-size: 15px;
             color: var(--muted);
-            line-height: 1.6;
+            line-height: 1.65;
         }
 
         @keyframes fade-up {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(16px) scale(0.98);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
     </style>
@@ -125,16 +133,16 @@
 
     <div class="card">
         <div class="icon-wrapper">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"
                 stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
         </div>
 
-        <h1 class="title">Welcome to Premium!</h1>
+        <h1 class="title">Welcome to Premium</h1>
         <p class="desc">
-            Your payment was successful. BloxMulti will automatically detect your upgrade in a few seconds.<br><br>You
+            Your payment was successful. BloxMulti will automatically detect your upgrade in a few moments.<br><br>You
             can safely close this tab.
         </p>
     </div>
