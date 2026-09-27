@@ -181,7 +181,7 @@ export const TRAIT_DEFINITIONS = {
   unbound: { id: "unbound", name: "Unbound", damageBonus: 3.5, spaBonus: -0.05, rangeBonus: 0.10, critChanceBonus: 0, critDamageBonus: 0, dotBonus: 0, desc: "+350% DMG, -5% SPA, +10% RNG" },
   primordial: { id: "primordial", name: "Primordial", damageBonus: 0.35, spaBonus: -0.15, rangeBonus: 0.20, critChanceBonus: 0, critDamageBonus: 0, dotBonus: 0, desc: "+35% DMG, -15% SPA, +20% RNG" },
   forsaken: { id: "forsaken", name: "Forsaken", damageBonus: 0, spaBonus: 0, rangeBonus: 0.10, critChanceBonus: 0.35, critDamageBonus: 0.35, dotBonus: 0, desc: "+35% Crit Chance, +35% Crit DMG, +10% RNG" },
-  draconic: { id: "draconic", name: "Draconic", damageBonus: 0.20, spaBonus: 0, rangeBonus: 0.10, critChanceBonus: 0, critDamageBonus: 0, dotBonus: 0.50, desc: "+20% DMG, +50% DoT DMG, +10% RNG" },
+  draconic: { id: "draconic", name: "Draconic", damageBonus: 0.20, spaBonus: 0, rangeBonus: 0.10, critChanceBonus: 0, critDamageBonus: 0, dotBonus: 1.25, desc: "+20% DMG, +125% DoT DMG, +10% RNG" },
 };
 
 export function getSummonsData(unit) {

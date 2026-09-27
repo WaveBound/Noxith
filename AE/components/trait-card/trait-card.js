@@ -60,10 +60,10 @@ export const traits = [
     dropRate: "0.5%",
     rateNum: 0.5,
     pity: 300,
-    description: "Increase DMG by 20% - Increase DOT Damage by 50% - Decrease Overall cost by 10%",
+    description: "Increase DMG by 20% - Increase DOT Damage by 125% - Decrease Overall cost by 10%",
     stats: [
       { label: "DMG", value: "+20%" },
-      { label: "DOT DMG", value: "+50%" },
+      { label: "DOT DMG", value: "+125%" },
       { label: "Cost", value: "-10%" },
     ]
   },

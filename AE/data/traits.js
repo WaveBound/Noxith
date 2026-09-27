@@ -44,7 +44,7 @@ export const traits = [
     dropRate: "0.5%",
     rateNum: 0.5,
     pity: 300,
-    description: "Increase DMG by 20% - Increase DOT Damage by 50% - Decrease Overall cost by 10%",
+    description: "Increase DMG by 20% - Increase DOT Damage by 125% - Decrease Overall cost by 10%",
   },
   {
     id: "investor",
