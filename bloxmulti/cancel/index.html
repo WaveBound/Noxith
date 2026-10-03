@@ -2,145 +2,303 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Checkout Cancelled — BloxMulti</title>
-
+    <meta name="theme-color" content="#0b0b0b">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap"
-        rel="stylesheet" />
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #06050d;
-            --text: #edeafa;
-            --muted: #8f86ab;
-            --border: rgba(157, 111, 255, 0.14);
-            --font-body: 'Inter', sans-serif;
-            --font-display: 'Syne', sans-serif;
+            --bg: #0b0b0b;
+            --text: #ececec;
+            --muted: #8d8d8d;
+            --line: #232323;
+            --red: #ff3a5c;
+            --glass: linear-gradient(160deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .02) 60%)
         }
 
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            margin: 0
         }
 
         body {
-            font-family: var(--font-body);
+            font-family: Inter, system-ui, sans-serif;
             background: var(--bg);
             color: var(--text);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
+            overflow: hidden
         }
 
-        /* BACKGROUND - UNCHANGED */
-        .global-bg {
+        a {
+            color: inherit;
+            text-decoration: none
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            height: 42px;
+            padding: 0 20px;
+            border-radius: 99px;
+            font: 500 14px Inter, system-ui, sans-serif;
+            background: rgba(255, 255, 255, .07);
+            border: 1px solid rgba(255, 255, 255, .12);
+            backdrop-filter: blur(8px);
+            transition: .2s
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, .14)
+        }
+
+        .btn.w {
+            background: #f1f1f1;
+            color: #0b0b0b;
+            border-color: #f1f1f1
+        }
+
+        .btn.w:hover {
+            background: #fff
+        }
+
+        .fade {
+            background: linear-gradient(180deg, #fff 30%, #6e6e6e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent
+        }
+
+        /* same ambient stage as the homepage hero */
+        .bg {
             position: fixed;
             inset: 0;
-            z-index: -1;
+            z-index: 0;
             pointer-events: none;
-            background:
-                radial-gradient(ellipse 80% 60% at 75% 10%, rgba(100, 40, 220, 0.45) 0%, transparent 65%),
-                radial-gradient(ellipse 50% 40% at 15% 55%, rgba(50, 200, 255, 0.06) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 50% at 85% 85%, rgba(200, 50, 255, 0.10) 0%, transparent 55%),
-                linear-gradient(160deg, #07051a 0%, #0d0820 40%, #120a28 70%, #08050f 100%);
+            overflow: hidden;
+            background: linear-gradient(#050505, var(--bg))
         }
 
-        .global-bg::before {
-            content: '';
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: .5;
+            animation: drift 18s ease-in-out infinite alternate
+        }
+
+        .b1 {
+            width: 860px;
+            height: 580px;
+            right: -80px;
+            top: -140px;
+            background: radial-gradient(#e9eeec, #7d8683 50%, transparent 72%)
+        }
+
+        .b2 {
+            width: 720px;
+            height: 480px;
+            left: -140px;
+            bottom: -80px;
+            background: radial-gradient(#cfd4d2, #5d6462 55%, transparent 72%);
+            animation-delay: -6s
+        }
+
+        .b3 {
+            width: 340px;
+            height: 240px;
+            left: 38%;
+            top: -120px;
+            background: radial-gradient(#fff, transparent 70%);
+            opacity: .18;
+            animation-delay: -11s
+        }
+
+        @keyframes drift {
+            to {
+                transform: translate(-60px, 40px) scale(1.12)
+            }
+        }
+
+        .streaks {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 240px;
+            height: 300px;
+            transform: translateX(-50%)
+        }
+
+        .streaks i {
+            position: absolute;
+            bottom: -100px;
+            width: 1px;
+            height: 110px;
+            background: linear-gradient(transparent, #fff, transparent);
+            animation: rise 4.5s linear infinite
+        }
+
+        @keyframes rise {
+            to {
+                transform: translateY(-460px);
+                opacity: 0
+            }
+        }
+
+        .bg::after {
+            content: "";
             position: absolute;
             inset: 0;
-            background: repeating-linear-gradient(120deg, transparent 0px, transparent 40px, rgba(157, 111, 255, 0.015) 40px, rgba(157, 111, 255, 0.015) 41px);
+            background: radial-gradient(rgba(255, 255, 255, .25) 1px, transparent 1px) 0 0/90px 90px;
+            opacity: .12;
+            -webkit-mask: radial-gradient(70% 70% at 50% 50%, #000, transparent);
+            mask: radial-gradient(70% 70% at 50% 50%, #000, transparent)
+        }
+
+        .logo {
+            position: fixed;
+            top: 22px;
+            left: 28px;
+            z-index: 5;
+            font-weight: 700;
+            font-size: 17px;
+            letter-spacing: -.02em
         }
 
         .card {
-            background: rgba(12, 10, 24, 0.72);
-            border: 1px solid var(--border);
-            border-radius: 20px;
+            position: relative;
+            z-index: 4;
+            width: 100%;
+            max-width: 440px;
+            margin: 20px;
             padding: 48px 36px;
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
-            box-shadow:
-                0 30px 60px -15px rgba(0, 0, 0, 0.7),
-                0 0 0 1px rgba(255, 255, 255, 0.03),
-                inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            border: 1px solid #222;
+            border-radius: 22px;
+            background: var(--glass), #0e0e0e;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            width: 100%;
-            max-width: 440px;
-            animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            margin: 20px;
+            animation: up .7s cubic-bezier(.16, 1, .3, 1) both
+        }
+
+        @keyframes up {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 22px, 0)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
         }
 
         .icon-wrapper {
             width: 68px;
             height: 68px;
             border-radius: 50%;
-            background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ada4cb;
+            display: grid;
+            place-items: center;
             margin-bottom: 24px;
+            color: #fff;
+            background: linear-gradient(160deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .03));
+            border: 1px solid rgba(255, 255, 255, .16);
+            transition: .4s
+        }
+
+        .icon-wrapper.muted {
+            color: #b9b9b9;
+            border-color: rgba(255, 255, 255, .12)
+        }
+
+        .icon-wrapper.error {
+            color: var(--red);
+            background: linear-gradient(160deg, rgba(255, 58, 92, .16), rgba(255, 58, 92, .04));
+            border-color: rgba(255, 58, 92, .35)
+        }
+
+        .spinner {
+            animation: spin 1.1s linear infinite
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
         }
 
         .title {
-            font-family: var(--font-display);
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 12px;
-            letter-spacing: -0.5px;
-            background: linear-gradient(180deg, #ffffff 0%, #d8d0ee 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: clamp(28px, 4vw, 36px);
+            font-weight: 500;
+            letter-spacing: -.045em;
+            line-height: 1.05;
+            margin-bottom: 14px
         }
 
         .desc {
             font-size: 15px;
-            color: var(--muted);
-            line-height: 1.65;
+            color: #9a9a9a;
+            line-height: 1.65
         }
 
-        @keyframes fade-up {
-            from {
-                opacity: 0;
-                transform: translateY(16px) scale(0.98);
+        #fallback-container .btn {
+            margin-top: 24px
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation: none !important
+            }
+        }
+
+        @media(max-width:600px) {
+            .logo {
+                left: 20px
             }
 
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
+            .card {
+                padding: 40px 24px
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="global-bg"></div>
+    <div class="bg" aria-hidden="true">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="blob b3"></div>
+        <div class="streaks" id="streaks"></div>
+    </div>
+    <a class="logo" href="../index.html">BloxMulti</a>
 
     <div class="card">
-        <div class="icon-wrapper">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"
-                stroke-linecap="round" stroke-linejoin="round">
+        <div class="icon-wrapper muted"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        </div>
-
-        <h1 class="title">Checkout Cancelled</h1>
-        <p class="desc">
-            Your checkout session was cancelled and you were not charged.<br><br>You can safely close this tab.
-        </p>
+            </svg></div>
+        <h1 class="title fade">Checkout Cancelled</h1>
+        <p class="desc">Your checkout session was cancelled and you were not charged.<br><br>You can safely close this
+            tab.</p>
     </div>
+    <script>
+        const s = document.getElementById('streaks');
+        for (let i = 0; i < 7; i++) { const e = document.createElement('i'); e.style.left = (i * 38 + Math.random() * 14) + 'px'; e.style.animationDelay = (-Math.random() * 4.5) + 's'; e.style.animationDuration = (3.5 + Math.random() * 3) + 's'; e.style.opacity = .4 + Math.random() * .6; s.appendChild(e) }
+    </script>
 </body>
 
 </html>
