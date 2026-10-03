@@ -12,7 +12,7 @@
   <!-- Primary SEO Meta -->
   <meta name="title" content="BloxMulti Dashboard — Remote Screen Stream &amp; License Manager" />
   <meta name="description"
-    content="Access the official BloxMulti Web Dashboard. Monitor live Roblox multi-instance sessions via WebRTC remote screen streaming, manage Premium licenses, and claim referral rewards." />
+    content="Access the official BloxMulti Web Dashboard. Monitor live Roblox multi-instance sessions via WebRTC remote screen streaming, manage Premium licenses." />
   <meta name="keywords"
     content="BloxMulti dashboard, Roblox remote screen streaming, BloxMulti web app, BloxMulti login, Roblox multi instance remote monitor, BloxMulti premium billing" />
   <meta name="author" content="BloxMulti" />
@@ -1159,128 +1159,593 @@
         grid-template-columns: 1fr;
       }
     }
-  
+
     /* ══ Site style (matches index.html) ══ */
-    body { line-height: 1.55; }
-    ::-webkit-scrollbar-thumb { background: #2a2a2a; }
+    body {
+      line-height: 1.55;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #2a2a2a;
+    }
 
     /* ambient background: same blobs, dot grid and base gradient as the homepage hero */
-    .hero-bg { background: linear-gradient(#050505, var(--bg)); overflow: hidden; }
-    .hero-bg::before { background: radial-gradient(rgba(255, 255, 255, .25) 1px, transparent 1px) 0 0/90px 90px; opacity: .12; -webkit-mask: radial-gradient(70% 70% at 50% 50%, #000, transparent); mask: radial-gradient(70% 70% at 50% 50%, #000, transparent); }
-    .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .45; animation: drift 18s ease-in-out infinite alternate; }
-    .b1 { width: 860px; height: 580px; right: -80px; top: -140px; background: radial-gradient(#e9eeec, #7d8683 50%, transparent 72%); }
-    .b2 { width: 720px; height: 480px; left: -140px; bottom: -80px; background: radial-gradient(#cfd4d2, #5d6462 55%, transparent 72%); animation-delay: -6s; }
-    .b3 { width: 340px; height: 240px; left: 38%; top: -120px; background: radial-gradient(#fff, transparent 70%); opacity: .15; animation-delay: -11s; }
-    @keyframes drift { to { transform: translate(-60px, 40px) scale(1.12); } }
-    .hero-vignette { background: linear-gradient(to top, var(--bg) 0%, transparent 40%); opacity: .7; }
+    .hero-bg {
+      background: linear-gradient(#050505, var(--bg));
+      overflow: hidden;
+    }
+
+    .hero-bg::before {
+      background: radial-gradient(rgba(255, 255, 255, .25) 1px, transparent 1px) 0 0/90px 90px;
+      opacity: .12;
+      -webkit-mask: radial-gradient(70% 70% at 50% 50%, #000, transparent);
+      mask: radial-gradient(70% 70% at 50% 50%, #000, transparent);
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: .45;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+
+    .b1 {
+      width: 860px;
+      height: 580px;
+      right: -80px;
+      top: -140px;
+      background: radial-gradient(#e9eeec, #7d8683 50%, transparent 72%);
+    }
+
+    .b2 {
+      width: 720px;
+      height: 480px;
+      left: -140px;
+      bottom: -80px;
+      background: radial-gradient(#cfd4d2, #5d6462 55%, transparent 72%);
+      animation-delay: -6s;
+    }
+
+    .b3 {
+      width: 340px;
+      height: 240px;
+      left: 38%;
+      top: -120px;
+      background: radial-gradient(#fff, transparent 70%);
+      opacity: .15;
+      animation-delay: -11s;
+    }
+
+    @keyframes drift {
+      to {
+        transform: translate(-60px, 40px) scale(1.12);
+      }
+    }
+
+    .hero-vignette {
+      background: linear-gradient(to top, var(--bg) 0%, transparent 40%);
+      opacity: .7;
+    }
 
     /* sidebar */
-    .settings-sidebar { background: rgba(14, 14, 14, .7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-right: 1px solid #232323; padding: 18px 14px; }
-    .sidebar-back-btn { border-radius: 99px; padding: 7px 14px; font-size: 12px; font-weight: 500; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); }
-    .sidebar-back-btn:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .12); color: #fff; }
-    .settings-sidebar-brand { padding: 6px 8px 14px; border-bottom: 1px solid #232323; }
-    .brand-text { font-size: 17px; font-weight: 700; letter-spacing: -.02em; }
-    .settings-tab { border-radius: 99px; padding: 9px 14px; font-size: 13px; font-weight: 500; }
-    .settings-tab:hover { background: rgba(255, 255, 255, .06); }
-    .settings-tab.active { background: rgba(255, 255, 255, .1); color: #fff; }
-    .sidebar-user { border-top: 1px solid #232323; }
-    .user-chip { border-radius: 16px; background: var(--glass), #0e0e0e; border: 1px solid #222; padding: 8px 10px; }
-    .user-chip-av { border-radius: 50%; }
-    .user-chip-name { font-weight: 500; }
-    .sidebar-signout-btn { height: 34px; border-radius: 99px; font-size: 12px; font-weight: 500; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); color: var(--text); }
-    .sidebar-signout-btn:hover { background: rgba(255, 255, 255, .14); color: var(--red); border-color: rgba(255, 58, 92, .3); }
+    .settings-sidebar {
+      background: rgba(14, 14, 14, .7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-right: 1px solid #232323;
+      padding: 18px 14px;
+    }
+
+    .sidebar-back-btn {
+      border-radius: 99px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .sidebar-back-btn:hover {
+      background: rgba(255, 255, 255, .14);
+      border-color: rgba(255, 255, 255, .12);
+      color: #fff;
+    }
+
+    .settings-sidebar-brand {
+      padding: 6px 8px 14px;
+      border-bottom: 1px solid #232323;
+    }
+
+    .brand-text {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+    }
+
+    .settings-tab {
+      border-radius: 99px;
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .settings-tab:hover {
+      background: rgba(255, 255, 255, .06);
+    }
+
+    .settings-tab.active {
+      background: rgba(255, 255, 255, .1);
+      color: #fff;
+    }
+
+    .sidebar-user {
+      border-top: 1px solid #232323;
+    }
+
+    .user-chip {
+      border-radius: 16px;
+      background: var(--glass), #0e0e0e;
+      border: 1px solid #222;
+      padding: 8px 10px;
+    }
+
+    .user-chip-av {
+      border-radius: 50%;
+    }
+
+    .user-chip-name {
+      font-weight: 500;
+    }
+
+    .sidebar-signout-btn {
+      height: 34px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .12);
+      color: var(--text);
+    }
+
+    .sidebar-signout-btn:hover {
+      background: rgba(255, 255, 255, .14);
+      color: var(--red);
+      border-color: rgba(255, 58, 92, .3);
+    }
 
     /* mobile header */
-    .mobile-header { background: rgba(14, 14, 14, .82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid #232323; }
-    .mobile-back-btn { border-radius: 99px; padding: 6px 13px; font-weight: 500; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); }
-    .mobile-back-btn:hover { background: rgba(255, 255, 255, .14); }
-    .mobile-nav-btn { border-radius: 99px; font-weight: 500; background: rgba(255, 255, 255, .04); border: 1px solid #2a2a2a; }
-    .mobile-nav-btn.active { background: rgba(255, 255, 255, .1); color: #fff; border-color: rgba(255, 255, 255, .14); }
+    .mobile-header {
+      background: rgba(14, 14, 14, .82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid #232323;
+    }
+
+    .mobile-back-btn {
+      border-radius: 99px;
+      padding: 6px 13px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .mobile-back-btn:hover {
+      background: rgba(255, 255, 255, .14);
+    }
+
+    .mobile-nav-btn {
+      border-radius: 99px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid #2a2a2a;
+    }
+
+    .mobile-nav-btn.active {
+      background: rgba(255, 255, 255, .1);
+      color: #fff;
+      border-color: rgba(255, 255, 255, .14);
+    }
 
     /* top bar + content */
-    .dash-topbar { height: 60px; background: rgba(14, 14, 14, .6); border-bottom: 1px solid #232323; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-    .dash-topbar-title { font-size: 14px; font-weight: 500; letter-spacing: -.01em; }
-    .dash-content { padding: 32px 28px 64px; }
-    .tab-pane.active { gap: 14px; }
+    .dash-topbar {
+      height: 60px;
+      background: rgba(14, 14, 14, .6);
+      border-bottom: 1px solid #232323;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .dash-topbar-title {
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: -.01em;
+    }
+
+    .dash-content {
+      padding: 32px 28px 64px;
+    }
+
+    .tab-pane.active {
+      gap: 14px;
+    }
 
     /* cards */
-    .panel { background: var(--glass), #0e0e0e; border: 1px solid #222; border-radius: 22px; padding: 22px 24px; gap: 16px; backdrop-filter: none; transition: border-color .2s; }
-    .panel:hover { border-color: #3a3a3a; }
-    .panel-title { font-size: 17px; font-weight: 500; letter-spacing: -.02em; text-transform: none; color: var(--text); padding-bottom: 0; border-bottom: 0; }
-    .stab-account-card, .stab-plan-card, .pricing-note { border-radius: 16px; background: rgba(255, 255, 255, .03); border: 1px solid #232323; }
-    .stab-avatar { border-radius: 50%; }
-    .stab-name { font-weight: 500; }
-    .stab-plan-label { font-weight: 500; letter-spacing: .06em; }
-    .stab-plan-value.premium { background: #f1f1f1; color: #0b0b0b; border: 0; border-radius: 99px; padding: 2px 10px; font-weight: 700; letter-spacing: .08em; }
-    .stab-plan-value.free { border-radius: 99px; }
+    .panel {
+      background: var(--glass), #0e0e0e;
+      border: 1px solid #222;
+      border-radius: 22px;
+      padding: 22px 24px;
+      gap: 16px;
+      backdrop-filter: none;
+      transition: border-color .2s;
+    }
+
+    .panel:hover {
+      border-color: #3a3a3a;
+    }
+
+    .panel-title {
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: -.02em;
+      text-transform: none;
+      color: var(--text);
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .stab-account-card,
+    .stab-plan-card,
+    .pricing-note {
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid #232323;
+    }
+
+    .stab-avatar {
+      border-radius: 50%;
+    }
+
+    .stab-name {
+      font-weight: 500;
+    }
+
+    .stab-plan-label {
+      font-weight: 500;
+      letter-spacing: .06em;
+    }
+
+    .stab-plan-value.premium {
+      background: #f1f1f1;
+      color: #0b0b0b;
+      border: 0;
+      border-radius: 99px;
+      padding: 2px 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+
+    .stab-plan-value.free {
+      border-radius: 99px;
+    }
 
     /* inputs + buttons: pills */
-    .input { border-radius: 99px; padding: 10px 16px; font-size: 13px; background: #0a0a0a; border: 1px solid #2a2a2a; }
-    .input:focus { border-color: rgba(255, 255, 255, .4); }
-    .modal-btn { height: 38px; padding: 0 18px; border-radius: 99px; font-size: 13px; font-weight: 500; letter-spacing: 0; }
-    .modal-cancel { background: rgba(255, 255, 255, .07); border-color: rgba(255, 255, 255, .12); backdrop-filter: blur(8px); }
-    .modal-cancel:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .12); }
-    .modal-confirm:hover { background: #ff4d6d; }
-    .upgrade-confirm-btn { background: #f1f1f1 !important; color: #0b0b0b !important; border-color: #f1f1f1 !important; }
-    .upgrade-confirm-btn:hover { background: #fff !important; opacity: 1; }
-    .discord-btn { background: rgba(255, 255, 255, .07) !important; color: var(--text) !important; border-color: rgba(255, 255, 255, .12) !important; }
-    .discord-btn:hover { background: rgba(255, 255, 255, .14) !important; color: #fff !important; border-color: rgba(255, 255, 255, .12) !important; }
-    .premium-badge { background: #f1f1f1; color: #0b0b0b !important; font-size: 10px; font-weight: 700; letter-spacing: .08em; padding: 2px 9px; border-radius: 99px; }
+    .input {
+      border-radius: 99px;
+      padding: 10px 16px;
+      font-size: 13px;
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+    }
+
+    .input:focus {
+      border-color: rgba(255, 255, 255, .4);
+    }
+
+    .modal-btn {
+      height: 38px;
+      padding: 0 18px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
+    .modal-cancel {
+      background: rgba(255, 255, 255, .07);
+      border-color: rgba(255, 255, 255, .12);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-cancel:hover {
+      background: rgba(255, 255, 255, .14);
+      border-color: rgba(255, 255, 255, .12);
+    }
+
+    .modal-confirm:hover {
+      background: #ff4d6d;
+    }
+
+    .upgrade-confirm-btn {
+      background: #f1f1f1 !important;
+      color: #0b0b0b !important;
+      border-color: #f1f1f1 !important;
+    }
+
+    .upgrade-confirm-btn:hover {
+      background: #fff !important;
+      opacity: 1;
+    }
+
+    .discord-btn {
+      background: rgba(255, 255, 255, .07) !important;
+      color: var(--text) !important;
+      border-color: rgba(255, 255, 255, .12) !important;
+    }
+
+    .discord-btn:hover {
+      background: rgba(255, 255, 255, .14) !important;
+      color: #fff !important;
+      border-color: rgba(255, 255, 255, .12) !important;
+    }
+
+    .premium-badge {
+      background: #f1f1f1;
+      color: #0b0b0b !important;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      padding: 2px 9px;
+      border-radius: 99px;
+    }
 
     /* stream */
-    .stream-viewport { border-radius: 16px; background: #050505; border: 1px solid #1f1f1f; }
-    .stream-overlay { background: rgba(5, 5, 5, .94); }
-    .stream-overlay-icon { border-radius: 14px; background: rgba(255, 255, 255, .07); border-color: rgba(255, 255, 255, .14); color: #fff; }
-    .stream-overlay-title { font-size: 17px; font-weight: 500; letter-spacing: -.02em; }
-    .stream-id-badge { border-radius: 99px; color: #fff; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .14); }
+    .stream-viewport {
+      border-radius: 16px;
+      background: #050505;
+      border: 1px solid #1f1f1f;
+    }
+
+    .stream-overlay {
+      background: rgba(5, 5, 5, .94);
+    }
+
+    .stream-overlay-icon {
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .07);
+      border-color: rgba(255, 255, 255, .14);
+      color: #fff;
+    }
+
+    .stream-overlay-title {
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: -.02em;
+    }
+
+    .stream-id-badge {
+      border-radius: 99px;
+      color: #fff;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .14);
+    }
 
     /* pricing: same cards as the homepage */
-    .pricing-grid { gap: 14px; margin-top: 4px; }
-    .pricing-card { border: 1px solid #222; border-radius: 22px; background: var(--glass), #0e0e0e; padding: 30px; transition: border-color .2s; }
-    .pricing-card:hover { border-color: #3a3a3a; transform: none; }
-    .pricing-card.featured { background: #ececec; color: #0b0b0b; border-color: #fff; }
-    .pricing-tier-name { font-size: 15px; font-weight: 500; letter-spacing: 0; text-transform: none; color: #aaa; margin-bottom: 0; }
-    .pricing-price { font-size: 56px; font-weight: 500; letter-spacing: -.05em; margin: 14px 0 4px; }
-    .pricing-price span { letter-spacing: 0; margin-left: 2px; }
-    .pricing-sub { font-size: 13.5px; color: #8f8f8f; margin-bottom: 22px; }
-    .pricing-features { gap: 11px; margin-bottom: 28px; }
-    .pricing-feat-item { font-size: 14px; color: #cfcfcf; }
-    .pricing-check { color: #fff; }
-    .pricing-card.featured .pricing-tier-name, .pricing-card.featured .pricing-sub, .pricing-card.featured .pricing-price span { color: #555 !important; }
-    .pricing-card.featured .pricing-price { color: #0b0b0b; }
-    .pricing-card.featured .pricing-feat-item { color: #222; }
-    .pricing-card.featured .pricing-check { color: #000; }
-    .btn-pricing { height: 42px; border-radius: 99px; font-size: 14px; font-weight: 500; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); }
-    .btn-pricing:hover:not(:disabled) { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .12); }
-    .btn-pricing.primary { background: #f1f1f1; border-color: #f1f1f1; color: #0b0b0b; }
-    .btn-pricing.primary:hover:not(:disabled) { background: #fff; }
-    .pricing-card.featured .btn-pricing, .pricing-card.featured .btn-pricing.primary { background: #0b0b0b; color: #f1f1f1; border-color: #0b0b0b; }
-    .pricing-card.featured .btn-pricing:hover:not(:disabled) { background: #222; }
+    .pricing-grid {
+      gap: 14px;
+      margin-top: 4px;
+    }
+
+    .pricing-card {
+      border: 1px solid #222;
+      border-radius: 22px;
+      background: var(--glass), #0e0e0e;
+      padding: 30px;
+      transition: border-color .2s;
+    }
+
+    .pricing-card:hover {
+      border-color: #3a3a3a;
+      transform: none;
+    }
+
+    .pricing-card.featured {
+      background: #ececec;
+      color: #0b0b0b;
+      border-color: #fff;
+    }
+
+    .pricing-tier-name {
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0;
+      text-transform: none;
+      color: #aaa;
+      margin-bottom: 0;
+    }
+
+    .pricing-price {
+      font-size: 56px;
+      font-weight: 500;
+      letter-spacing: -.05em;
+      margin: 14px 0 4px;
+    }
+
+    .pricing-price span {
+      letter-spacing: 0;
+      margin-left: 2px;
+    }
+
+    .pricing-sub {
+      font-size: 13.5px;
+      color: #8f8f8f;
+      margin-bottom: 22px;
+    }
+
+    .pricing-features {
+      gap: 11px;
+      margin-bottom: 28px;
+    }
+
+    .pricing-feat-item {
+      font-size: 14px;
+      color: #cfcfcf;
+    }
+
+    .pricing-check {
+      color: #fff;
+    }
+
+    .pricing-card.featured .pricing-tier-name,
+    .pricing-card.featured .pricing-sub,
+    .pricing-card.featured .pricing-price span {
+      color: #555 !important;
+    }
+
+    .pricing-card.featured .pricing-price {
+      color: #0b0b0b;
+    }
+
+    .pricing-card.featured .pricing-feat-item {
+      color: #222;
+    }
+
+    .pricing-card.featured .pricing-check {
+      color: #000;
+    }
+
+    .btn-pricing {
+      height: 42px;
+      border-radius: 99px;
+      font-size: 14px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .btn-pricing:hover:not(:disabled) {
+      background: rgba(255, 255, 255, .14);
+      border-color: rgba(255, 255, 255, .12);
+    }
+
+    .btn-pricing.primary {
+      background: #f1f1f1;
+      border-color: #f1f1f1;
+      color: #0b0b0b;
+    }
+
+    .btn-pricing.primary:hover:not(:disabled) {
+      background: #fff;
+    }
+
+    .pricing-card.featured .btn-pricing,
+    .pricing-card.featured .btn-pricing.primary {
+      background: #0b0b0b;
+      color: #f1f1f1;
+      border-color: #0b0b0b;
+    }
+
+    .pricing-card.featured .btn-pricing:hover:not(:disabled) {
+      background: #222;
+    }
 
     /* modals + sign-in */
-    .modal-overlay { background: rgba(0, 0, 0, .7); }
-    .modal { background: var(--glass), #0e0e0e; border: 1px solid #2a2a2a; border-radius: 22px; padding: 26px; width: 360px; }
-    .modal-title { font-size: 17px; font-weight: 500; letter-spacing: -.02em; }
-    .auth-backdrop { background: rgba(5, 5, 5, .88); }
-    .auth-card { background: var(--glass), #0e0e0e; border: 1px solid #2a2a2a; border-radius: 22px; max-width: 340px; padding: 30px 24px 24px; }
-    .auth-title { font-size: 22px; font-weight: 500; letter-spacing: -.03em; }
-    .btn-oauth { height: 44px; border-radius: 99px; font-weight: 500; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); }
-    .btn-oauth:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .12); }
-    .btn-oauth.discord { background: rgba(255, 255, 255, .07); border-color: rgba(255, 255, 255, .12); color: var(--text); }
-    .btn-oauth.discord:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .12); }
-    .auth-footer-note a { color: #fff; font-weight: 500; }
+    .modal-overlay {
+      background: rgba(0, 0, 0, .7);
+    }
 
-    @media (prefers-reduced-motion: reduce) { .blob { animation: none; } }
+    .modal {
+      background: var(--glass), #0e0e0e;
+      border: 1px solid #2a2a2a;
+      border-radius: 22px;
+      padding: 26px;
+      width: 360px;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: -.02em;
+    }
+
+    .auth-backdrop {
+      background: rgba(5, 5, 5, .88);
+    }
+
+    .auth-card {
+      background: var(--glass), #0e0e0e;
+      border: 1px solid #2a2a2a;
+      border-radius: 22px;
+      max-width: 340px;
+      padding: 30px 24px 24px;
+    }
+
+    .auth-title {
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: -.03em;
+    }
+
+    .btn-oauth {
+      height: 44px;
+      border-radius: 99px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .btn-oauth:hover {
+      background: rgba(255, 255, 255, .14);
+      border-color: rgba(255, 255, 255, .12);
+    }
+
+    .btn-oauth.discord {
+      background: rgba(255, 255, 255, .07);
+      border-color: rgba(255, 255, 255, .12);
+      color: var(--text);
+    }
+
+    .btn-oauth.discord:hover {
+      background: rgba(255, 255, 255, .14);
+      border-color: rgba(255, 255, 255, .12);
+    }
+
+    .auth-footer-note a {
+      color: #fff;
+      font-weight: 500;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .blob {
+        animation: none;
+      }
+    }
+
     @media (max-width: 850px) {
-      .panel { padding: 18px; border-radius: 18px; }
-      .pricing-card { padding: 24px; border-radius: 18px; }
-      .blob { opacity: .35; }
+      .panel {
+        padding: 18px;
+        border-radius: 18px;
+      }
+
+      .pricing-card {
+        padding: 24px;
+        border-radius: 18px;
+      }
+
+      .blob {
+        opacity: .35;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="hero-bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+  <div class="hero-bg" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+  </div>
   <div class="hero-vignette" aria-hidden="true"></div>
 
   <div id="app">
@@ -1629,43 +2094,6 @@
           </div>
 
           <div class="panel">
-            <div class="panel-title">
-              <span>Your Referral Code</span>
-              <span class="premium-badge">EARN PREMIUM</span>
-            </div>
-
-            <div style="display:flex; gap:8px; max-width:440px;">
-              <input type="text" id="referralCodeBox" readonly value="Loading..." class="input"
-                style="font-family:var(--font-mono); font-weight:700; letter-spacing:1px; text-align:center;"
-                aria-label="Your Referral Code" />
-              <button class="modal-btn modal-cancel" id="copyRefBtn" onclick="copyReferralCode()">Copy</button>
-            </div>
-
-            <div
-              style="font-size:11px; color:var(--muted); line-height:1.5; background:rgba(255,255,255,0.02); border:1px solid var(--border); padding:10px 12px; border-radius:8px;">
-              Invite friends! When a friend joins and opens BloxMulti on 3 separate days, you instantly receive <strong
-                style="color:var(--text);">5 free days of Premium</strong>.
-            </div>
-
-            <div id="applyReferralCard"
-              style="display:flex; flex-direction:column; gap:8px; margin-top:4px; border-top:1px solid rgba(255,255,255,0.05); padding-top:12px;">
-              <div style="font-size:11px; font-weight:700; color:var(--text);">Have a Referral Code?</div>
-              <div style="display:flex; gap:8px; max-width:440px;">
-                <input type="text" id="applyReferralInput" class="input" placeholder="e.g. BM-XXXXXX"
-                  style="font-family:var(--font-mono); text-transform:uppercase;" aria-label="Enter Referral Code" />
-                <button class="modal-btn upgrade-confirm-btn" id="applyRefBtn"
-                  onclick="submitReferralCode()">Apply</button>
-              </div>
-              <div id="applyRefStatus" style="font-size:11px; display:none;" aria-live="polite"></div>
-            </div>
-
-            <div id="appliedReferralBanner"
-              style="display:none; padding:10px 14px; border-radius:8px; background:rgba(42,245,152,0.08); border:1px solid rgba(42,245,152,0.25); font-size:11.5px; color:var(--green); font-weight:600; text-align:center;">
-              ✓ Referral code applied!
-            </div>
-          </div>
-
-          <div class="panel">
             <div class="panel-title">Community &amp; Options</div>
             <div style="display:flex; flex-wrap:wrap; gap:8px;">
               <button class="modal-btn discord-btn" onclick="window.open('https://discord.gg/ju6ANNecQg', '_blank')"
@@ -1852,8 +2280,7 @@
 
     let state = {
       user: null,
-      subscription: { isPremium: false, tier: 0, renewDate: null, cancelAtPeriodEnd: false, status: "" },
-      referral: { referralCode: null, appliedCode: null }
+      subscription: { isPremium: false, tier: 0, renewDate: null, cancelAtPeriodEnd: false, status: "" }
     };
 
     let peer = null;
@@ -1954,18 +2381,6 @@
           }
         } catch (e) {
           console.warn("Subscription check warning:", e);
-        }
-
-        try {
-          const refRes = await supabaseRequest("POST", "/functions/v1/BloxMulti-Referral", { action: "get_referral_info" }, true);
-          if (refRes && refRes.ok) {
-            state.referral = {
-              referralCode: refRes.referralCode,
-              appliedCode: refRes.appliedCode
-            };
-          }
-        } catch (e) {
-          console.warn("Referral fetch warning:", e);
         }
 
         closeAuthModal();
@@ -2091,23 +2506,6 @@
         planBtnLifetime.textContent = "Get Lifetime ($15)";
       }
 
-      const refCodeBox = document.getElementById("referralCodeBox");
-      const applyCard = document.getElementById("applyReferralCard");
-      const appliedBanner = document.getElementById("appliedReferralBanner");
-
-      if (state.referral.referralCode) {
-        refCodeBox.value = state.referral.referralCode;
-      }
-
-      if (state.referral.appliedCode) {
-        applyCard.style.display = "none";
-        appliedBanner.style.display = "block";
-        appliedBanner.textContent = `✓ Referral code applied (${state.referral.appliedCode})`;
-      } else {
-        applyCard.style.display = "flex";
-        appliedBanner.style.display = "none";
-      }
-
       const streamKey = getUserStreamKey();
       if (streamKey) {
         document.getElementById("streamRoomBadge").textContent = `Room: ${streamKey}`;
@@ -2193,49 +2591,6 @@
           }
         }
       );
-    }
-
-    // ── Referral Handling ──
-    async function copyReferralCode() {
-      const val = document.getElementById("referralCodeBox").value;
-      if (!val || val === "Loading...") return;
-      try {
-        await navigator.clipboard.writeText(val);
-        const btn = document.getElementById("copyRefBtn");
-        btn.textContent = "Copied!";
-        setTimeout(() => btn.textContent = "Copy", 1800);
-      } catch (_) { }
-    }
-
-    async function submitReferralCode() {
-      const input = document.getElementById("applyReferralInput");
-      const status = document.getElementById("applyRefStatus");
-      const btn = document.getElementById("applyRefBtn");
-      const code = (input.value || "").trim();
-
-      if (!code) return;
-      btn.disabled = true;
-      status.style.display = "block";
-      status.style.color = "var(--muted)";
-      status.textContent = "Validating code...";
-
-      try {
-        const res = await supabaseRequest("POST", "/functions/v1/BloxMulti-Referral", { action: "apply_code", code }, true);
-        if (res.ok) {
-          status.style.color = "var(--green)";
-          status.textContent = "✓ " + (res.message || "Referral code applied successfully!");
-          state.referral.appliedCode = res.appliedCode;
-          setTimeout(() => fetchDashboardData(), 1500);
-        } else {
-          status.style.color = "var(--red)";
-          status.textContent = res.error || "Invalid referral code.";
-        }
-      } catch (err) {
-        status.style.color = "var(--red)";
-        status.textContent = err.message || "Network error applying code.";
-      } finally {
-        btn.disabled = false;
-      }
     }
 
     // ── Remote WebRTC Streaming ──

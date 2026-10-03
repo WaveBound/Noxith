@@ -1,394 +1,2073 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BloxMulti — Roblox Account Manager (RAM) &amp; Multiple Roblox Launcher</title>
-<link rel="canonical" href="https://noxith.com/bloxmulti/">
-<meta name="description" content="The modern Roblox Account Manager (RAM) and Multiple Roblox launcher. Run multiple Roblox accounts simultaneously on Windows with DPAPI encryption, FPS limits, and Mutex unlock.">
-<meta name="keywords" content="roblox ram, roblox account manager, roblox launcher, multiple roblox, roblox ram alternative, roblox multi account, roblox account switcher">
-<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
-<meta name="theme-color" content="#0b0b0b">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://noxith.com/bloxmulti/">
-<meta property="og:site_name" content="BloxMulti">
-<meta property="og:title" content="BloxMulti — Roblox Account Manager (RAM) &amp; Multiple Roblox Launcher">
-<meta property="og:description" content="Run multiple Roblox accounts concurrently on Windows. Modern RAM alternative with DPAPI encryption, per-account FPS limits and launcher tools.">
-<meta property="og:image" content="https://noxith.com/bloxmulti/og-image.png">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script>document.documentElement.classList.add('js')</script>
-<script type="application/ld+json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BloxMulti — Roblox Account Manager (RAM) &amp; Multiple Roblox Launcher</title>
+  <link rel="canonical" href="https://noxith.com/bloxmulti/">
+  <meta name="description"
+    content="The modern Roblox Account Manager (RAM) and Multiple Roblox launcher. Run multiple Roblox accounts simultaneously on Windows with DPAPI encryption, FPS limits, and Mutex unlock.">
+  <meta name="keywords"
+    content="roblox ram, roblox account manager, roblox launcher, multiple roblox, roblox ram alternative, roblox multi account, roblox account switcher">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta name="theme-color" content="#0b0b0b">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://noxith.com/bloxmulti/">
+  <meta property="og:site_name" content="BloxMulti">
+  <meta property="og:title" content="BloxMulti — Roblox Account Manager (RAM) &amp; Multiple Roblox Launcher">
+  <meta property="og:description"
+    content="Run multiple Roblox accounts concurrently on Windows. Modern RAM alternative with DPAPI encryption, per-account FPS limits and launcher tools.">
+  <meta property="og:image" content="https://noxith.com/bloxmulti/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>document.documentElement.classList.add('js')</script>
+  <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"BloxMulti Roblox Account Manager","operatingSystem":"Windows 10, Windows 11","applicationCategory":"UtilitiesApplication","softwareVersion":"1.4.4","downloadUrl":"https://downloads.noxith.com/download","offers":[{"@type":"Offer","name":"Standard","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Monthly Premium","price":"3.00","priceCurrency":"USD"},{"@type":"Offer","name":"Lifetime License","price":"15.00","priceCurrency":"USD"}]}
 </script>
-<style>
-:root{--bg:#0b0b0b;--text:#ececec;--muted:#8d8d8d;--line:#232323;--green:#2af598;
---glass:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.02) 60%);
---edge:none}
-*{box-sizing:border-box;margin:0}
-html{scroll-behavior:smooth}
-body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-a{color:inherit;text-decoration:none}
-.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:42px;padding:0 20px;border-radius:99px;font:500 14px Inter;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px);transition:.2s}
-.btn:hover{background:rgba(255,255,255,.14)}
-.btn.w{background:#f1f1f1;color:#0b0b0b;border-color:#f1f1f1}
-.btn.w:hover{background:#fff}
-.eyebrow{display:inline-block;font-size:12px;color:#b9b9b9;padding:5px 13px;border:1px solid var(--line);border-radius:99px;background:var(--glass)}
-.fade{background:linear-gradient(180deg,#fff 30%,#6e6e6e);-webkit-background-clip:text;background-clip:text;color:transparent}
-h2{font-size:clamp(34px,5vw,60px);font-weight:500;letter-spacing:-.045em;line-height:1.02;margin:20px 0 14px;max-width:11em}
-.sub{color:#9a9a9a;max-width:34em;font-size:16px}
+  <style>
+    :root {
+      --bg: #0b0b0b;
+      --text: #ececec;
+      --muted: #8d8d8d;
+      --line: #232323;
+      --green: #2af598;
+      --glass: linear-gradient(160deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .02) 60%);
+      --edge: none
+    }
 
-/* hero */
-.stage{position:relative;width:100vw;margin-left:calc(50% - 50vw);min-height:820px;background:linear-gradient(#050505,var(--bg));overflow:hidden;display:flex;flex-direction:column}
-.bfade{position:absolute;left:0;right:0;bottom:0;height:280px;z-index:2;background:linear-gradient(transparent,var(--bg));pointer-events:none}
-.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;animation:drift 18s ease-in-out infinite alternate}
-.b1{width:860px;height:580px;right:-80px;top:-140px;background:radial-gradient(#e9eeec,#7d8683 50%,transparent 72%)}
-.b2{width:720px;height:480px;left:-140px;bottom:-80px;background:radial-gradient(#cfd4d2,#5d6462 55%,transparent 72%);animation-delay:-6s}
-.b3{width:340px;height:240px;left:38%;top:-120px;background:radial-gradient(#fff,transparent 70%);opacity:.18;animation-delay:-11s}
-@keyframes drift{to{transform:translate(-60px,40px) scale(1.12)}}
-.streaks{position:absolute;left:50%;bottom:0;width:240px;height:300px;transform:translateX(-50%)}
-.streaks i{position:absolute;bottom:-100px;width:1px;height:110px;background:linear-gradient(transparent,#fff,transparent);animation:rise 4.5s linear infinite}
-@keyframes rise{to{transform:translateY(-460px);opacity:0}}
-.stage::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(rgba(255,255,255,.25) 1px,transparent 1px) 0 0/90px 90px;opacity:.12;-webkit-mask:radial-gradient(70% 70% at 50% 50%,#000,transparent);mask:radial-gradient(70% 70% at 50% 50%,#000,transparent)}
-.top{position:fixed;top:0;left:0;right:0;z-index:100;padding-left:28px!important;padding-right:28px!important;display:flex;align-items:center;justify-content:space-between;padding:22px 28px}
-.logo{font-weight:700;font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:9px;min-width:150px}
-.pill{display:flex;gap:4px;padding:6px;border-radius:99px;background:rgba(20,20,20,.7);border:1px solid #2a2a2a;backdrop-filter:blur(12px);font-size:13px}
-.pill a{padding:7px 14px;border-radius:99px;color:#cfcfcf}
-.pill a:hover{background:rgba(255,255,255,.1);color:#fff}
-.stage{padding-top:82px}
-.top .r{display:flex;gap:10px;align-items:center;min-width:0;height:46px;padding:0 4px 0 18px;background:rgba(20,20,20,.7);border:1px solid #2a2a2a;backdrop-filter:blur(12px);border-radius:99px;justify-content:flex-end;font-size:13.5px}
-.top .r .btn{height:38px;padding:0 16px}
-.copy{position:relative;z-index:4;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px 10px}
-.copy h1{font-size:clamp(46px,8.4vw,116px);font-weight:500;letter-spacing:-.055em;line-height:.95;max-width:9.5em}
-.copy h1 span{background:linear-gradient(90deg,#fff 20%,#5c5c5c);-webkit-background-clip:text;background-clip:text;color:transparent}
-.copy p{margin:24px 0 30px;color:#b4b4b4;font-size:17px;max-width:32em}
-.cta{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.node{position:absolute;z-index:3;display:flex;align-items:center;gap:12px;font-size:13px}
-.node small{display:block;color:var(--muted);font-size:11px}
-.node::before{content:"";position:absolute;top:18px;height:1px;width:140px;background:linear-gradient(90deg,transparent,#555)}
-.node.l{left:0;flex-direction:row}.node.l::before{right:calc(100% - 54px);left:auto;transform:translateX(0);width:46vw;max-width:520px;background:linear-gradient(270deg,#555,transparent)}
-.node.rt{flex-direction:row-reverse;text-align:right}.node.rt::before{left:calc(100% - 54px);width:46vw;max-width:520px;background:linear-gradient(90deg,#555,transparent)}
-.n1{top:32%;left:max(4%,calc(50% - 560px))}.n2{bottom:24%;left:max(3%,calc(50% - 600px))}.n3{top:32%;right:max(4%,calc(50% - 560px))}.n4{bottom:24%;right:max(3%,calc(50% - 600px))}
-.node.l::before,.node.rt::before{display:none}
-.mq{position:relative;z-index:4;margin:20px 0 26px;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-.track{display:flex;width:max-content;animation:mq 40s linear infinite;will-change:transform;font-size:15px;font-weight:600;color:#6f6f6f;white-space:nowrap}
-.track span{margin-right:54px}
-@keyframes mq{to{transform:translateX(calc(-1 * var(--w,50%)))}}
+    * {
+      box-sizing: border-box;
+      margin: 0
+    }
 
-section{padding:120px 0 0}
-.head{display:flex;flex-direction:column;align-items:flex-start}
+    html {
+      scroll-behavior: smooth
+    }
 
-/* bento */
-.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:46px}
-.card{position:relative;border:1px solid #222;border-radius:22px;background:var(--glass),#0e0e0e;box-shadow:none;padding:0;overflow:hidden;display:flex;flex-direction:column;transition:border-color .2s}
-.card:hover{border-color:#3a3a3a}
-.s4{grid-column:span 4}.s2{grid-column:span 2}.s3{grid-column:span 3}
-.viz{height:200px;background:linear-gradient(#050505,#0b0b0b);border-bottom:1px solid #1a1a1a;position:relative;display:flex;align-items:center;justify-content:center;gap:10px;overflow:hidden;isolation:isolate}
-.viz::before,.viz::after{content:"";position:absolute;z-index:0;border-radius:50%;pointer-events:none;will-change:transform;opacity:.6}
-.viz::before{width:75%;height:150%;right:-22%;top:-65%;background:radial-gradient(closest-side,rgba(233,238,236,.55),rgba(125,134,131,.28) 55%,transparent);animation:drift1 16s ease-in-out infinite alternate}
-.viz::after{width:70%;height:130%;left:-24%;bottom:-70%;background:radial-gradient(closest-side,rgba(207,212,210,.4),rgba(93,100,98,.22) 55%,transparent);animation:drift2 19s ease-in-out infinite alternate}
-@keyframes drift1{to{transform:translate3d(-14%,10%,0) scale(1.1)}}
-@keyframes drift2{to{transform:translate3d(16%,-12%,0) scale(1.12)}}
-.viz>*{position:relative;z-index:1}
-.txt{padding:22px 24px 26px}
-.txt h3{font-size:19px;font-weight:500;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
-.txt p{font-size:14px;color:#9a9a9a;margin-top:6px}
-.tag{font-size:10px;font-weight:700;letter-spacing:.08em;padding:2px 9px;border-radius:99px;background:#f1f1f1;color:#0b0b0b}
-.chip{padding:9px 14px;border-radius:12px;font-size:12.5px;background:linear-gradient(rgba(38,38,38,.92),rgba(20,20,20,.92));border:1px solid rgba(255,255,255,.14);border-top-color:rgba(255,255,255,.28);box-shadow:none;white-space:nowrap;display:flex;align-items:center;gap:8px}
-.chip b{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:none}
-.fan .chip{flex-direction:column;align-items:flex-start;gap:3px;padding:14px 16px;transform:translateY(calc(var(--y)*1px)) rotate(calc(var(--r)*1deg))}
-.fan .chip small{color:var(--muted);font-size:10.5px}
-.ring{width:130px;height:130px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#161616 0 30%,transparent 31%),repeating-radial-gradient(circle,rgba(255,255,255,.22) 0 1px,transparent 1px 16px)}
-.bars{align-items:flex-end;padding-bottom:34px}
-.bars span{width:12px;border-radius:5px;height:calc(var(--h)*1%);background:linear-gradient(#fff,#4a4a4a);opacity:.85}
-.toast{flex-direction:column}
-.pulse{width:64px;height:64px;border-radius:50%;background:#f1f1f1;display:grid;place-items:center;box-shadow:none;animation:pl 3s ease-in-out infinite}
-@keyframes pl{50%{transform:scale(1.06)}}
-.snap{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;width:230px;height:130px;animation:relayout 8s infinite}
-.snap i{border-radius:9px;border:1px solid rgba(255,255,255,.18);background:var(--glass)}
-.snap i:first-child{grid-row:span 2}
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden
+    }
 
-/* bento animations: each panel acts out its feature (transform/opacity only) */
-/* accounts: windows deal out of a stack, status dots come online */
-.fan .chip:nth-child(1){--o:-1.5;--i:0}.fan .chip:nth-child(2){--o:-.5;--i:1}.fan .chip:nth-child(3){--o:.5;--i:2}.fan .chip:nth-child(4){--o:1.5;--i:3}
-.fan .chip{animation:deal 8s infinite both;animation-delay:calc(var(--i)*.14s);will-change:translate,scale,opacity}
-@keyframes deal{0%,2%{translate:calc(var(--o)*-128px) 0;scale:.8;opacity:0;animation-timing-function:cubic-bezier(.2,.9,.25,1.1)}18%,74%{translate:0 0;scale:1;opacity:1;animation-timing-function:cubic-bezier(.6,0,.9,.4)}90%,100%{translate:calc(var(--o)*-128px) 0;scale:.8;opacity:0}}
-.fan small::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;vertical-align:1px;animation:online 8s infinite both;animation-delay:calc(var(--i)*.14s)}
-@keyframes online{0%,20%{transform:scale(0)}27%{transform:scale(1.7)}33%,74%{transform:scale(1)}88%,100%{transform:scale(0)}}
-/* cookies: a dial of tick marks turns, the shackle snaps shut, a ring clacks outward */
-.ring{position:relative}
-.ring::before{content:"";position:absolute;inset:-20px;border-radius:50%;background:repeating-conic-gradient(rgba(255,255,255,.55) 0 1.4deg,transparent 1.4deg 9deg);-webkit-mask:radial-gradient(closest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));mask:radial-gradient(closest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));opacity:.55;animation:spin 48s linear infinite;will-change:transform}
-.ring::after{content:"";position:absolute;inset:0;border-radius:50%;border:1px solid rgba(255,255,255,.75);opacity:0;animation:clack 6s ease-out infinite;will-change:transform,opacity}
-.ring svg{position:relative;z-index:1;overflow:visible}
-.shk{transform-box:fill-box;animation:shk 6s infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes shk{0%,44%{transform:translateY(-3.4px);animation-timing-function:cubic-bezier(.3,1.7,.5,1)}50%,88%{transform:translateY(0);animation-timing-function:ease-in-out}98%,100%{transform:translateY(-3.4px)}}
-@keyframes clack{0%,49%{transform:scale(1);opacity:0}51%{opacity:.9}74%,100%{transform:scale(1.85);opacity:0}}
-/* launcher: the place id types itself, then the launch arrow fires */
-.tw{position:relative;display:inline-block;font-variant-numeric:tabular-nums;color:#fff;margin-left:2px}
-.type{display:inline-block;animation:typ 8s infinite}
-.tw::after{content:"";position:absolute;left:0;top:1px;bottom:1px;width:1px;background:#fff;animation:caret 8s infinite;will-change:transform}
-@keyframes typ{0%,6%{clip-path:inset(0 100% 0 0);opacity:1;animation-timing-function:steps(15)}34%{clip-path:inset(0);opacity:1}86%{clip-path:inset(0);opacity:1}94%,100%{clip-path:inset(0);opacity:0}}
-@keyframes caret{0%,6%{transform:translateX(0);opacity:1;animation-timing-function:steps(15)}34%{transform:translateX(15ch);opacity:1}42%{opacity:1}48%,100%{transform:translateX(15ch);opacity:0}}
-.launch .chip:nth-child(2){animation:ready 8s ease-in-out infinite;will-change:transform,opacity}
-@keyframes ready{0%,36%{opacity:.5;transform:none}46%,76%{opacity:1;transform:translateY(-2px)}92%,100%{opacity:.5;transform:none}}
-.go{display:inline-block;color:var(--muted);animation:fire 8s infinite;will-change:transform,opacity}
-@keyframes fire{0%,48%{transform:none;opacity:1;color:#fff}54%{transform:translate(7px,-7px);opacity:0}55%{transform:translate(-7px,7px);opacity:0}64%,100%{transform:none;opacity:1;color:var(--muted)}}
-/* fps: live frame-time trace scrolls by; anything over the cap is flattened out */
-.fpsg{position:relative;width:260px;height:120px;overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent);mask:linear-gradient(90deg,transparent,#000 16%,#000 84%,transparent)}
-.fpsg .lay{position:absolute;inset:0;overflow:hidden}
-.fpsg .dim{opacity:.28}
-.fpsg .hi{clip-path:inset(40px 0 0 0)}
-.fpsg .tr{width:520px;height:120px;animation:scrollx 3.6s linear infinite;will-change:transform}
-@keyframes scrollx{to{transform:translateX(-260px)}}
-.capline{position:absolute;left:0;right:0;top:40px;height:1px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 5px,transparent 5px 10px)}
-.capline span{position:absolute;right:14%;top:-18px;background:#0a0a0a;padding:1px 5px;border-radius:4px;font-size:9.5px;font-weight:700;letter-spacing:.1em;color:#d0d0d0}
-/* webhooks: embeds arrive one after another, the red one pings */
-.hk{border-left-width:2px;animation:hkA 8s infinite both;will-change:transform,opacity;min-width:176px}
-.hk.a{border-left-color:var(--green)}
-.hk.r{border-left-color:#ff3a5c;animation-name:hkB}
-.hk b{position:relative}
-.hk.r b{background:#ff3a5c}
-.hk.r b::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:1px solid #ff3a5c;opacity:0;animation:ping 8s infinite both}
-@keyframes hkA{0%{opacity:0;translate:0 -16px;scale:.96;animation-timing-function:cubic-bezier(.2,.9,.25,1)}9%,76%{opacity:1;translate:0 0;scale:1}90%,100%{opacity:0;translate:0 8px;scale:.98}}
-@keyframes hkB{0%,30%{opacity:0;translate:0 -16px;scale:.96;animation-timing-function:cubic-bezier(.2,.9,.25,1)}40%,76%{opacity:1;translate:0 0;scale:1}90%,100%{opacity:0;translate:0 8px;scale:.98}}
-@keyframes ping{0%,42%{transform:scale(1);opacity:0}44%{opacity:.9}62%,100%{transform:scale(2.6);opacity:0}}
-/* p2p: handshake nodes, packets streaming through the play button */
-.p2p{display:flex;align-items:center;width:84%;max-width:470px}
-.nd{width:46px;height:46px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(rgba(38,38,38,.92),rgba(20,20,20,.92));display:grid;place-items:center;flex:none}
-.ln{flex:1;height:3px;position:relative;overflow:hidden;container-type:inline-size;margin:0 10px}
-.ln::before{content:"";position:absolute;left:0;right:0;top:1px;height:1px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.3) 0 4px,transparent 4px 9px)}
-.ln i{position:absolute;left:0;top:0;width:30px;height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,#fff);animation:pkt 2.6s linear infinite;will-change:transform}
-.ln i:nth-child(2){animation-delay:-1.3s}
-@keyframes pkt{from{transform:translateX(-30px)}to{transform:translateX(100cqw)}}
-.p2p .pulse{position:relative;width:54px;height:54px;flex:none}
-.pulse::before,.pulse::after{content:"";position:absolute;inset:0;border-radius:50%;border:1px solid rgba(255,255,255,.45);animation:rip 4s cubic-bezier(.25,.6,.35,1) infinite;pointer-events:none;will-change:transform,opacity;opacity:0}
-.pulse::after{animation-delay:2s}
-@keyframes rip{0%{transform:scale(1);opacity:.8}100%{transform:scale(2.2);opacity:0}}
-/* layouts: scattered windows snap into the saved layout with a little overshoot */
-.snap i{position:relative;overflow:hidden;min-width:0;min-height:0}
-.snap i::before{content:"";position:absolute;left:0;right:0;top:0;height:14px;border-bottom:1px solid rgba(255,255,255,.12);background:radial-gradient(circle at 8px 7px,rgba(255,255,255,.4) 1.5px,transparent 2px),radial-gradient(circle at 16px 7px,rgba(255,255,255,.22) 1.5px,transparent 2px),rgba(255,255,255,.03)}
-@keyframes relayout{
-0%,8%{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;animation-timing-function:cubic-bezier(.65,0,.25,1)}
-30%,42%{grid-template-columns:1.9fr 1fr;grid-template-rows:1.6fr 1fr;animation-timing-function:cubic-bezier(.65,0,.25,1)}
-64%,76%{grid-template-columns:1fr 1.9fr;grid-template-rows:1fr 1.6fr;animation-timing-function:cubic-bezier(.65,0,.25,1)}
-100%{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}}
-.card.off .viz,.card.off .viz *,.card.off .viz::before,.card.off .viz::after,.card.off .viz *::before,.card.off .viz *::after{animation-play-state:paused!important}
+    a {
+      color: inherit;
+      text-decoration: none
+    }
 
-/* scroll animations: scroll-linked. --rv runs 0→1 as the element travels up the viewport, so it always matches where you are */
-.js .rv{opacity:var(--rv,0);transform:translate3d(0,calc((1 - var(--rv,0))*28px),0)}
-.js .rv-card{transform:translate3d(0,calc((1 - var(--rv,0))*44px),0) scale(calc(.97 + var(--rv,0)*.03))}
-.js .rv-card .viz{transform:scale(calc(1.12 - var(--rv,0)*.12))}
-.js .rv-card .txt{opacity:clamp(0,calc((var(--rv,0) - .35)/.65),1);transform:translate3d(0,calc((1 - var(--rv,0))*12px),0)}
-.js .rv-tilt{transform:perspective(900px) rotateX(calc((1 - var(--rv,0))*12deg)) translate3d(0,calc((1 - var(--rv,0))*36px),0);transform-origin:50% 0}
-.js .spec.rv b{clip-path:inset(0 calc((1 - clamp(0,calc((var(--rv,0) - .25)/.75),1))*100%) 0 0)}
-.copy,.node{translate:0 calc(var(--p,0)*-70px);opacity:calc(1 - var(--p,0)*1.3)}
-.node{translate:0 calc(var(--p,0)*-120px)}
-@media(prefers-reduced-motion:reduce){.js .rv{opacity:1!important;transform:none!important}.js .spec.rv b{clip-path:none!important}.js .rv-card .viz,.js .rv-card .txt{opacity:1!important;transform:none!important}.copy,.node{translate:none;opacity:1}}
+    .wrap {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 20px
+    }
 
-/* specs */
-.specs{display:grid;grid-template-columns:repeat(4,1fr);margin-top:50px;border-top:1px solid var(--line)}
-.spec{padding:34px 26px 0 0;margin-right:26px;border-right:1px solid var(--line)}
-.spec:last-child{border:0;margin:0}
-.spec b{display:block;font-size:clamp(28px,3.4vw,44px);font-weight:500;letter-spacing:-.045em;line-height:1.05;margin:12px 0 12px}
-.spec p{font-size:13.5px;color:#8f8f8f}
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      height: 42px;
+      padding: 0 20px;
+      border-radius: 99px;
+      font: 500 14px Inter;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .12);
+      backdrop-filter: blur(8px);
+      transition: .2s
+    }
 
-/* pricing */
-.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:46px;align-items:stretch}
-.plan{display:flex;flex-direction:column;border:1px solid #222;border-radius:22px;background:var(--glass),#0e0e0e;box-shadow:none;padding:30px}
-.plan h3{font-size:15px;font-weight:500;color:#aaa}
-.price{font-size:56px;font-weight:500;letter-spacing:-.05em;margin:14px 0 4px}
-.price small{font-size:14px;color:var(--muted);letter-spacing:0}
-.plan>p{font-size:13.5px;color:#8f8f8f;margin-bottom:22px}
-.plan ul{list-style:none;padding:0;display:grid;gap:11px;font-size:14px;flex:1;margin-bottom:28px;color:#cfcfcf}
-.plan li::before{content:"✓";margin-right:10px;color:#fff}
-.plan .btn{width:100%}
-.plan.hot{background:#ececec;color:#0b0b0b;border-color:#fff;box-shadow:none}
-.plan.hot h3,.plan.hot>p,.plan.hot .price small{color:#555}
-.plan.hot ul{color:#222}.plan.hot li::before{color:#000}
-.plan.hot .btn{background:#0b0b0b;color:#f1f1f1;border-color:#0b0b0b}
+    .btn:hover {
+      background: rgba(255, 255, 255, .14)
+    }
 
-/* faq */
-.faq{display:grid;grid-template-columns:1fr 1.5fr;gap:60px;align-items:start}
-details{border:1px solid #222;border-radius:16px;background:var(--glass),#0e0e0e;margin-bottom:10px;transition:.2s}
-summary{cursor:pointer;padding:22px 24px;font-weight:500;font-size:16px;list-style:none;display:flex;justify-content:space-between;gap:18px}
-summary::after{content:"+";font-size:20px;line-height:1;color:var(--muted)}
-details[open]{border-color:#3a3a3a;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.03) 60%),#121212}
-details[open] summary::after{content:"–"}
-details p{padding:0 24px 24px;color:#9a9a9a;font-size:14.5px;max-width:38em}
+    .btn.w {
+      background: #f1f1f1;
+      color: #0b0b0b;
+      border-color: #f1f1f1
+    }
 
-/* footer */
-.cta2{margin-top:130px;text-align:center}
-.cta2 h2{margin:0 auto 26px;max-width:9em}
-.cta2 p{font-size:13px;color:var(--muted);margin-top:18px}
-.links{display:flex;gap:26px;flex-wrap:wrap;justify-content:center;margin:90px 0 0;font-size:13px;color:var(--muted)}
-.links a:hover{color:#fff}
-.word{font-size:clamp(70px,21vw,290px);font-weight:800;letter-spacing:-.06em;line-height:.8;text-align:center;height:.52em;overflow:hidden;margin-top:30px;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 85%);-webkit-background-clip:text;background-clip:text;color:transparent;user-select:none}
+    .btn.w:hover {
+      background: #fff
+    }
 
-@media(max-width:900px){
-  .pill,.node{display:none}
-  .top .r a:first-child{display:none}
-  .stage{min-height:660px}
-  .bento,.plans,.faq{grid-template-columns:1fr}.s4,.s2,.s3{grid-column:auto}
-  .specs{grid-template-columns:1fr 1fr}.spec{border-right:0;margin:0;padding-bottom:26px}
-  .faq{gap:10px}section{padding-top:84px}
-}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important}.toast .chip{opacity:1!important}}
-</style>
+    .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      color: #b9b9b9;
+      padding: 5px 13px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      background: var(--glass)
+    }
+
+    .fade {
+      background: linear-gradient(180deg, #fff 30%, #6e6e6e);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent
+    }
+
+    h2 {
+      font-size: clamp(34px, 5vw, 60px);
+      font-weight: 500;
+      letter-spacing: -.045em;
+      line-height: 1.02;
+      margin: 20px 0 14px;
+      max-width: 11em
+    }
+
+    .sub {
+      color: #9a9a9a;
+      max-width: 34em;
+      font-size: 16px
+    }
+
+    /* hero */
+    .stage {
+      position: relative;
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      min-height: 820px;
+      background: linear-gradient(#050505, var(--bg));
+      overflow: hidden;
+      display: flex;
+      flex-direction: column
+    }
+
+    .bfade {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 280px;
+      z-index: 2;
+      background: linear-gradient(transparent, var(--bg));
+      pointer-events: none
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: .55;
+      animation: drift 18s ease-in-out infinite alternate
+    }
+
+    .b1 {
+      width: 860px;
+      height: 580px;
+      right: -80px;
+      top: -140px;
+      background: radial-gradient(#e9eeec, #7d8683 50%, transparent 72%)
+    }
+
+    .b2 {
+      width: 720px;
+      height: 480px;
+      left: -140px;
+      bottom: -80px;
+      background: radial-gradient(#cfd4d2, #5d6462 55%, transparent 72%);
+      animation-delay: -6s
+    }
+
+    .b3 {
+      width: 340px;
+      height: 240px;
+      left: 38%;
+      top: -120px;
+      background: radial-gradient(#fff, transparent 70%);
+      opacity: .18;
+      animation-delay: -11s
+    }
+
+    @keyframes drift {
+      to {
+        transform: translate(-60px, 40px) scale(1.12)
+      }
+    }
+
+    .streaks {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      width: 240px;
+      height: 300px;
+      transform: translateX(-50%)
+    }
+
+    .streaks i {
+      position: absolute;
+      bottom: -100px;
+      width: 1px;
+      height: 110px;
+      background: linear-gradient(transparent, #fff, transparent);
+      animation: rise 4.5s linear infinite
+    }
+
+    @keyframes rise {
+      to {
+        transform: translateY(-460px);
+        opacity: 0
+      }
+    }
+
+    .stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(rgba(255, 255, 255, .25) 1px, transparent 1px) 0 0/90px 90px;
+      opacity: .12;
+      -webkit-mask: radial-gradient(70% 70% at 50% 50%, #000, transparent);
+      mask: radial-gradient(70% 70% at 50% 50%, #000, transparent)
+    }
+
+    .top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding-left: 28px !important;
+      padding-right: 28px !important;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 28px
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 17px;
+      letter-spacing: -.02em;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 150px
+    }
+
+    .pill {
+      display: flex;
+      gap: 4px;
+      padding: 6px;
+      border-radius: 99px;
+      background: rgba(20, 20, 20, .7);
+      border: 1px solid #2a2a2a;
+      backdrop-filter: blur(12px);
+      font-size: 13px
+    }
+
+    .pill a {
+      padding: 7px 14px;
+      border-radius: 99px;
+      color: #cfcfcf
+    }
+
+    .pill a:hover {
+      background: rgba(255, 255, 255, .1);
+      color: #fff
+    }
+
+    .stage {
+      padding-top: 82px
+    }
+
+    .top .r {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+      height: 46px;
+      padding: 0 4px 0 18px;
+      background: rgba(20, 20, 20, .7);
+      border: 1px solid #2a2a2a;
+      backdrop-filter: blur(12px);
+      border-radius: 99px;
+      justify-content: flex-end;
+      font-size: 13.5px
+    }
+
+    .top .r .btn {
+      height: 38px;
+      padding: 0 16px
+    }
+
+    .top .r a.in {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 3px 12px 3px 3px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .12);
+      color: #f1f1f1;
+      max-width: 180px
+    }
+
+    .top .r a.in:hover {
+      background: rgba(255, 255, 255, .14)
+    }
+
+    .top .r a.in .av {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      flex: none;
+      display: grid;
+      place-items: center;
+      background: #f1f1f1;
+      color: #0b0b0b;
+      font: 600 12px Inter;
+      overflow: hidden
+    }
+
+    .top .r a.in .av img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover
+    }
+
+    .top .r a.in .nm {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .copy {
+      position: relative;
+      z-index: 4;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px 20px 10px
+    }
+
+    .copy h1 {
+      font-size: clamp(46px, 8.4vw, 116px);
+      font-weight: 500;
+      letter-spacing: -.055em;
+      line-height: .95;
+      max-width: 9.5em
+    }
+
+    .copy h1 span {
+      background: linear-gradient(90deg, #fff 20%, #5c5c5c);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent
+    }
+
+    .copy p {
+      margin: 24px 0 30px;
+      color: #b4b4b4;
+      font-size: 17px;
+      max-width: 32em
+    }
+
+    .cta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center
+    }
+
+    .node {
+      position: absolute;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px
+    }
+
+    .node small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px
+    }
+
+    .node::before {
+      content: "";
+      position: absolute;
+      top: 18px;
+      height: 1px;
+      width: 140px;
+      background: linear-gradient(90deg, transparent, #555)
+    }
+
+    .node.l {
+      left: 0;
+      flex-direction: row
+    }
+
+    .node.l::before {
+      right: calc(100% - 54px);
+      left: auto;
+      transform: translateX(0);
+      width: 46vw;
+      max-width: 520px;
+      background: linear-gradient(270deg, #555, transparent)
+    }
+
+    .node.rt {
+      flex-direction: row-reverse;
+      text-align: right
+    }
+
+    .node.rt::before {
+      left: calc(100% - 54px);
+      width: 46vw;
+      max-width: 520px;
+      background: linear-gradient(90deg, #555, transparent)
+    }
+
+    .n1 {
+      top: 32%;
+      left: max(4%, calc(50% - 560px))
+    }
+
+    .n2 {
+      bottom: 24%;
+      left: max(3%, calc(50% - 600px))
+    }
+
+    .n3 {
+      top: 32%;
+      right: max(4%, calc(50% - 560px))
+    }
+
+    .n4 {
+      bottom: 24%;
+      right: max(3%, calc(50% - 600px))
+    }
+
+    .node.l::before,
+    .node.rt::before {
+      display: none
+    }
+
+    .mq {
+      position: relative;
+      z-index: 4;
+      margin: 20px 0 26px;
+      overflow: hidden;
+      -webkit-mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+      mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent)
+    }
+
+    .track {
+      display: flex;
+      width: max-content;
+      animation: mq 40s linear infinite;
+      will-change: transform;
+      font-size: 15px;
+      font-weight: 600;
+      color: #6f6f6f;
+      white-space: nowrap
+    }
+
+    .track span {
+      margin-right: 54px
+    }
+
+    @keyframes mq {
+      to {
+        transform: translateX(calc(-1 * var(--w, 50%)))
+      }
+    }
+
+    section {
+      padding: 120px 0 0
+    }
+
+    .head {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start
+    }
+
+    /* bento */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+      margin-top: 46px
+    }
+
+    .card {
+      position: relative;
+      border: 1px solid #222;
+      border-radius: 22px;
+      background: var(--glass), #0e0e0e;
+      box-shadow: none;
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color .2s
+    }
+
+    .card:hover {
+      border-color: #3a3a3a
+    }
+
+    .s4 {
+      grid-column: span 4
+    }
+
+    .s2 {
+      grid-column: span 2
+    }
+
+    .s3 {
+      grid-column: span 3
+    }
+
+    .viz {
+      height: 200px;
+      background: linear-gradient(#050505, #0b0b0b);
+      border-bottom: 1px solid #1a1a1a;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      overflow: hidden;
+      isolation: isolate
+    }
+
+    .viz::before,
+    .viz::after {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      border-radius: 50%;
+      pointer-events: none;
+      will-change: transform;
+      opacity: .6
+    }
+
+    .viz::before {
+      width: 75%;
+      height: 150%;
+      right: -22%;
+      top: -65%;
+      background: radial-gradient(closest-side, rgba(233, 238, 236, .55), rgba(125, 134, 131, .28) 55%, transparent);
+      animation: drift1 16s ease-in-out infinite alternate
+    }
+
+    .viz::after {
+      width: 70%;
+      height: 130%;
+      left: -24%;
+      bottom: -70%;
+      background: radial-gradient(closest-side, rgba(207, 212, 210, .4), rgba(93, 100, 98, .22) 55%, transparent);
+      animation: drift2 19s ease-in-out infinite alternate
+    }
+
+    @keyframes drift1 {
+      to {
+        transform: translate3d(-14%, 10%, 0) scale(1.1)
+      }
+    }
+
+    @keyframes drift2 {
+      to {
+        transform: translate3d(16%, -12%, 0) scale(1.12)
+      }
+    }
+
+    .viz>* {
+      position: relative;
+      z-index: 1
+    }
+
+    .txt {
+      padding: 22px 24px 26px
+    }
+
+    .txt h3 {
+      font-size: 19px;
+      font-weight: 500;
+      letter-spacing: -.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .txt p {
+      font-size: 14px;
+      color: #9a9a9a;
+      margin-top: 6px
+    }
+
+    .tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      padding: 2px 9px;
+      border-radius: 99px;
+      background: #f1f1f1;
+      color: #0b0b0b
+    }
+
+    .chip {
+      padding: 9px 14px;
+      border-radius: 12px;
+      font-size: 12.5px;
+      background: linear-gradient(rgba(38, 38, 38, .92), rgba(20, 20, 20, .92));
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-top-color: rgba(255, 255, 255, .28);
+      box-shadow: none;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .chip b {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: none
+    }
+
+    .fan .chip {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+      padding: 14px 16px;
+      transform: translateY(calc(var(--y)*1px)) rotate(calc(var(--r)*1deg))
+    }
+
+    .fan .chip small {
+      color: var(--muted);
+      font-size: 10.5px
+    }
+
+    .ring {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle, #161616 0 30%, transparent 31%), repeating-radial-gradient(circle, rgba(255, 255, 255, .22) 0 1px, transparent 1px 16px)
+    }
+
+    .bars {
+      align-items: flex-end;
+      padding-bottom: 34px
+    }
+
+    .bars span {
+      width: 12px;
+      border-radius: 5px;
+      height: calc(var(--h)*1%);
+      background: linear-gradient(#fff, #4a4a4a);
+      opacity: .85
+    }
+
+    .toast {
+      flex-direction: column
+    }
+
+    .pulse {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #f1f1f1;
+      display: grid;
+      place-items: center;
+      box-shadow: none;
+      animation: pl 3s ease-in-out infinite
+    }
+
+    @keyframes pl {
+      50% {
+        transform: scale(1.06)
+      }
+    }
+
+    .snap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 8px;
+      width: 230px;
+      height: 130px;
+      animation: relayout 8s infinite
+    }
+
+    .snap i {
+      border-radius: 9px;
+      border: 1px solid rgba(255, 255, 255, .18);
+      background: var(--glass)
+    }
+
+    .snap i:first-child {
+      grid-row: span 2
+    }
+
+    /* bento animations: each panel acts out its feature (transform/opacity only) */
+    /* accounts: windows deal out of a stack, status dots come online */
+    .fan .chip:nth-child(1) {
+      --o: -1.5;
+      --i: 0
+    }
+
+    .fan .chip:nth-child(2) {
+      --o: -.5;
+      --i: 1
+    }
+
+    .fan .chip:nth-child(3) {
+      --o: .5;
+      --i: 2
+    }
+
+    .fan .chip:nth-child(4) {
+      --o: 1.5;
+      --i: 3
+    }
+
+    .fan .chip {
+      animation: deal 8s infinite both;
+      animation-delay: calc(var(--i)*.14s);
+      will-change: translate, scale, opacity
+    }
+
+    @keyframes deal {
+
+      0%,
+      2% {
+        translate: calc(var(--o)*-128px) 0;
+        scale: .8;
+        opacity: 0;
+        animation-timing-function: cubic-bezier(.2, .9, .25, 1.1)
+      }
+
+      18%,
+      74% {
+        translate: 0 0;
+        scale: 1;
+        opacity: 1;
+        animation-timing-function: cubic-bezier(.6, 0, .9, .4)
+      }
+
+      90%,
+      100% {
+        translate: calc(var(--o)*-128px) 0;
+        scale: .8;
+        opacity: 0
+      }
+    }
+
+    .fan small::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 6px;
+      vertical-align: 1px;
+      animation: online 8s infinite both;
+      animation-delay: calc(var(--i)*.14s)
+    }
+
+    @keyframes online {
+
+      0%,
+      20% {
+        transform: scale(0)
+      }
+
+      27% {
+        transform: scale(1.7)
+      }
+
+      33%,
+      74% {
+        transform: scale(1)
+      }
+
+      88%,
+      100% {
+        transform: scale(0)
+      }
+    }
+
+    /* cookies: a dial of tick marks turns, the shackle snaps shut, a ring clacks outward */
+    .ring {
+      position: relative
+    }
+
+    .ring::before {
+      content: "";
+      position: absolute;
+      inset: -20px;
+      border-radius: 50%;
+      background: repeating-conic-gradient(rgba(255, 255, 255, .55) 0 1.4deg, transparent 1.4deg 9deg);
+      -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+      mask: radial-gradient(closest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+      opacity: .55;
+      animation: spin 48s linear infinite;
+      will-change: transform
+    }
+
+    .ring::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, .75);
+      opacity: 0;
+      animation: clack 6s ease-out infinite;
+      will-change: transform, opacity
+    }
+
+    .ring svg {
+      position: relative;
+      z-index: 1;
+      overflow: visible
+    }
+
+    .shk {
+      transform-box: fill-box;
+      animation: shk 6s infinite
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    @keyframes shk {
+
+      0%,
+      44% {
+        transform: translateY(-3.4px);
+        animation-timing-function: cubic-bezier(.3, 1.7, .5, 1)
+      }
+
+      50%,
+      88% {
+        transform: translateY(0);
+        animation-timing-function: ease-in-out
+      }
+
+      98%,
+      100% {
+        transform: translateY(-3.4px)
+      }
+    }
+
+    @keyframes clack {
+
+      0%,
+      49% {
+        transform: scale(1);
+        opacity: 0
+      }
+
+      51% {
+        opacity: .9
+      }
+
+      74%,
+      100% {
+        transform: scale(1.85);
+        opacity: 0
+      }
+    }
+
+    /* launcher: the place id types itself, then the launch arrow fires */
+    .tw {
+      position: relative;
+      display: inline-block;
+      font-variant-numeric: tabular-nums;
+      color: #fff;
+      margin-left: 2px
+    }
+
+    .type {
+      display: inline-block;
+      animation: typ 8s infinite
+    }
+
+    .tw::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 1px;
+      bottom: 1px;
+      width: 1px;
+      background: #fff;
+      animation: caret 8s infinite;
+      will-change: transform
+    }
+
+    @keyframes typ {
+
+      0%,
+      6% {
+        clip-path: inset(0 100% 0 0);
+        opacity: 1;
+        animation-timing-function: steps(15)
+      }
+
+      34% {
+        clip-path: inset(0);
+        opacity: 1
+      }
+
+      86% {
+        clip-path: inset(0);
+        opacity: 1
+      }
+
+      94%,
+      100% {
+        clip-path: inset(0);
+        opacity: 0
+      }
+    }
+
+    @keyframes caret {
+
+      0%,
+      6% {
+        transform: translateX(0);
+        opacity: 1;
+        animation-timing-function: steps(15)
+      }
+
+      34% {
+        transform: translateX(15ch);
+        opacity: 1
+      }
+
+      42% {
+        opacity: 1
+      }
+
+      48%,
+      100% {
+        transform: translateX(15ch);
+        opacity: 0
+      }
+    }
+
+    .launch .chip:nth-child(2) {
+      animation: ready 8s ease-in-out infinite;
+      will-change: transform, opacity
+    }
+
+    @keyframes ready {
+
+      0%,
+      36% {
+        opacity: .5;
+        transform: none
+      }
+
+      46%,
+      76% {
+        opacity: 1;
+        transform: translateY(-2px)
+      }
+
+      92%,
+      100% {
+        opacity: .5;
+        transform: none
+      }
+    }
+
+    .go {
+      display: inline-block;
+      color: var(--muted);
+      animation: fire 8s infinite;
+      will-change: transform, opacity
+    }
+
+    @keyframes fire {
+
+      0%,
+      48% {
+        transform: none;
+        opacity: 1;
+        color: #fff
+      }
+
+      54% {
+        transform: translate(7px, -7px);
+        opacity: 0
+      }
+
+      55% {
+        transform: translate(-7px, 7px);
+        opacity: 0
+      }
+
+      64%,
+      100% {
+        transform: none;
+        opacity: 1;
+        color: var(--muted)
+      }
+    }
+
+    /* fps: live frame-time trace scrolls by; anything over the cap is flattened out */
+    .fpsg {
+      position: relative;
+      width: 260px;
+      height: 120px;
+      overflow: hidden;
+      -webkit-mask: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+      mask: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent)
+    }
+
+    .fpsg .lay {
+      position: absolute;
+      inset: 0;
+      overflow: hidden
+    }
+
+    .fpsg .dim {
+      opacity: .28
+    }
+
+    .fpsg .hi {
+      clip-path: inset(40px 0 0 0)
+    }
+
+    .fpsg .tr {
+      width: 520px;
+      height: 120px;
+      animation: scrollx 3.6s linear infinite;
+      will-change: transform
+    }
+
+    @keyframes scrollx {
+      to {
+        transform: translateX(-260px)
+      }
+    }
+
+    .capline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 40px;
+      height: 1px;
+      background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .55) 0 5px, transparent 5px 10px)
+    }
+
+    .capline span {
+      position: absolute;
+      right: 14%;
+      top: -18px;
+      background: #0a0a0a;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      color: #d0d0d0
+    }
+
+    /* webhooks: embeds arrive one after another, the red one pings */
+    .hk {
+      border-left-width: 2px;
+      animation: hkA 8s infinite both;
+      will-change: transform, opacity;
+      min-width: 176px
+    }
+
+    .hk.a {
+      border-left-color: var(--green)
+    }
+
+    .hk.r {
+      border-left-color: #ff3a5c;
+      animation-name: hkB
+    }
+
+    .hk b {
+      position: relative
+    }
+
+    .hk.r b {
+      background: #ff3a5c
+    }
+
+    .hk.r b::after {
+      content: "";
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 1px solid #ff3a5c;
+      opacity: 0;
+      animation: ping 8s infinite both
+    }
+
+    @keyframes hkA {
+      0% {
+        opacity: 0;
+        translate: 0 -16px;
+        scale: .96;
+        animation-timing-function: cubic-bezier(.2, .9, .25, 1)
+      }
+
+      9%,
+      76% {
+        opacity: 1;
+        translate: 0 0;
+        scale: 1
+      }
+
+      90%,
+      100% {
+        opacity: 0;
+        translate: 0 8px;
+        scale: .98
+      }
+    }
+
+    @keyframes hkB {
+
+      0%,
+      30% {
+        opacity: 0;
+        translate: 0 -16px;
+        scale: .96;
+        animation-timing-function: cubic-bezier(.2, .9, .25, 1)
+      }
+
+      40%,
+      76% {
+        opacity: 1;
+        translate: 0 0;
+        scale: 1
+      }
+
+      90%,
+      100% {
+        opacity: 0;
+        translate: 0 8px;
+        scale: .98
+      }
+    }
+
+    @keyframes ping {
+
+      0%,
+      42% {
+        transform: scale(1);
+        opacity: 0
+      }
+
+      44% {
+        opacity: .9
+      }
+
+      62%,
+      100% {
+        transform: scale(2.6);
+        opacity: 0
+      }
+    }
+
+    /* p2p: handshake nodes, packets streaming through the play button */
+    .p2p {
+      display: flex;
+      align-items: center;
+      width: 84%;
+      max-width: 470px
+    }
+
+    .nd {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      background: linear-gradient(rgba(38, 38, 38, .92), rgba(20, 20, 20, .92));
+      display: grid;
+      place-items: center;
+      flex: none
+    }
+
+    .ln {
+      flex: 1;
+      height: 3px;
+      position: relative;
+      overflow: hidden;
+      container-type: inline-size;
+      margin: 0 10px
+    }
+
+    .ln::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 1px;
+      height: 1px;
+      background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .3) 0 4px, transparent 4px 9px)
+    }
+
+    .ln i {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 30px;
+      height: 3px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, transparent, #fff);
+      animation: pkt 2.6s linear infinite;
+      will-change: transform
+    }
+
+    .ln i:nth-child(2) {
+      animation-delay: -1.3s
+    }
+
+    @keyframes pkt {
+      from {
+        transform: translateX(-30px)
+      }
+
+      to {
+        transform: translateX(100cqw)
+      }
+    }
+
+    .p2p .pulse {
+      position: relative;
+      width: 54px;
+      height: 54px;
+      flex: none
+    }
+
+    .pulse::before,
+    .pulse::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, .45);
+      animation: rip 4s cubic-bezier(.25, .6, .35, 1) infinite;
+      pointer-events: none;
+      will-change: transform, opacity;
+      opacity: 0
+    }
+
+    .pulse::after {
+      animation-delay: 2s
+    }
+
+    @keyframes rip {
+      0% {
+        transform: scale(1);
+        opacity: .8
+      }
+
+      100% {
+        transform: scale(2.2);
+        opacity: 0
+      }
+    }
+
+    /* layouts: scattered windows snap into the saved layout with a little overshoot */
+    .snap i {
+      position: relative;
+      overflow: hidden;
+      min-width: 0;
+      min-height: 0
+    }
+
+    .snap i::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, .12);
+      background: radial-gradient(circle at 8px 7px, rgba(255, 255, 255, .4) 1.5px, transparent 2px), radial-gradient(circle at 16px 7px, rgba(255, 255, 255, .22) 1.5px, transparent 2px), rgba(255, 255, 255, .03)
+    }
+
+    @keyframes relayout {
+
+      0%,
+      8% {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        animation-timing-function: cubic-bezier(.65, 0, .25, 1)
+      }
+
+      30%,
+      42% {
+        grid-template-columns: 1.9fr 1fr;
+        grid-template-rows: 1.6fr 1fr;
+        animation-timing-function: cubic-bezier(.65, 0, .25, 1)
+      }
+
+      64%,
+      76% {
+        grid-template-columns: 1fr 1.9fr;
+        grid-template-rows: 1fr 1.6fr;
+        animation-timing-function: cubic-bezier(.65, 0, .25, 1)
+      }
+
+      100% {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr
+      }
+    }
+
+    .card.off .viz,
+    .card.off .viz *,
+    .card.off .viz::before,
+    .card.off .viz::after,
+    .card.off .viz *::before,
+    .card.off .viz *::after {
+      animation-play-state: paused !important
+    }
+
+    /* scroll animations: scroll-linked. --rv runs 0→1 as the element travels up the viewport, so it always matches where you are */
+    .js .rv {
+      opacity: var(--rv, 0);
+      transform: translate3d(0, calc((1 - var(--rv, 0))*28px), 0)
+    }
+
+    .js .rv-card {
+      transform: translate3d(0, calc((1 - var(--rv, 0))*44px), 0) scale(calc(.97 + var(--rv, 0)*.03))
+    }
+
+    .js .rv-card .viz {
+      transform: scale(calc(1.12 - var(--rv, 0)*.12))
+    }
+
+    .js .rv-card .txt {
+      opacity: clamp(0, calc((var(--rv, 0) - .35)/.65), 1);
+      transform: translate3d(0, calc((1 - var(--rv, 0))*12px), 0)
+    }
+
+    .js .rv-tilt {
+      transform: perspective(900px) rotateX(calc((1 - var(--rv, 0))*12deg)) translate3d(0, calc((1 - var(--rv, 0))*36px), 0);
+      transform-origin: 50% 0
+    }
+
+    .js .spec.rv b {
+      clip-path: inset(0 calc((1 - clamp(0, calc((var(--rv, 0) - .25)/.75), 1))*100%) 0 0)
+    }
+
+    .copy,
+    .node {
+      translate: 0 calc(var(--p, 0)*-70px);
+      opacity: calc(1 - var(--p, 0)*1.3)
+    }
+
+    .node {
+      translate: 0 calc(var(--p, 0)*-120px)
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      .js .rv {
+        opacity: 1 !important;
+        transform: none !important
+      }
+
+      .js .spec.rv b {
+        clip-path: none !important
+      }
+
+      .js .rv-card .viz,
+      .js .rv-card .txt {
+        opacity: 1 !important;
+        transform: none !important
+      }
+
+      .copy,
+      .node {
+        translate: none;
+        opacity: 1
+      }
+    }
+
+    /* specs */
+    .specs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      margin-top: 50px;
+      border-top: 1px solid var(--line)
+    }
+
+    .spec {
+      padding: 34px 26px 0 0;
+      margin-right: 26px;
+      border-right: 1px solid var(--line)
+    }
+
+    .spec:last-child {
+      border: 0;
+      margin: 0
+    }
+
+    .spec b {
+      display: block;
+      font-size: clamp(28px, 3.4vw, 44px);
+      font-weight: 500;
+      letter-spacing: -.045em;
+      line-height: 1.05;
+      margin: 12px 0 12px
+    }
+
+    .spec p {
+      font-size: 13.5px;
+      color: #8f8f8f
+    }
+
+    /* pricing */
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 46px;
+      align-items: stretch
+    }
+
+    .plan {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #222;
+      border-radius: 22px;
+      background: var(--glass), #0e0e0e;
+      box-shadow: none;
+      padding: 30px
+    }
+
+    .plan h3 {
+      font-size: 15px;
+      font-weight: 500;
+      color: #aaa
+    }
+
+    .price {
+      font-size: 56px;
+      font-weight: 500;
+      letter-spacing: -.05em;
+      margin: 14px 0 4px
+    }
+
+    .price small {
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 0
+    }
+
+    .plan>p {
+      font-size: 13.5px;
+      color: #8f8f8f;
+      margin-bottom: 22px
+    }
+
+    .plan ul {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      gap: 11px;
+      font-size: 14px;
+      flex: 1;
+      margin-bottom: 28px;
+      color: #cfcfcf
+    }
+
+    .plan li::before {
+      content: "✓";
+      margin-right: 10px;
+      color: #fff
+    }
+
+    .plan .btn {
+      width: 100%
+    }
+
+    .plan.hot {
+      background: #ececec;
+      color: #0b0b0b;
+      border-color: #fff;
+      box-shadow: none
+    }
+
+    .plan.hot h3,
+    .plan.hot>p,
+    .plan.hot .price small {
+      color: #555
+    }
+
+    .plan.hot ul {
+      color: #222
+    }
+
+    .plan.hot li::before {
+      color: #000
+    }
+
+    .plan.hot .btn {
+      background: #0b0b0b;
+      color: #f1f1f1;
+      border-color: #0b0b0b
+    }
+
+    /* faq */
+    .faq {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 60px;
+      align-items: start
+    }
+
+    details {
+      border: 1px solid #222;
+      border-radius: 16px;
+      background: var(--glass), #0e0e0e;
+      margin-bottom: 10px;
+      transition: .2s
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 22px 24px;
+      font-weight: 500;
+      font-size: 16px;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px
+    }
+
+    summary::after {
+      content: "+";
+      font-size: 20px;
+      line-height: 1;
+      color: var(--muted)
+    }
+
+    details[open] {
+      border-color: #3a3a3a;
+      background: linear-gradient(160deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .03) 60%), #121212
+    }
+
+    details[open] summary::after {
+      content: "–"
+    }
+
+    details p {
+      padding: 0 24px 24px;
+      color: #9a9a9a;
+      font-size: 14.5px;
+      max-width: 38em
+    }
+
+    /* footer */
+    .cta2 {
+      margin-top: 130px;
+      text-align: center
+    }
+
+    .cta2 h2 {
+      margin: 0 auto 26px;
+      max-width: 9em
+    }
+
+    .cta2 p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 18px
+    }
+
+    .links {
+      display: flex;
+      gap: 26px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 90px 0 0;
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    .links a:hover {
+      color: #fff
+    }
+
+    .word {
+      font-size: clamp(70px, 21vw, 290px);
+      font-weight: 800;
+      letter-spacing: -.06em;
+      line-height: .8;
+      text-align: center;
+      height: .52em;
+      overflow: hidden;
+      margin-top: 30px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 85%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      user-select: none
+    }
+
+    @media(max-width:900px) {
+
+      .pill,
+      .node {
+        display: none
+      }
+
+      .top .r a:first-child:not(.in) {
+        display: none
+      }
+
+      .top .r a.in .nm {
+        display: none
+      }
+
+      .top .r a.in {
+        padding: 3px
+      }
+
+      .stage {
+        min-height: 660px
+      }
+
+      .bento,
+      .plans,
+      .faq {
+        grid-template-columns: 1fr
+      }
+
+      .s4,
+      .s2,
+      .s3 {
+        grid-column: auto
+      }
+
+      .specs {
+        grid-template-columns: 1fr 1fr
+      }
+
+      .spec {
+        border-right: 0;
+        margin: 0;
+        padding-bottom: 26px
+      }
+
+      .faq {
+        gap: 10px
+      }
+
+      section {
+        padding-top: 84px
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important
+      }
+
+      .toast .chip {
+        opacity: 1 !important
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div class="wrap">
-<div class="stage" id="top">
-  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
-  <div class="streaks" id="streaks"></div>
-  <div class="bfade"></div>
+  <div class="wrap">
+    <div class="stage" id="top">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+      <div class="blob b3"></div>
+      <div class="streaks" id="streaks"></div>
+      <div class="bfade"></div>
 
-  <div class="top">
-    <a class="logo" href="#top">BloxMulti</a>
-    <nav class="pill"><a href="#features">Features</a><a href="#specs">Specs</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><a href="support.html">Support</a></nav>
-    <div class="r"><a href="dashboard.html">Sign In</a><a class="btn w" href="https://downloads.noxith.com/download">Download</a></div>
-  </div>
+      <div class="top">
+        <a class="logo" href="#top">BloxMulti</a>
+        <nav class="pill"><a href="#features">Features</a><a href="#specs">Specs</a><a href="#pricing">Pricing</a><a
+            href="#faq">FAQ</a><a href="support.html">Support</a></nav>
+        <div class="r"><a href="dashboard.html" id="navAuth">Sign In</a><a class="btn w"
+            href="https://downloads.noxith.com/download">Download</a></div>
+      </div>
 
-  <div class="node n1"><div>Mutex unlock<small>Win32 handles</small></div></div>
-  <div class="node n2"><div>DPAPI encryption<small>Local only</small></div></div>
-  <div class="node n3 rt"><div>Place ID launch<small>Job ID · private servers</small></div></div>
-  <div class="node n4 rt"><div>Discord webhooks<small>Premium</small></div></div>
+      <div class="node n1">
+        <div>Mutex unlock<small>Win32 handles</small></div>
+      </div>
+      <div class="node n2">
+        <div>DPAPI encryption<small>Local only</small></div>
+      </div>
+      <div class="node n3 rt">
+        <div>Place ID launch<small>Job ID · private servers</small></div>
+      </div>
+      <div class="node n4 rt">
+        <div>Discord webhooks<small>Premium</small></div>
+      </div>
 
-  <div class="copy">
-    <h1>Every Roblox account, <span>at once.</span></h1>
-    <p>The lightweight, secure alternative to classic Roblox RAM. Launch and manage multiple accounts side by side on Windows.</p>
-    <div class="cta">
-      <a class="btn" href="dashboard.html">Open Dashboard ↗</a>
-      <a class="btn w" href="https://downloads.noxith.com/download">Download BloxMulti</a>
+      <div class="copy">
+        <h1>Every Roblox account, <span>at once.</span></h1>
+        <p>The lightweight, secure alternative to classic Roblox RAM. Launch and manage multiple accounts side by side
+          on Windows.</p>
+        <div class="cta">
+          <a class="btn" href="dashboard.html">Open Dashboard ↗</a>
+          <a class="btn w" href="https://downloads.noxith.com/download">Download BloxMulti</a>
+        </div>
+      </div>
+
+      <div class="mq">
+        <div class="track" id="track">
+          <span>Multiple Roblox</span><span>DPAPI encryption</span><span>Place ID launcher</span><span>Online
+            friends</span><span>FPS caps</span><span>Launch logs</span><span>Discord webhooks</span><span>Window
+            layouts</span><span>Remote view</span>
+        </div>
+      </div>
+    </div>
+
+    <section id="features">
+      <div class="head"><span class="eyebrow">Features</span>
+        <h2 class="fade">Built to run more than one client.</h2>
+        <p class="sub">Everything you need to launch, organize and watch multiple Roblox accounts at the same time.</p>
+      </div>
+      <div class="bento">
+        <div class="card s4">
+          <div class="viz fan">
+            <div class="chip" style="--y:10;--r:-5"><span>Account 1</span><small>Roblox · running</small></div>
+            <div class="chip" style="--y:-6;--r:-1"><span>Account 2</span><small>Roblox · running</small></div>
+            <div class="chip" style="--y:-6;--r:2"><span>Account 3</span><small>Roblox · running</small></div>
+            <div class="chip" style="--y:10;--r:6"><span>Account 4</span><small>Roblox · running</small></div>
+          </div>
+          <div class="txt">
+            <h3>Multiple Roblox engine</h3>
+            <p>Neutralizes the singleton mutex and event handles on launch, so extra clients open without the
+              single-instance disconnect error.</p>
+          </div>
+        </div>
+
+        <div class="card s2">
+          <div class="viz">
+            <div class="ring"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff"
+                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="11" width="16" height="10" rx="2" />
+                <path class="shk" d="M8 11V7a4 4 0 0 1 8 0v4" />
+              </svg></div>
+          </div>
+          <div class="txt">
+            <h3>Encrypted cookies</h3>
+            <p>Cookies are encrypted with Windows DPAPI, tied to your Windows user, and stored locally on your PC.</p>
+          </div>
+        </div>
+
+        <div class="card s2">
+          <div class="viz launch" style="flex-direction:column">
+            <div class="chip">Place ID <span class="tw"><span class="type">133732935655930</span></span></div>
+            <div class="chip">Job ID / private server code <span class="go">↗</span></div>
+          </div>
+          <div class="txt">
+            <h3>Launcher &amp; friends</h3>
+            <p>Launch any Place ID, job ID or private server, pin games and join online friends.</p>
+          </div>
+        </div>
+
+        <div class="card s2">
+          <div class="viz fps">
+            <div class="fpsg">
+              <div class="lay dim">
+                <div class="tr"><svg width="520" height="120" viewBox="0 0 520 120" fill="none">
+                    <defs>
+                      <linearGradient id="fg0" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#fff" stop-opacity=".28" />
+                        <stop offset="1" stop-color="#fff" stop-opacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M0,74C6.7,71.7 13.3,61.0 20,60C26.7,59.0 33.3,72.7 40,68C46.7,63.3 53.3,35.7 60,32C66.7,28.3 73.3,47.7 80,46C86.7,44.3 93.3,21.0 100,22C106.7,23.0 113.3,49.7 120,52C126.7,54.3 133.3,32.7 140,36C146.7,39.3 153.3,69.0 160,72C166.7,75.0 173.3,61.3 180,54C186.7,46.7 193.3,26.7 200,28C206.7,29.3 213.3,54.3 220,62C226.7,69.7 233.3,72.0 240,74C246.7,76.0 253.3,76.3 260,74C266.7,71.7 273.3,61.0 280,60C286.7,59.0 293.3,72.7 300,68C306.7,63.3 313.3,35.7 320,32C326.7,28.3 333.3,47.7 340,46C346.7,44.3 353.3,21.0 360,22C366.7,23.0 373.3,49.7 380,52C386.7,54.3 393.3,32.7 400,36C406.7,39.3 413.3,69.0 420,72C426.7,75.0 433.3,61.3 440,54C446.7,46.7 453.3,26.7 460,28C466.7,29.3 473.3,54.3 480,62C486.7,69.7 493.3,72.0 500,74C506.7,76.0 513.3,76.3 520,74L520,120L0,120Z"
+                      fill="url(#fg0)" />
+                    <path
+                      d="M0,74C6.7,71.7 13.3,61.0 20,60C26.7,59.0 33.3,72.7 40,68C46.7,63.3 53.3,35.7 60,32C66.7,28.3 73.3,47.7 80,46C86.7,44.3 93.3,21.0 100,22C106.7,23.0 113.3,49.7 120,52C126.7,54.3 133.3,32.7 140,36C146.7,39.3 153.3,69.0 160,72C166.7,75.0 173.3,61.3 180,54C186.7,46.7 193.3,26.7 200,28C206.7,29.3 213.3,54.3 220,62C226.7,69.7 233.3,72.0 240,74C246.7,76.0 253.3,76.3 260,74C266.7,71.7 273.3,61.0 280,60C286.7,59.0 293.3,72.7 300,68C306.7,63.3 313.3,35.7 320,32C326.7,28.3 333.3,47.7 340,46C346.7,44.3 353.3,21.0 360,22C366.7,23.0 373.3,49.7 380,52C386.7,54.3 393.3,32.7 400,36C406.7,39.3 413.3,69.0 420,72C426.7,75.0 433.3,61.3 440,54C446.7,46.7 453.3,26.7 460,28C466.7,29.3 473.3,54.3 480,62C486.7,69.7 493.3,72.0 500,74C506.7,76.0 513.3,76.3 520,74"
+                      stroke="#fff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" />
+                  </svg></div>
+              </div>
+              <div class="lay hi">
+                <div class="tr"><svg width="520" height="120" viewBox="0 0 520 120" fill="none">
+                    <defs>
+                      <linearGradient id="fg1" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#fff" stop-opacity=".28" />
+                        <stop offset="1" stop-color="#fff" stop-opacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M0,74C6.7,71.7 13.3,61.0 20,60C26.7,59.0 33.3,72.7 40,68C46.7,63.3 53.3,35.7 60,32C66.7,28.3 73.3,47.7 80,46C86.7,44.3 93.3,21.0 100,22C106.7,23.0 113.3,49.7 120,52C126.7,54.3 133.3,32.7 140,36C146.7,39.3 153.3,69.0 160,72C166.7,75.0 173.3,61.3 180,54C186.7,46.7 193.3,26.7 200,28C206.7,29.3 213.3,54.3 220,62C226.7,69.7 233.3,72.0 240,74C246.7,76.0 253.3,76.3 260,74C266.7,71.7 273.3,61.0 280,60C286.7,59.0 293.3,72.7 300,68C306.7,63.3 313.3,35.7 320,32C326.7,28.3 333.3,47.7 340,46C346.7,44.3 353.3,21.0 360,22C366.7,23.0 373.3,49.7 380,52C386.7,54.3 393.3,32.7 400,36C406.7,39.3 413.3,69.0 420,72C426.7,75.0 433.3,61.3 440,54C446.7,46.7 453.3,26.7 460,28C466.7,29.3 473.3,54.3 480,62C486.7,69.7 493.3,72.0 500,74C506.7,76.0 513.3,76.3 520,74L520,120L0,120Z"
+                      fill="url(#fg1)" />
+                    <path
+                      d="M0,74C6.7,71.7 13.3,61.0 20,60C26.7,59.0 33.3,72.7 40,68C46.7,63.3 53.3,35.7 60,32C66.7,28.3 73.3,47.7 80,46C86.7,44.3 93.3,21.0 100,22C106.7,23.0 113.3,49.7 120,52C126.7,54.3 133.3,32.7 140,36C146.7,39.3 153.3,69.0 160,72C166.7,75.0 173.3,61.3 180,54C186.7,46.7 193.3,26.7 200,28C206.7,29.3 213.3,54.3 220,62C226.7,69.7 233.3,72.0 240,74C246.7,76.0 253.3,76.3 260,74C266.7,71.7 273.3,61.0 280,60C286.7,59.0 293.3,72.7 300,68C306.7,63.3 313.3,35.7 320,32C326.7,28.3 333.3,47.7 340,46C346.7,44.3 353.3,21.0 360,22C366.7,23.0 373.3,49.7 380,52C386.7,54.3 393.3,32.7 400,36C406.7,39.3 413.3,69.0 420,72C426.7,75.0 433.3,61.3 440,54C446.7,46.7 453.3,26.7 460,28C466.7,29.3 473.3,54.3 480,62C486.7,69.7 493.3,72.0 500,74C506.7,76.0 513.3,76.3 520,74"
+                      stroke="#fff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" />
+                  </svg></div>
+              </div>
+              <div class="capline"><span>CAP 240</span></div>
+            </div>
+          </div>
+          <div class="txt">
+            <h3>FPS control</h3>
+            <p>Set a global framerate cap, or give each account its own.</p>
+          </div>
+        </div>
+
+        <div class="card s2">
+          <div class="viz toast">
+            <div class="chip hk a"><b></b>Game launched</div>
+            <div class="chip hk r"><b></b>Account disconnected</div>
+          </div>
+          <div class="txt">
+            <h3>Discord webhooks <span class="tag">PREMIUM</span></h3>
+            <p>Alerts for disconnects, teleports and game launches, with a screenshot on disconnect.</p>
+          </div>
+        </div>
+
+        <div class="card s3">
+          <div class="viz">
+            <div class="p2p">
+              <div class="nd"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d6d6d6"
+                  stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="12" rx="2" />
+                  <path d="M8 20h8M12 16v4" />
+                </svg></div>
+              <div class="ln"><i></i><i></i></div>
+              <div class="pulse"><svg width="20" height="20" viewBox="0 0 24 24" fill="#0b0b0b">
+                  <polygon points="7 4 20 12 7 20" />
+                </svg></div>
+              <div class="ln"><i></i><i></i></div>
+              <div class="nd"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d6d6d6"
+                  stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="7" y="3" width="10" height="18" rx="2" />
+                  <path d="M11 18h2" />
+                </svg></div>
+            </div>
+          </div>
+          <div class="txt">
+            <h3>P2P remote view <span class="tag">PREMIUM</span></h3>
+            <p>Peer-to-peer WebRTC streaming to any browser, phone or tablet, with no relay server.</p>
+          </div>
+        </div>
+
+        <div class="card s3">
+          <div class="viz">
+            <div class="snap"><i></i><i></i><i></i></div>
+          </div>
+          <div class="txt">
+            <h3>Window layouts <span class="tag">PREMIUM</span></h3>
+            <p>Save a layout for a folder of accounts. Launch the folder and every client opens in its spot.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="specs">
+      <div class="head"><span class="eyebrow">Specifications</span>
+        <h2 class="fade">Small, local and safe by design.</h2>
+      </div>
+      <div class="specs">
+        <div class="spec"><span class="eyebrow">Binary size</span><b>~1.4 MB</b>
+          <p>Zero-dependency C++ backend with an Edge WebView2 frontend.</p>
+        </div>
+        <div class="spec"><span class="eyebrow">Engine safety</span><b>0% injection</b>
+          <p>No DLL injection or memory changes. External OS mutex control only.</p>
+        </div>
+        <div class="spec"><span class="eyebrow">Encryption</span><b>Windows DPAPI</b>
+          <p>Encrypted locally with keys tied to your Windows user profile.</p>
+        </div>
+        <div class="spec"><span class="eyebrow">Supports</span><b>Windows 10 &amp; 11</b>
+          <p>64-bit Windows installs and the native Roblox client.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <div class="head"><span class="eyebrow">Pricing</span>
+        <h2 class="fade">Free to start. Pay only for the extras.</h2>
+      </div>
+      <div class="plans">
+        <div class="plan">
+          <h3>Standard</h3>
+          <div class="price">$0</div>
+          <p>Free forever for casual multi-accounting.</p>
+          <ul>
+            <li>Unlimited simultaneous accounts</li>
+            <li>Global framerate cap</li>
+            <li>Place ID &amp; job ID launching</li>
+            <li>Saved servers &amp; bookmarks</li>
+            <li>Local DPAPI encryption</li>
+          </ul>
+          <a class="btn" href="https://downloads.noxith.com/download">Download free</a>
+        </div>
+        <div class="plan hot">
+          <h3>Monthly Premium</h3>
+          <div class="price">$3<small> / mo</small></div>
+          <p>The full automation suite. Cancel anytime.</p>
+          <ul>
+            <li>Everything in Standard</li>
+            <li>Discord webhook alerts &amp; screenshots</li>
+            <li>Multi-monitor window layouts</li>
+            <li>Per-account FPS limits</li>
+            <li>Remote WebRTC streaming</li>
+            <li>Live CPU / RAM / GPU telemetry</li>
+          </ul>
+          <a class="btn" href="dashboard.html">Subscribe ($3/mo)</a>
+        </div>
+        <div class="plan">
+          <h3>Lifetime</h3>
+          <div class="price">$15<small> once</small></div>
+          <p>Pay once, keep every future update.</p>
+          <ul>
+            <li>All Premium features unlocked</li>
+            <li>One-time payment, no renewals</li>
+            <li>License linked to your account</li>
+          </ul>
+          <a class="btn" href="dashboard.html">Get Lifetime ($15)</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="faq">
+        <div class="head"><span class="eyebrow">FAQ</span>
+          <h2 class="fade">Common questions.</h2>
+        </div>
+        <div>
+          <details open>
+            <summary>How does BloxMulti compare to Roblox RAM?</summary>
+            <p>BloxMulti is a modern Roblox Account Manager and launcher for Windows. Instead of plain-text storage and
+              manual mutex handling, it gives you a clean interface, DPAPI token encryption, automatic mutex unlocks and
+              per-account FPS limits.</p>
+          </details>
+          <details>
+            <summary>How do I play multiple Roblox accounts on one PC?</summary>
+            <p>Roblox uses a singleton mutex to block extra clients. BloxMulti releases that handle before each new
+              window launches, so independent accounts run side by side.</p>
+          </details>
+          <details>
+            <summary>Can I launch specific Place IDs and servers?</summary>
+            <p>Yes. Launch any Place ID, job ID or private server link with the selected account, and save favorites for
+              later.</p>
+          </details>
+          <details>
+            <summary>Is it safe? Can I get banned?</summary>
+            <p>BloxMulti doesn't inject code into Roblox or modify game memory. It works at the Windows level by
+              managing process handles and config files externally.</p>
+          </details>
+          <details>
+            <summary>Where are my logins stored?</summary>
+            <p>Only on your PC. Session tokens are encrypted with the Windows Data Protection API and tied to your user
+              profile.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <div class="cta2">
+      <h2 class="fade">Run them all.</h2>
+      <a class="btn w" href="https://downloads.noxith.com/download">Download BloxMulti v1.4.4</a>
+      <p>Windows 10 / 11 · Portable · SHA-256 verified · Clean VirusTotal scan</p>
+      <div class="links"><a href="https://github.com/WaveBound/BloxMulti">GitHub</a><a
+          href="https://discord.gg/ju6ANNecQg">Discord</a><a href="support.html">Support</a><a
+          href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a></div>
+      <div class="word" aria-hidden="true">BloxMulti</div>
     </div>
   </div>
 
-  <div class="mq"><div class="track" id="track">
-    <span>Multiple Roblox</span><span>DPAPI encryption</span><span>Place ID launcher</span><span>Online friends</span><span>FPS caps</span><span>Launch logs</span><span>Discord webhooks</span><span>Window layouts</span><span>Remote view</span>
-  </div></div>
-</div>
+  <script>
+    const t = document.getElementById('track'); const base = t.innerHTML;
+    function buildTrack() {
+      t.innerHTML = base; const w = t.scrollWidth; t.style.setProperty('--w', w + 'px');
+      let n = 0; while (t.scrollWidth < window.innerWidth + w && n < 20) { t.insertAdjacentHTML('beforeend', base); n++ }
+    }
+    const io = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('off', !e.isIntersecting)), { rootMargin: '80px' }); document.querySelectorAll('.card').forEach(c => io.observe(c));
+    buildTrack(); let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(buildTrack, 200) });
+    const s = document.getElementById('streaks');
+    for (let i = 0; i < 7; i++) { const e = document.createElement('i'); e.style.left = (i * 38 + Math.random() * 14) + 'px'; e.style.animationDelay = (-Math.random() * 4.5) + 's'; e.style.animationDuration = (3.5 + Math.random() * 3) + 's'; e.style.opacity = .4 + Math.random() * .6; s.appendChild(e) }
 
-<section id="features">
-  <div class="head"><span class="eyebrow">Features</span>
-  <h2 class="fade">Built to run more than one client.</h2>
-  <p class="sub">Everything you need to launch, organize and watch multiple Roblox accounts at the same time.</p></div>
-  <div class="bento">
-    <div class="card s4"><div class="viz fan">
-      <div class="chip" style="--y:10;--r:-5"><span>Account 1</span><small>Roblox · running</small></div>
-      <div class="chip" style="--y:-6;--r:-1"><span>Account 2</span><small>Roblox · running</small></div>
-      <div class="chip" style="--y:-6;--r:2"><span>Account 3</span><small>Roblox · running</small></div>
-      <div class="chip" style="--y:10;--r:6"><span>Account 4</span><small>Roblox · running</small></div>
-    </div><div class="txt"><h3>Multiple Roblox engine</h3><p>Neutralizes the singleton mutex and event handles on launch, so extra clients open without the single-instance disconnect error.</p></div></div>
+    (function () {
+      const rv = [];
+      function add(sel, cls, d) { document.querySelectorAll(sel).forEach((el, i) => { el.classList.add('rv', cls); rv.push({ el, d: d(i), cur: -1 }) }) }
+      add('.head .eyebrow', 'rv-up', () => 0); add('.head h2', 'rv-up', () => .5); add('.head .sub', 'rv-up', () => 1);
+      add('.bento .card', 'rv-card', i => i % 3); add('.spec', 'rv-up', i => i); add('.plan', 'rv-tilt', i => i);
+      add('.faq details', 'rv-up', i => i * .6); add('.cta2 > h2', 'rv-up', () => 0);
+      add('.cta2 > a, .cta2 > p, .cta2 > .links', 'rv-up', i => .5 + i * .5); add('.cta2 .word', 'rv-up', () => 2);
+      const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const clamp = v => v < 0 ? 0 : v > 1 ? 1 : v;
+      let busy = false;
+      function frame() {
+        busy = false; const vh = innerHeight; let more = false;
+        for (const r of rv) {
+          const top = r.el.getBoundingClientRect().top;
+          // starts rising near the bottom edge, finished by about 3/4 of the way up; small per-item offset for a gentle stagger
+          const start = vh * 1.0 - r.d * vh * .03, span = vh * .24;
+          const target = calm ? 1 : clamp((start - top) / span);
+          if (r.cur < 0) r.cur = target;               // first pass: snap, no catch-up
+          else { const diff = target - r.cur; r.cur = Math.abs(diff) < .002 ? target : r.cur + diff * .28; if (r.cur !== target) more = true }
+          if (r.cur !== r.last) { r.el.style.setProperty('--rv', r.cur.toFixed(3)); r.last = r.cur }
+        }
+        if (more) kick();
+      }
+      function kick() { if (!busy) { busy = true; requestAnimationFrame(frame) } }
+      addEventListener('scroll', kick, { passive: true }); addEventListener('resize', kick); frame();
+      const st = document.querySelector('.stage'); let tick = false;
+      function upd() { tick = false; const h = st.offsetHeight || 1; const p = Math.min(1, Math.max(0, scrollY / (h * .6))); st.style.setProperty('--p', p.toFixed(3)) }
+      addEventListener('scroll', () => { if (!tick) { tick = true; requestAnimationFrame(upd) } }, { passive: true }); upd();
+    })();
 
-    <div class="card s2"><div class="viz"><div class="ring"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path class="shk" d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div></div>
-    <div class="txt"><h3>Encrypted cookies</h3><p>Cookies are encrypted with Windows DPAPI, tied to your Windows user, and stored locally on your PC.</p></div></div>
-
-    <div class="card s2"><div class="viz launch" style="flex-direction:column"><div class="chip">Place ID <span class="tw"><span class="type">133732935655930</span></span></div><div class="chip">Job ID / private server code <span class="go">↗</span></div></div>
-    <div class="txt"><h3>Launcher &amp; friends</h3><p>Launch any Place ID, job ID or private server, pin games and join online friends.</p></div></div>
-
-    <div class="card s2"><div class="viz fps"><div class="fpsg"><div class="lay dim"><div class="tr"><svg width="520" height="120" viewBox="0 0 520 120" fill="none"><defs><linearGradient id="fg0" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><path d="M0,74C6.7,71.7 13.3,61.0 20,60C26.7,59.0 33.3,72.7 40,68C46.7,63.3 53.3,35.7 60,32C66.7,28.3 73.3,47.7 80,46C86.7,44.3 93.3,21.0 100,22C106.7,23.0 113.3,49.7 120,52C126.7,54.3 133.3,32.7 140,36C146.7,39.3 153.3,69.0 160,72C166.7,75.0 173.3,61.3 180,54C186.7,46.7 193.3,26.7 200,28C206.7,29.3 213.3,54.3 220,62C226.7,69.7 233.3,72.0 240,74C246.7,76.0 253.3,76.3 260,74C266.7,71.7 273.3,61.0 280,60C286.7,59.0 293.3,72.7 300,68C306.7,63.3 313.3,35.7 320,32C326.7,28.3 333.3,47.7 340,46C346.7,44.3 353.3,21.0 360,22C366.7,23.0 373.3,49.7 380,52C386.7,54.3 393.3,32.7 400,36C406.7,39.3 413.3,69.0 420,72C426.7,75.0 433.3,61.3 440,54C446.7,46.7 453.3,26.7 460,28C466.7,29.3 473.3,54.3 480,62C486.7,69.7 493.3,72.0 500,74C506.7,76.0 513.3,76.3 520,74L520,120L0,120Z" fill="url(#fg0)"/><path d="M0,74C6.7,71.7 13.3,61.0 20,60C26.7,59.0 33.3,72.7 40,68C46.7,63.3 53.3,35.7 60,32C66.7,28.3 73.3,47.7 80,46C86.7,44.3 93.3,21.0 100,22C106.7,23.0 113.3,49.7 120,52C126.7,54.3 133.3,32.7 140,36C146.7,39.3 153.3,69.0 160,72C166.7,75.0 173.3,61.3 180,54C186.7,46.7 193.3,26.7 200,28C206.7,29.3 213.3,54.3 220,62C226.7,69.7 233.3,72.0 240,74C246.7,76.0 253.3,76.3 260,74C266.7,71.7 273.3,61.0 280,60C286.7,59.0 293.3,72.7 300,68C306.7,63.3 313.3,35.7 320,32C326.7,28.3 333.3,47.7 340,46C346.7,44.3 353.3,21.0 360,22C366.7,23.0 373.3,49.7 380,52C386.7,54.3 393.3,32.7 400,36C406.7,39.3 413.3,69.0 420,72C426.7,75.0 433.3,61.3 440,54C446.7,46.7 453.3,26.7 460,28C466.7,29.3 473.3,54.3 480,62C486.7,69.7 493.3,72.0 500,74C506.7,76.0 513.3,76.3 520,74" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg></div></div><div class="lay hi"><div class="tr"><svg width="520" height="120" viewBox="0 0 520 120" fill="none"><defs><linearGradient id="fg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><path d="M0,74C6.7,71.7 13.3,61.0 20,60C26.7,59.0 33.3,72.7 40,68C46.7,63.3 53.3,35.7 60,32C66.7,28.3 73.3,47.7 80,46C86.7,44.3 93.3,21.0 100,22C106.7,23.0 113.3,49.7 120,52C126.7,54.3 133.3,32.7 140,36C146.7,39.3 153.3,69.0 160,72C166.7,75.0 173.3,61.3 180,54C186.7,46.7 193.3,26.7 200,28C206.7,29.3 213.3,54.3 220,62C226.7,69.7 233.3,72.0 240,74C246.7,76.0 253.3,76.3 260,74C266.7,71.7 273.3,61.0 280,60C286.7,59.0 293.3,72.7 300,68C306.7,63.3 313.3,35.7 320,32C326.7,28.3 333.3,47.7 340,46C346.7,44.3 353.3,21.0 360,22C366.7,23.0 373.3,49.7 380,52C386.7,54.3 393.3,32.7 400,36C406.7,39.3 413.3,69.0 420,72C426.7,75.0 433.3,61.3 440,54C446.7,46.7 453.3,26.7 460,28C466.7,29.3 473.3,54.3 480,62C486.7,69.7 493.3,72.0 500,74C506.7,76.0 513.3,76.3 520,74L520,120L0,120Z" fill="url(#fg1)"/><path d="M0,74C6.7,71.7 13.3,61.0 20,60C26.7,59.0 33.3,72.7 40,68C46.7,63.3 53.3,35.7 60,32C66.7,28.3 73.3,47.7 80,46C86.7,44.3 93.3,21.0 100,22C106.7,23.0 113.3,49.7 120,52C126.7,54.3 133.3,32.7 140,36C146.7,39.3 153.3,69.0 160,72C166.7,75.0 173.3,61.3 180,54C186.7,46.7 193.3,26.7 200,28C206.7,29.3 213.3,54.3 220,62C226.7,69.7 233.3,72.0 240,74C246.7,76.0 253.3,76.3 260,74C266.7,71.7 273.3,61.0 280,60C286.7,59.0 293.3,72.7 300,68C306.7,63.3 313.3,35.7 320,32C326.7,28.3 333.3,47.7 340,46C346.7,44.3 353.3,21.0 360,22C366.7,23.0 373.3,49.7 380,52C386.7,54.3 393.3,32.7 400,36C406.7,39.3 413.3,69.0 420,72C426.7,75.0 433.3,61.3 440,54C446.7,46.7 453.3,26.7 460,28C466.7,29.3 473.3,54.3 480,62C486.7,69.7 493.3,72.0 500,74C506.7,76.0 513.3,76.3 520,74" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg></div></div><div class="capline"><span>CAP 240</span></div></div></div>
-    <div class="txt"><h3>FPS control</h3><p>Set a global framerate cap, or give each account its own.</p></div></div>
-
-    <div class="card s2"><div class="viz toast"><div class="chip hk a"><b></b>Game launched</div><div class="chip hk r"><b></b>Account disconnected</div></div>
-    <div class="txt"><h3>Discord webhooks <span class="tag">PREMIUM</span></h3><p>Alerts for disconnects, teleports and game launches, with a screenshot on disconnect.</p></div></div>
-
-    <div class="card s3"><div class="viz"><div class="p2p"><div class="nd"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d6d6d6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></div><div class="ln"><i></i><i></i></div><div class="pulse"><svg width="20" height="20" viewBox="0 0 24 24" fill="#0b0b0b"><polygon points="7 4 20 12 7 20"/></svg></div><div class="ln"><i></i><i></i></div><div class="nd"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d6d6d6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></svg></div></div></div>
-    <div class="txt"><h3>P2P remote view <span class="tag">PREMIUM</span></h3><p>Peer-to-peer WebRTC streaming to any browser, phone or tablet, with no relay server.</p></div></div>
-
-    <div class="card s3"><div class="viz"><div class="snap"><i></i><i></i><i></i></div></div>
-    <div class="txt"><h3>Window layouts <span class="tag">PREMIUM</span></h3><p>Save a layout for a folder of accounts. Launch the folder and every client opens in its spot.</p></div></div>
-  </div>
-</section>
-
-<section id="specs">
-  <div class="head"><span class="eyebrow">Specifications</span><h2 class="fade">Small, local and safe by design.</h2></div>
-  <div class="specs">
-    <div class="spec"><span class="eyebrow">Binary size</span><b>~1.4 MB</b><p>Zero-dependency C++ backend with an Edge WebView2 frontend.</p></div>
-    <div class="spec"><span class="eyebrow">Engine safety</span><b>0% injection</b><p>No DLL injection or memory changes. External OS mutex control only.</p></div>
-    <div class="spec"><span class="eyebrow">Encryption</span><b>Windows DPAPI</b><p>Encrypted locally with keys tied to your Windows user profile.</p></div>
-    <div class="spec"><span class="eyebrow">Supports</span><b>Windows 10 &amp; 11</b><p>64-bit Windows installs and the native Roblox client.</p></div>
-  </div>
-</section>
-
-<section id="pricing">
-  <div class="head"><span class="eyebrow">Pricing</span><h2 class="fade">Free to start. Pay only for the extras.</h2></div>
-  <div class="plans">
-    <div class="plan"><h3>Standard</h3><div class="price">$0</div><p>Free forever for casual multi-accounting.</p>
-      <ul><li>Unlimited simultaneous accounts</li><li>Global framerate cap</li><li>Place ID &amp; job ID launching</li><li>Saved servers &amp; bookmarks</li><li>Local DPAPI encryption</li></ul>
-      <a class="btn" href="https://downloads.noxith.com/download">Download free</a></div>
-    <div class="plan hot"><h3>Monthly Premium</h3><div class="price">$3<small> / mo</small></div><p>The full automation suite. Cancel anytime.</p>
-      <ul><li>Everything in Standard</li><li>Discord webhook alerts &amp; screenshots</li><li>Multi-monitor window layouts</li><li>Per-account FPS limits</li><li>Remote WebRTC streaming</li><li>Live CPU / RAM / GPU telemetry</li></ul>
-      <a class="btn" href="dashboard.html">Subscribe ($3/mo)</a></div>
-    <div class="plan"><h3>Lifetime</h3><div class="price">$15<small> once</small></div><p>Pay once, keep every future update.</p>
-      <ul><li>All Premium features unlocked</li><li>One-time payment, no renewals</li><li>License linked to your account</li></ul>
-      <a class="btn" href="dashboard.html">Get Lifetime ($15)</a></div>
-  </div>
-</section>
-
-<section id="faq">
-  <div class="faq">
-    <div class="head"><span class="eyebrow">FAQ</span><h2 class="fade">Common questions.</h2></div>
-    <div>
-      <details open><summary>How does BloxMulti compare to Roblox RAM?</summary><p>BloxMulti is a modern Roblox Account Manager and launcher for Windows. Instead of plain-text storage and manual mutex handling, it gives you a clean interface, DPAPI token encryption, automatic mutex unlocks and per-account FPS limits.</p></details>
-      <details><summary>How do I play multiple Roblox accounts on one PC?</summary><p>Roblox uses a singleton mutex to block extra clients. BloxMulti releases that handle before each new window launches, so independent accounts run side by side.</p></details>
-      <details><summary>Can I launch specific Place IDs and servers?</summary><p>Yes. Launch any Place ID, job ID or private server link with the selected account, and save favorites for later.</p></details>
-      <details><summary>Is it safe? Can I get banned?</summary><p>BloxMulti doesn't inject code into Roblox or modify game memory. It works at the Windows level by managing process handles and config files externally.</p></details>
-      <details><summary>Where are my logins stored?</summary><p>Only on your PC. Session tokens are encrypted with the Windows Data Protection API and tied to your user profile.</p></details>
-    </div>
-  </div>
-</section>
-
-<div class="cta2">
-  <h2 class="fade">Run them all.</h2>
-  <a class="btn w" href="https://downloads.noxith.com/download">Download BloxMulti v1.4.4</a>
-  <p>Windows 10 / 11 · Portable · SHA-256 verified · Clean VirusTotal scan</p>
-  <div class="links"><a href="https://github.com/WaveBound/BloxMulti">GitHub</a><a href="https://discord.gg/ju6ANNecQg">Discord</a><a href="support.html">Support</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a></div>
-  <div class="word" aria-hidden="true">BloxMulti</div>
-</div>
-</div>
-
-<script>
-const t=document.getElementById('track');const base=t.innerHTML;
-function buildTrack(){t.innerHTML=base;const w=t.scrollWidth;t.style.setProperty('--w',w+'px');
-let n=0;while(t.scrollWidth<window.innerWidth+w&&n<20){t.insertAdjacentHTML('beforeend',base);n++}}
-const io=new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('off',!e.isIntersecting)),{rootMargin:'80px'});document.querySelectorAll('.card').forEach(c=>io.observe(c));
-buildTrack();let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(buildTrack,200)});
-const s=document.getElementById('streaks');
-for(let i=0;i<7;i++){const e=document.createElement('i');e.style.left=(i*38+Math.random()*14)+'px';e.style.animationDelay=(-Math.random()*4.5)+'s';e.style.animationDuration=(3.5+Math.random()*3)+'s';e.style.opacity=.4+Math.random()*.6;s.appendChild(e)}
-
-(function(){
-const rv=[];
-function add(sel,cls,d){document.querySelectorAll(sel).forEach((el,i)=>{el.classList.add('rv',cls);rv.push({el,d:d(i),cur:-1})})}
-add('.head .eyebrow','rv-up',()=>0);add('.head h2','rv-up',()=>.5);add('.head .sub','rv-up',()=>1);
-add('.bento .card','rv-card',i=>i%3);add('.spec','rv-up',i=>i);add('.plan','rv-tilt',i=>i);
-add('.faq details','rv-up',i=>i*.6);add('.cta2 > h2','rv-up',()=>0);
-add('.cta2 > a, .cta2 > p, .cta2 > .links','rv-up',i=>.5+i*.5);add('.cta2 .word','rv-up',()=>2);
-const calm=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const clamp=v=>v<0?0:v>1?1:v;
-let busy=false;
-function frame(){
-  busy=false;const vh=innerHeight;let more=false;
-  for(const r of rv){
-    const top=r.el.getBoundingClientRect().top;
-    // starts rising near the bottom edge, finished by about 3/4 of the way up; small per-item offset for a gentle stagger
-    const start=vh*1.0-r.d*vh*.03,span=vh*.24;
-    const target=calm?1:clamp((start-top)/span);
-    if(r.cur<0)r.cur=target;               // first pass: snap, no catch-up
-    else{const diff=target-r.cur;r.cur=Math.abs(diff)<.002?target:r.cur+diff*.28;if(r.cur!==target)more=true}
-    if(r.cur!==r.last){r.el.style.setProperty('--rv',r.cur.toFixed(3));r.last=r.cur}
-  }
-  if(more)kick();
-}
-function kick(){if(!busy){busy=true;requestAnimationFrame(frame)}}
-addEventListener('scroll',kick,{passive:true});addEventListener('resize',kick);frame();
-const st=document.querySelector('.stage');let tick=false;
-function upd(){tick=false;const h=st.offsetHeight||1;const p=Math.min(1,Math.max(0,scrollY/(h*.6)));st.style.setProperty('--p',p.toFixed(3))}
-addEventListener('scroll',()=>{if(!tick){tick=true;requestAnimationFrame(upd)}},{passive:true});upd();
-})();
-
-</script>
+  </script>
+  <script>
+    (function () {
+      var HOST = "vsgyclwnbrlticquvcjs.supabase.co", KEY = "sb_publishable_-IfvzZudr3vpqkVaaMN6uQ_ycOcDOHn";
+      var el = document.getElementById("navAuth"); if (!el) return;
+      function get(k) { try { return localStorage.getItem(k) } catch (e) { return null } }
+      function set(k, v) { try { localStorage.setItem(k, v) } catch (e) { } }
+      var tok = get("sb_access_token") || get("bm_web_token"), ref = get("sb_refresh_token") || get("bm_web_refresh");
+      if (!tok && !ref) return;
+      function show(u) {
+        var m = u.user_metadata || {}, name = m.full_name || m.name || (u.email || "Account").split("@")[0];
+        el.className = "in"; el.href = "dashboard.html"; el.title = "Signed in as " + (u.email || name);
+        el.textContent = "";
+        var av = document.createElement("span"); av.className = "av";
+        if (m.avatar_url) { var im = new Image(); im.alt = ""; im.referrerPolicy = "no-referrer"; im.src = m.avatar_url; av.appendChild(im) } else av.textContent = name.charAt(0).toUpperCase();
+        var nm = document.createElement("span"); nm.className = "nm"; nm.textContent = name;
+        el.appendChild(av); el.appendChild(nm);
+      }
+      function user(t) { return fetch("https://" + HOST + "/auth/v1/user", { headers: { apikey: KEY, Authorization: "Bearer " + t } }).then(function (r) { if (!r.ok) throw 0; return r.json() }) }
+      function refresh() {
+        if (!ref) return Promise.reject();
+        return fetch("https://" + HOST + "/auth/v1/token?grant_type=refresh_token", { method: "POST", headers: { apikey: KEY, "Content-Type": "application/json" }, body: JSON.stringify({ refresh_token: ref }) })
+          .then(function (r) { if (!r.ok) throw 0; return r.json() })
+          .then(function (d) { if (!d.access_token) throw 0; set("sb_access_token", d.access_token); if (d.refresh_token) set("sb_refresh_token", d.refresh_token); return d.access_token });
+      }
+      (tok ? user(tok) : Promise.reject()).catch(function () { return refresh().then(user) }).then(show).catch(function () { });
+    })();
+  </script>
 </body>
+
 </html>
