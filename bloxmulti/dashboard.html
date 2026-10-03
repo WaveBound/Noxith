@@ -1650,6 +1650,34 @@
       background: #222;
     }
 
+    /* more visible side-card buttons */
+    .pricing-card:not(.featured) .btn-pricing {
+      background: rgba(255, 255, 255, .13);
+      border-color: rgba(255, 255, 255, .32);
+      color: #fff;
+    }
+
+    .pricing-card:not(.featured) .btn-pricing:hover:not(:disabled) {
+      background: rgba(255, 255, 255, .22);
+      border-color: rgba(255, 255, 255, .5);
+    }
+
+    .pricing-card:not(.featured) .btn-pricing:disabled {
+      background: rgba(255, 255, 255, .09);
+      border-color: rgba(255, 255, 255, .22);
+      color: #d6d6d6;
+      opacity: 1;
+      cursor: default;
+    }
+
+    .pricing-card.featured .btn-pricing:disabled {
+      background: #2b2b2b;
+      border-color: #2b2b2b;
+      color: #f1f1f1;
+      opacity: 1;
+      cursor: default;
+    }
+
     /* modals + sign-in */
     .modal-overlay {
       background: rgba(0, 0, 0, .7);

@@ -298,7 +298,8 @@
       padding: 0 16px
     }
 
-    .top .r a.in {
+    .top .r a.in,
+    .top .r button.in {
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -310,11 +311,171 @@
       max-width: 180px
     }
 
-    .top .r a.in:hover {
+    .top .r a.in:hover,
+    .top .r button.in:hover {
       background: rgba(255, 255, 255, .14)
     }
 
-    .top .r a.in .av {
+    .top .r button.in {
+      font: 500 13.5px Inter;
+      cursor: pointer
+    }
+
+    .top .r {
+      position: relative
+    }
+
+    .sbtn {
+      background: none;
+      border: 0;
+      color: #f1f1f1;
+      font: 500 13.5px Inter;
+      cursor: pointer;
+      padding: 7px 10px;
+      border-radius: 99px
+    }
+
+    .sbtn:hover {
+      background: rgba(255, 255, 255, .1)
+    }
+
+    .umenu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 190px;
+      padding: 6px;
+      border-radius: 16px;
+      background: rgba(20, 20, 20, .92);
+      border: 1px solid #2a2a2a;
+      backdrop-filter: blur(14px);
+      display: none;
+      z-index: 60;
+      font-size: 13.5px
+    }
+
+    .umenu.open {
+      display: block
+    }
+
+    .umenu .em {
+      padding: 8px 12px 10px;
+      color: #8f8f8f;
+      font-size: 12px;
+      border-bottom: 1px solid #2a2a2a;
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .umenu a,
+    .umenu button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 8px 12px;
+      border-radius: 10px;
+      color: #e6e6e6;
+      background: none;
+      border: 0;
+      font: inherit;
+      cursor: pointer
+    }
+
+    .umenu a:hover,
+    .umenu button:hover {
+      background: rgba(255, 255, 255, .1)
+    }
+
+    .abd {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(5, 5, 5, .88);
+      backdrop-filter: blur(6px)
+    }
+
+    .abd.open {
+      display: flex
+    }
+
+    .acard {
+      position: relative;
+      width: 100%;
+      max-width: 340px;
+      padding: 30px 24px 24px;
+      text-align: center;
+      background: #0e0e0e;
+      border: 1px solid #2a2a2a;
+      border-radius: 22px
+    }
+
+    .acard h3 {
+      font: 500 22px Inter;
+      letter-spacing: -.03em;
+      margin: 0 0 4px
+    }
+
+    .acard p {
+      margin: 0 0 18px;
+      font-size: 13px;
+      color: #8f8f8f
+    }
+
+    .acard .x {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      background: none;
+      border: 0;
+      color: #8f8f8f;
+      font-size: 16px;
+      cursor: pointer
+    }
+
+    .acard .x:hover {
+      color: #fff
+    }
+
+    .oa {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      height: 44px;
+      margin-top: 8px;
+      border-radius: 99px;
+      font: 500 14px Inter;
+      color: #f1f1f1;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .12);
+      cursor: pointer;
+      transition: .2s
+    }
+
+    .oa:hover {
+      background: rgba(255, 255, 255, .14)
+    }
+
+    .acard small {
+      display: block;
+      margin-top: 18px;
+      font-size: 11.5px;
+      color: #8f8f8f;
+      line-height: 1.4
+    }
+
+    .acard small a {
+      color: #fff
+    }
+
+    .top .r .in .av {
       width: 26px;
       height: 26px;
       border-radius: 50%;
@@ -327,13 +488,13 @@
       overflow: hidden
     }
 
-    .top .r a.in .av img {
+    .top .r .in .av img {
       width: 100%;
       height: 100%;
       object-fit: cover
     }
 
-    .top .r a.in .nm {
+    .top .r .in .nm {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap
@@ -1637,15 +1798,15 @@
         display: none
       }
 
-      .top .r a:first-child:not(.in) {
+      .top .r .sbtn {
         display: none
       }
 
-      .top .r a.in .nm {
+      .top .r .in .nm {
         display: none
       }
 
-      .top .r a.in {
+      .top .r button.in {
         padding: 3px
       }
 
@@ -1684,6 +1845,79 @@
       }
     }
 
+
+    /* download count */
+    .dl {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 22px;
+      font-size: 13px;
+      color: #9a9a9a
+    }
+
+    .dl svg {
+      opacity: .7
+    }
+
+    .dl b {
+      font-weight: 600;
+      color: #f1f1f1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -.01em
+    }
+
+    .dl .q {
+      display: inline-block;
+      animation: qwave 1.2s ease-in-out infinite
+    }
+
+    .dl .q:nth-child(2) {
+      animation-delay: .15s
+    }
+
+    .dl .q:nth-child(3) {
+      animation-delay: .3s
+    }
+
+    @keyframes qwave {
+
+      0%,
+      60%,
+      100% {
+        opacity: .3;
+        transform: translateY(0)
+      }
+
+      30% {
+        opacity: 1;
+        transform: translateY(-3px)
+      }
+    }
+
+    /* couldn't load: stop the wave, leave a quiet ???+ */
+    .dl.err .q {
+      animation: none;
+      opacity: .45
+    }
+
+    .dl.ok b {
+      animation: dlpop .5s cubic-bezier(.2, .9, .25, 1.2)
+    }
+
+    @keyframes dlpop {
+      from {
+        opacity: 0;
+        transform: translateY(4px)
+      }
+    }
+
+    @media(max-width:900px) {
+      .stage {
+        min-height: 700px
+      }
+    }
+
     @media(prefers-reduced-motion:reduce) {
 
       *,
@@ -1712,7 +1946,7 @@
         <a class="logo" href="#top">BloxMulti</a>
         <nav class="pill"><a href="#features">Features</a><a href="#specs">Specs</a><a href="#pricing">Pricing</a><a
             href="#faq">FAQ</a><a href="support.html">Support</a></nav>
-        <div class="r"><a href="dashboard.html" id="navAuth">Sign In</a><a class="btn w"
+        <div class="r"><button type="button" class="sbtn" id="navAuth">Sign In</button><a class="btn w"
             href="https://downloads.noxith.com/download">Download</a></div>
       </div>
 
@@ -1736,6 +1970,16 @@
         <div class="cta">
           <a class="btn" href="dashboard.html">Open Dashboard ↗</a>
           <a class="btn w" href="https://downloads.noxith.com/download">Download BloxMulti</a>
+        </div>
+        <div class="dl" id="dl" aria-live="polite">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          <span><b><span id="dlCount"><span class="q">?</span><span class="q">?</span><span
+                  class="q">?</span></span>+</b> downloads</span>
         </div>
       </div>
 
@@ -2041,22 +2285,81 @@
     })();
 
   </script>
+
+  <div class="abd" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authT">
+    <div class="acard">
+      <button type="button" class="x" id="authX" aria-label="Close">✕</button>
+      <h3 id="authT">Sign In</h3>
+      <p>Sign in to access your BloxMulti dashboard.</p>
+      <button type="button" class="oa" data-p="google"><svg width="17" height="17" viewBox="0 0 24 24"
+          aria-hidden="true">
+          <path
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+            fill="#4285F4" />
+          <path
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+            fill="#34A853" />
+          <path
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z"
+            fill="#FBBC05" />
+          <path
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z"
+            fill="#EA4335" />
+        </svg> Continue with Google</button>
+      <button type="button" class="oa" data-p="discord"><svg width="17" height="17" viewBox="0 0 24 24" fill="#5865F2"
+          aria-hidden="true">
+          <path
+            d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+        </svg> Continue with Discord</button>
+      <small>By continuing, you agree to our <a href="terms.html" target="_blank">Terms</a> and <a href="privacy.html"
+          target="_blank">Privacy Policy</a>.</small>
+    </div>
+  </div>
   <script>
     (function () {
       var HOST = "vsgyclwnbrlticquvcjs.supabase.co", KEY = "sb_publishable_-IfvzZudr3vpqkVaaMN6uQ_ycOcDOHn";
-      var el = document.getElementById("navAuth"); if (!el) return;
+      var btn = document.getElementById("navAuth"), modal = document.getElementById("authModal"), right = btn.parentNode;
       function get(k) { try { return localStorage.getItem(k) } catch (e) { return null } }
       function set(k, v) { try { localStorage.setItem(k, v) } catch (e) { } }
+      function del(k) { try { localStorage.removeItem(k) } catch (e) { } }
+      // returning from OAuth: tokens arrive in the URL hash
+      if (location.hash.indexOf("access_token=") > -1) {
+        var p = new URLSearchParams(location.hash.substring(1)), at = p.get("access_token"), rt = p.get("refresh_token");
+        if (at) { set("sb_access_token", at); del("bm_web_token"); if (rt) { set("sb_refresh_token", rt); del("bm_web_refresh") } }
+        history.replaceState(null, document.title, location.pathname + location.search);
+      }
+      function openM() { modal.classList.add("open") }
+      function closeM() { modal.classList.remove("open") }
+      btn.addEventListener("click", openM);
+      document.getElementById("authX").addEventListener("click", closeM);
+      modal.addEventListener("click", function (e) { if (e.target === modal) closeM() });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeM() });
+      modal.querySelectorAll("[data-p]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          if (location.protocol === "file:") { alert("OAuth sign-in cannot run from file:///. Please use a web server or your live site."); return }
+          var pr = b.getAttribute("data-p"), sc = pr === "google" ? "&scopes=email+profile" : "&scopes=identify+email";
+          location.href = "https://" + HOST + "/auth/v1/authorize?provider=" + pr + sc + "&redirect_to=" + encodeURIComponent(location.origin + location.pathname);
+        })
+      });
+      // signed-in state
       var tok = get("sb_access_token") || get("bm_web_token"), ref = get("sb_refresh_token") || get("bm_web_refresh");
       if (!tok && !ref) return;
       function show(u) {
         var m = u.user_metadata || {}, name = m.full_name || m.name || (u.email || "Account").split("@")[0];
-        el.className = "in"; el.href = "dashboard.html"; el.title = "Signed in as " + (u.email || name);
-        el.textContent = "";
+        var a = document.createElement("button"); a.type = "button"; a.className = "in"; a.id = "navAuth"; a.title = "Signed in as " + (u.email || name);
         var av = document.createElement("span"); av.className = "av";
         if (m.avatar_url) { var im = new Image(); im.alt = ""; im.referrerPolicy = "no-referrer"; im.src = m.avatar_url; av.appendChild(im) } else av.textContent = name.charAt(0).toUpperCase();
         var nm = document.createElement("span"); nm.className = "nm"; nm.textContent = name;
-        el.appendChild(av); el.appendChild(nm);
+        a.appendChild(av); a.appendChild(nm);
+        var menu = document.createElement("div"); menu.className = "umenu";
+        var em = document.createElement("div"); em.className = "em"; em.textContent = u.email || name;
+        var dash = document.createElement("a"); dash.href = "dashboard.html"; dash.textContent = "Dashboard";
+        var out = document.createElement("button"); out.type = "button"; out.textContent = "Sign out";
+        menu.appendChild(em); menu.appendChild(dash); menu.appendChild(out);
+        a.addEventListener("click", function (e) { e.stopPropagation(); menu.classList.toggle("open") });
+        document.addEventListener("click", function () { menu.classList.remove("open") });
+        out.addEventListener("click", function () { ["sb_access_token", "sb_refresh_token", "bm_web_token", "bm_web_refresh"].forEach(del); location.reload() });
+        right.replaceChild(a, btn); right.appendChild(menu);
       }
       function user(t) { return fetch("https://" + HOST + "/auth/v1/user", { headers: { apikey: KEY, Authorization: "Bearer " + t } }).then(function (r) { if (!r.ok) throw 0; return r.json() }) }
       function refresh() {
@@ -2066,6 +2369,36 @@
           .then(function (d) { if (!d.access_token) throw 0; set("sb_access_token", d.access_token); if (d.refresh_token) set("sb_refresh_token", d.refresh_token); return d.access_token });
       }
       (tok ? user(tok) : Promise.reject()).catch(function () { return refresh().then(user) }).then(show).catch(function () { });
+    })();
+  </script>
+
+  <script>
+    (function () {
+      var box = document.getElementById("dl"), out = document.getElementById("dlCount");
+      if (!box || !out) return;
+      var calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      function fail() { box.classList.add("err") }
+      function show(n) {
+        box.classList.add("ok");
+        if (calm || n < 50) { out.textContent = n.toLocaleString(); return }
+        var t0 = performance.now(), d = 1100;
+        (function step(t) {
+          var k = Math.min(1, (t - t0) / d), e = 1 - Math.pow(1 - k, 3);
+          out.textContent = Math.round(n * e).toLocaleString();
+          if (k < 1) requestAnimationFrame(step)
+        })(t0);
+      }
+      var ctl = window.AbortController ? new AbortController() : null;
+      var to = setTimeout(function () { if (ctl) ctl.abort() }, 8000);
+      fetch("https://downloads.noxith.com/count", { cache: "no-store", signal: ctl ? ctl.signal : undefined })
+        .then(function (r) { if (!r.ok) throw 0; return r.text() })
+        .then(function (t) {
+          clearTimeout(to);
+          var n = parseInt(String(t).replace(/[^\d]/g, ""), 10);
+          if (!isFinite(n) || /<|[a-z]{3,}/i.test(t)) throw 0;
+          show(n);
+        })
+        .catch(function () { clearTimeout(to); fail() });
     })();
   </script>
 </body>
