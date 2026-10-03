@@ -17,7 +17,7 @@
     content="BloxMulti dashboard, Roblox remote screen streaming, BloxMulti web app, BloxMulti login, Roblox multi instance remote monitor, BloxMulti premium billing" />
   <meta name="author" content="BloxMulti" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
-  <meta name="theme-color" content="#9d6fff" />
+  <meta name="theme-color" content="#0b0b0b" />
   <meta name="application-name" content="BloxMulti Dashboard" />
 
   <!-- Open Graph / Social -->
@@ -97,41 +97,38 @@
   <style>
     /* ── BloxMulti Theme Variables (Desktop App Onyx Theme) ── */
     :root {
-      --bg: #06050d;
-      --sidebar-bg: rgba(6, 5, 14, 0.97);
-      --surface: #0a0916;
-      --surface-2: #100e22;
-      --surface-hover: #161430;
-      --surface-card: rgba(15, 14, 28, 0.65);
-      --surface-card-hover: rgba(22, 20, 42, 0.85);
-      --input-bg: #05040a;
-      --border: rgba(255, 255, 255, 0.06);
-      --border-hi: rgba(255, 255, 255, 0.12);
-      --slideout-bg: rgba(16, 14, 34, 0.98);
-      --settings-sidebar-bg: rgba(6, 5, 14, 0.92);
-      --panel-bg: rgba(10, 9, 20, 0.72);
-      --modal-bg: #0d0c1e;
-      --modal-border: rgba(255, 255, 255, 0.08);
-
-      --accent: #9d6fff;
-      --accent-glow: rgba(157, 111, 255, 0.28);
-      --accent-light: #c4a0ff;
-      --accent-subtle: rgba(157, 111, 255, 0.08);
-      --accent-subtle-hover: rgba(157, 111, 255, 0.16);
-      --accent-border: rgba(157, 111, 255, 0.3);
-      --accent-text: #ffffff;
-
-      --text: #edeafa;
-      --muted: #6a607e;
-      --placeholder: rgba(106, 96, 126, 0.4);
-
+      --bg: #0b0b0b;
+      --sidebar-bg: rgba(14, 14, 14, 0.82);
+      --surface: #0e0e0e;
+      --surface-2: #151515;
+      --surface-hover: #1a1a1a;
+      --surface-card: rgba(255, 255, 255, 0.03);
+      --surface-card-hover: rgba(255, 255, 255, 0.06);
+      --input-bg: #0a0a0a;
+      --border: #232323;
+      --border-hi: #2e2e2e;
+      --slideout-bg: #0e0e0e;
+      --settings-sidebar-bg: rgba(14, 14, 14, 0.7);
+      --panel-bg: #0e0e0e;
+      --modal-bg: #0e0e0e;
+      --modal-border: #2a2a2a;
+      --accent: #f1f1f1;
+      --accent-glow: rgba(255, 255, 255, 0.12);
+      --accent-light: #ffffff;
+      --accent-subtle: rgba(255, 255, 255, 0.07);
+      --accent-subtle-hover: rgba(255, 255, 255, 0.12);
+      --accent-border: rgba(255, 255, 255, 0.14);
+      --accent-text: #0b0b0b;
+      --text: #ececec;
+      --muted: #8d8d8d;
+      --placeholder: rgba(141, 141, 141, 0.5);
       --red: #ff3a5c;
       --green: #2af598;
-      --premium-badge-bg: linear-gradient(135deg, var(--accent) 0%, #c4a0ff 100%);
-      --premium-badge-color: white;
-
-      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --glass: linear-gradient(160deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .02) 60%);
+      --premium-badge-bg: #f1f1f1;
+      --premium-badge-color: #0b0b0b;
+      --font: 'Inter', system-ui, sans-serif;
+      --font-display: 'Inter', system-ui, sans-serif;
       --font-mono: 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
     }
 
@@ -177,18 +174,14 @@
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background:
-        radial-gradient(ellipse 80% 60% at 70% 30%, rgba(157, 111, 255, 0.18) 0%, transparent 65%),
-        radial-gradient(ellipse 50% 40% at 20% 60%, rgba(50, 200, 255, 0.04) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 90% 80%, rgba(157, 111, 255, 0.1) 0%, transparent 55%),
-        linear-gradient(160deg, #06050d 0%, #030208 40%, #0a0718 100%);
+      background: linear-gradient(#050505, #0b0b0b);
     }
 
     .hero-bg::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: repeating-linear-gradient(120deg, transparent 0px, transparent 40px, rgba(157, 111, 255, 0.025) 40px, rgba(157, 111, 255, 0.025) 41.5px);
+      background: none;
     }
 
     .hero-vignette {
@@ -840,12 +833,12 @@
     }
 
     .pricing-card:hover {
-      border-color: rgba(157, 111, 255, 0.28);
+      border-color: #3a3a3a;
       transform: translateY(-2px);
     }
 
     .pricing-card.featured {
-      background: rgba(157, 111, 255, 0.05);
+      background: rgba(255, 255, 255, 0.05);
       border-color: var(--accent-border);
     }
 
@@ -1166,11 +1159,128 @@
         grid-template-columns: 1fr;
       }
     }
+  
+    /* ══ Site style (matches index.html) ══ */
+    body { line-height: 1.55; }
+    ::-webkit-scrollbar-thumb { background: #2a2a2a; }
+
+    /* ambient background: same blobs, dot grid and base gradient as the homepage hero */
+    .hero-bg { background: linear-gradient(#050505, var(--bg)); overflow: hidden; }
+    .hero-bg::before { background: radial-gradient(rgba(255, 255, 255, .25) 1px, transparent 1px) 0 0/90px 90px; opacity: .12; -webkit-mask: radial-gradient(70% 70% at 50% 50%, #000, transparent); mask: radial-gradient(70% 70% at 50% 50%, #000, transparent); }
+    .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .45; animation: drift 18s ease-in-out infinite alternate; }
+    .b1 { width: 860px; height: 580px; right: -80px; top: -140px; background: radial-gradient(#e9eeec, #7d8683 50%, transparent 72%); }
+    .b2 { width: 720px; height: 480px; left: -140px; bottom: -80px; background: radial-gradient(#cfd4d2, #5d6462 55%, transparent 72%); animation-delay: -6s; }
+    .b3 { width: 340px; height: 240px; left: 38%; top: -120px; background: radial-gradient(#fff, transparent 70%); opacity: .15; animation-delay: -11s; }
+    @keyframes drift { to { transform: translate(-60px, 40px) scale(1.12); } }
+    .hero-vignette { background: linear-gradient(to top, var(--bg) 0%, transparent 40%); opacity: .7; }
+
+    /* sidebar */
+    .settings-sidebar { background: rgba(14, 14, 14, .7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-right: 1px solid #232323; padding: 18px 14px; }
+    .sidebar-back-btn { border-radius: 99px; padding: 7px 14px; font-size: 12px; font-weight: 500; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); }
+    .sidebar-back-btn:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .12); color: #fff; }
+    .settings-sidebar-brand { padding: 6px 8px 14px; border-bottom: 1px solid #232323; }
+    .brand-text { font-size: 17px; font-weight: 700; letter-spacing: -.02em; }
+    .settings-tab { border-radius: 99px; padding: 9px 14px; font-size: 13px; font-weight: 500; }
+    .settings-tab:hover { background: rgba(255, 255, 255, .06); }
+    .settings-tab.active { background: rgba(255, 255, 255, .1); color: #fff; }
+    .sidebar-user { border-top: 1px solid #232323; }
+    .user-chip { border-radius: 16px; background: var(--glass), #0e0e0e; border: 1px solid #222; padding: 8px 10px; }
+    .user-chip-av { border-radius: 50%; }
+    .user-chip-name { font-weight: 500; }
+    .sidebar-signout-btn { height: 34px; border-radius: 99px; font-size: 12px; font-weight: 500; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); color: var(--text); }
+    .sidebar-signout-btn:hover { background: rgba(255, 255, 255, .14); color: var(--red); border-color: rgba(255, 58, 92, .3); }
+
+    /* mobile header */
+    .mobile-header { background: rgba(14, 14, 14, .82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid #232323; }
+    .mobile-back-btn { border-radius: 99px; padding: 6px 13px; font-weight: 500; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); }
+    .mobile-back-btn:hover { background: rgba(255, 255, 255, .14); }
+    .mobile-nav-btn { border-radius: 99px; font-weight: 500; background: rgba(255, 255, 255, .04); border: 1px solid #2a2a2a; }
+    .mobile-nav-btn.active { background: rgba(255, 255, 255, .1); color: #fff; border-color: rgba(255, 255, 255, .14); }
+
+    /* top bar + content */
+    .dash-topbar { height: 60px; background: rgba(14, 14, 14, .6); border-bottom: 1px solid #232323; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .dash-topbar-title { font-size: 14px; font-weight: 500; letter-spacing: -.01em; }
+    .dash-content { padding: 32px 28px 64px; }
+    .tab-pane.active { gap: 14px; }
+
+    /* cards */
+    .panel { background: var(--glass), #0e0e0e; border: 1px solid #222; border-radius: 22px; padding: 22px 24px; gap: 16px; backdrop-filter: none; transition: border-color .2s; }
+    .panel:hover { border-color: #3a3a3a; }
+    .panel-title { font-size: 17px; font-weight: 500; letter-spacing: -.02em; text-transform: none; color: var(--text); padding-bottom: 0; border-bottom: 0; }
+    .stab-account-card, .stab-plan-card, .pricing-note { border-radius: 16px; background: rgba(255, 255, 255, .03); border: 1px solid #232323; }
+    .stab-avatar { border-radius: 50%; }
+    .stab-name { font-weight: 500; }
+    .stab-plan-label { font-weight: 500; letter-spacing: .06em; }
+    .stab-plan-value.premium { background: #f1f1f1; color: #0b0b0b; border: 0; border-radius: 99px; padding: 2px 10px; font-weight: 700; letter-spacing: .08em; }
+    .stab-plan-value.free { border-radius: 99px; }
+
+    /* inputs + buttons: pills */
+    .input { border-radius: 99px; padding: 10px 16px; font-size: 13px; background: #0a0a0a; border: 1px solid #2a2a2a; }
+    .input:focus { border-color: rgba(255, 255, 255, .4); }
+    .modal-btn { height: 38px; padding: 0 18px; border-radius: 99px; font-size: 13px; font-weight: 500; letter-spacing: 0; }
+    .modal-cancel { background: rgba(255, 255, 255, .07); border-color: rgba(255, 255, 255, .12); backdrop-filter: blur(8px); }
+    .modal-cancel:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .12); }
+    .modal-confirm:hover { background: #ff4d6d; }
+    .upgrade-confirm-btn { background: #f1f1f1 !important; color: #0b0b0b !important; border-color: #f1f1f1 !important; }
+    .upgrade-confirm-btn:hover { background: #fff !important; opacity: 1; }
+    .discord-btn { background: rgba(255, 255, 255, .07) !important; color: var(--text) !important; border-color: rgba(255, 255, 255, .12) !important; }
+    .discord-btn:hover { background: rgba(255, 255, 255, .14) !important; color: #fff !important; border-color: rgba(255, 255, 255, .12) !important; }
+    .premium-badge { background: #f1f1f1; color: #0b0b0b !important; font-size: 10px; font-weight: 700; letter-spacing: .08em; padding: 2px 9px; border-radius: 99px; }
+
+    /* stream */
+    .stream-viewport { border-radius: 16px; background: #050505; border: 1px solid #1f1f1f; }
+    .stream-overlay { background: rgba(5, 5, 5, .94); }
+    .stream-overlay-icon { border-radius: 14px; background: rgba(255, 255, 255, .07); border-color: rgba(255, 255, 255, .14); color: #fff; }
+    .stream-overlay-title { font-size: 17px; font-weight: 500; letter-spacing: -.02em; }
+    .stream-id-badge { border-radius: 99px; color: #fff; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .14); }
+
+    /* pricing: same cards as the homepage */
+    .pricing-grid { gap: 14px; margin-top: 4px; }
+    .pricing-card { border: 1px solid #222; border-radius: 22px; background: var(--glass), #0e0e0e; padding: 30px; transition: border-color .2s; }
+    .pricing-card:hover { border-color: #3a3a3a; transform: none; }
+    .pricing-card.featured { background: #ececec; color: #0b0b0b; border-color: #fff; }
+    .pricing-tier-name { font-size: 15px; font-weight: 500; letter-spacing: 0; text-transform: none; color: #aaa; margin-bottom: 0; }
+    .pricing-price { font-size: 56px; font-weight: 500; letter-spacing: -.05em; margin: 14px 0 4px; }
+    .pricing-price span { letter-spacing: 0; margin-left: 2px; }
+    .pricing-sub { font-size: 13.5px; color: #8f8f8f; margin-bottom: 22px; }
+    .pricing-features { gap: 11px; margin-bottom: 28px; }
+    .pricing-feat-item { font-size: 14px; color: #cfcfcf; }
+    .pricing-check { color: #fff; }
+    .pricing-card.featured .pricing-tier-name, .pricing-card.featured .pricing-sub, .pricing-card.featured .pricing-price span { color: #555 !important; }
+    .pricing-card.featured .pricing-price { color: #0b0b0b; }
+    .pricing-card.featured .pricing-feat-item { color: #222; }
+    .pricing-card.featured .pricing-check { color: #000; }
+    .btn-pricing { height: 42px; border-radius: 99px; font-size: 14px; font-weight: 500; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); }
+    .btn-pricing:hover:not(:disabled) { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .12); }
+    .btn-pricing.primary { background: #f1f1f1; border-color: #f1f1f1; color: #0b0b0b; }
+    .btn-pricing.primary:hover:not(:disabled) { background: #fff; }
+    .pricing-card.featured .btn-pricing, .pricing-card.featured .btn-pricing.primary { background: #0b0b0b; color: #f1f1f1; border-color: #0b0b0b; }
+    .pricing-card.featured .btn-pricing:hover:not(:disabled) { background: #222; }
+
+    /* modals + sign-in */
+    .modal-overlay { background: rgba(0, 0, 0, .7); }
+    .modal { background: var(--glass), #0e0e0e; border: 1px solid #2a2a2a; border-radius: 22px; padding: 26px; width: 360px; }
+    .modal-title { font-size: 17px; font-weight: 500; letter-spacing: -.02em; }
+    .auth-backdrop { background: rgba(5, 5, 5, .88); }
+    .auth-card { background: var(--glass), #0e0e0e; border: 1px solid #2a2a2a; border-radius: 22px; max-width: 340px; padding: 30px 24px 24px; }
+    .auth-title { font-size: 22px; font-weight: 500; letter-spacing: -.03em; }
+    .btn-oauth { height: 44px; border-radius: 99px; font-weight: 500; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); }
+    .btn-oauth:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .12); }
+    .btn-oauth.discord { background: rgba(255, 255, 255, .07); border-color: rgba(255, 255, 255, .12); color: var(--text); }
+    .btn-oauth.discord:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .12); }
+    .auth-footer-note a { color: #fff; font-weight: 500; }
+
+    @media (prefers-reduced-motion: reduce) { .blob { animation: none; } }
+    @media (max-width: 850px) {
+      .panel { padding: 18px; border-radius: 18px; }
+      .pricing-card { padding: 24px; border-radius: 18px; }
+      .blob { opacity: .35; }
+    }
   </style>
 </head>
 
 <body>
-  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-bg" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
   <div class="hero-vignette" aria-hidden="true"></div>
 
   <div id="app">
