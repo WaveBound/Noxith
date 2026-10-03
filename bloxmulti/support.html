@@ -111,14 +111,6 @@
               "@type": "Answer",
               "text": "Ensure the executable is placed in a folder with full read and write permissions (such as Desktop, Documents, or a custom folder like C:\\BloxMulti). Avoid running directly from a temporary zip folder or write-protected system directories."
             }
-          },
-          {
-            "@type": "Question",
-            "name": "Why does the second account disconnect the first account?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Make sure you launch instances through BloxMulti so its Multi-Instance Engine can neutralize the single-instance Mutex handle before the Roblox client initialises."
-            }
           }
         ]
       }
@@ -127,188 +119,583 @@
   </script>
 
   <script>document.documentElement.classList.add('js')</script>
-<style>
-:root{--bg:#0b0b0b;--text:#ececec;--muted:#8d8d8d;--line:#232323;--green:#2af598;
---glass:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.02) 60%);
---edge:none}
-*{box-sizing:border-box;margin:0}
-html{scroll-behavior:smooth}
-body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-a{color:inherit;text-decoration:none}
-.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:42px;padding:0 20px;border-radius:99px;font:500 14px Inter,system-ui,sans-serif;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px);transition:.2s}
-.btn:hover{background:rgba(255,255,255,.14)}
-.btn.w{background:#f1f1f1;color:#0b0b0b;border-color:#f1f1f1}
-.btn.w:hover{background:#fff}
-.eyebrow{display:inline-block;font-size:12px;color:#b9b9b9;padding:5px 13px;border:1px solid var(--line);border-radius:99px;background:var(--glass)}
-.fade{background:linear-gradient(180deg,#fff 30%,#6e6e6e);-webkit-background-clip:text;background-clip:text;color:transparent}
+  <style>
+    :root {
+      --bg: #0b0b0b;
+      --text: #ececec;
+      --muted: #8d8d8d;
+      --line: #232323;
+      --green: #2af598;
+      --glass: linear-gradient(160deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .02) 60%);
+      --edge: none
+    }
 
-/* hero */
-.stage{position:relative;width:100vw;margin-left:calc(50% - 50vw);min-height:440px;background:linear-gradient(#050505,var(--bg));overflow:hidden;display:flex;flex-direction:column;padding-top:82px}
-.bfade{position:absolute;left:0;right:0;bottom:0;height:200px;z-index:2;background:linear-gradient(transparent,var(--bg));pointer-events:none}
-.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;animation:drift 18s ease-in-out infinite alternate}
-.b1{width:860px;height:580px;right:-80px;top:-140px;background:radial-gradient(#e9eeec,#7d8683 50%,transparent 72%)}
-.b2{width:720px;height:480px;left:-140px;bottom:-80px;background:radial-gradient(#cfd4d2,#5d6462 55%,transparent 72%);animation-delay:-6s}
-.b3{width:340px;height:240px;left:38%;top:-120px;background:radial-gradient(#fff,transparent 70%);opacity:.18;animation-delay:-11s}
-@keyframes drift{to{transform:translate(-60px,40px) scale(1.12)}}
-.streaks{position:absolute;left:50%;bottom:0;width:240px;height:300px;transform:translateX(-50%)}
-.streaks i{position:absolute;bottom:-100px;width:1px;height:110px;background:linear-gradient(transparent,#fff,transparent);animation:rise 4.5s linear infinite}
-@keyframes rise{to{transform:translateY(-460px);opacity:0}}
-.stage::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(rgba(255,255,255,.25) 1px,transparent 1px) 0 0/90px 90px;opacity:.12;-webkit-mask:radial-gradient(70% 70% at 50% 50%,#000,transparent);mask:radial-gradient(70% 70% at 50% 50%,#000,transparent)}
-.top{position:fixed;top:0;left:0;right:0;z-index:100;padding-left:28px!important;padding-right:28px!important;display:flex;align-items:center;justify-content:space-between;padding:22px 28px}
-.logo{font-weight:700;font-size:17px;letter-spacing:-.02em;display:flex;align-items:center;gap:9px;min-width:150px}
-.pill{display:flex;gap:4px;padding:6px;border-radius:99px;background:rgba(20,20,20,.7);border:1px solid #2a2a2a;backdrop-filter:blur(12px);font-size:13px}
-.pill a{padding:7px 14px;border-radius:99px;color:#cfcfcf}
-.pill a:hover,.pill a[aria-current]{background:rgba(255,255,255,.1);color:#fff}
-.top .r{display:flex;gap:10px;align-items:center;min-width:0;height:46px;padding:0 4px 0 18px;background:rgba(20,20,20,.7);border:1px solid #2a2a2a;backdrop-filter:blur(12px);border-radius:99px;justify-content:flex-end;font-size:13.5px}
-.top .r .btn{height:38px;padding:0 16px}
-.copy{position:relative;z-index:4;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px 40px}
-.copy h1{font-size:clamp(42px,7vw,92px);font-weight:500;letter-spacing:-.055em;line-height:.98;max-width:12em;margin:20px 0 0}
-.copy p{margin-top:20px;color:#b4b4b4;font-size:17px;max-width:32em}
+    * {
+      box-sizing: border-box;
+      margin: 0
+    }
 
-/* document */
-.doc{position:relative;z-index:4;max-width:820px;margin:0 auto;padding:0 0 10px}
-.sec{padding:36px 0;border-top:1px solid var(--line)}
-.sec:first-child{border-top:0;padding-top:10px}
-.doc h2{font-size:clamp(22px,2.6vw,28px);font-weight:500;letter-spacing:-.035em;line-height:1.15;margin:0 0 14px;color:var(--text)}
-.doc h3{font-size:16px;font-weight:500;letter-spacing:-.01em;color:var(--text);margin:26px 0 8px}
-.doc h3:first-child{margin-top:0}
-.doc p{color:#9a9a9a;font-size:15px;line-height:1.75;margin-bottom:14px;max-width:46em}
-.doc p:last-child{margin-bottom:0}
-.doc ul,.doc ol{color:#9a9a9a;font-size:15px;line-height:1.75;padding-left:22px;margin-bottom:14px;max-width:46em}
-.doc li{margin-bottom:9px;padding-left:4px}
-.doc li::marker{color:#555}
-.doc strong{color:#d6d6d6;font-weight:500}
-.doc a{color:#fff;border-bottom:1px solid rgba(255,255,255,.3);transition:border-color .2s}
-.doc a:hover{border-color:#fff}
-.doc code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12.5px;color:#e4e4e4;padding:2px 8px;border-radius:8px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(rgba(38,38,38,.92),rgba(20,20,20,.92))}
+    html {
+      scroll-behavior: smooth
+    }
 
-/* footer */
-.cta2{margin-top:110px;text-align:center}
-.links{display:flex;gap:26px;flex-wrap:wrap;justify-content:center;margin:0;font-size:13px;color:var(--muted)}
-.links a:hover,.links a[aria-current]{color:#fff}
-.word{font-size:clamp(70px,21vw,290px);font-weight:800;letter-spacing:-.06em;line-height:.8;text-align:center;height:.52em;overflow:hidden;margin-top:60px;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 85%);-webkit-background-clip:text;background-clip:text;color:transparent;user-select:none}
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden
+    }
 
-/* scroll animations: scroll-linked (--rv runs 0 to 1 as the element crosses the viewport) */
-.js .rv{opacity:var(--rv,0);transform:translate3d(0,calc((1 - var(--rv,0))*28px),0)}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important}.js .rv{opacity:1!important;transform:none!important}}
+    a {
+      color: inherit;
+      text-decoration: none
+    }
 
-@media(max-width:900px){
-  .pill{display:none}
-  .top .r a:first-child{display:none}
-  .stage{min-height:380px}
-  .doc{padding:0}
-}
-</style>
+    .wrap {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 20px
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      height: 42px;
+      padding: 0 20px;
+      border-radius: 99px;
+      font: 500 14px Inter, system-ui, sans-serif;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .12);
+      backdrop-filter: blur(8px);
+      transition: .2s
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, .14)
+    }
+
+    .btn.w {
+      background: #f1f1f1;
+      color: #0b0b0b;
+      border-color: #f1f1f1
+    }
+
+    .btn.w:hover {
+      background: #fff
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      color: #b9b9b9;
+      padding: 5px 13px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      background: var(--glass)
+    }
+
+    .fade {
+      background: linear-gradient(180deg, #fff 30%, #6e6e6e);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent
+    }
+
+    /* hero */
+    .stage {
+      position: relative;
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      min-height: 440px;
+      background: linear-gradient(#050505, var(--bg));
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding-top: 82px
+    }
+
+    .bfade {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 200px;
+      z-index: 2;
+      background: linear-gradient(transparent, var(--bg));
+      pointer-events: none
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: .55;
+      animation: drift 18s ease-in-out infinite alternate
+    }
+
+    .b1 {
+      width: 860px;
+      height: 580px;
+      right: -80px;
+      top: -140px;
+      background: radial-gradient(#e9eeec, #7d8683 50%, transparent 72%)
+    }
+
+    .b2 {
+      width: 720px;
+      height: 480px;
+      left: -140px;
+      bottom: -80px;
+      background: radial-gradient(#cfd4d2, #5d6462 55%, transparent 72%);
+      animation-delay: -6s
+    }
+
+    .b3 {
+      width: 340px;
+      height: 240px;
+      left: 38%;
+      top: -120px;
+      background: radial-gradient(#fff, transparent 70%);
+      opacity: .18;
+      animation-delay: -11s
+    }
+
+    @keyframes drift {
+      to {
+        transform: translate(-60px, 40px) scale(1.12)
+      }
+    }
+
+    .streaks {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      width: 240px;
+      height: 300px;
+      transform: translateX(-50%)
+    }
+
+    .streaks i {
+      position: absolute;
+      bottom: -100px;
+      width: 1px;
+      height: 110px;
+      background: linear-gradient(transparent, #fff, transparent);
+      animation: rise 4.5s linear infinite
+    }
+
+    @keyframes rise {
+      to {
+        transform: translateY(-460px);
+        opacity: 0
+      }
+    }
+
+    .stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(rgba(255, 255, 255, .25) 1px, transparent 1px) 0 0/90px 90px;
+      opacity: .12;
+      -webkit-mask: radial-gradient(70% 70% at 50% 50%, #000, transparent);
+      mask: radial-gradient(70% 70% at 50% 50%, #000, transparent)
+    }
+
+    .top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding-left: 28px !important;
+      padding-right: 28px !important;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 28px
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 17px;
+      letter-spacing: -.02em;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 150px
+    }
+
+    .pill {
+      display: flex;
+      gap: 4px;
+      padding: 6px;
+      border-radius: 99px;
+      background: rgba(20, 20, 20, .7);
+      border: 1px solid #2a2a2a;
+      backdrop-filter: blur(12px);
+      font-size: 13px
+    }
+
+    .pill a {
+      padding: 7px 14px;
+      border-radius: 99px;
+      color: #cfcfcf
+    }
+
+    .pill a:hover,
+    .pill a[aria-current] {
+      background: rgba(255, 255, 255, .1);
+      color: #fff
+    }
+
+    .top .r {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+      height: 46px;
+      padding: 0 4px 0 18px;
+      background: rgba(20, 20, 20, .7);
+      border: 1px solid #2a2a2a;
+      backdrop-filter: blur(12px);
+      border-radius: 99px;
+      justify-content: flex-end;
+      font-size: 13.5px
+    }
+
+    .top .r .btn {
+      height: 38px;
+      padding: 0 16px
+    }
+
+    .copy {
+      position: relative;
+      z-index: 4;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px 20px 40px
+    }
+
+    .copy h1 {
+      font-size: clamp(42px, 7vw, 92px);
+      font-weight: 500;
+      letter-spacing: -.055em;
+      line-height: .98;
+      max-width: 12em;
+      margin: 20px 0 0
+    }
+
+    .copy p {
+      margin-top: 20px;
+      color: #b4b4b4;
+      font-size: 17px;
+      max-width: 32em
+    }
+
+    /* document */
+    .doc {
+      position: relative;
+      z-index: 4;
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 0 10px
+    }
+
+    .sec {
+      padding: 36px 0;
+      border-top: 1px solid var(--line)
+    }
+
+    .sec:first-child {
+      border-top: 0;
+      padding-top: 10px
+    }
+
+    .doc h2 {
+      font-size: clamp(22px, 2.6vw, 28px);
+      font-weight: 500;
+      letter-spacing: -.035em;
+      line-height: 1.15;
+      margin: 0 0 14px;
+      color: var(--text)
+    }
+
+    .doc h3 {
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: -.01em;
+      color: var(--text);
+      margin: 26px 0 8px
+    }
+
+    .doc h3:first-child {
+      margin-top: 0
+    }
+
+    .doc p {
+      color: #9a9a9a;
+      font-size: 15px;
+      line-height: 1.75;
+      margin-bottom: 14px;
+      max-width: 46em
+    }
+
+    .doc p:last-child {
+      margin-bottom: 0
+    }
+
+    .doc ul,
+    .doc ol {
+      color: #9a9a9a;
+      font-size: 15px;
+      line-height: 1.75;
+      padding-left: 22px;
+      margin-bottom: 14px;
+      max-width: 46em
+    }
+
+    .doc li {
+      margin-bottom: 9px;
+      padding-left: 4px
+    }
+
+    .doc li::marker {
+      color: #555
+    }
+
+    .doc strong {
+      color: #d6d6d6;
+      font-weight: 500
+    }
+
+    .doc a {
+      color: #fff;
+      border-bottom: 1px solid rgba(255, 255, 255, .3);
+      transition: border-color .2s
+    }
+
+    .doc a:hover {
+      border-color: #fff
+    }
+
+    .doc code {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 12.5px;
+      color: #e4e4e4;
+      padding: 2px 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      background: linear-gradient(rgba(38, 38, 38, .92), rgba(20, 20, 20, .92))
+    }
+
+    /* footer */
+    .cta2 {
+      margin-top: 110px;
+      text-align: center
+    }
+
+    .links {
+      display: flex;
+      gap: 26px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted)
+    }
+
+    .links a:hover,
+    .links a[aria-current] {
+      color: #fff
+    }
+
+    .word {
+      font-size: clamp(70px, 21vw, 290px);
+      font-weight: 800;
+      letter-spacing: -.06em;
+      line-height: .8;
+      text-align: center;
+      height: .52em;
+      overflow: hidden;
+      margin-top: 60px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 85%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      user-select: none
+    }
+
+    /* scroll animations: scroll-linked (--rv runs 0 to 1 as the element crosses the viewport) */
+    .js .rv {
+      opacity: var(--rv, 0);
+      transform: translate3d(0, calc((1 - var(--rv, 0))*28px), 0)
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important
+      }
+
+      .js .rv {
+        opacity: 1 !important;
+        transform: none !important
+      }
+    }
+
+    @media(max-width:900px) {
+      .pill {
+        display: none
+      }
+
+      .top .r a:first-child {
+        display: none
+      }
+
+      .stage {
+        min-height: 380px
+      }
+
+      .doc {
+        padding: 0
+      }
+    }
+  </style>
 </head>
 
 <body>
-<div class="wrap">
-<div class="stage" id="top">
-  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
-  <div class="streaks" id="streaks"></div>
-  <div class="bfade"></div>
+  <div class="wrap">
+    <div class="stage" id="top">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+      <div class="blob b3"></div>
+      <div class="streaks" id="streaks"></div>
+      <div class="bfade"></div>
 
-  <div class="top">
-    <a class="logo" href="index.html">BloxMulti</a>
-    <nav class="pill" aria-label="Main Navigation"><a href="index.html#features">Features</a><a href="index.html#specs">Specs</a><a href="index.html#pricing">Pricing</a><a href="index.html#faq">FAQ</a><a href="support.html" aria-current="page">Support</a></nav>
-    <div class="r"><a href="dashboard.html">Sign In</a><a class="btn w" href="https://downloads.noxith.com/download">Download</a></div>
+      <div class="top">
+        <a class="logo" href="index.html">BloxMulti</a>
+        <nav class="pill" aria-label="Main Navigation"><a href="index.html#features">Features</a><a
+            href="index.html#specs">Specs</a><a href="index.html#pricing">Pricing</a><a href="index.html#faq">FAQ</a><a
+            href="support.html" aria-current="page">Support</a></nav>
+        <div class="r"><a href="dashboard.html">Sign In</a><a class="btn w"
+            href="https://downloads.noxith.com/download">Download</a></div>
+      </div>
+
+      <div class="copy">
+        <span class="eyebrow">Help</span>
+        <h1 class="fade">Support &amp; Troubleshooting</h1>
+        <p>Need assistance setting up BloxMulti or troubleshooting multi-instance launching? Find answers to frequently
+          asked questions below or reach out to our community.</p>
+      </div>
+    </div>
+
+    <main class="doc" role="main">
+      <section class="sec">
+        <h2>Frequently Asked Questions (FAQ)</h2>
+        <h3>What is BloxMulti?</h3>
+        <p>BloxMulti is a lightweight, portable Windows utility that lets you launch and manage multiple Roblox client
+          instances concurrently on a single PC. It isolates each account's session with its own token vault and unlocks
+          singleton Mutex handles automatically.</p>
+
+        <h3>Do I need to install anything for the UI to work?</h3>
+        <p>BloxMulti uses <strong>Microsoft Edge WebView2</strong> to render its user interface. Most Windows 10 and 11
+          machines include this runtime by default. If the app displays a blank window or fails to open, install the
+          official
+          <a href="https://developer.microsoft.com/en-us/microsoft-edge/webview2/" target="_blank"
+            rel="noopener">WebView2
+            Evergreen Runtime</a> from Microsoft.
+        </p>
+
+        <h3>Can I get banned for using BloxMulti?</h3>
+        <p>BloxMulti does not inject code into the Roblox game engine or alter in-game memory. It manages native Windows
+          Mutex
+          objects and handles session launching. However, always ensure your use complies with Roblox's Terms of Use.
+        </p>
+      </section>
+      <section class="sec">
+        <h2>Troubleshooting Common Issues</h2>
+        <h3>Windows SmartScreen blocked the app</h3>
+        <ul>
+          <li>Because BloxMulti is a portable executable without an expensive commercial code-signing certificate,
+            Windows
+            SmartScreen may display an unrecognized app notice. Click <strong>More info</strong> and select <strong>Run
+              anyway</strong>.</li>
+          <li>If the file was downloaded from a browser, right-click <code>BloxMulti.exe</code>, select
+            <strong>Properties</strong>, check the <strong>Unblock</strong> box at the bottom, and click Apply.
+          </li>
+        </ul>
+
+        <h3>Accounts or tabs are not saving</h3>
+        <p>Ensure the executable is placed in a folder with full read and write permissions (such as
+          <code>Desktop</code>,
+          <code>Documents</code>, or a custom folder like <code>C:\BloxMulti</code>). Avoid running directly from a
+          temporary
+          zip folder or write-protected system directories.
+        </p>
+
+        <h3>Second account disconnects first account</h3>
+        <p>Make sure you launch instances through BloxMulti so its Multi-Instance Engine can neutralize the
+          single-instance
+          Mutex handle before the Roblox client initialises.</p>
+      </section>
+      <section class="sec">
+        <h2>Community &amp; Direct Support</h2>
+        <p>If you're encountering an issue not covered above, get direct help from our team:</p>
+        <ul>
+          <li><strong>Discord Community:</strong> <a href="https://discord.gg/ju6ANNecQg" target="_blank"
+              rel="noopener">Join
+              our Discord Server</a> (Fastest response)</li>
+          <li><strong>GitHub Issues:</strong> <a href="https://github.com/WaveBound/BloxMulti/issues" target="_blank"
+              rel="noopener">Submit a Bug Report on GitHub</a></li>
+        </ul>
+      </section>
+    </main>
+
+    <div class="cta2">
+      <div class="links"><a href="https://github.com/WaveBound/BloxMulti" target="_blank" rel="noopener">GitHub</a><a
+          href="https://discord.gg/ju6ANNecQg" target="_blank" rel="noopener">Discord</a><a href="support.html"
+          aria-current="page">Support</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of
+          Service</a></div>
+      <div class="word" aria-hidden="true">BloxMulti</div>
+    </div>
   </div>
 
-  <div class="copy">
-    <span class="eyebrow">Help</span>
-    <h1 class="fade">Support &amp; Troubleshooting</h1>
-    <p>Need assistance setting up BloxMulti or troubleshooting multi-instance launching? Find answers to frequently asked questions below or reach out to our community.</p>
-  </div>
-</div>
-
-<main class="doc" role="main">
-<section class="sec">
-<h2>Frequently Asked Questions (FAQ)</h2>
-    <h3>What is BloxMulti?</h3>
-    <p>BloxMulti is a lightweight, portable Windows utility that lets you launch and manage multiple Roblox client
-      instances concurrently on a single PC. It isolates each account's session with its own token vault and unlocks
-      singleton Mutex handles automatically.</p>
-
-    <h3>Do I need to install anything for the UI to work?</h3>
-    <p>BloxMulti uses <strong>Microsoft Edge WebView2</strong> to render its user interface. Most Windows 10 and 11
-      machines include this runtime by default. If the app displays a blank window or fails to open, install the
-      official
-      <a href="https://developer.microsoft.com/en-us/microsoft-edge/webview2/" target="_blank" rel="noopener">WebView2
-        Evergreen Runtime</a> from Microsoft.
-    </p>
-
-    <h3>Can I get banned for using BloxMulti?</h3>
-    <p>BloxMulti does not inject code into the Roblox game engine or alter in-game memory. It manages native Windows
-      Mutex
-      objects and handles session launching. However, always ensure your use complies with Roblox's Terms of Use.</p>
-</section>
-<section class="sec">
-<h2>Troubleshooting Common Issues</h2>
-    <h3>Windows SmartScreen blocked the app</h3>
-    <ul>
-      <li>Because BloxMulti is a portable executable without an expensive commercial code-signing certificate, Windows
-        SmartScreen may display an unrecognized app notice. Click <strong>More info</strong> and select <strong>Run
-          anyway</strong>.</li>
-      <li>If the file was downloaded from a browser, right-click <code>BloxMulti.exe</code>, select
-        <strong>Properties</strong>, check the <strong>Unblock</strong> box at the bottom, and click Apply.
-      </li>
-    </ul>
-
-    <h3>Accounts or tabs are not saving</h3>
-    <p>Ensure the executable is placed in a folder with full read and write permissions (such as <code>Desktop</code>,
-      <code>Documents</code>, or a custom folder like <code>C:\BloxMulti</code>). Avoid running directly from a
-      temporary
-      zip folder or write-protected system directories.
-    </p>
-
-    <h3>Second account disconnects first account</h3>
-    <p>Make sure you launch instances through BloxMulti so its Multi-Instance Engine can neutralize the single-instance
-      Mutex handle before the Roblox client initialises.</p>
-</section>
-<section class="sec">
-<h2>Community &amp; Direct Support</h2>
-    <p>If you're encountering an issue not covered above, get direct help from our team:</p>
-    <ul>
-      <li><strong>Discord Community:</strong> <a href="https://discord.gg/ju6ANNecQg" target="_blank"
-          rel="noopener">Join
-          our Discord Server</a> (Fastest response)</li>
-      <li><strong>GitHub Issues:</strong> <a href="https://github.com/WaveBound/BloxMulti/issues" target="_blank"
-          rel="noopener">Submit a Bug Report on GitHub</a></li>
-    </ul>
-</section>
-</main>
-
-<div class="cta2">
-  <div class="links"><a href="https://github.com/WaveBound/BloxMulti" target="_blank" rel="noopener">GitHub</a><a href="https://discord.gg/ju6ANNecQg" target="_blank" rel="noopener">Discord</a><a href="support.html" aria-current="page">Support</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a></div>
-  <div class="word" aria-hidden="true">BloxMulti</div>
-</div>
-</div>
-
-<script>
-const s=document.getElementById('streaks');
-for(let i=0;i<7;i++){const e=document.createElement('i');e.style.left=(i*38+Math.random()*14)+'px';e.style.animationDelay=(-Math.random()*4.5)+'s';e.style.animationDuration=(3.5+Math.random()*3)+'s';e.style.opacity=.4+Math.random()*.6;s.appendChild(e)}
-(function(){
-const rv=[];
-document.querySelectorAll('.copy > *, .sec, .cta2 .links, .cta2 .word').forEach((el,i)=>{el.classList.add('rv');rv.push({el,d:0,cur:-1})});
-const calm=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const clamp=v=>v<0?0:v>1?1:v;
-let busy=false;
-function frame(){
-  busy=false;const vh=innerHeight;let more=false;
-  for(const r of rv){
-    const top=r.el.getBoundingClientRect().top;
-    const start=vh*1.0-r.d*vh*.03,span=vh*.24;
-    const target=calm?1:clamp((start-top)/span);
-    if(r.cur<0)r.cur=target;
-    else{const diff=target-r.cur;r.cur=Math.abs(diff)<.002?target:r.cur+diff*.28;if(r.cur!==target)more=true}
-    if(r.cur!==r.last){r.el.style.setProperty('--rv',r.cur.toFixed(3));r.last=r.cur}
-  }
-  if(more)kick();
-}
-function kick(){if(!busy){busy=true;requestAnimationFrame(frame)}}
-addEventListener('scroll',kick,{passive:true});addEventListener('resize',kick);frame();
-})();
-</script>
+  <script>
+    const s = document.getElementById('streaks');
+    for (let i = 0; i < 7; i++) { const e = document.createElement('i'); e.style.left = (i * 38 + Math.random() * 14) + 'px'; e.style.animationDelay = (-Math.random() * 4.5) + 's'; e.style.animationDuration = (3.5 + Math.random() * 3) + 's'; e.style.opacity = .4 + Math.random() * .6; s.appendChild(e) }
+    (function () {
+      const rv = [];
+      document.querySelectorAll('.copy > *, .sec, .cta2 .links, .cta2 .word').forEach((el, i) => { el.classList.add('rv'); rv.push({ el, d: 0, cur: -1 }) });
+      const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const clamp = v => v < 0 ? 0 : v > 1 ? 1 : v;
+      let busy = false;
+      function frame() {
+        busy = false; const vh = innerHeight; let more = false;
+        for (const r of rv) {
+          const top = r.el.getBoundingClientRect().top;
+          const start = vh * 1.0 - r.d * vh * .03, span = vh * .24;
+          const target = calm ? 1 : clamp((start - top) / span);
+          if (r.cur < 0) r.cur = target;
+          else { const diff = target - r.cur; r.cur = Math.abs(diff) < .002 ? target : r.cur + diff * .28; if (r.cur !== target) more = true }
+          if (r.cur !== r.last) { r.el.style.setProperty('--rv', r.cur.toFixed(3)); r.last = r.cur }
+        }
+        if (more) kick();
+      }
+      function kick() { if (!busy) { busy = true; requestAnimationFrame(frame) } }
+      addEventListener('scroll', kick, { passive: true }); addEventListener('resize', kick); frame();
+    })();
+  </script>
 </body>
+
 </html>
