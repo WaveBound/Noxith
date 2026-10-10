@@ -2425,7 +2425,7 @@
 
     function getUserStreamKey() {
       if (!state.user || !state.user.id) return "";
-      const prefix = (state.user.id.includes("-") ? state.user.id.split("-")[0] : state.user.id.substring(0, 8)).toLowerCase();
+      const prefix = state.user.id.replace(/-/g, "").slice(0, 8).toUpperCase();
       return `bm-${prefix}`;
     }
 
