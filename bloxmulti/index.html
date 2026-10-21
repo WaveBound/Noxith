@@ -25,7 +25,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script>document.documentElement.classList.add('js')</script>
   <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"BloxMulti Roblox Account Manager","operatingSystem":"Windows 10, Windows 11","applicationCategory":"UtilitiesApplication","softwareVersion":"1.4.7","downloadUrl":"https://downloads.noxith.com/download","offers":[{"@type":"Offer","name":"Standard","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Monthly Premium","price":"3.00","priceCurrency":"USD"},{"@type":"Offer","name":"Lifetime License","price":"15.00","priceCurrency":"USD"}]}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"BloxMulti Roblox Account Manager","operatingSystem":"Windows 10, Windows 11","applicationCategory":"UtilitiesApplication","softwareVersion":"1.4.8","downloadUrl":"https://downloads.noxith.com/download","offers":[{"@type":"Offer","name":"Standard","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Monthly Premium","price":"3.00","priceCurrency":"USD"},{"@type":"Offer","name":"Lifetime License","price":"15.00","priceCurrency":"USD"}]}
 </script>
   <style>
     :root {
@@ -581,17 +581,15 @@
     }
 
     .node.l {
-      left: 0;
       flex-direction: row
     }
 
     .node.l::before {
-      right: calc(100% - 54px);
-      left: auto;
-      transform: translateX(0);
-      width: 46vw;
-      max-width: 520px;
-      background: linear-gradient(270deg, #555, transparent)
+      left: 0;
+      right: auto;
+      width: 140px;
+      max-width: none;
+      background: linear-gradient(90deg, transparent, #555)
     }
 
     .node.rt {
@@ -600,10 +598,11 @@
     }
 
     .node.rt::before {
-      left: calc(100% - 54px);
-      width: 46vw;
-      max-width: 520px;
-      background: linear-gradient(90deg, #555, transparent)
+      right: 0;
+      left: auto;
+      width: 140px;
+      max-width: none;
+      background: linear-gradient(270deg, transparent, #555)
     }
 
     .n1 {
@@ -626,10 +625,6 @@
       right: max(3%, calc(50% - 600px))
     }
 
-    .node.l::before,
-    .node.rt::before {
-      display: none
-    }
 
     .mq {
       position: relative;
@@ -1366,6 +1361,25 @@
       }
     }
 
+    /* Smart Recovery uses the same glass, outline and status-chip language. */
+    .recovery { flex-direction: column; gap: 16px; }
+    .recovery-loop { display: grid; place-items: center; width: 138px; height: 80px; }
+    .recovery-frame { position: absolute; inset: 0; border: 1px solid rgba(255,255,255,.2); border-radius: 9px; background: var(--glass); animation: recovery-window 8s ease-in-out infinite; }
+    .recovery-frame::before { content: ""; position: absolute; top: 10px; left: 11px; width: 3px; height: 3px; border-radius: 50%; background: #777; box-shadow: 7px 0 #777, 14px 0 #777; }
+    .recovery-refresh { position: relative; display: grid; place-items: center; color: #eee; animation: recovery-turn 8s ease-in-out infinite; }
+    .recovery-label { min-width: 198px; justify-content: center; }
+    .recovery-label b { animation: recovery-status 8s step-end infinite; }
+    .recovery-states { display: grid; }
+    .recovery-state { grid-area: 1 / 1; opacity: 0; animation: recovery-wait 8s step-end infinite; }
+    .recovery-state.opening { animation-name: recovery-open; }
+    .recovery-state.restored { opacity: 1; animation-name: recovery-restored; }
+    @keyframes recovery-turn { 0%, 34% { transform: rotate(0); } 57%, 100% { transform: rotate(360deg); } }
+    @keyframes recovery-window { 0%, 34%, 59%, 100% { opacity: 1; transform: scale(1); } 42%, 47% { opacity: 0; transform: scale(.94); } }
+    @keyframes recovery-status { 0%, 34% { background: #aaa; } 35%, 56% { background: #d4ba88; } 57%, 100% { background: var(--green); } }
+    @keyframes recovery-wait { 0%, 34% { opacity: 1; } 35%, 100% { opacity: 0; } }
+    @keyframes recovery-open { 0%, 34% { opacity: 0; } 35%, 56% { opacity: 1; } 57%, 100% { opacity: 0; } }
+    @keyframes recovery-restored { 0%, 56% { opacity: 0; } 57%, 100% { opacity: 1; } }
+
     /* p2p: handshake nodes, packets streaming through the play button */
     .p2p {
       display: flex;
@@ -1945,6 +1959,9 @@
       .toast .chip {
         opacity: 1 !important
       }
+      .recovery-state { opacity: 0 !important; }
+      .recovery-state:last-child { opacity: 1 !important; }
+      .recovery-label b { background: var(--green) !important; }
     }
   </style>
 </head>
@@ -1966,10 +1983,10 @@
             href="https://downloads.noxith.com/download">Download</a></div>
       </div>
 
-      <div class="node n1">
+      <div class="node n1 l">
         <div>Mutex unlock<small>Win32 handles</small></div>
       </div>
-      <div class="node n2">
+      <div class="node n2 l">
         <div>DPAPI encryption<small>Local only</small></div>
       </div>
       <div class="node n3 rt">
@@ -2005,7 +2022,7 @@
         <div class="track" id="track">
           <span>Multiple Roblox</span><span>DPAPI encryption</span><span>Place ID launcher</span><span>Online
             friends</span><span>FPS caps</span><span>Launch logs</span><span>Discord webhooks</span><span>Window
-            layouts</span><span>Remote view</span>
+            layouts</span><span>Remote view</span><span>Smart Recovery</span>
         </div>
       </div>
     </div>
@@ -2106,11 +2123,25 @@
           </div>
           <div class="txt">
             <h3>Discord webhooks <span class="tag">PREMIUM</span></h3>
-            <p>Alerts for disconnects, teleports and game launches, with a screenshot on disconnect.</p>
+            <p>Alerts for disconnects, teleports and game launches, with disconnect screenshots and optional reconnect updates.</p>
           </div>
         </div>
 
-        <div class="card s3">
+        <div class="card s2">
+          <div class="viz recovery" role="img" aria-label="Smart Recovery waits for internet, reopens Roblox and restores the window">
+            <div class="recovery-loop">
+              <div class="recovery-frame"></div>
+              <div class="recovery-refresh"><svg width="28" height="28" viewBox="0 0 384 384" fill="currentColor" aria-hidden="true"><path d="M234.667 149.333V106.667h79.898C287.579 67.978 242.745 42.667 192 42.667 109.525 42.667 42.667 109.525 42.667 192c0 82.475 66.858 149.333 149.333 149.333 76.201 0 139.072-57.075 148.195-130.807l42.342 5.292C370.808 310.618 289.974 384 192 384 85.961 384 0 298.039 0 192 0 85.961 85.961 0 192 0c60.316 0 114.136 27.813 149.335 71.313V0H384v149.333H234.667z"/></svg></div>
+            </div>
+            <div class="chip recovery-label"><b></b><span class="recovery-states"><span class="recovery-state">Waiting for internet</span><span class="recovery-state opening">Reopening Roblox</span><span class="recovery-state restored">Window restored</span></span></div>
+          </div>
+          <div class="txt">
+            <h3>Smart Recovery <span class="tag">PREMIUM</span></h3>
+            <p>Waits for internet, closes the disconnected game normally and reopens the account in its previous window position.</p>
+          </div>
+        </div>
+
+        <div class="card s2">
           <div class="viz">
             <div class="p2p">
               <div class="nd"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d6d6d6"
@@ -2136,7 +2167,7 @@
           </div>
         </div>
 
-        <div class="card s3">
+        <div class="card s2">
           <div class="viz">
             <div class="snap"><i></i><i></i><i></i></div>
           </div>
@@ -2192,7 +2223,8 @@
           <p>The full automation suite. Cancel anytime.</p>
           <ul>
             <li>Everything in Standard</li>
-            <li>Discord webhook alerts &amp; screenshots</li>
+            <li>Smart Recovery with window restoration</li>
+            <li>Discord alerts, screenshots &amp; reconnect updates</li>
             <li>Multi-monitor window layouts</li>
             <li>Per-account FPS limits</li>
             <li>Remote WebRTC streaming</li>
@@ -2242,6 +2274,10 @@
               managing process handles and config files externally.</p>
           </details>
           <details>
+            <summary>What happens if my internet disconnects?</summary>
+            <p>With Premium Smart Recovery enabled, BloxMulti keeps the disconnected game open until Roblox is reachable again. It then closes the game normally, relaunches the account and restores its window position. Optional Discord alerts keep disconnect and reconnect notifications in order.</p>
+          </details>
+          <details>
             <summary>Where are my logins stored?</summary>
             <p>Only on your PC. Session tokens are encrypted with the Windows Data Protection API and tied to your user
               profile.</p>
@@ -2252,7 +2288,7 @@
 
     <div class="cta2">
       <h2 class="fade">Run them all.</h2>
-      <a class="btn w" href="https://downloads.noxith.com/download">Download BloxMulti v1.4.7</a>
+      <a class="btn w" href="https://downloads.noxith.com/download">Download BloxMulti v1.4.8</a>
       <p>Windows 10 / 11 · Portable · SHA-256 verified · Clean VirusTotal scan</p>
       <div class="links"><a href="https://github.com/WaveBound/BloxMulti">GitHub</a><a
           href="https://discord.gg/ju6ANNecQg">Discord</a><a href="support.html">Support</a><a
