@@ -4,7 +4,7 @@
    <!-- Main Noxith Homepage -->
    <url>
       <loc>https://noxith.com/</loc>
-      <lastmod>2026-08-02</lastmod>
+      <lastmod>2026-10-03</lastmod>
       <changefreq>monthly</changefreq>
       <priority>1.00</priority>
    </url>
@@ -12,7 +12,7 @@
    <!-- BloxMulti Main Page -->
    <url>
       <loc>https://noxith.com/bloxmulti/</loc>
-      <lastmod>2026-09-12</lastmod>
+      <lastmod>2026-10-21</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.95</priority>
    </url>
@@ -51,21 +51,21 @@
    <url>
       <loc>https://noxith.com/ae-macro/</loc>
       <lastmod>2026-08-28</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.85</priority>
+      <changefreq>yearly</changefreq>
+      <priority>0.60</priority>
    </url>
 
    <url>
       <loc>https://noxith.com/utdx/</loc>
       <lastmod>2026-06-03</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.85</priority>
+      <changefreq>yearly</changefreq>
+      <priority>0.60</priority>
    </url>
 
    <url>
       <loc>https://noxith.com/wavebound/</loc>
       <lastmod>2026-05-01</lastmod>
-      <changefreq>monthly</changefreq>
+      <changefreq>yearly</changefreq>
       <priority>0.60</priority>
    </url>
 
