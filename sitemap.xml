@@ -12,7 +12,7 @@
    <!-- BloxMulti Main Page -->
    <url>
       <loc>https://noxith.com/bloxmulti/</loc>
-      <lastmod>2026-10-21</lastmod>
+      <lastmod>2026-10-22</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.95</priority>
    </url>
@@ -36,15 +36,15 @@
    <!-- BloxMulti Legal & Trust Anchors -->
    <url>
       <loc>https://noxith.com/bloxmulti/privacy.html</loc>
-      <lastmod>2026-09-12</lastmod>
+      <lastmod>2026-10-22</lastmod>
       <changefreq>yearly</changefreq>
-      <priority>0.40</priority>
+      <priority>0.5</priority>
    </url>
    <url>
       <loc>https://noxith.com/bloxmulti/terms.html</loc>
-      <lastmod>2026-09-12</lastmod>
+      <lastmod>2026-10-22</lastmod>
       <changefreq>yearly</changefreq>
-      <priority>0.40</priority>
+      <priority>0.5</priority>
    </url>
 
    <!-- Other Projects -->

@@ -12,7 +12,7 @@
   <!-- Primary SEO Meta -->
   <meta name="title" content="Privacy Policy — BloxMulti | Data Security &amp; Encryption Standards" />
   <meta name="description"
-    content="Review BloxMulti's Privacy Policy. Learn how our local Windows DPAPI token encryption, zero telemetry tracking, and AES-256 Google Drive sync protect your data." />
+    content="Learn how BloxMulti handles local account data, authentication, encrypted Google Drive backups, notifications, and optional feedback stored with Supabase." />
   <meta name="keywords"
     content="BloxMulti privacy policy, BloxMulti data security, Roblox alt manager privacy, Windows DPAPI encryption, Roblox account security, zero telemetry multi account" />
   <meta name="author" content="BloxMulti" />
@@ -26,7 +26,7 @@
   <meta property="og:locale" content="en_US" />
   <meta property="og:title" content="Privacy Policy — BloxMulti Data Protection &amp; Security" />
   <meta property="og:description"
-    content="Understand how BloxMulti handles local Windows DPAPI encryption, OAuth credentials, and zero-telemetry privacy." />
+    content="Understand how BloxMulti handles local data, authentication, encrypted backups, and optional polls, ratings, and form responses." />
   <meta property="og:image" content="https://noxith.com/bloxmulti/og-image.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -37,7 +37,7 @@
   <meta name="twitter:url" content="https://noxith.com/bloxmulti/privacy.html" />
   <meta name="twitter:title" content="Privacy Policy — BloxMulti Data Security" />
   <meta name="twitter:description"
-    content="Learn how BloxMulti protects your session tokens with local DPAPI encryption and zero-knowledge Google Drive backup." />
+    content="Review BloxMulti privacy practices for local account data, encrypted backups, notifications, and optional feedback." />
   <meta name="twitter:image" content="https://noxith.com/bloxmulti/og-image.png" />
 
   <!-- Structured Data: WebPage, PrivacyPolicy & Breadcrumbs -->
@@ -68,8 +68,8 @@
         "@id": "https://noxith.com/bloxmulti/privacy.html#webpage",
         "url": "https://noxith.com/bloxmulti/privacy.html",
         "name": "Privacy Policy — BloxMulti",
-        "description": "Details regarding local session storage, Windows DPAPI encryption, zero personal telemetry, and OAuth authentication.",
-        "dateModified": "2026-05-16",
+        "description": "Privacy practices for local session storage, account authentication, encrypted backups, notifications, and optional feedback.",
+        "dateModified": "2026-10-22",
         "isPartOf": {
           "@type": "WebSite",
           "@id": "https://noxith.com/bloxmulti/#website",
@@ -177,7 +177,7 @@ a{color:inherit;text-decoration:none}
   <div class="copy">
     <span class="eyebrow">Legal</span>
     <h1 class="fade">Privacy Policy</h1>
-    <p>Last updated May 16, 2026</p>
+    <p>Last updated October 22, 2026</p>
   </div>
 </div>
 
@@ -191,9 +191,10 @@ a{color:inherit;text-decoration:none}
     <p>BloxMulti is designed as a standalone, local Windows desktop application. We prioritize your privacy and collect
       minimal data.</p>
     <ul>
-      <li><strong>Local Data:</strong> The App stores your account session tokens (encrypted via Windows DPAPI), window
-        layouts, saved servers, and settings locally on your device. We do not transmit this local data to external
-        databases.</li>
+      <li><strong>Local Data:</strong> The App stores your saved Roblox account session cookies (encrypted via Windows DPAPI), window
+        layouts, saved servers, and settings locally on your device. These account-management files are not uploaded
+        to BloxMulti's database. If you enable Cloud Sync, an encrypted backup is stored in your Google Drive as
+        described below.</li>
       <li><strong>Telemetry and Analytics:</strong> We do not track keystrokes, personal in-game activity, or sell
         behavioral telemetry.</li>
     </ul>
@@ -209,6 +210,9 @@ a{color:inherit;text-decoration:none}
       <li><strong>Basic Profile Information:</strong> Such as your display name and avatar URL, provided securely during
         OAuth authentication.</li>
     </ul>
+    <p>Sign-in credentials and basic profile details are stored in the App's local browser storage to keep you
+      signed in. Session credentials are exchanged with the authentication services as needed. This storage is
+      separate from the DPAPI protection used for saved Roblox session cookies.</p>
     <p>We use this information strictly for licensing and authentication. We never sell your personal information to
       third
       parties.</p>
@@ -229,8 +233,43 @@ a{color:inherit;text-decoration:none}
     </ul>
 </section>
 <section class="sec">
-<h2>4. Third-Party Services &amp; Libraries</h2>
+<h2>4. Notifications &amp; Optional Feedback</h2>
+    <p>The App can display announcements, polls, star ratings, and short forms. Taking part in a poll, rating, or form
+      is optional and does not require signing in to a BloxMulti account.</p>
     <ul>
+      <li><strong>What is stored:</strong> When you submit a response, Supabase stores your selected answer, star
+        rating, or form answers, the associated post, the submission time, and a hash of a random installation
+        identifier. The identifier helps prevent duplicate responses to the same post. The feedback response record
+        does not include an account ID, name, or email address unless you include identifying information in an answer.</li>
+      <li><strong>Local notification data:</strong> Your device stores the random installation identifier and which
+        posts you have read. Read markers are not sent to BloxMulti as read receipts. Loaded content and unfinished
+        answers are kept in memory rather than saved as notification history in browser storage.</li>
+      <li><strong>Purpose and access:</strong> BloxMulti's authorized administrators can review submitted feedback to
+        understand user needs and improve the App. Aggregate poll totals and rating averages may be shown after you
+        submit. Individual form answers are not made public through the App.</li>
+      <li><strong>Retention and deletion:</strong> A post's deadline stops participation and removes it from the
+        active inbox; it does not automatically erase submitted responses. Responses remain stored until the post or
+        those responses are deleted. Deleting a post also deletes all its associated responses.</li>
+    </ul>
+    <p>Free-text answers may identify you even though no sign-in is required. Do not submit passwords, session tokens,
+      payment details, or other sensitive information. Clearing the App's browser storage removes local notification
+      identifiers and read markers, but does not delete responses already submitted; it can also allow another response
+      from that installation.</p>
+    <p>To request deletion of feedback, contact us through our <a href="support.html">Support Page</a>. Include enough
+      information to help us locate the submission, such as the post title and approximate submission time. Because
+      feedback is recorded using an installation identifier rather than an account, we may need additional information
+      to identify your response. Do not send us your password or session tokens.</p>
+</section>
+<section class="sec">
+<h2>5. Third-Party Services &amp; Libraries</h2>
+    <ul>
+      <li><strong>Supabase:</strong> Provides account authentication and database hosting for account, subscription,
+        notification, and feedback records.</li>
+      <li><strong>Google and Discord:</strong> Provide optional sign-in. Google Drive stores encrypted backups when
+        you enable Cloud Sync. Links in announcements may also take you to third-party services, whose own privacy
+        policies apply to your use of those services.</li>
+      <li><strong>Stripe:</strong> Processes Premium payments. Payment information you provide during checkout is
+        handled by Stripe under its own privacy policy.</li>
       <li><strong>Roblox:</strong> BloxMulti interacts with the Roblox client to manage sessions and instances.
         BloxMulti
         is not affiliated with, maintained, authorized, endorsed, or sponsored by Roblox Corporation.</li>
@@ -242,18 +281,19 @@ a{color:inherit;text-decoration:none}
     </ul>
 </section>
 <section class="sec">
-<h2>5. Data Security</h2>
-    <p>Your local account data and cookies reside solely on your computer, secured with Windows Data Protection API
-      (DPAPI).
-      Only license verification records and referral tallies are stored in our secure database.</p>
+<h2>6. Data Security</h2>
+    <p>Saved Roblox session cookies are protected locally using Windows Data Protection API (DPAPI). Optional Cloud
+      Sync backups are encrypted before upload as described above. Account and subscription records, notification
+      content, and submitted feedback are stored using Supabase, with access restricted to the functions and
+      administrators that need it. Local read markers are not stored in that database.</p>
 </section>
 <section class="sec">
-<h2>6. Changes to This Policy</h2>
+<h2>7. Changes to This Policy</h2>
     <p>We may update this Privacy Policy from time to time as we add new features. We will notify users of any
       significant changes via updates to the application or our website.</p>
 </section>
 <section class="sec">
-<h2>7. Contact Us</h2>
+<h2>8. Contact Us</h2>
     <p>If you have any questions or concerns about this Privacy Policy, please contact us via our <a
         href="support.html">Support Page</a> or join our <a href="https://discord.gg/ju6ANNecQg" target="_blank"
         rel="noopener">Discord Server</a>.</p>
