@@ -1968,7 +1968,7 @@
 
             <div id="streamControlsRow"
               style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
-              <button class="modal-btn modal-cancel" id="streamReconnectBtn" onclick="autoConnectStream()"
+              <button class="modal-btn modal-cancel" id="streamReconnectBtn" onclick="autoConnectStream(true)"
                 style="height:32px; font-size:11.5px;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"
                   aria-hidden="true">
@@ -2220,13 +2220,27 @@
 
     // ── Unified Storage Helper (Identical to index.html) ──
     const Auth = {
+      generation: 0,
+      refreshPromise: null,
+      subject(token) {
+        try { return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).sub || null; }
+        catch { return null; }
+      },
       getToken() {
         return localStorage.getItem("sb_access_token") || localStorage.getItem("bm_web_token") || null;
       },
       getRefresh() {
         return localStorage.getItem("sb_refresh_token") || localStorage.getItem("bm_web_refresh") || null;
       },
-      setTokens(token, refresh) {
+      setTokens(token, refresh, replaceSession = true) {
+        if (replaceSession) {
+          this.generation++;
+          this.refreshPromise = null;
+          stopStream();
+          state.user = null;
+          state.subscription = freeSubscription();
+          confirmCallback = null;
+        }
         if (token) {
           localStorage.setItem("sb_access_token", token);
           localStorage.removeItem("bm_web_token");
@@ -2252,7 +2266,7 @@
           const token = params.get("access_token");
           const refresh = params.get("refresh_token");
           if (token) {
-            this.setTokens(token, refresh || this.getRefresh());
+            this.setTokens(token, refresh);
           }
           history.replaceState(null, document.title, window.location.pathname + window.location.search);
           return true;
@@ -2273,7 +2287,10 @@
         }
 
         if (refresh) {
-          try {
+          if (this.refreshPromise) return this.refreshPromise;
+          const generation = this.generation;
+          const isCurrent = () => generation === this.generation && this.getRefresh() === refresh && this.getToken() === token;
+          const task = (async () => { try {
             const res = await fetch(`https://${SUPABASE_HOST}/auth/v1/token?grant_type=refresh_token`, {
               method: "POST",
               headers: {
@@ -2282,16 +2299,26 @@
               },
               body: JSON.stringify({ refresh_token: refresh })
             });
+            if (!isCurrent()) return null;
             if (res.ok) {
               const data = await res.json();
+              if (!isCurrent()) return null;
               if (data.access_token) {
-                this.setTokens(data.access_token, data.refresh_token || refresh);
+                this.setTokens(data.access_token, data.refresh_token || refresh, false);
                 return data.access_token;
               }
+            } else if ((res.status === 400 || res.status === 401) && isCurrent()) {
+              this.clear();
+              openAuthModal();
             }
           } catch (err) {
             console.error("Dashboard token refresh failed:", err);
           }
+          return null;
+          })();
+          this.refreshPromise = task;
+          try { return await task; }
+          finally { if (this.refreshPromise === task) this.refreshPromise = null; }
         }
         return null;
       },
@@ -2306,15 +2333,21 @@
       }
     };
 
+    function freeSubscription() { return { isPremium: false, tier: 0, renewDate: null, cancelAtPeriodEnd: false, status: "" }; }
     let state = {
       user: null,
-      subscription: { isPremium: false, tier: 0, renewDate: null, cancelAtPeriodEnd: false, status: "" }
+      remoteAccess: null,
+      subscription: freeSubscription()
     };
 
     let peer = null;
     let activeDataConnection = null;
     let activeMediaCall = null;
     let peerRetryTimer = null;
+    let streamGeneration = 0;
+    let streamConnectTask = null;
+    let dashboardGeneration = 0;
+    let storageRefreshTimer = null;
 
     // ── Tab Management ──
     function switchTab(tabId) {
@@ -2352,9 +2385,11 @@
 
     // ── Requests (Auto-refresh on every call) ──
     async function supabaseRequest(method, path, body = null, useAuth = true) {
+      const generation = Auth.generation;
       let token = null;
       if (useAuth) {
         token = await Auth.ensureToken();
+        if (generation !== Auth.generation) throw new Error("Session changed");
         if (!token) throw new Error("Unauthorized");
       }
 
@@ -2368,18 +2403,24 @@
       if (body) options.body = JSON.stringify(body);
 
       const res = await fetch(`https://${SUPABASE_HOST}${path}`, options);
+      if (useAuth && generation !== Auth.generation) throw new Error("Session changed");
       if (!res.ok) {
         const errText = await res.text();
         throw new Error(`HTTP ${res.status}: ${errText}`);
       }
-      return res.json();
+      const data = await res.json();
+      if (useAuth && generation !== Auth.generation) throw new Error("Session changed");
+      return data;
     }
 
     // ── Data Fetching ──
     async function fetchDashboardData() {
       Auth.parseHash();
+      const generation = Auth.generation, request = ++dashboardGeneration;
+      const isCurrent = () => generation === Auth.generation && request === dashboardGeneration;
 
       const validToken = await Auth.ensureToken();
+      if (!isCurrent()) return;
       if (!validToken) {
         openAuthModal();
         return;
@@ -2387,19 +2428,23 @@
 
       try {
         const u = await supabaseRequest("GET", "/auth/v1/user", null, true);
-        state.user = {
+        if (!isCurrent()) return;
+        const user = {
           id: u.id,
           email: u.email,
-          name: u.user_metadata?.full_name || u.email.split('@')[0],
+          name: u.user_metadata?.full_name || (u.email || '').split('@')[0],
           picture: u.user_metadata?.avatar_url || ""
         };
 
+        let subscription = freeSubscription();
         try {
           const subRes = await supabaseRequest("GET", `/rest/v1/subscriptions?user_id=eq.${u.id}&select=tier,status,current_period_end,cancel_at_period_end`, null, true);
+          if (!isCurrent()) return;
           if (Array.isArray(subRes) && subRes.length > 0) {
             const status = subRes[0].status;
-            const isPrem = status === "active" || status === "trialing";
-            state.subscription = {
+            const end = subRes[0].current_period_end;
+            const isPrem = (status === "active" || status === "trialing") && (end === "infinity" || Date.parse(end) > Date.now());
+            subscription = {
               isPremium: isPrem,
               tier: subRes[0].tier,
               renewDate: subRes[0].current_period_end,
@@ -2408,9 +2453,14 @@
             };
           }
         } catch (e) {
+          if (!isCurrent()) return;
           console.warn("Subscription check warning:", e);
         }
 
+        if (!isCurrent()) return;
+        state.user = user;
+        state.subscription = subscription;
+        if (!subscription.isPremium) stopStream();
         closeAuthModal();
         renderUI();
 
@@ -2418,15 +2468,14 @@
           autoConnectStream();
         }
       } catch (err) {
+        if (!isCurrent()) return;
         console.error("Session invalid:", err);
         openAuthModal();
       }
     }
 
     function getUserStreamKey() {
-      if (!state.user || !state.user.id) return "";
-      const prefix = state.user.id.replace(/-/g, "").slice(0, 8).toUpperCase();
-      return `bm-${prefix}`;
+      return state.remoteAccess?.roomId || "";
     }
 
     // ── Render Views ──
@@ -2441,8 +2490,13 @@
       const sideAv = document.getElementById("sidebarAvatar");
       const accAv = document.getElementById("accountAvatar");
       if (state.user.picture) {
-        sideAv.innerHTML = `<img src="${state.user.picture}" alt="Avatar">`;
-        accAv.innerHTML = `<img src="${state.user.picture}" alt="Avatar">`;
+        for (const avatar of [sideAv, accAv]) {
+          const image = document.createElement('img');
+          try { const url = new URL(state.user.picture); if (url.protocol !== 'https:') throw new Error(); image.src = url.href; }
+          catch { avatar.textContent = (state.user.name || "U").charAt(0).toUpperCase(); continue; }
+          image.alt = 'Avatar';
+          avatar.replaceChildren(image);
+        }
       } else {
         const initial = (state.user.name || "U").charAt(0).toUpperCase();
         sideAv.textContent = initial;
@@ -2558,7 +2612,9 @@
 
     // ── Checkout & Stripe ──
     async function initiateCheckout(planType) {
+      const generation = Auth.generation;
       const token = await Auth.ensureToken();
+      if (generation !== Auth.generation) return;
       if (!token) {
         openAuthModal();
         return;
@@ -2566,27 +2622,33 @@
 
       try {
         const res = await supabaseRequest("POST", "/functions/v1/BloxMulti-Subscription", { planType }, true);
+        if (generation !== Auth.generation) return;
         if (res && res.url) {
           window.location.href = res.url;
         } else if (res && res.message === "Already subscribed") {
           await fetchDashboardData();
+          if (generation !== Auth.generation) return;
           showModalAlert("Already Active", "Your account is already active with BloxMulti Premium!");
         } else {
           showModalAlert("Checkout Error", res.error || "Unable to start checkout session.");
         }
       } catch (err) {
+        if (generation !== Auth.generation) return;
         showModalAlert("Checkout Failed", err.message || "Failed to reach subscription service.");
       }
     }
 
     // ── Cancellation & Resumption ──
     function confirmCancelSub() {
+      const generation = Auth.generation;
       showModalConfirm(
         "Cancel Subscription",
         "Are you sure you want to cancel your BloxMulti Premium subscription? You will keep your benefits until the end of your current billing period.",
         async () => {
+          if (generation !== Auth.generation) return;
           try {
             const res = await supabaseRequest("POST", "/functions/v1/BloxMulti-CancelSubscription", {}, true);
+            if (generation !== Auth.generation) return;
             if (res.ok) {
               showModalAlert("Subscription Canceled", `Your subscription has been canceled. You retain full access until ${new Date(res.accessEndsAt).toLocaleDateString()}.`);
               await fetchDashboardData();
@@ -2594,6 +2656,7 @@
               showModalAlert("Cancellation Failed", res.error || "Failed to cancel subscription.");
             }
           } catch (e) {
+            if (generation !== Auth.generation) return;
             showModalAlert("Cancellation Error", e.message);
           }
         },
@@ -2602,12 +2665,15 @@
     }
 
     function confirmResumeSub() {
+      const generation = Auth.generation;
       showModalConfirm(
         "Resume Subscription",
         "Resume your BloxMulti Premium recurring plan? It will continue auto-renewing normally.",
         async () => {
+          if (generation !== Auth.generation) return;
           try {
             const res = await supabaseRequest("POST", "/functions/v1/BloxMulti-ResumeSubscription", {}, true);
+            if (generation !== Auth.generation) return;
             if (res.ok) {
               showModalAlert("Subscription Resumed", "Your subscription is active and will auto-renew normally.");
               await fetchDashboardData();
@@ -2615,6 +2681,7 @@
               showModalAlert("Resume Failed", res.error || "Failed to resume subscription.");
             }
           } catch (e) {
+            if (generation !== Auth.generation) return;
             showModalAlert("Resume Error", e.message);
           }
         }
@@ -2622,87 +2689,117 @@
     }
 
     // ── Remote WebRTC Streaming ──
-    function autoConnectStream() {
-      if (!state.subscription.isPremium) return;
+    function validRemoteAccess(access) {
+      return access && /^bm-[a-f0-9]{32}$/.test(access.roomId) && /^[a-f0-9]{64}$/.test(access.token) &&
+        Number.isFinite(Date.parse(access.expiresAt)) && Date.parse(access.expiresAt) > Date.now();
+    }
 
-      const streamKey = getUserStreamKey();
-      if (!streamKey) return;
-
+    async function autoConnectStream(reconnect = false) {
+      if (!state.subscription.isPremium || !state.user?.id) return;
+      if (streamConnectTask) return streamConnectTask;
+      if (!reconnect && peer && validRemoteAccess(state.remoteAccess)) return;
       stopStream(false);
-
+      const generation = streamGeneration, authGeneration = Auth.generation, ownerId = state.user.id;
+      const isCurrent = () => generation === streamGeneration && authGeneration === Auth.generation &&
+        ownerId === state.user?.id && state.subscription.isPremium;
       const statusPill = document.getElementById("streamStatusPill");
       const overlay = document.getElementById("streamWaitingOverlay");
-
       statusPill.textContent = "Connecting...";
       statusPill.style.color = "var(--accent-light)";
 
-      peer = new Peer({
-        debug: 1,
-        config: {
-          iceServers: [
+      const task = (async () => { try {
+        // The RPC returns only this authenticated account's current host access.
+        // Never derive a host ID from a user ID or accept a caller-supplied code.
+        const access = await supabaseRequest('POST', '/rest/v1/rpc/get_remote_view_session', {}, true);
+        if (!isCurrent()) return;
+        if (!validRemoteAccess(access)) {
+          statusPill.textContent = "Offline";
+          statusPill.style.color = "var(--muted)";
+          return;
+        }
+        state.remoteAccess = access;
+        document.getElementById("streamRoomBadge").textContent = `Room: ${access.roomId}`;
+        document.getElementById("streamOverlayRoomTag").textContent = `Stream ID: ${access.roomId}`;
+        const viewer = new Peer({
+          debug: 1,
+          config: { iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'turn:openrelay.metered.ca:80', username: 'openrelay', credential: 'openrelay' },
             { urls: 'turn:openrelay.metered.ca:443', username: 'openrelay', credential: 'openrelay' }
-          ]
-        }
-      });
-
-      peer.on('open', () => {
-        activeDataConnection = peer.connect(streamKey);
-        activeDataConnection.on('open', () => {
-          statusPill.textContent = "Awaiting Screen...";
+          ] }
         });
+        peer = viewer;
+        const authorized = () => isCurrent() && peer === viewer && state.remoteAccess === access && validRemoteAccess(access);
+        peerRetryTimer = setTimeout(() => {
+          if (!isCurrent()) return;
+          stopStream(false);
+          autoConnectStream(); // Refresh owner-only access if the host renewed it.
+        }, Math.min(2147483647, Math.max(1, Date.parse(access.expiresAt) - Date.now())));
 
-        activeDataConnection.on('close', () => {
-          handleStreamDisconnect();
+        viewer.on('open', () => {
+          if (!authorized()) return;
+          const connection = viewer.connect(access.roomId, { metadata: { token: access.token } });
+          activeDataConnection = connection;
+          connection.on('open', () => { if (authorized() && activeDataConnection === connection) statusPill.textContent = "Awaiting Screen..."; });
+          connection.on('close', () => { if (isCurrent() && activeDataConnection === connection) handleStreamDisconnect(); });
+          connection.on('error', () => { if (isCurrent() && activeDataConnection === connection) handleStreamDisconnect(); });
         });
-      });
-
-      peer.on('call', (call) => {
-        activeMediaCall = call;
-        call.answer();
-        call.on('stream', (remoteStream) => {
-          const video = document.getElementById("remoteVideo");
-          video.srcObject = remoteStream;
-          overlay.style.display = "none";
-          statusPill.textContent = "LIVE";
-          statusPill.style.color = "var(--green)";
+        viewer.on('call', (call) => {
+          if (!authorized() || call.peer !== access.roomId || call.metadata?.token !== access.token ||
+              !activeDataConnection || activeDataConnection.peer !== access.roomId || activeMediaCall) {
+            call.close(); return;
+          }
+          activeMediaCall = call;
+          call.on('stream', (remoteStream) => {
+            if (!authorized() || activeMediaCall !== call) {
+              remoteStream.getTracks().forEach(track => track.stop());
+              return;
+            }
+            const video = document.getElementById("remoteVideo");
+            video.srcObject = remoteStream;
+            overlay.style.display = "none";
+            statusPill.textContent = "LIVE";
+            statusPill.style.color = "var(--green)";
+          });
+          call.on('close', () => { if (isCurrent() && activeMediaCall === call) handleStreamDisconnect(); });
+          call.on('error', () => { if (isCurrent() && activeMediaCall === call) handleStreamDisconnect(); });
+          call.answer();
         });
-
-        call.on('close', () => {
-          handleStreamDisconnect();
+        viewer.on('error', (err) => {
+          if (!isCurrent()) return;
+          console.warn("Peer connection issue:", err);
+          stopStream(false);
+          statusPill.textContent = "Offline";
+          statusPill.style.color = "var(--red)";
         });
-      });
-
-      peer.on('error', (err) => {
-        console.warn("Peer connection issue:", err);
+      } catch (err) {
+        if (!isCurrent()) return;
+        console.warn('Remote session unavailable:', err);
         statusPill.textContent = "Offline";
         statusPill.style.color = "var(--red)";
-      });
+      } })();
+      streamConnectTask = task;
+      try { return await task; }
+      finally { if (streamConnectTask === task) streamConnectTask = null; }
     }
 
     function handleStreamDisconnect() {
-      const statusPill = document.getElementById("streamStatusPill");
-      const overlay = document.getElementById("streamWaitingOverlay");
-      const video = document.getElementById("remoteVideo");
-
-      if (video.srcObject) {
-        video.srcObject.getTracks().forEach(t => t.stop());
-        video.srcObject = null;
-      }
-
-      if (state.subscription.isPremium) {
-        overlay.style.display = "flex";
-      }
-      statusPill.textContent = "Disconnected";
-      statusPill.style.color = "var(--muted)";
+      stopStream();
     }
 
     function stopStream(resetStatus = true) {
+      ++streamGeneration;
+      streamConnectTask = null;
       clearTimeout(peerRetryTimer);
-      if (activeMediaCall) { activeMediaCall.close(); activeMediaCall = null; }
-      if (activeDataConnection) { activeDataConnection.close(); activeDataConnection = null; }
-      if (peer) { peer.destroy(); peer = null; }
+      peerRetryTimer = null;
+      const call = activeMediaCall, connection = activeDataConnection, viewer = peer;
+      activeMediaCall = activeDataConnection = peer = null;
+      state.remoteAccess = null;
+      document.getElementById("streamRoomBadge").textContent = 'Room: —';
+      document.getElementById("streamOverlayRoomTag").textContent = 'Stream ID: —';
+      if (call) call.close();
+      if (connection) connection.close();
+      if (viewer) viewer.destroy();
 
       const video = document.getElementById("remoteVideo");
       if (video.srcObject) {
@@ -2710,10 +2807,8 @@
         video.srcObject = null;
       }
 
+      if (state.subscription.isPremium) document.getElementById("streamWaitingOverlay").style.display = "flex";
       if (resetStatus) {
-        if (state.subscription.isPremium) {
-          document.getElementById("streamWaitingOverlay").style.display = "flex";
-        }
         const statusPill = document.getElementById("streamStatusPill");
         statusPill.textContent = "Disconnected";
         statusPill.style.color = "var(--muted)";
@@ -2784,10 +2879,24 @@
 
     function signOut() {
       Auth.clear();
-      state.user = null;
-      stopStream();
       openAuthModal();
     }
+
+    window.addEventListener('storage', event => {
+      if (event.key !== null && !['sb_access_token', 'sb_refresh_token', 'bm_web_token', 'bm_web_refresh'].includes(event.key)) return;
+      // Another tab may have signed out or replaced the account. Its credentials
+      // are already in storage; invalidate local work without deleting them.
+      if (!state.user?.id || Auth.subject(Auth.getToken()) !== state.user.id) {
+        Auth.generation++;
+        Auth.refreshPromise = null;
+        stopStream();
+        state.user = null;
+        state.subscription = freeSubscription();
+        confirmCallback = null;
+      }
+      clearTimeout(storageRefreshTimer);
+      storageRefreshTimer = setTimeout(() => { storageRefreshTimer = null; fetchDashboardData(); }, 0);
+    });
 
     window.addEventListener("DOMContentLoaded", () => {
       fetchDashboardData();
