@@ -1928,7 +1928,7 @@
             </div>
 
             <div class="stream-viewport" id="streamViewport">
-              <video id="remoteVideo" autoplay playsinline aria-label="Live remote client feed"></video>
+              <video id="remoteVideo" autoplay muted playsinline aria-label="Live remote client feed"></video>
 
               <div class="stream-overlay" id="streamWaitingOverlay">
                 <div class="stream-overlay-icon" aria-hidden="true">
@@ -2348,6 +2348,7 @@
     let peerRetryTimer = null;
     let streamGeneration = 0;
     let streamConnectTask = null;
+    let streamPlaybackTimer = null;
     let dashboardGeneration = 0;
     let storageRefreshTimer = null;
 
@@ -2696,7 +2697,7 @@
         Number.isFinite(Date.parse(access.expiresAt)) && Date.parse(access.expiresAt) > Date.now();
     }
 
-    async function autoConnectStream(reconnect = false) {
+    async function autoConnectStream(reconnect = false, retrying = false) {
       if (!state.subscription.isPremium || !state.user?.id) return;
       if (streamConnectTask) return streamConnectTask;
       if (!reconnect && peer && validRemoteAccess(state.remoteAccess)) return;
@@ -2732,6 +2733,13 @@
         });
         peer = viewer;
         const authorized = () => isCurrent() && peer === viewer && state.remoteAccess === access && validRemoteAccess(access);
+        // One startup retry, then leave an actionable status instead of a false LIVE badge.
+        streamPlaybackTimer = setTimeout(() => {
+          if (!authorized()) return;
+          stopStream(false);
+          if (!retrying) autoConnectStream(true, true);
+          else statusPill.textContent = "No video received. Click Reconnect.";
+        }, 15000);
         peerRetryTimer = setTimeout(() => {
           if (!isCurrent()) return;
           stopStream(false);
@@ -2743,8 +2751,8 @@
           const connection = viewer.connect(access.roomId, { metadata: { token: access.token } });
           activeDataConnection = connection;
           connection.on('open', () => { if (authorized() && activeDataConnection === connection) statusPill.textContent = "Awaiting Screen..."; });
-          connection.on('close', () => { if (isCurrent() && activeDataConnection === connection) handleStreamDisconnect(); });
-          connection.on('error', () => { if (isCurrent() && activeDataConnection === connection) handleStreamDisconnect(); });
+          connection.on('close', () => { if (isCurrent() && activeDataConnection === connection) stopStream(); });
+          connection.on('error', () => { if (isCurrent() && activeDataConnection === connection) stopStream(); });
         });
         viewer.on('call', (call) => {
           if (!authorized() || call.peer !== access.roomId || call.metadata?.token !== access.token ||
@@ -2752,19 +2760,31 @@
             call.close(); return;
           }
           activeMediaCall = call;
-          call.on('stream', (remoteStream) => {
+          call.on('stream', remoteStream => {
             if (!authorized() || activeMediaCall !== call) {
               remoteStream.getTracks().forEach(track => track.stop());
               return;
             }
             const video = document.getElementById("remoteVideo");
+            const current = () => authorized() && activeMediaCall === call && video.srcObject === remoteStream;
+            video.muted = true;
+            video.onplaying = () => {
+              if (!current()) return;
+              clearTimeout(streamPlaybackTimer); streamPlaybackTimer = null;
+              overlay.style.display = "none";
+              statusPill.textContent = "LIVE";
+              statusPill.style.color = "var(--green)";
+            };
             video.srcObject = remoteStream;
-            overlay.style.display = "none";
-            statusPill.textContent = "LIVE";
-            statusPill.style.color = "var(--green)";
+            video.play().catch(error => {
+              if (!current()) return;
+              console.warn('Remote playback failed:', error);
+              stopStream(false);
+              statusPill.textContent = "Playback blocked. Click Reconnect.";
+            });
           });
-          call.on('close', () => { if (isCurrent() && activeMediaCall === call) handleStreamDisconnect(); });
-          call.on('error', () => { if (isCurrent() && activeMediaCall === call) handleStreamDisconnect(); });
+          call.on('close', () => { if (isCurrent() && activeMediaCall === call) stopStream(); });
+          call.on('error', () => { if (isCurrent() && activeMediaCall === call) stopStream(); });
           call.answer();
         });
         viewer.on('error', (err) => {
@@ -2785,13 +2805,11 @@
       finally { if (streamConnectTask === task) streamConnectTask = null; }
     }
 
-    function handleStreamDisconnect() {
-      stopStream();
-    }
-
     function stopStream(resetStatus = true) {
       ++streamGeneration;
       streamConnectTask = null;
+      clearTimeout(streamPlaybackTimer);
+      streamPlaybackTimer = null;
       clearTimeout(peerRetryTimer);
       peerRetryTimer = null;
       const call = activeMediaCall, connection = activeDataConnection, viewer = peer;
@@ -2804,6 +2822,8 @@
       if (viewer) viewer.destroy();
 
       const video = document.getElementById("remoteVideo");
+      video.onplaying = null;
+      video.pause();
       if (video.srcObject) {
         video.srcObject.getTracks().forEach(t => t.stop());
         video.srcObject = null;
