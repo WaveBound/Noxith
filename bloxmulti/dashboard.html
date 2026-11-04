@@ -96,7 +96,7 @@
   </script>
 
   <link rel="stylesheet" href="styles/dashboard-base.css">
-<link rel="stylesheet" href="styles/dashboard-layout.css">
+<link rel="stylesheet" href="styles/dashboard-layout.css?v=2">
 <link rel="stylesheet" href="styles/shared-plans.css">
 <style>
 
@@ -271,10 +271,13 @@
               <button class="modal-btn upgrade-confirm-btn overview-action" onclick="switchTab('stream')">Open remote screen <span aria-hidden="true">→</span></button>
             </div>
             <div class="panel overview-card">
+              <div class="overview-card-header">
               <div class="overview-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                <span class="overview-tag" id="overviewPlan">Loading plan…</span>
+              </div>
               <h3>Account &amp; plan</h3>
               <p>Review your subscription and manage your billing settings.</p>
-              <div class="overview-meta"><span class="overview-tag" id="overviewPlan">Loading plan…</span><button class="modal-btn modal-cancel overview-action" onclick="switchTab('account')">Manage account</button></div>
+              <div class="overview-meta"><button class="modal-btn modal-cancel overview-action" onclick="switchTab('account')">Manage account</button></div>
             </div>
           </div>
           <div class="panel overview-card" style="min-height:0;">
