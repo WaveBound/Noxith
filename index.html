@@ -897,6 +897,56 @@
         transition: none
       }
     }
+
+    /* Product cards and navigation share the same compact controls as BloxMulti. */
+    .top .r { height:auto; gap:8px; padding:0; background:transparent; border:0; border-radius:0; backdrop-filter:none; }
+    .top .r .sbtn { display:inline-flex; align-items:center; justify-content:center; min-height:38px; padding:0 12px; border:1px solid #343434; border-radius:7px; font-size:13px; }
+    .top .r .btn { height:38px; padding:0 14px; border-radius:7px; }
+    #projects .bento { gap:10px; }
+    #projects .card { background:#101010; border-color:#262626; border-radius:10px; backdrop-filter:none; box-shadow:none; }
+    #projects .card:hover { border-color:#484848; box-shadow:none; }
+    #projects .card::before, #projects .viz::before, #projects .viz::after { display:none; }
+    #projects .viz { background:#090909; border-color:#252525; }
+    #projects .viz img { transition:opacity .2s ease; }
+    #projects .card:hover .viz img { transform:none; }
+    #projects .viz .shade { background:linear-gradient(transparent 65%,rgba(10,10,10,.75)); }
+    #projects .ico { width:48px; height:48px; border-radius:9px; background:#202020; border:1px solid #303030; animation:none; }
+    #projects .txt { padding:20px; }
+    #projects .txt h3 { font-size:19px; }
+    #projects .tags { margin:14px 0 16px; }
+    #projects .txt .btn, #projects .txt .btn.w { width:100%; min-height:38px; height:auto; padding:9px 12px; border:1px solid #454545; border-radius:7px; background:#292929; color:#eee; font-size:12px; font-weight:600; }
+    #projects .txt .btn:hover, #projects .txt .btn.w:hover { background:#353535; border-color:#666; }
+    a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible { outline:2px solid #eee; outline-offset:3px; }
+    @media(max-width:900px) {
+      .top { grid-template-columns:1fr auto; grid-template-rows:auto auto; gap:8px; padding:10px 16px; background:rgba(8,8,9,.95); backdrop-filter:blur(12px); }
+      .top .logo { grid-column:1; grid-row:1; min-width:0; }
+      .top .r { grid-column:2; grid-row:1; height:auto; padding:0; background:transparent; border:0; }
+      .top .pill { display:flex; grid-column:1 / -1; grid-row:2; max-width:100%; overflow-x:auto; white-space:nowrap; padding:0 0 4px; border:0; border-radius:0; background:none; backdrop-filter:none; scrollbar-width:none; }
+      .top .pill::-webkit-scrollbar { display:none; }
+      .top .pill a, .top .pill button { flex:none; padding:7px 10px; border-radius:6px; }
+      .stage { padding-top:120px; }
+      section, #team { scroll-margin-top:125px; }
+    }
+    @media(max-width:480px) {
+      .wrap { padding:0 14px; }
+      .copy h1 { font-size:clamp(40px,11vw,54px); }
+      .copy p { font-size:15px; }
+      #projects .viz.big { height:200px; }
+      #projects .txt { padding:17px; }
+    }
+
+
+    .top .r .sbtn { background:#161616; border:1px solid #666; color:#fff; }
+    .top .r .sbtn:hover { background:#303030; border-color:#999; color:#fff; }
+    .cta2 button.btn { background:#161616; border-color:#666; color:#fff; }
+    .cta2 button.btn:hover { background:#303030; border-color:#999; }
+
+
+    /* Simple project marks. */
+    #projects .project-mark { display:grid; place-items:center; color:#bcbcbc; }
+    #projects .project-mark svg { width:46px; height:46px; }
+    #projects .project-mark img { position:static; display:block; width:88px; height:88px; object-fit:contain; opacity:1; }
+
   </style>
   <script>document.documentElement.classList.add('js')</script>
 </head>
@@ -913,7 +963,7 @@
       <div class="top">
         <a class="logo" href="/"><img src="logo.png" alt="noxith logo" onerror="this.style.display='none'">noxith
           <small>hub</small></a>
-        <nav class="pill">
+        <nav class="pill" aria-label="Main navigation">
           <a href="#projects">Projects</a><a href="#team">Team</a>
           <button type="button" onclick="openModal()">Contact</button>
           <button type="button" onclick="if(window.NoxithDonations)NoxithDonations.open()">Donate</button>
@@ -976,11 +1026,7 @@
 
         <div class="card s2 rv" data-cat="active">
           <div class="viz">
-            <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff"
-                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z" />
-                <path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z" />
-              </svg></div>
+            <div class="project-mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 7.5h17l6 6V39a2 2 0 0 1-2 2H13a2 2 0 0 1-2-2V9.5a2 2 0 0 1 2-2Z"/><path d="M30 8v6h6M17 20h13M17 26h13M17 32h9"/></svg></div>
           </div>
           <div class="txt">
             <h3>Anime Expedition Wiki</h3>
@@ -992,10 +1038,7 @@
 
         <div class="card s2 rv" data-cat="discontinued">
           <div class="viz">
-            <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff"
-                stroke-width="1.8" stroke-linecap="round">
-                <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" />
-              </svg></div>
+            <div class="project-mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 37h28M13 31V20M22 31V13M31 31V24"/><path d="m12 15 10-6 9 9 6-5"/><path d="M33 13h4v4"/></svg></div>
           </div>
           <div class="txt">
             <h3>UTDX Optimizer</h3>
@@ -1008,12 +1051,7 @@
 
         <div class="card s2 rv" data-cat="discontinued">
           <div class="viz">
-            <div class="ico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff"
-                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="5" y="5" width="14" height="14" rx="2" />
-                <rect x="9" y="9" width="6" height="6" />
-                <path d="M9 1v4M15 1v4M9 19v4M15 19v4M1 9h4M1 15h4M19 9h4M19 15h4" />
-              </svg></div>
+            <div class="project-mark wave-mark" aria-hidden="true"><img src="wavebound/logo/main%20logo.png" alt=""></div>
           </div>
           <div class="txt">
             <h3>Wavebound</h3>

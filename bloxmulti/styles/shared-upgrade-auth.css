@@ -1,0 +1,44 @@
+    /* Pricing follows the desktop app's upgrade modal. */
+    .compare-card { position:relative; background:#161616; border-color:#2b2b2b; padding:16px 18px; }
+    .compare-card.compare-featured { background:#161616; border-color:#555; }
+    .compare-card:nth-child(3) { border-color:rgba(230,185,115,.4); }
+    .compare-name { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:7px; font-size:13.5px; }
+    .compare-badge { display:inline-flex; align-items:center; padding:3px 7px; border:1px solid #4b4b4b; border-radius:6px; color:#dedede; background:rgba(255,255,255,.07); font-size:8.5px; font-weight:700; letter-spacing:.04em; line-height:1.2; }
+    .compare-badge.gold { color:#1a1002; background:linear-gradient(135deg,#f2c976,#d49f45); border-color:transparent; }
+    .compare-price { font-size:26px; letter-spacing:-.02em; }
+    .compare-card:nth-child(3) .compare-price { color:#eed08d; }
+    .compare-card:nth-child(3) .compare-price span { color:#aaa; }
+    .compare-desc { font-size:11px; line-height:1.45; }
+    .compare-features { padding-top:12px; border-top:1px solid #2b2b2b; }
+    .compare-action { min-height:34px; border-radius:8px; }
+    .compare-featured .compare-action:not(:disabled) { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); color:#eee; }
+    .compare-featured .compare-action:hover:not(:disabled) { background:rgba(255,255,255,.14); }
+    .compare-card:nth-child(3) .compare-action:not(:disabled) { background:linear-gradient(135deg,#f0c775,#d89e3f); border-color:rgba(255,225,160,.3); color:#170e02; }
+    .compare-card:nth-child(3) .compare-action:hover:not(:disabled) { background:linear-gradient(135deg,#fad589,#e2ab4c); }
+    .compare-note { display:flex; gap:10px; align-items:flex-start; padding:11px 13px; background:#1a1415; border-color:#573239; color:#d3b7bb; font-size:11px; line-height:1.5; }
+    .compare-note svg { flex:none; width:16px; height:16px; color:#dc8791; margin-top:1px; }
+    .compare-note strong { display:block; margin-bottom:2px; color:#f0d8db; font-size:11.5px; }
+
+
+    /* Shared sign-in presentation on the site and dashboard. */
+    #authModal { padding:16px; overflow-y:auto; }
+    #authModal .auth-dialog-card { position:relative; width:100%; max-width:380px; max-height:calc(100dvh - 32px); overflow:auto; margin:auto; padding:22px; background:#141414; border:1px solid #333; border-radius:10px; color:#eee; text-align:left; box-shadow:0 20px 60px rgba(0,0,0,.55); }
+    #authModal .auth-brand { display:flex; align-items:center; gap:10px; padding:0 36px 17px 0; margin-bottom:20px; border-bottom:1px solid #2b2b2b; }
+    #authModal .auth-brand img { width:34px; height:34px; object-fit:contain; border:0; border-radius:0; }
+    #authModal .auth-brand-copy { display:flex; flex-direction:column; gap:2px; min-width:0; }
+    #authModal .auth-brand-copy strong { font-size:13px; font-weight:700; line-height:1.2; }
+    #authModal .auth-brand-copy span { color:#a3a3a3; font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+    #authModal .auth-dialog-card h3 { margin:0 0 6px; font:600 21px/1.2 Inter,system-ui,sans-serif; letter-spacing:-.025em; color:#eee; }
+    #authModal .auth-dialog-card .auth-dialog-desc { margin:0 0 18px; color:#aaa; font:400 12px/1.55 Inter,system-ui,sans-serif; }
+    #authModal .auth-dialog-card .oa, #authModal .auth-dialog-card .btn-oauth { display:flex; align-items:center; justify-content:flex-start; gap:11px; width:100%; height:44px; margin:8px 0 0; padding:0 13px; border:1px solid #414141; border-radius:7px; background:#222; color:#eee; font:600 12px/1.2 Inter,system-ui,sans-serif; cursor:pointer; }
+    #authModal .auth-dialog-card .oa:hover, #authModal .auth-dialog-card .btn-oauth:hover { background:#2c2c2c; border-color:#666; }
+    #authModal .auth-dialog-card .oa svg, #authModal .auth-dialog-card .btn-oauth svg { flex:none; }
+    #authModal .auth-dialog-card .oa::after, #authModal .auth-dialog-card .btn-oauth::after { content:'→'; margin-left:auto; color:#aaa; font-size:15px; font-weight:400; }
+    #authModal .auth-dialog-card .auth-legal { display:block; margin:18px 0 0; padding-top:14px; border-top:1px solid #2b2b2b; color:#aaa; font:400 11px/1.6 Inter,system-ui,sans-serif; }
+    #authModal .auth-dialog-card .auth-legal a { color:#ddd; font-weight:600; text-decoration:underline; text-underline-offset:2px; }
+    #authModal .auth-dialog-card .auth-return { display:inline-block; margin-top:12px; color:#aaa; font:500 11px/1.4 Inter,system-ui,sans-serif; text-decoration:none; }
+    #authModal .auth-dialog-card .auth-return:hover { color:#fff; }
+    #authModal .auth-dialog-card .x, #authModal .auth-dialog-card .auth-close-btn { position:absolute; top:16px; right:16px; display:grid; place-items:center; width:30px; height:30px; padding:0; background:transparent; border:0; border-radius:6px; color:#aaa; font-size:15px; cursor:pointer; text-decoration:none; }
+    #authModal .auth-dialog-card .x:hover, #authModal .auth-dialog-card .auth-close-btn:hover { color:#fff; background:#292929; }
+    #authModal .auth-dialog-card :is(button,a):focus-visible { outline:2px solid #eee; outline-offset:3px; }
+    @media(max-width:380px) { #authModal .auth-dialog-card { padding:18px; } }

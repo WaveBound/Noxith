@@ -1,0 +1,75 @@
+
+    /* Desktop-app surfaces, kept neutral to match the dashboard's selected theme. */
+    body { height:100vh; height:100dvh; line-height:1.45; }
+    .hero-bg { background:linear-gradient(145deg,#0b0b0b,#0f0f0f); }
+    .hero-bg .blob, .hero-vignette { display:none; }
+    .settings-sidebar, .mobile-header { background:#090909; border-color:#242424; }
+    .settings-sidebar { padding:18px 12px; }
+    .settings-sidebar-brand { border-color:#242424; }
+    .settings-tab { border-radius:8px; padding:9px 10px; font-size:12px; }
+    .settings-tab.active { background:rgba(255,255,255,.07); }
+    .sidebar-back-btn, .sidebar-signout-btn, .mobile-back-btn { border-radius:7px; }
+    .dash-topbar { height:52px; background:#0d0d0d; border-color:#242424; }
+    .dash-content { max-width:1100px; padding:24px 28px 28px; }
+    .panel { background:#141414; border:1px solid #262626; border-radius:10px; padding:18px; gap:12px; }
+    .panel:hover { border-color:#303030; }
+    .panel-title { font-size:13px; font-weight:600; letter-spacing:0; }
+    .overview-heading { padding:2px 0 6px; }
+    .overview-kicker { font-size:9px; letter-spacing:.08em; color:var(--muted); }
+    .overview-heading h2 { font-size:24px; font-weight:600; letter-spacing:-.02em; margin:6px 0; }
+    .overview-heading p, .overview-card p { font-size:12px; line-height:1.55; }
+    .overview-grid { gap:10px; }
+    .overview-card { min-height:150px; }
+    .overview-card h3 { font-size:13px; font-weight:600; }
+    .overview-icon { width:30px; height:30px; border-radius:8px; background:#232323; border:0; color:#bcbcbc; }
+    .overview-icon svg { width:16px; height:16px; }
+    .overview-action { min-height:33px; border-radius:7px; }
+    .overview-tag { border-radius:6px; font-size:10px; }
+    .overview-link { font-size:11.5px; }
+    #panePlans > .panel { gap:12px; }
+    .pricing-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:0; }
+    .pricing-card, .pricing-card.featured { padding:16px; border-radius:10px; background:#191919; border:1px solid #303030; color:var(--text); }
+    .pricing-card.featured { background:#202020; border-color:#555; }
+    .pricing-tier-name, .pricing-card.featured .pricing-tier-name { font-size:13px; font-weight:700; color:var(--text) !important; }
+    .pricing-price, .pricing-card.featured .pricing-price { margin:9px 0 4px; color:var(--text); font-size:30px; font-weight:800; line-height:1; letter-spacing:-.03em; }
+    .pricing-price span, .pricing-card.featured .pricing-price span { color:var(--muted) !important; font-size:11px !important; }
+    .pricing-sub, .pricing-card.featured .pricing-sub { margin-bottom:12px; color:var(--muted) !important; font-size:11px; line-height:1.4; }
+    .pricing-features { gap:6px; margin:0 0 14px; padding:0; }
+    .pricing-feat-item, .pricing-card.featured .pricing-feat-item { align-items:flex-start; gap:7px; color:var(--text); font-size:11.5px; line-height:1.4; }
+    .pricing-check, .pricing-card.featured .pricing-check { color:#d6d6d6; }
+    .btn-pricing, .pricing-card.featured .btn-pricing, .pricing-card:not(.featured) .btn-pricing { min-height:34px; height:auto; padding:8px 10px; border-radius:7px; font-size:11.5px; font-weight:600; background:#292929; border:1px solid #454545; color:#eee; }
+    .pricing-card.featured .btn-pricing.primary:not(:disabled) { background:#eee; border-color:#eee; color:#111; }
+    .pricing-card.featured .btn-pricing:disabled, .pricing-card:not(.featured) .btn-pricing:disabled { background:#252525; border-color:#3a3a3a; color:#a8a8a8; }
+    .pricing-note { margin:0; padding:9px 11px; border-radius:7px; font-size:10.5px; line-height:1.5; text-align:left; }
+    .stream-viewport { border-radius:10px; }
+    .user-chip, .stab-account-card, .stab-plan-card { background:#1a1a1a; border-color:#2b2b2b; border-radius:8px; }
+    .stab-name, .user-chip-name { font-weight:600; }
+    .stab-email, .user-chip-email { user-select:text; }
+    @media(max-width:1000px) { .pricing-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media(max-width:850px) {
+      #app, .mobile-header { border-radius:0; }
+      .mobile-header { flex-shrink:0; backdrop-filter:none; -webkit-backdrop-filter:none; }
+      .mobile-top-row { padding:10px 14px; }
+      .mobile-segmented-nav { padding:0 10px 10px; }
+      .mobile-nav-btn { min-height:38px; height:auto; padding:7px 4px; border-radius:7px; font-size:11px; }
+      .dash-content { padding:20px 16px 28px; }
+      .overview-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .overview-card { min-height:150px; }
+    }
+    @media(max-width:650px) {
+      .pricing-grid, .overview-grid { grid-template-columns:minmax(0,1fr); }
+      .pricing-card { min-width:0; }
+      .overview-card { min-height:0; }
+      .overview-action { margin-top:4px; }
+      .stream-viewport { min-height:260px; aspect-ratio:auto; }
+      .stream-overlay { padding:20px; }
+      .panel-title { gap:8px; flex-wrap:wrap; }
+    }
+    @media(max-width:380px) {
+      .mobile-nav-btn svg { display:none; }
+      .mobile-nav-btn { font-size:10.5px; }
+      .dash-content { padding:16px 12px 24px; }
+      .panel { padding:14px; }
+    }
+
+

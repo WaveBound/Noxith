@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="BloxMulti">
+  <defs>
+    <mask id="back-cutout" maskUnits="userSpaceOnUse" x="0" y="0" width="256" height="256" style="mask-type:luminance">
+      <rect width="256" height="256" fill="white"/>
+      <rect x="81" y="81" width="94" height="94" rx="13" fill="black"/>
+      <rect x="66" y="96" width="94" height="94" rx="13" fill="black"/>
+    </mask>
+    <mask id="middle-cutout" maskUnits="userSpaceOnUse" x="0" y="0" width="256" height="256" style="mask-type:luminance">
+      <rect width="256" height="256" fill="white"/>
+      <rect x="66" y="96" width="94" height="94" rx="13" fill="black"/>
+    </mask>
+  </defs>
+  <g transform="translate(128 128) scale(1.3832258065) translate(-128 -128)" fill="none" stroke="#f1f1f1" stroke-linecap="round">
+    <rect x="98" y="68" width="90" height="90" rx="11" stroke-width="4" opacity=".37" mask="url(#back-cutout)"/>
+    <rect x="83" y="83" width="90" height="90" rx="11" stroke-width="4" opacity=".64" mask="url(#middle-cutout)"/>
+    <rect x="68" y="98" width="90" height="90" rx="11" stroke-width="4"/>
+    <path d="M113 128v30m-15-15h30" stroke-width="4.4"/>
+  </g>
+</svg>
