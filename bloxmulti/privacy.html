@@ -228,9 +228,9 @@ a{color:inherit;text-decoration:none}
         handles you choose to add. Initial names may come from your sign-in provider. Your profile can also display the
         profile picture URL supplied by that provider; the feature does not require you to upload an image to BloxMulti.</li>
       <li><strong>Activity information:</strong> When sharing is enabled and the App is running, it sends Supabase
-        periodic heartbeats containing the running Roblox instances' process identifiers, game and place identifiers,
-        a random app-session ID, and a sequence number. The session ID is generated for the app session; it is not a
-        hardware ID. Supabase records heartbeat and instance start times and uses its clock to calculate per-game
+        periodic heartbeats containing the running game and place identifiers, the longest-running current game's
+        identifier and elapsed time, a random app-session ID, and a sequence number. The session ID is generated for
+        the app session; it is not a hardware ID. Supabase records heartbeat times and uses its clock to calculate per-game
         playtime. The App keeps its current activity list in memory and does not save profile playtime counters in a
         local file. The current version attempts to remove the old profile activity counter file when it starts.</li>
       <li><strong>What is public:</strong> Your profile page can show your username, display name, profile picture, bio,
