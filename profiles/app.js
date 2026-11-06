@@ -2,17 +2,16 @@
 const card=ProfileRenderer.create(document);let profile=null;
 const pathMatch=location.pathname.match(/^\/u\/([a-z0-9_]{3,24})\/?$/i);
 const username=pathMatch?.[1]||new URLSearchParams(location.search).get('user');
-card.render({displayName:'Player',links:{}});card.loadGames();
+function showMessage(text){document.getElementById('publicProfile').hidden=true;const message=document.getElementById('profileMessage');message.hidden=false;message.textContent=text;document.getElementById('copyLink').hidden=true;card.loadGames();}
 async function refresh(){
  try{
-  if(location.pathname.startsWith('/u/')&&!pathMatch){document.getElementById('profileName').textContent='Profile not found';return;}
+  if(location.pathname.startsWith('/u/')&&!pathMatch){showMessage('Profile not found.');return;}
   profile=username?await ProfileApi.get(username):await ProfileApi.state();
-  if(!profile){document.getElementById('profileName').textContent='Profile not found';return;}
+  if(!profile){showMessage('Profile not found.');return;}
+  if(!profile.trackingEnabled){showMessage('Profile sharing is disabled.');return;}
+  document.getElementById('publicProfile').hidden=false;document.getElementById('profileMessage').hidden=true;document.getElementById('copyLink').hidden=false;
   card.render(profile);card.loadGames(profile);document.title=(profile.displayName||'Profile')+' · BloxMulti';
-  const total=document.getElementById('totalPlaytime'),count=document.getElementById('totalGames');
-  if(total)total.textContent=Math.floor((profile.totalSeconds||0)/3600)+'h '+Math.floor((profile.totalSeconds||0)/60)%60+'m';
-  if(count)count.textContent=profile.gameCount||0;
- }catch{document.getElementById('profileBio').textContent=username?'Unable to load profile.':'Sign in and enable your profile in BloxMulti.';}
+ }catch{showMessage(username?'Unable to load profile.':'Sign in and enable your profile in BloxMulti.');}
 }
 refresh();
 setInterval(()=>card.tickActivity(profile?.currentActivity),1000);

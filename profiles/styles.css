@@ -239,4 +239,6 @@ body:not(.dashboard-editor) #customize, body:not(.dashboard-editor) #createProfi
 .socials a .icon{fill:none;stroke:currentColor}.socials a:first-child .icon{fill:none;stroke:currentColor}.socials a{width:36px;height:36px;border-radius:8px}.socials a:hover{background:#ffffff0d}.socials a .icon{width:20px;height:20px}
 /* Embedded card preview omits the surrounding page controls. */
 body.preview-mode .site-chrome,body.preview-mode .page-footer{display:none}body.preview-mode .stage{min-height:100vh;padding:28px 16px;align-items:center}body.preview-mode .profile-card{animation:none}body.preview-mode .block{display:none}body.preview-mode .profile-card a{pointer-events:none}
+.status-dot,.live-dot{background:#35d77b}.profile-message{text-align:center;color:#aaa}
+.presence.is-empty .presence-placeholder{display:grid;font-size:11px;background:#242424;color:#888}.presence.is-empty .presence-placeholder::after{content:'???'}.presence.is-empty{cursor:default}.empty-game{cursor:default;opacity:.7}.empty-game:hover{transform:none}.empty-game .game-placeholder{background:#242424;color:#888;font-size:10px}
 .badges:empty{display:none}
