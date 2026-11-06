@@ -19,32 +19,16 @@ function create(root,{themeTarget,document:doc=globalThis.document,social=global
   }
  }
  let imageGeneration=0;
- const metadataCache=new Map(), pendingMetadata=new Map();
  function loadGames(data={}){
   const generation=++imageGeneration,list=get('favoriteGames');list.replaceChildren();
-  const base=globalThis.location&&(globalThis.location.hostname==='noxith.com'||globalThis.location.hostname.endsWith('.noxith.com'))?'https://noxith-game-images.wavebound.workers.dev':'';
-  const targets=[];
-  function queueMetadata(game,link,name,isCurrent=false){if(/^[1-9]\d{0,15}$/.test(String(game.universeId||''))&&Number.isSafeInteger(Number(game.universeId)))targets.push({game,link,name,isCurrent});}
-  function loadMetadata(){
-   const ids=[...new Set(targets.map(({game})=>String(game.universeId)))].sort();if(!ids.length)return;
-   function apply(){
-    if(generation!==imageGeneration)return;
-    for(const {game,link,name,isCurrent} of targets){
-     if(isCurrent&&game.expiresAt&&Date.parse(game.expiresAt)<=Date.now())continue;
-     const info=metadataCache.get(String(game.universeId))?.info;if(!info)continue;if(info.name)name.textContent=info.name;
-     if(typeof info.imageUrl==='string'&&/^https:\/\//.test(info.imageUrl)&&!link.querySelector('img')){const img=doc.createElement('img');img.alt='';img.onload=()=>{if(generation===imageGeneration&&link.isConnected&&!link.querySelector('img')&&(!isCurrent||!game.expiresAt||Date.parse(game.expiresAt)>Date.now()))link.prepend(img);};img.src=info.imageUrl;}
-    }
+  function queueMetadata(game,link,name,isCurrent=false){
+   if(typeof game.name==='string'&&game.name)name.textContent=game.name;
+   if(typeof game.imageUrl==='string'&&/^https:\/\/[a-z0-9-]+\.rbxcdn\.com\//i.test(game.imageUrl)){
+    const img=doc.createElement('img');img.alt='';img.referrerPolicy='no-referrer';
+    img.onload=()=>{if(generation===imageGeneration&&(!isCurrent||!game.expiresAt||Date.parse(game.expiresAt)>Date.now()))link.prepend(img);};img.src=game.imageUrl;
    }
-   apply();
-   const stale=ids.filter(id=>(metadataCache.get(id)?.expires||0)<=Date.now()&&!pendingMetadata.has(id));
-   if(stale.length){
-    const task=fetcher(base+'/api/games?ids='+stale.join(',')).then(r=>{if(!r.ok)throw Error();return r.json();}).then(result=>{
-     for(const id of stale){const previous=metadataCache.get(id)?.info||{},fresh=result.games?.[id]||{};const info={name:fresh.name||previous.name||'',imageUrl:fresh.imageUrl||previous.imageUrl||''};metadataCache.set(id,{info,expires:Date.now()+(fresh.name&&fresh.imageUrl?3600000:60000)});}
-    }).catch(()=>{for(const id of stale){const previous=metadataCache.get(id)?.info||{};metadataCache.set(id,{info:previous,expires:Date.now()+60000});}}).finally(()=>{for(const id of stale)pendingMetadata.delete(id);});
-    for(const id of stale)pendingMetadata.set(id,task);
-   }
-   Promise.allSettled([...new Set(ids.map(id=>pendingMetadata.get(id)).filter(Boolean))]).then(apply);
   }
+  function loadMetadata(){}
   const games=(data.games||[]).slice(0,3);
   for(const game of games){
    const a=doc.createElement('a');a.className='favorite-game';a.href='https://www.roblox.com/games/'+game.placeId;a.target='_blank';a.rel='noopener noreferrer';
