@@ -28,3 +28,8 @@ body:has(#paneProfile.active) .dash-content{max-width:1600px;margin-left:0;margi
 #paneProfile .profile-details-panel textarea{height:112px;min-height:112px;max-height:112px;resize:none;overflow-y:auto}#paneProfile .profile-appearance-panel .panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}#paneProfile .profile-appearance-panel .appearance-help{margin:0;color:#999;font-size:11px;line-height:1.5;text-align:right}#paneProfile .profile-appearance-panel .image-preview{height:clamp(165px,20vh,205px)}
 
 #paneProfile .profile-workspace .profile-form{grid-template-areas:'details'}
+
+/* Center the loading and disabled states in the profile workspace. */
+#paneProfile.active:has(> .profile-notice:not([hidden])){min-height:max(280px,calc(100dvh - 120px));align-items:center;justify-content:center}
+#paneProfile .profile-notice{width:min(100%,460px);max-width:460px;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:36px 28px!important}
+#paneProfile .profile-notice p{max-width:350px}
