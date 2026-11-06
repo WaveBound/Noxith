@@ -668,6 +668,19 @@
       align-items: flex-start
     }
 
+    .profile-feature {
+      margin-top: 14px; padding: 32px; border: 1px solid #242424; border-radius: 22px;
+      background: linear-gradient(120deg, #181818, #0d0d0d); display: flex;
+      justify-content: space-between; align-items: center; gap: 28px;
+    }
+    .profile-feature h3 { font-size: 22px; font-weight: 500; letter-spacing: -.03em; margin: 8px 0; }
+    .profile-feature p { color: #a6a6a6; font-size: 14px; max-width: 560px; line-height: 1.6; }
+    .profile-feature-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .profile-feature-actions a { white-space: nowrap; }
+    .profile-feature-actions .profile-privacy { color: #aaa; font-size: 13px; }
+    .profile-feature-actions .profile-privacy:hover { color: #fff; }
+    @media (max-width: 700px) { .profile-feature { padding: 24px; align-items: flex-start; flex-direction: column; } }
+
     /* bento */
     .bento {
       display: grid;
@@ -3800,6 +3813,18 @@
             <p>Save your accounts' current games and relaunch them together. One preset is free; Premium includes
               unlimited presets and saved window positions.</p>
           </div>
+        </div>
+      </div>
+      <div class="profile-feature">
+        <div>
+          <span class="eyebrow">Optional public profiles</span>
+          <h3>Share what you play.</h3>
+          <p>Create a public profile with your bio and links, and share your current game and most-played experiences.
+            Activity sharing is off by default and can be turned off in BloxMulti.</p>
+        </div>
+        <div class="profile-feature-actions">
+          <a class="btn" href="dashboard.html?tab=profile">Manage profile ↗</a>
+          <a class="profile-privacy" href="privacy.html#profiles">How sharing works</a>
         </div>
       </div>
     </section>
