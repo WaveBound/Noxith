@@ -12,9 +12,9 @@
   <!-- Primary SEO Meta -->
   <meta name="title" content="Privacy Policy — BloxMulti | Data Security &amp; Encryption Standards" />
   <meta name="description"
-    content="Learn how BloxMulti handles local account data, authentication, encrypted Google Drive backups, notifications, and optional feedback stored with Supabase." />
+    content="Learn how BloxMulti handles local data, authentication, optional public profiles, encrypted backups, and feedback." />
   <meta name="keywords"
-    content="BloxMulti privacy policy, BloxMulti data security, Roblox alt manager privacy, Windows DPAPI encryption, Roblox account security, zero telemetry multi account" />
+    content="BloxMulti privacy policy, BloxMulti data security, Roblox alt manager privacy, Windows DPAPI encryption, Roblox account security, optional profile activity" />
   <meta name="author" content="BloxMulti" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <meta name="theme-color" content="#0b0b0b" />
@@ -69,7 +69,7 @@
         "url": "https://noxith.com/bloxmulti/privacy.html",
         "name": "Privacy Policy — BloxMulti",
         "description": "Privacy practices for local session storage, account authentication, encrypted backups, notifications, and optional feedback.",
-        "dateModified": "2026-11-02",
+        "dateModified": "2026-11-05",
         "isPartOf": {
           "@type": "WebSite",
           "@id": "https://noxith.com/bloxmulti/#website",
@@ -177,7 +177,7 @@ a{color:inherit;text-decoration:none}
   <div class="copy">
     <span class="eyebrow">Legal</span>
     <h1 class="fade">Privacy Policy</h1>
-    <p>Last updated November 2, 2026</p>
+    <p>Last updated November 5, 2026</p>
   </div>
 </div>
 
@@ -196,8 +196,7 @@ a{color:inherit;text-decoration:none}
         on your device. These account-management files are not uploaded
         to BloxMulti's database. If you enable Cloud Sync, an encrypted backup is stored in your Google Drive as
         described below.</li>
-      <li><strong>Telemetry and Analytics:</strong> We do not track keystrokes, personal in-game activity, or sell
-        behavioral telemetry.</li>
+      <li><strong>Telemetry and Analytics:</strong> We do not track keystrokes or sell behavioral telemetry. If you opt in to a public profile, the App tracks game and playtime information as described below.</li>
     </ul>
 </section>
 <section class="sec">
@@ -214,9 +213,46 @@ a{color:inherit;text-decoration:none}
     <p>Sign-in credentials and basic profile details are stored in the App's local browser storage to keep you
       signed in. Session credentials are exchanged with the authentication services as needed. This storage is
       separate from the DPAPI protection used for saved Roblox session cookies.</p>
-    <p>We use this information strictly for licensing and authentication. We never sell your personal information to
+    <p>We use this information for licensing and authentication and, if you opt in, to provide your public profile as described below. We never sell your personal information to
       third
       parties.</p>
+</section>
+<section class="sec">
+<h2>2A. Optional Public Profiles &amp; Game Activity</h2>
+    <p>Public profiles and game-activity sharing are optional and off by default. To enable them, sign in and turn on
+      <strong>Share game activity on my profile</strong> in the App. A profile record is created when you first enable
+      sharing. Signing in by itself does not create a profile record, although account authentication and other features
+      continue to handle their own data as described in this policy.</p>
+    <ul>
+      <li><strong>Profile information:</strong> We store your account ID, public username, display name, bio, and social
+        handles you choose to add. Initial names may come from your sign-in provider. Your profile can also display the
+        profile picture URL supplied by that provider; the feature does not require you to upload an image to BloxMulti.</li>
+      <li><strong>Activity information:</strong> While sharing is enabled and the App is running, it tracks game and
+        place identifiers, accumulated playtime, and the current game's elapsed session time. It stores local counters,
+        a random counter identifier, and cached game identifiers on your device. Supabase stores playtime totals and
+        the counter identifier with your account so repeated uploads can be handled safely. The counter identifier is
+        randomly generated, not a hardware ID.</li>
+      <li><strong>What is public:</strong> Your profile page can show your username, display name, profile picture, bio,
+        social links, current game, most-played games, and playtime totals. They are publicly accessible, including to
+        anyone with the profile link, and may be copied or shared. The public profile response does not include your email address, account ID,
+        or counter identifier. Profile viewers may connect to third-party services for profile images, game information,
+        and images; those services receive the network requests needed to provide them.</li>
+      <li><strong>Stopping sharing:</strong> You can turn the setting off in the App. Once the change is saved, the App
+        stops collecting and uploading profile activity, current activity is removed, and the profile page hides your
+        details. The public profile API returns only a disabled status, rather than saved profile details, while sharing
+        is off. Turning sharing off does not
+        automatically erase the profile, saved playtime, or local counter file. If the change cannot be saved, the App
+        pauses tracking locally and asks you to try again.</li>
+      <li><strong>Retention and deletion:</strong> A current-game entry stops being shown after about two minutes without
+        a heartbeat, and a cleanup task checks for expired entries every two minutes. Profile details and playtime totals
+        remain until the profile or account is deleted; there is no automatic time limit for those records. Local counter
+        data may remain on your device after sharing is turned off. To request deletion of profile data, contact us via
+        the <a href="support.html">Support Page</a>. Removing local data alone does not remove data already stored in
+        Supabase.</li>
+    </ul>
+    <p>Playtime and current activity may be delayed or incomplete if the App closes, your device sleeps, the connection
+      fails, or game information cannot be resolved. Other account and optional service data are handled separately
+      from this profile feature.</p>
 </section>
 <section class="sec">
 <h2>3. Google Drive Synchronization</h2>
@@ -265,7 +301,7 @@ a{color:inherit;text-decoration:none}
 <h2>5. Third-Party Services &amp; Libraries</h2>
     <ul>
       <li><strong>Supabase:</strong> Provides account authentication and database hosting for account, subscription,
-        notification, and feedback records.</li>
+        notification, feedback, and optional profile records.</li>
       <li><strong>Google and Discord:</strong> Provide optional sign-in. Google Drive stores encrypted backups when
         you enable Cloud Sync. Links in announcements may also take you to third-party services, whose own privacy
         policies apply to your use of those services.</li>
