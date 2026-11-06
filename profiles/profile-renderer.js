@@ -22,27 +22,34 @@ function create(root,{themeTarget,document:doc=globalThis.document,social=global
  function loadGames(data={}){
   const generation=++imageGeneration,list=get('favoriteGames');list.replaceChildren();
   const base=globalThis.location&&(globalThis.location.hostname==='noxith.com'||globalThis.location.hostname.endsWith('.noxith.com'))?'https://noxith-game-images.wavebound.workers.dev':'';
-  function metadata(game,link,name,isCurrent=false){
-   fetcher(base+'/api/game/'+game.placeId).then(r=>{if(!r.ok)throw Error();return r.json();}).then(result=>{
-    if(generation!==imageGeneration||(isCurrent&&game.expiresAt&&Date.parse(game.expiresAt)<=Date.now()))return;if(result.name)name.textContent=result.name;
-    if(typeof result.imageUrl==='string'&&/^https:\/\//.test(result.imageUrl)){const img=doc.createElement('img');img.alt='';img.onload=()=>{if(generation===imageGeneration&&(!isCurrent||!game.expiresAt||Date.parse(game.expiresAt)>Date.now()))link.prepend(img);};img.src=result.imageUrl;}
+  const targets=[];
+  function queueMetadata(game,link,name,isCurrent=false){if(/^[1-9]\d{0,15}$/.test(String(game.universeId||''))&&Number.isSafeInteger(Number(game.universeId)))targets.push({game,link,name,isCurrent});}
+  function loadMetadata(){
+   const ids=[...new Set(targets.map(({game})=>String(game.universeId)))].sort();if(!ids.length)return;
+   fetcher(base+'/api/games?ids='+ids.join(',')).then(r=>{if(!r.ok)throw Error();return r.json();}).then(result=>{
+    if(generation!==imageGeneration)return;
+    for(const {game,link,name,isCurrent} of targets){
+     if(isCurrent&&game.expiresAt&&Date.parse(game.expiresAt)<=Date.now())continue;
+     const info=result.games?.[String(game.universeId)];if(!info)continue;if(info.name)name.textContent=info.name;
+     if(typeof info.imageUrl==='string'&&/^https:\/\//.test(info.imageUrl)){const img=doc.createElement('img');img.alt='';img.onload=()=>{if(generation===imageGeneration&&(!isCurrent||!game.expiresAt||Date.parse(game.expiresAt)>Date.now()))link.prepend(img);};img.src=info.imageUrl;}
+    }
    }).catch(()=>{});
   }
   const games=(data.games||[]).slice(0,3);
   for(const game of games){
    const a=doc.createElement('a');a.className='favorite-game';a.href='https://www.roblox.com/games/'+game.placeId;a.target='_blank';a.rel='noopener noreferrer';
-   const copy=doc.createElement('span'),name=doc.createElement('strong'),time=doc.createElement('small');name.textContent='Roblox experience';time.textContent=formatDuration(game.totalSeconds)+' played';copy.append(name,time);a.append(copy);list.append(a);metadata(game,a,name);
+   const copy=doc.createElement('span'),name=doc.createElement('strong'),time=doc.createElement('small');name.textContent='Roblox experience';time.textContent=formatDuration(game.totalSeconds)+' played';copy.append(name,time);a.append(copy);list.append(a);queueMetadata(game,a,name);
   }
   for(let i=games.length;i<3;i++){
    const slot=doc.createElement('div'),icon=doc.createElement('span'),copy=doc.createElement('span'),name=doc.createElement('strong'),time=doc.createElement('small');
    slot.className='favorite-game empty-game';icon.className='game-placeholder';icon.textContent='???';name.textContent='???';time.textContent='No game yet';copy.append(name,time);slot.append(icon,copy);list.append(slot);
   }
-  const current=data.currentActivity,presence=get('nowPlaying'),status=get('avatarStatus');if(status)status.hidden=!current||Boolean(current.expiresAt&&Date.parse(current.expiresAt)<=Date.now());if(!presence)return;
-  if(!current||(current.expiresAt&&Date.parse(current.expiresAt)<=Date.now())){showInactive();return;}
+  const current=data.currentActivity,presence=get('nowPlaying'),status=get('avatarStatus');if(status)status.hidden=!current||Boolean(current.expiresAt&&Date.parse(current.expiresAt)<=Date.now());if(!presence){loadMetadata();return;}
+  if(!current||(current.expiresAt&&Date.parse(current.expiresAt)<=Date.now())){showInactive();loadMetadata();return;}
   presence.hidden=false;presence.classList.remove('is-empty');presence.querySelector('.live-dot')?.removeAttribute('hidden');presence.querySelector('.equalizer')?.removeAttribute('hidden');const label=get('playingLabel');if(label)label.textContent='Playing';
   presence.querySelector('img')?.remove();presence.href='https://www.roblox.com/games/'+current.placeId;get('playingName').textContent='Roblox experience';
   tickActivity(current);
-  metadata(current,presence,get('playingName'),true);
+  queueMetadata(current,presence,get('playingName'),true);loadMetadata();
  }
  function showInactive(){
   const presence=get('nowPlaying');if(!presence)return;presence.hidden=false;presence.classList.add('is-empty');presence.removeAttribute('href');presence.querySelector('img')?.remove();
