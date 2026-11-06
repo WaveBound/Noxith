@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="logo-transparent.svg">
+  <link rel="icon" type="image/svg+xml" href="/profiles/assets/bloxmulti.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BloxMulti Dashboard — Remote Screen Stream &amp; License Manager</title>
 
@@ -104,6 +104,7 @@
 <link rel="stylesheet" href="styles/shared-upgrade-auth.css">
 <style>
   </style>
+<link rel="stylesheet" href="/profiles/profile-editor.css">
 </head>
 
 <body>
@@ -160,6 +161,7 @@
             <span>Plans &amp; Upgrades</span>
           </button>
 
+          <button class="settings-tab" id="tabBtnProfile" role="tab" aria-selected="false" aria-controls="paneProfile" onclick="switchTab('profile')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Profile</span></button>
           <button class="settings-tab" id="tabBtnAccount" role="tab" aria-selected="false" aria-controls="paneAccount"
             onclick="switchTab('account')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -238,6 +240,7 @@
           </svg>
           Plans
         </button>
+        <button class="mobile-nav-btn" id="mobTabBtnProfile" role="tab" aria-selected="false" aria-controls="paneProfile" onclick="switchTab('profile')">Profile</button>
         <button class="mobile-nav-btn" id="mobTabBtnAccount" role="tab" aria-selected="false"
           aria-controls="paneAccount" onclick="switchTab('account')">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -257,6 +260,64 @@
       </header>
 
       <div class="dash-content">
+        <section class="tab-pane" id="paneProfile" role="tabpanel" aria-labelledby="tabBtnProfile">
+  <svg class="profile-symbols" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><symbol id="i-link" viewBox="0 0 24 24"><path d="m10 8 3-3a4 4 0 0 1 6 6l-3 3m-2 2-3 3a4 4 0 0 1-6-6l3-3m0 6 8-8"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6Z"/><path d="m8 12 3 3 5-6"/></symbol>
+<symbol id="i-discord" viewBox="0 0 24 24"><path d="m7 5-3 1-2 11 5 2 1-2m9-12 3 1 2 11-5 2-1-2M7 7a15 15 0 0 1 10 0M7 16a12 12 0 0 0 10 0"/><path d="M8 12h.01M16 12h.01" stroke-width="3.8"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M4 3h4l12 18h-4Zm0 18 7-8m2-2 7-8"/></symbol>
+<symbol id="i-roblox" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" fill-rule="evenodd" d="M5.5 2 22 6.5 17.5 22 2 17.5 5.5 2Zm4.7 7-1.2 4.8 4.8 1.2L15 10.2 10.2 9Z"/></symbol>
+<symbol id="i-github" viewBox="0 0 24 24"><path d="M9 21c-5 1-5-2-7-2m14 3v-4c0-1-.2-2-1-3 4 0 6-2 6-5 0-2-1-3-2-4 0-1 0-3-1-3-2 0-3 1-4 1a15 15 0 0 0-5 0C8 4 6 3 4 3c-1 1-1 3 0 4-1 1-2 2-2 4 0 3 2 5 6 5-1 1-1 2-1 3v3"/></symbol>
+<symbol id="i-builder" viewBox="0 0 24 24"><path d="m14 4 6 6-3 3-2-2-8 8-3-3 8-8-2-2 4-2ZM4 19l2 2"/></symbol>
+<symbol id="i-creator" viewBox="0 0 24 24"><path d="m12 2 1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2ZM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z"/></symbol>
+<symbol id="i-reddit" viewBox="0 0 32 32"><path fill="currentColor" stroke="none" d="M12.606 20.986c-0.225 0.001-0.407 0.183-0.407 0.408 0 0.112 0.045 0.214 0.118 0.288l-0-0c0.952 0.716 2.155 1.146 3.457 1.146 0.085 0 0.17-0.002 0.255-0.006l-0.012 0c0.081 0.004 0.175 0.006 0.27 0.006 1.294 0 2.488-0.431 3.445-1.158l-0.014 0.010c0.077-0.081 0.124-0.19 0.124-0.311 0-0.101-0.033-0.194-0.089-0.269l0.001 0.001c-0.074-0.074-0.177-0.119-0.29-0.119s-0.215 0.045-0.29 0.119l0-0c-0.799 0.575-1.798 0.919-2.877 0.919-0.092 0-0.184-0.003-0.275-0.007l0.013 0.001c-0.082 0.005-0.178 0.008-0.274 0.008-1.075 0-2.070-0.345-2.88-0.93l0.014 0.010c-0.074-0.073-0.175-0.119-0.287-0.119-0.001 0-0.002 0-0.003 0h0zM19.436 16c-0.861 0.001-1.56 0.699-1.56 1.561s0.699 1.561 1.561 1.561 1.561-0.699 1.561-1.561v0c-0.002-0.862-0.7-1.56-1.562-1.561h-0zM12.563 16c0.861 0 1.56 0.699 1.56 1.56s-0.699 1.56-1.56 1.56-1.56-0.699-1.56-1.56c0-0.861 0.698-1.56 1.56-1.56h0zM22.261 6.933c0.852 0.006 1.54 0.698 1.54 1.551 0 0.857-0.694 1.551-1.551 1.551-0.828 0-1.505-0.65-1.549-1.467l-0-0.004-3.245-0.684-1 4.682c2.185 0.049 4.201 0.737 5.878 1.884l-0.037-0.024c0.38-0.379 0.905-0.614 1.485-0.614 0.008 0 0.017 0 0.025 0h-0.001c1.21 0.001 2.191 0.982 2.192 2.192v0c-0.007 0.88-0.513 1.64-1.249 2.011l-0.013 0.006c0.033 0.191 0.052 0.412 0.052 0.637 0 0.005 0 0.009-0 0.014v-0.001c0 3.367-3.911 6.086-8.752 6.086s-8.752-2.719-8.752-6.086c0-0.001 0-0.003 0-0.005 0-0.234 0.020-0.463 0.057-0.687l-0.003 0.024c-0.771-0.35-1.298-1.114-1.298-2.001 0-1.21 0.981-2.191 2.191-2.191 0 0 0.001 0 0.001 0h-0c0.586 0.006 1.116 0.238 1.509 0.613l-0.001-0.001c1.66-1.148 3.711-1.841 5.924-1.858l0.004-0 1.106-5.226c0.028-0.103 0.090-0.189 0.173-0.245l0.002-0.001c0.063-0.037 0.139-0.059 0.22-0.059 0.027 0 0.054 0.003 0.080 0.007l-0.003-0 3.631 0.771c0.247-0.522 0.77-0.876 1.375-0.876 0.003 0 0.007 0 0.010 0h-0.001zM16 1.004c0 0 0 0-0 0-8.282 0-14.996 6.714-14.996 14.996s6.714 14.996 14.996 14.996c8.282 0 14.996-6.714 14.996-14.996 0-4.141-1.678-7.89-4.392-10.604v0c-2.714-2.714-6.463-4.392-10.604-4.392v0z"/></symbol>
+<symbol id="i-youtube" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3Z"/></symbol>
+<symbol id="i-twitch" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" fill-rule="evenodd" d="M4 3h17v12l-5 5h-4l-3 2v-2H4V3Zm3 2v12h4v2l2-2h3l3-3V5H7Z"/><path d="M11 8v5m4-5v5"/></symbol></defs></svg>
+  <div class="profile-toolbar"><div class="profile-heading-actions"><span id="message" role="status" aria-live="polite"></span><a class="profile-view" href="/profiles/">View profile <span aria-hidden="true">↗</span></a><button class="profile-button primary" type="submit" form="profileForm">Save changes</button></div></div>
+  <div class="profile-workspace">
+  <form id="profileForm" class="profile-form">
+    <div class="panel profile-panel profile-details-panel"><div class="panel-heading profile-links-heading"><div><h3>Profile details</h3><p>The basics for your public page.</p></div><button type="button" class="profile-button subtle" id="addLink">Links</button></div>
+      <div class="profile-identity"><div class="avatar-control"><p>Your profile uses your sign-in account picture.</p></div>
+      <div class="field-grid"><label><span class="field-heading"><span>Username</span><small>3–24 letters, numbers or underscores.</small></span><input name="username" required maxlength="24" pattern="[A-Za-z0-9_]{3,24}"></label><label>Display name<input name="displayName" required maxlength="40"></label></div></div>
+      <label>Bio<textarea name="bio" maxlength="160" rows="3" placeholder="A little about you"></textarea></label>
+    </div>
+  </form>
+  <aside class="profile-preview"><div id="profilePreview" class="profile-preview-card" aria-label="Live profile preview"></div></aside>
+  </div>
+  <template id="profilePreviewTemplate"><link rel="stylesheet" href="/profiles/styles.css"><style>:host{display:block;color:#e3e3e3;font:14px Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--text:#e3e3e3;--muted:#8c8c8c;--accent:#c6c6c6;--ambient:#353535;--background:#090909;--panel:#141414;--border:#ffffff15;--page-paint:linear-gradient(135deg,#171717,#090909)}.preview-scene{position:relative;height:100%;min-height:0;display:grid;place-items:center;padding:24px;box-sizing:border-box;overflow:hidden;background:var(--background)}.preview-scene .backdrop{position:absolute}.preview-scene .block{display:none}.preview-scene .profile-card{width:min(100%,494px);position:relative;animation:none}.preview-scene .profile-card a{pointer-events:none}</style><svg class="defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="m10 8 3-3a4 4 0 0 1 6 6l-3 3m-2 2-3 3a4 4 0 0 1-6-6l3-3m0 6 8-8"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="m15 4 5 5M4 20l5-1L20 8a2 2 0 0 0-5-5L4 14Z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-game" viewBox="0 0 24 24"><path d="M8 8h8c3 0 4 3 4.5 7 .4 3-1.5 4-3.5 2l-2-2H9l-2 2c-2 2-4 1-3.5-2C4 11 5 8 8 8Z"/><path d="M8 10v4m-2-2h4m5 0h.01m2 2h.01"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6Z"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-diamond" viewBox="0 0 24 24"><path d="m3 8 5-5h8l5 5-9 13Zm0 0h18M8 3l-2 5 6 13 6-13-2-5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-discord" viewBox="0 0 24 24"><path d="m7 5-3 1-2 11 5 2 1-2m9-12 3 1 2 11-5 2-1-2M7 7a15 15 0 0 1 10 0M7 16a12 12 0 0 0 10 0"/><path d="M8 12h.01M16 12h.01" stroke-width="3.8"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M4 3h4l12 18h-4Zm0 18 7-8m2-2 7-8"/></symbol>
+    <symbol id="i-roblox" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" fill-rule="evenodd" d="M5.5 2 22 6.5 17.5 22 2 17.5 5.5 2Zm4.7 7-1.2 4.8 4.8 1.2L15 10.2 10.2 9Z"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path d="M9 21c-5 1-5-2-7-2m14 3v-4c0-1-.2-2-1-3 4 0 6-2 6-5 0-2-1-3-2-4 0-1 0-3-1-3-2 0-3 1-4 1a15 15 0 0 0-5 0C8 4 6 3 4 3c-1 1-1 3 0 4-1 1-2 2-2 4 0 3 2 5 6 5-1 1-1 2-1 3v3"/></symbol>
+    <symbol id="i-builder" viewBox="0 0 24 24"><path d="m14 4 6 6-3 3-2-2-8 8-3-3 8-8-2-2 4-2ZM4 19l2 2"/></symbol>
+    <symbol id="i-creator" viewBox="0 0 24 24"><path d="m12 2 1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2ZM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z"/></symbol>
+    <symbol id="i-reddit" viewBox="0 0 32 32"><path fill="currentColor" stroke="none" d="M12.606 20.986c-0.225 0.001-0.407 0.183-0.407 0.408 0 0.112 0.045 0.214 0.118 0.288l-0-0c0.952 0.716 2.155 1.146 3.457 1.146 0.085 0 0.17-0.002 0.255-0.006l-0.012 0c0.081 0.004 0.175 0.006 0.27 0.006 1.294 0 2.488-0.431 3.445-1.158l-0.014 0.010c0.077-0.081 0.124-0.19 0.124-0.311 0-0.101-0.033-0.194-0.089-0.269l0.001 0.001c-0.074-0.074-0.177-0.119-0.29-0.119s-0.215 0.045-0.29 0.119l0-0c-0.799 0.575-1.798 0.919-2.877 0.919-0.092 0-0.184-0.003-0.275-0.007l0.013 0.001c-0.082 0.005-0.178 0.008-0.274 0.008-1.075 0-2.070-0.345-2.88-0.93l0.014 0.010c-0.074-0.073-0.175-0.119-0.287-0.119-0.001 0-0.002 0-0.003 0h0zM19.436 16c-0.861 0.001-1.56 0.699-1.56 1.561s0.699 1.561 1.561 1.561 1.561-0.699 1.561-1.561v0c-0.002-0.862-0.7-1.56-1.562-1.561h-0zM12.563 16c0.861 0 1.56 0.699 1.56 1.56s-0.699 1.56-1.56 1.56-1.56-0.699-1.56-1.56c0-0.861 0.698-1.56 1.56-1.56h0zM22.261 6.933c0.852 0.006 1.54 0.698 1.54 1.551 0 0.857-0.694 1.551-1.551 1.551-0.828 0-1.505-0.65-1.549-1.467l-0-0.004-3.245-0.684-1 4.682c2.185 0.049 4.201 0.737 5.878 1.884l-0.037-0.024c0.38-0.379 0.905-0.614 1.485-0.614 0.008 0 0.017 0 0.025 0h-0.001c1.21 0.001 2.191 0.982 2.192 2.192v0c-0.007 0.88-0.513 1.64-1.249 2.011l-0.013 0.006c0.033 0.191 0.052 0.412 0.052 0.637 0 0.005 0 0.009-0 0.014v-0.001c0 3.367-3.911 6.086-8.752 6.086s-8.752-2.719-8.752-6.086c0-0.001 0-0.003 0-0.005 0-0.234 0.020-0.463 0.057-0.687l-0.003 0.024c-0.771-0.35-1.298-1.114-1.298-2.001 0-1.21 0.981-2.191 2.191-2.191 0 0 0.001 0 0.001 0h-0c0.586 0.006 1.116 0.238 1.509 0.613l-0.001-0.001c1.66-1.148 3.711-1.841 5.924-1.858l0.004-0 1.106-5.226c0.028-0.103 0.090-0.189 0.173-0.245l0.002-0.001c0.063-0.037 0.139-0.059 0.22-0.059 0.027 0 0.054 0.003 0.080 0.007l-0.003-0 3.631 0.771c0.247-0.522 0.77-0.876 1.375-0.876 0.003 0 0.007 0 0.010 0h-0.001zM16 1.004c0 0 0 0-0 0-8.282 0-14.996 6.714-14.996 14.996s6.714 14.996 14.996 14.996c8.282 0 14.996-6.714 14.996-14.996 0-4.141-1.678-7.89-4.392-10.604v0c-2.714-2.714-6.463-4.392-10.604-4.392v0z"/></symbol>
+    <symbol id="i-youtube" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3Z"/></symbol>
+    <symbol id="i-twitch" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" fill-rule="evenodd" d="M4 3h17v12l-5 5h-4l-3 2v-2H4V3Zm3 2v12h4v2l2-2h3l3-3V5H7Z"/><path d="M11 8v5m4-5v5"/></symbol>
+  </defs></svg><div class="preview-scene"><div class="backdrop" aria-hidden="true"><div class="ambient"></div><div class="custom-background" id="customBackground"></div><div class="background-shade"></div><div class="block block-one"></div><div class="block block-two"></div></div><article class="profile-card" aria-label="Example player profile">
+      <div class="profile-top"><div class="avatar-wrap"><div class="avatar avatar-empty" id="profileAvatar" aria-label="No profile picture"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></div><span class="status-dot" id="avatarStatus" aria-label="Online"></span></div>
+        <div class="name-line"><h1 id="profileName">Player</h1></div>
+        <p class="bio" id="profileBio"></p><div class="socials" id="profileLinks" aria-label="Profile links"></div>
+        
+      </div>
+      <a class="presence" id="nowPlaying" href="https://www.roblox.com/games/2753915549" target="_blank" rel="noopener noreferrer"><span class="presence-placeholder" aria-hidden="true"></span><div class="presence-copy"><p><span class="live-dot"></span>Playing <strong id="playingName">Blox Fruits</strong></p><span>38m elapsed</span></div><span class="equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span><svg class="icon presence-arrow" viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+      <section class="favorites-section" aria-label="Favorite games"><div class="section-label"><svg class="icon" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z"/></svg><h2>Most played</h2></div><div class="favorites" id="favoriteGames"></div></section>
+      <div class="playtime"><span><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg><strong id="totalPlaytime">0h 0m</strong> played</span><span class="stat-divider"></span><span><svg class="icon" viewBox="0 0 24 24"><path d="M8 8h8c3 0 4 3 4.5 7 .4 3-1.5 4-3.5 2l-2-2H9l-2 2c-2 2-4 1-3.5-2C4 11 5 8 8 8Z"/><path d="M8 10v4m-2-2h4m5 0h.01m2 2h.01"/></svg><strong id="totalGames">0</strong> games</span></div>
+      <div class="card-footer"><span>tracked with <a class="credit-brand" href="https://noxith.com/bloxmulti" target="_blank" rel="noopener noreferrer"><img src="/profiles/assets/bloxmulti.svg" alt="" width="12" height="12"><strong>BloxMulti</strong></a></span></div>
+    </article></div></template>
+  <dialog class="link-dialog" id="linkDialog" aria-labelledby="linkDialogTitle"><form id="linkForm"><div class="link-dialog-heading"><div><h2 id="linkDialogTitle">Links</h2><p>Choose what appears on your profile.</p></div><button type="button" class="link-dialog-close" id="closeLinkDialog" aria-label="Close">×</button></div><div class="manage-section"><h3>Links</h3><div id="linkFields" class="profile-link-list"></div><p class="profile-empty" id="linkEmpty">No links added yet.</p><div class="link-entry"><h3 id="linkEntryTitle">Add a link</h3><div id="linkServices" class="link-services" role="group" aria-label="Choose a service"></div><label for="linkUrl">Handle or profile link</label><input id="linkUrl" type="text" placeholder="Username, ID, or profile URL"><p id="linkError" class="link-error" role="status"></p><div class="link-entry-actions"><button type="button" id="removeLink" class="profile-text-button">Remove link</button><button type="button" id="cancelLink" class="profile-text-button">Cancel edit</button><button type="submit" class="profile-button subtle" id="confirmLink">+ Add link</button></div></div></div><div class="link-dialog-actions"><button type="button" class="profile-button primary" id="doneLinkDialog">Done</button></div></form></dialog>
+</section>
         <section class="tab-pane active" id="paneOverview" role="tabpanel" aria-labelledby="tabBtnOverview">
           <div class="overview-heading">
             <span class="overview-kicker">Your workspace</span>
@@ -277,7 +338,7 @@
               </div>
               <h3>Account &amp; plan</h3>
               <p>Review your subscription and manage your billing settings.</p>
-              <div class="overview-meta"><button class="modal-btn modal-cancel overview-action" onclick="switchTab('account')">Manage account</button></div>
+              <div class="overview-meta"><button class="modal-btn modal-cancel overview-action" onclick="switchTab('account')">Manage account</button><button class="modal-btn modal-cancel overview-action" onclick="switchTab('profile')">Edit profile</button></div>
             </div>
           </div>
           <div class="panel overview-card" style="min-height:0;">
@@ -492,7 +553,7 @@
     <div class="auth-card auth-dialog-card" onclick="event.stopPropagation()">
       <a href="index.html" class="auth-close-btn" title="Back to website" aria-label="Back to website">✕</a>
 
-      <div class="auth-brand"><img src="logo-transparent.svg" alt=""><div class="auth-brand-copy"><strong>BloxMulti</strong><span>Account</span></div></div>
+      <div class="auth-brand"><img src="/profiles/assets/bloxmulti.svg" alt=""><div class="auth-brand-copy"><strong>BloxMulti</strong><span>Account</span></div></div>
       <h3 class="auth-title" id="dashAuthTitle">Sign in to BloxMulti</h3>
       <p class="auth-desc auth-dialog-desc" id="authDialogDescription">Choose an account to access your dashboard.</p>
 
@@ -576,7 +637,7 @@
           this.generation++;
           this.refreshPromise = null;
           stopStream();
-          state.user = null;
+          state.user = null;window.dispatchEvent(new Event('bloxmulti-profile-auth'));
           state.subscription = freeSubscription();
           confirmCallback = null;
         }
@@ -666,7 +727,8 @@
           alert("OAuth sign-in cannot be run from file:///.\nPlease run on a local web server or upload to your website.");
           return;
         }
-        const redirect = encodeURIComponent(window.location.origin + window.location.pathname);
+        const profileTab = new URLSearchParams(window.location.search).get('tab') === 'profile' ? '?tab=profile' : '';
+        const redirect = encodeURIComponent(window.location.origin + window.location.pathname + profileTab);
         const scopes = provider === "google" ? "&scopes=email+profile" : "&scopes=identify+email";
         window.location.href = `https://${SUPABASE_HOST}/auth/v1/authorize?provider=${provider}${scopes}&redirect_to=${redirect}`;
       }
@@ -715,6 +777,7 @@
         overview: "Overview",
         stream: "Remote Screen Stream",
         plans: "Plans & Upgrades",
+        profile: "Profile",
         account: "Account & Billing"
       };
       document.getElementById("pageTitle").textContent = titles[tabId] || "Dashboard";
@@ -799,7 +862,7 @@
         }
 
         if (!isCurrent()) return;
-        state.user = user;
+        state.user = user;window.dispatchEvent(new Event('bloxmulti-profile-auth'));
         state.subscription = subscription;
         if (!subscription.isPremium) stopStream();
         closeAuthModal();
@@ -1252,7 +1315,7 @@
         Auth.generation++;
         Auth.refreshPromise = null;
         stopStream();
-        state.user = null;
+        state.user = null;window.dispatchEvent(new Event('bloxmulti-profile-auth'));
         state.subscription = freeSubscription();
         confirmCallback = null;
       }
@@ -1261,9 +1324,14 @@
     });
 
     window.addEventListener("DOMContentLoaded", () => {
+      if (new URLSearchParams(window.location.search).get('tab') === 'profile') switchTab('profile');
       fetchDashboardData();
     });
   </script>
+  <script src="/profiles/profile-api.js" defer></script><script src="/profiles/social-links.js" defer></script>
+  
+  <script src="/profiles/profile-renderer.js" defer></script>
+  <script src="/profiles/dashboard-editor.js" defer></script>
 </body>
 
 </html>

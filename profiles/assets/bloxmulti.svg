@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="62 62 132 132" fill="none">
+  <title>BloxMulti</title>
+  <defs>
+    <mask id="middle" maskUnits="userSpaceOnUse" x="62" y="62" width="132" height="132">
+      <path fill="white" d="M62 62h132v132H62z"/>
+      <rect x="80" y="80" width="96" height="96" rx="14" fill="black"/>
+    </mask>
+    <mask id="front" maskUnits="userSpaceOnUse" x="62" y="62" width="132" height="132">
+      <path fill="white" d="M62 62h132v132H62z"/>
+      <rect x="65" y="95" width="96" height="96" rx="14" fill="black"/>
+    </mask>
+  </defs>
+  <g mask="url(#front)" stroke="#f1f1f1" stroke-width="6">
+    <g mask="url(#middle)"><rect x="98" y="68" width="90" height="90" rx="11" opacity=".37"/></g>
+    <rect x="83" y="83" width="90" height="90" rx="11" opacity=".64"/>
+  </g>
+  <rect x="68" y="98" width="90" height="90" rx="11" stroke="#f1f1f1" stroke-width="6"/>
+  <path d="M113 128v30m-15-15h30" stroke="#f1f1f1" stroke-width="6.6" stroke-linecap="round"/>
+</svg>
