@@ -4,18 +4,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wavebound - Macro Tool</title>
+    <title>Wavebound — Precision Macro Recorder, OCR &amp; Game Automation for Windows</title>
+    <meta name="description"
+        content="Free Windows 10/11 macro recorder and game automation tool with sub-10ms timing, smooth mouse path editing, OCR screen reading, HSV color detection, Discord webhooks, and remote control.">
+    <meta name="keywords"
+        content="Wavebound, macro recorder, game automation, Windows macro tool, mouse path recorder, OCR macro, image detection macro, auto clicker, MiniMacro, remote desktop macro">
+    <meta name="author" content="Wavebound">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#000000">
+    <link rel="canonical" href="https://noxith.com/wavebound/">
+
+    <!-- Open Graph / Discord / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Wavebound">
+    <meta property="og:title" content="Wavebound — Game Automation, Done Right.">
+    <meta property="og:description"
+        content="Record once, run forever. Sub-10ms timing, smooth on-screen path editor, OCR screen reading, HSV color detection, and Discord webhook alerts for Windows 10/11.">
+    <meta property="og:url" content="https://noxith.com/wavebound/">
+    <meta property="og:image" content="https://raw.githubusercontent.com/WaveBound/WaveBound/main/logo/main%20logo.png">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Wavebound — Precision Macro Recorder &amp; Game Automation">
+    <meta name="twitter:description"
+        content="Free portable MiniMacro (~800 KB) and full OCR/scripting automation suite for Windows 10/11.">
+    <meta name="twitter:image"
+        content="https://raw.githubusercontent.com/WaveBound/WaveBound/main/logo/main%20logo.png">
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Wavebound",
+      "operatingSystem": "Windows 10, Windows 11",
+      "applicationCategory": "UtilitiesApplication",
+      "description": "Precision macro recorder and game automation tool featuring sub-10ms timing, smooth mouse path editing, OCR screen reading, HSV color detection, and Discord webhook alerts.",
+      "url": "https://noxith.com/wavebound/",
+      "downloadUrl": "https://github.com/WaveBound/WaveBound/releases",
+      "softwareVersion": "1.2.3",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="remote.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700;1,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700;1,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png"
         href="https://raw.githubusercontent.com/WaveBound/WaveBound/main/logo/main%20logo.png">
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" defer></script>
 </head>
 
 <body>
@@ -208,14 +254,15 @@
                 <p class="s-sub" data-reveal data-delay="0.12">Two versions. Pick what fits.</p>
                 <div class="dl-grid">
                     <div class="dl-card" data-reveal data-delay="0.06">
+                        <div class="pro-tag tag-subtle">Portable</div>
                         <div class="dl-body">
                             <h3>Wavebound MiniMacro</h3>
-                            <p>Portable record & playback. No install, no setup. Just run it.</p>
+                            <p>Portable record, on-screen path editor &amp; playback. No install, no admin prompt—just run it.</p>
                             <ul class="dl-list">
-                                <li><i class="fas fa-check"></i>Record & playback</li>
-                                <li><i class="fas fa-check"></i>Zero-install portable</li>
-                                <li><i class="fas fa-check"></i>Discord webhook alerts</li>
-                                <li><i class="fas fa-check"></i>Minimal resource usage</li>
+                                <li><i class="fas fa-check"></i>Smooth mouse path &amp; curve editor</li>
+                                <li><i class="fas fa-check"></i>Image detection &amp; click slots</li>
+                                <li><i class="fas fa-check"></i>Discord webhook loop alerts</li>
+                                <li><i class="fas fa-check"></i>Zero-install portable · ultra-low CPU</li>
                             </ul>
                         </div>
                         <div class="dl-foot">
@@ -223,7 +270,7 @@
                                 class="dl-btn-ghost" download>
                                 <i class="fas fa-download"></i> Download Portable
                             </a>
-                            <span class="dl-meta">~700 KB · Windows 10/11</span>
+                            <span class="dl-meta">~800 KB · Windows 10/11</span>
                         </div>
                     </div>
                     <div class="dl-card dl-card-pro" data-reveal data-delay="0.18">

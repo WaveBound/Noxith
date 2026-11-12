@@ -5,18 +5,19 @@
 
 :root {
     --bg: #000;
-    --bg-surface: #080808;
-    --bg-raised: #0d0d0d;
+    --bg-surface: #07090e;
+    --bg-raised: #0d111a;
     --accent: #58a6ff;
-    --accent-low: rgba(88, 166, 255, 0.08);
-    --accent-mid: rgba(88, 166, 255, 0.18);
-    --accent-border: rgba(88, 166, 255, 0.32);
+    --accent-low: rgba(88, 166, 255, 0.09);
+    --accent-mid: rgba(88, 166, 255, 0.22);
+    --accent-border: rgba(88, 166, 255, 0.35);
     --white: #ffffff;
-    --text: #d4d4d8;
-    --muted: #a1a1aa;
-    --border: rgba(255, 255, 255, 0.07);
-    --border-hover: rgba(255, 255, 255, 0.14);
-    --shadow-glow: 0 0 40px rgba(88, 166, 255, 0.12);
+    --text: rgba(255, 255, 255, 0.90);
+    --muted: rgba(255, 255, 255, 0.65);
+    --subtle: rgba(255, 255, 255, 0.40);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.18);
+    --shadow-glow: 0 0 40px rgba(88, 166, 255, 0.14);
     --ease: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
 }
@@ -103,6 +104,8 @@ h4 {
 }
 
 .nav-inner {
+    max-width: 1180px;
+    margin: 0 auto;
     width: 100%;
     display: flex;
     align-items: center;
@@ -494,6 +497,7 @@ h4 {
 
 .h1-accent em {
     font-style: italic;
+    padding-right: 0.04em;
     background: linear-gradient(120deg, #ffffff 0%, var(--accent) 65%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -793,12 +797,13 @@ h4 {
 
 .feat-card {
     position: relative;
-    background: var(--bg-surface);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, rgba(255, 255, 255, 0.008) 100%);
     border: 1px solid var(--border);
-    border-radius: 22px;
-    padding: 42px 38px;
+    border-radius: 20px;
+    padding: 40px 36px;
     overflow: hidden;
-    transition: border-color 0.4s var(--ease), transform 0.4s var(--ease), box-shadow 0.4s;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition: border-color 0.35s var(--ease), transform 0.35s var(--ease), box-shadow 0.35s;
     cursor: default;
 }
 
@@ -930,14 +935,15 @@ h4 {
 }
 
 .dl-card {
-    background: var(--bg-surface);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, rgba(255, 255, 255, 0.008) 100%);
     border: 1px solid var(--border);
-    border-radius: 26px;
-    padding: 44px 38px;
+    border-radius: 22px;
+    padding: 42px 36px;
     display: flex;
     flex-direction: column;
     position: relative;
-    transition: border-color 0.4s var(--ease), transform 0.4s var(--ease), box-shadow 0.4s;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition: border-color 0.35s var(--ease), transform 0.35s var(--ease), box-shadow 0.35s;
     overflow: hidden;
 }
 
@@ -1003,6 +1009,12 @@ h4 {
     padding: 5px 12px;
     border-radius: 99px;
     font-family: 'JetBrains Mono', monospace;
+}
+
+.pro-tag.tag-subtle {
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--border-hover);
 }
 
 .dl-body {
@@ -1232,10 +1244,7 @@ h4 {
         max-width: 480px;
     }
 
-    .hero-badge {
-        display: none;
-    }
-
+    .hero-badge,
     .hero-corners {
         display: none;
     }
