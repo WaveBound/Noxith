@@ -29,12 +29,12 @@ function create(root,{themeTarget,document:doc=globalThis.document,social=global
    }
   }
   function loadMetadata(){}
-  const games=(data.games||[]).slice(0,3);
+  const games=(data.games||[]).slice(0,4);
   for(const game of games){
    const a=doc.createElement('a');a.className='favorite-game';a.href='https://www.roblox.com/games/'+game.placeId;a.target='_blank';a.rel='noopener noreferrer';
    const copy=doc.createElement('span'),name=doc.createElement('strong'),time=doc.createElement('small');name.textContent='Roblox experience';time.textContent=formatDuration(game.totalSeconds)+' played';copy.append(name,time);a.append(copy);list.append(a);queueMetadata(game,a,name);
   }
-  for(let i=games.length;i<3;i++){
+  for(let i=games.length;i<4;i++){
    const slot=doc.createElement('div'),icon=doc.createElement('span'),copy=doc.createElement('span'),name=doc.createElement('strong'),time=doc.createElement('small');
    slot.className='favorite-game empty-game';icon.className='game-placeholder';icon.textContent='???';name.textContent='???';time.textContent='No game yet';copy.append(name,time);slot.append(icon,copy);list.append(slot);
   }
@@ -53,8 +53,8 @@ function create(root,{themeTarget,document:doc=globalThis.document,social=global
  function tickActivity(current){
   const presence=get('nowPlaying');if(!presence||!current)return;
   if(current.expiresAt&&Date.parse(current.expiresAt)<=Date.now()){showInactive();return;}
-  const elapsed=presence.querySelector('.presence-copy > span'),age=current.seenAt?Math.max(0,(Date.now()-Date.parse(current.seenAt))/1000):0;
-  if(elapsed){const seconds=(current.sessionElapsedSeconds||0)+age;elapsed.textContent=seconds>=86400?formatDuration(seconds)+' elapsed':Math.floor(seconds/60)+'m elapsed';}
+  const elapsed=presence.querySelector('.presence-copy > span'),seenAt=current.seenAt?Date.parse(current.seenAt):NaN,age=Number.isFinite(seenAt)?Math.max(0,(Date.now()-seenAt)/1000):0;
+  if(elapsed){const seconds=Math.max(0,(Number(current.sessionElapsedSeconds)||0)+age);elapsed.textContent=(seconds>=3600?formatDuration(seconds):Math.floor(seconds/60)+'m')+' elapsed';}
  }
  return {render,loadGames,tickActivity};
 }
