@@ -263,8 +263,8 @@ body.preview-mode .site-chrome,body.preview-mode .page-footer{display:none}body.
 .section-label>.icon{width:12px;height:12px}
 .favorites{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .favorite-game{gap:10px;padding:9px 10px;border-radius:10px}
-.favorite-game img,.game-placeholder{width:36px;height:36px;border-radius:7px}
-.favorite-game>span{flex:1;min-width:0}
+.favorite-game img,.game-placeholder{flex:none;width:36px;height:36px;border-radius:7px}
+.favorite-game>span:not(.game-placeholder){flex:1;min-width:0}
 .favorite-game small{margin-top:2px;overflow:hidden;text-overflow:ellipsis}
 .playtime{flex-wrap:wrap;gap:8px 14px;margin-top:18px;padding-top:15px}
 .card-footer{margin-top:16px}
@@ -283,3 +283,22 @@ body.preview-mode .site-chrome,body.preview-mode .page-footer{display:none}body.
  .favorite-game{gap:7px;padding:7px 8px}
  .favorite-game img,.game-placeholder{width:30px;height:30px}
 }
+
+/* External link confirmation modal. */
+.link-confirm-dialog{width:min(420px,calc(100% - 32px));padding:22px;background:#161616;border:1px solid #2e2e2e;border-radius:16px}
+.link-confirm-dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(6px)}
+.link-confirm-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.link-confirm-title{display:flex;align-items:center;gap:12px;min-width:0}
+.link-confirm-badge{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:#1f1f1f;border:1px solid #333;color:#d6d6d6;flex-shrink:0}
+.link-confirm-badge .icon{width:18px;height:18px}
+.link-confirm-title .overline{font-size:10px;letter-spacing:1.2px;color:#8a8a8a;margin-bottom:3px}
+.link-confirm-title h2{font-size:17px;font-weight:600;letter-spacing:-.3px;color:#ededed}
+.link-confirm-head .icon-action{width:32px;height:32px;margin:-4px -4px 0 0;flex-shrink:0}
+.link-confirm-desc{margin-top:14px;font-size:12.5px;line-height:1.6;color:#a4a4a4}
+.link-confirm-url{margin-top:12px;padding:11px 12px;background:#0e0e0e;border:1px solid #2a2a2a;border-radius:9px;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;color:#9a9a9a;overflow-wrap:anywhere;word-break:break-word;user-select:all}
+.link-confirm-url .url-host{color:#f0f0f0;font-weight:600}
+.link-confirm-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:18px}
+.link-confirm-cancel{min-height:36px;padding:8px 13px;border:1px solid #303030;border-radius:7px;background:#1e1e1e;color:#cfcfcf;font-size:12px;font-weight:500}
+.link-confirm-cancel:hover{background:#272727;border-color:#444;color:#fff}
+.link-confirm-go{min-height:36px;padding:8px 14px;font-size:12px;font-weight:600;border-radius:7px}
+.link-confirm-go .icon{width:13px;height:13px}

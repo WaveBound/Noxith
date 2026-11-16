@@ -21,3 +21,26 @@ document.getElementById('copyLink').addEventListener('click',async()=>{
  const url=new URL('/u/'+encodeURIComponent(profile.username),location.origin);
  const status=document.getElementById('copyStatus');try{await navigator.clipboard.writeText(url.href);status.textContent='Link copied';}catch{status.textContent='Unable to copy link';}setTimeout(()=>status.textContent='',3000);
 });
+const linkDialog=document.getElementById('externalLinkDialog'),linkUrlBox=document.getElementById('externalLinkUrl'),linkProceed=document.getElementById('externalLinkProceed');
+function openExternalConfirm(href){
+ let parsed;try{parsed=new URL(href);}catch{return false;}
+ if(parsed.protocol!=='https:')return false;
+ if(parsed.hostname==='noxith.com'||parsed.hostname.endsWith('.noxith.com'))return false;
+ const proto=document.createElement('span');proto.className='url-muted';proto.textContent=parsed.protocol+'//';
+ const host=document.createElement('strong');host.className='url-host';host.textContent=parsed.host;
+ const rest=document.createElement('span');rest.className='url-muted';rest.textContent=parsed.pathname+parsed.search+parsed.hash;
+ linkUrlBox.replaceChildren(proto,host,rest);
+ linkProceed.href=parsed.href;
+ if(typeof linkDialog.showModal==='function'){linkDialog.showModal();return true;}
+ return false;
+}
+document.getElementById('publicProfile').addEventListener('click',e=>{
+ if(e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+ const anchor=e.target.closest('a[href]');
+ if(!anchor||anchor.classList.contains('credit-brand'))return;
+ if(openExternalConfirm(anchor.href))e.preventDefault();
+});
+document.getElementById('externalLinkClose').addEventListener('click',()=>linkDialog.close());
+document.getElementById('externalLinkCancel').addEventListener('click',()=>linkDialog.close());
+linkProceed.addEventListener('click',()=>linkDialog.close());
+linkDialog.addEventListener('click',e=>{if(e.target===linkDialog)linkDialog.close();});
