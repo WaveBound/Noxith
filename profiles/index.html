@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="/profiles/assets/bloxmulti.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;650;700;750;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/profiles/styles.css?v=20261116-6"><script src="/profiles/profile-api.js?v=20261105-3" defer></script><script src="/profiles/social-links.js?v=20261105-3" defer></script><script src="/profiles/profile-renderer.js?v=20261116-1" defer></script><script src="/profiles/app.js?v=20261116-1" defer></script>
+  <link rel="stylesheet" href="/profiles/styles.css?v=20261116-7"><script src="/profiles/profile-api.js?v=20261105-3" defer></script><script src="/profiles/social-links.js?v=20261105-3" defer></script><script src="/profiles/profile-renderer.js?v=20261116-1" defer></script><script src="/profiles/app.js?v=20261116-3" defer></script>
 </head>
 <body>
   <svg class="defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
@@ -50,15 +50,15 @@
   </main>
   <footer class="page-footer"><span>your games. your profile.</span></footer>
   <dialog class="link-confirm-dialog" id="externalLinkDialog" aria-labelledby="externalLinkTitle" aria-describedby="externalLinkDesc">
-    <div class="link-confirm-head">
-      <div class="link-confirm-title"><span class="link-confirm-badge" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6Z"/><path d="m8 12 3 3 5-6"/></svg></span><div><span class="overline">EXTERNAL LINK</span><h2 id="externalLinkTitle">Leaving BloxMulti</h2></div></div>
+    <div class="dialog-heading">
+      <div><span class="overline">EXTERNAL LINK</span><h2 id="externalLinkTitle">Leaving BloxMulti</h2></div>
       <button type="button" class="icon-action" id="externalLinkClose" aria-label="Close"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></svg></button>
     </div>
     <p class="link-confirm-desc" id="externalLinkDesc">You're about to open an external website. Check the full link below to make sure it's somewhere you trust.</p>
     <div class="link-confirm-url" id="externalLinkUrl"></div>
     <div class="link-confirm-actions">
-      <button type="button" class="link-confirm-cancel" id="externalLinkCancel">Go back</button>
-      <a class="save-button link-confirm-go" id="externalLinkProceed" href="#" target="_blank" rel="noopener noreferrer">Visit site <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+      <button type="button" class="cancel-button" id="externalLinkCancel">Go back</button>
+      <a class="save-button" id="externalLinkProceed" href="#" target="_blank" rel="noopener noreferrer">Visit site <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
     </div>
   </dialog>
 

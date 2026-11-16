@@ -43,4 +43,10 @@ document.getElementById('publicProfile').addEventListener('click',e=>{
 document.getElementById('externalLinkClose').addEventListener('click',()=>linkDialog.close());
 document.getElementById('externalLinkCancel').addEventListener('click',()=>linkDialog.close());
 linkProceed.addEventListener('click',()=>linkDialog.close());
-linkDialog.addEventListener('click',e=>{if(e.target===linkDialog)linkDialog.close();});
+let backdropDown=false;
+function isOutsideDialog(e){const r=linkDialog.getBoundingClientRect();return e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom;}
+linkDialog.addEventListener('pointerdown',e=>{backdropDown=e.target===linkDialog&&isOutsideDialog(e);});
+linkDialog.addEventListener('click',e=>{
+ if(backdropDown&&e.target===linkDialog&&isOutsideDialog(e))linkDialog.close();
+ backdropDown=false;
+});
